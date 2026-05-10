@@ -141,8 +141,8 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
     <div class="mb-lg shrink-0">
         <div class="font-headline-md text-headline-md font-bold text-primary">Hi</div>
         <div class="mt-md flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 transition-all duration-200 cursor-pointer">
-            <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden"><span class="material-symbols-outlined text-outline">person</span></div>
-            <div><div class="font-label-sm text-label-sm text-on-surface">Hi Learner</div><div class="text-on-surface-variant text-[12px]">Học giả Cấp độ 12</div></div>
+            <div id="profile-avatar-container" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center"><span class="material-symbols-outlined text-outline">person</span></div>
+            <div><div id="profile-name" class="font-label-sm text-label-sm text-on-surface truncate max-w-[140px]">Hi Learner</div><div id="profile-email" class="text-on-surface-variant text-[12px] truncate max-w-[140px]">Vui lòng đăng nhập</div></div>
         </div>
     </div>
     <button onclick="startSession()" class="mb-lg shrink-0 w-full py-sm bg-primary text-on-primary rounded-lg font-label-sm text-label-sm transition-all duration-200 active:scale-95 shadow-[0_4px_12px_rgba(0,97,146,0.2)]">Bắt đầu ôn tập</button>
@@ -161,7 +161,7 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
 
 <header id="main-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 justify-between items-center" style="display: none;">
     <div id="mobile-header-title" class="font-headline-md text-xl font-bold text-primary">Hi</div>
-    <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden"><span class="material-symbols-outlined text-outline text-sm">person</span></div>
+    <div id="mobile-profile-avatar" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center"><span class="material-symbols-outlined text-outline text-sm">person</span></div>
 </header>
 
 <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe" style="display: none;">
@@ -2113,6 +2113,23 @@ document.addEventListener("DOMContentLoaded", async () => {
         const user = await HiDB.getCurrentUser();
         if (user) {
             console.log("Đã đăng nhập:", user.email);
+            
+            // CẬP NHẬT GIAO DIỆN PROFILE
+            const name = user.user_metadata?.full_name || user.email.split('@')[0];
+            const avatar = user.user_metadata?.avatar_url;
+            
+            const nameEl = document.getElementById('profile-name');
+            const emailEl = document.getElementById('profile-email');
+            const avatarDesk = document.getElementById('profile-avatar-container');
+            const avatarMob = document.getElementById('mobile-profile-avatar');
+            
+            if (nameEl) nameEl.textContent = name;
+            if (emailEl) emailEl.textContent = user.email;
+            if (avatar) {
+                if (avatarDesk) { avatarDesk.style.backgroundImage = `url('${avatar}')`; avatarDesk.innerHTML = ''; }
+                if (avatarMob) { avatarMob.style.backgroundImage = `url('${avatar}')`; avatarMob.innerHTML = ''; }
+            }
+
             // Nếu user ở trang landing/login, tự động vào dashboard
             const curPage = document.querySelector('.page.active')?.id;
             if (curPage === 'page-landing' || curPage === 'page-login') {
