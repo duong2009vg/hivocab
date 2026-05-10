@@ -1085,7 +1085,11 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
 
     document.getElementById('learning-progress-container').style.display = 'none';
     document.getElementById('learning-streak-container').style.display = 'none';
-    document.getElementById('learning-close-btn').setAttribute('onclick', "navigateTo('topic-detail')");
+
+    // Quay lại đúng trang: nếu đang ở lesson-detail thì back về lesson-detail
+    const callerPage = document.querySelector('.page.active')?.id;
+    const backPage = (callerPage === 'page-lesson-detail') ? 'lesson-detail' : 'topic-detail';
+    document.getElementById('learning-close-btn').setAttribute('onclick', `navigateTo('${backPage}')`);
     navigateTo('learning');
 
     document.querySelectorAll('.exercise-step').forEach(el => el.classList.add('hidden'));
@@ -1102,7 +1106,14 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
         HiSessionUI.init();
         container.innerHTML = `<div class="flex items-center justify-center mt-24"><span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span></div>`;
 
-        const words = await HiDB.getWordsDueForReview(10);
+        // Ưu tiên dùng từ của lesson hiện tại nếu có
+        let words;
+        if (window._currentLessonWords && window._currentLessonWords.length > 0) {
+            words = window._currentLessonWords;
+        } else {
+            words = await HiDB.getWordsDueForReview(10);
+        }
+
         if (!words || words.length === 0) {
             container.innerHTML = '<div class="text-center mt-20 text-on-surface-variant"><h2 class="font-bold text-xl mb-2">Không có từ để luyện tập</h2><p>Thêm từ mới vào chủ đề trước.</p></div>';
             return;
@@ -1118,6 +1129,7 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
             item.exerciseData = null;
         }
         HiSessionUI.render();
+        document.getElementById('complete-btn')?.setAttribute('onclick', `navigateTo('${backPage}')`);
 
     } catch(err) {
         console.error('[startSinglePractice] Lỗi:', err);
@@ -1694,6 +1706,190 @@ window._openTopic = function(topicId, topicName, category) {
     window._currentCategory  = category;
     navigateTo('topic-detail');
 };
+
+// ── LOAD LESSONS vào trang topic-detail ──────────────────────────
+window._loadLessons = async function() {
+    const topicId   = window._currentTopicId;
+    const topicName = window._currentTopicName || '—';
+
+    // Cập nhật title
+    ['td-title', 'td-title-mobile'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = topicName;
+    });
+    const sidebarName = document.getElementById('sub-sidebar-topic-name');
+    if (sidebarName) sidebarName.textContent = topicName;
+    const mobileTitle = document.getElementById('td-mobile-header-title');
+    if (mobileTitle) mobileTitle.textContent = topicName;
+
+    const listEl = document.getElementById('lessons-list');
+    if (!listEl) return;
+
+    // Skeleton loading
+    listEl.innerHTML = `<div class="flex items-center justify-center py-12 col-span-3">
+        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+    </div>`;
+
+    if (!topicId) {
+        listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-on-surface-variant">Không tìm thấy chủ đề.</div>`;
+        return;
+    }
+
+    try {
+        const lessons = await HiDB.getLessonsInTopic(topicId);
+
+        if (!lessons || lessons.length === 0) {
+            listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[40px] text-outline mb-3 block">menu_book</span>
+                Chủ đề này chưa có từ vựng nào.
+            </div>`;
+            return;
+        }
+
+        // Cập nhật subtitle
+        ['td-subtitle', 'td-subtitle-mobile'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = `${lessons.length} lesson · ${lessons.reduce((s, l) => s + l.totalWords, 0)} từ`;
+        });
+
+        listEl.innerHTML = lessons.map(lesson => {
+            const prog = lesson.progress || 0;
+            const progColor = prog >= 80 ? 'bg-green-500' : prog >= 40 ? 'bg-primary' : 'bg-yellow-400';
+            return `
+            <div onclick="window._openLesson('${topicId}', ${lesson.index}, '${lesson.name}', '${topicName.replace(/'/g,"&#39;")}')"
+                 class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary text-[22px]">menu_book</span>
+                    </div>
+                    <span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-full">${prog}%</span>
+                </div>
+                <div>
+                    <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors">${lesson.name}</h3>
+                    <p class="text-sm text-on-surface-variant mt-0.5">${lesson.totalWords} từ vựng</p>
+                </div>
+                <div class="mt-auto">
+                    <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+                        <div class="h-full ${progColor} rounded-full transition-all duration-700" style="width:${prog}%"></div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('[_loadLessons]', err);
+        listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-error">
+            <span class="material-symbols-outlined text-[40px] mb-3 block">error</span>
+            Không thể tải danh sách lesson: ${err.message}
+        </div>`;
+    }
+};
+
+// ── MỞ MỘT LESSON cụ thể ─────────────────────────────────────────
+window._openLesson = function(topicId, lessonIndex, lessonName, topicName) {
+    window._currentTopicId    = topicId;
+    window._currentTopicName  = topicName;
+    window._currentLessonIndex = lessonIndex;
+    window._currentLessonName  = lessonName;
+    navigateTo('lesson-detail');
+};
+
+// ── LOAD WORDS vào trang lesson-detail ───────────────────────────
+window._loadLessonWords = async function() {
+    const topicId     = window._currentTopicId;
+    const topicName   = window._currentTopicName || '—';
+    const lessonIndex = window._currentLessonIndex ?? 0;
+    const lessonName  = window._currentLessonName  || `Lesson ${lessonIndex + 1}`;
+
+    // Cập nhật labels
+    ['ld-title', 'ld-title-mobile', 'ld-mobile-header-title', 'ld-sidebar-lesson'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = lessonName;
+    });
+    const sidebarTopic = document.getElementById('ld-sidebar-topic');
+    if (sidebarTopic) sidebarTopic.textContent = topicName;
+
+    const listEl = document.getElementById('lesson-words-list');
+    if (!listEl) return;
+
+    listEl.innerHTML = `<div class="flex items-center justify-center py-12">
+        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+    </div>`;
+
+    if (!topicId) {
+        listEl.innerHTML = `<p class="text-center py-12 text-on-surface-variant">Không tìm thấy lesson.</p>`;
+        return;
+    }
+
+    try {
+        const words = await HiDB.getWordsInLesson(topicId, lessonIndex);
+        window._currentLessonWords = words; // lưu để startSinglePractice dùng
+
+        // Cập nhật subtitle
+        ['ld-subtitle', 'ld-subtitle-mobile'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = `${words.length} từ vựng`;
+        });
+
+        if (!words || words.length === 0) {
+            listEl.innerHTML = `<div class="text-center py-12 text-on-surface-variant">
+                <span class="material-symbols-outlined text-[40px] text-outline mb-3 block">inbox</span>
+                Lesson này chưa có từ vựng.
+            </div>`;
+            return;
+        }
+
+        const levelLabel = ['Mới', '1h', '8h', '1 ngày', '1 tuần', '1 tháng'];
+        const levelColor = ['bg-surface-container text-outline', 'bg-red-100 text-red-700', 'bg-yellow-100 text-yellow-700', 'bg-blue-100 text-blue-700', 'bg-green-100 text-green-700', 'bg-green-200 text-green-800'];
+
+        listEl.innerHTML = words.map((w, i) => {
+            const lv = w.level || 0;
+            const badge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${levelColor[lv]}">${levelLabel[lv]}</span>`;
+            return `
+            <div class="group bg-surface-container-lowest/80 backdrop-blur-sm border border-outline-variant/20 rounded-xl p-4 flex items-start gap-4 soft-shadow hover:shadow-md transition-all fade-in" style="animation-delay:${i * 0.03}s">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <span class="text-sm font-bold text-primary">${i + 1}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-bold text-on-surface text-base group-hover:text-primary transition-colors">${_esc(w.word)}</span>
+                        ${w.phonetic ? `<span class="text-sm text-outline">${_esc(w.phonetic)}</span>` : ''}
+                        ${badge}
+                        <button onclick="HiDict && HiDict.playWordAudio('${_esc(w.word)}')" class="ml-auto p-1 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary" title="Phát âm">
+                            <span class="material-symbols-outlined text-[18px]">volume_up</span>
+                        </button>
+                    </div>
+                    <p class="text-sm text-on-surface-variant mt-1">${_esc(w.meaning)}</p>
+                    ${w.exampleSentence ? `<p class="text-sm text-outline italic mt-1">${_esc(w.exampleSentence)}</p>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('[_loadLessonWords]', err);
+        listEl.innerHTML = `<div class="text-center py-12 text-error">
+            <span class="material-symbols-outlined text-[40px] mb-3 block">error</span>
+            Không thể tải từ vựng: ${err.message}
+        </div>`;
+    }
+};
+
+// ── TÌM KIẾM TỪ TRONG LESSON ─────────────────────────────────────
+window.filterLessonWords = function() {
+    const q1 = document.getElementById('ld-search')?.value.toLowerCase() || '';
+    const q2 = document.getElementById('ld-search-mobile')?.value.toLowerCase() || '';
+    const q  = q1 || q2;
+    document.querySelectorAll('#lesson-words-list > div').forEach(card => {
+        const text = card.textContent.toLowerCase();
+        card.style.display = (!q || text.includes(q)) ? '' : 'none';
+    });
+};
+
+// Helper escape html
+function _esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 
 // ── Topic Creation Modal ────────────────────────────────────────
 const TOPIC_ICONS = [
