@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8"/>
@@ -912,12 +912,12 @@ window.toggleTheme = function() {
     if (toggleBtn) toggleBtn.checked = isDark;
 };
 
-window.navigateTo = function(page){
+window.navigateTo = function(page, preserveHash = false){
     // Đóng tất cả trang
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     const el = document.getElementById('page-'+page);
     if(el) { el.classList.add('active'); window.scrollTo(0,0); }
-    window.location.hash = page;
+    if (!preserveHash) window.location.hash = page;
  
     // Điều khiển Component dùng chung (Navbar / Sidebar)
     const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'dictionary', 'settings'];
@@ -1305,7 +1305,7 @@ window.addEventListener('DOMContentLoaded', () => {
         // QUAN TRỌNG: KHÔNG xóa hash ở đây!
         // Supabase cần đọc access_token từ hash để tạo session.
         // HiDB.init() (chạy sau) sẽ tự xử lý và xóa hash sau khi parse xong.
-        window.navigateTo('landing'); // Hiện landing tạm thời trong khi chờ auth
+        window.navigateTo('landing', true); // Hiện landing tạm thời trong khi chờ auth
     } else if(h) {
         window.navigateTo(h);
     } else {

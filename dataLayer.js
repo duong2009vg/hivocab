@@ -149,7 +149,7 @@ window.HiDB = (() => {
                     word_progress ( level, user_id )
                 )
             `)
-            .eq('user_id', user.id)
+            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: true });
 
         if (error) throw error;
@@ -743,7 +743,7 @@ window.HiDB = (() => {
                 *,
                 exercise_questions ( * )
             `)
-            .eq('user_id', user.id)
+            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: false });
 
         if (error) throw error;
