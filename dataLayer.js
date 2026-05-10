@@ -171,7 +171,6 @@ window.HiDB = (() => {
                 : 0;
 
             return {
-                id:         topic.id,
                 name:       topic.name,
                 icon:       topic.icon,
                 totalWords,
@@ -838,7 +837,12 @@ window.HiDB = (() => {
     }
 
     // Export public API
+    // Export public API
     return {
+        onAuthStateChange: (callback) => {
+            if (!_supabase) throw new Error('[HiDB] Chưa khởi tạo');
+            return _supabase.auth.onAuthStateChange(callback);
+        },
         // Setup
         init,
 
