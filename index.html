@@ -191,7 +191,7 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
         </nav>
         <div class="flex items-center space-x-3">
             <a class="hidden md:inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg text-white glass-button cursor-pointer" onclick="navigateTo('login')">Đăng nhập</a>
-            <a class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 shadow-sm transition-colors cursor-pointer" onclick="navigateTo('dashboard')">Bắt đầu ngay</a>
+            <a class="inline-flex items-center justify-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 shadow-sm transition-colors cursor-pointer" onclick="window.handleStartNow()">Bắt đầu ngay</a>
         </div>
     </header>
     <main class="relative z-10 flex-grow flex items-center max-w-7xl mx-auto w-full mt-24 lg:mt-32">
@@ -200,7 +200,7 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
                 <h1 class="text-5xl lg:text-7xl font-semibold text-white tracking-tight leading-[1.1] mb-6">Hi giúp bạn làm chủ mọi ngôn ngữ một cách dễ dàng</h1>
                 <p class="mt-4 text-xl text-white/90 mb-10 max-w-lg">Làm chủ từ vựng, ngữ pháp, đọc, viết, nghe và nói.</p>
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <a class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 shadow-sm transition-colors w-max cursor-pointer" onclick="navigateTo('dashboard')">Bắt đầu học ngay</a>
+                    <a class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-gray-900 bg-white hover:bg-gray-50 shadow-sm transition-colors w-max cursor-pointer" onclick="window.handleStartNow()">Bắt đầu học ngay</a>
                     <a class="inline-flex items-center justify-center px-6 py-3 border border-white/30 text-base font-medium rounded-lg text-white bg-white/20 hover:bg-white/30 backdrop-blur-sm transition-colors w-max cursor-pointer" onclick="navigateTo('features')">Khám phá tính năng</a>
                 </div>
             </div>
@@ -1286,8 +1286,14 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Khởi tạo trang ban đầu
     const h = window.location.hash.slice(1);
-    if(h) window.navigateTo(h);
-    else window.navigateTo('landing');
+    if (h && (h.includes('access_token=') || h.includes('error_description='))) {
+        window.location.hash = ''; // Xóa hash đi để tránh navigateTo('access_token=...') gây trắng trang
+        window.navigateTo('landing'); // Hiện trang landing tạm chờ Supabase xử lý auth
+    } else if(h) {
+        window.navigateTo(h);
+    } else {
+        window.navigateTo('landing');
+    }
 
     // Hiển thị fallback cho Dashboard ngay lập tức
     if (typeof HiDashboard !== 'undefined') HiDashboard.renderFallback();
@@ -1515,6 +1521,22 @@ window.handleGoogleLogin = async function() {
         // Nếu là Supabase thật → sẽ redirect sang Google OAuth
     } catch(err) {
         if (statusEl) { statusEl.textContent = '⚠ ' + err.message; statusEl.className = 'mt-3 text-center text-sm text-error'; }
+    }
+};
+
+// ── Bắt đầu ngay (Kiểm tra đăng nhập) ───────────────────────────
+window.handleStartNow = async function() {
+    const isMock = localStorage.getItem('hi_use_mock') === 'true';
+    let user = null;
+    if (typeof HiDB !== 'undefined') {
+        try {
+            user = await HiDB.getCurrentUser();
+        } catch(e) {}
+    }
+    if (user || isMock) {
+        navigateTo('dashboard');
+    } else {
+        navigateTo('login');
     }
 };
 
@@ -2132,7 +2154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             // Nếu user ở trang landing/login, tự động vào dashboard
             const curPage = document.querySelector('.page.active')?.id;
-            if (curPage === 'page-landing' || curPage === 'page-login') {
+            if (!curPage || curPage === 'page-landing' || curPage === 'page-login') {
                 navigateTo('dashboard');
             }
         }
@@ -2148,6 +2170,7 @@ window.handleLogout = async function() {
             await HiDB.signOut();
         }
         localStorage.removeItem('hi_use_mock');
+        window.location.hash = ''; // Xóa hash để khi reload về landing
         window.location.reload(); // Reload để reset UI về landing
     } catch(err) {
         console.error("Lỗi đăng xuất:", err);
