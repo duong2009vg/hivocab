@@ -161,7 +161,22 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
 
 <header id="main-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 justify-between items-center" style="display: none;">
     <div id="mobile-header-title" class="font-headline-md text-xl font-bold text-primary">Hi</div>
-    <div id="mobile-profile-avatar" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center"><span class="material-symbols-outlined text-outline text-sm">person</span></div>
+    <div class="relative">
+        <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform" aria-label="Hồ sơ"><span class="material-symbols-outlined text-outline text-sm">person</span></button>
+        <!-- Mobile profile dropdown -->
+        <div id="mobile-profile-dropdown" class="hidden absolute right-0 top-10 w-52 bg-surface rounded-xl shadow-xl border border-outline-variant/20 z-[200] overflow-hidden fade-in">
+            <div class="px-4 py-3 border-b border-outline-variant/15">
+                <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
+                <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
+            </div>
+            <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">settings</span>Cài đặt
+            </button>
+            <button onclick="window.handleLogout()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors border-t border-outline-variant/15">
+                <span class="material-symbols-outlined text-[18px]">logout</span>Đăng xuất
+            </button>
+        </div>
+    </div>
 </header>
 
 <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe" style="display: none;">
@@ -1287,8 +1302,10 @@ window.addEventListener('DOMContentLoaded', () => {
     // Khởi tạo trang ban đầu
     const h = window.location.hash.slice(1);
     if (h && (h.includes('access_token=') || h.includes('error_description='))) {
-        window.location.hash = ''; // Xóa hash đi để tránh navigateTo('access_token=...') gây trắng trang
-        window.navigateTo('landing'); // Hiện trang landing tạm chờ Supabase xử lý auth
+        // QUAN TRỌNG: KHÔNG xóa hash ở đây!
+        // Supabase cần đọc access_token từ hash để tạo session.
+        // HiDB.init() (chạy sau) sẽ tự xử lý và xóa hash sau khi parse xong.
+        window.navigateTo('landing'); // Hiện landing tạm thời trong khi chờ auth
     } else if(h) {
         window.navigateTo(h);
     } else {
@@ -1319,7 +1336,10 @@ window.addEventListener('DOMContentLoaded', () => {
 
 window.addEventListener('hashchange', () => {
     const h = window.location.hash.slice(1);
-    if(h) window.navigateTo(h);
+    // Bỏ qua hash OAuth từ Supabase (access_token, error_description)
+    if(h && !h.includes('access_token=') && !h.includes('error_description=')) {
+        window.navigateTo(h);
+    }
 });
 </script>
 
@@ -2128,6 +2148,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         );
         console.log("Đã kết nối Supabase thành công!");
         
+        // Sau khi Supabase init xong, xóa hash OAuth nếu còn (Supabase đã parse xong rồi)
+        if (window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=')) {
+            history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        
         // Tắt chế độ mock data
         localStorage.removeItem('hi_use_mock');
         
@@ -2137,20 +2162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             console.log("Đã đăng nhập:", user.email);
             
             // CẬP NHẬT GIAO DIỆN PROFILE
-            const name = user.user_metadata?.full_name || user.email.split('@')[0];
-            const avatar = user.user_metadata?.avatar_url;
-            
-            const nameEl = document.getElementById('profile-name');
-            const emailEl = document.getElementById('profile-email');
-            const avatarDesk = document.getElementById('profile-avatar-container');
-            const avatarMob = document.getElementById('mobile-profile-avatar');
-            
-            if (nameEl) nameEl.textContent = name;
-            if (emailEl) emailEl.textContent = user.email;
-            if (avatar) {
-                if (avatarDesk) { avatarDesk.style.backgroundImage = `url('${avatar}')`; avatarDesk.innerHTML = ''; }
-                if (avatarMob) { avatarMob.style.backgroundImage = `url('${avatar}')`; avatarMob.innerHTML = ''; }
-            }
+            _updateProfileUI(user);
 
             // Nếu user ở trang landing/login, tự động vào dashboard
             const curPage = document.querySelector('.page.active')?.id;
@@ -2163,6 +2175,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+// CẬP NHẬT UI PROFILE (dùng chung cho desktop + mobile)
+window._updateProfileUI = function(user) {
+    const name = user.user_metadata?.full_name || user.email.split('@')[0];
+    const avatar = user.user_metadata?.avatar_url;
+
+    const nameEl    = document.getElementById('profile-name');
+    const emailEl   = document.getElementById('profile-email');
+    const avatarDesk = document.getElementById('profile-avatar-container');
+    const avatarMob  = document.getElementById('mobile-profile-avatar');
+
+    if (nameEl)  nameEl.textContent  = name;
+    if (emailEl) emailEl.textContent = user.email;
+
+    if (avatar) {
+        if (avatarDesk) { avatarDesk.style.backgroundImage = `url('${avatar}')`; avatarDesk.innerHTML = ''; }
+        if (avatarMob)  { avatarMob.style.backgroundImage  = `url('${avatar}')`; avatarMob.innerHTML = ''; }
+    }
+
+    // Cập nhật info trong mobile dropdown
+    const dropName  = document.getElementById('mobile-dropdown-name');
+    const dropEmail = document.getElementById('mobile-dropdown-email');
+    if (dropName)  dropName.textContent  = name;
+    if (dropEmail) dropEmail.textContent = user.email;
+};
+
 // XỬ LÝ ĐĂNG XUẤT
 window.handleLogout = async function() {
     try {
@@ -2170,12 +2207,36 @@ window.handleLogout = async function() {
             await HiDB.signOut();
         }
         localStorage.removeItem('hi_use_mock');
-        window.location.hash = ''; // Xóa hash để khi reload về landing
+        history.replaceState(null, '', window.location.pathname); // Xóa hash sạch
         window.location.reload(); // Reload để reset UI về landing
     } catch(err) {
         console.error("Lỗi đăng xuất:", err);
     }
 };
+
+// MOBILE PROFILE DROPDOWN
+window.toggleMobileProfileDropdown = function() {
+    const dropdown = document.getElementById('mobile-profile-dropdown');
+    if (!dropdown) return;
+    const isHidden = dropdown.classList.contains('hidden');
+    if (isHidden) {
+        dropdown.classList.remove('hidden');
+        // Đóng khi click ra ngoài
+        setTimeout(() => {
+            document.addEventListener('click', _closeMobileDropdownOutside, { once: true });
+        }, 0);
+    } else {
+        dropdown.classList.add('hidden');
+    }
+};
+
+function _closeMobileDropdownOutside(e) {
+    const dropdown = document.getElementById('mobile-profile-dropdown');
+    const avatar   = document.getElementById('mobile-profile-avatar');
+    if (dropdown && !dropdown.contains(e.target) && !avatar.contains(e.target)) {
+        dropdown.classList.add('hidden');
+    }
+}
 </script>
 </body>
 </html>
