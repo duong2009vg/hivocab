@@ -134,10 +134,10 @@ window.HiDB = (() => {
      * @returns {Promise<Array>}
      */
     async function getTopics() {
-        const user = await getCurrentUser();
-        if (!user) throw new Error('Chưa đăng nhập');
+        const user = await getCurrentUser().catch(() => null);
 
-        const { data, error } = await _getClient()
+        // Build filter: user topics + public topics (user_id IS NULL)
+        let query = _getClient()
             .from('topics')
             .select(`
                 id,
@@ -149,28 +149,34 @@ window.HiDB = (() => {
                     word_progress ( level, user_id )
                 )
             `)
-            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: true });
 
+        if (user) {
+            query = query.or(`user_id.eq.${user.id},user_id.is.null`);
+        } else {
+            query = query.is('user_id', null);
+        }
+
+        const { data, error } = await query;
         if (error) throw error;
 
         // Tính tiến độ (%) cho từng topic
-        return data.map(topic => {
+        return (data || []).map(topic => {
             const words = topic.words || [];
             const totalWords = words.length;
 
-            // Lọc progress của user hiện tại
-            const progresses = words
-                .flatMap(w => w.word_progress)
-                .filter(p => p.user_id === user.id);
+            // Lọc progress của user hiện tại (anonymous = không có progress)
+            const progresses = user
+                ? words.flatMap(w => w.word_progress).filter(p => p.user_id === user.id)
+                : [];
 
-            // Tiến độ = (tổng level của từng từ) / (totalWords * 5) * 100
             const totalLevel = progresses.reduce((sum, p) => sum + p.level, 0);
             const progress   = totalWords > 0
                 ? Math.round((totalLevel / (totalWords * 5)) * 100)
                 : 0;
 
             return {
+                id:         topic.id,   // ← cần cho _openTopic / _loadLessons
                 name:       topic.name,
                 icon:       topic.icon,
                 totalWords,
@@ -225,8 +231,7 @@ window.HiDB = (() => {
      * @returns {Promise<Array>}
      */
     async function getWordsInTopic(topicId) {
-        const user = await getCurrentUser();
-        if (!user) throw new Error('Chưa đăng nhập');
+        const user = await getCurrentUser().catch(() => null);
 
         const { data, error } = await _getClient()
             .from('words')
@@ -304,8 +309,7 @@ window.HiDB = (() => {
      */
     async function getLessonsInTopic(topicId) {
         const LESSON_SIZE = 50;
-        const user = await getCurrentUser();
-        if (!user) throw new Error('Chưa đăng nhập');
+        const user = await getCurrentUser().catch(() => null);
 
         const { data: words, error } = await _getClient()
             .from('words')
@@ -320,10 +324,10 @@ window.HiDB = (() => {
         for (let i = 0; i < allWords.length || lessons.length === 0; i += LESSON_SIZE) {
             const chunk = allWords.slice(i, i + LESSON_SIZE);
             const lessonIndex = Math.floor(i / LESSON_SIZE);
-            const totalLevel = chunk.reduce((sum, w) => {
+            const totalLevel = user ? chunk.reduce((sum, w) => {
                 const p = (w.word_progress || []).find(p => p.user_id === user.id);
                 return sum + (p?.level ?? 0);
-            }, 0);
+            }, 0) : 0;
             lessons.push({
                 id:         `lesson-${topicId}-${lessonIndex}`,
                 topicId,
@@ -346,8 +350,7 @@ window.HiDB = (() => {
      */
     async function getWordsInLesson(topicId, lessonIndex) {
         const LESSON_SIZE = 50;
-        const user = await getCurrentUser();
-        if (!user) throw new Error('Chưa đăng nhập');
+        const user = await getCurrentUser().catch(() => null);
 
         const { data, error } = await _getClient()
             .from('words')
@@ -733,17 +736,23 @@ window.HiDB = (() => {
      * @returns {Promise<Array>} mảng exercise objects
      */
     async function getCustomExercises() {
-        const user = await getCurrentUser();
-        if (!user) return [];
+        const user = await getCurrentUser().catch(() => null);
 
-        const { data, error } = await _getClient()
+        let query = _getClient()
             .from('exercises')
             .select(`
                 *,
                 exercise_questions ( * )
             `)
-            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: false });
+
+        if (user) {
+            query = query.or(`user_id.eq.${user.id},user_id.is.null`);
+        } else {
+            query = query.is('user_id', null);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
