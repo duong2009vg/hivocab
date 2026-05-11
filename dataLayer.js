@@ -64,10 +64,13 @@ window.HiDB = (() => {
     function calculateNextReview(currentLevel, rating) {
         let newLevel = currentLevel;
 
-        if (rating === 'easy') {
+        // Từ mới (level 0): luôn lên level 1, bất kể đúng hay sai
+        if (currentLevel === 0) {
+            newLevel = 1;
+        } else if (rating === 'easy') {
             newLevel = Math.min(currentLevel + 1, 5);
         } else if (rating === 'hard') {
-            newLevel = Math.max(currentLevel - 1, 1);
+            newLevel = Math.max(currentLevel - 1, 1); // tối thiểu level 1
         }
         // 'good' → newLevel giữ nguyên
 
