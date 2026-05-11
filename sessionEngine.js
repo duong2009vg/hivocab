@@ -36,6 +36,7 @@ const HiSession = (() => {
         queueIndex:  0,    // con trỏ vào queue
         completed:   [],   // [{ word, rating, attempts }]
         isActive:    false,
+        allowedType: null, // nếu set, mọi item chỉ dùng dạng này (single-practice mode)
     };
 
     // ----------------------------------------------------------
@@ -206,17 +207,18 @@ const HiSession = (() => {
      * @param {Array} words - từ HiDB.getWordsDueForReview()
      *   Mỗi phần tử: { wordId, word, phonetic, meaning, exampleSentence, level, ... }
      */
-    function startSession(words) {
+    function startSession(words, allowedType = null) {
         if (!words || words.length === 0) {
             throw new Error('[HiSession] Không có từ nào để ôn tập.');
         }
 
         _state = {
-            allWords:   words,
-            queue:      _shuffle(words).map(w => _createQueueItem(w)),
-            queueIndex: 0,
-            completed:  [],
-            isActive:   true,
+            allWords:    words,
+            queue:       _shuffle(words).map(w => _createQueueItem(w, allowedType)),
+            queueIndex:  0,
+            completed:   [],
+            isActive:    true,
+            allowedType, // giữ lại để dùng khi trả lời sai
         };
 
         // Lazy-generate exercise data cho item đầu tiên ngay lập tức
@@ -378,8 +380,9 @@ const HiSession = (() => {
 
         } else {
             // Đổi sang dạng bài khác cho từ này
+            // Nếu phiên có allowedType (single-practice mode), giữ nguyên dạng
             item.usedTypes.push(item.exerciseType);
-            const nextType = _pickNextType(item.usedTypes);
+            const nextType = _state.allowedType || _pickNextType(item.usedTypes);
             item.exerciseType = nextType;
             item.exerciseData = _generateExerciseData(item.word, nextType, _state.allWords);
 

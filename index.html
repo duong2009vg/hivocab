@@ -1233,14 +1233,7 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
             level:           w.level      ?? 0,
         }));
 
-        HiSession.startSession(sessionWords);
-
-        // Override tất cả items sang dạng bài được chọn
-        const firstItem = HiSession.getCurrentItem();
-        if (firstItem) {
-            firstItem.exerciseType = forcedType;
-            firstItem.exerciseData = null;
-        }
+        HiSession.startSession(sessionWords, forcedType);
 
         HiSessionUI.render();
 
