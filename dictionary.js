@@ -17,7 +17,8 @@
 const HiDict = (() => {
 
     const DICT_URL  = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-    const GROQ_URL  = '/api/groq';
+    // ⚠️ Thay URL dưới đây bằng domain proxy thật của bạn trên Vercel
+    const GROQ_URL  = 'https://duongvocab-proxy.vercel.app/api/groq';
     const GROQ_MODEL = 'llama-3.1-8b-instant';   // nhanh, miễn phí
 
     // Cache kết quả tra (bao gồm bản dịch) để không gọi API lặp lại
