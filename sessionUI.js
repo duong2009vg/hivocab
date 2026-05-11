@@ -339,19 +339,25 @@ const HiSessionUI = (() => {
     function _renderFill(item) {
         const d = item.exerciseData;
 
-        // Tạo input boxes cho từng chữ cái (bỏ qua khoảng trắng)
-        const letters = d.answer.split('').filter(c => c !== ' ');
-        const inputsHTML = letters.map((_, i) => `
-            <input type="text" maxlength="1"
-                   data-fill-index="${i}"
+        // Tạo input boxes cho từng chữ cái, thêm dấu cách phân tách giữa các từ
+        let fillIndex = 0;
+        const inputsHTML = d.answer.split('').map((char) => {
+            if (char === ' ') {
+                // Hiển thị khoảng cách nhìn thấy được giữa các từ
+                return `<span class="w-3 md:w-4 shrink-0" aria-hidden="true"></span>`;
+            }
+            const idx = fillIndex++;
+            return `<input type="text" maxlength="1"
+                   data-fill-index="${idx}"
                    class="${CSS.fillInput}"
-                   autocomplete="off" autocorrect="off" spellcheck="false"/>
-        `).join('');
+                   autocomplete="off" autocorrect="off" spellcheck="false"/>`;
+        }).join('');
 
+        const totalLetters = d.answer.replace(/\s/g, '').length;
         // Nếu từ có nhiều chữ (> 8), chia thành 2 dòng bằng flex-wrap
-        const boxesClass = letters.length > 8
-            ? 'flex gap-1 md:gap-2 justify-center flex-wrap max-w-full'
-            : 'flex gap-1 md:gap-2 justify-center';
+        const boxesClass = totalLetters > 8
+            ? 'flex gap-1 md:gap-2 justify-center flex-wrap max-w-full items-end'
+            : 'flex gap-1 md:gap-2 justify-center items-end';
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
@@ -462,7 +468,16 @@ const HiSessionUI = (() => {
 
         // Thu thập các chữ cái đã nhập
         const inputs  = document.querySelectorAll('[data-fill-index]');
-        const typed   = Array.from(inputs).map(i => i.value || '_').join('');
+        const typedLetters = Array.from(inputs).map(i => i.value || '_');
+
+        // Ghép lại đáp án, chèn dấu cách đúng vị trí theo answer gốc
+        const item = HiSession.getCurrentItem();
+        const answer = item?.exerciseData?.answer || '';
+        let letterIdx = 0;
+        const typed = answer.split('').map(char => {
+            if (char === ' ') return ' ';
+            return typedLetters[letterIdx++] || '_';
+        }).join('');
 
         const result  = HiSession.submitAnswer(typed);
 
