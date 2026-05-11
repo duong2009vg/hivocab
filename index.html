@@ -709,6 +709,8 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
                 <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
             </div>
         </div>
+        <!-- Pagination -->
+        <div id="vocab-pagination" class="hidden flex items-center justify-center gap-2 py-4 flex-wrap"></div>
     </div>
 </main>
 </div>
@@ -2240,31 +2242,36 @@ document.getElementById('modal-create-topic')?.addEventListener('click', functio
 // VOCABULARY PAGE — Kho từ vựng động từ Supabase
 // ============================================================
 
-window._vocabAllWords = null; // cache
+window._vocabAllWords   = null; // cache toàn bộ từ
+window._vocabFiltered   = null; // từ sau khi search
+window._vocabPage       = 1;    // trang hiện tại
+const VOCAB_PAGE_SIZE   = 50;   // số từ mỗi trang
 
 window._loadVocabularyPage = async function() {
-    const listEl    = document.getElementById('vocab-list');
+    const listEl     = document.getElementById('vocab-list');
     const subtitleEl = document.getElementById('vocab-subtitle');
     if (!listEl) return;
 
     listEl.innerHTML = `<div class="flex items-center justify-center py-16">
         <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
     </div>`;
+    document.getElementById('vocab-pagination')?.classList.add('hidden');
 
     try {
         if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
 
-        // Lấy tất cả topics, rồi lấy từ của từng topic
         const topics = await HiDB.getTopics();
         const wordPromises = topics.map(t => HiDB.getWordsInTopic(t.id).then(ws => ws.map(w => ({ ...w, topicName: t.name }))));
         const nested = await Promise.all(wordPromises);
         const allWords = nested.flat();
 
-        window._vocabAllWords = allWords;
+        window._vocabAllWords  = allWords;
+        window._vocabFiltered  = allWords;
+        window._vocabPage      = 1;
 
         if (subtitleEl) subtitleEl.textContent = `${allWords.length} từ vựng đã lưu.`;
 
-        window._renderVocabList(allWords);
+        window._renderVocabPage();
 
     } catch (err) {
         console.error('[_loadVocabularyPage]', err);
@@ -2276,16 +2283,27 @@ window._loadVocabularyPage = async function() {
     }
 };
 
-window._renderVocabList = function(words) {
-    const listEl = document.getElementById('vocab-list');
+window._renderVocabPage = function() {
+    const listEl  = document.getElementById('vocab-list');
+    const paginEl = document.getElementById('vocab-pagination');
     if (!listEl) return;
 
-    if (!words || words.length === 0) {
+    const words      = window._vocabFiltered || [];
+    const total      = words.length;
+    const totalPages = Math.max(1, Math.ceil(total / VOCAB_PAGE_SIZE));
+    const page       = Math.min(window._vocabPage, totalPages);
+    window._vocabPage = page;
+
+    const start = (page - 1) * VOCAB_PAGE_SIZE;
+    const slice = words.slice(start, start + VOCAB_PAGE_SIZE);
+
+    if (total === 0) {
         listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
             <span class="material-symbols-outlined text-[56px] opacity-30">auto_stories</span>
             <p class="font-semibold text-base">Kho từ vựng trống</p>
             <p class="text-sm opacity-70">Thêm từ vào chủ đề để hiện ở đây</p>
         </div>`;
+        if (paginEl) paginEl.classList.add('hidden');
         return;
     }
 
@@ -2299,7 +2317,7 @@ window._renderVocabList = function(words) {
         'bg-green-200 text-green-800',
     ];
 
-    listEl.innerHTML = words.map((w, i) => {
+    listEl.innerHTML = slice.map((w, i) => {
         const lv = Math.min(w.level || 0, 5);
         return `
         <div class="glass-card soft-shadow rounded-xl p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-3 group fade-in" style="animation-delay:${Math.min(i * 0.02, 0.4)}s">
@@ -2319,18 +2337,69 @@ window._renderVocabList = function(words) {
             </button>
         </div>`;
     }).join('');
+
+    // ── Pagination controls ────────────────────────────────────
+    if (!paginEl) return;
+    if (totalPages <= 1) { paginEl.classList.add('hidden'); return; }
+    paginEl.classList.remove('hidden');
+
+    const btnBase     = 'min-w-[36px] h-9 px-3 rounded-lg text-sm font-semibold transition-colors';
+    const btnActive   = 'bg-primary text-on-primary';
+    const btnNormal   = 'bg-surface-container text-on-surface hover:bg-surface-container-high';
+    const btnDisabled = 'bg-surface-container text-outline opacity-40 cursor-not-allowed';
+
+    const pageNums = new Set([1, totalPages]);
+    for (let p = Math.max(1, page - 2); p <= Math.min(totalPages, page + 2); p++) pageNums.add(p);
+    const sorted = [...pageNums].sort((a, b) => a - b);
+
+    let html = `<button onclick="window._vocabGoPage(${page - 1})"
+        class="${btnBase} ${page === 1 ? btnDisabled : btnNormal} flex items-center"
+        ${page === 1 ? 'disabled' : ''}>
+        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+    </button>`;
+
+    let prev = 0;
+    sorted.forEach(p => {
+        if (prev && p - prev > 1) html += `<span class="text-outline px-1 self-center">…</span>`;
+        html += `<button onclick="window._vocabGoPage(${p})"
+            class="${btnBase} ${p === page ? btnActive : btnNormal}">${p}</button>`;
+        prev = p;
+    });
+
+    html += `<button onclick="window._vocabGoPage(${page + 1})"
+        class="${btnBase} ${page === totalPages ? btnDisabled : btnNormal} flex items-center"
+        ${page === totalPages ? 'disabled' : ''}>
+        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+    </button>`;
+
+    html += `<span class="text-xs text-on-surface-variant w-full text-center mt-1">
+        ${start + 1}–${Math.min(start + VOCAB_PAGE_SIZE, total)} / ${total} từ
+    </span>`;
+
+    paginEl.innerHTML = html;
+    listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+window._vocabGoPage = function(p) {
+    const total      = window._vocabFiltered?.length || 0;
+    const totalPages = Math.max(1, Math.ceil(total / VOCAB_PAGE_SIZE));
+    window._vocabPage = Math.max(1, Math.min(p, totalPages));
+    window._renderVocabPage();
 };
 
 window._filterVocabList = function() {
-    const q = (document.getElementById('vocab-search')?.value || '').toLowerCase().trim();
+    const q   = (document.getElementById('vocab-search')?.value || '').toLowerCase().trim();
     const all = window._vocabAllWords || [];
     const filtered = !q ? all : all.filter(w =>
         w.word.toLowerCase().includes(q) || (w.meaning || '').toLowerCase().includes(q)
     );
-    window._renderVocabList(filtered);
+    window._vocabFiltered = filtered;
+    window._vocabPage     = 1;
+    window._renderVocabPage();
     const subtitleEl = document.getElementById('vocab-subtitle');
     if (subtitleEl) subtitleEl.textContent = `${filtered.length} từ vựng${q ? ` khớp với "${q}"` : ' đã lưu.'}`;
 };
+
 
 // ============================================================
 // EXERCISE DETAIL PAGE — Mở và chạy bài tập tùy chỉnh
