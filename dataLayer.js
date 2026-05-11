@@ -39,6 +39,7 @@ window.HiDB = (() => {
         const DAY  = 24 * HOUR;
 
         switch (level) {
+            case 0: return HOUR;          // từ mới chưa học
             case 1: return HOUR;
             case 2: return 8  * HOUR;
             case 3: return DAY;
@@ -488,7 +489,7 @@ window.HiDB = (() => {
             .eq('word_id', wordId)
             .maybeSingle();
 
-        const currentLevel   = existing?.level        ?? 1;
+        const currentLevel   = existing?.level        ?? 0;
         const currentCount   = existing?.review_count ?? 0;
 
         // Tính level mới và thời điểm ôn tiếp
