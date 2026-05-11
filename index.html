@@ -608,35 +608,39 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
 </main>
 </div>
 
+<!-- ==================== PAGE: EXERCISE DETAIL ==================== -->
+<div id="page-exercise-detail" class="page">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-6 py-3 flex items-center gap-4 shadow-sm">
+    <button onclick="navigateTo('exercises')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full">
+        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+    </button>
+    <h1 id="exd-title" class="font-bold text-on-surface text-lg truncate flex-1">Bài tập</h1>
+    <span id="exd-progress-label" class="text-sm text-on-surface-variant font-medium shrink-0"></span>
+</header>
+<main class="pt-20 pb-12 px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto min-h-[100dvh] flex flex-col gap-6 items-center">
+    <div id="exd-container" class="w-full mt-4"></div>
+</main>
+</div>
+
 <!-- ==================== PAGE: VOCABULARY ==================== -->
 <div id="page-vocabulary" class="page">
 <main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-5 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <header class="hidden lg:flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div><h1 class="font-headline-lg text-headline-lg text-on-surface">Kho từ vựng</h1><p class="text-on-surface-variant mt-1">Ôn tập và làm chủ các từ đã lưu.</p></div>
+            <div>
+                <h1 class="font-headline-lg text-headline-lg text-on-surface">Kho từ vựng</h1>
+                <p id="vocab-subtitle" class="text-on-surface-variant mt-1">Ôn tập và làm chủ các từ đã lưu.</p>
+            </div>
         </header>
         <div class="relative w-full lg:w-96 mb-2">
             <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-            <input class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-b-2 border-transparent focus:border-secondary-fixed-dim focus:bg-surface transition-all outline-none rounded-t-sm placeholder:text-outline text-sm md:text-base" placeholder="Tìm kiếm từ ngữ, ý nghĩa..."/>
+            <input id="vocab-search" oninput="window._filterVocabList()"
+                   class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-b-2 border-transparent focus:border-secondary-fixed-dim focus:bg-surface transition-all outline-none rounded-t-sm placeholder:text-outline text-sm md:text-base"
+                   placeholder="Tìm kiếm từ ngữ, ý nghĩa..."/>
         </div>
-        <div class="flex flex-col gap-4 flex-1">
-            <div class="glass-card soft-shadow rounded-xl p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-3 group">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2"><h2 class="text-lg md:text-2xl text-on-surface font-bold tracking-tight">Ephemeral</h2><span class="text-outline font-mono text-xs md:text-sm">/ɪˈfem.ər.əl/</span></div>
-                    <p class="text-sm md:text-base text-on-surface mb-3 border-l-2 border-secondary-fixed-dim pl-3">Phù du, chóng tàn, tồn tại trong thời gian ngắn.</p>
-                </div>
-                <button onclick="HiSpeak('Ephemeral')" class="shrink-0 p-2 rounded-full bg-surface-container-low text-primary hover:bg-primary-container/10 transition-colors self-start mt-1" title="Nghe phát âm">
-                    <span class="material-symbols-outlined text-[20px]">volume_up</span>
-                </button>
-            </div>
-            <div class="glass-card soft-shadow rounded-xl p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-3 group">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2"><h2 class="text-lg md:text-2xl text-on-surface font-bold tracking-tight">Ubiquitous</h2><span class="text-outline font-mono text-xs md:text-sm">/juːˈbɪk.wɪ.təs/</span></div>
-                    <p class="text-sm md:text-base text-on-surface mb-3 border-l-2 border-secondary-fixed-dim pl-3">Có mặt ở khắp mọi nơi, nhan nhản.</p>
-                </div>
-                <button onclick="HiSpeak('Ubiquitous')" class="shrink-0 p-2 rounded-full bg-surface-container-low text-primary hover:bg-primary-container/10 transition-colors self-start mt-1" title="Nghe phát âm">
-                    <span class="material-symbols-outlined text-[20px]">volume_up</span>
-                </button>
+        <div id="vocab-list" class="flex flex-col gap-4 flex-1">
+            <div class="flex items-center justify-center py-16">
+                <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
             </div>
         </div>
     </div>
@@ -922,7 +926,7 @@ window.navigateTo = function(page, preserveHash = false){
     // Điều khiển Component dùng chung (Navbar / Sidebar)
     const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'dictionary', 'settings'];
     const isMainTab = mainTabs.includes(page);
-    const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail');
+    const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail' || page === 'exercise-detail');
     
     // Sidebar Desktop
     const sidebar = document.getElementById('main-sidebar');
@@ -957,6 +961,14 @@ window.navigateTo = function(page, preserveHash = false){
             window._renderCategoryTabs && window._renderCategoryTabs();
             window._renderTopicsGrid  && window._renderTopicsGrid();
         }, 0);
+    }
+    // Khi vào trang Vocabulary: load từ vựng thật
+    if (page === 'vocabulary') {
+        setTimeout(() => window._loadVocabularyPage && window._loadVocabularyPage(), 0);
+    }
+    // Khi vào exercise-detail: render bài tập
+    if (page === 'exercise-detail') {
+        setTimeout(() => window._renderExerciseDetail && window._renderExerciseDetail(), 0);
     }
     // Khi vào trang Exercises: render danh sách bài tập
     if (page === 'exercises') {
@@ -1100,14 +1112,14 @@ window.startSession = async function() {
     }
 };
 
-// ── startSinglePractice: luyện 1 dạng bài cụ thể ───────────────
+// ── startSinglePractice: luyện 1 dạng bài từ lesson hiện tại ────
 window.startSinglePractice = async function(exerciseTypeIndex) {
     const typeMap = ['flashcard', 'mcq', 'fill', 'listen'];
     const forcedType = typeMap[exerciseTypeIndex] || 'flashcard';
 
-    document.getElementById('learning-progress-container').style.display = 'none';
-    document.getElementById('learning-streak-container').style.display = 'none';
-    document.getElementById('learning-close-btn').setAttribute('onclick', "navigateTo('topic-detail')");
+    document.getElementById('learning-progress-container').style.display = 'flex';
+    document.getElementById('learning-streak-container').style.display  = 'flex';
+    document.getElementById('learning-close-btn').setAttribute('onclick', "navigateTo('lesson-detail')");
     navigateTo('learning');
 
     document.querySelectorAll('.exercise-step').forEach(el => el.classList.add('hidden'));
@@ -1124,21 +1136,42 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
         HiSessionUI.init();
         container.innerHTML = `<div class="flex items-center justify-center mt-24"><span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span></div>`;
 
-        const words = await HiDB.getWordsDueForReview(10);
-        if (!words || words.length === 0) {
+        // Dùng từ của lesson đang mở; fallback về getWordsDueForReview nếu chưa có
+        let rawWords = window._currentLessonWords;
+        if (!rawWords || rawWords.length === 0) {
+            const topicId     = window._currentTopicId;
+            const lessonIndex = window._currentLessonIndex ?? 0;
+            if (topicId) {
+                rawWords = await HiDB.getWordsInLesson(topicId, lessonIndex);
+            } else {
+                rawWords = await HiDB.getWordsDueForReview(20);
+            }
+        }
+
+        if (!rawWords || rawWords.length === 0) {
             container.innerHTML = '<div class="text-center mt-20 text-on-surface-variant"><h2 class="font-bold text-xl mb-2">Không có từ để luyện tập</h2><p>Thêm từ mới vào chủ đề trước.</p></div>';
             return;
         }
 
-        // Tạo queue với forced type
-        const singleWords = [words[0]];
-        HiSession.startSession(singleWords);
-        // Override type của item đầu
-        const item = HiSession.getCurrentItem();
-        if (item) {
-            item.exerciseType = forcedType;
-            item.exerciseData = null;
+        // Chuẩn hoá sang định dạng HiSession (id → wordId)
+        const sessionWords = rawWords.map(w => ({
+            wordId:          w.id || w.wordId,
+            word:            w.word,
+            phonetic:        w.phonetic   || '',
+            meaning:         w.meaning    || '',
+            exampleSentence: w.exampleSentence || '',
+            level:           w.level      ?? 0,
+        }));
+
+        HiSession.startSession(sessionWords);
+
+        // Override tất cả items sang dạng bài được chọn
+        const firstItem = HiSession.getCurrentItem();
+        if (firstItem) {
+            firstItem.exerciseType = forcedType;
+            firstItem.exerciseData = null;
         }
+
         HiSessionUI.render();
 
     } catch(err) {
@@ -2110,6 +2143,283 @@ window._setExerciseCat = function(cat, btnEl) {
 document.getElementById('modal-create-topic')?.addEventListener('click', function(e) {
     if (e.target === this) window.closeCreateTopicModal();
 });
+
+// ============================================================
+// VOCABULARY PAGE — Kho từ vựng động từ Supabase
+// ============================================================
+
+window._vocabAllWords = null; // cache
+
+window._loadVocabularyPage = async function() {
+    const listEl    = document.getElementById('vocab-list');
+    const subtitleEl = document.getElementById('vocab-subtitle');
+    if (!listEl) return;
+
+    listEl.innerHTML = `<div class="flex items-center justify-center py-16">
+        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+    </div>`;
+
+    try {
+        if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
+
+        // Lấy tất cả topics, rồi lấy từ của từng topic
+        const topics = await HiDB.getTopics();
+        const wordPromises = topics.map(t => HiDB.getWordsInTopic(t.id).then(ws => ws.map(w => ({ ...w, topicName: t.name }))));
+        const nested = await Promise.all(wordPromises);
+        const allWords = nested.flat();
+
+        window._vocabAllWords = allWords;
+
+        if (subtitleEl) subtitleEl.textContent = `${allWords.length} từ vựng đã lưu.`;
+
+        window._renderVocabList(allWords);
+
+    } catch (err) {
+        console.error('[_loadVocabularyPage]', err);
+        listEl.innerHTML = `<div class="text-center py-16 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[48px] opacity-30 block mb-3">error_outline</span>
+            <p class="font-semibold">Không thể tải từ vựng</p>
+            <p class="text-sm mt-1">${_esc(err.message)}</p>
+        </div>`;
+    }
+};
+
+window._renderVocabList = function(words) {
+    const listEl = document.getElementById('vocab-list');
+    if (!listEl) return;
+
+    if (!words || words.length === 0) {
+        listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+            <span class="material-symbols-outlined text-[56px] opacity-30">auto_stories</span>
+            <p class="font-semibold text-base">Kho từ vựng trống</p>
+            <p class="text-sm opacity-70">Thêm từ vào chủ đề để hiện ở đây</p>
+        </div>`;
+        return;
+    }
+
+    const lvLabel = ['Mới', '1h', '8h', '1 ngày', '1 tuần', '1 tháng'];
+    const lvColor = [
+        'bg-surface-container text-outline',
+        'bg-red-100 text-red-700',
+        'bg-yellow-100 text-yellow-700',
+        'bg-blue-100 text-blue-700',
+        'bg-green-100 text-green-700',
+        'bg-green-200 text-green-800',
+    ];
+
+    listEl.innerHTML = words.map((w, i) => {
+        const lv = Math.min(w.level || 0, 5);
+        return `
+        <div class="glass-card soft-shadow rounded-xl p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-3 group fade-in" style="animation-delay:${Math.min(i * 0.02, 0.4)}s">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                    <h2 class="text-lg md:text-2xl text-on-surface font-bold tracking-tight">${_esc(w.word)}</h2>
+                    ${w.phonetic ? `<span class="text-outline font-mono text-xs md:text-sm">${_esc(w.phonetic)}</span>` : ''}
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
+                </div>
+                <p class="text-sm md:text-base text-on-surface border-l-2 border-secondary-fixed-dim pl-3">${_esc(w.meaning)}</p>
+                ${w.exampleSentence ? `<p class="text-xs text-outline italic mt-1 line-clamp-1">${_esc(w.exampleSentence)}</p>` : ''}
+                ${w.topicName ? `<p class="text-[11px] text-primary/60 mt-1.5 font-medium">${_esc(w.topicName)}</p>` : ''}
+            </div>
+            <button onclick="typeof window.HiSpeak==='function'&&HiSpeak('${_esc(w.word)}')"
+                    class="shrink-0 p-2 rounded-full bg-surface-container-low text-primary hover:bg-primary-container/10 transition-colors self-start mt-1" title="Nghe phát âm">
+                <span class="material-symbols-outlined text-[20px]">volume_up</span>
+            </button>
+        </div>`;
+    }).join('');
+};
+
+window._filterVocabList = function() {
+    const q = (document.getElementById('vocab-search')?.value || '').toLowerCase().trim();
+    const all = window._vocabAllWords || [];
+    const filtered = !q ? all : all.filter(w =>
+        w.word.toLowerCase().includes(q) || (w.meaning || '').toLowerCase().includes(q)
+    );
+    window._renderVocabList(filtered);
+    const subtitleEl = document.getElementById('vocab-subtitle');
+    if (subtitleEl) subtitleEl.textContent = `${filtered.length} từ vựng${q ? ` khớp với "${q}"` : ' đã lưu.'}`;
+};
+
+// ============================================================
+// EXERCISE DETAIL PAGE — Mở và chạy bài tập tùy chỉnh
+// ============================================================
+
+window._renderExerciseDetail = async function() {
+    const container = document.getElementById('exd-container');
+    const titleEl   = document.getElementById('exd-title');
+    if (!container) return;
+
+    container.innerHTML = `<div class="flex items-center justify-center py-16">
+        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+    </div>`;
+
+    const exerciseId = window._currentExerciseId;
+    if (!exerciseId) {
+        container.innerHTML = `<p class="text-center py-16 text-on-surface-variant">Không tìm thấy bài tập.</p>`;
+        return;
+    }
+
+    try {
+        if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
+
+        const exercises = await HiDB.getCustomExercises();
+        const ex = exercises.find(e => e.id === exerciseId);
+        if (!ex) throw new Error('Bài tập không tồn tại.');
+
+        if (titleEl) titleEl.textContent = ex.title;
+
+        if (!ex.questions || ex.questions.length === 0) {
+            container.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3 text-center">
+                <span class="material-symbols-outlined text-[56px] opacity-30">quiz</span>
+                <p class="font-semibold">Bài tập này chưa có câu hỏi nào.</p>
+            </div>`;
+            return;
+        }
+
+        // Khởi tạo state bài tập
+        window._exdState = {
+            questions: ex.questions,
+            current:   0,
+            score:     0,
+            answered:  false,
+        };
+        window._renderExdQuestion();
+
+    } catch (err) {
+        console.error('[_renderExerciseDetail]', err);
+        container.innerHTML = `<div class="text-center py-16 text-error">
+            <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
+            <p>${_esc(err.message)}</p>
+        </div>`;
+    }
+};
+
+window._renderExdQuestion = function() {
+    const container = document.getElementById('exd-container');
+    const progressEl = document.getElementById('exd-progress-label');
+    if (!container || !window._exdState) return;
+
+    const { questions, current, score } = window._exdState;
+    const q = questions[current];
+    const total = questions.length;
+
+    if (progressEl) progressEl.textContent = `${current + 1} / ${total}`;
+
+    if (q.type === 'mcq' && q.options) {
+        const opts = q.options;
+        container.innerHTML = `
+        <div class="w-full flex flex-col gap-4 fade-in">
+            <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8">
+                <p class="text-xs font-bold text-outline uppercase tracking-widest mb-3">Câu ${current + 1}</p>
+                <p class="text-base md:text-xl font-semibold text-on-surface leading-snug mb-6">${_esc(q.prompt)}</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="exd-opts">
+                    ${opts.map((opt, i) => `
+                    <button onclick="window._exdSelectOpt(${i})"
+                            data-exd-opt="${i}"
+                            class="w-full text-left p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-sm md:text-base text-on-surface hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98]">
+                        ${_esc(typeof opt === 'object' ? opt.text || opt : opt)}
+                    </button>`).join('')}
+                </div>
+            </div>
+        </div>`;
+    } else {
+        // fill / text question
+        container.innerHTML = `
+        <div class="w-full flex flex-col gap-4 fade-in">
+            <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+                <p class="text-xs font-bold text-outline uppercase tracking-widest">Câu ${current + 1}</p>
+                <p class="text-base md:text-xl font-semibold text-on-surface leading-snug">${_esc(q.prompt)}</p>
+                <input id="exd-text-input" type="text" placeholder="Nhập câu trả lời..."
+                       autocomplete="off" spellcheck="false"
+                       onkeydown="if(event.key==='Enter') window._exdCheckText()"
+                       class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant focus:border-primary rounded-t-lg px-4 py-3 text-on-surface placeholder:text-outline outline-none transition-colors"/>
+                <button onclick="window._exdCheckText()" class="w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
+                    Kiểm tra
+                </button>
+            </div>
+        </div>`;
+        setTimeout(() => document.getElementById('exd-text-input')?.focus(), 100);
+    }
+};
+
+window._exdSelectOpt = function(idx) {
+    if (window._exdState?.answered) return;
+    window._exdState.answered = true;
+
+    const q = window._exdState.questions[window._exdState.current];
+    const correct = String(q.answer) === String(typeof q.options[idx] === 'object' ? q.options[idx].text || q.options[idx] : q.options[idx]);
+
+    document.querySelectorAll('[data-exd-opt]').forEach(btn => {
+        btn.disabled = true;
+        btn.onclick  = null;
+        const val = typeof q.options[btn.dataset.exdOpt] === 'object'
+            ? q.options[btn.dataset.exdOpt].text || q.options[btn.dataset.exdOpt]
+            : q.options[btn.dataset.exdOpt];
+        if (String(val) === String(q.answer)) {
+            btn.className = btn.className.replace('border-outline-variant/40', 'border-green-500') + ' bg-green-50';
+        } else if (Number(btn.dataset.exdOpt) === idx && !correct) {
+            btn.className = btn.className.replace('border-outline-variant/40', 'border-error') + ' bg-error-container/20';
+        }
+    });
+
+    if (correct) window._exdState.score++;
+    setTimeout(() => window._exdAdvance(), 1400);
+};
+
+window._exdCheckText = function() {
+    if (window._exdState?.answered) return;
+    const input = document.getElementById('exd-text-input');
+    if (!input) return;
+    const typed = input.value.trim();
+    if (!typed) { input.classList.add('border-error'); return; }
+
+    window._exdState.answered = true;
+    const q = window._exdState.questions[window._exdState.current];
+    const correct = typed.toLowerCase() === String(q.answer).toLowerCase();
+
+    input.disabled = true;
+    if (correct) {
+        input.className = input.className + ' border-green-500 bg-green-50';
+        window._exdState.score++;
+    } else {
+        input.className = input.className + ' border-error bg-error-container/20';
+        input.value = q.answer;
+    }
+    setTimeout(() => window._exdAdvance(), 1400);
+};
+
+window._exdAdvance = function() {
+    const st = window._exdState;
+    if (!st) return;
+    st.current++;
+    st.answered = false;
+
+    if (st.current >= st.questions.length) {
+        // Kết quả
+        const pct = Math.round((st.score / st.questions.length) * 100);
+        const container = document.getElementById('exd-container');
+        const progressEl = document.getElementById('exd-progress-label');
+        if (progressEl) progressEl.textContent = '';
+        if (container) container.innerHTML = `
+        <div class="w-full flex flex-col items-center gap-5 mt-6 fade-in text-center px-4">
+            <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg">
+                <span class="material-symbols-outlined text-[48px] icon-fill">${pct >= 70 ? 'check_circle' : 'sentiment_neutral'}</span>
+            </div>
+            <h2 class="text-2xl font-bold text-on-surface">Hoàn thành!</h2>
+            <p class="text-on-surface-variant">Bạn trả lời đúng <span class="font-bold text-primary text-xl">${st.score}/${st.questions.length}</span> câu (${pct}%)</p>
+            <div class="flex gap-3 mt-2">
+                <button onclick="window._renderExerciseDetail()" class="bg-primary/10 text-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/20 transition-colors">
+                    Làm lại
+                </button>
+                <button onclick="navigateTo('exercises')" class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
+                    Về danh sách
+                </button>
+            </div>
+        </div>`;
+    } else {
+        window._renderExdQuestion();
+    }
+};
 
 // ============================================================
 // DICTIONARY PAGE  —  Tra từ điển
