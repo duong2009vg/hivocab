@@ -136,7 +136,6 @@ window.HiDB = (() => {
     async function getTopics() {
         const user = await getCurrentUser().catch(() => null);
 
-        // Build filter: user topics + public topics (user_id IS NULL)
         let query = _getClient()
             .from('topics')
             .select(`
@@ -160,12 +159,10 @@ window.HiDB = (() => {
         const { data, error } = await query;
         if (error) throw error;
 
-        // Tính tiến độ (%) cho từng topic
         return (data || []).map(topic => {
             const words = topic.words || [];
             const totalWords = words.length;
 
-            // Lọc progress của user hiện tại (anonymous = không có progress)
             const progresses = user
                 ? words.flatMap(w => w.word_progress).filter(p => p.user_id === user.id)
                 : [];
@@ -176,7 +173,7 @@ window.HiDB = (() => {
                 : 0;
 
             return {
-                id:         topic.id,   // ← cần cho _openTopic / _loadLessons
+                id:         topic.id,       // ← QUAN TRỌNG: cần cho _openTopic
                 name:       topic.name,
                 icon:       topic.icon,
                 totalWords,
@@ -736,23 +733,17 @@ window.HiDB = (() => {
      * @returns {Promise<Array>} mảng exercise objects
      */
     async function getCustomExercises() {
-        const user = await getCurrentUser().catch(() => null);
+        const user = await getCurrentUser();
+        if (!user) return [];
 
-        let query = _getClient()
+        const { data, error } = await _getClient()
             .from('exercises')
             .select(`
                 *,
                 exercise_questions ( * )
             `)
+            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: false });
-
-        if (user) {
-            query = query.or(`user_id.eq.${user.id},user_id.is.null`);
-        } else {
-            query = query.is('user_id', null);
-        }
-
-        const { data, error } = await query;
 
         if (error) throw error;
 
