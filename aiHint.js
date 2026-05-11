@@ -17,9 +17,9 @@ const HiAIHint = (() => {
     // CONSTANTS
     // ----------------------------------------------------------
     // ⚠️ Proxy Vercel — API key bảo mật server-side, không lộ ra frontend
-    const GEMINI_PROXY  = 'https://groq-proxy-sandy.vercel.app/api/gemini';
-    const GEMINI_MODEL  = 'gemini-2.0-flash';
-    const MAX_TOKENS    = 256;
+    const GROQ_PROXY  = 'https://groq-proxy-sandy.vercel.app/api/groq';
+    const GROQ_MODEL  = 'llama-3.1-8b-instant';
+    const MAX_TOKENS  = 256;
 
     // ----------------------------------------------------------
     // PROMPT BUILDER
@@ -79,28 +79,22 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
     }
 
     // ----------------------------------------------------------
-    // GEMINI API CALL
+    // GROQ API CALL
     // ----------------------------------------------------------
 
     /**
-     * Gọi Gemini qua Vercel proxy và trả về text response.
+     * Gọi Groq qua Vercel proxy và trả về text response.
      * API key bảo mật server-side — frontend không cần biết key.
-     *
-     * @param {string} prompt
-     * @returns {Promise<string>}
      */
-    async function _callGemini(prompt) {
-        const res = await fetch(GEMINI_PROXY, {
+    async function _callGroq(prompt) {
+        const res = await fetch(GROQ_PROXY, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model:    GEMINI_MODEL,
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    maxOutputTokens: MAX_TOKENS,
-                    temperature:     0.7,
-                    topP:            0.9,
-                }
+                model:       GROQ_MODEL,
+                messages:    [{ role: 'user', content: prompt }],
+                temperature: 0.7,
+                max_tokens:  MAX_TOKENS,
             })
         });
 
@@ -111,9 +105,9 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
         }
 
         const data = await res.json();
-        const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-        if (!text) throw new Error('Gemini trả về kết quả rỗng.');
-        return text.trim();
+        const text = data?.choices?.[0]?.message?.content?.trim();
+        if (!text) throw new Error('Groq trả về kết quả rỗng.');
+        return text;
     }
 
     // ----------------------------------------------------------
@@ -130,7 +124,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
      */
     async function getHint(ctx) {
         const prompt = _buildPrompt(ctx);
-        return await _callGemini(prompt);
+        return await _callGroq(prompt);
     }
 
     // ----------------------------------------------------------
@@ -161,7 +155,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
         hintEl.innerHTML = `
             <div class="flex items-center gap-2 text-primary">
                 <span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
-                <span>Gemini AI đang tạo gợi ý...</span>
+                <span>Groq AI đang tạo gợi ý...</span>
             </div>`;
 
         try {
