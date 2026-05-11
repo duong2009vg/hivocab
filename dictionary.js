@@ -142,6 +142,9 @@ Rules:
         if (!word || !word.trim()) return null;
         const key = word.trim().toLowerCase();
 
+        // Free Dictionary API chỉ hỗ trợ từ đơn — bỏ qua cụm từ nhiều chữ
+        if (key.includes(' ')) return null;
+
         if (_cache.has(key)) return _cache.get(key);
 
         try {
@@ -228,16 +231,20 @@ Rules:
      * @param {number} rate  - tốc độ fallback TTS (0.5–1.0)
      */
     async function playWordAudio(word, rate = 0.9) {
-        const result = await lookupWord(word);
+        // Cụm từ nhiều chữ không có trong từ điển — dùng TTS trực tiếp
+        const isSingleWord = word && !word.trim().includes(' ');
 
-        if (result?.audioUrl) {
-            try {
-                if (!_audioEl) _audioEl = new Audio();
-                _audioEl.pause();
-                _audioEl.src = result.audioUrl;
-                await _audioEl.play();
-                return;
-            } catch (_) { /* fallback */ }
+        if (isSingleWord) {
+            const result = await lookupWord(word);
+            if (result?.audioUrl) {
+                try {
+                    if (!_audioEl) _audioEl = new Audio();
+                    _audioEl.pause();
+                    _audioEl.src = result.audioUrl;
+                    await _audioEl.play();
+                    return;
+                } catch (_) { /* fallback */ }
+            }
         }
 
         // Fallback: Web Speech API
