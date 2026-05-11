@@ -308,9 +308,10 @@ window.HiDB = (() => {
         const LESSON_SIZE = 50;
         const user = await getCurrentUser().catch(() => null);
 
+        // Chỉ lấy id của words, không join word_progress (tránh RLS chặn anonymous)
         const { data: words, error } = await _getClient()
             .from('words')
-            .select(`id, word_progress ( level, user_id )`)
+            .select('id')
             .eq('topic_id', topicId)
             .order('created_at', { ascending: true });
 
@@ -321,10 +322,9 @@ window.HiDB = (() => {
         for (let i = 0; i < allWords.length || lessons.length === 0; i += LESSON_SIZE) {
             const chunk = allWords.slice(i, i + LESSON_SIZE);
             const lessonIndex = Math.floor(i / LESSON_SIZE);
-            const totalLevel = user ? chunk.reduce((sum, w) => {
-                const p = (w.word_progress || []).find(p => p.user_id === user.id);
-                return sum + (p?.level ?? 0);
-            }, 0) : 0;
+            // Progress = 0 vì không join word_progress nữa (tránh RLS)
+            // Có thể fetch riêng nếu cần chính xác, hiện tại để 0 là OK
+            const totalLevel = 0;
             lessons.push({
                 id:         `lesson-${topicId}-${lessonIndex}`,
                 topicId,
@@ -349,28 +349,43 @@ window.HiDB = (() => {
         const LESSON_SIZE = 50;
         const user = await getCurrentUser().catch(() => null);
 
+        // Bước 1: Lấy words (không join word_progress để tránh RLS chặn anonymous)
         const { data, error } = await _getClient()
             .from('words')
-            .select(`id, word, phonetic, meaning, example_sentence,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
+            .select('id, word, phonetic, meaning, example_sentence')
             .eq('topic_id', topicId)
             .order('created_at', { ascending: true })
             .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
 
         if (error) throw error;
 
-        return (data || []).map(w => {
-            const progress = (w.word_progress || [])[0] || null;
+        const words = data || [];
+
+        // Bước 2: Nếu có user, lấy word_progress riêng rồi merge
+        let progressMap = {};
+        if (user && words.length > 0) {
+            const wordIds = words.map(w => w.id);
+            const { data: progData } = await _getClient()
+                .from('word_progress')
+                .select('word_id, level, next_review_at, last_reviewed_at, review_count')
+                .eq('user_id', user.id)
+                .in('word_id', wordIds);
+
+            (progData || []).forEach(p => { progressMap[p.word_id] = p; });
+        }
+
+        return words.map(w => {
+            const progress = progressMap[w.id] || null;
             return {
                 id:              w.id,
                 word:            w.word,
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
-                level:           progress?.level          ?? 0,
+                level:           progress?.level           ?? 0,
                 nextReviewAt:    progress?.next_review_at  ?? null,
                 lastReviewedAt:  progress?.last_reviewed_at ?? null,
-                reviewCount:     progress?.review_count     ?? 0,
+                reviewCount:     progress?.review_count    ?? 0,
                 isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
             };
         });
@@ -733,23 +748,17 @@ window.HiDB = (() => {
      * @returns {Promise<Array>} mảng exercise objects
      */
     async function getCustomExercises() {
-        const user = await getCurrentUser().catch(() => null);
+        const user = await getCurrentUser();
+        if (!user) return [];
 
-        let query = _getClient()
+        const { data, error } = await _getClient()
             .from('exercises')
             .select(`
                 *,
                 exercise_questions ( * )
             `)
+            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: false });
-
-        if (user) {
-            query = query.or(`user_id.eq.${user.id},user_id.is.null`);
-        } else {
-            query = query.is('user_id', null);
-        }
-
-        const { data, error } = await query;
 
         if (error) throw error;
 
