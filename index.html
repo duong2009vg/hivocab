@@ -555,15 +555,81 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
             </div>
         </div>
 
-        <!-- Mobile card -->
+        <!-- Mobile card — design mới theo code.html -->
         <div class="flex flex-col lg:hidden gap-4 mt-2">
-            <div class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-2xl p-5 soft-shadow">
-                <h2 id="ld-title-mobile" class="text-2xl font-bold text-on-surface leading-tight">Lesson 1</h2>
-                <p id="ld-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">0 từ vựng</p>
+
+            <!-- Topic Header Card (glassmorphism) -->
+            <div class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-2xl p-5 soft-shadow relative overflow-hidden">
+                <!-- Decorative blob -->
+                <div class="absolute -top-8 -right-8 w-28 h-28 bg-primary-container/20 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="flex items-start justify-between">
+                    <div class="flex-1 min-w-0 pr-3">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold tracking-wider uppercase mb-2">Lesson</span>
+                        <h2 id="ld-title-mobile" class="text-2xl font-bold text-on-surface leading-tight">Lesson 1</h2>
+                        <p id="ld-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">0 từ vựng</p>
+                    </div>
+                    <div id="ld-icon-mobile" class="w-11 h-11 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">book</span>
+                    </div>
+                </div>
+                <!-- Progress bar -->
+                <div class="mt-4">
+                    <div class="flex justify-between text-xs mb-1.5">
+                        <span class="text-on-surface-variant">Mastery</span>
+                        <span id="ld-progress-pct-mobile" class="font-bold text-primary">0%</span>
+                    </div>
+                    <div class="w-full bg-surface-variant rounded-full h-1.5 overflow-hidden">
+                        <div id="ld-progress-bar-mobile" class="bg-primary h-1.5 rounded-full transition-all duration-500" style="width:0%"></div>
+                    </div>
+                </div>
+                <!-- CTA button -->
+                <button onclick="startSinglePractice(0)" class="mt-5 w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 text-sm">
+                    Bắt đầu học
+                </button>
             </div>
-            <div class="relative w-full">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                <input id="ld-search-mobile" oninput="window.filterLessonWords()" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary border-t-0 border-l-0 border-r-0 rounded-t-DEFAULT pl-10 pr-4 py-3 text-sm text-on-surface placeholder:text-outline focus:ring-0 transition-colors" placeholder="Tìm kiếm từ vựng..." type="text"/>
+
+            <!-- Study Modes Grid -->
+            <div>
+                <h3 class="font-bold text-on-background text-base mb-3">Study Modes</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="startSinglePractice(0)" class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 aspect-square active:scale-95 transition-all soft-shadow group">
+                        <div class="w-10 h-10 rounded-full bg-secondary-container/30 flex items-center justify-center text-secondary group-hover:bg-secondary-container transition-colors">
+                            <span class="material-symbols-outlined">style</span>
+                        </div>
+                        <span class="text-xs font-bold text-on-surface">Flashcard</span>
+                    </button>
+                    <button onclick="startSinglePractice(1)" class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 aspect-square active:scale-95 transition-all soft-shadow group">
+                        <div class="w-10 h-10 rounded-full bg-tertiary-container/20 flex items-center justify-center text-tertiary group-hover:bg-tertiary-container/40 transition-colors">
+                            <span class="material-symbols-outlined">quiz</span>
+                        </div>
+                        <span class="text-xs font-bold text-on-surface">Trắc Nghiệm</span>
+                    </button>
+                    <button onclick="startSinglePractice(2)" class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 aspect-square active:scale-95 transition-all soft-shadow group">
+                        <div class="w-10 h-10 rounded-full bg-primary-container/10 flex items-center justify-center text-primary group-hover:bg-primary-container/30 transition-colors">
+                            <span class="material-symbols-outlined">edit_square</span>
+                        </div>
+                        <span class="text-xs font-bold text-on-surface">Điền từ</span>
+                    </button>
+                    <button onclick="startSinglePractice(3)" class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-xl p-4 flex flex-col items-center justify-center gap-2 aspect-square active:scale-95 transition-all soft-shadow group">
+                        <div class="w-10 h-10 rounded-full bg-[#E8DEF8] flex items-center justify-center text-[#4A4458] group-hover:bg-[#E8DEF8]/80 transition-colors">
+                            <span class="material-symbols-outlined">hearing</span>
+                        </div>
+                        <span class="text-xs font-bold text-on-surface">Nghe &amp; Viết</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Search bar -->
+            <div class="sticky top-16 z-40 bg-background/90 backdrop-blur-md py-2 -mx-4 px-4">
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+                    <input id="ld-search-mobile" oninput="window.filterLessonWords()"
+                        class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary-fixed-dim rounded-t-lg pl-10 pr-10 py-3 text-sm text-on-surface placeholder:text-outline-variant focus:outline-none transition-colors"
+                        placeholder="Search vocabulary..." type="text"/>
+                    <button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-primary">
+                        <span class="material-symbols-outlined text-[20px]">filter_list</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1854,6 +1920,7 @@ window._openLesson = function(topicId, lessonIndex) {
     window._currentTopicId     = topicId;
     window._currentLessonIndex = lessonIndex;
     window._currentLessonName  = lessonName;
+    window._currentLessonProgress = Math.round(lesson?.progress || 0);
     // _currentTopicName đã được set khi _openTopic, giữ nguyên
     navigateTo('lesson-detail');
 };
@@ -1872,6 +1939,13 @@ window._loadLessonWords = async function() {
     });
     const sidebarTopic = document.getElementById('ld-sidebar-topic');
     if (sidebarTopic) sidebarTopic.textContent = topicName;
+
+    // Cập nhật progress mobile từ lesson data nếu có
+    const prog = window._currentLessonProgress ?? 0;
+    const pctEl = document.getElementById('ld-progress-pct-mobile');
+    const barEl = document.getElementById('ld-progress-bar-mobile');
+    if (pctEl) pctEl.textContent = prog + '%';
+    if (barEl) barEl.style.width = prog + '%';
 
     const listEl = document.getElementById('lesson-words-list');
     if (!listEl) return;
