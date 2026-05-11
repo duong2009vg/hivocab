@@ -733,17 +733,23 @@ window.HiDB = (() => {
      * @returns {Promise<Array>} mảng exercise objects
      */
     async function getCustomExercises() {
-        const user = await getCurrentUser();
-        if (!user) return [];
+        const user = await getCurrentUser().catch(() => null);
 
-        const { data, error } = await _getClient()
+        let query = _getClient()
             .from('exercises')
             .select(`
                 *,
                 exercise_questions ( * )
             `)
-            .or(`user_id.eq.${user.id},user_id.is.null`)
             .order('created_at', { ascending: false });
+
+        if (user) {
+            query = query.or(`user_id.eq.${user.id},user_id.is.null`);
+        } else {
+            query = query.is('user_id', null);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
