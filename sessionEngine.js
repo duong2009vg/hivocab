@@ -380,9 +380,16 @@ const HiSession = (() => {
 
         } else {
             // Đổi sang dạng bài khác cho từ này
-            // Nếu phiên có allowedType (single-practice mode), giữ nguyên dạng
-            item.usedTypes.push(item.exerciseType);
-            const nextType = _state.allowedType || _pickNextType(item.usedTypes);
+            // Nếu phiên có allowedType (single-practice mode), giữ nguyên dạng — KHÔNG đổi type
+            let nextType;
+            if (_state.allowedType) {
+                // Single-practice: luôn giữ nguyên type đã chọn
+                nextType = _state.allowedType;
+            } else {
+                // Mixed mode: đổi sang dạng bài khác, tránh lặp
+                item.usedTypes.push(item.exerciseType);
+                nextType = _pickNextType(item.usedTypes);
+            }
             item.exerciseType = nextType;
             item.exerciseData = _generateExerciseData(item.word, nextType, _state.allWords);
 

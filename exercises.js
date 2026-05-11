@@ -40,16 +40,26 @@ const HiExercise = (() => {
     }
 
     // ── Tạo câu hỏi từ mảng words ─────────────────────────────
-    function _buildQuestions(words) {
+    /**
+     * @param {Array}  words
+     * @param {Array|null} onlyTypes - nếu set, chỉ tạo bài thuộc các type này
+     *   vd: ['fill_word', 'fill_blank'] → không tạo MCQ
+     */
+    function _buildQuestions(words, onlyTypes = null) {
         const pool   = _shuffle(words).slice(0, MAX_WORDS_PER_EX);
         const questions = [];
 
         pool.forEach(w => {
             // Chỉ thêm dạng có đủ dữ liệu
-            const availableTypes = [];
+            let availableTypes = [];
             if (words.length >= 4) availableTypes.push('mcq');
             if (w.word)            availableTypes.push('fill_word');
             if (w.example_sentence || w.exampleSentence) availableTypes.push('fill_blank');
+
+            // Lọc theo onlyTypes nếu có
+            if (onlyTypes && onlyTypes.length > 0) {
+                availableTypes = availableTypes.filter(t => onlyTypes.includes(t));
+            }
 
             if (availableTypes.length === 0) return;
 
@@ -244,10 +254,14 @@ const HiExercise = (() => {
             qs = ex.questions || [];
         } else {
             // Tự động sinh questions từ words
-            let words = ex.words;
+            const words = ex.words;
             if (ex.forceFill) {
-                qs = _buildQuestions(words).filter(q => q.type !== 'mcq');
-                if (qs.length === 0) qs = _buildQuestions(words); // fallback
+                // Chỉ dùng fill types — truyền thẳng vào _buildQuestions để tránh fallback rỗng
+                qs = _buildQuestions(words, ['fill_word', 'fill_blank']);
+                if (qs.length === 0) {
+                    // Không đủ dữ liệu fill (không có exampleSentence) → fallback toàn type
+                    qs = _buildQuestions(words);
+                }
             } else {
                 qs = _buildQuestions(words);
             }
