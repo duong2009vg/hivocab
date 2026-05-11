@@ -2,7 +2,7 @@
 // HI - AI HINT ENGINE  |  aiHint.js
 // ============================================================
 // Gọi Gemini API để tạo gợi ý thông minh cho bài tập Fill-in-blank.
-// API key được lưu trong localStorage (cài đặt bởi user).
+// API key bảo mật server-side qua Vercel proxy (không lưu localStorage).
 //
 // Phụ thuộc: sessionEngine.js (HiSession) phải load trước.
 //
@@ -16,29 +16,10 @@ const HiAIHint = (() => {
     // ----------------------------------------------------------
     // CONSTANTS
     // ----------------------------------------------------------
-    const STORAGE_KEY   = 'hi_gemini_api_key';
+    // ⚠️ Proxy Vercel — API key bảo mật server-side, không lộ ra frontend
+    const GEMINI_PROXY  = 'https://groq-proxy-sandy.vercel.app/api/gemini';
     const GEMINI_MODEL  = 'gemini-2.0-flash';
-    const GEMINI_BASE   = 'https://generativelanguage.googleapis.com/v1beta/models';
     const MAX_TOKENS    = 256;
-
-    // ----------------------------------------------------------
-    // API KEY MANAGEMENT
-    // ----------------------------------------------------------
-
-    /** Lấy API key từ localStorage */
-    function getApiKey() {
-        return localStorage.getItem(STORAGE_KEY) || '';
-    }
-
-    /** Lưu API key vào localStorage */
-    function saveApiKey(key) {
-        localStorage.setItem(STORAGE_KEY, key.trim());
-    }
-
-    /** Xóa API key */
-    function clearApiKey() {
-        localStorage.removeItem(STORAGE_KEY);
-    }
 
     // ----------------------------------------------------------
     // PROMPT BUILDER
@@ -102,22 +83,19 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
     // ----------------------------------------------------------
 
     /**
-     * Gọi Gemini API và trả về text response.
+     * Gọi Gemini qua Vercel proxy và trả về text response.
+     * API key bảo mật server-side — frontend không cần biết key.
      *
      * @param {string} prompt
-     * @param {string} apiKey
      * @returns {Promise<string>}
      */
-    async function _callGemini(prompt, apiKey) {
-        const url = `${GEMINI_BASE}/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-
-        const res = await fetch(url, {
-            method: 'POST',
+    async function _callGemini(prompt) {
+        const res = await fetch(GEMINI_PROXY, {
+            method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: prompt }]
-                }],
+                model:    GEMINI_MODEL,
+                contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: {
                     maxOutputTokens: MAX_TOKENS,
                     temperature:     0.7,
@@ -144,19 +122,15 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
 
     /**
      * Lấy gợi ý AI cho một context từ vựng cụ thể.
+     * API key bảo mật server-side, không cần truyền từ frontend.
      *
      * @param {Object} ctx  - { word, meaning, sentence?, phonetic? }
      * @returns {Promise<string>}  - text gợi ý
-     * @throws {Error}  - nếu thiếu API key hoặc gọi thất bại
+     * @throws {Error}  - nếu gọi proxy thất bại
      */
     async function getHint(ctx) {
-        const apiKey = getApiKey();
-        if (!apiKey) {
-            throw new Error('Chưa cài đặt Gemini API key. Vào Cài đặt để thêm API key.');
-        }
-
         const prompt = _buildPrompt(ctx);
-        return await _callGemini(prompt, apiKey);
+        return await _callGemini(prompt);
     }
 
     // ----------------------------------------------------------
@@ -210,13 +184,11 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
                 </div>`;
 
         } catch (err) {
-            const isNoKey = err.message.includes('API key') || err.message.includes('Chưa cài đặt');
             hintEl.innerHTML = `
                 <div class="flex items-start gap-2">
                     <span class="material-symbols-outlined text-[18px] text-error shrink-0 mt-0.5">error</span>
                     <div>
                         <span class="text-error font-medium text-sm">${_esc(err.message)}</span>
-                        ${isNoKey ? `<button onclick="navigateTo('settings')" class="block mt-1 text-primary text-xs underline">→ Đến Cài đặt</button>` : ''}
                     </div>
                 </div>`;
         }
@@ -239,9 +211,6 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
     // PUBLIC API
     // ----------------------------------------------------------
     return {
-        getApiKey,
-        saveApiKey,
-        clearApiKey,
         getHint,
         renderHint,
     };
