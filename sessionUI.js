@@ -193,11 +193,12 @@ const HiSessionUI = (() => {
         if (_isShowingFeedback) return;
         const result = HiSession.rateFlashcard(rating);
 
-        if (result.correct) {
-            // Đúng (Good/Easy) → feedback ngắn rồi tiếp tục
+        if (result.isNewWord) {
+            // Từ mới lv0: auto pass bất kể bấm gì
+            _showFeedbackOverlay(true, `✓ Từ mới — đã ghi nhận!`, () => render());
+        } else if (result.correct) {
             _showFeedbackOverlay(true, `+1 từ hoàn thành`, () => render());
         } else {
-            // Hard → chuyển sang dạng khác, không cần feedback dài
             _showFeedbackOverlay(false, `Hãy thử lại với dạng bài khác nhé!`, () => render());
         }
     }
@@ -305,7 +306,18 @@ const HiSessionUI = (() => {
         // Vì sau submitAnswer queue đã advance, lấy lại options từ result
         _highlightMCQResult(result.correct);
 
-        setTimeout(() => render(), 1600);
+        if (result.skipped) {
+            setTimeout(() => _showSkipFeedback(result.correctAnswer, () => render()), 200);
+        } else {
+            _highlightMCQResult(result.correct);
+            if (result.isNewWord && !result.correct) {
+                // Từ mới: user chọn sai nhưng vẫn pass → toast màu primary
+                _showToast(true, `✓ Từ mới — Đáp án: ${result.correctAnswer}`, 'new');
+                setTimeout(() => render(), 1800);
+            } else {
+                setTimeout(() => render(), 1600);
+            }
+        }
     }
 
     /** Hiển thị màu sắc đúng/sai trên MCQ options */
@@ -329,6 +341,7 @@ const HiSessionUI = (() => {
         });
 
         // Hiện toast feedback
+        // isNewWord/skipped được xử lý ở _onMCQCheck — toast thường chạy ở đây
         _showToast(correct, correct ? '✓ Chính xác!' : '✗ Sai rồi, thử dạng bài khác nhé!');
     }
 
@@ -494,8 +507,16 @@ const HiSessionUI = (() => {
             inp.disabled = true;
         });
 
-        _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
-        setTimeout(() => render(), 1800);
+        if (result.skipped) {
+            inputs.forEach(inp => { inp.disabled = true; });
+            _showSkipFeedback(result.correctAnswer, () => render());
+        } else if (result.isNewWord && !result.correct) {
+            _showToast(true, `✓ Từ mới — Đáp án: ${result.correctAnswer}`, 'new');
+            setTimeout(() => render(), 1800);
+        } else {
+            _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
+            setTimeout(() => render(), 1800);
+        }
     }
 
     /** Xin gợi ý AI cho fill exercise — dùng Groq (llama-3.1-8b-instant) */
@@ -691,8 +712,18 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
             inputEl.value = result.correctAnswer; // Hiện đáp án đúng
         }
 
-        _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
-        setTimeout(() => render(), 1800);
+        if (result.skipped) {
+            inputEl.disabled = true;
+            _showSkipFeedback(result.correctAnswer, () => render());
+        } else if (result.isNewWord && !result.correct) {
+            inputEl.className = inputEl.className + ' border-primary bg-primary/5 text-primary';
+            inputEl.value = result.correctAnswer;
+            _showToast(true, `✓ Từ mới — Đáp án: ${result.correctAnswer}`, 'new');
+            setTimeout(() => render(), 1800);
+        } else {
+            _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
+            setTimeout(() => render(), 1800);
+        }
     }
 
     // ----------------------------------------------------------
@@ -730,11 +761,13 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
                         <div class="flex items-center justify-between py-1 border-b border-outline-variant/10 last:border-0">
                             <span class="font-medium text-on-surface text-sm">${_esc(w.word.word)}</span>
                             <span class="text-xs px-2 py-1 rounded-full font-bold ${
-                                w.rating === 'easy' ? 'bg-primary text-on-primary' :
-                                w.rating === 'good' ? 'bg-secondary-container text-on-secondary-container' :
+                                w.skipped                ? 'bg-amber-100 text-amber-800' :
+                                w.isNew                  ? 'bg-primary/10 text-primary' :
+                                w.rating === 'easy'      ? 'bg-primary text-on-primary' :
+                                w.rating === 'good'      ? 'bg-secondary-container text-on-secondary-container' :
                                 'bg-tertiary-fixed text-on-tertiary-fixed'
                             }">
-                                ${w.rating === 'easy' ? 'Dễ' : w.rating === 'good' ? 'Tốt' : 'Khó'}
+                                ${w.skipped ? 'Bỏ qua' : w.isNew ? 'Từ mới' : w.rating === 'easy' ? 'Dễ' : w.rating === 'good' ? 'Tốt' : 'Khó'}
                             </span>
                         </div>
                     `).join('')}
@@ -765,9 +798,19 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
      * @param {boolean} correct
      * @param {string}  message
      */
-    function _showToast(correct, message) {
-        // Xóa toast cũ nếu có
+    /**
+     * Toast nhỏ hiện dưới exercise card (tự biến mất).
+     * @param {boolean} correct
+     * @param {string}  message
+     * @param {'correct'|'wrong'|'skip'|'new'} [type] - override màu sắc
+     */
+    function _showToast(correct, message, type = null) {
         document.getElementById('hi-toast')?.remove();
+
+        const colorClass = type === 'skip' ? 'bg-amber-500 text-white'
+                         : type === 'new'  ? 'bg-primary text-on-primary'
+                         : correct         ? 'bg-green-500 text-white'
+                         :                   'bg-error text-on-error';
 
         const toast = document.createElement('div');
         toast.id = 'hi-toast';
@@ -775,27 +818,54 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
             fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999]
             px-5 py-3 rounded-xl font-bold text-sm shadow-lg
             transition-all duration-300 opacity-0
-            ${correct
-                ? 'bg-green-500 text-white'
-                : 'bg-error text-on-error'
-            }
+            ${colorClass}
         `;
         toast.textContent = message;
         document.body.appendChild(toast);
 
-        // Fade IN
         requestAnimationFrame(() => {
             toast.style.opacity = '1';
             toast.style.transform = 'translateX(-50%) translateY(-8px)';
         });
 
-        // Fade OUT và xóa sau displayMs
-        const displayMs = correct ? 1200 : 1600;
+        const displayMs = type === 'skip' ? 2000 : correct ? 1200 : 1600;
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(-50%) translateY(0px)';
-            setTimeout(() => toast.remove(), 300); // đợi transition xong
+            setTimeout(() => toast.remove(), 300);
         }, displayMs);
+    }
+
+    /**
+     * Overlay skip đặc biệt (màu amber), hiện lên giữa màn hình.
+     * Gọi khi result.skipped === true.
+     * @param {string}   correctAnswer
+     * @param {Function} onDone
+     */
+    function _showSkipFeedback(correctAnswer, onDone) {
+        document.getElementById('hi-toast')?.remove();
+        document.getElementById('hi-skip-overlay')?.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'hi-skip-overlay';
+        overlay.className = 'fixed inset-0 z-[9998] flex items-center justify-center bg-black/10 backdrop-blur-[2px] transition-opacity duration-300 opacity-0';
+        overlay.innerHTML = `
+            <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:1rem;padding:1.5rem 2rem;max-width:320px;width:calc(100% - 2rem);text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.75rem;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
+                <span class="material-symbols-outlined" style="color:#f59e0b;font-size:40px;">skip_next</span>
+                <p style="font-weight:700;color:#92400e;font-size:1rem;margin:0;">Đã bỏ qua từ này</p>
+                <p style="color:#b45309;font-size:0.875rem;margin:0;line-height:1.5;">
+                    Đáp án đúng: <strong style="color:#78350f;">${correctAnswer.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</strong>
+                </p>
+                <p style="color:#d97706;font-size:0.75rem;margin:0;">Từ sẽ được đưa về Lv.1 để ôn lại sớm hơn.</p>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+
+        setTimeout(() => {
+            overlay.style.opacity = '0';
+            setTimeout(() => { overlay.remove(); onDone(); }, 300);
+        }, 2200);
     }
 
     /**
@@ -858,6 +928,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         _onListenSlow,
         _onListenCheck,
         _speak,
+        _showSkipFeedback,
     };
 
 })();

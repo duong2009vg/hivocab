@@ -184,6 +184,7 @@ const HiSession = (() => {
             exerciseData: null,   // lazy-generated
             usedTypes:    [],
             attempts:     0,
+            failCount:    0,      // số lần sai trong phiên này (để skip khi >= 3)
         };
     }
 
@@ -344,13 +345,97 @@ const HiSession = (() => {
     // ----------------------------------------------------------
 
     /**
-     * Xử lý kết quả đúng/sai:
-     *   ĐÚNG → đưa vào completed, gọi HiDB.reviewWord async
-     *   SAI  → đổi dạng bài, đẩy xuống cuối queue
+     * Xử lý kết quả đúng/sai với 2 logic đặc biệt:
+     *
+     *   [A] TỪ MỚI (word.level === 0 hoặc word.isNew === true):
+     *       Bất kể đúng hay sai, bất kể dạng bài nào → tự động hoàn thành,
+     *       gọi reviewWord với rating 'good' → lên lv1.
+     *
+     *   [B] SAI QUÁ 3 LẦN (failCount >= 3):
+     *       Cho phép skip để hoàn thành phiên,
+     *       gọi reviewWord với rating 'hard' và currentLevel bị ép về 1 → giữ lv1.
+     *
+     *   ĐÚNG (từ thường) → đưa vào completed, gọi HiDB.reviewWord async.
+     *   SAI  (từ thường, chưa đến 3 lần) → đổi dạng bài, đẩy xuống cuối queue.
      */
     function _processResult(item, correct, correctAnswer, explicitRating = null) {
+
+        // ── [A] TỪ MỚI (lv0): auto-complete bất kể đúng/sai ──────────────
+        const isNewWord = (item.word.level === 0) || (item.word.isNew === true);
+        if (isNewWord) {
+            _state.completed.push({
+                word:     item.word,
+                rating:   'good',   // lv0 → lv1
+                attempts: item.attempts,
+                isNew:    true,
+            });
+
+            // Luôn gọi reviewWord với 'good' để lên lv1
+            if (typeof HiDB !== 'undefined') {
+                HiDB.reviewWord(item.word.wordId, 'good')
+                    .catch(err => console.error('[HiSession] reviewWord (new word) error:', err));
+            }
+
+            _state.queueIndex++;
+
+            return {
+                correct:       true,
+                correctAnswer,
+                feedback:      correct ? '✓ Chính xác!' : `✓ Đã ghi nhớ! Đáp án: ${correctAnswer}`,
+                rating:        'good',
+                wordCompleted: true,
+                isNewWord:     true,
+            };
+        }
+
+        // ── [B] SAI QUÁ 3 LẦN: cho phép skip, reset về lv1 ───────────────
+        if (!correct) {
+            item.failCount = (item.failCount || 0) + 1;
+
+            if (item.failCount >= 3) {
+                // Skip từ này — đẩy vào completed nhưng đánh dấu skipped
+                _state.completed.push({
+                    word:     item.word,
+                    rating:   'hard',
+                    attempts: item.attempts,
+                    skipped:  true,
+                });
+
+                // reviewWord với 'hard': calculateNextReview sẽ đưa về max(level-1, 1)
+                // Để ép thẳng về lv1 bất kể level hiện tại, ta override bằng cách
+                // trực tiếp upsert level=1 qua một wrapper — nhưng vì HiDB.reviewWord
+                // dùng calculateNextReview nên ta gọi với rating 'hard' nhiều lần sẽ
+                // dần về lv1. Thay vào đó ta tạo helper nội bộ gọi reviewWord với
+                // forceLevel=1 bằng cách truyền rating đặc biệt 'reset'.
+                // → Giải pháp đơn giản nhất: gọi HiDB.reviewWordToLevel nếu có,
+                //   fallback về hard (sẽ giảm 1 level, đủ để trừng phạt).
+                if (typeof HiDB !== 'undefined') {
+                    // Thử gọi reviewWordToLevel (nếu đã implement), fallback về hard
+                    if (typeof HiDB.reviewWordToLevel === 'function') {
+                        HiDB.reviewWordToLevel(item.word.wordId, 1)
+                            .catch(err => console.error('[HiSession] reviewWordToLevel error:', err));
+                    } else {
+                        HiDB.reviewWord(item.word.wordId, 'hard')
+                            .catch(err => console.error('[HiSession] reviewWord (skip) error:', err));
+                    }
+                }
+
+                _state.queueIndex++;
+
+                return {
+                    correct:       false,
+                    correctAnswer,
+                    feedback:      `⏭ Bỏ qua. Đáp án: ${correctAnswer}`,
+                    rating:        'hard',
+                    wordCompleted: true,   // tính là "xong" để phiên có thể kết thúc
+                    skipped:       true,
+                    failCount:     item.failCount,
+                };
+            }
+        }
+
+        // ── ĐÚNG (từ thường) ───────────────────────────────────────────────
         if (correct) {
-            // Tính rating SM-2 dựa trên số lần thử
             const rating = explicitRating || (
                 item.attempts === 1 ? 'easy' :
                 item.attempts === 2 ? 'good' : 'hard'
@@ -362,7 +447,6 @@ const HiSession = (() => {
                 attempts: item.attempts,
             });
 
-            // Ghi vào Supabase bất đồng bộ
             if (typeof HiDB !== 'undefined') {
                 HiDB.reviewWord(item.word.wordId, rating)
                     .catch(err => console.error('[HiSession] reviewWord error:', err));
@@ -377,34 +461,30 @@ const HiSession = (() => {
                 rating,
                 wordCompleted: true,
             };
-
-        } else {
-            // Đổi sang dạng bài khác cho từ này
-            // Nếu phiên có allowedType (single-practice mode), giữ nguyên dạng — KHÔNG đổi type
-            let nextType;
-            if (_state.allowedType) {
-                // Single-practice: luôn giữ nguyên type đã chọn
-                nextType = _state.allowedType;
-            } else {
-                // Mixed mode: đổi sang dạng bài khác, tránh lặp
-                item.usedTypes.push(item.exerciseType);
-                nextType = _pickNextType(item.usedTypes);
-            }
-            item.exerciseType = nextType;
-            item.exerciseData = _generateExerciseData(item.word, nextType, _state.allWords);
-
-            // Đẩy item xuống cuối queue
-            _state.queue.push(item);
-            _state.queueIndex++;
-
-            return {
-                correct:       false,
-                correctAnswer,
-                feedback:      `✗ Đáp án: ${correctAnswer}`,
-                wordCompleted: false,
-                nextExerciseType: nextType,
-            };
         }
+
+        // ── SAI (từ thường, failCount < 3): đổi dạng bài, đẩy xuống cuối ──
+        let nextType;
+        if (_state.allowedType) {
+            nextType = _state.allowedType;
+        } else {
+            item.usedTypes.push(item.exerciseType);
+            nextType = _pickNextType(item.usedTypes);
+        }
+        item.exerciseType = nextType;
+        item.exerciseData = _generateExerciseData(item.word, nextType, _state.allWords);
+
+        _state.queue.push(item);
+        _state.queueIndex++;
+
+        return {
+            correct:          false,
+            correctAnswer,
+            feedback:         `✗ Đáp án: ${correctAnswer}`,
+            wordCompleted:    false,
+            nextExerciseType: nextType,
+            failCount:        item.failCount,
+        };
     }
 
     // ----------------------------------------------------------

@@ -525,6 +525,53 @@ window.HiDB = (() => {
     }
 
     /**
+     * Ép một từ về một level cụ thể (bất kể level hiện tại).
+     * Dùng khi user sai quá 3 lần trong phiên → reset về lv1.
+     *
+     * @param {string} wordId
+     * @param {number} targetLevel  - level muốn ép về (thường là 1)
+     * @returns {Promise<{ newLevel: number, nextReviewAt: Date, intervalLabel: string }>}
+     */
+    async function reviewWordToLevel(wordId, targetLevel) {
+        const user = await getCurrentUser();
+        if (!user) throw new Error('Chưa đăng nhập');
+
+        const { data: existing } = await _getClient()
+            .from('word_progress')
+            .select('review_count')
+            .eq('user_id', user.id)
+            .eq('word_id', wordId)
+            .maybeSingle();
+
+        const currentCount = existing?.review_count ?? 0;
+        const newLevel     = Math.max(1, Math.min(5, targetLevel)); // clamp 1–5
+        const intervalMs   = _getIntervalMs(newLevel);
+        const nextReviewAt = new Date(Date.now() + intervalMs);
+
+        const payload = {
+            user_id:          user.id,
+            word_id:          wordId,
+            level:            newLevel,
+            next_review_at:   nextReviewAt.toISOString(),
+            last_reviewed_at: new Date().toISOString(),
+            review_count:     currentCount + 1,
+        };
+
+        const { error } = await _getClient()
+            .from('word_progress')
+            .upsert(payload, { onConflict: 'user_id,word_id' });
+
+        if (error) throw error;
+        await _logStudySession();
+
+        return {
+            newLevel,
+            nextReviewAt,
+            intervalLabel: getIntervalLabel(newLevel),
+        };
+    }
+
+    /**
      * Log phiên học: tăng words_reviewed thêm 1 cho ngày hôm nay.
      *
      * Dùng RPC `increment_session` (INSERT … ON CONFLICT DO UPDATE)
@@ -870,6 +917,7 @@ window.HiDB = (() => {
         // SM-2 Core
         getWordsDueForReview,
         reviewWord,
+        reviewWordToLevel,      // ép từ về level cụ thể (dùng khi skip)
         calculateNextReview,    // export để test / debug
         getIntervalLabel,
 
