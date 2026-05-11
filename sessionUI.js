@@ -517,7 +517,7 @@ const HiSessionUI = (() => {
         hintEl.innerHTML = `
             <div class="flex items-center gap-2 text-primary text-xs">
                 <span class="material-symbols-outlined text-[16px] animate-spin">refresh</span>
-                <span>Groq AI đang tạo gợi ý...</span>
+                <span>Gemini AI đang tạo gợi ý...</span>
             </div>`;
 
         try {
@@ -542,23 +542,24 @@ Rules (STRICT):
 
 Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ cái. [1 câu gợi ý ngắn về nghĩa/ngữ cảnh]"`;
 
-            const res = await fetch('/api/groq', {
+            const res = await fetch('https://groq-proxy-sandy.vercel.app/api/gemini', {
                 method: 'POST',
-                headers: {
-                    'Content-Type':  'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model:       'llama-3.1-8b-instant',
-                    messages:    [{ role: 'user', content: prompt }],
-                    temperature: 0.2,
-                    max_tokens:  120,
+                    model:    'gemini-2.0-flash',
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        maxOutputTokens: 120,
+                        temperature:     0.2,
+                        topP:            0.9,
+                    }
                 }),
             });
 
-            if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
+            if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
             const json = await res.json();
-            const hint = json.choices?.[0]?.message?.content?.trim();
-            if (!hint) throw new Error('Groq trả về rỗng.');
+            const hint = json.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            if (!hint) throw new Error('Gemini trả về rỗng.');
 
             hintEl.innerHTML = `
                 <div class="flex items-start gap-2">

@@ -161,7 +161,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
         hintEl.innerHTML = `
             <div class="flex items-center gap-2 text-primary">
                 <span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
-                <span>Đang kết nối AI Gemini...</span>
+                <span>Gemini AI đang tạo gợi ý...</span>
             </div>`;
 
         try {
