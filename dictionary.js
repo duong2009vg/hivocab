@@ -93,9 +93,24 @@ Rules:
             const content = json.choices?.[0]?.message?.content?.trim();
             if (!content) return null;
 
-            // Parse JSON từ response (loại bỏ markdown nếu có)
-            const cleaned = content.replace(/```json\n?|\n?```/g, '').trim();
-            const parsed  = JSON.parse(cleaned);
+            // Parse JSON từ response — robust: xử lý markdown fence, trailing comma, single quote
+            let cleaned = content
+                .replace(/```json\n?|\n?```/g, '')  // bỏ markdown fence
+                .trim();
+
+            // Trích xuất block JSON đầu tiên trong response (tránh text thừa trước/sau)
+            const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error('Không tìm thấy JSON trong response');
+            cleaned = jsonMatch[0];
+
+            // Sửa trailing comma trước } hoặc ] (JSON không hợp lệ nhưng Groq hay sinh ra)
+            cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
+
+            // Sửa single-quoted string → double-quoted (một số model trả về kiểu này)
+            // Chỉ áp dụng nếu không có double-quote hợp lệ xung quanh
+            cleaned = cleaned.replace(/:\s*'([^']*)'/g, ': "$1"');
+
+            const parsed = JSON.parse(cleaned);
 
             // Map viDefinitions về cùng cấu trúc meanings
             const viMeanings = meanings.map((m, mi) => ({
