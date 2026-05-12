@@ -132,6 +132,137 @@ html.dark .bg-primary-container\/10 { background-color: rgba(0, 129, 192, 0.2); 
 html.dark .hover\:bg-surface-container-low:hover { background-color: #334155; }
 html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129, 192, 0.15); }
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+
+/* ============================================================
+   THEME SYSTEM
+   ============================================================ */
+:root {
+    --hi-p:      #006192;
+    --hi-p-on:   #ffffff;
+    --hi-p-tint: #004b72;
+    --hi-p-fix:  #cce5ff;
+    --hi-p-10:   rgba(0,97,146,0.10);
+    --hi-p-20:   rgba(0,97,146,0.20);
+    --hi-p-dark: #90cdff;
+}
+.bg-primary                            { background-color: var(--hi-p) !important; }
+.text-primary                          { color: var(--hi-p) !important; }
+.border-primary                        { border-color: var(--hi-p) !important; }
+.focus\:border-primary:focus           { border-color: var(--hi-p) !important; }
+.hover\:text-primary:hover             { color: var(--hi-p) !important; }
+.text-on-primary                       { color: var(--hi-p-on) !important; }
+.bg-primary\/10                        { background-color: var(--hi-p-10) !important; }
+.bg-primary\/5                         { background-color: var(--hi-p-10) !important; }
+.bg-primary\/8                         { background-color: var(--hi-p-10) !important; }
+.hover\:bg-primary\/10:hover           { background-color: var(--hi-p-10) !important; }
+.bg-primary-container\/10             { background-color: var(--hi-p-10) !important; }
+.bg-primary-container                  { background-color: var(--hi-p-fix) !important; }
+.hover\:bg-primary-container\/10:hover { background-color: var(--hi-p-10) !important; }
+.hover\:bg-surface-tint:hover          { background-color: var(--hi-p-tint) !important; }
+.bg-surface-tint                       { background-color: var(--hi-p-tint) !important; }
+.bg-primary-fixed\/20                  { background-color: var(--hi-p-20) !important; }
+#learn-progress, #ex-progress-bar      { background-color: var(--hi-p) !important; }
+
+html.dark .bg-primary                  { background-color: var(--hi-p-dark) !important; }
+html.dark .text-primary                { color: var(--hi-p-dark) !important; }
+html.dark .border-primary              { border-color: var(--hi-p-dark) !important; }
+html.dark .focus\:border-primary:focus { border-color: var(--hi-p-dark) !important; }
+html.dark .hover\:text-primary:hover   { color: var(--hi-p-dark) !important; }
+html.dark .text-on-primary             { color: #0d1117 !important; }
+html.dark .bg-primary\/10              { background-color: rgba(144,205,255,0.12) !important; }
+html.dark .bg-primary\/5               { background-color: rgba(144,205,255,0.06) !important; }
+html.dark .hover\:bg-primary\/10:hover { background-color: rgba(144,205,255,0.12) !important; }
+html.dark .bg-primary-container\/10   { background-color: rgba(144,205,255,0.12) !important; }
+html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(144,205,255,0.12) !important; }
+html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--hi-p-dark) !important; }
+
+/* ── GREENGREEN / Sage (từ ảnh CORTIS × TikTok) ── */
+[data-theme="sage"] {
+    --hi-p:      #1a1a1a;
+    --hi-p-on:   #ffffff;
+    --hi-p-tint: #333333;
+    --hi-p-fix:  #d4e8dc;
+    --hi-p-10:   rgba(26,26,26,0.08);
+    --hi-p-20:   rgba(26,26,26,0.15);
+    --hi-p-dark: #a8d5b5;
+}
+html:not(.dark)[data-theme="sage"] body               { background-color: #7aaa8a !important; }
+html:not(.dark)[data-theme="sage"] .bg-background     { background-color: #7aaa8a !important; }
+html:not(.dark)[data-theme="sage"] .bg-surface        { background-color: #8ab89a !important; }
+html:not(.dark)[data-theme="sage"] .bg-surface\/80,
+html:not(.dark)[data-theme="sage"] .bg-surface\/90    { background-color: rgba(138,184,154,0.92) !important; }
+html:not(.dark)[data-theme="sage"] .bg-surface-container-lowest { background-color: rgba(255,255,255,0.30) !important; }
+html:not(.dark)[data-theme="sage"] .bg-surface-container-low    { background-color: rgba(255,255,255,0.20) !important; }
+html:not(.dark)[data-theme="sage"] .bg-surface-container        { background-color: rgba(255,255,255,0.15) !important; }
+html:not(.dark)[data-theme="sage"] .bg-surface-container-high   { background-color: rgba(255,255,255,0.25) !important; }
+html:not(.dark)[data-theme="sage"] .glass-card        { background-color: rgba(255,255,255,0.20) !important; border-color: rgba(255,255,255,0.35) !important; }
+html:not(.dark)[data-theme="sage"] .text-on-surface   { color: #0f1a13 !important; }
+html:not(.dark)[data-theme="sage"] .text-on-surface-variant { color: #2d4a35 !important; }
+html:not(.dark)[data-theme="sage"] .text-outline      { color: #3d5c46 !important; }
+html:not(.dark)[data-theme="sage"] .border-outline-variant\/20,
+html:not(.dark)[data-theme="sage"] .border-outline-variant\/30,
+html:not(.dark)[data-theme="sage"] .border-outline-variant\/40 { border-color: rgba(15,26,19,0.18) !important; }
+html:not(.dark)[data-theme="sage"] .bg-primary        { background-color: #1a1a1a !important; }
+html:not(.dark)[data-theme="sage"] .text-on-primary   { color: #ffffff !important; }
+html:not(.dark)[data-theme="sage"] .text-primary      { color: #0f1a13 !important; }
+html:not(.dark)[data-theme="sage"] .border-primary    { border-color: #1a1a1a !important; }
+html:not(.dark)[data-theme="sage"] .focus\:border-primary:focus { border-color: #1a1a1a !important; }
+html:not(.dark)[data-theme="sage"] .bg-primary\/10    { background-color: rgba(26,26,26,0.10) !important; }
+html:not(.dark)[data-theme="sage"] .hover\:bg-primary\/10:hover { background-color: rgba(26,26,26,0.10) !important; }
+html:not(.dark)[data-theme="sage"] .bg-primary-container\/10 { background-color: rgba(26,26,26,0.08) !important; }
+html:not(.dark)[data-theme="sage"] .hover\:bg-primary-container\/10:hover { background-color: rgba(26,26,26,0.08) !important; }
+html:not(.dark)[data-theme="sage"] #learn-progress,
+html:not(.dark)[data-theme="sage"] #ex-progress-bar   { background-color: #1a1a1a !important; }
+html.dark[data-theme="sage"] body                     { background-color: #0d1f14 !important; }
+html.dark[data-theme="sage"] .bg-background           { background-color: #0d1f14 !important; }
+html.dark[data-theme="sage"] .bg-primary              { background-color: #a8d5b5 !important; }
+html.dark[data-theme="sage"] .text-primary            { color: #a8d5b5 !important; }
+html.dark[data-theme="sage"] .text-on-primary         { color: #0d1f14 !important; }
+html.dark[data-theme="sage"] #learn-progress,
+html.dark[data-theme="sage"] #ex-progress-bar         { background-color: #a8d5b5 !important; }
+
+/* ── Emerald ── */
+[data-theme="green"] {
+    --hi-p: #1a7a4a; --hi-p-on: #ffffff; --hi-p-tint: #0f5c35;
+    --hi-p-fix: #c6f0d8; --hi-p-10: rgba(26,122,74,0.10);
+    --hi-p-20: rgba(26,122,74,0.20); --hi-p-dark: #6ee4a0;
+}
+html.dark[data-theme="green"] .bg-primary   { background-color: #6ee4a0 !important; }
+html.dark[data-theme="green"] .text-primary { color: #6ee4a0 !important; }
+html.dark[data-theme="green"] .text-on-primary { color: #071a0f !important; }
+
+/* ── Violet ── */
+[data-theme="purple"] {
+    --hi-p: #6750a4; --hi-p-on: #ffffff; --hi-p-tint: #4f3c8a;
+    --hi-p-fix: #eaddff; --hi-p-10: rgba(103,80,164,0.10);
+    --hi-p-20: rgba(103,80,164,0.20); --hi-p-dark: #cfbcff;
+}
+html.dark[data-theme="purple"] .bg-primary   { background-color: #cfbcff !important; }
+html.dark[data-theme="purple"] .text-primary { color: #cfbcff !important; }
+html.dark[data-theme="purple"] .text-on-primary { color: #1a0e35 !important; }
+
+/* ── Rose ── */
+[data-theme="rose"] {
+    --hi-p: #b5294e; --hi-p-on: #ffffff; --hi-p-tint: #8c1e3c;
+    --hi-p-fix: #ffd9e2; --hi-p-10: rgba(181,41,78,0.10);
+    --hi-p-20: rgba(181,41,78,0.20); --hi-p-dark: #ffb1c8;
+}
+html.dark[data-theme="rose"] .bg-primary   { background-color: #ffb1c8 !important; }
+html.dark[data-theme="rose"] .text-primary { color: #ffb1c8 !important; }
+html.dark[data-theme="rose"] .text-on-primary { color: #3b0015 !important; }
+
+/* ── Amber ── */
+[data-theme="amber"] {
+    --hi-p: #b45309; --hi-p-on: #ffffff; --hi-p-tint: #8a3e06;
+    --hi-p-fix: #fde68a; --hi-p-10: rgba(180,83,9,0.10);
+    --hi-p-20: rgba(180,83,9,0.20); --hi-p-dark: #fcd34d;
+}
+html.dark[data-theme="amber"] .bg-primary   { background-color: #fcd34d !important; }
+html.dark[data-theme="amber"] .text-primary { color: #fcd34d !important; }
+html.dark[data-theme="amber"] .text-on-primary { color: #2d1a00 !important; }
+
+/* Smooth transition khi đổi theme */
+body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color 0.3s ease; }
 </style>
 </head>
 <body class="bg-background text-on-background font-hanken antialiased overflow-x-hidden transition-colors duration-300">
@@ -845,20 +976,112 @@ html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129
 <main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-8 fade-in">
         <div class="flex flex-col gap-6 flex-1">
+
             <!-- Giao diện -->
-            <section class="glass-card soft-shadow rounded-xl p-8">
+            <section class="glass-card soft-shadow rounded-xl p-6 md:p-8">
                 <h2 class="font-headline-md text-xl font-bold text-on-surface mb-6 border-b border-outline-variant/20 pb-4">Giao diện</h2>
-                <div class="flex items-center justify-between">
+
+                <!-- Dark mode toggle -->
+                <div class="flex items-center justify-between mb-8">
                     <div>
-                        <h3 class="font-bold text-on-surface text-lg">Chế độ tối (Dark Mode)</h3>
+                        <h3 class="font-bold text-on-surface text-base md:text-lg">Chế độ tối (Dark Mode)</h3>
                         <p class="text-on-surface-variant text-sm mt-1">Giảm chói và bảo vệ mắt khi học trong môi trường thiếu sáng.</p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
                         <input type="checkbox" id="darkModeToggle" class="sr-only peer" onchange="window.toggleTheme()">
                         <div class="w-14 h-7 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
                     </label>
                 </div>
+
+                <!-- Theme colour picker -->
+                <div>
+                    <h3 class="font-bold text-on-surface text-base md:text-lg mb-1">Màu giao diện</h3>
+                    <p class="text-on-surface-variant text-sm mb-5">Chọn bảng màu phù hợp với phong cách của bạn.</p>
+
+                    <div class="grid grid-cols-3 md:grid-cols-6 gap-3" id="theme-picker">
+
+                        <!-- Ocean Blue (default) -->
+                        <button onclick="window.applyTheme('blue')"
+                                data-theme-btn="blue"
+                                class="theme-btn flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group">
+                            <div class="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
+                                <div style="background:#006192"></div>
+                                <div style="background:#cce5ff"></div>
+                                <div style="background:#f9faf7"></div>
+                                <div style="background:#90cdff"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface text-center leading-tight">Ocean<br>Blue</span>
+                        </button>
+
+                        <!-- GREENGREEN / Sage -->
+                        <button onclick="window.applyTheme('sage')"
+                                data-theme-btn="sage"
+                                class="theme-btn flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group">
+                            <div class="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
+                                <div style="background:#7aaa8a"></div>
+                                <div style="background:#d4e8dc"></div>
+                                <div style="background:#1a1a1a"></div>
+                                <div style="background:#a8d5b5"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface text-center leading-tight">Green<br>Green</span>
+                        </button>
+
+                        <!-- Emerald -->
+                        <button onclick="window.applyTheme('green')"
+                                data-theme-btn="green"
+                                class="theme-btn flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group">
+                            <div class="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
+                                <div style="background:#1a7a4a"></div>
+                                <div style="background:#c6f0d8"></div>
+                                <div style="background:#f9faf7"></div>
+                                <div style="background:#6ee4a0"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface text-center leading-tight">Emerald<br>Green</span>
+                        </button>
+
+                        <!-- Violet -->
+                        <button onclick="window.applyTheme('purple')"
+                                data-theme-btn="purple"
+                                class="theme-btn flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group">
+                            <div class="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
+                                <div style="background:#6750a4"></div>
+                                <div style="background:#eaddff"></div>
+                                <div style="background:#f9faf7"></div>
+                                <div style="background:#cfbcff"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface text-center leading-tight">Violet<br>Purple</span>
+                        </button>
+
+                        <!-- Rose -->
+                        <button onclick="window.applyTheme('rose')"
+                                data-theme-btn="rose"
+                                class="theme-btn flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group">
+                            <div class="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
+                                <div style="background:#b5294e"></div>
+                                <div style="background:#ffd9e2"></div>
+                                <div style="background:#f9faf7"></div>
+                                <div style="background:#ffb1c8"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface text-center leading-tight">Coral<br>Rose</span>
+                        </button>
+
+                        <!-- Amber -->
+                        <button onclick="window.applyTheme('amber')"
+                                data-theme-btn="amber"
+                                class="theme-btn flex flex-col items-center gap-2 p-3 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group">
+                            <div class="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
+                                <div style="background:#b45309"></div>
+                                <div style="background:#fde68a"></div>
+                                <div style="background:#f9faf7"></div>
+                                <div style="background:#fcd34d"></div>
+                            </div>
+                            <span class="text-[11px] font-semibold text-on-surface-variant group-hover:text-on-surface text-center leading-tight">Sunrise<br>Amber</span>
+                        </button>
+
+                    </div>
+                </div>
             </section>
+
         </div>
     </div>
 </main>
@@ -985,6 +1208,31 @@ window.toggleTheme = function() {
     const toggleBtn = document.getElementById('darkModeToggle');
     if (toggleBtn) toggleBtn.checked = isDark;
 };
+
+// ── Colour theme ──────────────────────────────────────────
+const _THEMES = ['blue','sage','green','purple','rose','amber'];
+
+window.applyTheme = function(name) {
+    if (!_THEMES.includes(name)) name = 'blue';
+    const html = document.documentElement;
+    // Xoá theme cũ
+    _THEMES.forEach(t => { if (t !== 'blue') html.removeAttribute('data-theme') });
+    if (name !== 'blue') html.setAttribute('data-theme', name);
+    localStorage.setItem('colour-theme', name);
+    _updateThemeBtns(name);
+};
+
+function _updateThemeBtns(active) {
+    document.querySelectorAll('[data-theme-btn]').forEach(btn => {
+        const isActive = btn.dataset.themeBtn === active;
+        btn.classList.toggle('border-primary',   isActive);
+        btn.classList.toggle('bg-primary\/5',    isActive);
+        btn.classList.toggle('border-transparent', !isActive);
+        // Scale up khi active
+        btn.style.transform = isActive ? 'scale(1.08)' : '';
+        btn.style.boxShadow = isActive ? '0 0 0 3px var(--hi-p)' : '';
+    });
+}
 
 window.navigateTo = function(page, preserveHash = false){
     // Đóng tất cả trang
@@ -1397,7 +1645,7 @@ window._testGeminiKey = async function() {
 };
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Kích hoạt theme
+    // Kích hoạt dark/light mode
     const savedTheme = localStorage.getItem('theme');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
@@ -1405,6 +1653,10 @@ window.addEventListener('DOMContentLoaded', () => {
         const toggleBtn = document.getElementById('darkModeToggle');
         if (toggleBtn) toggleBtn.checked = true;
     }
+
+    // Khôi phục colour theme
+    const savedColour = localStorage.getItem('colour-theme') || 'blue';
+    window.applyTheme(savedColour);
 
     // Logic Inputs Điền từ (static HTML fallback)
     const inputs = document.querySelectorAll('.fill-input');
