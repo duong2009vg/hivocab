@@ -360,7 +360,9 @@ const HiSession = (() => {
      */
     function _processResult(item, correct, correctAnswer, explicitRating = null) {
 
-        // ── [A] TỪ MỚI (lv0): auto-complete bất kể đúng/sai ──────────────
+        // ── [A] TỪ MỚI (lv0): auto-advance bất kể đúng/sai ──────────────
+        // Từ mới không bị đẩy lại queue, nhưng trả về `correct` thật
+        // để UI vẫn hiển thị đúng/sai cho người dùng thấy.
         const isNewWord = (item.word.level === 0) || (item.word.isNew === true);
         if (isNewWord) {
             _state.completed.push({
@@ -370,7 +372,6 @@ const HiSession = (() => {
                 isNew:    true,
             });
 
-            // Luôn gọi reviewWord với 'good' để lên lv1
             if (typeof HiDB !== 'undefined') {
                 HiDB.reviewWord(item.word.wordId, 'good')
                     .catch(err => console.error('[HiSession] reviewWord (new word) error:', err));
@@ -379,9 +380,9 @@ const HiSession = (() => {
             _state.queueIndex++;
 
             return {
-                correct:       true,
+                correct:       correct,          // ← trả về kết quả THẬT
                 correctAnswer,
-                feedback:      correct ? '✓ Chính xác!' : `✓ Đã ghi nhớ! Đáp án: ${correctAnswer}`,
+                feedback:      correct ? '✓ Chính xác!' : `✗ Đáp án: ${correctAnswer}`,
                 rating:        'good',
                 wordCompleted: true,
                 isNewWord:     true,

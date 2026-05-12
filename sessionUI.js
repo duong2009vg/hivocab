@@ -291,6 +291,11 @@ const HiSessionUI = (() => {
         if (_isShowingFeedback || _selectedMCQIndex === null) return;
         _isShowingFeedback = true;
 
+        // Lưu index đáp án đúng TRƯỚC khi submitAnswer advance queue
+        const currentItem = HiSession.getCurrentItem();
+        const correctIndex = currentItem?.exerciseData?.options
+            ?.findIndex(o => o.isCorrect) ?? -1;
+
         const result = HiSession.submitAnswer(_selectedMCQIndex);
 
         // Disable tất cả options
@@ -300,48 +305,35 @@ const HiSessionUI = (() => {
         });
         document.getElementById('mcq-check')?.setAttribute('disabled', '');
 
-        // Hiển thị visual đúng/sai trên các options
-        const item = { exerciseData: HiSession.getCurrentItem()?.exerciseData };
-        const currentItem = HiSession.getCurrentItem();
-        // Vì sau submitAnswer queue đã advance, lấy lại options từ result
-        _highlightMCQResult(result.correct);
-
         if (result.skipped) {
+            _highlightMCQResult(result.correct, correctIndex);
             setTimeout(() => _showSkipFeedback(result.correctAnswer, () => render()), 200);
         } else {
-            _highlightMCQResult(result.correct);
-            if (result.isNewWord && !result.correct) {
-                // Từ mới: user chọn sai nhưng vẫn pass → toast màu primary
-                _showToast(true, `✓ Từ mới — Đáp án: ${result.correctAnswer}`, 'new');
-                setTimeout(() => render(), 1800);
-            } else {
-                setTimeout(() => render(), 1600);
-            }
+            _highlightMCQResult(result.correct, correctIndex);
+            setTimeout(() => render(), 1600);
         }
     }
 
     /** Hiển thị màu sắc đúng/sai trên MCQ options */
-    function _highlightMCQResult(correct) {
+    function _highlightMCQResult(correct, correctIndex) {
         const options = document.querySelectorAll('.mcq-opt');
         options.forEach((btn, idx) => {
-            // Lấy lại exerciseData từ item trước khi bị advance
-            // Cách đơn giản: check class đang chọn
             const isSelected = btn.dataset.idx == _selectedMCQIndex;
+            const isCorrect  = idx === correctIndex;
             const icon = btn.querySelector('.material-symbols-outlined');
 
-            if (isSelected) {
-                if (correct) {
-                    btn.className = CSS.mcqOptCorrect;
-                    if (icon) { icon.textContent = 'check_circle'; icon.className = 'material-symbols-outlined text-green-600'; }
-                } else {
-                    btn.className = CSS.mcqOptWrong;
-                    if (icon) { icon.textContent = 'cancel'; icon.className = 'material-symbols-outlined text-error'; }
-                }
+            if (isCorrect) {
+                // Luôn highlight đáp án đúng màu xanh
+                btn.className = CSS.mcqOptCorrect;
+                if (icon) { icon.textContent = 'check_circle'; icon.className = 'material-symbols-outlined text-green-600'; }
+            } else if (isSelected && !correct) {
+                // Đáp án user chọn mà sai → đỏ
+                btn.className = CSS.mcqOptWrong;
+                if (icon) { icon.textContent = 'cancel'; icon.className = 'material-symbols-outlined text-error'; }
             }
         });
 
         // Hiện toast feedback
-        // isNewWord/skipped được xử lý ở _onMCQCheck — toast thường chạy ở đây
         _showToast(correct, correct ? '✓ Chính xác!' : '✗ Sai rồi, thử dạng bài khác nhé!');
     }
 
@@ -510,9 +502,6 @@ const HiSessionUI = (() => {
         if (result.skipped) {
             inputs.forEach(inp => { inp.disabled = true; });
             _showSkipFeedback(result.correctAnswer, () => render());
-        } else if (result.isNewWord && !result.correct) {
-            _showToast(true, `✓ Từ mới — Đáp án: ${result.correctAnswer}`, 'new');
-            setTimeout(() => render(), 1800);
         } else {
             _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
             setTimeout(() => render(), 1800);
@@ -715,11 +704,6 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         if (result.skipped) {
             inputEl.disabled = true;
             _showSkipFeedback(result.correctAnswer, () => render());
-        } else if (result.isNewWord && !result.correct) {
-            inputEl.className = inputEl.className + ' border-primary bg-primary/5 text-primary';
-            inputEl.value = result.correctAnswer;
-            _showToast(true, `✓ Từ mới — Đáp án: ${result.correctAnswer}`, 'new');
-            setTimeout(() => render(), 1800);
         } else {
             _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
             setTimeout(() => render(), 1800);
