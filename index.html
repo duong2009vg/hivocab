@@ -1798,6 +1798,11 @@ window.addEventListener('hashchange', () => {
         <input id="new-ex-desc" type="text" maxlength="100" placeholder="Bài tập 15 câu..."
                class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"/>
       </div>
+      <div>
+        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Nhóm <span class="text-outline font-normal normal-case tracking-normal">(tùy chọn)</span></label>
+        <input id="new-ex-group" type="text" maxlength="80" placeholder="Ví dụ: Business English, IELTS..."
+               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"/>
+      </div>
       <div id="create-ex-error" class="text-error text-sm hidden"></div>
       <div class="flex gap-3 mt-2">
         <button onclick="window._closeCreateExerciseModal()" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Hủy</button>

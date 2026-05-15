@@ -120,30 +120,32 @@ const HiExercise = (() => {
 
                 // 1 bài tập tổng hợp cho mỗi topic
                 exercises.push({
-                    id:       `ex-${topic.id}-vocab`,
-                    title:    `${topic.name}`,
-                    subtitle: `${Math.min(words.length, MAX_WORDS_PER_EX)} câu hỏi • Trắc nghiệm & Điền từ`,
-                    category: 'vocab',
-                    icon:     topic.icon || 'menu_book',
-                    color:    'from-blue-500/20 to-primary/10',
-                    iconColor:'text-blue-500',
+                    id:          `ex-${topic.id}-vocab`,
+                    title:       `${topic.name}`,
+                    subtitle:    `${Math.min(words.length, MAX_WORDS_PER_EX)} câu hỏi • Trắc nghiệm & Điền từ`,
+                    category:    'vocab',
+                    icon:        topic.icon || 'menu_book',
+                    color:       'from-blue-500/20 to-primary/10',
+                    iconColor:   'text-blue-500',
+                    topic_group: topic.name,
                     words,
-                    topicName: topic.name,
+                    topicName:   topic.name,
                 });
 
                 // Bài ôn tập (chỉ fill types) nếu đủ từ
                 if (words.length >= 4) {
                     exercises.push({
-                        id:       `ex-${topic.id}-review`,
-                        title:    `Ôn tập: ${topic.name}`,
-                        subtitle: `${Math.min(words.length, MAX_WORDS_PER_EX)} câu • Điền từ & Chỗ trống`,
-                        category: 'review',
-                        icon:     'history_edu',
-                        color:    'from-green-500/20 to-emerald-500/10',
-                        iconColor:'text-green-600',
+                        id:          `ex-${topic.id}-review`,
+                        title:       `Ôn tập: ${topic.name}`,
+                        subtitle:    `${Math.min(words.length, MAX_WORDS_PER_EX)} câu • Điền từ & Chỗ trống`,
+                        category:    'review',
+                        icon:        'history_edu',
+                        color:       'from-green-500/20 to-emerald-500/10',
+                        iconColor:   'text-green-600',
+                        topic_group: topic.name,
                         words,
-                        topicName: topic.name,
-                        forceFill: true, // chỉ dùng fill types
+                        topicName:   topic.name,
+                        forceFill:   true,
                     });
                 }
             }
@@ -153,15 +155,16 @@ const HiExercise = (() => {
                 const customEx = await HiDB.getCustomExercises();
                 customEx.forEach(ex => {
                     exercises.push({
-                        id:       ex.id,
-                        title:    ex.title,
-                        subtitle: ex.description || `${ex.questions.length} câu hỏi`,
-                        category: 'custom',
-                        icon:     ex.icon || 'edit_note',
-                        color:    'from-orange-500/20 to-amber-500/10',
-                        iconColor:'text-orange-500',
-                        isCustom: true,
-                        questions: ex.questions,
+                        id:          ex.id,
+                        title:       ex.title,
+                        subtitle:    ex.description || `${ex.questions.length} câu hỏi`,
+                        category:    'custom',
+                        icon:        ex.icon || 'edit_note',
+                        color:       'from-orange-500/20 to-amber-500/10',
+                        iconColor:   'text-orange-500',
+                        topic_group: ex.topic_group || null,
+                        isCustom:    true,
+                        questions:   ex.questions,
                     });
                 });
             }
@@ -171,6 +174,77 @@ const HiExercise = (() => {
             console.warn('[HiExercise] _generateExerciseList error:', e);
             return [];
         }
+    }
+
+    // ── Render bài tập theo nhóm topic_group ─────────────────
+    function _renderGrouped(container, exercises) {
+        if (exercises.length === 0) {
+            container.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+                <span class="material-symbols-outlined text-[48px] opacity-40">edit_off</span>
+                <p class="font-semibold">Chưa có bài tập nào</p>
+                <p class="text-sm opacity-60">Hãy thêm từ vựng vào các chủ đề để tạo bài tập</p>
+            </div>`;
+            return;
+        }
+
+        // Gom nhóm — giữ thứ tự xuất hiện đầu tiên
+        const groups   = [];
+        const groupMap = new Map();
+        for (const ex of exercises) {
+            const key = ex.topic_group ?? '__ungrouped__';
+            if (!groupMap.has(key)) {
+                const g = { label: ex.topic_group ?? null, items: [] };
+                groupMap.set(key, g);
+                groups.push(g);
+            }
+            groupMap.get(key).items.push(ex);
+        }
+
+        // Nhóm có tên trước, ungrouped cuối
+        const named     = groups.filter(g => g.label !== null);
+        const ungrouped = groups.find(g => g.label === null);
+        const ordered   = [...named, ...(ungrouped ? [ungrouped] : [])];
+
+        container.innerHTML = ordered.map(group => `
+            <div class="col-span-3">
+                ${group.label ? `
+                <div class="flex items-center gap-2 mb-3 mt-1">
+                    <span class="material-symbols-outlined text-[16px] text-on-surface-variant">folder_open</span>
+                    <h2 class="text-xs font-bold text-on-surface-variant tracking-widest uppercase truncate">${_escHtml(group.label)}</h2>
+                    <div class="flex-1 h-px bg-outline-variant/30"></div>
+                </div>` : ''}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    ${group.items.map(ex => _renderExCard(ex)).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function _renderExCard(ex) {
+        return `
+        <div onclick="window._openExercise('${ex.id}')"
+            class="cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-xl rounded-2xl p-5 border border-outline-variant/20 soft-shadow transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col gap-4 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br ${ex.color} opacity-40 pointer-events-none rounded-2xl"></div>
+            <div class="relative flex items-start gap-4">
+                <div class="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0 shadow-sm">
+                    <span class="material-symbols-outlined text-[22px] ${ex.iconColor}">${ex.icon}</span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors text-sm md:text-base leading-snug line-clamp-2">${ex.title}</h3>
+                    <p class="text-xs text-on-surface-variant mt-0.5">${ex.subtitle}</p>
+                </div>
+            </div>
+            <div class="relative flex items-center gap-2">
+                <span class="material-symbols-outlined text-[14px] text-primary">play_circle</span>
+                <span class="text-xs font-bold text-primary">Bắt đầu</span>
+            </div>
+        </div>`;
+    }
+
+    function _escHtml(str) {
+        return String(str || '')
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
     // ── Render trang danh sách bài tập ────────────────────────
@@ -216,25 +290,7 @@ const HiExercise = (() => {
             return;
         }
 
-        grid.innerHTML = filtered.map(ex => `
-        <div onclick="window._openExercise('${ex.id}')"
-            class="cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-xl rounded-2xl p-5 border border-outline-variant/20 soft-shadow transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col gap-4 overflow-hidden">
-            <!-- gradient background -->
-            <div class="absolute inset-0 bg-gradient-to-br ${ex.color} opacity-40 pointer-events-none rounded-2xl"></div>
-            <div class="relative flex items-start gap-4">
-                <div class="w-11 h-11 rounded-xl bg-surface-container-high flex items-center justify-center shrink-0 shadow-sm">
-                    <span class="material-symbols-outlined text-[22px] ${ex.iconColor}">${ex.icon}</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors text-sm md:text-base leading-snug line-clamp-2">${ex.title}</h3>
-                    <p class="text-xs text-on-surface-variant mt-0.5">${ex.subtitle}</p>
-                </div>
-            </div>
-            <div class="relative flex items-center gap-2">
-                <span class="material-symbols-outlined text-[14px] text-primary">play_circle</span>
-                <span class="text-xs font-bold text-primary">Bắt đầu</span>
-            </div>
-        </div>`).join('');
+        _renderGrouped(grid, filtered);
     };
 
     window._switchExFilter = function(catId) {
@@ -482,6 +538,8 @@ const HiExercise = (() => {
     window.openCreateExerciseModal = function() {
         document.getElementById('new-ex-title').value = '';
         document.getElementById('new-ex-desc').value = '';
+        const groupEl = document.getElementById('new-ex-group');
+        if (groupEl) groupEl.value = '';
         document.getElementById('create-ex-error').classList.add('hidden');
         const modal = document.getElementById('modal-create-exercise');
         if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
@@ -494,9 +552,10 @@ const HiExercise = (() => {
 
     // Nhấn Tiếp tục -> Tạo exercise -> Mở Builder
     window._submitCreateExercise = async function() {
-        const title = document.getElementById('new-ex-title').value.trim();
-        const desc  = document.getElementById('new-ex-desc').value.trim();
-        const errEl = document.getElementById('create-ex-error');
+        const title      = document.getElementById('new-ex-title').value.trim();
+        const desc       = document.getElementById('new-ex-desc').value.trim();
+        const topicGroup = document.getElementById('new-ex-group')?.value.trim() || null;
+        const errEl      = document.getElementById('create-ex-error');
         
         if (!title) {
             errEl.textContent = 'Vui lòng nhập tên bài tập';
@@ -506,7 +565,12 @@ const HiExercise = (() => {
         errEl.classList.add('hidden');
 
         try {
-            const ex = await HiDB.createCustomExercise({ title, description: desc, category: 'custom' });
+            const ex = await HiDB.createCustomExercise({
+                title,
+                description: desc,
+                category:    'custom',
+                topic_group: topicGroup,
+            });
             _builderExerciseId = ex.id;
             
             // Xoá cache để update list ngoài

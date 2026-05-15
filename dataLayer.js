@@ -804,6 +804,7 @@ window.HiDB = (() => {
             description: ex.description || '',
             category:    ex.category,
             icon:        ex.icon,
+            topic_group: ex.topic_group || null,
             isCustom:    true,
             questions:   (ex.exercise_questions || [])
                 .sort((a, b) => a.order_index - b.order_index)
@@ -825,13 +826,13 @@ window.HiDB = (() => {
      * @param {{ title, description, category, icon }} info
      * @returns {Promise<Object>} exercise vừa tạo
      */
-    async function createCustomExercise({ title, description = '', category = 'custom', icon = 'edit_note' }) {
+    async function createCustomExercise({ title, description = '', category = 'custom', icon = 'edit_note', topic_group = null }) {
         const user = await getCurrentUser();
         if (!user) throw new Error('Chưa đăng nhập');
 
         const { data, error } = await _getClient()
             .from('exercises')
-            .insert({ user_id: user.id, title, description, category, icon })
+            .insert({ user_id: user.id, title, description, category, icon, topic_group })
             .select()
             .single();
 
