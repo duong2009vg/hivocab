@@ -2707,27 +2707,32 @@ window._renderExdQuestion = function() {
     const progressEl = document.getElementById('exd-progress-label');
     if (!container || !window._exdState) return;
 
-    const { questions, current, score } = window._exdState;
+    const { questions, current } = window._exdState;
     const q = questions[current];
     const total = questions.length;
 
     if (progressEl) progressEl.textContent = `${current + 1} / ${total}`;
 
+    const optLetters = ['A', 'B', 'C', 'D'];
+
     if (q.type === 'mcq' && q.options) {
         const opts = q.options;
         container.innerHTML = `
         <div class="w-full flex flex-col gap-4 fade-in">
-            <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8">
-                <p class="text-xs font-bold text-outline uppercase tracking-widest mb-3">Câu ${current + 1}</p>
-                <p class="text-base md:text-xl font-semibold text-on-surface leading-snug mb-6">${_esc(q.prompt)}</p>
+            <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8 flex flex-col gap-5">
+                <p class="text-xs font-bold text-outline uppercase tracking-widest">Câu ${current + 1}</p>
+                <p class="text-base md:text-xl font-semibold text-on-surface leading-snug">${_esc(q.prompt)}</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="exd-opts">
                     ${opts.map((opt, i) => `
                     <button onclick="window._exdSelectOpt(${i})"
                             data-exd-opt="${i}"
-                            class="w-full text-left p-4 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-sm md:text-base text-on-surface hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98]">
-                        ${_esc(typeof opt === 'object' ? opt.text || opt : opt)}
+                            class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-sm md:text-base text-on-surface hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98] flex items-center gap-3">
+                        <span class="shrink-0 w-7 h-7 rounded-full border border-outline-variant/50 flex items-center justify-center text-xs font-bold text-outline">${optLetters[i]}</span>
+                        <span>${_esc(typeof opt === 'object' ? opt.text || opt : opt)}</span>
                     </button>`).join('')}
                 </div>
+                <!-- Feedback + hint (hidden until answered) -->
+                <div id="exd-feedback" class="hidden flex flex-col gap-3"></div>
             </div>
         </div>`;
     } else {
@@ -2744,34 +2749,80 @@ window._renderExdQuestion = function() {
                 <button onclick="window._exdCheckText()" class="w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
                     Kiểm tra
                 </button>
+                <!-- Feedback + hint (hidden until answered) -->
+                <div id="exd-feedback" class="hidden flex flex-col gap-3"></div>
             </div>
         </div>`;
         setTimeout(() => document.getElementById('exd-text-input')?.focus(), 100);
     }
 };
 
+// Hiển thị feedback + hint + nút Tiếp theo sau khi trả lời
+function _exdShowFeedback(correct, q) {
+    const feedbackEl = document.getElementById('exd-feedback');
+    if (!feedbackEl) return;
+
+    const isLast = window._exdState.current >= window._exdState.questions.length - 1;
+    const nextLabel = isLast ? 'Xem kết quả' : 'Tiếp theo →';
+
+    const hintHTML = q.hint ? `
+        <div class="rounded-xl bg-surface-container p-4 border border-outline-variant/30">
+            <p class="text-xs font-bold text-primary uppercase tracking-wide mb-1.5 flex items-center gap-1">
+                <span class="material-symbols-outlined text-[15px]">lightbulb</span> Giải thích
+            </p>
+            <p class="text-sm text-on-surface leading-relaxed">${_esc(q.hint)}</p>
+        </div>` : '';
+
+    feedbackEl.innerHTML = `
+        ${correct
+            ? `<div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/30">
+                   <span class="material-symbols-outlined text-green-600 text-[20px]">check_circle</span>
+                   <span class="font-bold text-green-700 text-sm">Chính xác!</span>
+               </div>`
+            : `<div class="flex items-start gap-2 px-4 py-3 rounded-xl bg-error/10 border border-error/30">
+                   <span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">cancel</span>
+                   <div>
+                       <p class="font-bold text-error text-sm">Chưa đúng</p>
+                       <p class="text-xs text-on-surface-variant mt-0.5">Đáp án: <strong class="text-on-surface">${_esc(q.answer)}</strong></p>
+                   </div>
+               </div>`
+        }
+        ${hintHTML}
+        <button onclick="window._exdAdvance()"
+                class="w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors flex items-center justify-center gap-2">
+            ${nextLabel}
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </button>`;
+
+    feedbackEl.classList.remove('hidden');
+}
+
 window._exdSelectOpt = function(idx) {
     if (window._exdState?.answered) return;
     window._exdState.answered = true;
 
     const q = window._exdState.questions[window._exdState.current];
-    const correct = String(q.answer) === String(typeof q.options[idx] === 'object' ? q.options[idx].text || q.options[idx] : q.options[idx]);
+    const selectedText = typeof q.options[idx] === 'object' ? q.options[idx].text || q.options[idx] : q.options[idx];
+    const correct = String(q.answer) === String(selectedText);
 
+    // Highlight đáp án đúng/sai
     document.querySelectorAll('[data-exd-opt]').forEach(btn => {
         btn.disabled = true;
         btn.onclick  = null;
-        const val = typeof q.options[btn.dataset.exdOpt] === 'object'
-            ? q.options[btn.dataset.exdOpt].text || q.options[btn.dataset.exdOpt]
-            : q.options[btn.dataset.exdOpt];
+        const i   = Number(btn.dataset.exdOpt);
+        const val = typeof q.options[i] === 'object' ? q.options[i].text || q.options[i] : q.options[i];
+        btn.classList.remove('hover:border-primary/40', 'hover:bg-primary/5', 'active:scale-[0.98]');
         if (String(val) === String(q.answer)) {
-            btn.className = btn.className.replace('border-outline-variant/40', 'border-green-500') + ' bg-green-50';
-        } else if (Number(btn.dataset.exdOpt) === idx && !correct) {
-            btn.className = btn.className.replace('border-outline-variant/40', 'border-error') + ' bg-error-container/20';
+            btn.classList.add('border-green-500', 'bg-green-500/10', 'text-green-800');
+            btn.classList.remove('border-outline-variant/40');
+        } else if (i === idx && !correct) {
+            btn.classList.add('border-error', 'bg-error/10', 'text-error');
+            btn.classList.remove('border-outline-variant/40');
         }
     });
 
     if (correct) window._exdState.score++;
-    setTimeout(() => window._exdAdvance(), 1400);
+    _exdShowFeedback(correct, q);
 };
 
 window._exdCheckText = function() {
@@ -2785,15 +2836,19 @@ window._exdCheckText = function() {
     const q = window._exdState.questions[window._exdState.current];
     const correct = typed.toLowerCase() === String(q.answer).toLowerCase();
 
+    // Disable input + highlight
     input.disabled = true;
+    const checkBtn = input.nextElementSibling;
+    if (checkBtn && checkBtn.tagName === 'BUTTON') checkBtn.disabled = true;
+
     if (correct) {
-        input.className = input.className + ' border-green-500 bg-green-50';
+        input.classList.add('border-green-500', 'bg-green-50');
         window._exdState.score++;
     } else {
-        input.className = input.className + ' border-error bg-error-container/20';
-        input.value = q.answer;
+        input.classList.add('border-error', 'bg-red-50');
     }
-    setTimeout(() => window._exdAdvance(), 1400);
+
+    _exdShowFeedback(correct, q);
 };
 
 window._exdAdvance = function() {
@@ -2803,7 +2858,7 @@ window._exdAdvance = function() {
     st.answered = false;
 
     if (st.current >= st.questions.length) {
-        // Kết quả
+        // Màn hình kết quả
         const pct = Math.round((st.score / st.questions.length) * 100);
         const container = document.getElementById('exd-container');
         const progressEl = document.getElementById('exd-progress-label');
