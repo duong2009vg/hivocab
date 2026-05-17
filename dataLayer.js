@@ -102,6 +102,10 @@ window.HiDB = (() => {
     /**
      * Lấy user đang đăng nhập. Trả về null nếu chưa đăng nhập.
      */
+    function normalizeTopicCategory(category) {
+        return String(category || 'general').trim() || 'general';
+    }
+
     async function getCurrentUser() {
         const { data: { user } } = await _getClient().auth.getUser();
         return user;
@@ -181,7 +185,7 @@ window.HiDB = (() => {
                 id:         topic.id,       // ← QUAN TRỌNG: cần cho _openTopic
                 name:       topic.name,
                 icon:       topic.icon,
-                category:   topic.category || 'general',
+                category:   normalizeTopicCategory(topic.category),
                 totalWords,
                 progress,
                 createdAt:  topic.created_at,
@@ -200,9 +204,11 @@ window.HiDB = (() => {
         const user = await getCurrentUser();
         if (!user) throw new Error('Chưa đăng nhập');
 
+        const normalizedCategory = normalizeTopicCategory(category);
+
         const { data, error } = await _getClient()
             .from('topics')
-            .insert({ user_id: user.id, name, icon, category })
+            .insert({ user_id: user.id, name, icon, category: normalizedCategory })
             .select()
             .single();
 

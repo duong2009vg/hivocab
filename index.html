@@ -1911,13 +1911,9 @@ window.addEventListener('hashchange', () => {
       </div>
       <div>
         <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Danh mục</label>
-        <select id="new-topic-category" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors text-sm">
-          <option value="general">🌐 General</option>
-          <option value="ielts">🏅 IELTS / TOEIC</option>
-          <option value="cefr">⭐ CEFR</option>
-          <option value="thpt">🏫 THPT</option>
-          <option value="idiom">💬 Idiom &amp; Collocation</option>
-        </select>
+        <input id="new-topic-category" type="text" maxlength="80" list="topic-category-options" placeholder="Ví dụ: IELTS/TOEIC"
+               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors text-sm"/>
+        <datalist id="topic-category-options"></datalist>
       </div>
       <div id="create-topic-error" class="text-error text-sm hidden"></div>
       <div class="flex gap-3 mt-2">
@@ -1985,34 +1981,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ── Topic Categories ────────────────────────────────────────────
-const TOPIC_CATEGORIES = [
-    { id: 'all',     label: 'Tất cả',              icon: 'apps' },
-    { id: 'general', label: 'General',             icon: 'public' },
-    { id: 'ielts',   label: 'IELTS / TOEIC',       icon: 'military_tech' },
-    { id: 'cefr',    label: 'CEFR',                icon: 'workspace_premium' },
-    { id: 'thpt',    label: 'THPT',                icon: 'school' },
-    { id: 'idiom',   label: 'Idiom & Collocation', icon: 'format_quote' },
-];
-
+// ── Topic Categories: sinh động từ cột topics.category trên Supabase ──
 window._activeCategory = 'all';
 window._allTopics      = [];
+window._topicCategories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
+
+function _topicCategoryValue(category) {
+    return String(category || 'general').trim() || 'general';
+}
+
+function _topicCategoryIcon(category) {
+    const compact = _topicCategoryValue(category).toLowerCase().replace(/[\s/_-]+/g, '');
+    if (compact.includes('ielts') || compact.includes('toeic')) return 'military_tech';
+    if (compact.includes('cefr')) return 'workspace_premium';
+    if (compact.includes('thpt')) return 'school';
+    if (compact.includes('idiom') || compact.includes('collocation')) return 'format_quote';
+    if (compact.includes('general')) return 'public';
+    return 'folder';
+}
+
+function _buildTopicCategories(topics = []) {
+    const seen = new Set();
+    const categories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
+    topics.forEach(topic => {
+        const value = _topicCategoryValue(topic.category);
+        if (seen.has(value)) return;
+        seen.add(value);
+        categories.push({ id: value, label: value, icon: _topicCategoryIcon(value) });
+    });
+    window._topicCategories = categories;
+    return categories;
+}
+
+function _renderTopicCategoryDatalist() {
+    const list = document.getElementById('topic-category-options');
+    if (!list) return;
+    const categories = _buildTopicCategories(window._allTopics || []).filter(cat => cat.id !== 'all');
+    list.innerHTML = categories.map(cat => `<option value="${_esc(cat.label)}"></option>`).join('');
+}
 
 // Render category tab bar
 window._renderCategoryTabs = function() {
     const bar = document.getElementById('category-tabs');
     if (!bar) return;
-    bar.innerHTML = TOPIC_CATEGORIES.map(cat => {
+    const categories = _buildTopicCategories(window._allTopics || []);
+    bar.innerHTML = categories.map((cat, index) => {
         const active = cat.id === window._activeCategory;
         return `
-        <button onclick="window._switchCategory('${cat.id}')"
+        <button onclick="window._switchCategoryByIndex(${index})"
             class="category-tab flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap transition-all duration-200 shrink-0
                    ${active ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container text-on-surface-variant hover:bg-primary/10 hover:text-primary border border-outline-variant/30'}"
-            data-cat="${cat.id}">
+            data-cat="${_esc(cat.id)}">
             <span class="material-symbols-outlined text-[15px]">${cat.icon}</span>
-            ${cat.label}
+            ${_esc(cat.label)}
         </button>`;
     }).join('');
+    _renderTopicCategoryDatalist();
 };
 
 // Switch active category tab
@@ -2020,6 +2044,11 @@ window._switchCategory = function(catId) {
     window._activeCategory = catId;
     window._renderCategoryTabs();
     window._renderTopicsGrid();
+};
+
+window._switchCategoryByIndex = function(index) {
+    const cat = window._topicCategories?.[index];
+    window._switchCategory(cat?.id || 'all');
 };
 
 // Render topics grid filtered by active category
@@ -2041,16 +2070,23 @@ window._renderTopicsGrid = async function() {
             }
         }
 
+        const tableCategories = (topics || []).map(t => ({
+            ...t,
+            category: _topicCategoryValue(t.category),
+        }));
+        window._allTopics = tableCategories;
+        window._renderCategoryTabs();
+
         const filtered = window._activeCategory === 'all'
-            ? topics
-            : topics.filter(t => (t.category || 'general') === window._activeCategory);
+            ? tableCategories
+            : tableCategories.filter(t => t.category === window._activeCategory);
 
         if (!filtered || filtered.length === 0) {
-            const catLabel = TOPIC_CATEGORIES.find(c => c.id === window._activeCategory)?.label || 'danh mục này';
+            const catLabel = window._topicCategories.find(c => c.id === window._activeCategory)?.label || window._activeCategory || 'danh mục này';
             grid.innerHTML = `
                 <div class="col-span-4 flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
                     <span class="material-symbols-outlined text-[48px] opacity-40">folder_open</span>
-                    <p class="font-semibold">Chưa có chủ đề nào trong ${catLabel}</p>
+                    <p class="font-semibold">Chưa có chủ đề nào trong ${_esc(catLabel)}</p>
                     <button onclick="window.openCreateTopicModal()" class="mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-5 py-2 rounded-lg transition-colors flex items-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">add</span>Tạo chủ đề
                     </button>
@@ -2325,6 +2361,7 @@ window.openCreateTopicModal = function() {
     }
     // Pre-select current category in dropdown
     const catSel = document.getElementById('new-topic-category');
+    _renderTopicCategoryDatalist();
     if (catSel) catSel.value = window._activeCategory !== 'all' ? window._activeCategory : 'general';
     document.getElementById('new-topic-icon').value = 'folder';
     document.getElementById('new-topic-name').value = '';
