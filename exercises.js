@@ -574,7 +574,8 @@ const HiExercise = (() => {
             _builderExerciseId = ex.id;
             
             // Xoá cache để update list ngoài
-            _cachedExList = null; 
+            _cachedExList = null;
+            window._allExercises = null;
 
             window._closeCreateExerciseModal();
             window._openExerciseBuilder(ex.title);
@@ -599,6 +600,7 @@ const HiExercise = (() => {
         if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
         _builderExerciseId = null;
         // Refresh page to show new exercise
+        window._allExercises = null;
         window._renderExercisesPage();
     };
 
@@ -672,6 +674,7 @@ const HiExercise = (() => {
             
             // Xoá cache customEx
             _cachedExList = null;
+            window._allExercises = null;
             _renderBuilderQuestionList();
         } catch (e) {
             alert('Lỗi: ' + e.message);
@@ -720,6 +723,7 @@ const HiExercise = (() => {
         try {
             await HiDB.deleteExerciseQuestion(qId);
             _cachedExList = null;
+            window._allExercises = null;
             _renderBuilderQuestionList();
         } catch (e) {
             alert('Lỗi: ' + e.message);

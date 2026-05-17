@@ -807,10 +807,32 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </main>
 </div>
 
+<!-- ==================== PAGE: EXERCISE GROUP ==================== -->
+<div id="page-exercise-group" class="page">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-6 py-3 flex items-center gap-4 shadow-sm">
+    <button onclick="navigateTo('exercises')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full">
+        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+    </button>
+    <div class="flex-1 min-w-0">
+        <h1 id="exg-title" class="font-bold text-on-surface text-lg truncate">Bài tập</h1>
+        <p id="exg-subtitle" class="text-xs text-on-surface-variant truncate"></p>
+    </div>
+</header>
+<main class="pt-20 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 min-h-[100dvh]">
+    <div class="max-w-5xl mx-auto w-full flex flex-col gap-4 fade-in">
+        <div id="exercise-group-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="flex items-center justify-center py-16 col-span-3">
+                <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+
 <!-- ==================== PAGE: EXERCISE DETAIL ==================== -->
 <div id="page-exercise-detail" class="page">
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-6 py-3 flex items-center gap-4 shadow-sm">
-    <button onclick="navigateTo('exercises')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full">
+    <button onclick="window._backFromExerciseDetail()" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full">
         <span class="material-symbols-outlined text-[22px]">arrow_back</span>
     </button>
     <h1 id="exd-title" class="font-bold text-on-surface text-lg truncate flex-1">Bài tập</h1>
@@ -1244,7 +1266,8 @@ window.navigateTo = function(page, preserveHash = false){
     // Điều khiển Component dùng chung (Navbar / Sidebar)
     const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'dictionary', 'settings'];
     const isMainTab = mainTabs.includes(page);
-    const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail' || page === 'exercise-detail');
+    const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail');
+    const isExerciseDetail = (page === 'exercise-group' || page === 'exercise-detail');
     
     // Sidebar Desktop
     const sidebar = document.getElementById('main-sidebar');
@@ -1271,7 +1294,7 @@ window.navigateTo = function(page, preserveHash = false){
     // Mobile Bottom Nav
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if(bottomNav) {
-        bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
+        bottomNav.style.display = (isMainTab || isTopicDetail || isExerciseDetail) ? '' : 'none';
     }
     // Khi vào trang Topics: render tabs + grid
     if (page === 'topics') {
@@ -1287,6 +1310,10 @@ window.navigateTo = function(page, preserveHash = false){
     // Khi vào exercise-detail: render bài tập
     if (page === 'exercise-detail') {
         setTimeout(() => window._renderExerciseDetail && window._renderExerciseDetail(), 0);
+    }
+    // Khi vào exercise-group: render các bài tập con trong folder
+    if (page === 'exercise-group') {
+        setTimeout(() => window._renderExerciseGroupPage && window._renderExerciseGroupPage(), 0);
     }
     // Khi vào trang Exercises: render danh sách bài tập
     if (page === 'exercises') {
@@ -1324,8 +1351,8 @@ window.navigateTo = function(page, preserveHash = false){
     }
 
     // Cập nhật trạng thái Active trên Menu
-    if(isMainTab || isTopicDetail) {
-        const activeTarget = isTopicDetail ? 'topics' : page; 
+    if(isMainTab || isTopicDetail || isExerciseDetail) {
+        const activeTarget = isTopicDetail ? 'topics' : isExerciseDetail ? 'exercises' : page; 
         
         document.querySelectorAll('.nav-item').forEach(a => {
             a.classList.remove('text-primary');
@@ -2298,7 +2325,7 @@ window.openCreateTopicModal = function() {
     }
     // Pre-select current category in dropdown
     const catSel = document.getElementById('new-topic-category');
-    if (catSel && window._activeCategory !== 'all') catSel.value = window._activeCategory;
+    if (catSel) catSel.value = window._activeCategory !== 'all' ? window._activeCategory : 'general';
     document.getElementById('new-topic-icon').value = 'folder';
     document.getElementById('new-topic-name').value = '';
     const err = document.getElementById('create-topic-error');
@@ -2328,11 +2355,13 @@ window.selectTopicIcon = function(icon) {
 window.submitCreateTopic = async function() {
     const nameEl = document.getElementById('new-topic-name');
     const iconEl = document.getElementById('new-topic-icon');
+    const catEl  = document.getElementById('new-topic-category');
     const errEl  = document.getElementById('create-topic-error');
     const btn    = document.getElementById('create-topic-submit');
 
     const name = nameEl?.value.trim();
     const icon = iconEl?.value || 'folder';
+    const category = catEl?.value || 'general';
 
     if (!name) {
         if (errEl) { errEl.textContent = 'Vui lòng nhập tên chủ đề.'; errEl.classList.remove('hidden'); }
@@ -2344,10 +2373,11 @@ window.submitCreateTopic = async function() {
         if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
         if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
 
-        const newTopic = await HiDB.createTopic(name, icon);
+        const newTopic = await HiDB.createTopic(name, icon, category);
 
-        // Thêm card vào topics grid
-        window.addTopicCard(newTopic);
+        // Refresh cache để tab danh mục và click vào topic mới đều đúng state.
+        window._allTopics = [];
+        await window._renderTopicsGrid();
         window.closeCreateTopicModal();
 
     } catch(err) {
@@ -2363,7 +2393,7 @@ window.addTopicCard = function(topic) {
     const card = document.createElement('div');
     card.id = `topic-card-${topic.id}`;
     card.className = 'cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in';
-    card.setAttribute('onclick', `navigateTo('topic-detail')`);
+    card.setAttribute('onclick', `window._openTopic('${topic.id}')`);
     card.innerHTML = `
         <button onclick="event.stopPropagation(); window.deleteTopicCard('${topic.id}');"
                 class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-outline hover:bg-error-container hover:text-error transition-colors z-10">
@@ -2387,6 +2417,7 @@ window.deleteTopicCard = async function(topicId) {
     try {
         if (typeof HiDB !== 'undefined') await HiDB.deleteTopic(topicId);
         document.getElementById(`topic-card-${topicId}`)?.remove();
+        window._allTopics = (window._allTopics || []).filter(t => t.id !== topicId);
     } catch(err) { alert('Lỗi xóa: ' + err.message); }
 };
 
@@ -2394,6 +2425,54 @@ window.deleteTopicCard = async function(topicId) {
 // EXERCISES PAGE  —  Render danh sách bài tập
 // ============================================================
 window._allExercises = null;
+window._exerciseGroupsCache = [];
+window._currentExerciseGroup = null;
+const UNGROUPED_EXERCISE_GROUP = 'Chưa phân loại';
+
+function _getExerciseGroupLabel(ex) {
+    const group = (ex.topic_group || '').trim();
+    return group || UNGROUPED_EXERCISE_GROUP;
+}
+
+function _buildExerciseGroups(exercises) {
+    const map = new Map();
+    exercises.forEach(ex => {
+        const label = _getExerciseGroupLabel(ex);
+        if (!map.has(label)) {
+            map.set(label, { label, items: [], totalQuestions: 0 });
+        }
+        const group = map.get(label);
+        group.items.push(ex);
+        group.totalQuestions += ex.questions?.length ?? 0;
+    });
+    return Array.from(map.values());
+}
+
+function _renderExerciseCard(ex, returnPage = 'exercises') {
+    const catIcon = { vocab: 'translate', listen: 'hearing', review: 'quiz', custom: 'edit_note' };
+    const catLabel = { vocab: 'Từ vựng', listen: 'Nghe - Viết', review: 'Ôn tập', custom: 'Tùy chỉnh' };
+    const icon  = ex.icon  || catIcon[ex.category]  || 'edit_note';
+    const label = catLabel[ex.category] || 'Tùy chỉnh';
+    const qCount = ex.questions?.length ?? 0;
+    return `
+    <div onclick="window._openExercise('${ex.id}', '${returnPage}')"
+         class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
+        <div class="flex items-start justify-between gap-2">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-primary text-[22px]">${icon}</span>
+            </div>
+            <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-secondary/10 text-secondary">${label}</span>
+        </div>
+        <div class="flex-1">
+            <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">${_esc(ex.title)}</h3>
+            ${ex.description ? `<p class="text-sm text-on-surface-variant mt-1 line-clamp-2">${_esc(ex.description)}</p>` : ''}
+        </div>
+        <div class="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/20">
+            <span class="text-xs text-outline">${qCount} câu hỏi</span>
+            <span class="material-symbols-outlined text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
+        </div>
+    </div>`;
+}
 
 window._renderExercisesPage = async function(filterCat) {
     const grid = document.getElementById('exercises-list');
@@ -2428,28 +2507,25 @@ window._renderExercisesPage = async function(filterCat) {
             return;
         }
 
-        const catIcon = { vocab: 'translate', listen: 'hearing', review: 'quiz', custom: 'edit_note' };
-        const catLabel = { vocab: 'Từ vựng', listen: 'Nghe - Viết', review: 'Ôn tập', custom: 'Tùy chỉnh' };
+        const groups = _buildExerciseGroups(exercises);
+        window._exerciseGroupsCache = groups;
 
-        grid.innerHTML = exercises.map(ex => {
-            const icon  = ex.icon  || catIcon[ex.category]  || 'edit_note';
-            const label = catLabel[ex.category] || 'Tùy chỉnh';
-            const qCount = ex.questions?.length ?? 0;
+        grid.innerHTML = groups.map((group, i) => {
             return `
-            <div onclick="window._openExercise('${ex.id}')"
-                 class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
+            <div onclick="window._openExerciseGroupByIndex(${i})"
+                 class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in min-h-[180px]">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-primary text-[22px]">${icon}</span>
+                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-primary text-[26px]">folder</span>
                     </div>
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-secondary/10 text-secondary">${label}</span>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-secondary/10 text-secondary">${group.items.length} bài</span>
                 </div>
                 <div class="flex-1">
-                    <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">${_esc(ex.title)}</h3>
-                    ${ex.description ? `<p class="text-sm text-on-surface-variant mt-1 line-clamp-2">${_esc(ex.description)}</p>` : ''}
+                    <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2 text-lg">${_esc(group.label)}</h3>
+                    <p class="text-sm text-on-surface-variant mt-1">${group.totalQuestions} câu hỏi trong nhóm</p>
                 </div>
                 <div class="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/20">
-                    <span class="text-xs text-outline">${qCount} câu hỏi</span>
+                    <span class="text-xs text-outline">Mở thư mục</span>
                     <span class="material-symbols-outlined text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
                 </div>
             </div>`;
@@ -2464,15 +2540,74 @@ window._renderExercisesPage = async function(filterCat) {
     }
 };
 
-window._openExercise = function(exerciseId) {
+window._openExerciseGroupByIndex = function(index) {
+    const group = window._exerciseGroupsCache?.[index];
+    if (!group) return;
+    window._currentExerciseGroup = group.label;
+    navigateTo('exercise-group');
+};
+
+window._renderExerciseGroupPage = async function() {
+    const listEl = document.getElementById('exercise-group-list');
+    const titleEl = document.getElementById('exg-title');
+    const subtitleEl = document.getElementById('exg-subtitle');
+    if (!listEl) return;
+
+    listEl.innerHTML = `<div class="flex items-center justify-center py-16 col-span-3">
+        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+    </div>`;
+
+    try {
+        if (!window._allExercises) {
+            window._allExercises = typeof HiDB !== 'undefined'
+                ? await HiDB.getCustomExercises()
+                : [];
+        }
+        const cat = window._activeExerciseCat || 'all';
+        let exercises = window._allExercises || [];
+        if (cat !== 'all') {
+            exercises = exercises.filter(e => (e.category || 'custom') === cat);
+        }
+
+        const groupLabel = window._currentExerciseGroup || UNGROUPED_EXERCISE_GROUP;
+        const items = exercises.filter(ex => _getExerciseGroupLabel(ex) === groupLabel);
+        const totalQuestions = items.reduce((sum, ex) => sum + (ex.questions?.length ?? 0), 0);
+
+        if (titleEl) titleEl.textContent = groupLabel;
+        if (subtitleEl) subtitleEl.textContent = `${items.length} bài tập · ${totalQuestions} câu hỏi`;
+
+        if (items.length === 0) {
+            listEl.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+                <span class="material-symbols-outlined text-[56px] opacity-30">folder_open</span>
+                <p class="font-semibold text-base">Thư mục này chưa có bài tập nào</p>
+            </div>`;
+            return;
+        }
+
+        listEl.innerHTML = items.map(ex => _renderExerciseCard(ex, 'exercise-group')).join('');
+    } catch(err) {
+        listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-error">
+            <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
+            Không thể tải thư mục bài tập: ${_esc(err.message)}
+        </div>`;
+    }
+};
+
+window._openExercise = function(exerciseId, returnPage = 'exercises') {
     window._currentExerciseId = exerciseId;
+    window._exerciseReturnPage = returnPage;
     navigateTo('exercise-detail');
+};
+
+window._backFromExerciseDetail = function() {
+    navigateTo(window._exerciseReturnPage || 'exercises');
 };
 
 // Filter tab exercises
 window._setExerciseCat = function(cat, btnEl) {
     window._activeExerciseCat = cat;
     window._allExercises = null; // clear cache để re-fetch với filter
+    window._exerciseGroupsCache = [];
     // Update tab UI
     document.querySelectorAll('.exercise-cat-btn').forEach(b => {
         b.classList.remove('bg-primary', 'text-on-primary');
@@ -2733,7 +2868,7 @@ window._renderExdQuestion = function() {
                             data-exd-opt="${i}"
                             class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-sm md:text-base text-on-surface hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98] flex items-center gap-3">
                         <span class="shrink-0 w-7 h-7 rounded-full border border-outline-variant/50 flex items-center justify-center text-xs font-bold text-outline">${optLetters[i]}</span>
-                        <span>${_esc(typeof opt === 'object' ? opt.text || opt : opt)}</span>
+                        <span>${_esc(typeof opt === 'object' ? (opt.label || opt.text || opt.value || '') : opt)}</span>
                     </button>`).join('')}
                 </div>
                 <!-- Feedback + hint (hidden until answered) -->
@@ -2807,15 +2942,19 @@ window._exdSelectOpt = function(idx) {
     window._exdState.answered = true;
 
     const q = window._exdState.questions[window._exdState.current];
-    const selectedText = typeof q.options[idx] === 'object' ? q.options[idx].text || q.options[idx] : q.options[idx];
-    const correct = String(q.answer) === String(selectedText);
+    const selectedValue = typeof q.options[idx] === 'object'
+        ? (q.options[idx].value ?? q.options[idx].text ?? q.options[idx].label)
+        : q.options[idx];
+    const correct = String(q.answer) === String(selectedValue);
 
     // Highlight đáp án đúng/sai
     document.querySelectorAll('[data-exd-opt]').forEach(btn => {
         btn.disabled = true;
         btn.onclick  = null;
         const i   = Number(btn.dataset.exdOpt);
-        const val = typeof q.options[i] === 'object' ? q.options[i].text || q.options[i] : q.options[i];
+        const val = typeof q.options[i] === 'object'
+            ? (q.options[i].value ?? q.options[i].text ?? q.options[i].label)
+            : q.options[i];
         btn.classList.remove('hover:border-primary/40', 'hover:bg-primary/5', 'active:scale-[0.98]');
         if (String(val) === String(q.answer)) {
             btn.classList.add('border-green-500', 'bg-green-500/10', 'text-green-800');
@@ -2879,7 +3018,7 @@ window._exdAdvance = function() {
                 <button onclick="window._renderExerciseDetail()" class="bg-primary/10 text-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/20 transition-colors">
                     Làm lại
                 </button>
-                <button onclick="navigateTo('exercises')" class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
+                <button onclick="window._backFromExerciseDetail()" class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
                     Về danh sách
                 </button>
             </div>

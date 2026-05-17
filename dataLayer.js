@@ -146,6 +146,7 @@ window.HiDB = (() => {
                 id,
                 name,
                 icon,
+                category,
                 created_at,
                 words (
                     id,
@@ -180,6 +181,7 @@ window.HiDB = (() => {
                 id:         topic.id,       // ← QUAN TRỌNG: cần cho _openTopic
                 name:       topic.name,
                 icon:       topic.icon,
+                category:   topic.category || 'general',
                 totalWords,
                 progress,
                 createdAt:  topic.created_at,
@@ -194,13 +196,13 @@ window.HiDB = (() => {
      * @param {string} icon  - Tên icon Material Symbols (mặc định: 'folder')
      * @returns {Promise<Object>} - Topic vừa tạo
      */
-    async function createTopic(name, icon = 'folder') {
+    async function createTopic(name, icon = 'folder', category = 'general') {
         const user = await getCurrentUser();
         if (!user) throw new Error('Chưa đăng nhập');
 
         const { data, error } = await _getClient()
             .from('topics')
-            .insert({ user_id: user.id, name, icon })
+            .insert({ user_id: user.id, name, icon, category })
             .select()
             .single();
 
