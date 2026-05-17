@@ -1,47 +1,58 @@
-// ============================================================
+﻿// ============================================================
 // HI - DICTIONARY  |  dictionary.js
 // ============================================================
-// Wrapper cho Free Dictionary API + Groq AI dịch sang tiếng Việt.
+// Wrapper cho Free Dictionary API + Groq AI dá»‹ch sang tiáº¿ng Viá»‡t.
 //
 // API public:
 //   await HiDict.lookupWord('serendipity')
-//   → { word, phonetic, audioUrl, meanings, synonyms,
-//       viSummary,      // nghĩa tiếng Việt ngắn gọn
+//   â†’ { word, phonetic, audioUrl, meanings, synonyms,
+//       viSummary,      // nghÄ©a tiáº¿ng Viá»‡t ngáº¯n gá»n
 //       viMeanings }    // [{ partOfSpeech, viDefinitions: ['...'] }]
-//   → null nếu không tìm thấy
+//   â†’ null náº¿u khÃ´ng tÃ¬m tháº¥y
 //
 //   await HiDict.playWordAudio('serendipity')
-//   → phát âm chuẩn nếu có audio URL, fallback sang Web Speech API
+//   â†’ phÃ¡t Ã¢m chuáº©n náº¿u cÃ³ audio URL, fallback sang Web Speech API
 // ============================================================
 
 const HiDict = (() => {
 
     const DICT_URL  = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-    // ⚠️ Thay URL dưới đây bằng domain proxy thật của bạn trên Vercel
+    // âš ï¸ Thay URL dÆ°á»›i Ä‘Ã¢y báº±ng domain proxy tháº­t cá»§a báº¡n trÃªn Vercel
     const GROQ_URL  = 'https://groq-proxy-sandy.vercel.app/api/groq';
-    const GROQ_MODEL = 'llama-3.1-8b-instant';   // nhanh, miễn phí
+    const GROQ_MODEL = 'llama-3.1-8b-instant';   // nhanh, miá»…n phÃ­
 
-    // Cache kết quả tra (bao gồm bản dịch) để không gọi API lặp lại
+    // Cache káº¿t quáº£ tra (bao gá»“m báº£n dá»‹ch) Ä‘á»ƒ khÃ´ng gá»i API láº·p láº¡i
     const _cache = new Map();
 
-    // Audio element dùng chung
+    // Audio element dÃ¹ng chung
     let _audioEl = null;
+
+    function _warmSpeechVoices() {
+        if (!window.speechSynthesis) return;
+        window.speechSynthesis.getVoices();
+    }
+
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        _warmSpeechVoices();
+        window.speechSynthesis.addEventListener('voiceschanged', _warmSpeechVoices);
+        window.addEventListener('pointerdown', _warmSpeechVoices, { once: true });
+    }
 
     // --------------------------------------------------------
     // GROQ TRANSLATION
     // --------------------------------------------------------
 
     /**
-     * Dịch toàn bộ nghĩa của một từ sang tiếng Việt qua Groq AI.
-     * Gọi 1 lần duy nhất, nhận JSON có cấu trúc.
+     * Dá»‹ch toÃ n bá»™ nghÄ©a cá»§a má»™t tá»« sang tiáº¿ng Viá»‡t qua Groq AI.
+     * Gá»i 1 láº§n duy nháº¥t, nháº­n JSON cÃ³ cáº¥u trÃºc.
      *
-     * @param {string} word       - từ tiếng Anh
-     * @param {Array}  meanings   - mảng meaning object từ Free Dictionary
+     * @param {string} word       - tá»« tiáº¿ng Anh
+     * @param {Array}  meanings   - máº£ng meaning object tá»« Free Dictionary
      * @returns {Promise<{ viSummary: string, viMeanings: Array }|null>}
      */
     async function _translateWithGroq(word, meanings) {
         try {
-            // Nén danh sách định nghĩa thành text gọn để gửi lên
+            // NÃ©n danh sÃ¡ch Ä‘á»‹nh nghÄ©a thÃ nh text gá»n Ä‘á»ƒ gá»­i lÃªn
             const defLines = [];
             meanings.forEach((m, mi) => {
                 m.definitions.forEach((d, di) => {
@@ -58,10 +69,10 @@ ${defLines.join('\n')}
 
 Return ONLY valid JSON (no markdown, no explanation) in this exact format:
 {
-  "viSummary": "nghĩa ngắn gọn nhất bằng tiếng Việt (1 dòng)",
+  "viSummary": "nghÄ©a ngáº¯n gá»n nháº¥t báº±ng tiáº¿ng Viá»‡t (1 dÃ²ng)",
   "viDefinitions": {
-    "0-0": "dịch định nghĩa [0-0] sang tiếng Việt",
-    "0-1": "dịch định nghĩa [0-1] sang tiếng Việt"
+    "0-0": "dá»‹ch Ä‘á»‹nh nghÄ©a [0-0] sang tiáº¿ng Viá»‡t",
+    "0-1": "dá»‹ch Ä‘á»‹nh nghÄ©a [0-1] sang tiáº¿ng Viá»‡t"
   }
 }
 
@@ -93,26 +104,26 @@ Rules:
             const content = json.choices?.[0]?.message?.content?.trim();
             if (!content) return null;
 
-            // Parse JSON từ response — robust: xử lý markdown fence, trailing comma, single quote
+            // Parse JSON tá»« response â€” robust: xá»­ lÃ½ markdown fence, trailing comma, single quote
             let cleaned = content
-                .replace(/```json\n?|\n?```/g, '')  // bỏ markdown fence
+                .replace(/```json\n?|\n?```/g, '')  // bá» markdown fence
                 .trim();
 
-            // Trích xuất block JSON đầu tiên trong response (tránh text thừa trước/sau)
+            // TrÃ­ch xuáº¥t block JSON Ä‘áº§u tiÃªn trong response (trÃ¡nh text thá»«a trÆ°á»›c/sau)
             const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) throw new Error('Không tìm thấy JSON trong response');
+            if (!jsonMatch) throw new Error('KhÃ´ng tÃ¬m tháº¥y JSON trong response');
             cleaned = jsonMatch[0];
 
-            // Sửa trailing comma trước } hoặc ] (JSON không hợp lệ nhưng Groq hay sinh ra)
+            // Sá»­a trailing comma trÆ°á»›c } hoáº·c ] (JSON khÃ´ng há»£p lá»‡ nhÆ°ng Groq hay sinh ra)
             cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
 
-            // Sửa single-quoted string → double-quoted (một số model trả về kiểu này)
-            // Chỉ áp dụng nếu không có double-quote hợp lệ xung quanh
+            // Sá»­a single-quoted string â†’ double-quoted (má»™t sá»‘ model tráº£ vá» kiá»ƒu nÃ y)
+            // Chá»‰ Ã¡p dá»¥ng náº¿u khÃ´ng cÃ³ double-quote há»£p lá»‡ xung quanh
             cleaned = cleaned.replace(/:\s*'([^']*)'/g, ': "$1"');
 
             const parsed = JSON.parse(cleaned);
 
-            // Map viDefinitions về cùng cấu trúc meanings
+            // Map viDefinitions vá» cÃ¹ng cáº¥u trÃºc meanings
             const viMeanings = meanings.map((m, mi) => ({
                 partOfSpeech:  m.partOfSpeech,
                 viDefinitions: m.definitions.map((_, di) =>
@@ -126,7 +137,7 @@ Rules:
             };
 
         } catch (err) {
-            console.warn('[HiDict] Lỗi Groq translate:', err);
+            console.warn('[HiDict] Lá»—i Groq translate:', err);
             return null;
         }
     }
@@ -136,20 +147,20 @@ Rules:
     // --------------------------------------------------------
 
     /**
-     * Tra từ điển tiếng Anh và dịch nghĩa sang tiếng Việt.
+     * Tra tá»« Ä‘iá»ƒn tiáº¿ng Anh vÃ  dá»‹ch nghÄ©a sang tiáº¿ng Viá»‡t.
      *
      * @param {string} word
      * @returns {Promise<Object|null>}
      *   {
-     *     word,           // từ gốc
-     *     phonetic,       // /foʊˈnɛtɪk/
-     *     audioUrl,       // URL file .mp3 phát âm (có thể null)
-     *     meanings: [     // nghĩa tiếng Anh
+     *     word,           // tá»« gá»‘c
+     *     phonetic,       // /foÊŠËˆnÉ›tÉªk/
+     *     audioUrl,       // URL file .mp3 phÃ¡t Ã¢m (cÃ³ thá»ƒ null)
+     *     meanings: [     // nghÄ©a tiáº¿ng Anh
      *       { partOfSpeech, definitions: [{ definition, example, synonyms }] }
      *     ],
-     *     synonyms,       // mảng string (top 6)
-     *     viSummary,      // nghĩa tiếng Việt ngắn gọn (từ Groq)
-     *     viMeanings: [   // bản dịch từng nghĩa
+     *     synonyms,       // máº£ng string (top 6)
+     *     viSummary,      // nghÄ©a tiáº¿ng Viá»‡t ngáº¯n gá»n (tá»« Groq)
+     *     viMeanings: [   // báº£n dá»‹ch tá»«ng nghÄ©a
      *       { partOfSpeech, viDefinitions: ['...', ...] }
      *     ],
      *   }
@@ -158,7 +169,7 @@ Rules:
         if (!word || !word.trim()) return null;
         const key = word.trim().toLowerCase();
 
-        // Free Dictionary API chỉ hỗ trợ từ đơn — bỏ qua cụm từ nhiều chữ
+        // Free Dictionary API chá»‰ há»— trá»£ tá»« Ä‘Æ¡n â€” bá» qua cá»¥m tá»« nhiá»u chá»¯
         if (key.includes(' ')) return null;
 
         if (_cache.has(key)) return _cache.get(key);
@@ -182,7 +193,7 @@ Rules:
                 phonetic = ph?.text || '';
             }
 
-            // Audio URL (ưu tiên US accent)
+            // Audio URL (Æ°u tiÃªn US accent)
             let audioUrl = null;
             if (entry.phonetics) {
                 const withAudio = entry.phonetics.filter(p => p.audio);
@@ -190,7 +201,7 @@ Rules:
                 audioUrl = (us || withAudio[0])?.audio || null;
             }
 
-            // Parse meanings (tiếng Anh)
+            // Parse meanings (tiáº¿ng Anh)
             const meanings = (entry.meanings || []).map(m => ({
                 partOfSpeech: m.partOfSpeech,
                 definitions:  (m.definitions || []).slice(0, 3).map(d => ({
@@ -200,7 +211,7 @@ Rules:
                 })),
             }));
 
-            // Synonyms tổng hợp (top 6)
+            // Synonyms tá»•ng há»£p (top 6)
             const allSynonyms = new Set();
             meanings.forEach(m => m.definitions.forEach(d => d.synonyms.forEach(s => allSynonyms.add(s))));
             (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => allSynonyms.add(s)));
@@ -215,15 +226,15 @@ Rules:
                 viMeanings: null,
             };
 
-            // Lưu tạm vào cache (chưa có bản dịch) để playAudio không bị block
+            // LÆ°u táº¡m vÃ o cache (chÆ°a cÃ³ báº£n dá»‹ch) Ä‘á»ƒ playAudio khÃ´ng bá»‹ block
             _cache.set(key, result);
 
-            // Gọi Groq dịch tiếng Việt (không block render)
+            // Gá»i Groq dá»‹ch tiáº¿ng Viá»‡t (khÃ´ng block render)
             _translateWithGroq(entry.word, meanings).then(vi => {
                 if (vi) {
                     result.viSummary  = vi.viSummary;
                     result.viMeanings = vi.viMeanings;
-                    // Cập nhật cache
+                    // Cáº­p nháº­t cache
                     _cache.set(key, result);
                 }
             });
@@ -231,7 +242,7 @@ Rules:
             return result;
 
         } catch (err) {
-            console.warn('[HiDict] Lỗi fetch:', err);
+            console.warn('[HiDict] Lá»—i fetch:', err);
             return null;
         }
     }
@@ -241,50 +252,59 @@ Rules:
     // --------------------------------------------------------
 
     /**
-     * Phát âm từ — ưu tiên audio URL thật, fallback Web Speech API.
+     * PhÃ¡t Ã¢m tá»« â€” Æ°u tiÃªn audio URL tháº­t, fallback Web Speech API.
      *
      * @param {string} word
-     * @param {number} rate  - tốc độ fallback TTS (0.5–1.0)
+     * @param {number} rate  - tá»‘c Ä‘á»™ fallback TTS (0.5â€“1.0)
      */
     async function playWordAudio(word, rate = 0.9) {
-        // Cụm từ nhiều chữ không có trong từ điển — dùng TTS trực tiếp
-        const isSingleWord = word && !word.trim().includes(' ');
+        if (!word || !word.trim()) return;
+        const key = word.trim().toLowerCase();
+        const isSingleWord = !key.includes(' ');
 
-        if (isSingleWord) {
-            const result = await lookupWord(word);
-            if (result?.audioUrl) {
-                try {
-                    if (!_audioEl) _audioEl = new Audio();
-                    _audioEl.pause();
-                    _audioEl.src = result.audioUrl;
-                    await _audioEl.play();
-                    return;
-                } catch (_) { /* fallback */ }
-            }
-        }
-
-        // Fallback: Web Speech API
-        if (window.speechSynthesis) {
+        const speakNow = () => {
+            if (!window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(word);
             utter.lang  = 'en-US';
             utter.rate  = rate;
-            const trySpeak = () => {
-                const voices = speechSynthesis.getVoices();
-                const v = voices.find(v => v.lang === 'en-US' && !v.localService)
-                       || voices.find(v => v.lang === 'en-US')
-                       || voices.find(v => v.lang.startsWith('en'));
-                if (v) utter.voice = v;
-                speechSynthesis.speak(utter);
-            };
-            if (speechSynthesis.getVoices().length > 0) trySpeak();
-            else speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true });
+            const voices = window.speechSynthesis.getVoices();
+            const v = voices.find(v => v.lang === 'en-US' && !v.localService)
+                   || voices.find(v => v.lang === 'en-US')
+                   || voices.find(v => v.lang.startsWith('en'));
+            if (v) utter.voice = v;
+            window.speechSynthesis.speak(utter);
+        };
+
+        const cached = _cache.get(key);
+        if (isSingleWord && cached?.audioUrl) {
+            try {
+                if (!_audioEl) _audioEl = new Audio();
+                _audioEl.pause();
+                _audioEl.src = cached.audioUrl;
+                await _audioEl.play();
+                return;
+            } catch (_) { /* fallback */ }
+        }
+
+        speakNow();
+
+        if (isSingleWord && !_cache.has(key)) {
+            lookupWord(word).then(result => {
+                if (!result?.audioUrl) return;
+                try {
+                    if (!_audioEl) _audioEl = new Audio();
+                    _audioEl.preload = 'auto';
+                    _audioEl.src = result.audioUrl;
+                    _audioEl.load();
+                } catch (_) { /* ignore preload errors */ }
+            });
         }
     }
 
     // --------------------------------------------------------
 
-    /** Xoá cache (dùng khi test). */
+    /** XoÃ¡ cache (dÃ¹ng khi test). */
     function clearCache() { _cache.clear(); }
 
     return { lookupWord, playWordAudio, clearCache };

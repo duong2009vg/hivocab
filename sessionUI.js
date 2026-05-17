@@ -1,21 +1,21 @@
-// ============================================================
+﻿// ============================================================
 // HI - SESSION UI  |  sessionUI.js
 // ============================================================
-// Render toàn bộ giao diện phiên học, khớp 100% design system
-// của A7.html (color tokens, glass-card, Material Symbols...).
+// Render toÃ n bá»™ giao diá»‡n phiÃªn há»c, khá»›p 100% design system
+// cá»§a A7.html (color tokens, glass-card, Material Symbols...).
 //
-// Phụ thuộc: sessionEngine.js (HiSession), dataLayer.js (HiDB)
+// Phá»¥ thuá»™c: sessionEngine.js (HiSession), dataLayer.js (HiDB)
 //
-// TÍCH HỢP VÀO A7.html:
-//   1. Thêm id="exercise-container" vào thẻ <main> trong page-learning:
+// TÃCH Há»¢P VÃ€O A7.html:
+//   1. ThÃªm id="exercise-container" vÃ o tháº» <main> trong page-learning:
 //      <main ... >
 //        <div id="exercise-container"></div>
 //      </main>
 //
-//   2. Xóa toàn bộ 4 section#exercise-0 → exercise-3 cũ
-//      (và section#exercise-completed cũ) khỏi HTML.
+//   2. XÃ³a toÃ n bá»™ 4 section#exercise-0 â†’ exercise-3 cÅ©
+//      (vÃ  section#exercise-completed cÅ©) khá»i HTML.
 //
-//   3. Khởi tạo trong window.startSession():
+//   3. Khá»Ÿi táº¡o trong window.startSession():
 //      HiSessionUI.init();
 //      const words = await HiDB.getWordsDueForReview(20);
 //      HiSession.startSession(words);
@@ -25,14 +25,14 @@
 const HiSessionUI = (() => {
 
     // ----------------------------------------------------------
-    // CONSTANTS - CSS classes từ design system của Hi
+    // CONSTANTS - CSS classes tá»« design system cá»§a Hi
     // ----------------------------------------------------------
     const CSS = {
         card:          'w-full bg-surface-container-lowest/80 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl soft-shadow',
         label:         'text-on-surface-variant font-label-sm text-[10px] md:text-xs uppercase tracking-widest opacity-60',
         btnPrimary:    'w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl md:rounded-full font-bold text-sm hover:bg-surface-tint transition-colors',
         btnDisabled:   'w-full bg-surface-variant text-on-surface-variant px-6 py-3.5 rounded-xl md:rounded-full font-bold text-sm cursor-not-allowed opacity-50',
-        // MCQ option — mobile: flex row (text + icon); desktop: flex column (centered)
+        // MCQ option â€” mobile: flex row (text + icon); desktop: flex column (centered)
         mcqOptDefault: 'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border border-outline-variant/40 bg-surface-container-lowest flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all hover:border-primary/40 hover:bg-primary/5 active:scale-[0.98]',
         mcqOptSelected:'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-primary bg-primary/8 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
         mcqOptCorrect: 'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-green-500 bg-green-50 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
@@ -52,13 +52,13 @@ const HiSessionUI = (() => {
     // ----------------------------------------------------------
 
     /**
-     * Khởi tạo UI, bind container.
-     * Gọi trước HiSession.startSession().
+     * Khá»Ÿi táº¡o UI, bind container.
+     * Gá»i trÆ°á»›c HiSession.startSession().
      */
     function init() {
         _container = document.getElementById('exercise-container');
         if (!_container) {
-            console.error('[HiSessionUI] Không tìm thấy #exercise-container trong DOM.');
+            console.error('[HiSessionUI] KhÃ´ng tÃ¬m tháº¥y #exercise-container trong DOM.');
             return;
         }
         _selectedMCQIndex = null;
@@ -67,16 +67,16 @@ const HiSessionUI = (() => {
     }
 
     // ----------------------------------------------------------
-    // RENDER ĐIỀU PHỐI CHÍNH
+    // RENDER ÄIá»€U PHá»I CHÃNH
     // ----------------------------------------------------------
 
     /**
-     * Render exercise hiện tại từ HiSession.getCurrentItem().
-     * Gọi sau mỗi lần advance (đúng hoặc sai).
+     * Render exercise hiá»‡n táº¡i tá»« HiSession.getCurrentItem().
+     * Gá»i sau má»—i láº§n advance (Ä‘Ãºng hoáº·c sai).
      */
     function render() {
         if (!_container) {
-            console.error('[HiSessionUI] Chưa gọi init().');
+            console.error('[HiSessionUI] ChÆ°a gá»i init().');
             return;
         }
 
@@ -113,13 +113,13 @@ const HiSessionUI = (() => {
         const d = item.exerciseData;
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
-            <div class="${CSS.label}">Bài tập: Thẻ ghi nhớ</div>
+            <div class="${CSS.label}">BÃ i táº­p: Tháº» ghi nhá»›</div>
 
             <div id="flashcard-card"
                  class="${CSS.card} flex flex-col min-h-[360px] md:min-h-[400px] relative overflow-hidden cursor-pointer transition-all"
                  onclick="HiSessionUI._flipCard()">
 
-                <!-- MẶT TRƯỚC: hiển thị nghĩa tiếng Việt -->
+                <!-- Máº¶T TRÆ¯á»šC: hiá»ƒn thá»‹ nghÄ©a tiáº¿ng Viá»‡t -->
                 <div id="card-front"
                      class="flex-1 flex flex-col items-center justify-center p-6 md:p-8 z-10 bg-surface-container-lowest rounded-2xl">
                     <span class="text-on-surface-variant text-sm mb-4">${d.frontLabel}</span>
@@ -128,11 +128,11 @@ const HiSessionUI = (() => {
                     </h2>
                     <button class="bg-primary text-on-primary px-6 py-2.5 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none">
                         <span class="material-symbols-outlined text-[18px]">visibility</span>
-                        Nhấn xem đáp án
+                        Nháº¥n xem Ä‘Ã¡p Ã¡n
                     </button>
                 </div>
 
-                <!-- MẶT SAU: hiển thị từ tiếng Anh + rate buttons -->
+                <!-- Máº¶T SAU: hiá»ƒn thá»‹ tá»« tiáº¿ng Anh + rate buttons -->
                 <div id="card-back"
                      class="hidden flex-1 flex flex-col items-center justify-center p-6 md:p-8 z-10 bg-primary-fixed/20 rounded-2xl">
                     <span class="text-on-surface-variant text-sm mb-4">${d.backLabel}</span>
@@ -141,7 +141,7 @@ const HiSessionUI = (() => {
                             ${_esc(d.backWord)}
                         </h2>
                         <button onclick="event.stopPropagation(); HiSessionUI._speak('${_esc(d.backWord)}')"
-                                title="Nghe phát âm"
+                                title="Nghe phÃ¡t Ã¢m"
                                 class="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
                             <span class="material-symbols-outlined text-[22px]">volume_up</span>
                         </button>
@@ -153,32 +153,32 @@ const HiSessionUI = (() => {
                     <div class="flex w-full md:w-auto flex-row justify-center gap-2 md:gap-4">
                         <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('hard')"
                             class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90 transition-opacity">
-                            Khó
+                            KhÃ³
                         </button>
                         <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('good')"
                             class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-secondary-container text-on-secondary-container hover:opacity-90 transition-opacity">
-                            Tốt
+                            Tá»‘t
                         </button>
                         <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('easy')"
                             class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-primary text-on-primary hover:bg-surface-tint transition-colors">
-                            Dễ
+                            Dá»…
                         </button>
                     </div>
                 </div>
             </div>
         </div>`;
-        // Phát âm tự động khi lật thẻ (sau render)
-        // Sẽ được gọi từ _flipCard
+        // PhÃ¡t Ã¢m tá»± Ä‘á»™ng khi láº­t tháº» (sau render)
+        // Sáº½ Ä‘Æ°á»£c gá»i tá»« _flipCard
     }
 
-    /** Lật card */
+    /** Láº­t card */
     function _flipCard() {
         const front = document.getElementById('card-front');
         const back  = document.getElementById('card-back');
         if (front && back) {
             front.classList.toggle('hidden');
             back.classList.toggle('hidden');
-            // Phát âm khi lật sang mặt sau
+            // PhÃ¡t Ã¢m khi láº­t sang máº·t sau
             if (!back.classList.contains('hidden')) {
                 const item = HiSession.getCurrentItem();
                 if (item?.exerciseData?.backWord) {
@@ -188,18 +188,18 @@ const HiSessionUI = (() => {
         }
     }
 
-    /** Xử lý rating flashcard */
+    /** Xá»­ lÃ½ rating flashcard */
     function _onFlashcardRate(rating) {
         if (_isShowingFeedback) return;
         const result = HiSession.rateFlashcard(rating);
 
         if (result.isNewWord) {
-            // Từ mới lv0: auto pass bất kể bấm gì
-            _showFeedbackOverlay(true, `✓ Từ mới — đã ghi nhận!`, () => render());
+            // Tá»« má»›i lv0: auto pass báº¥t ká»ƒ báº¥m gÃ¬
+            _showFeedbackOverlay(true, `âœ“ Tá»« má»›i â€” Ä‘Ã£ ghi nháº­n!`, () => render());
         } else if (result.correct) {
-            _showFeedbackOverlay(true, `+1 từ hoàn thành`, () => render());
+            _showFeedbackOverlay(true, `+1 tá»« hoÃ n thÃ nh`, () => render());
         } else {
-            _showFeedbackOverlay(false, `Hãy thử lại với dạng bài khác nhé!`, () => render());
+            _showFeedbackOverlay(false, `HÃ£y thá»­ láº¡i vá»›i dáº¡ng bÃ i khÃ¡c nhÃ©!`, () => render());
         }
     }
 
@@ -220,7 +220,7 @@ const HiSessionUI = (() => {
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
-            <div class="${CSS.label}">Bài tập: Trắc nghiệm</div>
+            <div class="${CSS.label}">BÃ i táº­p: Tráº¯c nghiá»‡m</div>
 
             <div class="${CSS.card} p-6 md:p-8 flex flex-col">
                 <div class="text-center mb-5 md:mb-7">
@@ -228,14 +228,14 @@ const HiSessionUI = (() => {
                     <div class="flex items-center justify-center gap-2">
                         <h2 class="font-bold text-on-surface text-2xl md:text-3xl">"${_esc(d.word)}"</h2>
                         <button onclick="HiSessionUI._speak('${_esc(d.word)}')"
-                                title="Nghe phát âm"
+                                title="Nghe phÃ¡t Ã¢m"
                                 class="p-2 rounded-full bg-surface-container-low text-primary hover:bg-primary/10 transition-colors shrink-0">
                             <span class="material-symbols-outlined text-[20px]">volume_up</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Mobile: 1 cột | Desktop: grid 2×2 -->
+                <!-- Mobile: 1 cá»™t | Desktop: grid 2Ã—2 -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="mcq-options">
                     ${optionsHTML}
                 </div>
@@ -245,19 +245,19 @@ const HiSessionUI = (() => {
                             onclick="HiSessionUI._onMCQCheck()"
                             class="${CSS.btnDisabled}"
                             disabled>
-                        Kiểm tra & Tiếp tục
+                        Kiá»ƒm tra & Tiáº¿p tá»¥c
                     </button>
                 </div>
             </div>
         </div>`;
     }
 
-    /** Chọn một option MCQ */
+    /** Chá»n má»™t option MCQ */
     function _onMCQSelect(idx) {
         if (_isShowingFeedback) return;
         _selectedMCQIndex = idx;
 
-        // Reset tất cả options về default
+        // Reset táº¥t cáº£ options vá» default
         document.querySelectorAll('.mcq-opt').forEach((btn, i) => {
             btn.className = CSS.mcqOptDefault;
             const icon = btn.querySelector('.material-symbols-outlined');
@@ -267,7 +267,7 @@ const HiSessionUI = (() => {
             }
         });
 
-        // Highlight option được chọn
+        // Highlight option Ä‘Æ°á»£c chá»n
         const selectedBtn = document.querySelector(`[data-idx="${idx}"]`);
         if (selectedBtn) {
             selectedBtn.className = CSS.mcqOptSelected;
@@ -278,7 +278,7 @@ const HiSessionUI = (() => {
             }
         }
 
-        // Enable nút kiểm tra
+        // Enable nÃºt kiá»ƒm tra
         const checkBtn = document.getElementById('mcq-check');
         if (checkBtn) {
             checkBtn.disabled = false;
@@ -286,19 +286,19 @@ const HiSessionUI = (() => {
         }
     }
 
-    /** Kiểm tra đáp án MCQ */
+    /** Kiá»ƒm tra Ä‘Ã¡p Ã¡n MCQ */
     function _onMCQCheck() {
         if (_isShowingFeedback || _selectedMCQIndex === null) return;
         _isShowingFeedback = true;
 
-        // Lưu index đáp án đúng TRƯỚC khi submitAnswer advance queue
+        // LÆ°u index Ä‘Ã¡p Ã¡n Ä‘Ãºng TRÆ¯á»šC khi submitAnswer advance queue
         const currentItem = HiSession.getCurrentItem();
         const correctIndex = currentItem?.exerciseData?.options
             ?.findIndex(o => o.isCorrect) ?? -1;
 
         const result = HiSession.submitAnswer(_selectedMCQIndex);
 
-        // Disable tất cả options
+        // Disable táº¥t cáº£ options
         document.querySelectorAll('.mcq-opt').forEach(btn => {
             btn.disabled = true;
             btn.onclick  = null;
@@ -314,7 +314,7 @@ const HiSessionUI = (() => {
         }
     }
 
-    /** Hiển thị màu sắc đúng/sai trên MCQ options */
+    /** Hiá»ƒn thá»‹ mÃ u sáº¯c Ä‘Ãºng/sai trÃªn MCQ options */
     function _highlightMCQResult(correct, correctIndex) {
         const options = document.querySelectorAll('.mcq-opt');
         options.forEach((btn, idx) => {
@@ -323,32 +323,32 @@ const HiSessionUI = (() => {
             const icon = btn.querySelector('.material-symbols-outlined');
 
             if (isCorrect) {
-                // Luôn highlight đáp án đúng màu xanh
+                // LuÃ´n highlight Ä‘Ã¡p Ã¡n Ä‘Ãºng mÃ u xanh
                 btn.className = CSS.mcqOptCorrect;
                 if (icon) { icon.textContent = 'check_circle'; icon.className = 'material-symbols-outlined text-green-600'; }
             } else if (isSelected && !correct) {
-                // Đáp án user chọn mà sai → đỏ
+                // ÄÃ¡p Ã¡n user chá»n mÃ  sai â†’ Ä‘á»
                 btn.className = CSS.mcqOptWrong;
                 if (icon) { icon.textContent = 'cancel'; icon.className = 'material-symbols-outlined text-error'; }
             }
         });
 
-        // Hiện toast feedback
-        _showToast(correct, correct ? '✓ Chính xác!' : '✗ Sai rồi, thử dạng bài khác nhé!');
+        // Hiá»‡n toast feedback
+        _showToast(correct, correct ? 'âœ“ ChÃ­nh xÃ¡c!' : 'âœ— Sai rá»“i, thá»­ dáº¡ng bÃ i khÃ¡c nhÃ©!');
     }
 
     // ----------------------------------------------------------
-    // RENDER: FILL IN BLANK (điền chữ cái)
+    // RENDER: FILL IN BLANK (Ä‘iá»n chá»¯ cÃ¡i)
     // ----------------------------------------------------------
 
     function _renderFill(item) {
         const d = item.exerciseData;
 
-        // Tạo input boxes cho từng chữ cái, thêm dấu cách phân tách giữa các từ
+        // Táº¡o input boxes cho tá»«ng chá»¯ cÃ¡i, thÃªm dáº¥u cÃ¡ch phÃ¢n tÃ¡ch giá»¯a cÃ¡c tá»«
         let fillIndex = 0;
         const inputsHTML = d.answer.split('').map((char) => {
             if (char === ' ') {
-                // Hiển thị khoảng cách nhìn thấy được giữa các từ
+                // Hiá»ƒn thá»‹ khoáº£ng cÃ¡ch nhÃ¬n tháº¥y Ä‘Æ°á»£c giá»¯a cÃ¡c tá»«
                 return `<span class="w-3 md:w-4 shrink-0" aria-hidden="true"></span>`;
             }
             const idx = fillIndex++;
@@ -359,23 +359,23 @@ const HiSessionUI = (() => {
         }).join('');
 
         const totalLetters = d.answer.replace(/\s/g, '').length;
-        // Nếu từ có nhiều chữ (> 8), chia thành 2 dòng bằng flex-wrap
+        // Náº¿u tá»« cÃ³ nhiá»u chá»¯ (> 8), chia thÃ nh 2 dÃ²ng báº±ng flex-wrap
         const boxesClass = totalLetters > 8
             ? 'flex gap-1 md:gap-2 justify-center flex-wrap max-w-full items-end'
             : 'flex gap-1 md:gap-2 justify-center items-end';
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
-            <div class="${CSS.label}">Bài tập: Điền vào chỗ trống</div>
+            <div class="${CSS.label}">BÃ i táº­p: Äiá»n vÃ o chá»— trá»‘ng</div>
 
             <div class="${CSS.card} p-5 md:p-8 flex flex-col items-center min-h-[300px] justify-center">
 
-                <!-- Gợi ý nghĩa + nút phát âm -->
+                <!-- Gá»£i Ã½ nghÄ©a + nÃºt phÃ¡t Ã¢m -->
                 <div class="text-center mb-6 w-full">
                     <div class="flex items-center justify-center gap-2 mb-3">
-                        <p class="text-sm text-on-surface-variant font-medium">Điền từ tiếng Anh có nghĩa:</p>
+                        <p class="text-sm text-on-surface-variant font-medium">Äiá»n tá»« tiáº¿ng Anh cÃ³ nghÄ©a:</p>
                         <button onclick="HiSessionUI._speak('${_esc(d.answer)}')"
-                                title="Nghe phát âm từ cần điền"
+                                title="Nghe phÃ¡t Ã¢m tá»« cáº§n Ä‘iá»n"
                                 class="p-1.5 rounded-full bg-surface-container-low text-primary hover:bg-primary/10 transition-colors">
                             <span class="material-symbols-outlined text-[18px]">volume_up</span>
                         </button>
@@ -393,22 +393,22 @@ const HiSessionUI = (() => {
                     <button onclick="HiSessionUI._getAIHint()"
                             class="mt-4 text-primary font-bold text-xs md:text-sm flex items-center justify-center gap-1 hover:bg-primary-container/10 px-3 py-2 rounded-lg mx-auto w-max transition-colors">
                         <span class="material-symbols-outlined text-[16px]">lightbulb</span>
-                        Xin gợi ý AI
+                        Xin gá»£i Ã½ AI
                     </button>
                     <div id="ai-hint-container"
                          class="mt-3 text-xs md:text-sm text-on-surface-variant hidden bg-surface-container-low p-3 rounded-lg border border-outline-variant/30 w-full text-left">
                     </div>
                 </div>
 
-                <!-- Input boxes từng chữ cái -->
+                <!-- Input boxes tá»«ng chá»¯ cÃ¡i -->
                 <div class="${boxesClass}" id="fill-boxes">
                     ${inputsHTML}
                 </div>
 
-                <!-- Nút kiểm tra -->
+                <!-- NÃºt kiá»ƒm tra -->
                 <div class="mt-8 w-full">
                     <button onclick="HiSessionUI._onFillCheck()" class="${CSS.btnPrimary}">
-                        Kiểm tra
+                        Kiá»ƒm tra
                     </button>
                 </div>
             </div>
@@ -418,7 +418,7 @@ const HiSessionUI = (() => {
         _bindFillInputs();
     }
 
-    /** Tạo HTML câu ví dụ với ___ được highlight */
+    /** Táº¡o HTML cÃ¢u vÃ­ dá»¥ vá»›i ___ Ä‘Æ°á»£c highlight */
     function _buildSentenceHTML(sentence) {
         return _esc(sentence).replace(
             /___/g,
@@ -426,23 +426,23 @@ const HiSessionUI = (() => {
         );
     }
 
-    /** Keyboard navigation giữa các ô fill */
+    /** Keyboard navigation giá»¯a cÃ¡c Ã´ fill */
     function _bindFillInputs() {
         const inputs = document.querySelectorAll('[data-fill-index]');
         inputs.forEach((input, idx) => {
-            // Auto-advance khi nhập ký tự
+            // Auto-advance khi nháº­p kÃ½ tá»±
             input.addEventListener('input', (e) => {
                 const val = e.target.value;
-                // Chỉ giữ ký tự cuối nếu user paste nhiều chữ
+                // Chá»‰ giá»¯ kÃ½ tá»± cuá»‘i náº¿u user paste nhiá»u chá»¯
                 if (val.length > 1) {
-                    // Điền cascade từ vị trí hiện tại
+                    // Äiá»n cascade tá»« vá»‹ trÃ­ hiá»‡n táº¡i
                     const chars = val.toUpperCase().split('');
                     inputs.forEach((inp, i) => {
                         if (i >= idx && chars[i - idx] !== undefined) {
                             inp.value = chars[i - idx];
                         }
                     });
-                    // Focus vào ô tiếp theo sau paste
+                    // Focus vÃ o Ã´ tiáº¿p theo sau paste
                     const nextIdx = Math.min(idx + chars.length, inputs.length - 1);
                     inputs[nextIdx]?.focus();
                 } else if (val.length === 1 && idx < inputs.length - 1) {
@@ -450,32 +450,32 @@ const HiSessionUI = (() => {
                 }
             });
 
-            // Backspace → về ô trước
+            // Backspace â†’ vá» Ã´ trÆ°á»›c
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.value && idx > 0) {
                     inputs[idx - 1].focus();
                 }
-                // Enter → kiểm tra
+                // Enter â†’ kiá»ƒm tra
                 if (e.key === 'Enter') {
                     _onFillCheck();
                 }
             });
         });
 
-        // Auto-focus ô đầu tiên
+        // Auto-focus Ã´ Ä‘áº§u tiÃªn
         inputs[0]?.focus();
     }
 
-    /** Kiểm tra đáp án fill-in-blank */
+    /** Kiá»ƒm tra Ä‘Ã¡p Ã¡n fill-in-blank */
     function _onFillCheck() {
         if (_isShowingFeedback) return;
         _isShowingFeedback = true;
 
-        // Thu thập các chữ cái đã nhập
+        // Thu tháº­p cÃ¡c chá»¯ cÃ¡i Ä‘Ã£ nháº­p
         const inputs  = document.querySelectorAll('[data-fill-index]');
         const typedLetters = Array.from(inputs).map(i => i.value || '_');
 
-        // Ghép lại đáp án, chèn dấu cách đúng vị trí theo answer gốc
+        // GhÃ©p láº¡i Ä‘Ã¡p Ã¡n, chÃ¨n dáº¥u cÃ¡ch Ä‘Ãºng vá»‹ trÃ­ theo answer gá»‘c
         const item = HiSession.getCurrentItem();
         const answer = item?.exerciseData?.answer || '';
         let letterIdx = 0;
@@ -486,13 +486,13 @@ const HiSessionUI = (() => {
 
         const result  = HiSession.submitAnswer(typed);
 
-        // Visual feedback trên các ô
+        // Visual feedback trÃªn cÃ¡c Ã´
         inputs.forEach((inp, i) => {
             if (result.correct) {
                 inp.className = CSS.fillInput + ' border-green-500 bg-green-50';
             } else {
                 inp.className = CSS.fillInput + ' border-error bg-error-container/20';
-                // Điền đáp án đúng để user thấy
+                // Äiá»n Ä‘Ã¡p Ã¡n Ä‘Ãºng Ä‘á»ƒ user tháº¥y
                 const correct = result.correctAnswer.replace(/\s/g, '');
                 if (correct[i]) inp.value = correct[i].toUpperCase();
             }
@@ -503,12 +503,12 @@ const HiSessionUI = (() => {
             inputs.forEach(inp => { inp.disabled = true; });
             _showSkipFeedback(result.correctAnswer, () => render());
         } else {
-            _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
+            _showToast(result.correct, result.correct ? 'âœ“ ChÃ­nh xÃ¡c!' : `âœ— ÄÃ¡p Ã¡n: ${result.correctAnswer}`);
             setTimeout(() => render(), 1800);
         }
     }
 
-    /** Xin gợi ý AI cho fill exercise — dùng Groq (llama-3.1-8b-instant) */
+    /** Xin gá»£i Ã½ AI cho fill exercise â€” dÃ¹ng Groq (llama-3.1-8b-instant) */
     async function _getAIHint() {
         const hintEl = document.getElementById('ai-hint-container');
         if (!hintEl) return;
@@ -522,12 +522,12 @@ const HiSessionUI = (() => {
         const meaning  = ctx.meaning    || '';
         const sentence = ctx.sentence   || '';
 
-        // Hiện loading
+        // Hiá»‡n loading
         hintEl.classList.remove('hidden');
         hintEl.innerHTML = `
             <div class="flex items-center gap-2 text-primary text-xs">
                 <span class="material-symbols-outlined text-[16px] animate-spin">refresh</span>
-                <span>Groq AI đang tạo gợi ý...</span>
+                <span>Groq AI Ä‘ang táº¡o gá»£i Ã½...</span>
             </div>`;
 
         try {
@@ -550,7 +550,7 @@ Rules (STRICT):
 - Do NOT reveal the full English word
 - Be precise and helpful, not vague
 
-Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ cái. [1 câu gợi ý ngắn về nghĩa/ngữ cảnh]"`;
+Example format: "Báº¯t Ä‘áº§u báº±ng "${firstLetter}", gá»“m ${letters} chá»¯ cÃ¡i. [1 cÃ¢u gá»£i Ã½ ngáº¯n vá» nghÄ©a/ngá»¯ cáº£nh]"`;
 
             const res = await fetch('https://groq-proxy-sandy.vercel.app/api/groq', {
                 method: 'POST',
@@ -566,7 +566,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
             if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
             const json = await res.json();
             const hint = json.choices?.[0]?.message?.content?.trim();
-            if (!hint) throw new Error('Groq trả về rỗng.');
+            if (!hint) throw new Error('Groq tráº£ vá» rá»—ng.');
 
             hintEl.innerHTML = `
                 <div class="flex items-start gap-2">
@@ -578,14 +578,14 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
             hintEl.innerHTML = `
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-[14px] text-error">error</span>
-                    <span class="text-error text-xs">Không thể lấy gợi ý: ${_esc(err.message)}</span>
+                    <span class="text-error text-xs">KhÃ´ng thá»ƒ láº¥y gá»£i Ã½: ${_esc(err.message)}</span>
                 </div>`;
         }
     }
 
 
     // ----------------------------------------------------------
-    // RENDER: LISTEN (nghe và điền từ)
+    // RENDER: LISTEN (nghe vÃ  Ä‘iá»n tá»«)
     // ----------------------------------------------------------
 
     function _renderListen(item) {
@@ -593,54 +593,54 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
-            <div class="${CSS.label}">Bài tập: Luyện nghe</div>
+            <div class="${CSS.label}">BÃ i táº­p: Luyá»‡n nghe</div>
 
             <div class="${CSS.card} p-6 md:p-8 flex flex-col items-center min-h-[360px] md:min-h-[400px] justify-center">
 
                 <span class="text-on-surface-variant text-sm md:text-base mb-6 md:mb-10 block text-center">
-                    Nghe và nhập từ bạn nghe được
+                    Nghe vÃ  nháº­p tá»« báº¡n nghe Ä‘Æ°á»£c
                 </span>
 
-                <!-- Nút phát âm thanh -->
+                <!-- NÃºt phÃ¡t Ã¢m thanh -->
                 <button id="listen-play-btn"
                         onclick="HiSessionUI._onListenPlay()"
                         class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_8px_24px_rgba(0,129,192,0.3)] hover:scale-105 active:scale-95 transition-all mb-6 md:mb-10 group">
                     <span class="material-symbols-outlined icon-fill text-[40px] md:text-[48px] ml-1 md:ml-2">play_arrow</span>
                 </button>
 
-                <!-- Phiên âm hint (ẩn ban đầu, hiện sau lần nghe đầu) -->
+                <!-- PhiÃªn Ã¢m hint (áº©n ban Ä‘áº§u, hiá»‡n sau láº§n nghe Ä‘áº§u) -->
                 <p id="listen-phonetic" class="text-on-surface-variant font-mono text-sm mb-4 opacity-0 transition-opacity duration-500">
                     ${d.phonetic ? _esc(d.phonetic) : ''}
                 </p>
 
-                <!-- Input nhập từ -->
+                <!-- Input nháº­p tá»« -->
                 <div class="w-full max-w-md relative mb-6 md:mb-10">
                     <input id="listen-input"
                            type="text"
-                           placeholder="Nhập từ bằng tiếng Anh..."
+                           placeholder="Nháº­p tá»« báº±ng tiáº¿ng Anh..."
                            autocomplete="off" autocorrect="off" spellcheck="false"
                            onkeydown="if(event.key==='Enter') HiSessionUI._onListenCheck()"
                            class="w-full bg-[#F5F5F5] border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 rounded-t-lg px-4 md:px-6 py-3 md:py-4 font-body-lg text-center text-on-surface placeholder:text-outline-variant/70 transition-colors outline-none"/>
-                    <!-- Nút phát chậm -->
+                    <!-- NÃºt phÃ¡t cháº­m -->
                     <div class="absolute right-2 md:right-3 top-1/2 -translate-y-1/2">
                         <button onclick="HiSessionUI._onListenSlow()"
-                                title="Phát chậm"
+                                title="PhÃ¡t cháº­m"
                                 class="text-outline-variant hover:text-primary p-2 transition-colors rounded-full">
                             <span class="material-symbols-outlined text-[18px] md:text-[20px]">speed</span>
                         </button>
                     </div>
                 </div>
 
-                <!-- Nút kiểm tra -->
+                <!-- NÃºt kiá»ƒm tra -->
                 <div class="w-full max-w-md">
                     <button onclick="HiSessionUI._onListenCheck()" class="${CSS.btnPrimary}">
-                        Kiểm tra
+                        Kiá»ƒm tra
                     </button>
                 </div>
             </div>
         </div>`;
 
-        // Auto-phát âm khi bài hiển thị
+        // Auto-phÃ¡t Ã¢m khi bÃ i hiá»ƒn thá»‹
         setTimeout(() => _onListenPlay(), 400);
     }
 
@@ -653,20 +653,20 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         HiSession.speakWord(item.exerciseData.wordToSpeak, 0.85);
         _listenPlayCount++;
 
-        // Hiện phonetic sau lần nghe đầu tiên
+        // Hiá»‡n phonetic sau láº§n nghe Ä‘áº§u tiÃªn
         if (_listenPlayCount >= 1) {
             const phoneticEl = document.getElementById('listen-phonetic');
             if (phoneticEl) phoneticEl.style.opacity = '1';
         }
 
-        // Animate nút play
+        // Animate nÃºt play
         const btn = document.getElementById('listen-play-btn');
         if (btn) {
             btn.classList.add('scale-95', 'bg-primary/80');
             setTimeout(() => btn.classList.remove('scale-95', 'bg-primary/80'), 300);
         }
 
-        // Focus vào input sau khi phát
+        // Focus vÃ o input sau khi phÃ¡t
         setTimeout(() => document.getElementById('listen-input')?.focus(), 500);
     }
 
@@ -684,7 +684,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         const typed = inputEl.value.trim();
         if (!typed) {
             inputEl.classList.add('border-error');
-            inputEl.placeholder = 'Hãy nhập từ bạn nghe được...';
+            inputEl.placeholder = 'HÃ£y nháº­p tá»« báº¡n nghe Ä‘Æ°á»£c...';
             return;
         }
 
@@ -698,31 +698,31 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
             inputEl.className = inputEl.className + ' border-green-500 bg-green-50 text-green-700';
         } else {
             inputEl.className = inputEl.className + ' border-error bg-error-container/20 text-error';
-            inputEl.value = result.correctAnswer; // Hiện đáp án đúng
+            inputEl.value = result.correctAnswer; // Hiá»‡n Ä‘Ã¡p Ã¡n Ä‘Ãºng
         }
 
         if (result.skipped) {
             inputEl.disabled = true;
             _showSkipFeedback(result.correctAnswer, () => render());
         } else {
-            _showToast(result.correct, result.correct ? '✓ Chính xác!' : `✗ Đáp án: ${result.correctAnswer}`);
+            _showToast(result.correct, result.correct ? 'âœ“ ChÃ­nh xÃ¡c!' : `âœ— ÄÃ¡p Ã¡n: ${result.correctAnswer}`);
             setTimeout(() => render(), 1800);
         }
     }
 
     // ----------------------------------------------------------
-    // RENDER: COMPLETION (Hoàn thành phiên)
+    // RENDER: COMPLETION (HoÃ n thÃ nh phiÃªn)
     // ----------------------------------------------------------
 
     function _renderCompletion() {
         const summary = HiSession.endSession();
         const progress = HiSession.getProgress();
 
-        // Update progress bar lên 100%
+        // Update progress bar lÃªn 100%
         const bar = document.getElementById('learn-progress');
         if (bar) bar.style.width = '100%';
 
-        // Ẩn streak container
+        // áº¨n streak container
         document.getElementById('learning-streak-container')?.classList.add('hidden');
 
         _container.innerHTML = `
@@ -730,16 +730,16 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
             <div class="w-20 h-20 md:w-24 md:h-24 bg-primary-container text-on-primary-container rounded-full flex items-center justify-center mb-2 shadow-lg">
                 <span class="material-symbols-outlined text-[48px] md:text-[56px] icon-fill">check_circle</span>
             </div>
-            <h2 class="text-2xl md:text-4xl font-bold text-on-surface tracking-tight">Hoàn thành xuất sắc!</h2>
+            <h2 class="text-2xl md:text-4xl font-bold text-on-surface tracking-tight">HoÃ n thÃ nh xuáº¥t sáº¯c!</h2>
             <p class="text-on-surface-variant text-sm md:text-lg mb-2">
-                Bạn đã củng cố thành công
-                <span class="font-bold text-primary">${summary.wordsReviewed} từ vựng</span>
-                vào bộ nhớ.
+                Báº¡n Ä‘Ã£ cá»§ng cá»‘ thÃ nh cÃ´ng
+                <span class="font-bold text-primary">${summary.wordsReviewed} tá»« vá»±ng</span>
+                vÃ o bá»™ nhá»›.
             </p>
 
-            <!-- Tóm tắt kết quả -->
+            <!-- TÃ³m táº¯t káº¿t quáº£ -->
             <div class="w-full max-w-sm glass-card soft-shadow rounded-xl p-5 mt-2">
-                <h3 class="font-bold text-on-surface mb-4 text-left text-sm uppercase tracking-wider text-outline">Kết quả phiên học</h3>
+                <h3 class="font-bold text-on-surface mb-4 text-left text-sm uppercase tracking-wider text-outline">Káº¿t quáº£ phiÃªn há»c</h3>
                 <div class="flex flex-col gap-2">
                     ${summary.completedWords.map(w => `
                         <div class="flex items-center justify-between py-1 border-b border-outline-variant/10 last:border-0">
@@ -751,7 +751,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
                                 w.rating === 'good'      ? 'bg-secondary-container text-on-secondary-container' :
                                 'bg-tertiary-fixed text-on-tertiary-fixed'
                             }">
-                                ${w.skipped ? 'Bỏ qua' : w.isNew ? 'Từ mới' : w.rating === 'easy' ? 'Dễ' : w.rating === 'good' ? 'Tốt' : 'Khó'}
+                                ${w.skipped ? 'Bá» qua' : w.isNew ? 'Tá»« má»›i' : w.rating === 'easy' ? 'Dá»…' : w.rating === 'good' ? 'Tá»‘t' : 'KhÃ³'}
                             </span>
                         </div>
                     `).join('')}
@@ -760,7 +760,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
 
             <button onclick="navigateTo('dashboard')"
                     class="w-full md:w-auto bg-primary text-on-primary px-8 py-3.5 rounded-xl md:rounded-full font-bold shadow-md hover:-translate-y-1 transition-transform mt-4">
-                Về Trang chủ
+                Vá» Trang chá»§
             </button>
         </div>`;
     }
@@ -769,7 +769,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
     // UI HELPERS
     // ----------------------------------------------------------
 
-    /** Cập nhật progress bar */
+    /** Cáº­p nháº­t progress bar */
     function _updateProgress() {
         if (!HiSession.getCurrentItem && !HiSession.getProgress) return;
         const progress = HiSession.getProgress();
@@ -778,15 +778,15 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
     }
 
     /**
-     * Toast nhỏ hiện dưới exercise card (tự biến mất).
+     * Toast nhá» hiá»‡n dÆ°á»›i exercise card (tá»± biáº¿n máº¥t).
      * @param {boolean} correct
      * @param {string}  message
      */
     /**
-     * Toast nhỏ hiện dưới exercise card (tự biến mất).
+     * Toast nhá» hiá»‡n dÆ°á»›i exercise card (tá»± biáº¿n máº¥t).
      * @param {boolean} correct
      * @param {string}  message
-     * @param {'correct'|'wrong'|'skip'|'new'} [type] - override màu sắc
+     * @param {'correct'|'wrong'|'skip'|'new'} [type] - override mÃ u sáº¯c
      */
     function _showToast(correct, message, type = null) {
         document.getElementById('hi-toast')?.remove();
@@ -821,8 +821,8 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
     }
 
     /**
-     * Overlay skip đặc biệt (màu amber), hiện lên giữa màn hình.
-     * Gọi khi result.skipped === true.
+     * Overlay skip Ä‘áº·c biá»‡t (mÃ u amber), hiá»‡n lÃªn giá»¯a mÃ n hÃ¬nh.
+     * Gá»i khi result.skipped === true.
      * @param {string}   correctAnswer
      * @param {Function} onDone
      */
@@ -836,11 +836,11 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         overlay.innerHTML = `
             <div style="background:#fffbeb;border:2px solid #f59e0b;border-radius:1rem;padding:1.5rem 2rem;max-width:320px;width:calc(100% - 2rem);text-align:center;display:flex;flex-direction:column;align-items:center;gap:0.75rem;box-shadow:0 20px 60px rgba(0,0,0,0.15);">
                 <span class="material-symbols-outlined" style="color:#f59e0b;font-size:40px;">skip_next</span>
-                <p style="font-weight:700;color:#92400e;font-size:1rem;margin:0;">Đã bỏ qua từ này</p>
+                <p style="font-weight:700;color:#92400e;font-size:1rem;margin:0;">ÄÃ£ bá» qua tá»« nÃ y</p>
                 <p style="color:#b45309;font-size:0.875rem;margin:0;line-height:1.5;">
-                    Đáp án đúng: <strong style="color:#78350f;">${correctAnswer.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</strong>
+                    ÄÃ¡p Ã¡n Ä‘Ãºng: <strong style="color:#78350f;">${correctAnswer.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</strong>
                 </p>
-                <p style="color:#d97706;font-size:0.75rem;margin:0;">Từ sẽ được đưa về Lv.1 để ôn lại sớm hơn.</p>
+                <p style="color:#d97706;font-size:0.75rem;margin:0;">Tá»« sáº½ Ä‘Æ°á»£c Ä‘Æ°a vá» Lv.1 Ä‘á»ƒ Ã´n láº¡i sá»›m hÆ¡n.</p>
             </div>`;
         document.body.appendChild(overlay);
 
@@ -853,17 +853,17 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
     }
 
     /**
-     * Overlay feedback toàn màn hình (dùng cho flashcard).
+     * Overlay feedback toÃ n mÃ n hÃ¬nh (dÃ¹ng cho flashcard).
      * @param {boolean}  correct
      * @param {string}   message
-     * @param {Function} onDone   - callback sau khi ẩn
+     * @param {Function} onDone   - callback sau khi áº©n
      */
     function _showFeedbackOverlay(correct, message, onDone) {
         _showToast(correct, message);
         setTimeout(onDone, 1200);
     }
 
-    /** Escape HTML để tránh XSS */
+    /** Escape HTML Ä‘á»ƒ trÃ¡nh XSS */
     function _esc(str) {
         if (!str) return '';
         return String(str)
@@ -874,9 +874,9 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
     }
 
     /**
-     * Phát âm một từ/cụm từ tiếng Anh bằng Web Speech API.
-     * @param {string} word  - Từ cần phát âm
-     * @param {number} rate  - Tốc độ (0.5–1.0), mặc định 0.9
+     * PhÃ¡t Ã¢m má»™t tá»«/cá»¥m tá»« tiáº¿ng Anh báº±ng Web Speech API.
+     * @param {string} word  - Tá»« cáº§n phÃ¡t Ã¢m
+     * @param {number} rate  - Tá»‘c Ä‘á»™ (0.5â€“1.0), máº·c Ä‘á»‹nh 0.9
      */
     function _speak(word, rate = 0.9) {
         if (!word || !window.speechSynthesis) return;
@@ -885,7 +885,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         utter.lang = 'en-US';
         utter.rate = rate;
         utter.pitch = 1;
-        // Chọn giọng en-US nếu có
+        // Chá»n giá»ng en-US náº¿u cÃ³
         const voices = window.speechSynthesis.getVoices();
         const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
                        || voices.find(v => v.lang === 'en-US')
@@ -918,9 +918,9 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
 })();
 
 /**
- * HiSpeak - Hàm phát âm toàn cục (dùng cho topic-detail, vocabulary, v.v.)
- * @param {string} word  - Từ cần phát âm
- * @param {number} rate  - Tốc độ (0.5-1.0), mặc định 0.9
+ * HiSpeak - HÃ m phÃ¡t Ã¢m toÃ n cá»¥c (dÃ¹ng cho topic-detail, vocabulary, v.v.)
+ * @param {string} word  - Tá»« cáº§n phÃ¡t Ã¢m
+ * @param {number} rate  - Tá»‘c Ä‘á»™ (0.5-1.0), máº·c Ä‘á»‹nh 0.9
  */
 window.HiSpeak = function(word, rate = 0.9) {
     if (!word || !window.speechSynthesis) return;
@@ -929,42 +929,39 @@ window.HiSpeak = function(word, rate = 0.9) {
     utter.lang = 'en-US';
     utter.rate = rate;
     utter.pitch = 1;
-    // Tải voices (trình duyệt đôi khi cần gọi getVoices() sau sự kiện voiceschanged)
-    const trySpeak = () => {
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
-                       || voices.find(v => v.lang === 'en-US')
-                       || voices.find(v => v.lang.startsWith('en'));
-        if (preferred) utter.voice = preferred;
-        window.speechSynthesis.speak(utter);
-    };
-    if (window.speechSynthesis.getVoices().length > 0) {
-        trySpeak();
-    } else {
-        window.speechSynthesis.addEventListener('voiceschanged', trySpeak, { once: true });
-    }
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
+                   || voices.find(v => v.lang === 'en-US')
+                   || voices.find(v => v.lang.startsWith('en'));
+    if (preferred) utter.voice = preferred;
+    window.speechSynthesis.speak(utter);
 };
 
+if (window.speechSynthesis) {
+    window.speechSynthesis.getVoices();
+    window.addEventListener('pointerdown', () => window.speechSynthesis.getVoices(), { once: true });
+}
+
 
 // ============================================================
-// TÍCH HỢP VÀO A7.html - THAY THẾ CÁC HÀM CŨ
+// TÃCH Há»¢P VÃ€O A7.html - THAY THáº¾ CÃC HÃ€M CÅ¨
 // ============================================================
-// Dán đoạn này vào <script> cuối A7.html, thay thế toàn bộ
-// các hàm startSession, startSinglePractice, handleExerciseComplete,
+// DÃ¡n Ä‘oáº¡n nÃ y vÃ o <script> cuá»‘i A7.html, thay tháº¿ toÃ n bá»™
+// cÃ¡c hÃ m startSession, startSinglePractice, handleExerciseComplete,
 // nextExercise, flipCard, rateCard, selectMCQ, checkFillInBlank,
-// updateProgress, getAIHint cũ.
+// updateProgress, getAIHint cÅ©.
 // ============================================================
 
-// ── 1. Thêm id vào <main> trong page-learning ──────────────
-// Tìm dòng:
+// â”€â”€ 1. ThÃªm id vÃ o <main> trong page-learning â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// TÃ¬m dÃ²ng:
 //   <main class="pt-24 md:pt-[100px] ...">
-// Đổi thành:
+// Äá»•i thÃ nh:
 //   <main class="pt-24 md:pt-[100px] ..." id="learning-main">
 //     <div id="exercise-container"></div>
 //   </main>
-// Và XÓA 4 section cũ (exercise-0 → exercise-3) + section exercise-completed.
+// VÃ  XÃ“A 4 section cÅ© (exercise-0 â†’ exercise-3) + section exercise-completed.
 
-// ── 2. Thay thế startSession ────────────────────────────────
+// â”€â”€ 2. Thay tháº¿ startSession â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 window.startSession = async function() {
     document.getElementById('learning-progress-container').style.display = 'flex';
     document.getElementById('learning-streak-container').style.display  = 'flex';
@@ -975,17 +972,17 @@ window.startSession = async function() {
     try {
         HiSessionUI.init();
 
-        // Load từ từ Supabase
+        // Load tá»« tá»« Supabase
         const words = await HiDB.getWordsDueForReview(20);
 
         if (!words || words.length === 0) {
             document.getElementById('exercise-container').innerHTML = `
                 <div class="text-center mt-20 fade-in">
                     <span class="material-symbols-outlined text-[64px] text-outline mb-4 block">check_circle</span>
-                    <h2 class="text-2xl font-bold text-on-surface mb-2">Tất cả đã ôn xong!</h2>
-                    <p class="text-on-surface-variant mb-8">Không có từ nào cần ôn lúc này. Hãy quay lại sau.</p>
+                    <h2 class="text-2xl font-bold text-on-surface mb-2">Táº¥t cáº£ Ä‘Ã£ Ã´n xong!</h2>
+                    <p class="text-on-surface-variant mb-8">KhÃ´ng cÃ³ tá»« nÃ o cáº§n Ã´n lÃºc nÃ y. HÃ£y quay láº¡i sau.</p>
                     <button onclick="navigateTo('dashboard')" class="bg-primary text-on-primary px-8 py-3 rounded-full font-bold">
-                        Về Trang chủ
+                        Vá» Trang chá»§
                     </button>
                 </div>`;
             return;
@@ -994,16 +991,16 @@ window.startSession = async function() {
         HiSession.startSession(words);
         HiSessionUI.render();
 
-        // Cập nhật streak trên header
+        // Cáº­p nháº­t streak trÃªn header
         const stats = await HiDB.getDashboardStats();
         const streakEl = document.querySelector('#learning-streak-container span.font-bold');
         if (streakEl) streakEl.textContent = stats.streak;
 
     } catch (err) {
-        console.error('[startSession] Lỗi:', err);
+        console.error('[startSession] Lá»—i:', err);
         document.getElementById('exercise-container').innerHTML = `
             <div class="text-center mt-20 text-error">
-                <p class="font-bold">Lỗi khi tải phiên học.</p>
+                <p class="font-bold">Lá»—i khi táº£i phiÃªn há»c.</p>
                 <p class="text-sm mt-1">${err.message}</p>
             </div>`;
     }
