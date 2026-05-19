@@ -1,13 +1,13 @@
 // ============================================================
 // HI - SESSION ENGINE  |  sessionEngine.js
 // ============================================================
-// Thuật toán quản lý phiên ôn tập:
-//   - Mỗi phiên user phải trả lời ĐÚNG toàn bộ từ
-//   - Trả lời SAI → chuyển sang dạng bài khác cho từ đó
-//   - Trả lời ĐÚNG → từ được đánh dấu hoàn thành
-//   - Kết thúc khi tất cả từ được trả lời đúng
+// Thu?t to�n qu?n l� phi�n �n t?p:
+//   - M?i phi�n user ph?i tr? l?i ��NG to�n b? t?
+//   - Tr? l?i SAI ? chuy?n sang d?ng b�i kh�c cho t? d�
+//   - Tr? l?i ��NG ? t? du?c d�nh d?u ho�n th�nh
+//   - K?t th�c khi t?t c? t? du?c tr? l?i d�ng
 //
-// Phụ thuộc: dataLayer.js (HiDB phải load trước)
+// Ph? thu?c: dataLayer.js (HiDB ph?i load tru?c)
 // ============================================================
 
 const HiSession = (() => {
@@ -18,7 +18,7 @@ const HiSession = (() => {
 
     const EXERCISE_TYPES = ['flashcard', 'mcq', 'fill', 'listen'];
 
-    // Pool fallback cho MCQ khi session có ít hơn 4 từ
+    // Pool fallback cho MCQ khi session c� �t hon 4 t?
     const FALLBACK_DISTRACTORS = [
         'Sự kiên nhẫn',   'Trí tuệ nhân tạo', 'Cảm xúc sâu sắc',
         'Sức mạnh nội tâm','Niềm tin tuyệt đối','Hy vọng le lói',
@@ -28,15 +28,15 @@ const HiSession = (() => {
     ];
 
     // ----------------------------------------------------------
-    // SESSION STATE (reset mỗi lần startSession)
+    // SESSION STATE (reset m?i l?n startSession)
     // ----------------------------------------------------------
     let _state = {
-        allWords:    [],   // toàn bộ từ của phiên
-        queue:       [],   // hàng chờ các exercise item
-        queueIndex:  0,    // con trỏ vào queue
+        allWords:    [],   // to�n b? t? c?a phi�n
+        queue:       [],   // h�ng ch? c�c exercise item
+        queueIndex:  0,    // con tr? v�o queue
         completed:   [],   // [{ word, rating, attempts }]
         isActive:    false,
-        allowedType: null, // nếu set, mọi item chỉ dùng dạng này (single-practice mode)
+        allowedType: null, // n?u set, m?i item ch? d�ng d?ng n�y (single-practice mode)
     };
 
     // ----------------------------------------------------------
@@ -61,11 +61,11 @@ const HiSession = (() => {
     // ----------------------------------------------------------
 
     /**
-     * Chọn ngẫu nhiên dạng bài KHÁC với những dạng đã dùng cho từ này.
+     * Ch?n ng?u nhi�n d?ng b�i KH�C v?i nh?ng d?ng d� d�ng cho t? n�y.
      */
     function _pickNextType(usedTypes) {
         const available = EXERCISE_TYPES.filter(t => !usedTypes.includes(t));
-        // Nếu đã dùng hết 4 dạng thì reset (cycle lại từ đầu)
+        // N?u d� d�ng h?t 4 d?ng th� reset (cycle l?i t? d?u)
         if (available.length === 0) {
             return _randomFrom(EXERCISE_TYPES);
         }
@@ -77,18 +77,18 @@ const HiSession = (() => {
     // ----------------------------------------------------------
 
     /**
-     * Tạo dữ liệu bài tập cho từng dạng.
-     * @param {Object} word        - từ cần tạo bài
+     * T?o d? li?u b�i t?p cho t?ng d?ng.
+     * @param {Object} word        - t? c?n t?o b�i
      * @param {string} type        - 'flashcard' | 'mcq' | 'fill' | 'listen'
-     * @param {Array}  allWords    - toàn bộ từ trong phiên (để tạo MCQ distractor)
-     * @returns {Object}           - exerciseData tương ứng
+     * @param {Array}  allWords    - to�n b? t? trong phi�n (d? t?o MCQ distractor)
+     * @returns {Object}           - exerciseData tuong ?ng
      */
     function _generateExerciseData(word, type, allWords) {
         switch (type) {
 
-            // ── FLASHCARD ────────────────────────────────────────
-            // Front: nghĩa tiếng Việt → User nhớ lại từ tiếng Anh
-            // Back: từ tiếng Anh + phiên âm + nút Hard/Good/Easy
+            // -- FLASHCARD ----------------------------------------
+            // Front: nghia ti?ng Vi?t ? User nh? l?i t? ti?ng Anh
+            // Back: t? ti?ng Anh + phi�n �m + n�t Hard/Good/Easy
             case 'flashcard':
                 return {
                     frontLabel:  'Dịch sang tiếng Anh',
@@ -98,17 +98,17 @@ const HiSession = (() => {
                     phonetic:    word.phonetic || '',
                 };
 
-            // ── MCQ ──────────────────────────────────────────────
-            // Hiển thị từ tiếng Anh → chọn nghĩa tiếng Việt đúng
+            // -- MCQ ----------------------------------------------
+            // Hi?n th? t? ti?ng Anh ? ch?n nghia ti?ng Vi?t d�ng
             case 'mcq': {
                 const correctOption = { text: word.meaning, isCorrect: true };
 
-                // Lấy distractors từ các từ khác trong session
+                // L?y distractors t? c�c t? kh�c trong session
                 const others = allWords
                     .filter(w => w.wordId !== word.wordId)
                     .map(w => w.meaning);
 
-                // Pad bằng fallback pool nếu không đủ 3 distractors
+                // Pad b?ng fallback pool n?u kh�ng d? 3 distractors
                 const fallbackPool = FALLBACK_DISTRACTORS.filter(d => !others.includes(d));
                 while (others.length < 3) {
                     others.push(fallbackPool.shift() || 'Không xác định');
@@ -125,12 +125,12 @@ const HiSession = (() => {
                 };
             }
 
-            // ── FILL IN BLANK ────────────────────────────────────
-            // Hiển thị câu ví dụ có chỗ trống → điền từng chữ cái
+            // -- FILL IN BLANK ------------------------------------
+            // Hi?n th? c�u v� d? c� ch? tr?ng ? di?n t?ng ch? c�i
             case 'fill': {
                 let sentence = null;
                 if (word.exampleSentence) {
-                    // Thay từ trong câu bằng dấu gạch ngang (case-insensitive)
+                    // Thay t? trong c�u b?ng d?u g?ch ngang (case-insensitive)
                     sentence = word.exampleSentence.replace(
                         new RegExp(`\\b${_escapeRegex(word.word)}\\b`, 'gi'),
                         '___'
@@ -138,12 +138,12 @@ const HiSession = (() => {
                 }
                 return {
                     sentence,
-                    // Hiển thị khi không có câu ví dụ
+                    // Hi?n th? khi kh�ng c� c�u v� d?
                     meaningHint: `Điền từ tiếng Anh có nghĩa: "${word.meaning}"`,
                     answer:      word.word,
-                    letters:     word.word.replace(/\s/g, '').length, // bỏ khoảng trắng khi đếm
+                    letters:     word.word.replace(/\s/g, '').length, // b? kho?ng tr?ng khi d?m
                     hasSpaces:   word.word.includes(' '),
-                    // Dùng cho AI hint
+                    // D�ng cho AI hint
                     aiContext: {
                         sentence:   word.exampleSentence || '',
                         answer:     word.word,
@@ -152,8 +152,8 @@ const HiSession = (() => {
                 };
             }
 
-            // ── LISTEN ───────────────────────────────────────────
-            // Phát âm thanh → user nhập lại từ nghe được
+            // -- LISTEN -------------------------------------------
+            // Ph�t �m thanh ? user nh?p l?i t? nghe du?c
             case 'listen':
                 return {
                     wordToSpeak: word.word,
@@ -175,7 +175,7 @@ const HiSession = (() => {
     // QUEUE MANAGEMENT
     // ----------------------------------------------------------
 
-    /** Tạo queue item ban đầu cho một từ */
+    /** T?o queue item ban d?u cho m?t t? */
     function _createQueueItem(word, forcedType = null) {
         const exerciseType = forcedType || _randomFrom(EXERCISE_TYPES);
         return {
@@ -184,11 +184,11 @@ const HiSession = (() => {
             exerciseData: null,   // lazy-generated
             usedTypes:    [],
             attempts:     0,
-            failCount:    0,      // số lần sai trong phiên này (để skip khi >= 3)
+            failCount:    0,      // s? l?n sai trong phi�n n�y (d? skip khi >= 3)
         };
     }
 
-    /** Generate exerciseData nếu chưa có (lazy) */
+    /** Generate exerciseData n?u chua c� (lazy) */
     function _ensureExerciseData(item) {
         if (!item.exerciseData) {
             item.exerciseData = _generateExerciseData(
@@ -200,13 +200,13 @@ const HiSession = (() => {
     }
 
     // ----------------------------------------------------------
-    // PUBLIC: KHỞI TẠO PHIÊN
+    // PUBLIC: KH?I T?O PHI�N
     // ----------------------------------------------------------
 
     /**
-     * Bắt đầu phiên ôn tập với danh sách từ.
-     * @param {Array} words - từ HiDB.getWordsDueForReview()
-     *   Mỗi phần tử: { wordId, word, phonetic, meaning, exampleSentence, level, ... }
+     * B?t d?u phi�n �n t?p v?i danh s�ch t?.
+     * @param {Array} words - t? HiDB.getWordsDueForReview()
+     *   M?i ph?n t?: { wordId, word, phonetic, meaning, exampleSentence, level, ... }
      */
     function startSession(words, allowedType = null) {
         if (!words || words.length === 0) {
@@ -219,21 +219,21 @@ const HiSession = (() => {
             queueIndex:  0,
             completed:   [],
             isActive:    true,
-            allowedType, // giữ lại để dùng khi trả lời sai
+            allowedType, // gi? l?i d? d�ng khi tr? l?i sai
         };
 
-        // Lazy-generate exercise data cho item đầu tiên ngay lập tức
+        // Lazy-generate exercise data cho item d?u ti�n ngay l?p t?c
         _ensureExerciseData(_state.queue[0]);
 
-        console.log(`[HiSession] ✅ Phiên bắt đầu với ${words.length} từ.`);
+        console.log(`[HiSession] Phiên bắt đầu với ${words.length} từ.`);
     }
 
     // ----------------------------------------------------------
-    // PUBLIC: ĐỌC STATE
+    // PUBLIC: �?C STATE
     // ----------------------------------------------------------
 
     /**
-     * Lấy exercise item hiện tại.
+     * L?y exercise item hi?n t?i.
      * @returns {{ word, exerciseType, exerciseData, attempts } | null}
      */
     function getCurrentItem() {
@@ -245,7 +245,7 @@ const HiSession = (() => {
     }
 
     /**
-     * Lấy tiến độ phiên học.
+     * L?y ti?n d? phi�n h?c.
      * @returns {{ completed, total, percent, queueRemaining }}
      */
     function getProgress() {
@@ -259,26 +259,26 @@ const HiSession = (() => {
         };
     }
 
-    /** Kiểm tra phiên đã hoàn thành chưa. */
+    /** Ki?m tra phi�n d� ho�n th�nh chua. */
     function isComplete() {
         return _state.isActive &&
                _state.completed.length >= _state.allWords.length;
     }
 
-    /** Lấy danh sách từ đã hoàn thành (để hiển thị kết quả). */
+    /** L?y danh s�ch t? d� ho�n th�nh (d? hi?n th? k?t qu?). */
     function getCompletedWords() {
         return [..._state.completed];
     }
 
     // ----------------------------------------------------------
-    // PUBLIC: SUBMIT ĐÁP ÁN
+    // PUBLIC: SUBMIT ��P �N
     // ----------------------------------------------------------
 
     /**
-     * Kiểm tra đáp án cho MCQ, Fill-in-blank, Listen.
-     * @param {string|number} userAnswer - đáp án của user
-     *   - MCQ: index của option được chọn (0–3)
-     *   - Fill/Listen: chuỗi ký tự nhập
+     * Ki?m tra d�p �n cho MCQ, Fill-in-blank, Listen.
+     * @param {string|number} userAnswer - d�p �n c?a user
+     *   - MCQ: index c?a option du?c ch?n (0�3)
+     *   - Fill/Listen: chu?i k� t? nh?p
      * @returns {{ correct: boolean, correctAnswer: string, feedback: string }}
      */
     function submitAnswer(userAnswer) {
@@ -301,7 +301,7 @@ const HiSession = (() => {
             }
 
             case 'fill': {
-                // So sánh case-insensitive, bỏ qua khoảng trắng thừa
+                // So s�nh case-insensitive, b? qua kho?ng tr?ng th?a
                 const normalized = str => str.trim().toLowerCase().replace(/\s+/g, ' ');
                 correct = normalized(String(userAnswer)) === normalized(item.exerciseData.answer);
                 correctAnswer = item.exerciseData.answer;
@@ -323,7 +323,7 @@ const HiSession = (() => {
     }
 
     /**
-     * Đánh giá Flashcard.
+     * ��nh gi� Flashcard.
      * @param {'easy'|'good'|'hard'} rating
      * @returns {{ correct: boolean, correctAnswer: string, feedback: string, rating: string }}
      */
@@ -341,33 +341,33 @@ const HiSession = (() => {
     }
 
     // ----------------------------------------------------------
-    // PRIVATE: XỬ LÝ KẾT QUẢ
+    // PRIVATE: X? L� K?T QU?
     // ----------------------------------------------------------
 
     /**
-     * Xử lý kết quả đúng/sai với 2 logic đặc biệt:
+     * X? l� k?t qu? d�ng/sai v?i 2 logic d?c bi?t:
      *
-     *   [A] TỪ MỚI (word.level === 0 hoặc word.isNew === true):
-     *       Bất kể đúng hay sai, bất kể dạng bài nào → tự động hoàn thành,
-     *       gọi reviewWord với rating 'good' → lên lv1.
+     *   [A] T? M?I (word.level === 0 ho?c word.isNew === true):
+     *       B?t k? d�ng hay sai, b?t k? d?ng b�i n�o ? t? d?ng ho�n th�nh,
+     *       g?i reviewWord v?i rating 'good' ? l�n lv1.
      *
-     *   [B] SAI QUÁ 3 LẦN (failCount >= 3):
-     *       Cho phép skip để hoàn thành phiên,
-     *       gọi reviewWord với rating 'hard' và currentLevel bị ép về 1 → giữ lv1.
+     *   [B] SAI QU� 3 L?N (failCount >= 3):
+     *       Cho ph�p skip d? ho�n th�nh phi�n,
+     *       g?i reviewWord v?i rating 'hard' v� currentLevel b? �p v? 1 ? gi? lv1.
      *
-     *   ĐÚNG (từ thường) → đưa vào completed, gọi HiDB.reviewWord async.
-     *   SAI  (từ thường, chưa đến 3 lần) → đổi dạng bài, đẩy xuống cuối queue.
+     *   ��NG (t? thu?ng) ? dua v�o completed, g?i HiDB.reviewWord async.
+     *   SAI  (t? thu?ng, chua d?n 3 l?n) ? d?i d?ng b�i, d?y xu?ng cu?i queue.
      */
     function _processResult(item, correct, correctAnswer, explicitRating = null) {
 
-        // ── [A] TỪ MỚI (lv0): auto-advance bất kể đúng/sai ──────────────
-        // Từ mới không bị đẩy lại queue, nhưng trả về `correct` thật
-        // để UI vẫn hiển thị đúng/sai cho người dùng thấy.
+        // -- [A] T? M?I (lv0): auto-advance b?t k? d�ng/sai --------------
+        // T? m?i kh�ng b? d?y l?i queue, nhung tr? v? `correct` th?t
+        // d? UI v?n hi?n th? d�ng/sai cho ngu?i d�ng th?y.
         const isNewWord = (item.word.level === 0) || (item.word.isNew === true);
         if (isNewWord) {
             _state.completed.push({
                 word:     item.word,
-                rating:   'good',   // lv0 → lv1
+                rating:   'good',   // lv0 ? lv1
                 attempts: item.attempts,
                 isNew:    true,
             });
@@ -380,7 +380,7 @@ const HiSession = (() => {
             _state.queueIndex++;
 
             return {
-                correct:       correct,          // ← trả về kết quả THẬT
+                correct:       correct,          // ? tr? v? k?t qu? TH?T
                 correctAnswer,
                 feedback:      correct ? '✓ Chính xác!' : `✗ Đáp án: ${correctAnswer}`,
                 rating:        'good',
@@ -389,12 +389,12 @@ const HiSession = (() => {
             };
         }
 
-        // ── [B] SAI QUÁ 3 LẦN: cho phép skip, reset về lv1 ───────────────
+        // -- [B] SAI QU� 3 L?N: cho ph�p skip, reset v? lv1 ---------------
         if (!correct) {
             item.failCount = (item.failCount || 0) + 1;
 
             if (item.failCount >= 3) {
-                // Skip từ này — đẩy vào completed nhưng đánh dấu skipped
+                // Skip t? n�y � d?y v�o completed nhung d�nh d?u skipped
                 _state.completed.push({
                     word:     item.word,
                     rating:   'hard',
@@ -402,16 +402,16 @@ const HiSession = (() => {
                     skipped:  true,
                 });
 
-                // reviewWord với 'hard': calculateNextReview sẽ đưa về max(level-1, 1)
-                // Để ép thẳng về lv1 bất kể level hiện tại, ta override bằng cách
-                // trực tiếp upsert level=1 qua một wrapper — nhưng vì HiDB.reviewWord
-                // dùng calculateNextReview nên ta gọi với rating 'hard' nhiều lần sẽ
-                // dần về lv1. Thay vào đó ta tạo helper nội bộ gọi reviewWord với
-                // forceLevel=1 bằng cách truyền rating đặc biệt 'reset'.
-                // → Giải pháp đơn giản nhất: gọi HiDB.reviewWordToLevel nếu có,
-                //   fallback về hard (sẽ giảm 1 level, đủ để trừng phạt).
+                // reviewWord v?i 'hard': calculateNextReview s? dua v? max(level-1, 1)
+                // �? �p th?ng v? lv1 b?t k? level hi?n t?i, ta override b?ng c�ch
+                // tr?c ti?p upsert level=1 qua m?t wrapper � nhung v� HiDB.reviewWord
+                // d�ng calculateNextReview n�n ta g?i v?i rating 'hard' nhi?u l?n s?
+                // d?n v? lv1. Thay v�o d� ta t?o helper n?i b? g?i reviewWord v?i
+                // forceLevel=1 b?ng c�ch truy?n rating d?c bi?t 'reset'.
+                // ? Gi?i ph�p don gi?n nh?t: g?i HiDB.reviewWordToLevel n?u c�,
+                //   fallback v? hard (s? gi?m 1 level, d? d? tr?ng ph?t).
                 if (typeof HiDB !== 'undefined') {
-                    // Thử gọi reviewWordToLevel (nếu đã implement), fallback về hard
+                    // Th? g?i reviewWordToLevel (n?u d� implement), fallback v? hard
                     if (typeof HiDB.reviewWordToLevel === 'function') {
                         HiDB.reviewWordToLevel(item.word.wordId, 1)
                             .catch(err => console.error('[HiSession] reviewWordToLevel error:', err));
@@ -428,14 +428,14 @@ const HiSession = (() => {
                     correctAnswer,
                     feedback:      `⏭ Bỏ qua. Đáp án: ${correctAnswer}`,
                     rating:        'hard',
-                    wordCompleted: true,   // tính là "xong" để phiên có thể kết thúc
+                    wordCompleted: true,   // t�nh l� "xong" d? phi�n c� th? k?t th�c
                     skipped:       true,
                     failCount:     item.failCount,
                 };
             }
         }
 
-        // ── ĐÚNG (từ thường) ───────────────────────────────────────────────
+        // -- ��NG (t? thu?ng) -----------------------------------------------
         if (correct) {
             const rating = explicitRating || (
                 item.attempts === 1 ? 'easy' :
@@ -464,7 +464,7 @@ const HiSession = (() => {
             };
         }
 
-        // ── SAI (từ thường, failCount < 3): đổi dạng bài, đẩy xuống cuối ──
+        // -- SAI (t? thu?ng, failCount < 3): d?i d?ng b�i, d?y xu?ng cu?i --
         let nextType;
         if (_state.allowedType) {
             nextType = _state.allowedType;
@@ -493,22 +493,22 @@ const HiSession = (() => {
     // ----------------------------------------------------------
 
     /**
-     * Phát âm một từ tiếng Anh qua Web Speech API.
+     * Ph�t �m m?t t? ti?ng Anh qua Web Speech API.
      * @param {string} word
-     * @param {number} rate - tốc độ (0.5–1.5, mặc định 0.85)
+     * @param {number} rate - t?c d? (0.5�1.5, m?c d?nh 0.85)
      */
     function speakWord(word, rate = 0.85) {
         if (!window.speechSynthesis) {
             console.warn('[HiSession] Trình duyệt không hỗ trợ SpeechSynthesis.');
             return;
         }
-        window.speechSynthesis.cancel(); // Dừng bất kỳ âm thanh đang phát
+        window.speechSynthesis.cancel(); // D?ng b?t k? �m thanh dang ph�t
         const utterance = new SpeechSynthesisUtterance(word);
         utterance.lang  = 'en-US';
         utterance.rate  = rate;
         utterance.pitch = 1;
 
-        // Ưu tiên giọng native nếu có
+        // Uu ti�n gi?ng native n?u c�
         const voices = window.speechSynthesis.getVoices();
         const preferred = voices.find(v =>
             v.lang.startsWith('en') && (v.name.includes('Google') || v.localService)
@@ -519,11 +519,11 @@ const HiSession = (() => {
     }
 
     // ----------------------------------------------------------
-    // PUBLIC: KẾT THÚC PHIÊN
+    // PUBLIC: K?T TH�C PHI�N
     // ----------------------------------------------------------
 
     /**
-     * Đánh dấu phiên kết thúc và trả về tổng kết.
+     * ��nh d?u phi�n k?t th�c v� tr? v? t?ng k?t.
      * @returns {{ wordsReviewed: number, completedWords: Array }}
      */
     function endSession() {
@@ -548,7 +548,7 @@ const HiSession = (() => {
         speakWord,
         endSession,
 
-        // Expose EXERCISE_TYPES để sessionUI dùng
+        // Expose EXERCISE_TYPES d? sessionUI d�ng
         EXERCISE_TYPES,
     };
 
