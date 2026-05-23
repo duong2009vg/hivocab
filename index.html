@@ -4,6 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Hi - Master Vocabulary</title>
+<link rel="icon" type="image/svg+xml" href="logo.svg"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -114,6 +115,9 @@ tailwind.config={
 .glass-button { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.2s ease-in-out; }
 .glass-button:hover { background: rgba(255, 255, 255, 0.25); }
 .glass-card-hero { background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255, 255, 255, 0.1); }
+.brand-logo { display:block; width:auto; height:38px; }
+.brand-logo-sm { display:block; width:auto; height:30px; }
+.brand-logo-hero { display:block; width:auto; height:42px; }
 
 /* TÙY CHỈNH DARK MODE TOÀN CẦU */
 html.dark body { background-color: #0f172a; color: #f8fafc; }
@@ -270,7 +274,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <!-- ==================== UI DÙNG CHUNG (SIDEBAR / HEADER / BOTTOM NAV) ==================== -->
 <nav id="main-sidebar" class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-6 bg-surface/80 backdrop-blur-xl border-r border-outline-variant/20 shadow-sm z-50" style="display: none;">
     <div class="mb-lg shrink-0">
-        <div class="font-headline-md text-headline-md font-bold text-primary">Hi</div>
+        <a onclick="window.navigateTo('dashboard')" class="inline-flex cursor-pointer" aria-label="Hi - Trang chu"><img class="brand-logo" src="logo-mark.svg" alt="Hi"/></a>
         <div class="mt-md flex items-center gap-sm p-sm rounded-lg hover:bg-primary-container/10 transition-all duration-200 cursor-pointer">
             <div id="profile-avatar-container" class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center"><span class="material-symbols-outlined text-outline">person</span></div>
             <div><div id="profile-name" class="font-label-sm text-label-sm text-on-surface truncate max-w-[140px]">Hi Learner</div><div id="profile-email" class="text-on-surface-variant text-[12px] truncate max-w-[140px]">Vui lòng đăng nhập</div></div>
@@ -291,7 +295,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <header id="main-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 justify-between items-center" style="display: none;">
-    <div id="mobile-header-title" class="font-headline-md text-xl font-bold text-primary">Hi</div>
+    <div id="mobile-header-title"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></div>
     <div class="relative">
         <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform" aria-label="Hồ sơ"><span class="material-symbols-outlined text-outline text-sm">person</span></button>
         <!-- Mobile profile dropdown -->
@@ -330,7 +334,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
         <div class="absolute inset-0 bg-gradient-to-r from-[#1a1c2c]/60 to-transparent w-full lg:w-1/2"></div>
     </div>
     <header class="relative z-20 flex items-center justify-between mx-auto w-full max-w-7xl">
-        <div class="flex-shrink-0 flex items-center"><a class="text-white text-3xl font-medium tracking-tight cursor-pointer" onclick="window.navigateTo('landing')">Hi</a></div>
+        <div class="flex-shrink-0 flex items-center"><a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-hero" src="logo-mark-white.svg" alt="Hi"/></a></div>
         <nav class="hidden lg:flex items-center space-x-1 glass-nav rounded-full px-2 py-1.5">
             <a class="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onclick="navigateTo('features')">Tính năng</a><div class="w-px h-4 bg-white/30 mx-1"></div>
             <a class="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onclick="navigateTo('reviews')">Đánh giá</a><div class="w-px h-4 bg-white/30 mx-1"></div>
@@ -376,7 +380,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <div id="page-features" class="page">
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
     <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
-        <a class="text-primary text-2xl md:text-3xl font-bold tracking-tight cursor-pointer" onclick="window.navigateTo('landing')">Hi</a>
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
         <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
     </div>
 </header>
@@ -398,7 +402,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <div id="page-reviews" class="page">
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
     <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
-        <a class="text-primary text-2xl md:text-3xl font-bold tracking-tight cursor-pointer" onclick="window.navigateTo('landing')">Hi</a>
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
         <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
     </div>
 </header>
@@ -425,7 +429,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <div id="page-faq" class="page">
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
     <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
-        <a class="text-primary text-2xl md:text-3xl font-bold tracking-tight cursor-pointer" onclick="window.navigateTo('landing')">Hi</a>
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
         <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
     </div>
 </header>
@@ -439,7 +443,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <div id="page-support" class="page">
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
     <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
-        <a class="text-primary text-2xl md:text-3xl font-bold tracking-tight cursor-pointer" onclick="window.navigateTo('landing')">Hi</a>
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
         <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
     </div>
 </header>
@@ -470,7 +474,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <main class="relative z-10 w-full min-h-screen flex items-center justify-center px-6 md:px-md bg-gradient-to-br from-[#1a1c2c] via-[#3a4a6b] to-[#7d87a8]">
 <div class="w-full max-w-md bg-surface/80 backdrop-blur-[24px] p-8 md:p-xl rounded-[24px] soft-shadow border border-white/50 fade-in">
 <div class="text-center mb-8 md:mb-lg">
-<h1 class="font-headline-lg text-4xl md:text-headline-lg text-primary tracking-tight mb-2">Hi</h1>
+<img class="brand-logo mx-auto mb-3" src="logo-mark.svg" alt="Hi"/>
 <h2 class="font-headline-md text-xl md:text-headline-md text-on-surface">Chào mừng trở lại!</h2>
 <p class="font-body-md text-sm md:text-body-md text-on-surface-variant mt-2">Vui lòng đăng nhập để tiếp tục</p>
 </div>
@@ -597,7 +601,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <!-- Sub Sidebar dùng riêng cho Chi tiết chủ đề -->
 <nav id="sub-sidebar" class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-6 bg-surface/80 backdrop-blur-xl border-r border-outline-variant/20 shadow-sm z-50">
     <div class="mb-lg shrink-0">
-        <h1 class="font-headline-lg text-headline-lg font-bold text-primary">Hi</h1>
+        <img class="brand-logo" src="logo-mark.svg" alt="Hi"/>
         <p class="text-on-surface-variant mt-sm">Chủ đề hiện tại</p>
         <p id="sub-sidebar-topic-name" class="font-body-lg font-bold text-on-surface mt-xs line-clamp-2">—</p>
     </div>
@@ -652,7 +656,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <!-- Sidebar bên trái (desktop) -->
 <nav class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-6 bg-surface/80 backdrop-blur-xl border-r border-outline-variant/20 shadow-sm z-50">
     <div class="mb-lg shrink-0">
-        <h1 class="font-headline-lg text-headline-lg font-bold text-primary">Hi</h1>
+        <img class="brand-logo" src="logo-mark.svg" alt="Hi"/>
         <p id="ld-sidebar-topic" class="text-on-surface-variant mt-sm">—</p>
         <p id="ld-sidebar-lesson" class="font-body-lg font-bold text-on-surface mt-xs">Lesson 1</p>
     </div>
@@ -1282,11 +1286,12 @@ window.navigateTo = function(page, preserveHash = false){
         const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Bài tập', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
         const titleEl = document.getElementById('mobile-header-title');
         if(titleEl) {
-            titleEl.innerText = titles[page];
             if(page === 'dashboard') {
-                titleEl.className = "font-headline-md text-2xl font-bold text-primary tracking-tight";
+                titleEl.className = "";
+                titleEl.innerHTML = '<img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/>';
             } else {
                 titleEl.className = "font-headline-md text-xl font-bold text-on-surface truncate";
+                titleEl.textContent = titles[page];
             }
         }
     }
