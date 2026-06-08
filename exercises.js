@@ -39,6 +39,85 @@ const HiExercise = (() => {
         return a;
     }
 
+    function _escapeRegex(str) {
+        return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function _splitAnswerParts(answer) {
+        return String(answer || '').trim().split(/\s+/).filter(Boolean);
+    }
+
+    function _buildBlankPlaceholder(answer) {
+        return _splitAnswerParts(answer)
+            .map(part => '_'.repeat(part.length))
+            .join(' ');
+    }
+
+    function _getAnswerPartForms(part) {
+        const word = String(part || '').trim();
+        if (!word) return [];
+
+        const forms = new Set([word]);
+        if (!/^[A-Za-z]+$/.test(word)) return Array.from(forms);
+
+        const lower = word.toLowerCase();
+        forms.add(lower);
+        forms.add(`${lower}s`);
+        forms.add(`${lower}es`);
+        forms.add(`${lower}ed`);
+        forms.add(`${lower}ing`);
+
+        if (lower.endsWith('e')) {
+            forms.add(`${lower}d`);
+            forms.add(`${lower.slice(0, -1)}ing`);
+        }
+
+        if (/[^aeiou]y$/.test(lower)) {
+            forms.add(`${lower.slice(0, -1)}ies`);
+            forms.add(`${lower.slice(0, -1)}ied`);
+        }
+
+        if (/[aeiou][^aeiouwxy]$/.test(lower)) {
+            forms.add(`${lower}${lower.slice(-1)}ed`);
+            forms.add(`${lower}${lower.slice(-1)}ing`);
+        }
+
+        return Array.from(forms).sort((a, b) => b.length - a.length);
+    }
+
+    function _buildAnswerPhraseRegex(answer) {
+        const parts = _splitAnswerParts(answer);
+        if (!parts.length) return null;
+
+        const phrase = parts
+            .map(part => `(?:${_getAnswerPartForms(part).map(_escapeRegex).join('|')})`)
+            .join('\\s+');
+        return new RegExp(`(^|[^\\p{L}\\p{N}_])(${phrase})(?=$|[^\\p{L}\\p{N}_])`, 'iu');
+    }
+
+    function _blankAnswerInSentence(sentence, answer) {
+        const phraseRegex = _buildAnswerPhraseRegex(answer);
+        if (!phraseRegex) return null;
+
+        let matchedAnswer = null;
+        const source = String(sentence || '');
+        if (!phraseRegex.test(source)) return null;
+
+        phraseRegex.lastIndex = 0;
+        const blankedSentence = source.replace(phraseRegex, (match, prefix, matched) => {
+            matchedAnswer = matched;
+            return `${prefix}${_buildBlankPlaceholder(matched)}`;
+        });
+
+        if (!matchedAnswer) return null;
+
+        return {
+            sentence: blankedSentence,
+            answer: matchedAnswer,
+            placeholder: _buildBlankPlaceholder(matchedAnswer),
+        };
+    }
+
     // ── Tạo câu hỏi từ mảng words ─────────────────────────────
     /**
      * @param {Array}  words
@@ -88,14 +167,14 @@ const HiExercise = (() => {
             } else if (type === 'fill_blank') {
                 const sentence = w.example_sentence || w.exampleSentence || '';
                 if (!sentence) return;
-                const wordRegex = new RegExp(`\\b${w.word}\\b`, 'i');
-                if (!wordRegex.test(sentence)) return;
-                const blanked = sentence.replace(wordRegex, '___');
+                const blanked = _blankAnswerInSentence(sentence, w.word);
+                if (!blanked) return;
                 questions.push({
                     type:   'fill_blank',
-                    prompt: `Điền từ thích hợp vào chỗ trống:<br><em class="text-on-surface">"${blanked}"</em>`,
+                    prompt: `Điền từ thích hợp vào chỗ trống:<br><em class="text-on-surface">"${blanked.sentence}"</em>`,
                     hint:   w.meaning || '',
-                    answer: w.word.toLowerCase().trim(),
+                    answer: blanked.answer.toLowerCase().trim(),
+                    baseAnswer: w.word.toLowerCase().trim(),
                     word:   w,
                 });
             }

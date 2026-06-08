@@ -129,24 +129,32 @@ const HiSession = (() => {
             // Hi?n th? c�u v� d? c� ch? tr?ng ? di?n t?ng ch? c�i
             case 'fill': {
                 let sentence = null;
-                const blankPlaceholder = _buildBlankPlaceholder(word.word);
+                let answerText = word.word;
+                let blankPlaceholder = _buildBlankPlaceholder(answerText);
                 if (word.exampleSentence) {
                     // Thay t? trong c�u b?ng d?u g?ch ngang (case-insensitive)
-                    sentence = _blankAnswerInSentence(word.exampleSentence, word.word, blankPlaceholder);
+                    const blanked = _blankAnswerInSentence(word.exampleSentence, word.word);
+                    if (blanked) {
+                        sentence = blanked.sentence;
+                        answerText = blanked.answer;
+                        blankPlaceholder = blanked.placeholder;
+                    }
                 }
                 return {
                     sentence,
                     blankPlaceholder,
                     // Hi?n th? khi kh�ng c� c�u v� d?
                     meaningHint: `Điền từ tiếng Anh có nghĩa: "${word.meaning}"`,
-                    answer:      word.word,
-                    letters:     _countAnswerLetters(word.word),
-                    answerParts: _splitAnswerParts(word.word),
-                    hasSpaces:   /\s/.test(word.word.trim()),
+                    answer:      answerText,
+                    baseAnswer:  word.word,
+                    letters:     _countAnswerLetters(answerText),
+                    answerParts: _splitAnswerParts(answerText),
+                    hasSpaces:   /\s/.test(answerText.trim()),
                     // D�ng cho AI hint
                     aiContext: {
                         sentence:   word.exampleSentence || '',
-                        answer:     word.word,
+                        answer:     answerText,
+                        baseAnswer: word.word,
                         meaning:    word.meaning,
                         blankedSentence: sentence || '',
                         blankPlaceholder,
@@ -191,15 +199,65 @@ const HiSession = (() => {
         const parts = _splitAnswerParts(answer);
         if (!parts.length) return null;
 
-        const phrase = parts.map(_escapeRegex).join('\\s+');
+        const phrase = parts.map(_buildAnswerPartPattern).join('\\s+');
         return new RegExp(`(^|[^\\p{L}\\p{N}_])(${phrase})(?=$|[^\\p{L}\\p{N}_])`, 'giu');
     }
 
-    function _blankAnswerInSentence(sentence, answer, placeholder = _buildBlankPlaceholder(answer)) {
-        const phraseRegex = _buildAnswerPhraseRegex(answer);
-        if (!phraseRegex) return sentence;
+    function _buildAnswerPartPattern(part) {
+        const forms = _getAnswerPartForms(part);
+        return `(?:${forms.map(_escapeRegex).join('|')})`;
+    }
 
-        return String(sentence || '').replace(phraseRegex, (match, prefix) => `${prefix}${placeholder}`);
+    function _getAnswerPartForms(part) {
+        const word = String(part || '').trim();
+        if (!word) return [];
+
+        const forms = new Set([word]);
+        if (!/^[A-Za-z]+$/.test(word)) return Array.from(forms);
+
+        const lower = word.toLowerCase();
+        forms.add(lower);
+        forms.add(`${lower}s`);
+        forms.add(`${lower}es`);
+        forms.add(`${lower}ed`);
+        forms.add(`${lower}ing`);
+
+        if (lower.endsWith('e')) {
+            forms.add(`${lower}d`);
+            forms.add(`${lower.slice(0, -1)}ing`);
+        }
+
+        if (/[^aeiou]y$/.test(lower)) {
+            forms.add(`${lower.slice(0, -1)}ies`);
+            forms.add(`${lower.slice(0, -1)}ied`);
+        }
+
+        if (/[aeiou][^aeiouwxy]$/.test(lower)) {
+            forms.add(`${lower}${lower.slice(-1)}ed`);
+            forms.add(`${lower}${lower.slice(-1)}ing`);
+        }
+
+        return Array.from(forms).sort((a, b) => b.length - a.length);
+    }
+
+    function _blankAnswerInSentence(sentence, answer) {
+        const phraseRegex = _buildAnswerPhraseRegex(answer);
+        if (!phraseRegex) return null;
+
+        let matchedAnswer = null;
+        const source = String(sentence || '');
+        const blankedSentence = source.replace(phraseRegex, (match, prefix, matched) => {
+            matchedAnswer = matched;
+            return `${prefix}${_buildBlankPlaceholder(matched)}`;
+        });
+
+        if (!matchedAnswer) return null;
+
+        return {
+            sentence: blankedSentence,
+            answer: matchedAnswer,
+            placeholder: _buildBlankPlaceholder(matchedAnswer),
+        };
     }
 
     // ----------------------------------------------------------
