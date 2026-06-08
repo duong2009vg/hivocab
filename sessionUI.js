@@ -346,23 +346,25 @@ const HiSessionUI = (() => {
 
         // Tạo input boxes cho từng chữ cái, thêm dấu cách phân tách giữa các từ
         let fillIndex = 0;
-        const inputsHTML = d.answer.split('').map((char) => {
-            if (char === ' ') {
-                // Hiển thị khoảng cách nhìn thấy được giữa các từ
-                return `<span class="w-3 md:w-4 shrink-0" aria-hidden="true"></span>`;
-            }
-            const idx = fillIndex++;
-            return `<input type="text" maxlength="1"
-                   data-fill-index="${idx}"
-                   class="${CSS.fillInput}"
-                   autocomplete="off" autocorrect="off" spellcheck="false"/>`;
-        }).join('');
+        const answerParts = Array.isArray(d.answerParts) && d.answerParts.length
+            ? d.answerParts
+            : String(d.answer || '').trim().split(/\s+/).filter(Boolean);
+        const inputsHTML = answerParts.map((part) => `
+            <span class="inline-flex gap-1 md:gap-2 shrink-0" data-fill-word>
+                ${part.split('').map(() => {
+                    const idx = fillIndex++;
+                    return `<input type="text" maxlength="1"
+                           data-fill-index="${idx}"
+                           class="${CSS.fillInput}"
+                           autocomplete="off" autocorrect="off" spellcheck="false"/>`;
+                }).join('')}
+            </span>
+        `).join('<span class="w-3 md:w-5 shrink-0" aria-hidden="true"></span>');
 
-        const totalLetters = d.answer.replace(/\s/g, '').length;
-        // Nếu từ có nhiều chữ (> 8), chia thành 2 dòng bằng flex-wrap
+        const totalLetters = d.letters || answerParts.join('').length;
         const boxesClass = totalLetters > 8
-            ? 'flex gap-1 md:gap-2 justify-center flex-wrap max-w-full items-end'
-            : 'flex gap-1 md:gap-2 justify-center items-end';
+            ? 'flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end'
+            : 'flex gap-x-1 md:gap-x-2 justify-center items-end';
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
@@ -421,8 +423,11 @@ const HiSessionUI = (() => {
     /** Tạo HTML câu ví dụ với ___ được highlight */
     function _buildSentenceHTML(sentence) {
         return _esc(sentence).replace(
-            /___/g,
-            '<span class="inline-block border-b-2 border-outline-variant w-16 mx-1 align-bottom text-transparent">___</span>'
+            /_{2,}(?:\s+_{2,})*/g,
+            (placeholder) => placeholder.split(/\s+/).map(part => {
+                const width = Math.max(2.5, Math.min(part.length * 0.75, 7));
+                return `<span class="inline-block border-b-2 border-outline-variant mx-1 align-bottom text-transparent" style="width:${width}em">${part}</span>`;
+            }).join(' ')
         );
     }
 
@@ -436,7 +441,7 @@ const HiSessionUI = (() => {
                 // Chỉ giữ ký tự cuối nếu user paste nhiều chữ
                 if (val.length > 1) {
                     // Điền cascade từ vị trí hiện tại
-                    const chars = val.toUpperCase().split('');
+                    const chars = val.toUpperCase().replace(/\s+/g, '').split('');
                     inputs.forEach((inp, i) => {
                         if (i >= idx && chars[i - idx] !== undefined) {
                             inp.value = chars[i - idx];
@@ -532,10 +537,8 @@ const HiSessionUI = (() => {
 
         try {
             const letters      = word.replace(/\s/g, '').length;
-            const firstLetter  = word[0]?.toUpperCase() || '';
-            const blanked      = sentence
-                ? sentence.replace(new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'gi'), '_'.repeat(letters))
-                : '';
+            const firstLetter  = word.trim()[0]?.toUpperCase() || '';
+            const blanked      = ctx.blankedSentence || '';
 
             const prompt = `You are a Vietnamese vocabulary learning assistant. Give a CONCISE hint in Vietnamese for the English word the student needs to fill in.
 

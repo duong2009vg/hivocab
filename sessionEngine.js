@@ -129,25 +129,27 @@ const HiSession = (() => {
             // Hi?n th? c�u v� d? c� ch? tr?ng ? di?n t?ng ch? c�i
             case 'fill': {
                 let sentence = null;
+                const blankPlaceholder = _buildBlankPlaceholder(word.word);
                 if (word.exampleSentence) {
                     // Thay t? trong c�u b?ng d?u g?ch ngang (case-insensitive)
-                    sentence = word.exampleSentence.replace(
-                        new RegExp(`\\b${_escapeRegex(word.word)}\\b`, 'gi'),
-                        '___'
-                    );
+                    sentence = _blankAnswerInSentence(word.exampleSentence, word.word, blankPlaceholder);
                 }
                 return {
                     sentence,
+                    blankPlaceholder,
                     // Hi?n th? khi kh�ng c� c�u v� d?
                     meaningHint: `Điền từ tiếng Anh có nghĩa: "${word.meaning}"`,
                     answer:      word.word,
-                    letters:     word.word.replace(/\s/g, '').length, // b? kho?ng tr?ng khi d?m
-                    hasSpaces:   word.word.includes(' '),
+                    letters:     _countAnswerLetters(word.word),
+                    answerParts: _splitAnswerParts(word.word),
+                    hasSpaces:   /\s/.test(word.word.trim()),
                     // D�ng cho AI hint
                     aiContext: {
                         sentence:   word.exampleSentence || '',
                         answer:     word.word,
                         meaning:    word.meaning,
+                        blankedSentence: sentence || '',
+                        blankPlaceholder,
                     },
                 };
             }
@@ -169,6 +171,35 @@ const HiSession = (() => {
 
     function _escapeRegex(str) {
         return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function _splitAnswerParts(answer) {
+        return String(answer || '').trim().split(/\s+/).filter(Boolean);
+    }
+
+    function _countAnswerLetters(answer) {
+        return _splitAnswerParts(answer).join('').length;
+    }
+
+    function _buildBlankPlaceholder(answer) {
+        return _splitAnswerParts(answer)
+            .map(part => '_'.repeat(part.length))
+            .join(' ');
+    }
+
+    function _buildAnswerPhraseRegex(answer) {
+        const parts = _splitAnswerParts(answer);
+        if (!parts.length) return null;
+
+        const phrase = parts.map(_escapeRegex).join('\\s+');
+        return new RegExp(`(^|[^\\p{L}\\p{N}_])(${phrase})(?=$|[^\\p{L}\\p{N}_])`, 'giu');
+    }
+
+    function _blankAnswerInSentence(sentence, answer, placeholder = _buildBlankPlaceholder(answer)) {
+        const phraseRegex = _buildAnswerPhraseRegex(answer);
+        if (!phraseRegex) return sentence;
+
+        return String(sentence || '').replace(phraseRegex, (match, prefix) => `${prefix}${placeholder}`);
     }
 
     // ----------------------------------------------------------
