@@ -495,7 +495,9 @@ window.HiDB = (() => {
             .order('created_at', { ascending: true });
 
         const result = await queryWithLessonMeta;
-        if (!result.error) return { words: result.data || [], hasLessonMeta: true };
+        if (!result.error && (result.data || []).length > 0) {
+            return { words: result.data, hasLessonMeta: true };
+        }
 
         const LESSON_SIZE = 50;
         const fallback = await client
