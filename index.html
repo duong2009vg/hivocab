@@ -269,6 +269,18 @@ html.dark[data-theme="amber"] .text-on-primary { color: #2d1a00 !important; }
 
 /* Smooth transition khi đổi theme */
 body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color 0.3s ease; }
+
+/* Mobile game: maximize the playable area and prevent browser gestures over Unity. */
+@media (pointer: coarse) and (max-width: 1024px) {
+    #game-stage { gap: 0; }
+    #unity-wrap { border-radius: 0 !important; }
+    #unity-canvas {
+        height: calc(100dvh - 58px) !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        touch-action: none;
+    }
+}
 </style>
 </head>
 <body class="bg-background text-on-background font-hanken antialiased overflow-x-hidden transition-colors duration-300">

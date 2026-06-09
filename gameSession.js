@@ -5,7 +5,7 @@
 window.HiGameSession = (() => {
     const WORD_LIMIT = 20;
     const UNITY_ROOT = 'adventure-rabbit';
-    const UNITY_BUILD_VERSION = '20260609-disabled-compression-v1';
+    const UNITY_BUILD_VERSION = '20260610-mobile-controls-v1';
     const UNITY_LOADER = `${UNITY_ROOT}/Build/adventure-rabbit.loader.js?v=${UNITY_BUILD_VERSION}`;
 
     let _unityInstance = null;
@@ -330,12 +330,25 @@ window.HiGameSession = (() => {
         _unityInstance.SendMessage('HiWebGameBridge', 'RestartCurrentLevelFromWeb', '');
     }
 
-    function fullscreenUnity() {
-        if (_unityInstance?.SetFullscreen) {
-            _unityInstance.SetFullscreen(1);
-            return;
+    async function fullscreenUnity() {
+        const unityWrap = document.getElementById('unity-wrap');
+
+        try {
+            if (unityWrap?.requestFullscreen && !document.fullscreenElement) {
+                await unityWrap.requestFullscreen();
+            } else if (_unityInstance?.SetFullscreen) {
+                _unityInstance.SetFullscreen(1);
+            }
+
+            if (screen.orientation?.lock) {
+                await screen.orientation.lock('landscape');
+            }
+        } catch (err) {
+            console.warn('[HiGameSession] Fullscreen or landscape lock is unavailable:', err);
+            if (_unityInstance?.SetFullscreen && !document.fullscreenElement) {
+                _unityInstance.SetFullscreen(1);
+            }
         }
-        document.getElementById('unity-wrap')?.requestFullscreen?.();
     }
 
     async function backHome() {
