@@ -15,10 +15,46 @@ window.HiDB = (() => {
     // PRIVATE: Supabase client (khởi tạo qua init())
     // ----------------------------------------------------------
     let _supabase = null;
+    let _currentUser;
+    const CACHE_TTL_MS = 5 * 60 * 1000;
+    const _cache = new Map();
 
     function _getClient() {
         if (!_supabase) throw new Error('[HiDB] Chưa khởi tạo. Gọi HiDB.init() trước.');
         return _supabase;
+    }
+
+    function _cacheGet(key) {
+        const cached = _cache.get(key);
+        if (!cached) return null;
+        if (Date.now() - cached.savedAt > CACHE_TTL_MS) {
+            _cache.delete(key);
+            return null;
+        }
+        return cached.value;
+    }
+
+    function _cacheSet(key, value) {
+        _cache.set(key, { value, savedAt: Date.now() });
+        return value;
+    }
+
+    function clearCache(prefix = '') {
+        if (!prefix) {
+            _cache.clear();
+            return;
+        }
+        for (const key of _cache.keys()) {
+            if (key.startsWith(prefix)) _cache.delete(key);
+        }
+    }
+
+    function _invalidateVocabularyCache() {
+        clearCache('topics:');
+        clearCache('vocabulary:');
+        clearCache('lessons:');
+        clearCache('topic-words:');
+        clearCache('lesson-words:');
     }
 
 
@@ -107,8 +143,10 @@ window.HiDB = (() => {
     }
 
     async function getCurrentUser() {
-        const { data: { user } } = await _getClient().auth.getUser();
-        return user;
+        if (_currentUser !== undefined) return _currentUser;
+        const { data: { session } } = await _getClient().auth.getSession();
+        _currentUser = session?.user || null;
+        return _currentUser;
     }
 
     /**
@@ -128,6 +166,8 @@ window.HiDB = (() => {
     async function signOut() {
         const { error } = await _getClient().auth.signOut();
         if (error) throw error;
+        _currentUser = null;
+        clearCache();
     }
 
 
@@ -143,6 +183,24 @@ window.HiDB = (() => {
      */
     async function getTopics() {
         const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `topics:${user?.id || 'anon'}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
+        const { data: summaries, error: rpcError } = await _getClient()
+            .rpc('get_topic_summaries');
+
+        if (!rpcError) {
+            return _cacheSet(cacheKey, (summaries || []).map(topic => ({
+                id: topic.id,
+                name: topic.name,
+                icon: topic.icon,
+                category: normalizeTopicCategory(topic.category),
+                totalWords: Number(topic.total_words || 0),
+                progress: Number(topic.progress || 0),
+                createdAt: topic.created_at,
+            })));
+        }
 
         let query = _getClient()
             .from('topics')
@@ -168,7 +226,7 @@ window.HiDB = (() => {
         const { data, error } = await query;
         if (error) throw error;
 
-        return (data || []).map(topic => {
+        const topics = (data || []).map(topic => {
             const words = topic.words || [];
             const totalWords = words.length;
 
@@ -191,6 +249,7 @@ window.HiDB = (() => {
                 createdAt:  topic.created_at,
             };
         });
+        return _cacheSet(cacheKey, topics);
     }
 
     /**
@@ -213,6 +272,7 @@ window.HiDB = (() => {
             .single();
 
         if (error) throw error;
+        _invalidateVocabularyCache();
         return data;
     }
 
@@ -226,6 +286,7 @@ window.HiDB = (() => {
             .eq('id', topicId);
 
         if (error) throw error;
+        _invalidateVocabularyCache();
     }
 
 
@@ -241,6 +302,9 @@ window.HiDB = (() => {
      */
     async function getWordsInTopic(topicId) {
         const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `topic-words:${user?.id || 'anon'}:${topicId}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
 
         const { data, error } = await _getClient()
             .from('words')
@@ -257,7 +321,7 @@ window.HiDB = (() => {
 
         if (error) throw error;
 
-        return data.map(w => {
+        return _cacheSet(cacheKey, data.map(w => {
             // Lấy progress của user hiện tại (nếu có)
             const progress = (w.word_progress || [])[0] || null;
             return {
@@ -272,7 +336,7 @@ window.HiDB = (() => {
                 reviewCount:     progress?.review_count     ?? 0,
                 isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
             };
-        });
+        }));
     }
 
     /**
@@ -296,6 +360,7 @@ window.HiDB = (() => {
             .single();
 
         if (error) throw error;
+        _invalidateVocabularyCache();
         return data;
     }
 
@@ -309,6 +374,85 @@ window.HiDB = (() => {
             .eq('id', wordId);
 
         if (error) throw error;
+        _invalidateVocabularyCache();
+    }
+
+    async function getVocabularyPage(page = 1, pageSize = 50, search = '') {
+        const user = await getCurrentUser().catch(() => null);
+        const safePage = Math.max(1, Number(page) || 1);
+        const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 50));
+        const safeSearch = String(search || '').trim();
+        const cacheKey = `vocabulary:${user?.id || 'anon'}:${safePage}:${safePageSize}:${safeSearch.toLowerCase()}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
+        const { data: rpcRows, error: rpcError } = await _getClient().rpc('get_vocabulary_page', {
+            p_page: safePage,
+            p_page_size: safePageSize,
+            p_search: safeSearch,
+        });
+
+        if (!rpcError) {
+            const rows = rpcRows || [];
+            return _cacheSet(cacheKey, {
+                words: rows.map(row => ({
+                    id: row.id,
+                    topicId: row.topic_id,
+                    word: row.word,
+                    phonetic: row.phonetic,
+                    meaning: row.meaning,
+                    exampleSentence: row.example_sentence,
+                    topicName: row.topic_name,
+                    level: row.level ?? 0,
+                    nextReviewAt: row.next_review_at,
+                    lastReviewedAt: row.last_reviewed_at,
+                    reviewCount: row.review_count ?? 0,
+                })),
+                total: Number(rows[0]?.total_count || 0),
+                page: safePage,
+                pageSize: safePageSize,
+            });
+        }
+
+        const start = (safePage - 1) * safePageSize;
+        let query = _getClient()
+            .from('words')
+            .select(`
+                id, topic_id, word, phonetic, meaning, example_sentence,
+                topics!inner ( name ),
+                word_progress ( level, next_review_at, last_reviewed_at, review_count )
+            `, { count: 'exact' })
+            .order('created_at', { ascending: true })
+            .range(start, start + safePageSize - 1);
+
+        if (safeSearch) {
+            const escaped = safeSearch.replace(/[,%_()]/g, ' ').trim();
+            query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%`);
+        }
+
+        const { data, error, count } = await query;
+        if (error) throw error;
+        return _cacheSet(cacheKey, {
+            words: (data || []).map(row => {
+                const progress = (row.word_progress || [])[0] || null;
+                return {
+                    id: row.id,
+                    topicId: row.topic_id,
+                    word: row.word,
+                    phonetic: row.phonetic,
+                    meaning: row.meaning,
+                    exampleSentence: row.example_sentence,
+                    topicName: row.topics?.name || '',
+                    level: progress?.level ?? 0,
+                    nextReviewAt: progress?.next_review_at ?? null,
+                    lastReviewedAt: progress?.last_reviewed_at ?? null,
+                    reviewCount: progress?.review_count ?? 0,
+                };
+            }),
+            total: Number(count || 0),
+            page: safePage,
+            pageSize: safePageSize,
+        });
     }
 
     /**
@@ -316,17 +460,102 @@ window.HiDB = (() => {
      * @param {string} topicId
      * @returns {Promise<Array>} - [{ id, topicId, index, name, totalWords, progress, wordIds }]
      */
-    async function getLessonsInTopic(topicId) {
-        const LESSON_SIZE = 50;
-        const user = await getCurrentUser().catch(() => null);
+    async function getWordsForLessonQuery(topicId) {
+        const client = _getClient();
+        const queryWithLessonMeta = client
+            .from('words')
+            .select(`id, lesson_name, lesson_order, word_order, word_progress ( level, user_id )`)
+            .eq('topic_id', topicId)
+            .order('lesson_order', { ascending: true, nullsFirst: false })
+            .order('word_order', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
 
-        const { data: words, error } = await _getClient()
+        const result = await queryWithLessonMeta;
+        if (!result.error) return { words: result.data || [], hasLessonMeta: true };
+
+        const fallback = await client
             .from('words')
             .select(`id, word_progress ( level, user_id )`)
             .eq('topic_id', topicId)
             .order('created_at', { ascending: true });
 
-        if (error) throw error;
+        if (fallback.error) throw fallback.error;
+        return { words: fallback.data || [], hasLessonMeta: false };
+    }
+
+    async function getLessonWordsQuery(topicId, lessonIndex) {
+        const client = _getClient();
+        const queryWithLessonMeta = client
+            .from('words')
+            .select(`id, word, phonetic, meaning, example_sentence, lesson_name, lesson_order, word_order,
+                word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
+            .eq('topic_id', topicId)
+            .eq('lesson_order', lessonIndex)
+            .order('word_order', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+
+        const result = await queryWithLessonMeta;
+        if (!result.error) return { words: result.data || [], hasLessonMeta: true };
+
+        const LESSON_SIZE = 50;
+        const fallback = await client
+            .from('words')
+            .select(`id, word, phonetic, meaning, example_sentence,
+                word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
+            .eq('topic_id', topicId)
+            .order('created_at', { ascending: true })
+            .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
+
+        if (fallback.error) throw fallback.error;
+        return { words: fallback.data || [], hasLessonMeta: false };
+    }
+
+    async function getLessonsInTopic(topicId) {
+        const LESSON_SIZE = 50;
+        const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `lessons:${user?.id || 'anon'}:${topicId}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
+        const { words, hasLessonMeta } = await getWordsForLessonQuery(topicId);
+
+        const wordsWithNamedLessons = hasLessonMeta
+            ? (words || []).filter(w => w.lesson_name && w.lesson_order !== null && w.lesson_order !== undefined)
+            : [];
+
+        if (wordsWithNamedLessons.length > 0) {
+            const grouped = new Map();
+            for (const word of wordsWithNamedLessons) {
+                const key = Number(word.lesson_order);
+                if (!grouped.has(key)) {
+                    grouped.set(key, {
+                        name: word.lesson_name,
+                        words: [],
+                    });
+                }
+                grouped.get(key).words.push(word);
+            }
+
+            const namedLessons = Array.from(grouped.entries())
+                .sort(([a], [b]) => a - b)
+                .map(([lessonIndex, group]) => {
+                    const chunk = group.words;
+                    const totalLevel = user ? chunk.reduce((sum, w) => {
+                        const p = (w.word_progress || []).find(p => p.user_id === user.id);
+                        return sum + (p?.level ?? 0);
+                    }, 0) : 0;
+                    return {
+                        id:         `lesson-${topicId}-${lessonIndex}`,
+                        topicId,
+                        index:      lessonIndex,
+                        name:       group.name,
+                        totalWords: chunk.length,
+                        progress:   chunk.length > 0 ? Math.round((totalLevel / (chunk.length * 5)) * 100) : 0,
+                        wordIds:    chunk.map(w => w.id),
+                    };
+                });
+            return _cacheSet(cacheKey, namedLessons);
+        }
 
         const lessons = [];
         const allWords = words || [];
@@ -348,7 +577,7 @@ window.HiDB = (() => {
             });
             if (i + LESSON_SIZE >= allWords.length) break;
         }
-        return lessons;
+        return _cacheSet(cacheKey, lessons);
     }
 
     /**
@@ -358,20 +587,14 @@ window.HiDB = (() => {
      * @returns {Promise<Array>}
      */
     async function getWordsInLesson(topicId, lessonIndex) {
-        const LESSON_SIZE = 50;
         const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `lesson-words:${user?.id || 'anon'}:${topicId}:${lessonIndex}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
 
-        const { data, error } = await _getClient()
-            .from('words')
-            .select(`id, word, phonetic, meaning, example_sentence,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
-            .eq('topic_id', topicId)
-            .order('created_at', { ascending: true })
-            .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
+        const { words: data } = await getLessonWordsQuery(topicId, lessonIndex);
 
-        if (error) throw error;
-
-        return (data || []).map(w => {
+        return _cacheSet(cacheKey, (data || []).map(w => {
             const progress = (w.word_progress || [])[0] || null;
             return {
                 id:              w.id,
@@ -385,7 +608,7 @@ window.HiDB = (() => {
                 reviewCount:     progress?.review_count     ?? 0,
                 isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
             };
-        });
+        }));
     }
 
 
@@ -524,6 +747,7 @@ window.HiDB = (() => {
 
         // Cập nhật/tạo bản ghi phiên học hôm nay
         await _logStudySession();
+        _invalidateVocabularyCache();
 
         return {
             newLevel,
@@ -571,6 +795,7 @@ window.HiDB = (() => {
 
         if (error) throw error;
         await _logStudySession();
+        _invalidateVocabularyCache();
 
         return {
             newLevel,
@@ -901,7 +1126,11 @@ window.HiDB = (() => {
     return {
         onAuthStateChange: (callback) => {
             if (!_supabase) throw new Error('[HiDB] Chưa khởi tạo');
-            return _supabase.auth.onAuthStateChange(callback);
+            return _supabase.auth.onAuthStateChange((event, session) => {
+                _currentUser = session?.user || null;
+                clearCache();
+                callback(event, session);
+            });
         },
         // Setup
         init,
@@ -918,6 +1147,7 @@ window.HiDB = (() => {
 
         // Words
         getWordsInTopic,
+        getVocabularyPage,
         addWord,
         deleteWord,
         getLessonsInTopic,
@@ -929,6 +1159,7 @@ window.HiDB = (() => {
         reviewWordToLevel,      // ép từ về level cụ thể (dùng khi skip)
         calculateNextReview,    // export để test / debug
         getIntervalLabel,
+        clearCache,
 
         // Dashboard
         getDashboardStats,

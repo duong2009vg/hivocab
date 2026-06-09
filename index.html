@@ -2799,10 +2799,14 @@ document.getElementById('modal-create-topic')?.addEventListener('click', functio
 // VOCABULARY PAGE — Kho từ vựng động từ Supabase
 // ============================================================
 
-window._vocabAllWords   = null; // cache toàn bộ từ
-window._vocabFiltered   = null; // từ sau khi search
-window._vocabPage       = 1;    // trang hiện tại
-const VOCAB_PAGE_SIZE   = 50;   // số từ mỗi trang
+window._vocabAllWords   = null; // current server-side page
+window._vocabFiltered   = null;
+window._vocabTotal      = 0;
+window._vocabPage       = 1;
+window._vocabSearch     = '';
+window._vocabRequestId  = 0;
+window._vocabSearchTimer = null;
+const VOCAB_PAGE_SIZE   = 50;
 
 window._loadVocabularyPage = async function() {
     const listEl     = document.getElementById('vocab-list');
@@ -2817,16 +2821,21 @@ window._loadVocabularyPage = async function() {
     try {
         if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
 
-        const topics = await HiDB.getTopics();
-        const wordPromises = topics.map(t => HiDB.getWordsInTopic(t.id).then(ws => ws.map(w => ({ ...w, topicName: t.name }))));
-        const nested = await Promise.all(wordPromises);
-        const allWords = nested.flat();
+        const requestId = ++window._vocabRequestId;
+        const result = await HiDB.getVocabularyPage(
+            window._vocabPage,
+            VOCAB_PAGE_SIZE,
+            window._vocabSearch
+        );
+        if (requestId !== window._vocabRequestId) return;
 
-        window._vocabAllWords  = allWords;
-        window._vocabFiltered  = allWords;
-        window._vocabPage      = 1;
+        window._vocabAllWords  = result.words || [];
+        window._vocabFiltered  = result.words || [];
+        window._vocabTotal     = result.total || 0;
 
-        if (subtitleEl) subtitleEl.textContent = `${allWords.length} từ vựng đã lưu.`;
+        if (subtitleEl) {
+            subtitleEl.textContent = `${window._vocabTotal} từ vựng${window._vocabSearch ? ` khớp với "${window._vocabSearch}"` : ' đã lưu.'}`;
+        }
 
         window._renderVocabPage();
 
@@ -2846,13 +2855,13 @@ window._renderVocabPage = function() {
     if (!listEl) return;
 
     const words      = window._vocabFiltered || [];
-    const total      = words.length;
+    const total      = window._vocabTotal || 0;
     const totalPages = Math.max(1, Math.ceil(total / VOCAB_PAGE_SIZE));
     const page       = Math.min(window._vocabPage, totalPages);
     window._vocabPage = page;
 
     const start = (page - 1) * VOCAB_PAGE_SIZE;
-    const slice = words.slice(start, start + VOCAB_PAGE_SIZE);
+    const slice = words;
 
     if (total === 0) {
         listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
@@ -2938,23 +2947,19 @@ window._renderVocabPage = function() {
 };
 
 window._vocabGoPage = function(p) {
-    const total      = window._vocabFiltered?.length || 0;
+    const total      = window._vocabTotal || 0;
     const totalPages = Math.max(1, Math.ceil(total / VOCAB_PAGE_SIZE));
     window._vocabPage = Math.max(1, Math.min(p, totalPages));
-    window._renderVocabPage();
+    window._loadVocabularyPage();
 };
 
 window._filterVocabList = function() {
-    const q   = (document.getElementById('vocab-search')?.value || '').toLowerCase().trim();
-    const all = window._vocabAllWords || [];
-    const filtered = !q ? all : all.filter(w =>
-        w.word.toLowerCase().includes(q) || (w.meaning || '').toLowerCase().includes(q)
-    );
-    window._vocabFiltered = filtered;
-    window._vocabPage     = 1;
-    window._renderVocabPage();
-    const subtitleEl = document.getElementById('vocab-subtitle');
-    if (subtitleEl) subtitleEl.textContent = `${filtered.length} từ vựng${q ? ` khớp với "${q}"` : ' đã lưu.'}`;
+    clearTimeout(window._vocabSearchTimer);
+    window._vocabSearchTimer = setTimeout(() => {
+        window._vocabSearch = (document.getElementById('vocab-search')?.value || '').trim();
+        window._vocabPage = 1;
+        window._loadVocabularyPage();
+    }, 300);
 };
 
 
@@ -3577,6 +3582,9 @@ document.addEventListener("DOMContentLoaded", async () => {
             
             // CẬP NHẬT GIAO DIỆN PROFILE
             _updateProfileUI(user);
+            HiDB.getTopics().then(topics => {
+                window._allTopics = topics || [];
+            }).catch(err => console.warn('[prefetch topics]', err));
 
             if (window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=')) { history.replaceState(null, '', window.location.pathname + window.location.search); }
 
