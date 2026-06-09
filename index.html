@@ -288,6 +288,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
         <a onclick="navigateTo('topics')" id="nav-desktop-topics" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">grid_view</span><span>Chủ đề</span></a>
         <a onclick="navigateTo('vocabulary')" id="nav-desktop-vocabulary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">auto_stories</span><span>Kho từ vựng</span></a>
         <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">edit_note</span><span>Bài tập</span></a>
+        <a onclick="navigateTo('game')" id="nav-desktop-game" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">sports_esports</span><span>Game</span></a>
         <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">search</span><span>Tra từ</span></a>
     </div>
     <div class="mt-auto shrink-0 flex flex-col gap-base pt-md border-t border-outline-variant/20">
@@ -321,8 +322,8 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
         <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">home</span><span class="text-[9px] mt-0.5 font-semibold">Trang chủ</span></a>
         <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="text-[9px] mt-0.5 font-semibold">Chủ đề</span></a>
         <a onclick="navigateTo('exercises')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">edit_note</span><span class="text-[9px] mt-0.5 font-semibold">Bài tập</span></a>
+        <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
         <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
-        <a onclick="navigateTo('settings')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">settings</span><span class="text-[9px] mt-0.5 font-semibold">Cài đặt</span></a>
     </div>
 </nav>
 
@@ -813,6 +814,104 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </main>
 </div>
 
+<!-- ==================== PAGE: GAME ==================== -->
+<div id="page-game" class="page">
+<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+    <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
+        <header class="hidden lg:flex flex-col gap-1">
+            <h1 class="font-headline-lg text-headline-lg text-on-surface">Game</h1>
+            <p class="text-on-surface-variant">Chơi platformer, ăn xu, vượt quái và ôn từ vựng trong từng màn.</p>
+        </header>
+
+        <section id="game-home" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <button onclick="HiGameSession.loadLessonPicker()"
+                    class="text-left bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl border border-outline-variant/20 soft-shadow p-6 flex flex-col gap-4 hover:-translate-y-1 transition-all">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[28px]">map</span>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-on-surface">Phiêu lưu theo bài học</h2>
+                    <p class="text-sm text-on-surface-variant mt-1">Chọn chủ đề và lesson, sau đó vượt màn bằng từ trong bài đó.</p>
+                </div>
+                <div class="flex items-center gap-2 text-primary font-bold text-sm mt-auto">
+                    Chọn bài học <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </div>
+            </button>
+
+            <button onclick="HiGameSession.startReviewMode()"
+                    class="text-left bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl border border-outline-variant/20 soft-shadow p-6 flex flex-col gap-4 hover:-translate-y-1 transition-all">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-[28px]">history_edu</span>
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-on-surface">Ôn tập hôm nay</h2>
+                    <p class="text-sm text-on-surface-variant mt-1">Vào thẳng màn chơi với các từ đang đến hạn theo lịch SM-2.</p>
+                </div>
+                <div class="flex items-center gap-2 text-primary font-bold text-sm mt-auto">
+                    Bắt đầu chơi <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                </div>
+            </button>
+        </section>
+
+        <section id="game-lesson-picker" class="hidden bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl border border-outline-variant/20 soft-shadow p-5 md:p-6">
+            <div class="flex items-center justify-between gap-3 mb-5">
+                <div>
+                    <h2 class="text-lg font-bold text-on-surface">Chọn bài học</h2>
+                    <p class="text-sm text-on-surface-variant">Game sẽ dùng tối đa 20 từ trong lesson đã chọn.</p>
+                </div>
+                <button onclick="HiGameSession.backHome()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3">
+                <select id="game-topic-select" onchange="HiGameSession.loadLessonsForTopic(this.value)"
+                        class="rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
+                <select id="game-lesson-select"
+                        class="rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
+                <button onclick="HiGameSession.startSelectedLesson()" class="bg-primary text-on-primary rounded-xl px-5 py-3 font-bold">
+                    Chơi
+                </button>
+            </div>
+        </section>
+
+        <p id="game-status" class="text-sm text-on-surface-variant"></p>
+
+        <section id="game-stage" class="hidden flex flex-col gap-3">
+            <div id="unity-wrap" class="bg-[#172136] rounded-2xl border border-outline-variant/20 overflow-hidden soft-shadow">
+                <div class="flex items-center gap-3 justify-between px-3 md:px-5 py-3 border-b border-outline-variant/20">
+                    <button onclick="HiGameSession.backHome()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                    </button>
+                    <div class="min-w-0 flex-1">
+                        <div id="game-unity-title" class="text-sm font-bold text-white truncate">Adventure Rabbit</div>
+                        <div class="h-1.5 bg-surface-container-highest rounded-full overflow-hidden mt-1">
+                            <div id="unity-progress-bar" class="h-full bg-primary rounded-full transition-all" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="HiGameSession.restartUnityLevel()" class="p-2 rounded-full text-white/80 hover:bg-white/10" title="Restart">
+                            <span class="material-symbols-outlined text-[20px]">restart_alt</span>
+                        </button>
+                        <button onclick="HiGameSession.fullscreenUnity()" class="p-2 rounded-full text-white/80 hover:bg-white/10" title="Fullscreen">
+                            <span class="material-symbols-outlined text-[20px]">fullscreen</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="relative w-full bg-[#172136]">
+                    <canvas id="unity-canvas" class="block w-full h-[calc(100dvh-210px)] min-h-[420px] max-h-[720px] bg-[#172136]"></canvas>
+                    <div id="unity-loading" class="hidden absolute inset-0 flex items-center justify-center bg-[#172136]/90 text-white">
+                        <div class="flex flex-col items-center gap-3">
+                            <span class="material-symbols-outlined text-[42px] animate-spin">progress_activity</span>
+                            <span class="text-sm font-bold">Đang tải Adventure Rabbit...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+</div>
+
 <!-- ==================== PAGE: EXERCISE GROUP ==================== -->
 <div id="page-exercise-group" class="page">
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-6 py-3 flex items-center gap-4 shadow-sm">
@@ -1270,7 +1369,7 @@ window.navigateTo = function(page, preserveHash = false){
     if (!preserveHash) window.location.hash = page;
  
     // Điều khiển Component dùng chung (Navbar / Sidebar)
-    const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'dictionary', 'settings'];
+    const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'game', 'dictionary', 'settings'];
     const isMainTab = mainTabs.includes(page);
     const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail');
     const isExerciseDetail = (page === 'exercise-group' || page === 'exercise-detail');
@@ -1285,7 +1384,7 @@ window.navigateTo = function(page, preserveHash = false){
     
     // Đổi Title Mobile Header
     if(isMainTab) {
-        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Bài tập', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
+        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Bài tập', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
         const titleEl = document.getElementById('mobile-header-title');
         if(titleEl) {
             if(page === 'dashboard') {
@@ -1347,6 +1446,10 @@ window.navigateTo = function(page, preserveHash = false){
             }
             window._renderExercisesPage && window._renderExercisesPage();
         }, 0);
+    }
+    // Khi vào trang Game: reset màn chọn mode
+    if (page === 'game') {
+        setTimeout(() => window.HiGameSession && window.HiGameSession.renderGamePage(), 0);
     }
     // Khi vào topic-detail: load danh sách lesson
     if (page === 'topic-detail') {
@@ -1488,15 +1591,27 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
         HiSessionUI.init();
         container.innerHTML = `<div class="flex items-center justify-center mt-24"><span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span></div>`;
 
-        // Dùng từ của lesson đang mở; fallback về getWordsDueForReview nếu chưa có
-        let rawWords = window._currentLessonWords;
+        const topicId     = window._currentTopicId;
+        const lessonIndex = window._currentLessonIndex ?? 0;
+        const lessonKey   = topicId ? `${topicId}::${lessonIndex}` : null;
+
+        // Dùng cache chỉ khi cache thuộc đúng lesson đang mở; nếu khác lesson thì fetch lại.
+        let rawWords = lessonKey && window._currentLessonWordsKey === lessonKey
+            ? window._currentLessonWords
+            : null;
+
         if (!rawWords || rawWords.length === 0) {
-            const topicId     = window._currentTopicId;
-            const lessonIndex = window._currentLessonIndex ?? 0;
             if (topicId) {
                 rawWords = await HiDB.getWordsInLesson(topicId, lessonIndex);
+                if (window._currentTopicId !== topicId || window._currentLessonIndex !== lessonIndex) {
+                    return;
+                }
+                window._currentLessonWords = rawWords || [];
+                window._currentLessonWordsKey = lessonKey;
             } else {
                 rawWords = await HiDB.getWordsDueForReview(20);
+                window._currentLessonWords = [];
+                window._currentLessonWordsKey = null;
             }
         }
 
@@ -1811,6 +1926,7 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js"></script>
 <script src="exercises.js"></script>
+<script src="gameSession.js"></script>
 
 <!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
 <div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
@@ -2139,6 +2255,8 @@ window._openTopic = function(topicId, topicName, category) {
     window._currentTopicId   = topicId;
     window._currentTopicName = topicName;
     window._currentCategory  = category;
+    window._currentLessonWords = [];
+    window._currentLessonWordsKey = null;
     navigateTo('topic-detail');
 };
 
@@ -2245,6 +2363,8 @@ window._openLesson = function(topicId, lessonIndex) {
     window._currentLessonIndex = lessonIndex;
     window._currentLessonName  = lessonName;
     window._currentLessonProgress = Math.round(lesson?.progress || 0);
+    window._currentLessonWords = [];
+    window._currentLessonWordsKey = null;
     // _currentTopicName đã được set khi _openTopic, giữ nguyên
     navigateTo('lesson-detail');
 };
@@ -2287,7 +2407,13 @@ window._loadLessonWords = async function() {
         const words = typeof HiDB !== 'undefined'
             ? await HiDB.getWordsInLesson(topicId, lessonIndex)
             : [];
+
+        if (window._currentTopicId !== topicId || window._currentLessonIndex !== lessonIndex) {
+            return;
+        }
+
         window._currentLessonWords = words;
+        window._currentLessonWordsKey = `${topicId}::${lessonIndex}`;
 
         ['ld-subtitle','ld-subtitle-mobile'].forEach(id => {
             const el = document.getElementById(id);
