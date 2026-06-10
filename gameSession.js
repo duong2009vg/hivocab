@@ -357,6 +357,21 @@ window.HiGameSession = (() => {
         }
     }
 
+    function syncUnityFullscreenLayout() {
+        const unityWrap = document.getElementById('unity-wrap');
+        if (!unityWrap) return;
+
+        const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
+        unityWrap.classList.toggle('is-unity-fullscreen', fullscreenElement === unityWrap);
+
+        requestAnimationFrame(() => {
+            window.dispatchEvent(new Event('resize'));
+        });
+    }
+
+    document.addEventListener('fullscreenchange', syncUnityFullscreenLayout);
+    document.addEventListener('webkitfullscreenchange', syncUnityFullscreenLayout);
+
     async function backHome() {
         if (_unityInstance) {
             try {

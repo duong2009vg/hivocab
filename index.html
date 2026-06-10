@@ -286,6 +286,51 @@ html[data-mobile-device="true"] #unity-canvas {
     max-height: none !important;
     touch-action: none;
 }
+#unity-wrap:fullscreen,
+#unity-wrap:-webkit-full-screen {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #172136 !important;
+}
+#unity-wrap:fullscreen #unity-toolbar,
+#unity-wrap:-webkit-full-screen #unity-toolbar {
+    display: none !important;
+}
+#unity-wrap:fullscreen #unity-viewport,
+#unity-wrap:-webkit-full-screen #unity-viewport {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+}
+#unity-wrap:fullscreen #unity-canvas,
+#unity-wrap:-webkit-full-screen #unity-canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+#unity-wrap.is-unity-fullscreen {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+#unity-wrap.is-unity-fullscreen #unity-toolbar {
+    display: none !important;
+}
+#unity-wrap.is-unity-fullscreen #unity-viewport,
+#unity-wrap.is-unity-fullscreen #unity-canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
 @media (max-width: 1024px) {
     html[data-mobile-device="true"] #game-stage { gap: 0; }
 }
@@ -898,7 +943,7 @@ html[data-mobile-device="true"] #unity-canvas {
 
         <section id="game-stage" class="hidden flex flex-col gap-3">
             <div id="unity-wrap" class="bg-[#172136] rounded-2xl border border-outline-variant/20 overflow-hidden soft-shadow">
-                <div class="flex items-center gap-3 justify-between px-3 md:px-5 py-3 border-b border-outline-variant/20">
+                <div id="unity-toolbar" class="flex items-center gap-3 justify-between px-3 md:px-5 py-3 border-b border-outline-variant/20">
                     <button onclick="HiGameSession.backHome()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container">
                         <span class="material-symbols-outlined">arrow_back</span>
                     </button>
@@ -917,7 +962,7 @@ html[data-mobile-device="true"] #unity-canvas {
                         </button>
                     </div>
                 </div>
-                <div class="relative w-full bg-[#172136]">
+                <div id="unity-viewport" class="relative w-full bg-[#172136]">
                     <canvas id="unity-canvas" class="block w-full h-[calc(100dvh-210px)] min-h-[420px] max-h-[720px] bg-[#172136]"></canvas>
                     <div id="unity-loading" class="hidden absolute inset-0 flex items-center justify-center bg-[#172136]/90 text-white">
                         <div class="flex flex-col items-center gap-3">
@@ -1946,7 +1991,7 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js"></script>
 <script src="exercises.js"></script>
-<script src="gameSession.js"></script>
+<script src="gameSession.js?v=20260610-fullscreen-fix-v1"></script>
 
 <!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
 <div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
