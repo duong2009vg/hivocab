@@ -271,15 +271,23 @@ html.dark[data-theme="amber"] .text-on-primary { color: #2d1a00 !important; }
 body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color 0.3s ease; }
 
 /* Mobile game: maximize the playable area and prevent browser gestures over Unity. */
-@media (pointer: coarse) and (max-width: 1024px) {
-    #game-stage { gap: 0; }
-    #unity-wrap { border-radius: 0 !important; }
-    #unity-canvas {
-        height: calc(100dvh - 58px) !important;
-        min-height: 0 !important;
-        max-height: none !important;
-        touch-action: none;
-    }
+html[data-mobile-device="true"] {
+    overscroll-behavior: none;
+}
+html[data-mobile-device="true"] #game-stage {
+    gap: 0;
+}
+html[data-mobile-device="true"] #unity-wrap {
+    border-radius: 0 !important;
+}
+html[data-mobile-device="true"] #unity-canvas {
+    height: calc(100dvh - 58px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    touch-action: none;
+}
+@media (max-width: 1024px) {
+    html[data-mobile-device="true"] #game-stage { gap: 0; }
 }
 </style>
 </head>

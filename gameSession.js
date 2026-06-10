@@ -5,8 +5,14 @@
 window.HiGameSession = (() => {
     const WORD_LIMIT = 20;
     const UNITY_ROOT = 'adventure-rabbit';
-    const UNITY_BUILD_VERSION = '20260610-mobile-controls-v1';
+    const UNITY_BUILD_VERSION = '20260610-device-quiz-feedback-v2';
     const UNITY_LOADER = `${UNITY_ROOT}/Build/adventure-rabbit.loader.js?v=${UNITY_BUILD_VERSION}`;
+
+    const userAgent = navigator.userAgent || '';
+    const isMobileDevice = navigator.userAgentData?.mobile === true
+        || /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(userAgent)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    document.documentElement.dataset.mobileDevice = isMobileDevice ? 'true' : 'false';
 
     let _unityInstance = null;
     let _unityLoading = null;
