@@ -430,6 +430,9 @@ window.HiUnityGame = {
     onLevelFinished(levelId) {
         console.log('[HiUnityGame] Level finished:', levelId);
     },
+    onQuitRequested() {
+        window.HiGameSession?.backHome();
+    },
     onGameOver() {
         console.log('[HiUnityGame] Game over');
     },

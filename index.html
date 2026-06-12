@@ -928,12 +928,12 @@ html[data-mobile-device="true"] #unity-canvas {
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-3">
+            <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3">
                 <select id="game-topic-select" onchange="HiGameSession.loadLessonsForTopic(this.value)"
-                        class="rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
+                        class="min-w-0 w-full rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
                 <select id="game-lesson-select"
-                        class="rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
-                <button onclick="HiGameSession.startSelectedLesson()" class="bg-primary text-on-primary rounded-xl px-5 py-3 font-bold">
+                        class="min-w-0 w-full rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
+                <button onclick="HiGameSession.startSelectedLesson()" class="bg-primary text-on-primary rounded-xl px-5 py-3 font-bold whitespace-nowrap">
                     Chơi
                 </button>
             </div>
@@ -2173,6 +2173,16 @@ document.addEventListener('DOMContentLoaded', () => {
 window._activeCategory = 'all';
 window._allTopics      = [];
 window._topicCategories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
+const DEFAULT_TOPIC_CATEGORIES = [
+    'General English',
+    'IELTS/TOEIC',
+    'Oxford 3000',
+    'CEFR',
+    'THPT & ĐGNL',
+    'Idioms & Collocations',
+    'Grammar',
+    'Custom',
+];
 
 function _topicCategoryValue(category) {
     return String(category || 'general').trim() || 'general';
@@ -2193,8 +2203,9 @@ function _buildTopicCategories(topics = []) {
     const categories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
     topics.forEach(topic => {
         const value = _topicCategoryValue(topic.category);
-        if (seen.has(value)) return;
-        seen.add(value);
+        const key = value.toLocaleLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
         categories.push({ id: value, label: value, icon: _topicCategoryIcon(value) });
     });
     window._topicCategories = categories;
@@ -2204,8 +2215,11 @@ function _buildTopicCategories(topics = []) {
 function _renderTopicCategoryDatalist() {
     const list = document.getElementById('topic-category-options');
     if (!list) return;
-    const categories = _buildTopicCategories(window._allTopics || []).filter(cat => cat.id !== 'all');
-    list.innerHTML = categories.map(cat => `<option value="${_esc(cat.label)}"></option>`).join('');
+    const existing = _buildTopicCategories(window._allTopics || [])
+        .filter(cat => cat.id !== 'all')
+        .map(cat => cat.label);
+    const categories = [...new Set([...DEFAULT_TOPIC_CATEGORIES, ...existing])];
+    list.innerHTML = categories.map(category => `<option value="${_esc(category)}"></option>`).join('');
 }
 
 // Render category tab bar
@@ -2560,7 +2574,7 @@ window.openCreateTopicModal = function() {
     // Pre-select current category in dropdown
     const catSel = document.getElementById('new-topic-category');
     _renderTopicCategoryDatalist();
-    if (catSel) catSel.value = window._activeCategory !== 'all' ? window._activeCategory : 'general';
+    if (catSel) catSel.value = window._activeCategory !== 'all' ? window._activeCategory : 'General English';
     document.getElementById('new-topic-icon').value = 'folder';
     document.getElementById('new-topic-name').value = '';
     const err = document.getElementById('create-topic-error');
@@ -2596,7 +2610,7 @@ window.submitCreateTopic = async function() {
 
     const name = nameEl?.value.trim();
     const icon = iconEl?.value || 'folder';
-    const category = catEl?.value || 'general';
+    const category = catEl?.value.trim() || 'General English';
 
     if (!name) {
         if (errEl) { errEl.textContent = 'Vui lòng nhập tên chủ đề.'; errEl.classList.remove('hidden'); }
