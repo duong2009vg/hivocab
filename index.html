@@ -372,33 +372,22 @@ html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
     display: block !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #unity-toolbar {
-    display: none !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #unity-toolbar button {
-    width: 36px !important;
-    height: 36px !important;
-    padding: 0 !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    background: rgba(8, 13, 25, 0.55) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    pointer-events: auto;
-}
-html[data-mobile-device="true"].mobile-game-playing #unity-toolbar > .min-w-0 {
     position: absolute !important;
-    top: calc(env(safe-area-inset-top) + 10px) !important;
-    left: 58px !important;
-    right: 104px !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 20 !important;
+    height: calc(env(safe-area-inset-top) + 46px) !important;
+    padding: calc(env(safe-area-inset-top) + 6px) 10px 0 !important;
+    border: 0 !important;
+    background: transparent !important;
     pointer-events: none;
 }
-html[data-mobile-device="true"].mobile-game-playing #game-unity-title {
-    display: none !important;
-}
+html[data-mobile-device="true"].mobile-game-playing #unity-toolbar button,
+html[data-mobile-device="true"].mobile-game-playing #unity-toolbar > .min-w-0,
+html[data-mobile-device="true"].mobile-game-playing #game-unity-title,
 html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
-    height: 3px !important;
-    margin-top: 0 !important;
-    background: rgba(255, 255, 255, 0.22) !important;
+    display: none !important;
 }
 #unity-wrap:fullscreen,
 #unity-wrap:-webkit-full-screen {

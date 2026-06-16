@@ -114,27 +114,8 @@ window.HiGameSession = (() => {
     function _setMobileGamePlaying(active) {
         document.documentElement.classList.toggle('mobile-game-playing', !!active);
         if (active) window.scrollTo(0, 0);
-        _resizeUnityCanvasForMobile();
         requestAnimationFrame(() => {
-            _resizeUnityCanvasForMobile();
             window.dispatchEvent(new Event('resize'));
-        });
-    }
-
-    function _resizeUnityCanvasForMobile() {
-        if (document.documentElement.dataset.mobileDevice !== 'true') return;
-        if (!document.documentElement.classList.contains('mobile-game-playing')) return;
-
-        const canvas = document.getElementById('unity-canvas');
-        const viewport = document.getElementById('unity-viewport');
-        const wrap = document.getElementById('unity-wrap');
-        const width = Math.round(window.visualViewport?.width || window.innerWidth);
-        const height = Math.round(window.visualViewport?.height || window.innerHeight);
-
-        [wrap, viewport, canvas].forEach(el => {
-            if (!el) return;
-            el.style.width = `${width}px`;
-            el.style.height = `${height}px`;
         });
     }
 
@@ -399,8 +380,6 @@ window.HiGameSession = (() => {
 
     document.addEventListener('fullscreenchange', syncUnityFullscreenLayout);
     document.addEventListener('webkitfullscreenchange', syncUnityFullscreenLayout);
-    window.addEventListener('resize', _resizeUnityCanvasForMobile);
-    window.visualViewport?.addEventListener('resize', _resizeUnityCanvasForMobile);
 
     async function backHome() {
         if (_unityInstance) {
