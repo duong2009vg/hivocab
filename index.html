@@ -355,11 +355,21 @@ html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
     height: 100dvh !important;
     min-height: 0 !important;
     max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #unity-wrap {
+    position: fixed !important;
+    inset: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
+html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #unity-toolbar {
     display: none !important;
