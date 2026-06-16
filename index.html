@@ -137,6 +137,22 @@ html.dark input.fill-input, html.dark input { background-color: #334155; color: 
 html.dark .bg-primary-container\/10 { background-color: rgba(0, 129, 192, 0.2); }
 html.dark .hover\:bg-surface-container-low:hover { background-color: #334155; }
 html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129, 192, 0.15); }
+html.dark .topic-card-surface {
+    background-color: rgba(30, 41, 59, 0.88) !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+}
+html.dark .topic-card-surface:hover {
+    background-color: rgba(36, 48, 68, 0.92) !important;
+}
+html.dark .topic-card-surface .bg-surface-container-high {
+    background-color: #334155 !important;
+}
+html.dark .topic-card-surface .text-on-surface-variant {
+    color: #cbd5e1 !important;
+}
+html.dark .topic-card-surface .bg-surface-container-highest {
+    background-color: rgba(148, 163, 184, 0.22) !important;
+}
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
 /* ============================================================
@@ -2300,7 +2316,7 @@ window._renderTopicsGrid = async function() {
             const pct = topic.progress ?? 0;
             return `
             <div id="topic-card-${topic.id}" onclick="window._openTopic('${topic.id}');"
-                class="cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
+                class="topic-card-surface cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
                 <button onclick="event.stopPropagation(); window.deleteTopicCard('${topic.id}');" 
                     class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-outline hover:bg-error-container hover:text-error transition-colors z-10">
                     <span class="material-symbols-outlined text-[16px] md:text-[20px]">close</span>
@@ -2641,7 +2657,7 @@ window.addTopicCard = function(topic) {
     if (!grid) return;
     const card = document.createElement('div');
     card.id = `topic-card-${topic.id}`;
-    card.className = 'cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in';
+    card.className = 'topic-card-surface cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in';
     card.setAttribute('onclick', `window._openTopic('${topic.id}')`);
     card.innerHTML = `
         <button onclick="event.stopPropagation(); window.deleteTopicCard('${topic.id}');"
