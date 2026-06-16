@@ -308,6 +308,97 @@ html[data-mobile-device="true"] #unity-canvas {
     max-height: none !important;
     touch-action: none;
 }
+html[data-mobile-device="true"].mobile-game-playing,
+html[data-mobile-device="true"].mobile-game-playing body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden !important;
+    overscroll-behavior: none;
+}
+html[data-mobile-device="true"].mobile-game-playing #main-mobile-header,
+html[data-mobile-device="true"].mobile-game-playing #mobile-bottom-nav {
+    display: none !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #page-game {
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #page-game main {
+    display: block !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #page-game main > div {
+    width: 100vw !important;
+    max-width: none !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    gap: 0 !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #game-stage {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9999 !important;
+    display: block !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    background: #172136 !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
+html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
+html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-wrap {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-toolbar {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 20 !important;
+    height: calc(env(safe-area-inset-top) + 46px) !important;
+    padding: calc(env(safe-area-inset-top) + 6px) 10px 0 !important;
+    border: 0 !important;
+    background: linear-gradient(180deg, rgba(8, 13, 25, 0.55), rgba(8, 13, 25, 0)) !important;
+    pointer-events: none;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-toolbar button {
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    background: rgba(8, 13, 25, 0.55) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: auto;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-toolbar > .min-w-0 {
+    position: absolute !important;
+    top: calc(env(safe-area-inset-top) + 10px) !important;
+    left: 58px !important;
+    right: 104px !important;
+    pointer-events: none;
+}
+html[data-mobile-device="true"].mobile-game-playing #game-unity-title {
+    display: none !important;
+}
+html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
+    height: 3px !important;
+    margin-top: 0 !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+}
 #unity-wrap:fullscreen,
 #unity-wrap:-webkit-full-screen {
     width: 100vw !important;

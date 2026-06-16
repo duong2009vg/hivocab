@@ -111,6 +111,14 @@ window.HiGameSession = (() => {
         el.classList.toggle('hidden', !visible);
     }
 
+    function _setMobileGamePlaying(active) {
+        document.documentElement.classList.toggle('mobile-game-playing', !!active);
+        if (active) window.scrollTo(0, 0);
+        requestAnimationFrame(() => {
+            window.dispatchEvent(new Event('resize'));
+        });
+    }
+
     function _setStageTitle(title) {
         const el = document.getElementById('game-unity-title');
         if (el) el.textContent = title || 'Adventure Rabbit';
@@ -220,6 +228,7 @@ window.HiGameSession = (() => {
         _show('game-home', false);
         _show('game-lesson-picker', false);
         _show('game-stage', true);
+        _setMobileGamePlaying(true);
         _setStageTitle(title);
         const progress = document.getElementById('unity-progress-bar');
         if (progress) progress.style.width = '0%';
@@ -383,6 +392,7 @@ window.HiGameSession = (() => {
             _unityLoading = null;
         }
         document.getElementById('unity-canvas')?.replaceWith(document.getElementById('unity-canvas')?.cloneNode(false));
+        _setMobileGamePlaying(false);
         _show('game-stage', false);
         _show('game-lesson-picker', false);
         _show('game-home', true);
@@ -390,6 +400,7 @@ window.HiGameSession = (() => {
     }
 
     function renderGamePage() {
+        _setMobileGamePlaying(false);
         _show('game-stage', false);
         _show('game-lesson-picker', false);
         _show('game-home', true);
