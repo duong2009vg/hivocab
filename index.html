@@ -320,21 +320,21 @@ html[data-mobile-device="true"].mobile-game-playing #mobile-bottom-nav {
     display: none !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #page-game {
-    min-height: 100dvh !important;
+    min-height: var(--game-vh, 100dvh) !important;
     overflow: hidden !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #page-game main {
     display: block !important;
     width: 100vw !important;
-    height: 100dvh !important;
-    min-height: 100dvh !important;
+    height: var(--game-vh, 100dvh) !important;
+    min-height: var(--game-vh, 100dvh) !important;
     padding: 0 !important;
     margin: 0 !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #page-game main > div {
     width: 100vw !important;
     max-width: none !important;
-    height: 100dvh !important;
+    height: var(--game-vh, 100dvh) !important;
     margin: 0 !important;
     padding: 0 !important;
     gap: 0 !important;
@@ -345,14 +345,14 @@ html[data-mobile-device="true"].mobile-game-playing #game-stage {
     z-index: 9999 !important;
     display: block !important;
     width: 100vw !important;
-    height: 100dvh !important;
+    height: var(--game-vh, 100dvh) !important;
     background: #172136 !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
 html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
 html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
     width: 100vw !important;
-    height: 100dvh !important;
+    height: var(--game-vh, 100dvh) !important;
     min-height: 0 !important;
     max-height: none !important;
     margin: 0 !important;
@@ -2087,7 +2087,7 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js"></script>
 <script src="exercises.js"></script>
-<script src="gameSession.js?v=20260616-mobile-immersive-v2"></script>
+<script src="gameSession.js?v=20260616-mobile-viewport-sync-v3"></script>
 
 <!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
 <div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">

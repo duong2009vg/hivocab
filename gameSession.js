@@ -23,6 +23,7 @@ window.HiGameSession = (() => {
     let _failCounts = new Map();
     let _reviewed = new Set();
     let _stats = { correct: 0, wrong: 0 };
+    let _mobileViewportTimers = [];
 
     function _esc(value) {
         return String(value ?? '')
@@ -113,9 +114,34 @@ window.HiGameSession = (() => {
 
     function _setMobileGamePlaying(active) {
         document.documentElement.classList.toggle('mobile-game-playing', !!active);
-        if (active) window.scrollTo(0, 0);
-        requestAnimationFrame(() => {
-            window.dispatchEvent(new Event('resize'));
+        _clearMobileViewportTimers();
+        if (!active) {
+            document.documentElement.style.removeProperty('--game-vh');
+            return;
+        }
+
+        window.scrollTo(0, 0);
+        _scheduleMobileViewportSync();
+    }
+
+    function _clearMobileViewportTimers() {
+        _mobileViewportTimers.forEach(timer => window.clearTimeout(timer));
+        _mobileViewportTimers = [];
+    }
+
+    function _syncMobileGameViewport() {
+        if (document.documentElement.dataset.mobileDevice !== 'true') return;
+        if (!document.documentElement.classList.contains('mobile-game-playing')) return;
+
+        const height = Math.round(window.visualViewport?.height || window.innerHeight);
+        if (height > 0) document.documentElement.style.setProperty('--game-vh', `${height}px`);
+        window.dispatchEvent(new Event('resize'));
+    }
+
+    function _scheduleMobileViewportSync() {
+        _syncMobileGameViewport();
+        [40, 100, 180, 350, 700, 1200].forEach(delay => {
+            _mobileViewportTimers.push(window.setTimeout(_syncMobileGameViewport, delay));
         });
     }
 
@@ -284,6 +310,7 @@ window.HiGameSession = (() => {
                 if (progress) progress.style.width = `${Math.round(value * 100)}%`;
             });
             wrapper?.classList.add('hidden');
+            _scheduleMobileViewportSync();
             _setStatus('');
             return _unityInstance;
         })().catch(err => {
@@ -380,6 +407,8 @@ window.HiGameSession = (() => {
 
     document.addEventListener('fullscreenchange', syncUnityFullscreenLayout);
     document.addEventListener('webkitfullscreenchange', syncUnityFullscreenLayout);
+    window.visualViewport?.addEventListener('resize', _syncMobileGameViewport);
+    window.visualViewport?.addEventListener('scroll', _syncMobileGameViewport);
 
     async function backHome() {
         if (_unityInstance) {
