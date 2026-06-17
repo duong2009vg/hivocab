@@ -403,13 +403,13 @@ html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
 }
 @supports (padding: max(0px)) {
     html[data-mobile-device="true"].mobile-game-playing #game-stage {
-        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+        padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left) !important;
     }
     html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
     html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
     html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
         width: calc(var(--game-vw, 100vw) - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
-        height: calc(var(--game-vh, 100dvh) - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+        height: var(--game-vh, 100dvh) !important;
     }
 }
 .mobile-game-rotate-overlay {
@@ -2158,7 +2158,7 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
 <script src="exercises.js"></script>
-<script src="gameSession.js?v=20260617-ios-pwa-fit-v6"></script>
+<script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 
 <!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
 <div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
