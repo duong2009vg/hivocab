@@ -394,6 +394,38 @@ html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
     opacity: 0 !important;
     pointer-events: none !important;
 }
+.mobile-game-rotate-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: #0f172a;
+    color: #f8fafc;
+    text-align: center;
+}
+html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rotate-overlay {
+    display: flex;
+}
+.mobile-game-rotate-card {
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+.mobile-game-rotate-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(144, 205, 255, 0.14);
+    color: var(--hi-p-dark);
+}
 #unity-wrap:fullscreen,
 #unity-wrap:-webkit-full-screen {
     width: 100vw !important;
@@ -1050,6 +1082,15 @@ html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
         <p id="game-status" class="text-sm text-on-surface-variant"></p>
 
         <section id="game-stage" class="hidden flex flex-col gap-3">
+            <div id="mobile-game-rotate-overlay" class="mobile-game-rotate-overlay" aria-live="polite">
+                <div class="mobile-game-rotate-card">
+                    <div class="mobile-game-rotate-icon">
+                        <span class="material-symbols-outlined text-[40px]">screen_rotation</span>
+                    </div>
+                    <h2 class="text-xl font-bold">Xoay ngang để chơi game</h2>
+                    <p class="text-sm text-slate-300">Game sẽ tự bắt đầu sau khi điện thoại chuyển sang chế độ nằm ngang.</p>
+                </div>
+            </div>
             <div id="unity-wrap" class="bg-[#172136] rounded-2xl border border-outline-variant/20 overflow-hidden soft-shadow">
                 <div id="unity-toolbar" class="flex items-center gap-3 justify-between px-3 md:px-5 py-3 border-b border-outline-variant/20">
                     <button onclick="HiGameSession.backHome()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container">
@@ -2099,7 +2140,7 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
 <script src="exercises.js"></script>
-<script src="gameSession.js?v=20260617-mobile-orientation-sync-v4"></script>
+<script src="gameSession.js?v=20260617-mobile-landscape-gate-v5"></script>
 
 <!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
 <div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">

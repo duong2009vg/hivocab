@@ -117,11 +117,60 @@ window.HiGameSession = (() => {
         _clearMobileViewportTimers();
         if (!active) {
             document.documentElement.style.removeProperty('--game-vh');
+            _setAwaitingLandscape(false);
             return;
         }
 
         window.scrollTo(0, 0);
         _scheduleMobileViewportSync();
+    }
+
+    function _isMobilePortrait() {
+        if (document.documentElement.dataset.mobileDevice !== 'true') return false;
+        const width = Math.round(window.visualViewport?.width || window.innerWidth);
+        const height = Math.round(window.visualViewport?.height || window.innerHeight);
+        return height > width;
+    }
+
+    function _setAwaitingLandscape(active) {
+        document.documentElement.classList.toggle('mobile-game-awaiting-landscape', !!active);
+    }
+
+    function _waitForLandscapeIfNeeded() {
+        if (!_isMobilePortrait()) {
+            _setAwaitingLandscape(false);
+            return Promise.resolve();
+        }
+
+        _setAwaitingLandscape(true);
+        _setStatus('Hãy xoay ngang điện thoại để bắt đầu game.');
+
+        return new Promise(resolve => {
+            let settled = false;
+            const cleanup = () => {
+                window.removeEventListener('resize', finish);
+                window.removeEventListener('orientationchange', finish);
+                window.visualViewport?.removeEventListener('resize', finish);
+                screen.orientation?.removeEventListener?.('change', finish);
+            };
+            const finish = () => {
+                if (settled || _isMobilePortrait()) return;
+                settled = true;
+                _setAwaitingLandscape(false);
+                cleanup();
+                _scheduleMobileOrientationSync();
+                resolve();
+            };
+
+            window.addEventListener('resize', finish);
+            window.addEventListener('orientationchange', finish);
+            window.visualViewport?.addEventListener('resize', finish);
+            screen.orientation?.addEventListener?.('change', finish);
+
+            [120, 300, 600, 1000, 1600, 2400].forEach(delay => {
+                _mobileViewportTimers.push(window.setTimeout(finish, delay));
+            });
+        });
     }
 
     function _clearMobileViewportTimers() {
@@ -271,6 +320,7 @@ window.HiGameSession = (() => {
         if (progress) progress.style.width = '0%';
         _setStatus('Đang tải Adventure Rabbit...');
 
+        await _waitForLandscapeIfNeeded();
         await _loadUnity();
         _sendPayloadToUnity();
     }
