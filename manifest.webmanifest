@@ -1,0 +1,19 @@
+{
+  "name": "Hi - Master Vocabulary",
+  "short_name": "Hi Vocabulary",
+  "description": "Master vocabulary with spaced repetition, exercises, and games.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "orientation": "landscape",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png?v=1",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

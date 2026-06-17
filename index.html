@@ -2,11 +2,17 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta name="theme-color" content="#0f172a"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-title" content="Hi Vocabulary"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>Hi - Master Vocabulary</title>
 <link rel="icon" type="image/svg+xml" sizes="any" href="/logo-mark.svg?v=3"/>
 <link rel="shortcut icon" type="image/svg+xml" href="/logo-mark.svg?v=3"/>
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=1"/>
+<link rel="manifest" href="/manifest.webmanifest?v=20260617"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -337,14 +343,14 @@ html[data-mobile-device="true"].mobile-game-playing #page-game {
 }
 html[data-mobile-device="true"].mobile-game-playing #page-game main {
     display: block !important;
-    width: 100vw !important;
+    width: var(--game-vw, 100vw) !important;
     height: var(--game-vh, 100dvh) !important;
     min-height: var(--game-vh, 100dvh) !important;
     padding: 0 !important;
     margin: 0 !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #page-game main > div {
-    width: 100vw !important;
+    width: var(--game-vw, 100vw) !important;
     max-width: none !important;
     height: var(--game-vh, 100dvh) !important;
     margin: 0 !important;
@@ -356,14 +362,15 @@ html[data-mobile-device="true"].mobile-game-playing #game-stage {
     inset: 0 !important;
     z-index: 9999 !important;
     display: block !important;
-    width: 100vw !important;
+    width: var(--game-vw, 100vw) !important;
     height: var(--game-vh, 100dvh) !important;
     background: #172136 !important;
+    box-sizing: border-box !important;
 }
 html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
 html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
 html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
-    width: 100vw !important;
+    width: var(--game-vw, 100vw) !important;
     height: var(--game-vh, 100dvh) !important;
     min-height: 0 !important;
     max-height: none !important;
@@ -393,6 +400,17 @@ html[data-mobile-device="true"].mobile-game-playing #game-unity-title,
 html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
     opacity: 0 !important;
     pointer-events: none !important;
+}
+@supports (padding: max(0px)) {
+    html[data-mobile-device="true"].mobile-game-playing #game-stage {
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important;
+    }
+    html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
+    html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
+    html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
+        width: calc(var(--game-vw, 100vw) - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
+        height: calc(var(--game-vh, 100dvh) - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    }
 }
 .mobile-game-rotate-overlay {
     position: fixed;
@@ -2140,7 +2158,7 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
 <script src="exercises.js"></script>
-<script src="gameSession.js?v=20260617-mobile-landscape-gate-v5"></script>
+<script src="gameSession.js?v=20260617-ios-pwa-fit-v6"></script>
 
 <!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
 <div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">

@@ -12,7 +12,10 @@ window.HiGameSession = (() => {
     const isMobileDevice = navigator.userAgentData?.mobile === true
         || /Android|iPhone|iPad|iPod|IEMobile|Opera Mini|Mobile/i.test(userAgent)
         || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isStandaloneApp = window.navigator.standalone === true
+        || window.matchMedia?.('(display-mode: standalone)').matches === true;
     document.documentElement.dataset.mobileDevice = isMobileDevice ? 'true' : 'false';
+    document.documentElement.dataset.standaloneApp = isStandaloneApp ? 'true' : 'false';
 
     let _unityInstance = null;
     let _unityLoading = null;
@@ -117,6 +120,7 @@ window.HiGameSession = (() => {
         _clearMobileViewportTimers();
         if (!active) {
             document.documentElement.style.removeProperty('--game-vh');
+            document.documentElement.style.removeProperty('--game-vw');
             _setAwaitingLandscape(false);
             return;
         }
@@ -182,14 +186,20 @@ window.HiGameSession = (() => {
         if (document.documentElement.dataset.mobileDevice !== 'true') return;
         if (!document.documentElement.classList.contains('mobile-game-playing')) return;
 
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
+
+        const width = Math.round(window.visualViewport?.width || window.innerWidth);
         const height = Math.round(window.visualViewport?.height || window.innerHeight);
+        if (width > 0) document.documentElement.style.setProperty('--game-vw', `${width}px`);
         if (height > 0) document.documentElement.style.setProperty('--game-vh', `${height}px`);
         window.dispatchEvent(new Event('resize'));
     }
 
     function _scheduleMobileViewportSync() {
         _syncMobileGameViewport();
-        [40, 100, 180, 350, 700, 1200].forEach(delay => {
+        [40, 100, 180, 350, 700, 1200, 2000].forEach(delay => {
             _mobileViewportTimers.push(window.setTimeout(_syncMobileGameViewport, delay));
         });
     }
@@ -200,7 +210,7 @@ window.HiGameSession = (() => {
 
         window.scrollTo(0, 0);
         _syncMobileGameViewport();
-        [80, 160, 320, 600, 1000, 1600, 2400].forEach(delay => {
+        [80, 160, 320, 600, 1000, 1600, 2400, 3200].forEach(delay => {
             _mobileViewportTimers.push(window.setTimeout(_syncMobileGameViewport, delay));
         });
     }
