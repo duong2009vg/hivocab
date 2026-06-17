@@ -145,6 +145,17 @@ window.HiGameSession = (() => {
         });
     }
 
+    function _scheduleMobileOrientationSync() {
+        if (document.documentElement.dataset.mobileDevice !== 'true') return;
+        if (!document.documentElement.classList.contains('mobile-game-playing')) return;
+
+        window.scrollTo(0, 0);
+        _syncMobileGameViewport();
+        [80, 160, 320, 600, 1000, 1600, 2400].forEach(delay => {
+            _mobileViewportTimers.push(window.setTimeout(_syncMobileGameViewport, delay));
+        });
+    }
+
     function _setStageTitle(title) {
         const el = document.getElementById('game-unity-title');
         if (el) el.textContent = title || 'Adventure Rabbit';
@@ -409,6 +420,8 @@ window.HiGameSession = (() => {
     document.addEventListener('webkitfullscreenchange', syncUnityFullscreenLayout);
     window.visualViewport?.addEventListener('resize', _syncMobileGameViewport);
     window.visualViewport?.addEventListener('scroll', _syncMobileGameViewport);
+    window.addEventListener('orientationchange', _scheduleMobileOrientationSync);
+    screen.orientation?.addEventListener?.('change', _scheduleMobileOrientationSync);
 
     async function backHome() {
         if (_unityInstance) {
