@@ -140,6 +140,18 @@ html.dark .bg-surface-container-highest {
     background-color: rgba(148, 163, 184, 0.22) !important;
 }
 html.dark input.fill-input, html.dark input { background-color: #334155; color: #fff; border-color: #475569; }
+.fill-input {
+    width: clamp(1.45rem, calc((100vw - 3.5rem) / var(--fill-max-word-len, 10)), 2rem) !important;
+    height: 2.5rem !important;
+    font-size: 1rem !important;
+}
+@media (min-width: 640px) {
+    .fill-input {
+        width: 3rem !important;
+        height: 3.5rem !important;
+        font-size: 1.5rem !important;
+    }
+}
 html.dark .bg-primary-container\/10 { background-color: rgba(0, 129, 192, 0.2); }
 html.dark .hover\:bg-surface-container-low:hover { background-color: #334155; }
 html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(0, 129, 192, 0.15); }
@@ -1432,18 +1444,18 @@ html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
     <button onclick="window.getAIHint()" class="mt-4 text-primary font-bold text-xs md:text-sm flex items-center justify-center gap-1 hover:bg-primary-container/10 px-3 py-2 rounded-lg mx-auto w-max"><span class="material-symbols-outlined text-[16px]">lightbulb</span> Xin gợi ý AI</button>
     <div id="ai-hint-container" class="mt-3 text-xs md:text-sm text-on-surface-variant hidden bg-surface-container-low p-3 rounded-lg border border-outline-variant/30 w-full text-left"></div>
 </div>
-<div class="flex gap-1 md:gap-2 justify-center flex-wrap max-w-full" id="fill-boxes">
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
-<input type="text" maxlength="1" class="fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<div class="flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end overflow-hidden" id="fill-boxes" style="--fill-max-word-len:11">
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
+<input type="text" maxlength="1" class="fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0" />
 </div>
 <div class="mt-8 w-full"><button onclick="window.checkFillInBlank()" class="w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl md:rounded-full font-bold text-sm hover:bg-surface-tint transition-colors">Kiểm tra</button></div>
 </div>
@@ -2085,7 +2097,7 @@ window.addEventListener('hashchange', () => {
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js"></script>
-<script src="sessionUI.js"></script>
+<script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
 <script src="exercises.js"></script>
 <script src="gameSession.js?v=20260617-mobile-orientation-sync-v4"></script>
 

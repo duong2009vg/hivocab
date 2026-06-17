@@ -37,7 +37,7 @@ const HiSessionUI = (() => {
         mcqOptSelected:'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-primary bg-primary/8 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
         mcqOptCorrect: 'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-green-500 bg-green-50 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
         mcqOptWrong:   'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-error bg-error-container/30 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
-        fillInput:     'fill-input w-8 h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-lg sm:text-2xl text-on-surface uppercase outline-none px-0 transition-colors',
+        fillInput:     'fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0 transition-colors',
     };
 
     // Container element (set trong init)
@@ -349,8 +349,9 @@ const HiSessionUI = (() => {
         const answerParts = Array.isArray(d.answerParts) && d.answerParts.length
             ? d.answerParts
             : String(d.answer || '').trim().split(/\s+/).filter(Boolean);
+        const maxPartLen = Math.max(1, ...answerParts.map(part => String(part || '').length));
         const inputsHTML = answerParts.map((part) => `
-            <span class="inline-flex gap-1 md:gap-2 shrink-0" data-fill-word>
+            <span class="inline-flex gap-0.5 sm:gap-1 md:gap-2 flex-wrap justify-center max-w-full" data-fill-word>
                 ${part.split('').map(() => {
                     const idx = fillIndex++;
                     return `<input type="text" maxlength="1"
@@ -363,8 +364,9 @@ const HiSessionUI = (() => {
 
         const totalLetters = d.letters || answerParts.join('').length;
         const boxesClass = totalLetters > 8
-            ? 'flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end'
-            : 'flex gap-x-1 md:gap-x-2 justify-center items-end';
+            ? 'flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end overflow-hidden'
+            : 'flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end overflow-hidden';
+        const fillMaxWordLen = Math.min(Math.max(maxPartLen, 6), 18);
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
@@ -403,7 +405,7 @@ const HiSessionUI = (() => {
                 </div>
 
                 <!-- Input boxes từng chữ cái -->
-                <div class="${boxesClass}" id="fill-boxes">
+                <div class="${boxesClass}" id="fill-boxes" style="--fill-max-word-len:${fillMaxWordLen}">
                     ${inputsHTML}
                 </div>
 
