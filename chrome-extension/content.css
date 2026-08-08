@@ -1,0 +1,15 @@
+#hi-vocab-clipper-root { all: initial; }
+#hi-vocab-clipper-root, #hi-vocab-clipper-root * { box-sizing: border-box; }
+#hi-vocab-clipper-root button, #hi-vocab-clipper-root select { font: 500 13px/1.35 Arial, sans-serif; }
+.hi-vocab-fab { position: fixed; z-index: 2147483646; width: 38px; height: 38px; border: 0; border-radius: 12px; background: #0b6b91; color: white; box-shadow: 0 6px 20px #0003; cursor: pointer; font: 700 15px Arial; }
+.hi-vocab-panel { position: fixed; z-index: 2147483647; width: 310px; padding: 16px; border: 1px solid #d7dde1; border-radius: 14px; background: #fbfcfa; color: #152027; box-shadow: 0 14px 45px #10202c33; }
+.hi-vocab-panel h3 { margin: 0 0 2px; font: 700 19px/1.15 Arial, sans-serif; }
+.hi-vocab-muted { color: #66747d; font-size: 12px; }
+.hi-vocab-meaning { margin: 12px 0 8px; font-size: 15px; font-weight: 700; color: #075b79; }
+.hi-vocab-example { margin: 8px 0 12px; font-size: 12px; line-height: 1.45; color: #45535b; }
+.hi-vocab-panel select { width: 100%; padding: 9px 10px; border: 1px solid #cbd5da; border-radius: 8px; background: white; color: #152027; }
+.hi-vocab-actions { display: flex; gap: 8px; margin-top: 10px; }
+.hi-vocab-actions button { flex: 1; padding: 9px 10px; border: 0; border-radius: 8px; cursor: pointer; }
+.hi-vocab-add { background: #0b6b91; color: white; }
+.hi-vocab-close { background: #e9eef0; color: #31434c; }
+.hi-vocab-status { min-height: 17px; margin-top: 8px; color: #ba4b29; font-size: 12px; }

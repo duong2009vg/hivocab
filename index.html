@@ -3777,6 +3777,42 @@ document.getElementById('modal-save-word')?.addEventListener('click', function(e
 </script>
 <script src="dictionary.js"></script>
 <script>
+// Cầu nối cho Chrome extension. Extension không giữ Supabase token;
+// mọi thao tác thêm từ vẫn dùng session đăng nhập của app.
+window.addEventListener('message', async (event) => {
+    const message = event.data;
+    if (event.source !== window || message?.source !== 'hi-vocab-extension') return;
+
+    const reply = (ok, data = null, error = '') => window.postMessage({
+        source: 'hi-vocab-app', requestId: message.requestId, ok, data, error
+    }, '*');
+
+    try {
+        if (message.action === 'get-topics') {
+            const user = await HiDB.getCurrentUser();
+            if (!user) throw new Error('Bạn chưa đăng nhập trong app.');
+            reply(true, await HiDB.getTopics());
+            return;
+        }
+        if (message.action === 'add-word') {
+            const user = await HiDB.getCurrentUser();
+            if (!user) throw new Error('Bạn chưa đăng nhập trong app.');
+            const payload = message.payload || {};
+            if (!payload.topicId || !payload.word || !payload.meaning) {
+                throw new Error('Thiếu topic, từ hoặc nghĩa Việt.');
+            }
+            reply(true, await HiDB.addWord(payload.topicId, {
+                word: payload.word,
+                phonetic: payload.phonetic || '',
+                meaning: payload.meaning,
+                exampleSentence: payload.exampleSentence || ''
+            }));
+        }
+    } catch (error) {
+        reply(false, null, error?.message || 'Không thể xử lý yêu cầu.');
+    }
+});
+
 // KẾT NỐI SUPABASE THẬT
 document.addEventListener("DOMContentLoaded", async () => {
     try {
