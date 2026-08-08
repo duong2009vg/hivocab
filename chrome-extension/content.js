@@ -88,11 +88,12 @@
     if (!term || term.length > 80) { removeFab(); return; }
     const rect = getSelection().getRangeAt(0).getBoundingClientRect();
     removeFab();
-    fab = document.createElement('button'); fab.className = 'hi-vocab-fab'; fab.textContent = 'Hi'; fab.title = 'Tra và lưu từ';
+    fab = document.createElement('button'); fab.className = 'hi-vocab-fab'; fab.title = 'Tra và lưu từ';
+    fab.innerHTML = `<img src="${chrome.runtime.getURL('logo-mark.svg')}" alt="Hi" />`;
     fab.style.left = `${Math.min(Math.max(8, rect.right - 18), innerWidth - 48)}px`;
     fab.style.top = `${Math.min(Math.max(8, rect.bottom + 8), innerHeight - 48)}px`;
     root.appendChild(fab);
-    fab.onclick = async () => { const button = fab; button.disabled = true; button.textContent = '…'; current = await lookup(term); showPanel(rect.right - 18, rect.bottom + 52, current); removeFab(); };
+    fab.onclick = async () => { const button = fab; button.disabled = true; button.innerHTML = '<span class="hi-vocab-spinner">...</span>'; current = await lookup(term); showPanel(rect.right - 18, rect.bottom + 52, current); removeFab(); };
   });
   document.addEventListener('scroll', () => { removeFab(); closePanel(); }, true);
 
