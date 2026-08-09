@@ -1,6 +1,6 @@
 # Hi Vocabulary Clipper
 
-Extension Manifest V3 cho Chrome. Bôi đen một từ/cụm từ trên trang web, bấm nút `Hi`, xem nghĩa Việt + ví dụ, chọn topic rồi thêm vào app.
+Extension Manifest V3 cho Chrome. Bôi đen một từ/cụm từ trên trang web, bấm nút `Hi`, xem nghĩa Việt + ví dụ tiếng Anh, chọn topic rồi thêm vào app. Có thể bấm icon extension để mở popup tra từ riêng.
 
 ## Cài đặt
 
@@ -15,5 +15,6 @@ Extension tìm tab app theo title `Hi - Master Vocabulary`. Nếu app chưa mở
 ## Luồng dữ liệu
 
 - Free Dictionary API lấy IPA, định nghĩa tiếng Anh và ví dụ nếu có.
-- Groq proxy hiện tại của app tạo nghĩa Việt ngắn và ví dụ fallback.
+- Groq proxy hiện tại của app tạo nghĩa Việt ngắn và ví dụ fallback. Code sẽ bỏ qua example nếu phát hiện tiếng Việt để đảm bảo ví dụ chỉ dùng tiếng Anh.
 - Khi bấm thêm, extension gửi yêu cầu sang tab app có sẵn hoặc tự mở tab app nền; app gọi `HiDB.addWord`, vì vậy Supabase RLS và session hiện tại vẫn được giữ nguyên.
+- Popup có nút mở app để đăng nhập khi session chưa sẵn sàng.

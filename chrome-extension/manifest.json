@@ -14,7 +14,10 @@
       "run_at": "document_idle"
     }
   ],
-  "action": { "default_title": "Hi Vocabulary Clipper" },
+  "action": {
+    "default_title": "Hi Vocabulary Clipper",
+    "default_popup": "popup.html"
+  },
   "web_accessible_resources": [
     {
       "resources": ["logo-mark.svg"],

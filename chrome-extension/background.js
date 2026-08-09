@@ -53,6 +53,13 @@ async function sendToAppTab(tabId, message) {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === 'open-app') {
+    chrome.tabs.create({ url: APP_URL, active: true })
+      .then(tab => sendResponse({ ok: true, data: { tabId: tab.id } }))
+      .catch(error => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
   if (!['get-app-topics', 'add-to-app'].includes(message?.type)) return;
 
   (async () => {

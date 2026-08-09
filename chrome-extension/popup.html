@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hi Vocabulary</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="popup-shell">
+    <header class="popup-header">
+      <div class="brand">
+        <img src="logo-mark.svg" alt="Hi">
+        <div>
+          <p>Hi Vocabulary</p>
+          <span>Clipper</span>
+        </div>
+      </div>
+      <button id="loginButton" class="icon-button" type="button" title="Mở app">
+        <span>↗</span>
+      </button>
+    </header>
+
+    <form id="searchForm" class="search-card">
+      <label for="termInput">Tra từ nhanh</label>
+      <div class="search-row">
+        <input id="termInput" autocomplete="off" spellcheck="false" placeholder="Nhập từ tiếng Anh">
+        <button id="lookupButton" type="submit">Tra</button>
+      </div>
+    </form>
+
+    <section id="resultCard" class="result-card is-empty">
+      <div class="empty-state">
+        <strong>Chọn hoặc nhập một từ</strong>
+        <span>Extension sẽ tạo nghĩa tiếng Việt và chỉ dùng ví dụ tiếng Anh.</span>
+      </div>
+
+      <div class="result-body">
+        <div class="word-row">
+          <div>
+            <h1 id="wordText"></h1>
+            <p id="phoneticText"></p>
+          </div>
+          <span id="sourcePill">EN</span>
+        </div>
+        <p id="meaningText" class="meaning"></p>
+        <blockquote id="exampleText"></blockquote>
+      </div>
+    </section>
+
+    <section class="save-card">
+      <div class="save-head">
+        <div>
+          <strong>Lưu vào app</strong>
+          <span id="authStatus">Đang kiểm tra đăng nhập...</span>
+        </div>
+      </div>
+      <select id="topicSelect" disabled>
+        <option>Đang tải topic...</option>
+      </select>
+      <button id="saveButton" class="save-button" type="button" disabled>Lưu từ này</button>
+      <p id="statusText" class="status-text"></p>
+    </section>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

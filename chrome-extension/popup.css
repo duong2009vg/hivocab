@@ -1,0 +1,258 @@
+:root {
+  color-scheme: light;
+  --ink: #152027;
+  --muted: #66747d;
+  --line: #dbe3e7;
+  --soft: #f3f8f8;
+  --surface: #fbfcfa;
+  --primary: #0b6b91;
+  --primary-strong: #075b79;
+  --accent: #d73b00;
+  --success: #19734b;
+  --danger: #ba4b29;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  width: 380px;
+  min-height: 520px;
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, #cce5ff 0, transparent 34%),
+    linear-gradient(145deg, #fbfcfa 0%, #eef7f7 48%, #fff8f3 100%);
+  font: 500 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, select { font: inherit; }
+
+.popup-shell {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand img {
+  width: 34px;
+  height: 34px;
+}
+
+.brand p {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.brand span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.icon-button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .74);
+  color: var(--primary);
+  cursor: pointer;
+}
+
+.search-card,
+.result-card,
+.save-card {
+  border: 1px solid rgba(112, 120, 129, .22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .82);
+  box-shadow: 0 12px 32px rgba(16, 32, 44, .12);
+  backdrop-filter: blur(18px);
+}
+
+.search-card {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.search-card label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.search-row {
+  display: flex;
+  gap: 8px;
+}
+
+.search-row input {
+  min-width: 0;
+  flex: 1;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+}
+
+.search-row input:focus,
+.save-card select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(11, 107, 145, .14);
+}
+
+.search-row button,
+.save-button {
+  height: 42px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 16px;
+  background: var(--primary);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+.result-card {
+  min-height: 184px;
+  overflow: hidden;
+}
+
+.empty-state {
+  display: grid;
+  gap: 6px;
+  place-items: center;
+  min-height: 184px;
+  padding: 22px;
+  text-align: center;
+}
+
+.empty-state strong {
+  font-size: 16px;
+}
+
+.empty-state span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.result-body {
+  display: none;
+  gap: 12px;
+  padding: 14px;
+}
+
+.result-card:not(.is-empty) .empty-state { display: none; }
+.result-card:not(.is-empty) .result-body { display: grid; }
+
+.word-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.word-row h1 {
+  margin: 0;
+  color: var(--primary-strong);
+  font-size: 28px;
+  line-height: 1.05;
+}
+
+.word-row p {
+  min-height: 18px;
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+#sourcePill {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #e6f4f6;
+  color: var(--primary);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.meaning {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+blockquote {
+  margin: 0;
+  border-left: 3px solid var(--accent);
+  padding: 8px 0 8px 12px;
+  color: #45535b;
+  background: #fff8f3;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+}
+
+.save-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.save-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.save-head strong {
+  display: block;
+  font-size: 14px;
+}
+
+.save-head span,
+.status-text {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.save-card select {
+  width: 100%;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  background: white;
+  color: var(--ink);
+  outline: none;
+}
+
+.status-text {
+  min-height: 18px;
+  margin: 0;
+}
+
+.status-text.is-error { color: var(--danger); }
+.status-text.is-success { color: var(--success); }

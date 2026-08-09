@@ -339,6 +339,14 @@ window.HiDB = (() => {
         }));
     }
 
+    function _isEnglishExample(value) {
+        const text = String(value || '').trim();
+        if (!text || !/[a-z]/i.test(text)) return false;
+        if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(text)) return false;
+        if (/\b(và|là|của|cho|trong|một|những|các|được|không|với|khi|từ|người|này|đó)\b/i.test(text)) return false;
+        return true;
+    }
+
     /**
      * Thêm từ vựng mới vào chủ đề.
      *
@@ -354,7 +362,7 @@ window.HiDB = (() => {
                 word,
                 phonetic,
                 meaning,
-                example_sentence: exampleSentence,
+                example_sentence: _isEnglishExample(exampleSentence) ? exampleSentence : '',
             })
             .select()
             .single();

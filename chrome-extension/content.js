@@ -20,6 +20,13 @@
   function removeFab() { fab?.remove(); fab = null; }
   function closePanel() { panel?.remove(); panel = null; }
   function esc(value) { return String(value || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+  function isEnglishExample(value) {
+    const text = String(value || '').trim();
+    if (!text || !/[a-z]/i.test(text)) return false;
+    if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(text)) return false;
+    if (/\b(và|là|của|cho|trong|một|những|các|được|không|với|khi|từ|người|này|đó)\b/i.test(text)) return false;
+    return true;
+  }
 
   async function lookup(term) {
     let result = { word: term, phonetic: '', meaning: '', example: '' };
@@ -37,7 +44,7 @@
     } catch (_) { /* AI fallback below */ }
 
     try {
-      const prompt = `Translate this English vocabulary item into concise Vietnamese flashcard data. Return only JSON: {"meaning":"1-3 short Vietnamese meanings","example":"one natural English example sentence"}. Word: ${term}. English definition: ${result.english || '(not available)'}`;
+      const prompt = `Translate this English vocabulary item into concise Vietnamese flashcard data. Return only JSON: {"meaning":"1-3 short Vietnamese meanings","example":"one natural English example sentence in English only, no Vietnamese words"}. The example field must be 100% English. Word: ${term}. English definition: ${result.english || '(not available)'}`;
       const response = await fetch(GROQ_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages: [{ role: 'user', content: prompt }], temperature: 0.1, max_tokens: 180 })
@@ -47,9 +54,11 @@
         const raw = data.choices?.[0]?.message?.content || '';
         const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim().match(/\{[\s\S]*\}/)?.[0] || '{}');
         result.meaning = parsed.meaning || '';
-        result.example = result.example || parsed.example || '';
+        if (!isEnglishExample(result.example)) result.example = '';
+        if (!result.example && isEnglishExample(parsed.example)) result.example = parsed.example;
       }
     } catch (_) { /* keep dictionary result */ }
+    if (!isEnglishExample(result.example)) result.example = '';
     return result;
   }
 
