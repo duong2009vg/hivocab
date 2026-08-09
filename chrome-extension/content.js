@@ -67,12 +67,11 @@
     panel.className = 'hi-vocab-panel';
     panel.style.left = `${Math.min(x, innerWidth - 326)}px`;
     panel.style.top = `${Math.min(y, innerHeight - 300)}px`;
-    panel.innerHTML = `<h3>${esc(result.word)}</h3><div class="hi-vocab-muted">${esc(result.phonetic || 'Chưa có IPA')}</div><div class="hi-vocab-meaning">${esc(result.meaning || 'Chưa lấy được nghĩa Việt')}</div><div class="hi-vocab-example">${esc(result.example || 'Chưa có câu ví dụ')}</div><select aria-label="Chọn topic"><option>Đang tải topic...</option></select><div class="hi-vocab-actions"><button class="hi-vocab-add">Thêm vào app</button><button class="hi-vocab-close">Đóng</button></div><div class="hi-vocab-status"></div>`;
+    panel.innerHTML = `<h3>${esc(result.word)}</h3><div class="hi-vocab-muted">${esc(result.phonetic || 'Chưa có IPA')}</div><div class="hi-vocab-meaning">${esc(result.meaning || 'Chưa lấy được nghĩa Việt')}</div><div class="hi-vocab-example">${esc(result.example || 'Chưa có câu ví dụ')}</div><select aria-label="Chọn topic"><option>Đang tải topic...</option></select><div class="hi-vocab-actions"><button class="hi-vocab-add">Thêm vào app</button></div><div class="hi-vocab-status"></div>`;
     root.appendChild(panel);
     const select = panel.querySelector('select');
     const status = panel.querySelector('.hi-vocab-status');
     loadTopics(select).catch(error => { status.textContent = error.message; select.disabled = true; panel.querySelector('.hi-vocab-add').disabled = true; });
-    panel.querySelector('.hi-vocab-close').onclick = closePanel;
     panel.querySelector('.hi-vocab-add').onclick = async () => {
       const button = panel.querySelector('.hi-vocab-add');
       button.disabled = true; status.textContent = 'Đang thêm...';
@@ -95,6 +94,10 @@
     root.appendChild(fab);
     fab.onclick = async () => { const button = fab; button.disabled = true; button.innerHTML = '<span class="hi-vocab-spinner">...</span>'; current = await lookup(term); showPanel(rect.right - 18, rect.bottom + 52, current); removeFab(); };
   });
+  document.addEventListener('mousedown', event => {
+    if (!panel || root.contains(event.target)) return;
+    closePanel();
+  });
   document.addEventListener('scroll', () => { removeFab(); closePanel(); }, true);
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -102,9 +105,14 @@
     window.postMessage({ source: 'hi-vocab-extension', requestId: message.requestId, action: message.action, payload: message.payload }, '*');
     const handler = event => {
       if (event.source !== window || event.data?.source !== 'hi-vocab-app' || event.data.requestId !== message.requestId) return;
+      clearTimeout(timeout);
       window.removeEventListener('message', handler);
       sendResponse({ ok: event.data.ok, data: event.data.data, error: event.data.error });
     };
+    const timeout = setTimeout(() => {
+      window.removeEventListener('message', handler);
+      sendResponse({ ok: false, error: 'App chưa sẵn sàng. Hãy thử lại sau vài giây hoặc đăng nhập lại.' });
+    }, 12000);
     window.addEventListener('message', handler);
     return true;
   });
