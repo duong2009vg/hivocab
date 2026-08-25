@@ -1,6 +1,6 @@
 (() => {
   const DICT_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-  const GROQ_URL = 'https://groq-proxy-sandy.vercel.app/api/groq';
+  const TRANSLATE_URL = 'https://hivocab.vercel.app/api/translate';
   let fab = null;
   let panel = null;
   let current = null;
@@ -39,25 +39,22 @@
         result.word = entry.word || term;
         result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
         result.english = firstMeaning.definition || '';
-        result.example = firstMeaning.example || '';
+        result.example = isEnglishExample(firstMeaning.example) ? firstMeaning.example : '';
       }
-    } catch (_) { /* AI fallback below */ }
+    } catch (_) { /* translate fallback below */ }
 
     try {
-      const prompt = `Translate this English vocabulary item into concise Vietnamese flashcard data. Return only JSON: {"meaning":"1-3 short Vietnamese meanings","example":"one natural English example sentence in English only, no Vietnamese words"}. The example field must be 100% English. Word: ${term}. English definition: ${result.english || '(not available)'}`;
-      const response = await fetch(GROQ_URL, {
+      const textToTranslate = result.english || term;
+      const response = await fetch(TRANSLATE_URL, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'llama-3.1-8b-instant', messages: [{ role: 'user', content: prompt }], temperature: 0.1, max_tokens: 180 })
+        body: JSON.stringify({ text: textToTranslate, from: 'en', to: 'vi' })
       });
       if (response.ok) {
         const data = await response.json();
-        const raw = data.choices?.[0]?.message?.content || '';
-        const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim().match(/\{[\s\S]*\}/)?.[0] || '{}');
-        result.meaning = parsed.meaning || '';
-        if (!isEnglishExample(result.example)) result.example = '';
-        if (!result.example && isEnglishExample(parsed.example)) result.example = parsed.example;
+        if (data.ok && data.text) result.meaning = data.text;
       }
     } catch (_) { /* keep dictionary result */ }
+
     if (!isEnglishExample(result.example)) result.example = '';
     return result;
   }

@@ -17,10 +17,9 @@
 const HiDict = (() => {
 
     const DICT_URL  = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+    const TRANSLATE_URL = '/api/translate';
     // âš ï¸ Thay URL dÆ°á»›i Ä‘Ã¢y báº±ng domain proxy tháº­t cá»§a báº¡n trÃªn Vercel
-    const GROQ_URL  = 'https://groq-proxy-sandy.vercel.app/api/groq';
-    const GROQ_MODEL = 'llama-3.1-8b-instant';   // nhanh, miá»…n phÃ­
-
+    
     // Cache káº¿t quáº£ tra (bao gá»“m báº£n dá»‹ch) Ä‘á»ƒ khÃ´ng gá»i API láº·p láº¡i
     const _cache = new Map();
 
@@ -50,101 +49,53 @@ const HiDict = (() => {
      * @param {Array}  meanings   - máº£ng meaning object tá»« Free Dictionary
      * @returns {Promise<{ viSummary: string, viMeanings: Array }|null>}
      */
-    async function _translateWithGroq(word, meanings) {
+    async function _translateWithGoogle(word, meanings) {
         try {
-            // NÃ©n danh sÃ¡ch Ä‘á»‹nh nghÄ©a thÃ nh text gá»n Ä‘á»ƒ gá»­i lÃªn
-            const defLines = [];
+            const definitionRefs = [];
+            const texts = [word];
             meanings.forEach((m, mi) => {
                 m.definitions.forEach((d, di) => {
-                    defLines.push(`[${mi}-${di}][${m.partOfSpeech}] ${d.definition}`);
+                    definitionRefs.push({ mi, di });
+                    texts.push(d.definition);
                 });
             });
 
-            const prompt = `You are a Vietnamese dictionary assistant. Translate the following English word and its definitions into Vietnamese.
-
-Word: "${word}"
-
-Definitions:
-${defLines.join('\n')}
-
-Return ONLY valid JSON (no markdown, no explanation) in this exact format:
-{
-  "viSummary": "nghÄ©a ngáº¯n gá»n nháº¥t báº±ng tiáº¿ng Viá»‡t (1 dÃ²ng)",
-  "viDefinitions": {
-    "0-0": "dá»‹ch Ä‘á»‹nh nghÄ©a [0-0] sang tiáº¿ng Viá»‡t",
-    "0-1": "dá»‹ch Ä‘á»‹nh nghÄ©a [0-1] sang tiáº¿ng Viá»‡t"
-  }
-}
-
-Rules:
-- viSummary: 1 short line capturing the core meaning in Vietnamese
-- viDefinitions: translate each [mi-di] key's definition to natural Vietnamese
-- Keep translations concise and natural, not word-by-word
-- Do not include the word itself in viSummary`;
-
-            const res = await fetch(GROQ_URL, {
+            const res = await fetch(TRANSLATE_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type':  'application/json',
-                },
-                body: JSON.stringify({
-                    model:       GROQ_MODEL,
-                    messages:    [{ role: 'user', content: prompt }],
-                    temperature: 0.1,
-                    max_tokens:  800,
-                }),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texts, from: 'en', to: 'vi' }),
             });
 
             if (!res.ok) {
-                console.warn('[HiDict] Groq API error:', res.status);
+                console.warn('[HiDict] Translate API error:', res.status);
                 return null;
             }
 
-            const json    = await res.json();
-            const content = json.choices?.[0]?.message?.content?.trim();
-            if (!content) return null;
+            const json = await res.json();
+            const translations = json.translations || [];
+            if (!json.ok || !translations.length) return null;
 
-            // Parse JSON tá»« response â€” robust: xá»­ lÃ½ markdown fence, trailing comma, single quote
-            let cleaned = content
-                .replace(/```json\n?|\n?```/g, '')  // bá» markdown fence
-                .trim();
-
-            // TrÃ­ch xuáº¥t block JSON Ä‘áº§u tiÃªn trong response (trÃ¡nh text thá»«a trÆ°á»›c/sau)
-            const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
-            if (!jsonMatch) throw new Error('KhÃ´ng tÃ¬m tháº¥y JSON trong response');
-            cleaned = jsonMatch[0];
-
-            // Sá»­a trailing comma trÆ°á»›c } hoáº·c ] (JSON khÃ´ng há»£p lá»‡ nhÆ°ng Groq hay sinh ra)
-            cleaned = cleaned.replace(/,(\s*[}\]])/g, '$1');
-
-            // Sá»­a single-quoted string â†’ double-quoted (má»™t sá»‘ model tráº£ vá» kiá»ƒu nÃ y)
-            // Chá»‰ Ã¡p dá»¥ng náº¿u khÃ´ng cÃ³ double-quote há»£p lá»‡ xung quanh
-            cleaned = cleaned.replace(/:\s*'([^']*)'/g, ': "$1"');
-
-            const parsed = JSON.parse(cleaned);
-
-            // Map viDefinitions vá» cÃ¹ng cáº¥u trÃºc meanings
-            const viMeanings = meanings.map((m, mi) => ({
+            const viMeanings = meanings.map(m => ({
                 partOfSpeech:  m.partOfSpeech,
-                viDefinitions: m.definitions.map((_, di) =>
-                    parsed.viDefinitions?.[`${mi}-${di}`] || ''
-                ),
+                viDefinitions: m.definitions.map(() => ''),
             }));
 
+            definitionRefs.forEach((ref, index) => {
+                if (viMeanings[ref.mi]) {
+                    viMeanings[ref.mi].viDefinitions[ref.di] = translations[index + 1] || '';
+                }
+            });
+
             return {
-                viSummary: parsed.viSummary || '',
+                viSummary: translations[0] || translations[1] || '',
                 viMeanings,
             };
 
         } catch (err) {
-            console.warn('[HiDict] Lá»—i Groq translate:', err);
+            console.warn('[HiDict] Google translate error:', err);
             return null;
         }
     }
-
-    // --------------------------------------------------------
-    // LOOKUP
-    // --------------------------------------------------------
 
     /**
      * Tra tá»« Ä‘iá»ƒn tiáº¿ng Anh vÃ  dá»‹ch nghÄ©a sang tiáº¿ng Viá»‡t.
@@ -230,7 +181,7 @@ Rules:
             _cache.set(key, result);
 
             // Gá»i Groq dá»‹ch tiáº¿ng Viá»‡t (khÃ´ng block render)
-            _translateWithGroq(entry.word, meanings).then(vi => {
+            _translateWithGoogle(entry.word, meanings).then(vi => {
                 if (vi) {
                     result.viSummary  = vi.viSummary;
                     result.viMeanings = vi.viMeanings;
