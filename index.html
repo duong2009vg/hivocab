@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8"/>
@@ -1215,7 +1215,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <!-- Header (desktop) -->
         <header class="hidden lg:flex flex-col gap-1">
             <h1 class="font-headline-lg text-headline-lg text-on-surface">Tra từ</h1>
-            <p class="text-on-surface-variant">Tra nghĩa, phiên âm và ví dụ từ Free Dictionary.</p>
+            <p class="text-on-surface-variant">Dịch từ và cụm từ tiếng Anh sang tiếng Việt qua DeepL.</p>
         </header>
 
         <!-- Search bar -->
@@ -1223,7 +1223,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[22px]">search</span>
             <input id="dict-input"
                    type="text"
-                   placeholder="Nhập từ tiếng Anh để tra..."
+                   placeholder="Nhập từ hoặc cụm từ tiếng Anh..."
                    autocomplete="off" spellcheck="false"
                    onkeydown="if(event.key==='Enter') window.dictSearch()"
                    class="w-full pl-12 pr-24 py-4 bg-surface-container-lowest/80 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl text-on-surface placeholder:text-outline focus:border-primary focus:outline-none text-base md:text-lg transition-colors shadow-sm"/>
@@ -3472,7 +3472,7 @@ function _dictShow(state) {
     });
 }
 
-/** Tra từ — gọi HiDict và render kết quả */
+/** Tra từ — gọi HiDict (DeepL) và render kết quả ngay lập tức */
 window.dictSearch = async function() {
     const input = document.getElementById('dict-input');
     const word  = input?.value?.trim();
@@ -3496,21 +3496,6 @@ window.dictSearch = async function() {
     window._dictCurrentResult = result;
     _dictRenderResult(result);
     _dictShow('result');
-
-    // Poll 3s — đợi Groq dịch xong rồi patch bản dịch vào
-    const pollStart = Date.now();
-    const pollTimer = setInterval(() => {
-        const r = window._dictCurrentResult;
-        if (!r || r.word.toLowerCase() !== word.toLowerCase()) {
-            clearInterval(pollTimer); // Đã tra từ khác
-            return;
-        }
-        if (r.viSummary !== null) {
-            clearInterval(pollTimer);
-            _dictPatchVietnamese(r);
-        }
-        if (Date.now() - pollStart > 15000) clearInterval(pollTimer); // timeout
-    }, 600);
 };
 
 /** Render kết quả tra từ vào DOM */
@@ -3519,16 +3504,14 @@ function _dictRenderResult(r) {
     document.getElementById('dict-word').textContent     = r.word;
     document.getElementById('dict-phonetic').textContent = r.phonetic || '';
 
-    // Việt: summary badge (hiện nếu đã có, ẩn nếu chưa)
+    // Nghĩa tiếng Việt từ DeepL — hiện ngay, không cần chờ
     const viSumEl = document.getElementById('dict-vi-summary');
     if (viSumEl) {
         if (r.viSummary) {
             viSumEl.textContent = r.viSummary;
             viSumEl.classList.remove('hidden');
         } else {
-            // Hiện loading skeleton — Groq đang dịch
-            viSumEl.innerHTML = `<span class="animate-pulse text-outline text-xs">Groq AI đang dịch...</span>`;
-            viSumEl.classList.remove('hidden');
+            viSumEl.classList.add('hidden');
         }
     }
 
@@ -3545,7 +3528,7 @@ function _dictRenderResult(r) {
         synWrap.classList.add('hidden');
     }
 
-    // Meanings
+    // Meanings (tiếng Anh từ Free Dictionary — nếu có)
     const meaningsEl = document.getElementById('dict-meanings');
     meaningsEl.innerHTML = '';
 
@@ -3558,16 +3541,13 @@ function _dictRenderResult(r) {
     };
 
     (r.meanings || []).forEach((meaning, mi) => {
-        const colorClass  = posColors[meaning.partOfSpeech] || 'bg-surface-container text-on-surface-variant';
-        const viDefs      = r.viMeanings?.[mi]?.viDefinitions || [];
+        const colorClass = posColors[meaning.partOfSpeech] || 'bg-surface-container text-on-surface-variant';
 
         const defs = (meaning.definitions || []).map((d, i) => `
-            <div class="flex gap-3 ${i > 0 ? 'mt-4 pt-4 border-t border-outline-variant/15' : ''}" data-def="${mi}-${i}">
+            <div class="flex gap-3 ${i > 0 ? 'mt-4 pt-4 border-t border-outline-variant/15' : ''}">
                 <span class="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
                 <div class="flex-1">
                     <p class="text-sm md:text-base text-on-surface leading-relaxed">${_escHtml(d.definition)}</p>
-                    ${viDefs[i] ? `<p class="vi-def mt-1 text-sm font-medium text-primary/80">↳ ${_escHtml(viDefs[i])}</p>` :
-                                  `<p class="vi-def mt-1 text-xs text-outline animate-pulse">↳ đang dịch...</p>`}
                     ${d.example ? `<p class="mt-2 text-xs md:text-sm text-on-surface-variant italic border-l-2 border-secondary-fixed-dim pl-3">"${_escHtml(d.example)}"</p>` : ''}
                 </div>
             </div>
@@ -3575,7 +3555,6 @@ function _dictRenderResult(r) {
 
         const card = document.createElement('div');
         card.className = 'glass-card soft-shadow rounded-2xl p-5 md:p-6';
-        card.dataset.meaningIdx = mi;
         card.innerHTML = `
             <div class="flex items-center gap-2 mb-4">
                 <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${colorClass}">${meaning.partOfSpeech}</span>
@@ -3689,21 +3668,6 @@ window.dictSaveWord = async function(topicId, topicName) {
     if (!r || !topicId) return;
 
     const errEl = document.getElementById('save-word-error');
-    const saveBtn = document.querySelector(`[onclick*="dictSaveWord('${topicId}'"]`);
-
-    // ── Đợi Groq dịch xong (tối đa 6 giây) ──────────────────────
-    if (r.viSummary === null) {
-        // Hiện loading state
-        if (errEl) { errEl.classList.add('hidden'); }
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">refresh</span> Đang dịch...'; }
-
-        const deadline = Date.now() + 6000;
-        while (r.viSummary === null && Date.now() < deadline) {
-            await new Promise(res => setTimeout(res, 400));
-        }
-
-        if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = `<span class="material-symbols-outlined text-[18px]">add</span>`; }
-    }
 
     // ── Xác định meaning (ưu tiên tiếng Việt) ────────────────────
     let meaning = '';

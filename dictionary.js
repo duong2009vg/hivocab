@@ -1,29 +1,28 @@
-﻿// ============================================================
+// ============================================================
 // HI - DICTIONARY  |  dictionary.js
 // ============================================================
-// Wrapper cho Free Dictionary API + Groq AI dá»‹ch sang tiáº¿ng Viá»‡t.
+// Wrapper cho DeepL (dịch chính) + Free Dictionary API (IPA/audio phụ).
 //
 // API public:
 //   await HiDict.lookupWord('serendipity')
-//   â†’ { word, phonetic, audioUrl, meanings, synonyms,
-//       viSummary,      // nghÄ©a tiáº¿ng Viá»‡t ngáº¯n gá»n
-//       viMeanings }    // [{ partOfSpeech, viDefinitions: ['...'] }]
-//   â†’ null náº¿u khÃ´ng tÃ¬m tháº¥y
+//   → { word, phonetic, audioUrl, meanings, synonyms,
+//       viSummary,      // nghĩa tiếng Việt từ DeepL
+//       viMeanings }    // null (không còn dùng)
+//   → null nếu DeepL thực sự lỗi
 //
 //   await HiDict.playWordAudio('serendipity')
-//   â†’ phÃ¡t Ã¢m chuáº©n náº¿u cÃ³ audio URL, fallback sang Web Speech API
+//   → phát âm chuẩn nếu có audio URL, fallback sang Web Speech API
 // ============================================================
 
 const HiDict = (() => {
 
-    const DICT_URL  = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+    const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
     const TRANSLATE_URL = '/api/translate';
-    // âš ï¸ Thay URL dÆ°á»›i Ä‘Ã¢y báº±ng domain proxy tháº­t cá»§a báº¡n trÃªn Vercel
-    
-    // Cache káº¿t quáº£ tra (bao gá»“m báº£n dá»‹ch) Ä‘á»ƒ khÃ´ng gá»i API láº·p láº¡i
+
+    // Cache kết quả tra (bao gồm bản dịch) để không gọi API lặp lại
     const _cache = new Map();
 
-    // Audio element dÃ¹ng chung
+    // Audio element dùng chung
     let _audioEl = null;
 
     function _warmSpeechVoices() {
@@ -38,102 +37,50 @@ const HiDict = (() => {
     }
 
     // --------------------------------------------------------
-    // GROQ TRANSLATION
+    // DEEPL TRANSLATION (nguồn chính)
     // --------------------------------------------------------
 
     /**
-     * Dá»‹ch toÃ n bá»™ nghÄ©a cá»§a má»™t tá»« sang tiáº¿ng Viá»‡t qua Groq AI.
-     * Gá»i 1 láº§n duy nháº¥t, nháº­n JSON cÃ³ cáº¥u trÃºc.
+     * Dịch từ/cụm từ tiếng Anh sang tiếng Việt qua DeepL.
      *
-     * @param {string} word       - tá»« tiáº¿ng Anh
-     * @param {Array}  meanings   - máº£ng meaning object tá»« Free Dictionary
-     * @returns {Promise<{ viSummary: string, viMeanings: Array }|null>}
+     * @param {string} text  - từ hoặc cụm từ cần dịch
+     * @returns {Promise<string|null>}  bản dịch hoặc null nếu lỗi
      */
-    async function _translateWithGoogle(word, meanings) {
+    async function _translateWithDeepL(text) {
         try {
-            const definitionRefs = [];
-            const texts = [word];
-            meanings.forEach((m, mi) => {
-                m.definitions.forEach((d, di) => {
-                    definitionRefs.push({ mi, di });
-                    texts.push(d.definition);
-                });
-            });
-
             const res = await fetch(TRANSLATE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ texts, from: 'en', to: 'vi' }),
+                body: JSON.stringify({ text, from: 'en', to: 'vi' }),
             });
-
-            if (!res.ok) {
-                console.warn('[HiDict] Translate API error:', res.status);
-                return null;
-            }
-
+            if (!res.ok) return null;
             const json = await res.json();
-            const translations = json.translations || [];
-            if (!json.ok || !translations.length) return null;
-
-            const viMeanings = meanings.map(m => ({
-                partOfSpeech:  m.partOfSpeech,
-                viDefinitions: m.definitions.map(() => ''),
-            }));
-
-            definitionRefs.forEach((ref, index) => {
-                if (viMeanings[ref.mi]) {
-                    viMeanings[ref.mi].viDefinitions[ref.di] = translations[index + 1] || '';
-                }
-            });
-
-            return {
-                viSummary: translations[0] || translations[1] || '',
-                viMeanings,
-            };
-
+            return (json.ok && json.text) ? json.text : null;
         } catch (err) {
-            console.warn('[HiDict] Google translate error:', err);
+            console.warn('[HiDict] DeepL translate error:', err);
             return null;
         }
     }
 
+    // --------------------------------------------------------
+    // FREE DICTIONARY (nguồn phụ — IPA, audio, ví dụ)
+    // --------------------------------------------------------
+
     /**
-     * Tra tá»« Ä‘iá»ƒn tiáº¿ng Anh vÃ  dá»‹ch nghÄ©a sang tiáº¿ng Viá»‡t.
+     * Lấy dữ liệu từ Free Dictionary API.
+     * Chỉ dùng để lấy IPA, audio URL, meanings (tiếng Anh), synonyms.
+     * Không fail cả lookupWord nếu hàm này lỗi.
      *
-     * @param {string} word
+     * @param {string} word  - từ đơn tiếng Anh
      * @returns {Promise<Object|null>}
-     *   {
-     *     word,           // tá»« gá»‘c
-     *     phonetic,       // /foÊŠËˆnÉ›tÉªk/
-     *     audioUrl,       // URL file .mp3 phÃ¡t Ã¢m (cÃ³ thá»ƒ null)
-     *     meanings: [     // nghÄ©a tiáº¿ng Anh
-     *       { partOfSpeech, definitions: [{ definition, example, synonyms }] }
-     *     ],
-     *     synonyms,       // máº£ng string (top 6)
-     *     viSummary,      // nghÄ©a tiáº¿ng Viá»‡t ngáº¯n gá»n (tá»« Groq)
-     *     viMeanings: [   // báº£n dá»‹ch tá»«ng nghÄ©a
-     *       { partOfSpeech, viDefinitions: ['...', ...] }
-     *     ],
-     *   }
      */
-    async function lookupWord(word) {
-        if (!word || !word.trim()) return null;
-        const key = word.trim().toLowerCase();
-
-        // Free Dictionary API chá»‰ há»— trá»£ tá»« Ä‘Æ¡n â€” bá» qua cá»¥m tá»« nhiá»u chá»¯
-        if (key.includes(' ')) return null;
-
-        if (_cache.has(key)) return _cache.get(key);
-
+    async function _fetchDictionary(word) {
         try {
-            const res = await fetch(DICT_URL + encodeURIComponent(key));
-            if (!res.ok) { _cache.set(key, null); return null; }
+            const res = await fetch(DICT_URL + encodeURIComponent(word));
+            if (!res.ok) return null;
 
             const data = await res.json();
-            if (!Array.isArray(data) || data.length === 0) {
-                _cache.set(key, null);
-                return null;
-            }
+            if (!Array.isArray(data) || data.length === 0) return null;
 
             const entry = data[0];
 
@@ -144,7 +91,7 @@ const HiDict = (() => {
                 phonetic = ph?.text || '';
             }
 
-            // Audio URL (Æ°u tiÃªn US accent)
+            // Audio URL (ưu tiên US accent)
             let audioUrl = null;
             if (entry.phonetics) {
                 const withAudio = entry.phonetics.filter(p => p.audio);
@@ -152,7 +99,7 @@ const HiDict = (() => {
                 audioUrl = (us || withAudio[0])?.audio || null;
             }
 
-            // Parse meanings (tiáº¿ng Anh)
+            // Meanings (tiếng Anh, giữ để hiển thị định nghĩa gốc)
             const meanings = (entry.meanings || []).map(m => ({
                 partOfSpeech: m.partOfSpeech,
                 definitions:  (m.definitions || []).slice(0, 3).map(d => ({
@@ -162,40 +109,83 @@ const HiDict = (() => {
                 })),
             }));
 
-            // Synonyms tá»•ng há»£p (top 6)
+            // Synonyms tổng hợp (top 6)
             const allSynonyms = new Set();
             meanings.forEach(m => m.definitions.forEach(d => d.synonyms.forEach(s => allSynonyms.add(s))));
             (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => allSynonyms.add(s)));
 
-            const result = {
-                word:     entry.word,
+            return {
+                word:     entry.word || word,
                 phonetic,
                 audioUrl,
                 meanings,
                 synonyms: [...allSynonyms].slice(0, 6),
-                viSummary:  null,
-                viMeanings: null,
             };
-
-            // LÆ°u táº¡m vÃ o cache (chÆ°a cÃ³ báº£n dá»‹ch) Ä‘á»ƒ playAudio khÃ´ng bá»‹ block
-            _cache.set(key, result);
-
-            // Gá»i Groq dá»‹ch tiáº¿ng Viá»‡t (khÃ´ng block render)
-            _translateWithGoogle(entry.word, meanings).then(vi => {
-                if (vi) {
-                    result.viSummary  = vi.viSummary;
-                    result.viMeanings = vi.viMeanings;
-                    // Cáº­p nháº­t cache
-                    _cache.set(key, result);
-                }
-            });
-
-            return result;
-
         } catch (err) {
-            console.warn('[HiDict] Lá»—i fetch:', err);
+            console.warn('[HiDict] Free Dictionary error:', err);
             return null;
         }
+    }
+
+    // --------------------------------------------------------
+    // LOOKUP WORD (API chính)
+    // --------------------------------------------------------
+
+    /**
+     * Tra từ — DeepL làm nguồn chính, Free Dictionary làm phụ.
+     * Hỗ trợ từ đơn, cụm từ, slang, viết tắt.
+     *
+     * @param {string} word
+     * @returns {Promise<Object|null>}
+     *   {
+     *     word,           // từ gốc
+     *     phonetic,       // /foʊˈnɛtɪk/  (nếu có trong Dictionary)
+     *     audioUrl,       // URL file .mp3 (có thể null)
+     *     meanings: [     // nghĩa tiếng Anh từ Dictionary (có thể rỗng)
+     *       { partOfSpeech, definitions: [{ definition, example, synonyms }] }
+     *     ],
+     *     synonyms,       // mảng string (top 6, có thể rỗng)
+     *     viSummary,      // nghĩa tiếng Việt từ DeepL (luôn có nếu không lỗi)
+     *     viMeanings,     // null (không còn dùng)
+     *   }
+     */
+    async function lookupWord(word) {
+        if (!word || !word.trim()) return null;
+        const key = word.trim().toLowerCase();
+
+        if (_cache.has(key)) return _cache.get(key);
+
+        // 1. Dịch sang tiếng Việt qua DeepL (bắt buộc)
+        const viSummary = await _translateWithDeepL(word.trim());
+        if (!viSummary) {
+            _cache.set(key, null);
+            return null;
+        }
+
+        const result = {
+            word:       word.trim(),
+            phonetic:   '',
+            audioUrl:   null,
+            meanings:   [],
+            synonyms:   [],
+            viSummary,
+            viMeanings: null,
+        };
+
+        // 2. Lấy thêm IPA/audio/meanings từ Free Dictionary (optional, chỉ từ đơn)
+        if (!key.includes(' ')) {
+            const dictData = await _fetchDictionary(key);
+            if (dictData) {
+                result.word     = dictData.word;
+                result.phonetic = dictData.phonetic;
+                result.audioUrl = dictData.audioUrl;
+                result.meanings = dictData.meanings;
+                result.synonyms = dictData.synonyms;
+            }
+        }
+
+        _cache.set(key, result);
+        return result;
     }
 
     // --------------------------------------------------------
@@ -203,10 +193,10 @@ const HiDict = (() => {
     // --------------------------------------------------------
 
     /**
-     * PhÃ¡t Ã¢m tá»« â€” Æ°u tiÃªn audio URL tháº­t, fallback Web Speech API.
+     * Phát âm từ — ưu tiên audio URL thật, fallback Web Speech API.
      *
      * @param {string} word
-     * @param {number} rate  - tá»‘c Ä‘á»™ fallback TTS (0.5â€“1.0)
+     * @param {number} rate  - tốc độ fallback TTS (0.5–1.0)
      */
     async function playWordAudio(word, rate = 0.9) {
         if (!word || !word.trim()) return;
@@ -239,23 +229,11 @@ const HiDict = (() => {
         }
 
         speakNow();
-
-        if (isSingleWord && !_cache.has(key)) {
-            lookupWord(word).then(result => {
-                if (!result?.audioUrl) return;
-                try {
-                    if (!_audioEl) _audioEl = new Audio();
-                    _audioEl.preload = 'auto';
-                    _audioEl.src = result.audioUrl;
-                    _audioEl.load();
-                } catch (_) { /* ignore preload errors */ }
-            });
-        }
     }
 
     // --------------------------------------------------------
 
-    /** XoÃ¡ cache (dÃ¹ng khi test). */
+    /** Xoá cache (dùng khi test). */
     function clearCache() { _cache.clear(); }
 
     return { lookupWord, playWordAudio, clearCache };
