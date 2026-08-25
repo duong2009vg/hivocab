@@ -1,80 +1,103 @@
-const APP_TITLE = 'Hi - Master Vocabulary';
-const APP_URL = 'https://hivocab.vercel.app';
-const APP_READY_TIMEOUT_MS = 15000;
+const APP_URL      = 'https://hivocab.vercel.app';
+const API_BASE_URL = 'https://hivocab.vercel.app/api';
 
-async function findAppTab() {
-  const tabs = await chrome.tabs.query({});
-  return tabs.find(tab => (tab.title || '').includes(APP_TITLE) || (tab.url || '').startsWith(APP_URL));
+// ── Lưu / lấy auth token ─────────────────────────────────────────────────────
+
+function storeToken(token) {
+    return chrome.storage.local.set({ hivocab_auth_token: token });
 }
 
-function waitForTabComplete(tabId) {
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      chrome.tabs.onUpdated.removeListener(listener);
-      reject(new Error('App mở quá lâu, hãy thử lại sau vài giây.'));
-    }, APP_READY_TIMEOUT_MS);
-
-    const listener = (updatedTabId, changeInfo) => {
-      if (updatedTabId !== tabId || changeInfo.status !== 'complete') return;
-      clearTimeout(timeout);
-      chrome.tabs.onUpdated.removeListener(listener);
-      resolve();
-    };
-
-    chrome.tabs.onUpdated.addListener(listener);
-  });
+function clearToken() {
+    return chrome.storage.local.remove('hivocab_auth_token');
 }
 
-async function getOrOpenAppTab() {
-  const existingTab = await findAppTab();
-  if (existingTab?.id) {
-    if (existingTab.status === 'loading') await waitForTabComplete(existingTab.id);
-    return existingTab;
-  }
-
-  const createdTab = await chrome.tabs.create({ url: APP_URL, active: false });
-  if (!createdTab?.id) throw new Error('Không mở được app Hi Vocabulary.');
-  if (createdTab.status !== 'complete') await waitForTabComplete(createdTab.id);
-  return createdTab;
+async function getToken() {
+    const data = await chrome.storage.local.get('hivocab_auth_token');
+    return data.hivocab_auth_token || null;
 }
 
-async function sendToAppTab(tabId, message) {
-  try {
-    return await chrome.tabs.sendMessage(tabId, message);
-  } catch (error) {
-    const receiverMissing = String(error?.message || '').includes('Receiving end does not exist');
-    if (!receiverMissing) throw error;
+// ── Gọi API Vercel trực tiếp ─────────────────────────────────────────────────
 
-    // App tab may have been opened before the extension was installed/reloaded.
-    await chrome.scripting.insertCSS({ target: { tabId }, files: ['content.css'] });
-    await chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] });
-    return await chrome.tabs.sendMessage(tabId, message);
-  }
+async function apiGet(path, token) {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+    });
+    return res.json();
 }
+
+async function apiPost(path, token, body) {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+    return res.json();
+}
+
+// ── Message handler ───────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message?.type === 'open-app') {
-    chrome.tabs.create({ url: APP_URL, active: true })
-      .then(tab => sendResponse({ ok: true, data: { tabId: tab.id } }))
-      .catch(error => sendResponse({ ok: false, error: error.message }));
-    return true;
-  }
 
-  if (!['get-app-topics', 'add-to-app'].includes(message?.type)) return;
+    // Content script của web app gửi token lên để lưu
+    if (message?.type === 'store-auth-token') {
+        const token = message.token;
+        if (token) {
+            storeToken(token).then(() => sendResponse({ ok: true }));
+        } else {
+            clearToken().then(() => sendResponse({ ok: true }));
+        }
+        return true;
+    }
 
-  (async () => {
-    const appTab = await getOrOpenAppTab();
-    if (!appTab?.id) throw new Error('Không tìm thấy tab "Hi - Master Vocabulary".');
+    // Mở web app (dùng khi chưa có token)
+    if (message?.type === 'open-app') {
+        chrome.tabs.create({ url: APP_URL, active: true })
+            .then(tab => sendResponse({ ok: true, data: { tabId: tab.id } }))
+            .catch(err => sendResponse({ ok: false, error: err.message }));
+        return true;
+    }
 
-    const response = await sendToAppTab(appTab.id, {
-      type: 'HI_EXTENSION_PAGE_REQUEST',
-      requestId: message.requestId,
-      action: message.type === 'get-app-topics' ? 'get-topics' : 'add-word',
-      payload: message.payload || {}
-    });
-    if (!response?.ok) throw new Error(response?.error || 'App không phản hồi.');
-    sendResponse({ ok: true, data: response.data });
-  })().catch(error => sendResponse({ ok: false, error: error.message }));
+    // Lấy danh sách topics
+    if (message?.type === 'get-app-topics') {
+        (async () => {
+            const token = await getToken();
+            if (!token) {
+                return sendResponse({ ok: false, error: 'Chưa đăng nhập. Hãy mở app và đăng nhập.' });
+            }
+            const data = await apiGet('/topics', token);
+            if (!data.ok) {
+                // Token hết hạn hoặc lỗi
+                if (data.error?.includes('Invalid') || data.error?.includes('expired')) {
+                    await clearToken();
+                    return sendResponse({ ok: false, error: 'Phiên đăng nhập hết hạn. Hãy mở app để đăng nhập lại.' });
+                }
+                return sendResponse({ ok: false, error: data.error || 'Không tải được topic.' });
+            }
+            sendResponse({ ok: true, data: data.topics });
+        })().catch(err => sendResponse({ ok: false, error: err.message }));
+        return true;
+    }
 
-  return true;
+    // Lưu từ vào topic
+    if (message?.type === 'add-to-app') {
+        (async () => {
+            const token = await getToken();
+            if (!token) {
+                return sendResponse({ ok: false, error: 'Chưa đăng nhập. Hãy mở app và đăng nhập.' });
+            }
+            const data = await apiPost('/add-word', token, message.payload || {});
+            if (!data.ok) {
+                if (data.error?.includes('Invalid') || data.error?.includes('expired')) {
+                    await clearToken();
+                    return sendResponse({ ok: false, error: 'Phiên đăng nhập hết hạn. Hãy mở app để đăng nhập lại.' });
+                }
+                return sendResponse({ ok: false, error: data.error || 'Không lưu được từ.' });
+            }
+            sendResponse({ ok: true });
+        })().catch(err => sendResponse({ ok: false, error: err.message }));
+        return true;
+    }
 });

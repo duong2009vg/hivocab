@@ -3,7 +3,7 @@
   "name": "Hi Vocabulary Clipper",
   "version": "0.1.0",
   "description": "Tra nhanh từ đang bôi đen và thêm vào Hi - Master Vocabulary.",
-  "permissions": ["tabs", "scripting", "activeTab"],
+  "permissions": ["tabs", "scripting", "activeTab", "storage"],
   "host_permissions": ["<all_urls>"],
   "background": { "service_worker": "background.js" },
   "content_scripts": [

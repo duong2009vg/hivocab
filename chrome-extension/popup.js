@@ -1,4 +1,4 @@
-const DICT_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 const TRANSLATE_URL = 'https://hivocab.vercel.app/api/translate';
 
 let requestId = 0;
@@ -105,15 +105,16 @@ function updateSaveState() {
 }
 
 async function loadTopics() {
-  authStatus.textContent = 'Đang kiểm tra đăng nhập...';
+  authStatus.textContent = 'Đang kiểm tra...';
   topicSelect.disabled = true;
   saveButton.disabled = true;
 
   const response = await send('get-app-topics');
   if (!response?.ok) {
     topicsReady = false;
-    topicSelect.innerHTML = '<option>Chưa kết nối app</option>';
-    authStatus.textContent = 'Cần đăng nhập app';
+    topicSelect.innerHTML = '<option>Chưa kết nối</option>';
+    const isAuthError = (response?.error || '').includes('đăng nhập');
+    authStatus.textContent = isAuthError ? 'Chưa đăng nhập' : 'Lỗi kết nối';
     setStatus(response?.error || 'Không tải được topic.', 'error');
     return;
   }
@@ -128,7 +129,7 @@ async function loadTopics() {
   }
 
   topicsReady = true;
-  authStatus.textContent = 'Đã kết nối';
+  authStatus.textContent = 'Đã đăng nhập';
   topicSelect.disabled = false;
   topicSelect.innerHTML = topics.map(topic => `<option value="${esc(topic.id)}">${esc(topic.name)}</option>`).join('');
   setStatus('', '');
@@ -194,7 +195,7 @@ saveButton.addEventListener('click', async () => {
 });
 
 loginButton.addEventListener('click', () => {
-  send('open-app');
+  chrome.tabs.create({ url: 'https://hivocab.vercel.app', active: true });
 });
 
 document.addEventListener('DOMContentLoaded', () => {
