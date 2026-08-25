@@ -5,19 +5,24 @@ let requestId = 0;
 let currentResult = null;
 let topicsReady = false;
 
-const termInput = document.getElementById('termInput');
-const searchForm = document.getElementById('searchForm');
+const loginCard      = document.getElementById('loginCard');
+const mainContent    = document.getElementById('mainContent');
+const googleLoginBtn = document.getElementById('googleLoginBtn');
+const loginStatus    = document.getElementById('loginStatus');
+const logoutButton   = document.getElementById('logoutButton');
+
+const termInput    = document.getElementById('termInput');
+const searchForm   = document.getElementById('searchForm');
 const lookupButton = document.getElementById('lookupButton');
-const loginButton = document.getElementById('loginButton');
-const resultCard = document.getElementById('resultCard');
-const wordText = document.getElementById('wordText');
+const resultCard   = document.getElementById('resultCard');
+const wordText     = document.getElementById('wordText');
 const phoneticText = document.getElementById('phoneticText');
-const meaningText = document.getElementById('meaningText');
-const exampleText = document.getElementById('exampleText');
-const topicSelect = document.getElementById('topicSelect');
-const saveButton = document.getElementById('saveButton');
-const statusText = document.getElementById('statusText');
-const authStatus = document.getElementById('authStatus');
+const meaningText  = document.getElementById('meaningText');
+const exampleText  = document.getElementById('exampleText');
+const topicSelect  = document.getElementById('topicSelect');
+const saveButton   = document.getElementById('saveButton');
+const statusText   = document.getElementById('statusText');
+const authStatus   = document.getElementById('authStatus');
 
 function send(type, payload = {}) {
   return new Promise(resolve => {
@@ -46,11 +51,6 @@ function isEnglishExample(value) {
   if (/[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i.test(text)) return false;
   if (/\b(và|là|của|cho|trong|một|những|các|được|không|với|khi|từ|người|này|đó)\b/i.test(text)) return false;
   return true;
-}
-
-function parseJsonBlock(raw) {
-  const clean = String(raw || '').replace(/```json|```/g, '').trim();
-  return JSON.parse(clean.match(/\{[\s\S]*\}/)?.[0] || '{}');
 }
 
 async function lookup(term) {
@@ -104,8 +104,24 @@ function updateSaveState() {
   saveButton.disabled = !currentResult?.meaning || !topicsReady || !topicSelect.value;
 }
 
+async function checkAndShowUI() {
+  const authRes = await send('check-auth');
+  if (authRes?.ok && authRes?.loggedIn) {
+    loginCard.style.display = 'none';
+    mainContent.style.display = 'block';
+    logoutButton.style.display = 'flex';
+    loadTopics();
+    loadSelectedText();
+    termInput.focus();
+  } else {
+    loginCard.style.display = 'flex';
+    mainContent.style.display = 'none';
+    logoutButton.style.display = 'none';
+  }
+}
+
 async function loadTopics() {
-  authStatus.textContent = 'Đang kiểm tra...';
+  authStatus.textContent = 'Đang tải...';
   topicSelect.disabled = true;
   saveButton.disabled = true;
 
@@ -114,7 +130,11 @@ async function loadTopics() {
     topicsReady = false;
     topicSelect.innerHTML = '<option>Chưa kết nối</option>';
     const isAuthError = (response?.error || '').includes('đăng nhập');
-    authStatus.textContent = isAuthError ? 'Chưa đăng nhập' : 'Lỗi kết nối';
+    if (isAuthError) {
+      checkAndShowUI();
+      return;
+    }
+    authStatus.textContent = 'Lỗi kết nối';
     setStatus(response?.error || 'Không tải được topic.', 'error');
     return;
   }
@@ -123,7 +143,7 @@ async function loadTopics() {
   if (!topics.length) {
     topicsReady = false;
     topicSelect.innerHTML = '<option>Chưa có topic</option>';
-    authStatus.textContent = 'Đã kết nối';
+    authStatus.textContent = 'Đã đăng nhập';
     setStatus('App chưa có topic để thêm từ.', 'error');
     return;
   }
@@ -194,12 +214,25 @@ saveButton.addEventListener('click', async () => {
   updateSaveState();
 });
 
-loginButton.addEventListener('click', () => {
-  chrome.tabs.create({ url: 'https://hivocab.vercel.app', active: true });
+googleLoginBtn.addEventListener('click', async () => {
+  loginStatus.textContent = 'Đang mở cửa sổ đăng nhập...';
+  const res = await send('open-app');
+  if (!res?.ok) {
+    loginStatus.textContent = res?.error || 'Không thể mở cửa sổ đăng nhập.';
+  }
+});
+
+logoutButton.addEventListener('click', async () => {
+  await chrome.storage.local.remove('hivocab_session');
+  checkAndShowUI();
+});
+
+chrome.runtime.onMessage.addListener(message => {
+  if (message?.type === 'login-success') {
+    checkAndShowUI();
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadTopics();
-  loadSelectedText();
-  termInput.focus();
+  checkAndShowUI();
 });

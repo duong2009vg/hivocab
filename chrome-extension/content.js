@@ -15,23 +15,25 @@
   // ── Sync auth token lên background khi chạy trên web app ─────────────────
   function syncAuthToken() {
     try {
-      // Tìm key Supabase trong localStorage (dạng: sb-xxxxx-auth-token)
       const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
       if (!sbKey) {
-        chrome.runtime.sendMessage({ type: 'store-auth-token', token: null });
+        chrome.runtime.sendMessage({ type: 'store-auth-token', session: null });
         return;
       }
       const raw = localStorage.getItem(sbKey);
       if (!raw) {
-        chrome.runtime.sendMessage({ type: 'store-auth-token', token: null });
+        chrome.runtime.sendMessage({ type: 'store-auth-token', session: null });
         return;
       }
-      const session = JSON.parse(raw);
-      const token = session?.access_token || null;
-      chrome.runtime.sendMessage({ type: 'store-auth-token', token });
-    } catch (_) {
-      // Không phải trang web app hoặc lỗi parse
-    }
+      const parsed = JSON.parse(raw);
+      // Lưu full session để có refresh_token
+      const session = parsed?.access_token ? {
+        access_token:  parsed.access_token,
+        refresh_token: parsed.refresh_token || null,
+        expires_at:    parsed.expires_at    || null,
+      } : null;
+      chrome.runtime.sendMessage({ type: 'store-auth-token', session });
+    } catch (_) {}
   }
 
   // Sync ngay khi load và khi có thay đổi storage (login/logout)
