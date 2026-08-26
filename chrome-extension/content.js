@@ -68,34 +68,67 @@
 
   // ── Tra từ ────────────────────────────────────────────────────────────────
   async function lookup(term) {
-    let result = { word: term, phonetic: '', meaning: '', example: '', english: '' };
+    const result = { word: term, phonetic: '', meaning: '', example: '', english: '' };
+    const isPhrase = term.trim().includes(' ');
 
-    try {
-      const response = await fetch(DICT_URL + encodeURIComponent(term));
-      if (response.ok) {
-        const data = await response.json();
-        const entry = data[0] || {};
-        const firstMeaning = entry.meanings?.[0]?.definitions?.[0] || {};
-        result.word     = entry.word || term;
-        result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
-        result.english  = firstMeaning.definition || '';
-        result.example  = isEnglishExample(firstMeaning.example) ? firstMeaning.example : '';
-      }
-    } catch (_) { /* translate fallback below */ }
+    if (isPhrase) {
+      // Cụm từ: DeepL dịch trực tiếp
+      try {
+        const response = await fetch(TRANSLATE_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: term.trim(), from: 'en', to: 'vi' })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ok && data.text) result.meaning = data.text;
+        }
+      } catch (_) {}
+      result.example = `She used the phrase "${term.trim()}" in a sentence today.`;
 
-    try {
-      const textToTranslate = result.english || term;
-      const response = await fetch(TRANSLATE_URL, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: textToTranslate, from: 'en', to: 'vi' })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        if (data.ok && data.text) result.meaning = data.text;
-      }
-    } catch (_) { /* keep dictionary result */ }
+    } else {
+      // Từ đơn: Free Dictionary → DeepL dịch định nghĩa EN
+      let firstDefinition = '';
+      let foundExample = '';
+      try {
+        const response = await fetch(DICT_URL + encodeURIComponent(term));
+        if (response.ok) {
+          const data = await response.json();
+          const entry = data[0] || {};
+          result.word     = entry.word || term;
+          result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
 
-    if (!isEnglishExample(result.example)) result.example = '';
+          for (const e of data) {
+            for (const m of (e.meanings || [])) {
+              if (!firstDefinition && m.definitions?.[0]?.definition) {
+                firstDefinition = m.definitions[0].definition;
+              }
+              for (const d of (m.definitions || [])) {
+                if (!foundExample && d.example && isEnglishExample(d.example)) {
+                  foundExample = d.example;
+                }
+              }
+            }
+            if (firstDefinition && foundExample) break;
+          }
+        }
+      } catch (_) {}
+
+      result.example = foundExample || `She learned how to use "${term}" in a sentence today.`;
+
+      // DeepL dịch định nghĩa EN → VI (fallback: dịch từ trực tiếp)
+      const textToTranslate = firstDefinition || term;
+      try {
+        const response = await fetch(TRANSLATE_URL, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: textToTranslate, from: 'en', to: 'vi' })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.ok && data.text) result.meaning = data.text;
+        }
+      } catch (_) {}
+    }
+
     return result;
   }
 

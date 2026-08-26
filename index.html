@@ -3567,31 +3567,7 @@ function _dictRenderResult(r) {
     });
 }
 
-/**
- * Patch bản dịch tiếng Việt vào DOM đã render, không re-render toàn bộ.
- * Gọi sau khi Groq trả về kết quả (async).
- */
-function _dictPatchVietnamese(r) {
-    // Cập nhật summary
-    const viSumEl = document.getElementById('dict-vi-summary');
-    if (viSumEl && r.viSummary) {
-        viSumEl.textContent = r.viSummary;
-        viSumEl.classList.remove('hidden');
-    }
 
-    // Cập nhật từng định nghĩa
-    if (!r.viMeanings) return;
-    r.viMeanings.forEach((vm, mi) => {
-        (vm.viDefinitions || []).forEach((viText, di) => {
-            if (!viText) return;
-            const defEl = document.querySelector(`[data-def="${mi}-${di}"] .vi-def`);
-            if (defEl) {
-                defEl.className = 'vi-def mt-1 text-sm font-medium text-primary/80';
-                defEl.innerHTML = `↳ ${_escHtml(viText)}`;
-            }
-        });
-    });
-}
 
 /** Phát âm từ đang hiển thị */
 window.dictPlayAudio = async function() {
@@ -3684,8 +3660,19 @@ window.dictSaveWord = async function(topicId, topicName) {
         if (meaning) meaning = `[EN] ${meaning}`;
     }
 
-    // ── Câu ví dụ (tiếng Anh từ FreeDictionary) ──────────────────
-    const example = r.meanings?.[0]?.definitions?.[0]?.example || '';
+    // ── Câu ví dụ (từ Free Dictionary / fallback tổng hợp) ──────
+    let example = r.example || '';
+    if (!example && Array.isArray(r.meanings)) {
+        for (const m of r.meanings) {
+            for (const d of (m.definitions || [])) {
+                if (d.example) { example = d.example; break; }
+            }
+            if (example) break;
+        }
+    }
+    if (!example && r.word) {
+        example = `She learned how to use "${r.word}" in a sentence today.`;
+    }
 
     // ── Phonetic ──────────────────────────────────────────────────
     const phonetic = r.phonetic || '';

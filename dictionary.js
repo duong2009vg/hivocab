@@ -1,17 +1,14 @@
 // ============================================================
 // HI - DICTIONARY  |  dictionary.js
 // ============================================================
-// Wrapper cho DeepL (dịch chính) + Free Dictionary API (IPA/audio phụ).
+// Flow tra từ:
+//   - Từ đơn: Free Dictionary API (IPA, định nghĩa EN, ví dụ)
+//             → DeepL dịch định nghĩa EN sang tiếng Việt
+//   - Từ ghép / cụm từ: DeepL dịch trực tiếp
 //
 // API public:
 //   await HiDict.lookupWord('serendipity')
-//   → { word, phonetic, audioUrl, meanings, synonyms,
-//       viSummary,      // nghĩa tiếng Việt từ DeepL
-//       viMeanings }    // null (không còn dùng)
-//   → null nếu DeepL thực sự lỗi
-//
 //   await HiDict.playWordAudio('serendipity')
-//   → phát âm chuẩn nếu có audio URL, fallback sang Web Speech API
 // ============================================================
 
 const HiDict = (() => {
@@ -19,33 +16,20 @@ const HiDict = (() => {
     const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
     const TRANSLATE_URL = '/api/translate';
 
-    // Cache kết quả tra (bao gồm bản dịch) để không gọi API lặp lại
     const _cache = new Map();
-
-    // Audio element dùng chung
     let _audioEl = null;
 
-    function _warmSpeechVoices() {
-        if (!window.speechSynthesis) return;
-        window.speechSynthesis.getVoices();
-    }
-
+    // Warm up speech voices
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-        _warmSpeechVoices();
-        window.speechSynthesis.addEventListener('voiceschanged', _warmSpeechVoices);
-        window.addEventListener('pointerdown', _warmSpeechVoices, { once: true });
+        window.speechSynthesis.getVoices();
+        window.speechSynthesis.addEventListener('voiceschanged', () => window.speechSynthesis.getVoices());
+        window.addEventListener('pointerdown', () => window.speechSynthesis.getVoices(), { once: true });
     }
 
     // --------------------------------------------------------
-    // DEEPL TRANSLATION (nguồn chính)
+    // DEEPL (dịch văn bản EN → VI)
     // --------------------------------------------------------
 
-    /**
-     * Dịch từ/cụm từ tiếng Anh sang tiếng Việt qua DeepL.
-     *
-     * @param {string} text  - từ hoặc cụm từ cần dịch
-     * @returns {Promise<string|null>}  bản dịch hoặc null nếu lỗi
-     */
     async function _translateWithDeepL(text) {
         try {
             const res = await fetch(TRANSLATE_URL, {
@@ -57,23 +41,15 @@ const HiDict = (() => {
             const json = await res.json();
             return (json.ok && json.text) ? json.text : null;
         } catch (err) {
-            console.warn('[HiDict] DeepL translate error:', err);
+            console.warn('[HiDict] DeepL error:', err);
             return null;
         }
     }
 
     // --------------------------------------------------------
-    // FREE DICTIONARY (nguồn phụ — IPA, audio, ví dụ)
+    // FREE DICTIONARY API (từ đơn — IPA, định nghĩa, ví dụ)
     // --------------------------------------------------------
 
-    /**
-     * Lấy dữ liệu từ Free Dictionary API.
-     * Chỉ dùng để lấy IPA, audio URL, meanings (tiếng Anh), synonyms.
-     * Không fail cả lookupWord nếu hàm này lỗi.
-     *
-     * @param {string} word  - từ đơn tiếng Anh
-     * @returns {Promise<Object|null>}
-     */
     async function _fetchDictionary(word) {
         try {
             const res = await fetch(DICT_URL + encodeURIComponent(word));
@@ -84,14 +60,13 @@ const HiDict = (() => {
 
             const entry = data[0];
 
-            // Phonetic text
+            // Phonetic
             let phonetic = entry.phonetic || '';
             if (!phonetic && entry.phonetics) {
-                const ph = entry.phonetics.find(p => p.text);
-                phonetic = ph?.text || '';
+                phonetic = entry.phonetics.find(p => p.text)?.text || '';
             }
 
-            // Audio URL (ưu tiên US accent)
+            // Audio (ưu tiên US accent)
             let audioUrl = null;
             if (entry.phonetics) {
                 const withAudio = entry.phonetics.filter(p => p.audio);
@@ -99,7 +74,7 @@ const HiDict = (() => {
                 audioUrl = (us || withAudio[0])?.audio || null;
             }
 
-            // Meanings (tiếng Anh, giữ để hiển thị định nghĩa gốc)
+            // Meanings + tìm câu ví dụ đầu tiên hợp lệ
             const meanings = (entry.meanings || []).map(m => ({
                 partOfSpeech: m.partOfSpeech,
                 definitions:  (m.definitions || []).slice(0, 3).map(d => ({
@@ -109,17 +84,34 @@ const HiDict = (() => {
                 })),
             }));
 
-            // Synonyms tổng hợp (top 6)
+            // Câu ví dụ đầu tiên có nội dung (quét toàn bộ meanings)
+            let example = '';
+            for (const m of meanings) {
+                for (const d of m.definitions) {
+                    if (d.example) { example = d.example; break; }
+                }
+                if (example) break;
+            }
+            if (!example) {
+                example = `She learned how to use "${word}" in a sentence today.`;
+            }
+
+            // Synonyms (top 6)
             const allSynonyms = new Set();
             meanings.forEach(m => m.definitions.forEach(d => d.synonyms.forEach(s => allSynonyms.add(s))));
             (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => allSynonyms.add(s)));
 
+            // Định nghĩa đầu tiên (tiếng Anh) để dịch sang tiếng Việt
+            const firstDefinition = meanings[0]?.definitions?.[0]?.definition || '';
+
             return {
-                word:     entry.word || word,
+                word:            entry.word || word,
                 phonetic,
                 audioUrl,
                 meanings,
-                synonyms: [...allSynonyms].slice(0, 6),
+                synonyms:        [...allSynonyms].slice(0, 6),
+                example,
+                firstDefinition, // sẽ dùng để dịch DeepL
             };
         } catch (err) {
             console.warn('[HiDict] Free Dictionary error:', err);
@@ -128,26 +120,21 @@ const HiDict = (() => {
     }
 
     // --------------------------------------------------------
-    // LOOKUP WORD (API chính)
+    // LOOKUP WORD — API chính
     // --------------------------------------------------------
 
     /**
-     * Tra từ — DeepL làm nguồn chính, Free Dictionary làm phụ.
-     * Hỗ trợ từ đơn, cụm từ, slang, viết tắt.
+     * Tra từ với flow tách biệt giữa từ đơn và từ ghép.
      *
-     * @param {string} word
+     * Từ đơn:
+     *   1. Gọi Free Dictionary → IPA, definitions (EN), example
+     *   2. Dịch định nghĩa EN đầu tiên sang VI bằng DeepL → viSummary
+     *   3. Nếu Free Dictionary thất bại → DeepL dịch thẳng từ
+     *
+     * Từ ghép / cụm từ:
+     *   1. DeepL dịch trực tiếp cụm từ → viSummary
+     *
      * @returns {Promise<Object|null>}
-     *   {
-     *     word,           // từ gốc
-     *     phonetic,       // /foʊˈnɛtɪk/  (nếu có trong Dictionary)
-     *     audioUrl,       // URL file .mp3 (có thể null)
-     *     meanings: [     // nghĩa tiếng Anh từ Dictionary (có thể rỗng)
-     *       { partOfSpeech, definitions: [{ definition, example, synonyms }] }
-     *     ],
-     *     synonyms,       // mảng string (top 6, có thể rỗng)
-     *     viSummary,      // nghĩa tiếng Việt từ DeepL (luôn có nếu không lỗi)
-     *     viMeanings,     // null (không còn dùng)
-     *   }
      */
     async function lookupWord(word) {
         if (!word || !word.trim()) return null;
@@ -155,53 +142,60 @@ const HiDict = (() => {
 
         if (_cache.has(key)) return _cache.get(key);
 
-        // 1. Dịch sang tiếng Việt qua DeepL (bắt buộc)
-        const viSummary = await _translateWithDeepL(word.trim());
-        if (!viSummary) {
-            _cache.set(key, null);
-            return null;
-        }
+        const isPhrase = key.includes(' ');
 
-        const result = {
-            word:       word.trim(),
-            phonetic:   '',
-            audioUrl:   null,
-            meanings:   [],
-            synonyms:   [],
-            viSummary,
-            viMeanings: null,
-        };
+        if (isPhrase) {
+            // ── Từ ghép / cụm từ: DeepL dịch trực tiếp ──────────────
+            const viSummary = await _translateWithDeepL(word.trim());
+            if (!viSummary) { _cache.set(key, null); return null; }
 
-        // 2. Lấy thêm IPA/audio/meanings từ Free Dictionary (optional, chỉ từ đơn)
-        if (!key.includes(' ')) {
+            const result = {
+                word:       word.trim(),
+                phonetic:   '',
+                audioUrl:   null,
+                meanings:   [],
+                synonyms:   [],
+                example:    `She used the phrase "${word.trim()}" in a sentence today.`,
+                viSummary,
+                viMeanings: null,
+            };
+            _cache.set(key, result);
+            return result;
+
+        } else {
+            // ── Từ đơn: Free Dictionary + DeepL dịch định nghĩa ─────
             const dictData = await _fetchDictionary(key);
-            if (dictData) {
-                result.word     = dictData.word;
-                result.phonetic = dictData.phonetic;
-                result.audioUrl = dictData.audioUrl;
-                result.meanings = dictData.meanings;
-                result.synonyms = dictData.synonyms;
-            }
-        }
 
-        _cache.set(key, result);
-        return result;
+            // Xác định văn bản sẽ dịch sang VI:
+            //   ưu tiên định nghĩa EN đầu tiên, fallback là từ gốc
+            const textToTranslate = dictData?.firstDefinition || word.trim();
+            const viSummary = await _translateWithDeepL(textToTranslate);
+
+            // Nếu cả hai đều thất bại → null
+            if (!viSummary && !dictData) { _cache.set(key, null); return null; }
+
+            const result = {
+                word:       dictData?.word     || word.trim(),
+                phonetic:   dictData?.phonetic || '',
+                audioUrl:   dictData?.audioUrl || null,
+                meanings:   dictData?.meanings || [],
+                synonyms:   dictData?.synonyms || [],
+                example:    dictData?.example  || `She learned how to use "${word.trim()}" in a sentence today.`,
+                viSummary:  viSummary || null,
+                viMeanings: null,
+            };
+            _cache.set(key, result);
+            return result;
+        }
     }
 
     // --------------------------------------------------------
     // AUDIO
     // --------------------------------------------------------
 
-    /**
-     * Phát âm từ — ưu tiên audio URL thật, fallback Web Speech API.
-     *
-     * @param {string} word
-     * @param {number} rate  - tốc độ fallback TTS (0.5–1.0)
-     */
     async function playWordAudio(word, rate = 0.9) {
         if (!word || !word.trim()) return;
         const key = word.trim().toLowerCase();
-        const isSingleWord = !key.includes(' ');
 
         const speakNow = () => {
             if (!window.speechSynthesis) return;
@@ -218,7 +212,7 @@ const HiDict = (() => {
         };
 
         const cached = _cache.get(key);
-        if (isSingleWord && cached?.audioUrl) {
+        if (cached?.audioUrl && !key.includes(' ')) {
             try {
                 if (!_audioEl) _audioEl = new Audio();
                 _audioEl.pause();
@@ -231,9 +225,6 @@ const HiDict = (() => {
         speakNow();
     }
 
-    // --------------------------------------------------------
-
-    /** Xoá cache (dùng khi test). */
     function clearCache() { _cache.clear(); }
 
     return { lookupWord, playWordAudio, clearCache };
