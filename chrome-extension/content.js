@@ -131,43 +131,67 @@
 
     return result;
   }
-
-  // ── Load topics ───────────────────────────────────────────────────────────
-  async function loadTopics(select) {
-    const response = await send('get-app-topics');
-    if (!response?.ok) throw new Error(response?.error || 'Không tải được topic.');
-    const topics = response.data || [];
-    if (!topics.length) throw new Error('App chưa có topic để thêm từ.');
-    select.innerHTML = topics.map(topic => `<option value="${esc(topic.id)}">${esc(topic.name)}</option>`).join('');
-  }
-
-  // ── Panel ─────────────────────────────────────────────────────────────────
+  // ── Panel ───────────────────────────────────────────────────────────────────
   function showPanel(x, y, result) {
     closePanel();
     panel = document.createElement('div');
     panel.className = 'hi-vocab-panel';
     panel.style.left = `${Math.min(x, innerWidth - 326)}px`;
-    panel.style.top  = `${Math.min(y, innerHeight - 300)}px`;
+    panel.style.top  = `${Math.min(y, innerHeight - 320)}px`;
     panel.innerHTML = `
-      <h3>${esc(result.word)}</h3>
-      <div class="hi-vocab-muted">${esc(result.phonetic || 'Chưa có IPA')}</div>
-      <div class="hi-vocab-meaning">${esc(result.meaning || 'Chưa lấy được nghĩa Việt')}</div>
-      <div class="hi-vocab-example">${esc(result.example || 'Chưa có câu ví dụ')}</div>
+      <div class="hi-vocab-panel-header">
+        <div>
+          <h3>${esc(result.word)}</h3>
+          <div class="hi-vocab-muted">${esc(result.phonetic || '')}</div>
+        </div>
+        <button class="hi-vocab-audio-btn" title="Nghe phát âm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+        </button>
+      </div>
+      <div class="hi-vocab-meaning">${esc(result.meaning || 'Không lấy được nghĩa')}</div>
+      <div class="hi-vocab-example">${esc(result.example || '')}</div>
       <select aria-label="Chọn topic"><option>Đang tải topic...</option></select>
-      <div class="hi-vocab-actions"><button class="hi-vocab-add">Thêm vào app</button></div>
+      <div class="hi-vocab-actions"><button class="hi-vocab-add">⬇ Lưu vào app</button></div>
       <div class="hi-vocab-status"></div>`;
     root.appendChild(panel);
 
+    const audioButton = panel.querySelector('.hi-vocab-audio-btn');
     const select = panel.querySelector('select');
     const status = panel.querySelector('.hi-vocab-status');
     const addBtn = panel.querySelector('.hi-vocab-add');
+
+    audioButton.onclick = () => speakWord(result.word, result.audioUrl);
 
     loadTopics(select).catch(err => {
       status.textContent = err.message;
       select.disabled = true;
       addBtn.disabled = true;
-      // Nếu chưa đăng nhập → hiện link mở app
       if (err.message.includes('đăng nhập')) {
+        status.innerHTML = `<a href="${APP_URL}" target="_blank" style="color:#1a7a4a;text-decoration:underline">Mở app để đăng nhập</a>`;
+      }
+    });
+
+    addBtn.onclick = async () => {
+      addBtn.disabled = true;
+      status.textContent = 'Đang thêm...';
+      const response = await send('add-to-app', {
+        topicId: select.value,
+        word: result.word, phonetic: result.phonetic,
+        meaning: result.meaning, exampleSentence: result.example
+      });
+      if (response?.ok) {
+        status.style.color = '#19734b';
+        status.textContent = 'Đã lưu vào app ✓';
+        setTimeout(closePanel, 900);
+      } else {
+        addBtn.disabled = false;
+        status.textContent = response?.error || 'Không thêm được từ.';
+      }
+    };
+  }rr.message.includes('đăng nhập')) {
         status.innerHTML = `<a href="${APP_URL}" target="_blank" style="color:#1a7a4a;text-decoration:underline">Mở app để đăng nhập</a>`;
       }
     });
