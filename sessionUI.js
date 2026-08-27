@@ -561,7 +561,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model:       'llama-3.1-8b-instant',
+                    model:       'openai/gpt-oss-20b',
                     messages:    [{ role: 'user', content: prompt }],
                     temperature: 0.2,
                     max_tokens:  120,

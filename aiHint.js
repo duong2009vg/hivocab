@@ -18,7 +18,7 @@ const HiAIHint = (() => {
     // ----------------------------------------------------------
     // ⚠️ Proxy Vercel — API key bảo mật server-side, không lộ ra frontend
     const GROQ_PROXY  = '/api/groq';
-    const GROQ_MODEL  = 'llama-3.1-8b-instant';
+    const GROQ_MODEL  = 'openai/gpt-oss-20b';
     const MAX_TOKENS  = 256;
 
     // ----------------------------------------------------------
