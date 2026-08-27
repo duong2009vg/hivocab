@@ -21,17 +21,30 @@ const HiDict = (() => {
         window.addEventListener('pointerdown', () => window.speechSynthesis.getVoices(), { once: true });
     }
 
+    async function _fetchWithTimeout(url, options = {}, timeoutMs = 3500) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const res = await fetch(url, { ...options, signal: controller.signal });
+            clearTimeout(timer);
+            return res;
+        } catch (_) {
+            clearTimeout(timer);
+            return null;
+        }
+    }
+
     // --------------------------------------------------------
     // DeepL — dịch thẳng từ/cụm từ → VI
     // --------------------------------------------------------
     async function _translateWithDeepL(text) {
         try {
-            const res = await fetch(TRANSLATE_URL, {
+            const res = await _fetchWithTimeout(TRANSLATE_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text, from: 'en', to: 'vi' }),
-            });
-            if (!res.ok) return null;
+            }, 4500);
+            if (!res || !res.ok) return null;
             const json = await res.json();
             return (json.ok && json.text) ? json.text : null;
         } catch (err) {
@@ -45,8 +58,8 @@ const HiDict = (() => {
     // --------------------------------------------------------
     async function _fetchDictionary(word) {
         try {
-            const res = await fetch(DICT_URL + encodeURIComponent(word));
-            if (!res.ok) return null;
+            const res = await _fetchWithTimeout(DICT_URL + encodeURIComponent(word), {}, 2500);
+            if (!res || !res.ok) return null;
             const data = await res.json();
             if (!Array.isArray(data) || !data.length) return null;
 

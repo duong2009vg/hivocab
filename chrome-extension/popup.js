@@ -1,10 +1,11 @@
 const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 const TRANSLATE_URL = 'https://hivocab.vercel.app/api/translate';
 
-let requestId   = 0;
-let currentResult = null;
-let topicsReady   = false;
+let requestId       = 0;
+let currentResult   = null;
+let topicsReady     = false;
 let currentAudioUrl = null;
+let _loginPollTimer = null;
 
 const loginCard      = document.getElementById('loginCard');
 const mainContent    = document.getElementById('mainContent');
@@ -87,22 +88,40 @@ function speakTTS(word) {
   window.speechSynthesis.speak(utter);
 }
 
+const lookupCache = new Map();
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 3000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return response;
+  } catch (e) {
+    clearTimeout(timer);
+    return null;
+  }
+}
+
 // ── Lookup ────────────────────────────────────────────────────────────────
 async function lookup(term) {
-  const result = { word: term, phonetic: '', meaning: '', example: '', audioUrl: null };
-  const isPhrase = term.trim().includes(' ');
+  const key = term.trim().toLowerCase();
+  if (lookupCache.has(key)) return lookupCache.get(key);
 
-  // Chạy DeepL và Free Dictionary song song
-  const translatePromise = fetch(TRANSLATE_URL, {
+  const result = { word: term.trim(), phonetic: '', meaning: '', example: '', audioUrl: null };
+  const isPhrase = key.includes(' ');
+
+  // Chạy DeepL và Free Dictionary song song với timeout 3s
+  const translatePromise = fetchWithTimeout(TRANSLATE_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text: term.trim(), from: 'en', to: 'vi' })
-  }).then(r => r.ok ? r.json() : null).catch(() => null);
+  }, 4000).then(r => r && r.ok ? r.json() : null).catch(() => null);
 
   const dictPromise = isPhrase
     ? Promise.resolve(null)
-    : fetch(DICT_URL + encodeURIComponent(term))
-        .then(r => r.ok ? r.json() : null)
+    : fetchWithTimeout(DICT_URL + encodeURIComponent(key), {}, 2500)
+        .then(r => r && r.ok ? r.json() : null)
         .catch(() => null);
 
   const [translateData, dictData] = await Promise.all([translatePromise, dictPromise]);
@@ -276,10 +295,38 @@ audioBtn.addEventListener('click', () => {
   if (currentResult?.word) speakWord(currentResult.word, currentAudioUrl);
 });
 
+// ── Login polling (tránh treo khi service worker bị restart) ─────────────
+function startLoginPolling() {
+  if (_loginPollTimer) return;
+  let attempts = 0;
+  _loginPollTimer = setInterval(async () => {
+    attempts++;
+    const authRes = await send('check-auth');
+    if (authRes?.loggedIn) {
+      stopLoginPolling();
+      checkAndShowUI();
+    } else if (attempts >= 80) { // tối đa 2 phút
+      stopLoginPolling();
+      loginStatus.textContent = 'Hết thời gian chờ. Vui lòng thử lại.';
+    }
+  }, 1500);
+}
+
+function stopLoginPolling() {
+  if (_loginPollTimer) { clearInterval(_loginPollTimer); _loginPollTimer = null; }
+}
+
 googleLoginBtn.addEventListener('click', async () => {
   loginStatus.textContent = 'Đang mở cửa sổ đăng nhập...';
+  googleLoginBtn.disabled = true;
   const res = await send('open-app');
-  if (!res?.ok) loginStatus.textContent = res?.error || 'Không thể mở cửa sổ đăng nhập.';
+  googleLoginBtn.disabled = false;
+  if (!res?.ok) {
+    loginStatus.textContent = res?.error || 'Không thể mở cửa sổ đăng nhập.';
+    return;
+  }
+  // Bắt đầu poll — kể cả khi login-success message bị mất
+  startLoginPolling();
 });
 
 logoutButton.addEventListener('click', async () => {

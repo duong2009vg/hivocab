@@ -1,7 +1,7 @@
 const APP_URL      = 'https://hivocab.vercel.app';
 const API_BASE_URL = 'https://hivocab.vercel.app/api';
 
-// ── Storage helpers ───────────────────────────────────────────────────────────
+// ── Session storage helpers ───────────────────────────────────────────────
 
 function saveSession(session) {
     return chrome.storage.local.set({ hivocab_session: session });
@@ -16,28 +16,33 @@ async function getSession() {
     return data.hivocab_session || null;
 }
 
+// ── Login window ID (dùng session storage để sống qua service worker restart) ──
+
+async function getLoginWindowId() {
+    const data = await chrome.storage.session.get('loginWindowId').catch(() => ({}));
+    return data.loginWindowId ?? null;
+}
+
+async function setLoginWindowId(id) {
+    if (id === null) {
+        await chrome.storage.session.remove('loginWindowId').catch(() => {});
+    } else {
+        await chrome.storage.session.set({ loginWindowId: id }).catch(() => {});
+    }
+}
+
 // ── Token management (auto-refresh) ──────────────────────────────────────────
 
-/**
- * Lấy access_token hợp lệ.
- * Tự động refresh nếu sắp hết hạn (< 5 phút còn lại).
- * Trả về null nếu không có session hoặc không refresh được.
- */
 async function getValidToken() {
     const session = await getSession();
     if (!session?.access_token) return null;
 
-    // Kiểm tra hết hạn (expires_at tính bằng giây)
     const nowSec = Math.floor(Date.now() / 1000);
-    const isExpiringSoon = session.expires_at && (session.expires_at - nowSec) < 300; // < 5 phút
+    const isExpiringSoon = session.expires_at && (session.expires_at - nowSec) < 300;
 
     if (!isExpiringSoon) return session.access_token;
 
-    // Cố refresh
-    if (!session.refresh_token) {
-        await clearSession();
-        return null;
-    }
+    if (!session.refresh_token) { await clearSession(); return null; }
 
     try {
         const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
@@ -56,12 +61,11 @@ async function getValidToken() {
         }
     } catch (_) {}
 
-    // Refresh thất bại → xóa session cũ
     await clearSession();
     return null;
 }
 
-// ── HTTP helpers ──────────────────────────────────────────────────────────────
+// ── API helpers ───────────────────────────────────────────────────────────────
 
 async function apiGet(path, token) {
     const res = await fetch(`${API_BASE_URL}${path}`, {
@@ -84,31 +88,29 @@ async function apiPost(path, token, body) {
 
 // ── Login popup window ────────────────────────────────────────────────────────
 
-let _loginWindowId = null;
-
 async function openLoginWindow() {
-    // Đóng cửa sổ cũ nếu còn mở
-    if (_loginWindowId !== null) {
-        try { await chrome.windows.remove(_loginWindowId); } catch (_) {}
-        _loginWindowId = null;
+    const existingId = await getLoginWindowId();
+    if (existingId !== null) {
+        try { await chrome.windows.remove(existingId); } catch (_) {}
+        await setLoginWindowId(null);
     }
 
     const win = await chrome.windows.create({
-        url:    APP_URL,
-        type:   'popup',
-        width:  480,
-        height: 680,
+        url:     APP_URL,
+        type:    'popup',
+        width:   490,
+        height:  700,
         focused: true,
     });
-    _loginWindowId = win.id;
+    await setLoginWindowId(win.id);
 }
 
-// Đóng login window khi token đã được lưu
 async function closeLoginWindowIfOpen() {
-    if (_loginWindowId === null) return;
-    try { await chrome.windows.remove(_loginWindowId); } catch (_) {}
-    _loginWindowId = null;
-    // Thông báo cho popup để refresh
+    const id = await getLoginWindowId();
+    if (id === null) return;
+    try { await chrome.windows.remove(id); } catch (_) {}
+    await setLoginWindowId(null);
+    // Thông báo popup (best-effort, popup cũng tự poll)
     chrome.runtime.sendMessage({ type: 'login-success' }).catch(() => {});
 }
 
@@ -116,7 +118,7 @@ async function closeLoginWindowIfOpen() {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
-    // Content script của web app gửi session đầy đủ lên
+    // Content script gửi session đầy đủ
     if (message?.type === 'store-auth-token') {
         const session = message.session;
         if (session?.access_token) {
@@ -150,13 +152,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message?.type === 'get-app-topics') {
         (async () => {
             const token = await getValidToken();
-            if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Nhấn nút đăng nhập bên dưới.' });
+            if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Vui lòng đăng nhập lại.' });
             const data = await apiGet('/topics', token);
             if (!data.ok) {
-                if (data.error?.includes('Invalid') || data.error?.includes('expired')) {
-                    await clearSession();
-                    return sendResponse({ ok: false, error: 'Phiên hết hạn. Vui lòng đăng nhập lại.' });
-                }
+                if (/invalid|expired/i.test(data.error || '')) await clearSession();
                 return sendResponse({ ok: false, error: data.error || 'Không tải được topic.' });
             }
             sendResponse({ ok: true, data: data.topics });
@@ -168,13 +167,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message?.type === 'add-to-app') {
         (async () => {
             const token = await getValidToken();
-            if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Nhấn nút đăng nhập bên dưới.' });
+            if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Vui lòng đăng nhập lại.' });
             const data = await apiPost('/add-word', token, message.payload || {});
             if (!data.ok) {
-                if (data.error?.includes('Invalid') || data.error?.includes('expired')) {
-                    await clearSession();
-                    return sendResponse({ ok: false, error: 'Phiên hết hạn. Vui lòng đăng nhập lại.' });
-                }
+                if (/invalid|expired/i.test(data.error || '')) await clearSession();
                 return sendResponse({ ok: false, error: data.error || 'Không lưu được từ.' });
             }
             sendResponse({ ok: true });
