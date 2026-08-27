@@ -557,7 +557,7 @@ Rules (STRICT):
 
 Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ cái. [1 câu gợi ý ngắn về nghĩa/ngữ cảnh]"`;
 
-            const res = await fetch('https://groq-proxy-sandy.vercel.app/api/groq', {
+            const res = await fetch('/api/groq', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
