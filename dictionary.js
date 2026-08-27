@@ -4,23 +4,28 @@
 // Flow:
 //   DeepL     → dịch từ/cụm từ thẳng sang VI (luôn dùng, song song)
 //   Free Dict → lấy IPA + audio + câu ví dụ EN (chỉ từ đơn, song song)
+//   Groq      → tạo ví dụ thay thế khi Free Dict không có ví dụ thực
 // ============================================================
 
 const HiDict = (() => {
 
     const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
     const TRANSLATE_URL = '/api/translate';
+    const EXAMPLE_URL   = '/api/example';
 
     const _cache = new Map();
     let _audioEl = null;
 
-    // Warm up voices
+    // Warm up TTS voices
     if (typeof window !== 'undefined' && window.speechSynthesis) {
         window.speechSynthesis.getVoices();
         window.speechSynthesis.addEventListener('voiceschanged', () => window.speechSynthesis.getVoices());
         window.addEventListener('pointerdown', () => window.speechSynthesis.getVoices(), { once: true });
     }
 
+    // --------------------------------------------------------
+    // Helper: fetch với AbortController timeout
+    // --------------------------------------------------------
     async function _fetchWithTimeout(url, options = {}, timeoutMs = 3500) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -54,7 +59,7 @@ const HiDict = (() => {
     }
 
     // --------------------------------------------------------
-    // Free Dictionary — IPA, audio, câu ví dụ (từ đơn)
+    // Free Dictionary — IPA, audio (pre-loaded), câu ví dụ (từ đơn)
     // --------------------------------------------------------
     async function _fetchDictionary(word) {
         try {
@@ -71,12 +76,18 @@ const HiDict = (() => {
                 phonetic = entry.phonetics.find(p => p.text)?.text || '';
             }
 
-            // Audio URL (ưu tiên US)
+            // Audio URL (ưu tiên US) — pre-load ngay để phát tức thì
             let audioUrl = null;
+            let audioEl  = null;
             if (entry.phonetics) {
                 const withAudio = entry.phonetics.filter(p => p.audio);
                 const us = withAudio.find(p => p.audio.includes('-us.'));
                 audioUrl = (us || withAudio[0])?.audio || null;
+                if (audioUrl) {
+                    audioEl = new Audio(audioUrl);
+                    audioEl.preload = 'auto';
+                    audioEl.load(); // buffer ngầm ngay khi có URL
+                }
             }
 
             // Meanings (top 3 per part-of-speech)
@@ -89,7 +100,7 @@ const HiDict = (() => {
                 })),
             }));
 
-            // Tìm câu ví dụ tiếng Anh đầu tiên qua toàn bộ entries + meanings
+            // Tìm câu ví dụ tiếng Anh đầu tiên
             let example = '';
             outer: for (const e of data) {
                 for (const m of (e.meanings || [])) {
@@ -107,7 +118,7 @@ const HiDict = (() => {
             meanings.forEach(m => m.definitions.forEach(d => (d.synonyms || []).forEach(s => allSynonyms.add(s))));
             (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => allSynonyms.add(s)));
 
-            return { word: entry.word || word, phonetic, audioUrl, meanings, synonyms: [...allSynonyms].slice(0, 6), example };
+            return { word: entry.word || word, phonetic, audioUrl, audioEl, meanings, synonyms: [...allSynonyms].slice(0, 6), example };
         } catch (err) {
             console.warn('[HiDict] Free Dictionary error:', err);
             return null;
@@ -115,7 +126,26 @@ const HiDict = (() => {
     }
 
     // --------------------------------------------------------
-    // LOOKUP — song song DeepL + Free Dict
+    // Groq — tạo câu ví dụ khi Free Dict không có (chỉ gọi khi cần)
+    // --------------------------------------------------------
+    async function _generateExample(term, isPhrase) {
+        try {
+            const res = await _fetchWithTimeout(EXAMPLE_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ term, isPhrase: !!isPhrase }),
+            }, 6000);
+            if (!res || !res.ok) return null;
+            const data = await res.json();
+            return (data?.ok && data?.sentence) ? data.sentence : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    // --------------------------------------------------------
+    // LOOKUP — Phase 1: DeepL + FreeDict song song
+    //          Phase 2: Groq (chỉ khi FreeDict không có ví dụ)
     // --------------------------------------------------------
     async function lookupWord(word) {
         if (!word?.trim()) return null;
@@ -124,7 +154,7 @@ const HiDict = (() => {
 
         const isPhrase = key.includes(' ');
 
-        // Chạy song song: DeepL luôn chạy, Free Dict chỉ cho từ đơn
+        // Phase 1: song song
         const [viSummary, dictData] = await Promise.all([
             _translateWithDeepL(word.trim()),
             isPhrase ? Promise.resolve(null) : _fetchDictionary(key),
@@ -132,19 +162,28 @@ const HiDict = (() => {
 
         if (!viSummary && !dictData) { _cache.set(key, null); return null; }
 
-        const fallbackExample = isPhrase
-            ? `She used the phrase "${word.trim()}" in a sentence today.`
-            : `She learned how to use "${word.trim()}" in a sentence today.`;
+        const hasRealExample = !!(dictData?.example);
+
+        // Phase 2: Groq nếu FreeDict không có ví dụ (~500ms extra)
+        let exampleToUse = dictData?.example || '';
+        if (!hasRealExample) {
+            const generated = await _generateExample(word.trim(), isPhrase);
+            exampleToUse = generated || (isPhrase
+                ? `She said "${word.trim()}" to get the point across.`
+                : `She learned how to use "${word.trim()}" in a sentence today.`);
+        }
 
         const result = {
-            word:       dictData?.word     || word.trim(),
-            phonetic:   dictData?.phonetic || '',
-            audioUrl:   dictData?.audioUrl || null,
-            meanings:   dictData?.meanings || [],
-            synonyms:   dictData?.synonyms || [],
-            example:    dictData?.example  || fallbackExample,
-            viSummary:  viSummary || null,
-            viMeanings: null,
+            word:           dictData?.word     || word.trim(),
+            phonetic:       dictData?.phonetic || '',
+            audioUrl:       dictData?.audioUrl || null,
+            audioEl:        dictData?.audioEl  || null,  // pre-loaded Audio element
+            meanings:       dictData?.meanings || [],
+            synonyms:       dictData?.synonyms || [],
+            example:        exampleToUse,
+            hasRealExample,
+            viSummary:      viSummary || null,
+            viMeanings:     null,
         };
 
         _cache.set(key, result);
@@ -152,19 +191,19 @@ const HiDict = (() => {
     }
 
     // --------------------------------------------------------
-    // AUDIO — ưu tiên URL thật, fallback Web Speech API
+    // AUDIO — dùng pre-loaded audioEl (tức thì), fallback URL, fallback TTS
     // --------------------------------------------------------
     async function playWordAudio(word, rate = 0.9) {
         if (!word?.trim()) return;
-        const key = word.trim().toLowerCase();
+        const key    = word.trim().toLowerCase();
         const cached = _cache.get(key);
 
         const speakTTS = () => {
             if (!window.speechSynthesis) return;
             window.speechSynthesis.cancel();
             const utter = new SpeechSynthesisUtterance(word);
-            utter.lang = 'en-US';
-            utter.rate = rate;
+            utter.lang  = 'en-US';
+            utter.rate  = rate;
             const voices = window.speechSynthesis.getVoices();
             const v = voices.find(v => v.lang === 'en-US' && !v.localService)
                    || voices.find(v => v.lang === 'en-US')
@@ -173,6 +212,16 @@ const HiDict = (() => {
             window.speechSynthesis.speak(utter);
         };
 
+        // Ưu tiên pre-loaded audioEl (gần như 0ms delay)
+        if (cached?.audioEl) {
+            try {
+                cached.audioEl.currentTime = 0;
+                await cached.audioEl.play();
+                return;
+            } catch (_) { /* fallback */ }
+        }
+
+        // Fallback: tạo Audio mới từ URL
         if (cached?.audioUrl) {
             try {
                 if (!_audioEl) _audioEl = new Audio();
@@ -182,6 +231,7 @@ const HiDict = (() => {
                 return;
             } catch (_) { /* fallback */ }
         }
+
         speakTTS();
     }
 

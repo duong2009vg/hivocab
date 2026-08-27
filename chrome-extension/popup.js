@@ -1,11 +1,14 @@
 const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
 const TRANSLATE_URL = 'https://hivocab.vercel.app/api/translate';
+const EXAMPLE_URL   = 'https://hivocab.vercel.app/api/example';
 
 let requestId       = 0;
 let currentResult   = null;
 let topicsReady     = false;
-let currentAudioUrl = null;
+let currentAudioEl  = null;   // Audio element pre-loaded (phát tức thì)
+let currentAudioUrl = null;   // fallback URL
 let _loginPollTimer = null;
+
 
 const loginCard      = document.getElementById('loginCard');
 const mainContent    = document.getElementById('mainContent');
@@ -60,18 +63,22 @@ function isEnglishExample(value) {
 }
 
 // ── Audio ─────────────────────────────────────────────────────────────────
-function speakWord(word, audioUrl) {
+function speakWord(word, audioEl, audioUrl) {
   if (!word) return;
-
   audioBtn.classList.add('playing');
   setTimeout(() => audioBtn.classList.remove('playing'), 1200);
 
-  if (audioUrl) {
-    const audio = new Audio(audioUrl);
-    audio.play().catch(() => speakTTS(word));
-  } else {
-    speakTTS(word);
+  // Ưu tiên audioEl (đã pre-load, phát gần như tức thì)
+  if (audioEl) {
+    audioEl.currentTime = 0;
+    audioEl.play().catch(() => speakTTS(word));
+    return;
   }
+  if (audioUrl) {
+    new Audio(audioUrl).play().catch(() => speakTTS(word));
+    return;
+  }
+  speakTTS(word);
 }
 
 function speakTTS(word) {
@@ -87,6 +94,24 @@ function speakTTS(word) {
   if (voice) utter.voice = voice;
   window.speechSynthesis.speak(utter);
 }
+
+// ── Tạo câu ví dụ bằng Groq ──────────────────────────────────────────────
+async function generateExample(term, isPhrase) {
+  try {
+    const res = await fetchWithTimeout(EXAMPLE_URL, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ term, isPhrase: !!isPhrase }),
+    }, 6000);
+    if (!res || !res.ok) return null;
+    const data = await res.json();
+    return (data?.ok && data?.sentence) ? data.sentence : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+
 
 const lookupCache = new Map();
 
@@ -105,17 +130,26 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = 3000) {
 
 // ── Lookup ────────────────────────────────────────────────────────────────
 async function lookup(term) {
-  const key = term.trim().toLowerCase();
+  const key      = term.trim().toLowerCase();
   if (lookupCache.has(key)) return lookupCache.get(key);
 
-  const result = { word: term.trim(), phonetic: '', meaning: '', example: '', audioUrl: null };
   const isPhrase = key.includes(' ');
+  const result   = {
+    word:           term.trim(),
+    phonetic:       '',
+    meaning:        '',
+    example:        '',
+    audioUrl:       null,
+    audioEl:        null,    // Audio element pre-loaded
+    hasRealExample: false,
+    isPhrase,
+  };
 
-  // Chạy DeepL và Free Dictionary song song với timeout 3s
+  // DeepL (4s) + FreeDict (2.5s) song song
   const translatePromise = fetchWithTimeout(TRANSLATE_URL, {
-    method: 'POST',
+    method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: term.trim(), from: 'en', to: 'vi' })
+    body:    JSON.stringify({ text: term.trim(), from: 'en', to: 'vi' }),
   }, 4000).then(r => r && r.ok ? r.json() : null).catch(() => null);
 
   const dictPromise = isPhrase
@@ -126,23 +160,28 @@ async function lookup(term) {
 
   const [translateData, dictData] = await Promise.all([translatePromise, dictPromise]);
 
-  // Nghĩa tiếng Việt từ DeepL
   if (translateData?.ok && translateData?.text) result.meaning = translateData.text;
 
-  // IPA + audio + ví dụ từ Free Dictionary
   if (Array.isArray(dictData) && dictData.length > 0) {
     const entry = dictData[0];
-    result.word     = entry.word || term;
+    result.word     = entry.word || term.trim();
     result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
 
-    // Audio URL (ưu tiên US)
+    // Pre-load audio element ngay khi có URL (buffer ngầm, phát tức thì)
     if (entry.phonetics) {
       const withAudio = entry.phonetics.filter(p => p.audio);
-      const us = withAudio.find(p => p.audio.includes('-us.'));
-      result.audioUrl = (us || withAudio[0])?.audio || null;
+      const us        = withAudio.find(p => p.audio.includes('-us.'));
+      const audioUrl  = (us || withAudio[0])?.audio || null;
+      if (audioUrl) {
+        result.audioUrl = audioUrl;
+        const audio     = new Audio(audioUrl);
+        audio.preload   = 'auto';
+        audio.load();
+        result.audioEl  = audio;
+      }
     }
 
-    // Tìm câu ví dụ hợp lệ đầu tiên qua toàn bộ entries + meanings
+    // Tìm ví dụ tiếng Anh đầu tiên
     let foundExample = '';
     outer: for (const e of dictData) {
       for (const m of (e.meanings || [])) {
@@ -154,32 +193,35 @@ async function lookup(term) {
         }
       }
     }
-    result.example = foundExample;
+    if (foundExample) {
+      result.example        = foundExample;
+      result.hasRealExample = true;
+    }
   }
 
-  // Fallback ví dụ
-  if (!result.example) {
-    result.example = isPhrase
-      ? `She used the phrase "${term.trim()}" in a sentence today.`
-      : `She learned how to use "${term}" in a sentence today.`;
-  }
-
+  lookupCache.set(key, result);
   return result;
 }
 
 // ── Render ────────────────────────────────────────────────────────────────
 function renderResult(result) {
   currentResult   = result;
+  currentAudioEl  = result.audioEl  || null;
   currentAudioUrl = result.audioUrl || null;
 
   resultCard.classList.remove('is-empty');
   wordText.textContent     = result.word;
   phoneticText.textContent = result.phonetic || '';
   meaningText.textContent  = result.meaning  || 'Không lấy được nghĩa';
-  exampleText.textContent  = result.example  || '';
+
+  // Nếu có ví dụ thực → hiện ngay; nếu không → báo đang tạo (Groq sẽ điền sau)
+  exampleText.textContent = result.hasRealExample
+    ? result.example
+    : (result.example ? result.example : 'Đang tạo câu ví dụ...');
 
   // Hiện nút audio nếu có word
   audioBtn.style.display = result.word ? 'flex' : 'none';
+
 
   updateSaveState();
 }
@@ -259,7 +301,23 @@ async function runLookup(term) {
   setBusy(true);
   setStatus('', '');
   try {
-    renderResult(await lookup(cleanTerm));
+    const result = await lookup(cleanTerm);
+    renderResult(result);
+
+    // Nếu FreeDict không có ví dụ → gọi Groq tạo ví dụ (non-blocking, ~500ms)
+    if (!result.hasRealExample) {
+      generateExample(cleanTerm, result.isPhrase).then(sentence => {
+        if (!sentence) return;
+        // Cập nhật cache
+        const cached = lookupCache.get(cleanTerm.toLowerCase());
+        if (cached) { cached.example = sentence; cached.hasRealExample = true; }
+        // Cập nhật currentResult nếu vẫn là từ này
+        if (currentResult?.word === result.word) {
+          currentResult.example = sentence;
+          exampleText.textContent = sentence;
+        }
+      });
+    }
   } catch (error) {
     setStatus(error?.message || 'Không tra được từ này.', 'error');
   } finally {
@@ -291,9 +349,11 @@ saveButton.addEventListener('click', async () => {
   updateSaveState();
 });
 
+// Dùng pre-loaded audioEl để phát gần như tức thì
 audioBtn.addEventListener('click', () => {
-  if (currentResult?.word) speakWord(currentResult.word, currentAudioUrl);
+  if (currentResult?.word) speakWord(currentResult.word, currentAudioEl, currentAudioUrl);
 });
+
 
 // ── Login polling (tránh treo khi service worker bị restart) ─────────────
 function startLoginPolling() {
