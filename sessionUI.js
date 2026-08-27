@@ -453,6 +453,15 @@ const HiSessionUI = (() => {
                     const nextIdx = Math.min(idx + chars.length, inputs.length - 1);
                     inputs[nextIdx]?.focus();
                 } else if (val.length === 1 && idx < inputs.length - 1) {
+                    inputs.forEach((inp, i) => {
+                        if (i >= idx && chars[i - idx] !== undefined) {
+                            inp.value = chars[i - idx];
+                        }
+                    });
+                    // Focus vào ô tiếp theo sau paste
+                    const nextIdx = Math.min(idx + chars.length, inputs.length - 1);
+                    inputs[nextIdx]?.focus();
+                } else if (val.length === 1 && idx < inputs.length - 1) {
                     inputs[idx + 1].focus();
                 }
             });
@@ -515,7 +524,7 @@ const HiSessionUI = (() => {
         }
     }
 
-    /** Xin gợi ý AI cho fill exercise — dùng Groq (llama-3.1-8b-instant) */
+    /** Xin gợi ý AI cho fill exercise — dùng Groq (groq/compound-mini) */
     async function _getAIHint() {
         const hintEl = document.getElementById('ai-hint-container');
         if (!hintEl) return;
@@ -561,16 +570,17 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    model:       'openai/gpt-oss-20b',
+                    model:       'groq/compound-mini',
                     messages:    [{ role: 'user', content: prompt }],
-                    temperature: 0.2,
-                    max_tokens:  120,
+                    temperature: 0.3,
+                    max_tokens:  250,
                 }),
             });
 
             if (!res.ok) throw new Error(`Groq HTTP ${res.status}`);
             const json = await res.json();
-            const hint = json.choices?.[0]?.message?.content?.trim();
+            const msg  = json.choices?.[0]?.message;
+            const hint = (msg?.content || msg?.reasoning || '').trim();
             if (!hint) throw new Error('Groq trả về rỗng.');
 
             hintEl.innerHTML = `

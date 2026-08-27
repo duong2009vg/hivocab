@@ -34,10 +34,10 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model:       'openai/gpt-oss-20b',
+                model:       'groq/compound-mini',
                 messages:    [{ role: 'user', content: prompt }],
-                max_tokens:  80,
-                temperature: 0.6,
+                max_tokens:  150,
+                temperature: 0.5,
             }),
         });
 
@@ -47,7 +47,8 @@ export default async function handler(req, res) {
         }
 
         const data     = await groqRes.json();
-        const raw      = (data.choices?.[0]?.message?.content || '').trim();
+        const msg      = data.choices?.[0]?.message;
+        const raw      = (msg?.content || msg?.reasoning || '').trim();
         const sentence = raw.replace(/^["""''`]+|["""''`]+$/g, '').trim();
 
         return res.status(200).json({ ok: !!sentence, sentence: sentence || '' });
