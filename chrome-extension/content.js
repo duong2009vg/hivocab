@@ -415,6 +415,9 @@
       modalStatus.style.color   = '#0b6b91';
       modalStatus.textContent   = `Đang lưu vào "${topicName}"...`;
 
+      const topicBtns = topicListEl.querySelectorAll('.hi-vocab-picker-item');
+      topicBtns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.6'; });
+
       const response = await send('add-to-app', {
         topicId,
         word:            current.word,
@@ -424,17 +427,11 @@
       });
 
       if (response?.ok) {
-        modalStatus.style.color = '#19734b';
-        modalStatus.textContent = `Đã lưu thành công vào "${topicName}" ✓`;
-        statusEl.style.color    = '#19734b';
-        statusEl.textContent    = `Đã lưu vào "${topicName}" ✓`;
-        openSaveBtn.textContent = `✓ Đã lưu (${topicName})`;
-        openSaveBtn.disabled    = true;
-        setTimeout(() => {
-          modalEl.style.display = 'none';
+        showSuccessAnimation(current.word, topicName, () => {
           closePanel();
-        }, 900);
+        });
       } else {
+        topicBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
         modalStatus.style.color = '#ba4b29';
         modalStatus.textContent = response?.error || 'Không lưu được từ.';
       }
@@ -541,11 +538,47 @@
     };
   });
 
+  // ── Success Animation ───────────────────────────────────────────────────
+  function showSuccessAnimation(word, topicName, onDone) {
+    if (!panel) { if (onDone) onDone(); return; }
+    const overlay = document.createElement('div');
+    overlay.className = 'hiv-success-overlay';
+    overlay.innerHTML = `
+      <div class="hiv-success-card">
+        <div class="hiv-checkmark-wrap">
+          <svg class="hiv-checkmark-svg" viewBox="0 0 52 52">
+            <circle class="hiv-checkmark-circle" cx="26" cy="26" r="23" fill="none"/>
+            <path class="hiv-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+        </div>
+        <h3 class="hiv-success-title">Đã lưu từ thành công!</h3>
+        <p class="hiv-success-detail">
+          <span class="hiv-success-word">${esc(word)}</span>
+          <span class="hiv-success-arrow">➔</span>
+          <span class="hiv-success-topic">${esc(topicName)}</span>
+        </p>
+        <span class="hiv-success-hint">Đang đóng...</span>
+      </div>
+    `;
+    panel.appendChild(overlay);
+
+    setTimeout(() => {
+      overlay.style.transition = 'opacity 0.25s ease-out';
+      overlay.style.opacity = '0';
+      setTimeout(() => {
+        if (onDone) onDone();
+      }, 250);
+    }, 1400);
+  }
+
   document.addEventListener('mousedown', event => {
     if (!panel || root.contains(event.target)) return;
     closePanel();
   });
-  document.addEventListener('scroll', () => { removeFab(); closePanel(); }, true);
+  document.addEventListener('scroll', event => {
+    if (event.target && root.contains(event.target)) return;
+    removeFab();
+  }, true);
 
   // ── Listener cho web app ─────────────────────────────────────────────────
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

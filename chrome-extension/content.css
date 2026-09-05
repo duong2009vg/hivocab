@@ -251,6 +251,7 @@
   overflow-y: auto;
   flex: 1;
   max-height: 230px;
+  overscroll-behavior: contain;
 }
 
 .hi-vocab-step-hint {
@@ -343,3 +344,131 @@
   color: #66747d;
 }
 .hi-vocab-error { color: #ba4b29; }
+
+/* ── Success Checkmark Animation ───────────────────────── */
+.hiv-success-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  animation: hivFadeIn 0.2s ease-out forwards;
+}
+
+.hiv-success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 18px;
+  animation: hivPopIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.hiv-checkmark-wrap {
+  width: 62px;
+  height: 62px;
+  margin-bottom: 12px;
+}
+
+.hiv-checkmark-svg {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3.5;
+  stroke: #10b981;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0px 0px 0px #10b981;
+  animation: hivFillCircle 0.4s ease-in-out 0.4s forwards, hivPulseCheck 0.3s ease-in-out 0.8s both;
+}
+
+.hiv-checkmark-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3.5;
+  stroke-miterlimit: 10;
+  stroke: #10b981;
+  fill: #e8fdf4;
+  animation: hivStrokeAnim 0.5s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.hiv-checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke: #059669;
+  stroke-width: 4.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: hivStrokeAnim 0.35s cubic-bezier(0.65, 0, 0.45, 1) 0.45s forwards;
+}
+
+@keyframes hivStrokeAnim {
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes hivPulseCheck {
+  0%, 100% { transform: none; }
+  50% { transform: scale3d(1.12, 1.12, 1); }
+}
+
+@keyframes hivFillCircle {
+  100% { box-shadow: inset 0px 0px 0px 32px #e8fdf4; }
+}
+
+@keyframes hivFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes hivPopIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.hiv-success-title {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 800;
+  color: #065f46;
+  letter-spacing: -0.01em;
+}
+
+.hiv-success-detail {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.hiv-success-word {
+  font-weight: 800;
+  color: #075b79;
+}
+
+.hiv-success-arrow {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.hiv-success-topic {
+  font-weight: 700;
+  color: #10b981;
+  background: #ecfdf5;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+}
+
+.hiv-success-hint {
+  font-size: 11px;
+  color: #9ca3af;
+}

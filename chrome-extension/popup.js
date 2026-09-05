@@ -384,6 +384,9 @@ async function saveWordToTopic(topicId, topicName) {
   modalStatus.style.color = 'var(--primary)';
   modalStatus.textContent = `Đang lưu vào "${topicName}"...`;
 
+  const topicBtns = modalTopicList.querySelectorAll('.picker-item');
+  topicBtns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.6'; });
+
   const response = await send('add-to-app', {
     topicId,
     word:            currentResult.word,
@@ -393,16 +396,45 @@ async function saveWordToTopic(topicId, topicName) {
   });
 
   if (response?.ok) {
-    modalStatus.style.color = 'var(--success)';
-    modalStatus.textContent = `Đã lưu thành công vào "${topicName}" ✓`;
-    setStatus(`Đã lưu vào "${topicName}" ✓`, 'success');
-    setTimeout(() => {
-      closeSaveModal();
-    }, 700);
+    showPopupSuccessAnimation(currentResult.word, topicName, () => {
+      window.close();
+    });
   } else {
+    topicBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
     modalStatus.style.color = 'var(--danger)';
     modalStatus.textContent = response?.error || 'Không lưu được từ.';
   }
+}
+
+function showPopupSuccessAnimation(word, topicName, onDone) {
+  const overlay = document.createElement('div');
+  overlay.className = 'hiv-success-overlay';
+  overlay.innerHTML = `
+    <div class="hiv-success-card">
+      <div class="hiv-checkmark-wrap">
+        <svg class="hiv-checkmark-svg" viewBox="0 0 52 52">
+          <circle class="hiv-checkmark-circle" cx="26" cy="26" r="23" fill="none"/>
+          <path class="hiv-checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <h3 class="hiv-success-title">Đã lưu từ thành công!</h3>
+      <p class="hiv-success-detail">
+        <span class="hiv-success-word">${esc(word)}</span>
+        <span class="hiv-success-arrow">➔</span>
+        <span class="hiv-success-topic">${esc(topicName)}</span>
+      </p>
+      <span class="hiv-success-hint">Đang đóng extension...</span>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    overlay.style.transition = 'opacity 0.25s ease-out';
+    overlay.style.opacity = '0';
+    setTimeout(() => {
+      if (onDone) onDone();
+    }, 250);
+  }, 1400);
 }
 
 async function loadSelectedText() {
