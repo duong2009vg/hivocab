@@ -24,15 +24,25 @@ const wordText     = document.getElementById('wordText');
 const phoneticText = document.getElementById('phoneticText');
 const meaningText  = document.getElementById('meaningText');
 const exampleText  = document.getElementById('exampleText');
-const audioBtn     = document.getElementById('audioBtn');
-const folderSelect = document.getElementById('folderSelect');
-const topicSelect  = document.getElementById('topicSelect');
-const saveButton   = document.getElementById('saveButton');
-const statusText   = document.getElementById('statusText');
-const authStatus   = document.getElementById('authStatus');
+const audioBtn         = document.getElementById('audioBtn');
+const openSaveModalBtn = document.getElementById('openSaveModalBtn');
+const statusText       = document.getElementById('statusText');
+const authStatus       = document.getElementById('authStatus');
 
-let _allTopics  = [];
-let _foldersMap = {};
+const saveModal        = document.getElementById('saveModal');
+const modalBackBtn     = document.getElementById('modalBackBtn');
+const modalCloseBtn    = document.getElementById('modalCloseBtn');
+const modalTitle       = document.getElementById('modalTitle');
+const modalSubtitle    = document.getElementById('modalSubtitle');
+const folderStepView   = document.getElementById('folderStepView');
+const topicStepView    = document.getElementById('topicStepView');
+const modalFolderList  = document.getElementById('modalFolderList');
+const modalTopicList   = document.getElementById('modalTopicList');
+const modalStatus      = document.getElementById('modalStatus');
+
+let _allTopics       = [];
+let _foldersMap      = {};
+let _currentFolder   = null;
 
 // ── Message helper ────────────────────────────────────────────────────────
 function send(type, payload = {}) {
@@ -72,7 +82,6 @@ function speakWord(word, audioEl, audioUrl) {
   audioBtn.classList.add('playing');
   setTimeout(() => audioBtn.classList.remove('playing'), 1200);
 
-  // Ưu tiên audioEl (đã pre-load, phát gần như tức thì)
   if (audioEl) {
     audioEl.currentTime = 0;
     audioEl.play().catch(() => speakTTS(word));
@@ -115,8 +124,6 @@ async function generateExample(term, isPhrase) {
   }
 }
 
-
-
 const lookupCache = new Map();
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 3000) {
@@ -144,12 +151,11 @@ async function lookup(term) {
     meaning:        '',
     example:        '',
     audioUrl:       null,
-    audioEl:        null,    // Audio element pre-loaded
+    audioEl:        null,
     hasRealExample: false,
     isPhrase,
   };
 
-  // DeepL (4s) + FreeDict (2.5s) song song
   const translatePromise = fetchWithTimeout(TRANSLATE_URL, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -171,7 +177,6 @@ async function lookup(term) {
     result.word     = entry.word || term.trim();
     result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
 
-    // Pre-load audio element ngay khi có URL (buffer ngầm, phát tức thì)
     if (entry.phonetics) {
       const withAudio = entry.phonetics.filter(p => p.audio);
       const us        = withAudio.find(p => p.audio.includes('-us.'));
@@ -185,7 +190,6 @@ async function lookup(term) {
       }
     }
 
-    // Tìm ví dụ tiếng Anh đầu tiên
     let foundExample = '';
     outer: for (const e of dictData) {
       for (const m of (e.meanings || [])) {
@@ -218,20 +222,19 @@ function renderResult(result) {
   phoneticText.textContent = result.phonetic || '';
   meaningText.textContent  = result.meaning  || 'Không lấy được nghĩa';
 
-  // Nếu có ví dụ thực → hiện ngay; nếu không → báo đang tạo (Groq sẽ điền sau)
   exampleText.textContent = result.hasRealExample
     ? result.example
     : (result.example ? result.example : 'Đang tạo câu ví dụ...');
 
-  // Hiện nút audio nếu có word
   audioBtn.style.display = result.word ? 'flex' : 'none';
-
 
   updateSaveState();
 }
 
 function updateSaveState() {
-  saveButton.disabled = !currentResult?.meaning || !topicsReady || !topicSelect.value;
+  if (openSaveModalBtn) {
+    openSaveModalBtn.disabled = !currentResult?.meaning;
+  }
 }
 
 // ── Auth & Topics ─────────────────────────────────────────────────────────
@@ -252,19 +255,15 @@ async function checkAndShowUI() {
 }
 
 async function loadTopics() {
-  authStatus.textContent = 'Đang tải...';
-  folderSelect.disabled  = true;
-  topicSelect.disabled   = true;
-  saveButton.disabled    = true;
+  if (authStatus) authStatus.textContent = 'Đang tải...';
+  topicsReady = false;
 
   const response = await send('get-app-topics');
   if (!response?.ok) {
     topicsReady = false;
-    folderSelect.innerHTML = '<option>Chưa kết nối</option>';
-    topicSelect.innerHTML  = '<option>Chưa kết nối</option>';
     const isAuthError = (response?.error || '').includes('đăng nhập');
     if (isAuthError) { checkAndShowUI(); return; }
-    authStatus.textContent = 'Lỗi kết nối';
+    if (authStatus) authStatus.textContent = 'Lỗi kết nối';
     setStatus(response?.error || 'Không tải được topic.', 'error');
     return;
   }
@@ -272,9 +271,7 @@ async function loadTopics() {
   _allTopics = response.data || [];
   if (!_allTopics.length) {
     topicsReady = false;
-    folderSelect.innerHTML = '<option>Chưa có thư mục</option>';
-    topicSelect.innerHTML  = '<option>Chưa có chủ đề</option>';
-    authStatus.textContent = 'Đã đăng nhập';
+    if (authStatus) authStatus.textContent = 'Đã đăng nhập';
     setStatus('App chưa có topic để thêm từ.', 'error');
     return;
   }
@@ -287,6 +284,41 @@ async function loadTopics() {
     _foldersMap[folder].push(t);
   });
 
+  topicsReady = true;
+  if (authStatus) authStatus.textContent = 'Đã đăng nhập';
+  setStatus('', '');
+  updateSaveState();
+}
+
+// ── Pop-up Modal: Chọn Folder -> Chọn Topic ────────────────────────────────
+async function openSaveModal() {
+  if (!currentResult?.meaning) return;
+  if (!topicsReady) {
+    setStatus('Đang tải danh sách thư mục...', '');
+    await loadTopics();
+    if (!topicsReady) {
+      setStatus('Chưa tải được chủ đề. Vui lòng thử lại.', 'error');
+      return;
+    }
+  }
+  saveModal.style.display = 'flex';
+  renderFolderStep();
+}
+
+function closeSaveModal() {
+  saveModal.style.display = 'none';
+  modalStatus.style.display = 'none';
+}
+
+function renderFolderStep() {
+  _currentFolder = null;
+  modalBackBtn.style.display = 'none';
+  modalTitle.textContent = 'Chọn thư mục';
+  modalSubtitle.textContent = currentResult?.word ? `Từ: "${currentResult.word}"` : 'Lưu vào bộ từ vựng';
+  folderStepView.style.display = 'block';
+  topicStepView.style.display = 'none';
+  modalStatus.style.display = 'none';
+
   const folderNames = Object.keys(_foldersMap).sort((a, b) => {
     if (a.toLowerCase() === 'cam') return -1;
     if (b.toLowerCase() === 'cam') return 1;
@@ -295,44 +327,82 @@ async function loadTopics() {
     return a.localeCompare(b, 'vi');
   });
 
-  folderSelect.innerHTML = folderNames.map(f => 
-    `<option value="${esc(f)}">📁 ${esc(f)} (${_foldersMap[f].length})</option>`
-  ).join('');
-  folderSelect.disabled = false;
-
-  // Khôi phục folder & topic đã chọn trước đó (nếu có)
-  const saved = await chrome.storage.local.get(['last_folder', 'last_topic_id']).catch(() => ({}));
-  let activeFolder = saved.last_folder && _foldersMap[saved.last_folder] ? saved.last_folder : folderNames[0];
-  folderSelect.value = activeFolder;
-
-  renderTopicsForFolder(activeFolder, saved.last_topic_id);
-
-  topicsReady            = true;
-  authStatus.textContent = 'Đã đăng nhập';
-  setStatus('', '');
-  updateSaveState();
-}
-
-function renderTopicsForFolder(folderName, targetTopicId = null) {
-  const topicsInFolder = _foldersMap[folderName] || [];
-  if (!topicsInFolder.length) {
-    topicSelect.innerHTML = '<option value="">(Không có chủ đề)</option>';
-    topicSelect.disabled  = true;
-    updateSaveState();
+  if (!folderNames.length) {
+    modalFolderList.innerHTML = '<p class="status-text">Không có thư mục nào</p>';
     return;
   }
 
-  topicSelect.innerHTML = topicsInFolder.map(t => 
-    `<option value="${esc(t.id)}">${esc(t.name)}</option>`
-  ).join('');
-  topicSelect.disabled = false;
+  modalFolderList.innerHTML = folderNames.map(f => `
+    <button type="button" class="picker-item" data-folder="${esc(f)}">
+      <div class="picker-item-left">
+        <span class="picker-icon">📁</span>
+        <span class="picker-name">${esc(f)}</span>
+      </div>
+      <span class="picker-badge">${_foldersMap[f].length} chủ đề ›</span>
+    </button>
+  `).join('');
 
-  if (targetTopicId && topicsInFolder.some(t => t.id === targetTopicId)) {
-    topicSelect.value = targetTopicId;
-  } else {
-    topicSelect.value = topicsInFolder[0].id;
+  modalFolderList.querySelectorAll('.picker-item').forEach(btn => {
+    btn.onclick = () => selectFolder(btn.dataset.folder);
+  });
+}
+
+function selectFolder(folderName) {
+  _currentFolder = folderName;
+  modalBackBtn.style.display = 'inline-flex';
+  modalTitle.textContent = folderName;
+  modalSubtitle.textContent = 'Chọn chủ đề để lưu từ';
+  folderStepView.style.display = 'none';
+  topicStepView.style.display = 'block';
+  modalStatus.style.display = 'none';
+
+  const topicsInFolder = _foldersMap[folderName] || [];
+  if (!topicsInFolder.length) {
+    modalTopicList.innerHTML = '<p class="status-text">Thư mục này chưa có chủ đề</p>';
+    return;
   }
-  updateSaveState();
+
+  modalTopicList.innerHTML = topicsInFolder.map(t => `
+    <button type="button" class="picker-item" data-topic-id="${esc(t.id)}" data-topic-name="${esc(t.name)}">
+      <div class="picker-item-left">
+        <span class="picker-icon">📖</span>
+        <span class="picker-name">${esc(t.name)}</span>
+      </div>
+      <span class="picker-save-badge">+ Lưu</span>
+    </button>
+  `).join('');
+
+  modalTopicList.querySelectorAll('.picker-item').forEach(btn => {
+    btn.onclick = () => saveWordToTopic(btn.dataset.topicId, btn.dataset.topicName);
+  });
+}
+
+async function saveWordToTopic(topicId, topicName) {
+  if (!currentResult || !topicId) return;
+
+  modalStatus.style.display = 'block';
+  modalStatus.style.color = 'var(--primary)';
+  modalStatus.textContent = `Đang lưu vào "${topicName}"...`;
+
+  const response = await send('add-to-app', {
+    topicId,
+    word:            currentResult.word,
+    phonetic:        currentResult.phonetic,
+    meaning:         currentResult.meaning,
+    exampleSentence: currentResult.example,
+  });
+
+  if (response?.ok) {
+    modalStatus.style.color = 'var(--success)';
+    modalStatus.textContent = `Đã lưu thành công vào "${topicName}" ✓`;
+    setStatus(`Đã lưu vào "${topicName}" ✓`, 'success');
+    setTimeout(() => {
+      closeSaveModal();
+    }, 700);
+  } else {
+    modalStatus.style.color = 'var(--danger)';
+    modalStatus.textContent = response?.error || 'Không lưu được từ.';
+  }
 }
 
 async function loadSelectedText() {
@@ -359,14 +429,11 @@ async function runLookup(term) {
     const result = await lookup(cleanTerm);
     renderResult(result);
 
-    // Nếu FreeDict không có ví dụ → gọi Groq tạo ví dụ (non-blocking, ~500ms)
     if (!result.hasRealExample) {
       generateExample(cleanTerm, result.isPhrase).then(sentence => {
         if (!sentence) return;
-        // Cập nhật cache
         const cached = lookupCache.get(cleanTerm.toLowerCase());
         if (cached) { cached.example = sentence; cached.hasRealExample = true; }
-        // Cập nhật currentResult nếu vẫn là từ này
         if (currentResult?.word === result.word) {
           currentResult.example = sentence;
           exampleText.textContent = sentence;
@@ -383,36 +450,20 @@ async function runLookup(term) {
 // ── Event listeners ───────────────────────────────────────────────────────
 searchForm.addEventListener('submit', e => { e.preventDefault(); runLookup(termInput.value); });
 
-folderSelect.addEventListener('change', () => {
-  const selectedFolder = folderSelect.value;
-  renderTopicsForFolder(selectedFolder);
-  chrome.storage.local.set({ last_folder: selectedFolder, last_topic_id: topicSelect.value });
-});
-
-topicSelect.addEventListener('change', () => {
-  updateSaveState();
-  chrome.storage.local.set({ last_topic_id: topicSelect.value });
-});
-
-saveButton.addEventListener('click', async () => {
-  if (!currentResult || !topicSelect.value) return;
-  saveButton.disabled = true;
-  setStatus('Đang lưu...', '');
-  const response = await send('add-to-app', {
-    topicId:         topicSelect.value,
-    word:            currentResult.word,
-    phonetic:        currentResult.phonetic,
-    meaning:         currentResult.meaning,
-    exampleSentence: currentResult.example,
+if (openSaveModalBtn) {
+  openSaveModalBtn.addEventListener('click', openSaveModal);
+}
+if (modalCloseBtn) {
+  modalCloseBtn.addEventListener('click', closeSaveModal);
+}
+if (modalBackBtn) {
+  modalBackBtn.addEventListener('click', renderFolderStep);
+}
+if (saveModal) {
+  saveModal.addEventListener('click', e => {
+    if (e.target === saveModal) closeSaveModal();
   });
-  if (response?.ok) {
-    setStatus('Đã lưu vào app ✓', 'success');
-    chrome.storage.local.set({ last_folder: folderSelect.value, last_topic_id: topicSelect.value });
-  } else {
-    setStatus(response?.error || 'Không lưu được từ.', 'error');
-  }
-  updateSaveState();
-});
+}
 
 // Dùng pre-loaded audioEl để phát gần như tức thì
 audioBtn.addEventListener('click', () => {

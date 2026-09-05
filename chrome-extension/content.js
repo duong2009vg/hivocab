@@ -101,71 +101,28 @@
     window.speechSynthesis.speak(utter);
   }
 
-  // ── Load topics ───────────────────────────────────────────────────────────
-  async function loadTopics(folderSelectEl, topicSelectEl) {
-    const response = await send('get-app-topics');
-    if (!response?.ok) throw new Error(response?.error || 'Chưa đăng nhập. Vui lòng đăng nhập để lưu từ.');
-    const topics = response.data || [];
-    if (!topics.length) {
-      folderSelectEl.innerHTML = '<option value="">Chưa có thư mục</option>';
-      topicSelectEl.innerHTML  = '<option value="">Chưa có chủ đề nào</option>';
-      folderSelectEl.disabled  = true;
-      topicSelectEl.disabled   = true;
-      return [];
-    }
+  // ── Load topics & folders map ─────────────────────────────────────────────
+  let cachedTopics     = null;
+  let cachedFoldersMap = null;
 
+  async function getTopicsData() {
+    if (cachedTopics && cachedFoldersMap) {
+      return { topics: cachedTopics, foldersMap: cachedFoldersMap };
+    }
+    const response = await send('get-app-topics');
+    if (!response?.ok) {
+      throw new Error(response?.error || 'Chưa đăng nhập. Vui lòng đăng nhập để lưu từ.');
+    }
+    const topics = response.data || [];
     const foldersMap = {};
     topics.forEach(t => {
       const folder = (t.category || 'General English').trim();
       if (!foldersMap[folder]) foldersMap[folder] = [];
       foldersMap[folder].push(t);
     });
-
-    const folderNames = Object.keys(foldersMap).sort((a, b) => {
-      if (a.toLowerCase() === 'cam') return -1;
-      if (b.toLowerCase() === 'cam') return 1;
-      if (a.toLowerCase() === 'ielts') return -1;
-      if (b.toLowerCase() === 'ielts') return 1;
-      return a.localeCompare(b, 'vi');
-    });
-
-    folderSelectEl.innerHTML = folderNames.map(f => 
-      `<option value="${esc(f)}">📁 ${esc(f)} (${foldersMap[f].length})</option>`
-    ).join('');
-    folderSelectEl.disabled = false;
-
-    function renderTopics(selectedFolder, targetTopicId = null) {
-      const list = foldersMap[selectedFolder] || [];
-      if (!list.length) {
-        topicSelectEl.innerHTML = '<option value="">(Không có chủ đề)</option>';
-        topicSelectEl.disabled  = true;
-        return;
-      }
-      topicSelectEl.innerHTML = list.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
-      topicSelectEl.disabled  = false;
-      if (targetTopicId && list.some(t => t.id === targetTopicId)) {
-        topicSelectEl.value = targetTopicId;
-      } else {
-        topicSelectEl.value = list[0].id;
-      }
-    }
-
-    const saved = await chrome.storage.local.get(['last_folder', 'last_topic_id']).catch(() => ({}));
-    let activeFolder = saved.last_folder && foldersMap[saved.last_folder] ? saved.last_folder : folderNames[0];
-    folderSelectEl.value = activeFolder;
-    renderTopics(activeFolder, saved.last_topic_id);
-
-    folderSelectEl.onchange = () => {
-      const f = folderSelectEl.value;
-      renderTopics(f);
-      chrome.storage.local.set({ last_folder: f, last_topic_id: topicSelectEl.value });
-    };
-
-    topicSelectEl.onchange = () => {
-      chrome.storage.local.set({ last_topic_id: topicSelectEl.value });
-    };
-
-    return topics;
+    cachedTopics     = topics;
+    cachedFoldersMap = foldersMap;
+    return { topics, foldersMap };
   }
 
   // ── Tạo câu ví dụ bằng Groq (chỉ khi FreeDict không có) ─────────────────
@@ -271,93 +228,233 @@
 
     panel = document.createElement('div');
     panel.className  = 'hi-vocab-panel';
-    panel.style.left = `${Math.min(Math.max(10, x), innerWidth  - 330)}px`;
-    panel.style.top  = `${Math.min(Math.max(10, y), innerHeight - 320)}px`;
+    panel.style.left = `${Math.min(Math.max(10, x), innerWidth  - 340)}px`;
+    panel.style.top  = `${Math.min(Math.max(10, y), innerHeight - 340)}px`;
 
     panel.innerHTML = `
       <div class="hi-vocab-panel-header">
-        <div>
+        <div class="hi-vocab-header-left">
           <h3 id="hiv-word">${esc(data.word)}</h3>
           <div id="hiv-phonetic" class="hi-vocab-muted">${esc(data.phonetic || '')}</div>
         </div>
-        <button id="hiv-audio" class="hi-vocab-audio-btn" title="Nghe phát âm">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
-          </svg>
-        </button>
+        <div class="hi-vocab-header-right">
+          <button id="hiv-audio" class="hi-vocab-audio-btn" title="Nghe phát âm">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+              <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/>
+            </svg>
+          </button>
+          <button id="hiv-close" class="hi-vocab-panel-close" title="Đóng">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
       </div>
       <div id="hiv-meaning" class="hi-vocab-meaning">${esc(data.meaning || 'Đang tra nghĩa...')}</div>
       <div id="hiv-example" class="hi-vocab-example">${esc(data.example || '')}</div>
-      <div class="hi-vocab-select-row">
-        <select id="hiv-folder" aria-label="Chọn thư mục" disabled><option>Đang tải thư mục...</option></select>
-        <select id="hiv-topics" aria-label="Chọn chủ đề" disabled><option>Chọn thư mục trước...</option></select>
-      </div>
       <div class="hi-vocab-actions">
-        <button id="hiv-add" class="hi-vocab-add" disabled>⬇ Lưu vào app</button>
+        <button id="hiv-open-save" class="hi-vocab-add" ${data.meaning ? '' : 'disabled'}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Lưu từ này vào app
+        </button>
       </div>
-      <div id="hiv-status" class="hi-vocab-status"></div>`;
+      <div id="hiv-status" class="hi-vocab-status"></div>
+
+      <!-- Pop-up Modal bên trong panel: Step 1 Chọn Folder -> Step 2 Chọn Topic -->
+      <div id="hiv-modal" class="hi-vocab-modal" style="display:none">
+        <div class="hi-vocab-modal-header">
+          <button id="hiv-modal-back" class="hi-vocab-modal-back" type="button" style="display:none" title="Quay lại danh sách thư mục">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <span>Thư mục</span>
+          </button>
+          <div class="hi-vocab-modal-title-wrap">
+            <div id="hiv-modal-title" class="hi-vocab-modal-title">Chọn thư mục</div>
+            <div id="hiv-modal-subtitle" class="hi-vocab-modal-subtitle">Lưu vào bộ từ vựng</div>
+          </div>
+          <button id="hiv-modal-close" class="hi-vocab-modal-close" type="button" title="Đóng">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+        <div class="hi-vocab-modal-body">
+          <!-- Step 1: Thư mục -->
+          <div id="hiv-step-folders">
+            <div class="hi-vocab-step-hint">Chọn thư mục để xem các chủ đề:</div>
+            <div id="hiv-folder-list" class="hi-vocab-picker-list"></div>
+          </div>
+          <!-- Step 2: Chủ đề -->
+          <div id="hiv-step-topics" style="display:none">
+            <div class="hi-vocab-step-hint" id="hiv-topic-step-hint">Chọn chủ đề để lưu từ ngay:</div>
+            <div id="hiv-topic-list" class="hi-vocab-picker-list"></div>
+          </div>
+        </div>
+        <div id="hiv-modal-status" class="hi-vocab-modal-status" style="display:none"></div>
+      </div>`;
+
     root.appendChild(panel);
 
-    const audioBtn  = panel.querySelector('#hiv-audio');
-    const folderSel = panel.querySelector('#hiv-folder');
-    const select    = panel.querySelector('#hiv-topics');
-    const status    = panel.querySelector('#hiv-status');
-    const addBtn    = panel.querySelector('#hiv-add');
+    const audioBtn      = panel.querySelector('#hiv-audio');
+    const closeBtn      = panel.querySelector('#hiv-close');
+    const openSaveBtn   = panel.querySelector('#hiv-open-save');
+    const statusEl      = panel.querySelector('#hiv-status');
+    const modalEl       = panel.querySelector('#hiv-modal');
+    const modalBackBtn  = panel.querySelector('#hiv-modal-back');
+    const modalCloseBtn = panel.querySelector('#hiv-modal-close');
+    const modalTitle    = panel.querySelector('#hiv-modal-title');
+    const modalSubtitle = panel.querySelector('#hiv-modal-subtitle');
+    const stepFolders   = panel.querySelector('#hiv-step-folders');
+    const stepTopics    = panel.querySelector('#hiv-step-topics');
+    const folderListEl  = panel.querySelector('#hiv-folder-list');
+    const topicListEl   = panel.querySelector('#hiv-topic-list');
+    const modalStatus   = panel.querySelector('#hiv-modal-status');
 
-    // Closure luôn đọc current mới nhất (được cập nhật sau lookup)
     audioBtn.onclick = () => speakWord(current.word, current.audioEl, current.audioUrl);
+    closeBtn.onclick = () => closePanel();
 
-    loadTopics(folderSel, select).then(topics => {
-      if (topics?.length && current?.meaning && select.value) addBtn.disabled = false;
-    }).catch(err => {
-      status.textContent = err.message;
-      folderSel.disabled = true;
-      select.disabled    = true;
-      addBtn.disabled    = true;
-      if (err.message.includes('đăng nhập') || err.message.includes('Chưa đăng nhập')) {
-        status.innerHTML = `<a href="${APP_URL}" target="_blank" style="color:#0b6b91;font-weight:600;text-decoration:underline">Mở app để đăng nhập</a>`;
+    // Eagerly prefetch topics ngầm
+    getTopicsData().catch(() => {});
+
+    // Modal navigation
+    modalCloseBtn.onclick = () => {
+      modalEl.style.display = 'none';
+      modalStatus.style.display = 'none';
+    };
+
+    modalBackBtn.onclick = () => {
+      renderFolderStep();
+    };
+
+    function renderFolderStep() {
+      modalBackBtn.style.display = 'none';
+      modalTitle.textContent     = 'Chọn thư mục';
+      modalSubtitle.textContent  = current?.word ? `Từ: "${current.word}"` : 'Lưu vào bộ từ vựng';
+      stepFolders.style.display  = 'block';
+      stepTopics.style.display   = 'none';
+      modalStatus.style.display  = 'none';
+
+      if (!cachedFoldersMap) {
+        folderListEl.innerHTML = '<div class="hi-vocab-loading">Đang tải danh sách thư mục...</div>';
+        getTopicsData().then(() => renderFolderStep()).catch(err => {
+          folderListEl.innerHTML = `<div class="hi-vocab-error">${esc(err.message)}</div>`;
+          if (err.message.includes('đăng nhập') || err.message.includes('Chưa đăng nhập')) {
+            folderListEl.innerHTML += `<div style="margin-top:8px;text-align:center"><a href="${APP_URL}" target="_blank" style="color:#0b6b91;font-weight:700;text-decoration:underline">Mở app để đăng nhập</a></div>`;
+          }
+        });
+        return;
       }
-    });
 
-    select.addEventListener('change', () => {
-      if (current?.meaning && select.value) addBtn.disabled = false;
-    });
+      const folderNames = Object.keys(cachedFoldersMap).sort((a, b) => {
+        if (a.toLowerCase() === 'cam') return -1;
+        if (b.toLowerCase() === 'cam') return 1;
+        if (a.toLowerCase() === 'ielts') return -1;
+        if (b.toLowerCase() === 'ielts') return 1;
+        return a.localeCompare(b, 'vi');
+      });
 
-    addBtn.onclick = async () => {
-      if (!current?.meaning || !select.value) return;
-      addBtn.disabled    = true;
-      status.style.color = '#0b6b91';
-      status.textContent = 'Đang lưu...';
+      if (!folderNames.length) {
+        folderListEl.innerHTML = '<div class="hi-vocab-loading">Chưa có thư mục nào</div>';
+        return;
+      }
+
+      folderListEl.innerHTML = folderNames.map(f => `
+        <button type="button" class="hi-vocab-picker-item" data-folder="${esc(f)}">
+          <div class="hi-vocab-picker-left">
+            <span class="hi-vocab-picker-icon">📁</span>
+            <span class="hi-vocab-picker-name">${esc(f)}</span>
+          </div>
+          <span class="hi-vocab-picker-badge">${cachedFoldersMap[f].length} chủ đề ›</span>
+        </button>
+      `).join('');
+
+      folderListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
+        btn.onclick = () => selectFolder(btn.dataset.folder);
+      });
+    }
+
+    function selectFolder(folderName) {
+      modalBackBtn.style.display = 'inline-flex';
+      modalTitle.textContent     = folderName;
+      modalSubtitle.textContent  = 'Chọn chủ đề để lưu từ';
+      stepFolders.style.display  = 'none';
+      stepTopics.style.display   = 'block';
+      modalStatus.style.display  = 'none';
+
+      const topicsInFolder = cachedFoldersMap?.[folderName] || [];
+      if (!topicsInFolder.length) {
+        topicListEl.innerHTML = '<div class="hi-vocab-loading">Thư mục này chưa có chủ đề</div>';
+        return;
+      }
+
+      topicListEl.innerHTML = topicsInFolder.map(t => `
+        <button type="button" class="hi-vocab-picker-item" data-topic-id="${esc(t.id)}" data-topic-name="${esc(t.name)}">
+          <div class="hi-vocab-picker-left">
+            <span class="hi-vocab-picker-icon">📖</span>
+            <span class="hi-vocab-picker-name">${esc(t.name)}</span>
+          </div>
+          <span class="hi-vocab-save-badge">+ Lưu</span>
+        </button>
+      `).join('');
+
+      topicListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
+        btn.onclick = () => saveWordToTopic(btn.dataset.topicId, btn.dataset.topicName);
+      });
+    }
+
+    async function saveWordToTopic(topicId, topicName) {
+      if (!current || !topicId) return;
+
+      modalStatus.style.display = 'block';
+      modalStatus.style.color   = '#0b6b91';
+      modalStatus.textContent   = `Đang lưu vào "${topicName}"...`;
+
       const response = await send('add-to-app', {
-        topicId:         select.value,
+        topicId,
         word:            current.word,
         phonetic:        current.phonetic,
         meaning:         current.meaning,
         exampleSentence: current.example,
       });
+
       if (response?.ok) {
-        status.style.color = '#19734b';
-        status.textContent = `Đã lưu "${current.word}" ✓`;
-        chrome.storage.local.set({ last_folder: folderSel.value, last_topic_id: select.value });
-        setTimeout(closePanel, 1200);
+        modalStatus.style.color = '#19734b';
+        modalStatus.textContent = `Đã lưu thành công vào "${topicName}" ✓`;
+        statusEl.style.color    = '#19734b';
+        statusEl.textContent    = `Đã lưu vào "${topicName}" ✓`;
+        openSaveBtn.textContent = `✓ Đã lưu (${topicName})`;
+        openSaveBtn.disabled    = true;
+        setTimeout(() => {
+          modalEl.style.display = 'none';
+          closePanel();
+        }, 900);
       } else {
-        addBtn.disabled    = false;
-        status.style.color = '#ba4b29';
-        status.textContent = response?.error || 'Không lưu được từ.';
+        modalStatus.style.color = '#ba4b29';
+        modalStatus.textContent = response?.error || 'Không lưu được từ.';
       }
+    }
+
+    openSaveBtn.onclick = () => {
+      if (!current?.meaning) return;
+      modalEl.style.display = 'flex';
+      renderFolderStep();
     };
   }
 
   // ── Cập nhật panel sau khi lookup xong ────────────────────────────────────
   function updatePanel(result) {
     if (!panel) return;
-    const wordEl     = panel.querySelector('#hiv-word');
-    const phoneticEl = panel.querySelector('#hiv-phonetic');
-    const meaningEl  = panel.querySelector('#hiv-meaning');
-    const exampleEl  = panel.querySelector('#hiv-example');
-    const addBtn     = panel.querySelector('#hiv-add');
-    const select     = panel.querySelector('#hiv-topics');
+    const wordEl      = panel.querySelector('#hiv-word');
+    const phoneticEl  = panel.querySelector('#hiv-phonetic');
+    const meaningEl   = panel.querySelector('#hiv-meaning');
+    const exampleEl   = panel.querySelector('#hiv-example');
+    const openSaveBtn = panel.querySelector('#hiv-open-save');
 
     if (wordEl)     wordEl.textContent    = result.word;
     if (phoneticEl) phoneticEl.textContent = result.phonetic || '';
@@ -372,8 +469,8 @@
       }
     }
 
-    if (addBtn && select && !select.disabled && select.value && result.meaning) {
-      addBtn.disabled = false;
+    if (openSaveBtn && result.meaning) {
+      openSaveBtn.disabled = false;
     }
   }
 

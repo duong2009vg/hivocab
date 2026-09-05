@@ -16,7 +16,7 @@
         <img src="logo-mark.svg" alt="Hi">
         <div>
           <p>Hi Vocabulary</p>
-          <span>Clipper</span>
+          <span id="authStatus">Clipper</span>
         </div>
       </div>
       <button id="logoutButton" class="icon-button" type="button" title="Đăng xuất" style="display:none">
@@ -83,29 +83,62 @@
       </section>
 
       <section class="save-card">
-        <div class="save-head">
-          <div>
-            <strong>Lưu vào app</strong>
-            <span id="authStatus">Đang tải...</span>
-          </div>
-        </div>
-        <div class="folder-topic-group">
-          <div class="selector-field">
-            <label for="folderSelect" class="selector-label">Thư mục</label>
-            <select id="folderSelect" disabled>
-              <option>Đang tải thư mục...</option>
-            </select>
-          </div>
-          <div class="selector-field">
-            <label for="topicSelect" class="selector-label">Chủ đề</label>
-            <select id="topicSelect" disabled>
-              <option>Chọn thư mục trước...</option>
-            </select>
-          </div>
-        </div>
-        <button id="saveButton" class="save-button" type="button" disabled>Lưu từ này</button>
+        <button id="openSaveModalBtn" class="save-button" type="button" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Lưu từ này vào app
+        </button>
         <p id="statusText" class="status-text"></p>
       </section>
+    </div>
+
+    <!-- Pop-up Modal: Chọn Thư mục -> Chọn Chủ đề -> Lưu -->
+    <div id="saveModal" class="save-modal-overlay" style="display:none">
+      <div class="save-modal-card">
+        <!-- Modal Header -->
+        <div class="save-modal-header">
+          <button id="modalBackBtn" class="modal-nav-btn" type="button" style="display:none" title="Quay lại danh sách thư mục">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            <span>Thư mục</span>
+          </button>
+          <div class="modal-title-wrap">
+            <h3 id="modalTitle">Chọn thư mục</h3>
+            <span id="modalSubtitle" class="modal-sub">Lưu vào bộ từ vựng</span>
+          </div>
+          <button id="modalCloseBtn" class="modal-close-btn" type="button" title="Đóng">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="save-modal-body">
+          <!-- Step 1: Chọn Thư Mục -->
+          <div id="folderStepView" class="modal-step-view">
+            <div class="list-hint">Chọn thư mục để xem các chủ đề:</div>
+            <div id="modalFolderList" class="picker-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 2: Chọn Chủ Đề -->
+          <div id="topicStepView" class="modal-step-view" style="display:none">
+            <div class="list-hint" id="topicStepHint">Chọn chủ đề để lưu từ ngay:</div>
+            <div id="modalTopicList" class="picker-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Feedback Status -->
+        <div id="modalStatus" class="modal-status" style="display:none"></div>
+      </div>
     </div>
   </main>
 

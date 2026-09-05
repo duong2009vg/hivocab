@@ -381,8 +381,206 @@ blockquote {
   box-shadow: 0 0 0 3px rgba(11, 107, 145, .12);
 }
 
-.save-button { width: 100%; }
+.save-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+}
 
-.status-text { min-height: 14px; margin: 0; font-size: 11px; color: var(--muted); }
+.status-text { min-height: 14px; margin: 0; font-size: 11px; color: var(--muted); text-align: center; }
 .status-text.is-error { color: var(--danger); }
 .status-text.is-success { color: var(--success); }
+
+/* ── Pop-up Modal (Folder -> Topic) ─────────────────── */
+.save-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 25, 35, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: modalFadeIn 0.15s ease-out;
+}
+
+.save-modal-card {
+  width: 100%;
+  max-height: 85vh;
+  background: #ffffff;
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: 0 -8px 32px rgba(10, 25, 35, 0.2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.save-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+  background: #fbfdfc;
+  gap: 8px;
+}
+
+.modal-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: #e8f4f8;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.modal-nav-btn:hover { background: #d7edf4; }
+
+.modal-title-wrap {
+  flex: 1;
+  text-align: center;
+}
+.modal-title-wrap h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.modal-sub {
+  display: block;
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.modal-close-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.12s;
+}
+.modal-close-btn:hover { background: #f0f4f6; color: var(--ink); }
+
+.save-modal-body {
+  padding: 10px 12px 14px;
+  overflow-y: auto;
+  max-height: 280px;
+}
+
+.list-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fafbfc;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+.picker-item:hover {
+  background: #f0f7f9;
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+.picker-item:active {
+  transform: scale(0.99);
+}
+
+.picker-item-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+.picker-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.picker-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--muted);
+  background: #eef2f4;
+  padding: 2px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.picker-save-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary);
+  background: #e8f4f8;
+  padding: 3px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+.picker-item:hover .picker-save-badge {
+  background: var(--primary);
+  color: white;
+}
+
+.modal-status {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  background: #f0f7f9;
+  color: var(--primary);
+  border-top: 1px solid var(--line);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
