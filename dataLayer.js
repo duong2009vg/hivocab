@@ -999,6 +999,97 @@ window.HiDB = (() => {
     }
 
 
+    /**
+     * Lấy danh sách các phiên học trong một tháng cụ thể (kèm số từ đã ôn).
+     * Phục vụ hiển thị Lịch giữ lửa (Heatmap Calendar).
+     *
+     * @param {number} year  - Ví dụ: 2026
+     * @param {number} month - 1..12
+     * @returns {Promise<Object>} - Object dạng { 'YYYY-MM-DD': words_reviewed }
+     */
+    async function getMonthlyStudySessions(year, month) {
+        const user = await getCurrentUser().catch(() => null);
+        const result = {};
+
+        // 1. Đọc từ local cache / offline trước
+        try {
+            const localData = JSON.parse(localStorage.getItem('hi_study_sessions') || '{}');
+            Object.assign(result, localData);
+        } catch (_) {}
+
+        if (!user) return result;
+
+        // 2. Query từ Supabase study_sessions
+        const startMonthStr = String(month).padStart(2, '0');
+        const startDateStr = `${year}-${startMonthStr}-01`;
+        const lastDay = new Date(year, month, 0).getDate();
+        const endDateStr = `${year}-${startMonthStr}-${String(lastDay).padStart(2, '0')}`;
+
+        try {
+            const { data, error } = await _getClient()
+                .from('study_sessions')
+                .select('session_date, words_reviewed')
+                .eq('user_id', user.id)
+                .gte('session_date', startDateStr)
+                .lte('session_date', endDateStr);
+
+            if (!error && data) {
+                data.forEach(row => {
+                    const dateKey = typeof row.session_date === 'string' 
+                        ? row.session_date.split('T')[0] 
+                        : row.session_date;
+                    result[dateKey] = Number(row.words_reviewed || 0);
+                });
+            }
+        } catch (err) {
+            console.warn('[HiDB] getMonthlyStudySessions error:', err);
+        }
+
+        return result;
+    }
+
+    /**
+     * Lấy thông tin Mục tiêu IELTS & Ngày thi của user.
+     * @returns {Promise<Object|null>}
+     */
+    async function getIELTSGoal() {
+        let goal = null;
+        try {
+            const raw = localStorage.getItem('hi_ielts_goal');
+            if (raw) goal = JSON.parse(raw);
+        } catch (_) {}
+
+        const user = await getCurrentUser().catch(() => null);
+        if (user && user.user_metadata?.ielts_goal) {
+            goal = user.user_metadata.ielts_goal;
+            try { localStorage.setItem('hi_ielts_goal', JSON.stringify(goal)); } catch(_) {}
+        }
+        return goal;
+    }
+
+    /**
+     * Lưu Mục tiêu IELTS & Ngày thi của user.
+     * @param {Object} goalData - { examDate, overall, listening, reading, writing, speaking, motto }
+     */
+    async function saveIELTSGoal(goalData) {
+        if (!goalData) return;
+        try {
+            localStorage.setItem('hi_ielts_goal', JSON.stringify(goalData));
+        } catch (_) {}
+
+        const user = await getCurrentUser().catch(() => null);
+        if (user && _getClient()?.auth) {
+            try {
+                await _getClient().auth.updateUser({
+                    data: { ielts_goal: goalData }
+                });
+            } catch (err) {
+                console.warn('[HiDB] saveIELTSGoal sync error:', err);
+            }
+        }
+        return goalData;
+    }
+
     // ============================================================
     // PHẦN 7: PUBLIC API
     // ============================================================
@@ -1171,9 +1262,12 @@ window.HiDB = (() => {
         getIntervalLabel,
         clearCache,
 
-        // Dashboard
+        // Dashboard & Calendar & Goals
         getDashboardStats,
         getNextReviewTime,
+        getMonthlyStudySessions,
+        getIELTSGoal,
+        saveIELTSGoal,
 
         // Custom Exercises
         getCustomExercises,
