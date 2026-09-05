@@ -25,10 +25,14 @@ const phoneticText = document.getElementById('phoneticText');
 const meaningText  = document.getElementById('meaningText');
 const exampleText  = document.getElementById('exampleText');
 const audioBtn     = document.getElementById('audioBtn');
+const folderSelect = document.getElementById('folderSelect');
 const topicSelect  = document.getElementById('topicSelect');
 const saveButton   = document.getElementById('saveButton');
 const statusText   = document.getElementById('statusText');
 const authStatus   = document.getElementById('authStatus');
+
+let _allTopics  = [];
+let _foldersMap = {};
 
 // ── Message helper ────────────────────────────────────────────────────────
 function send(type, payload = {}) {
@@ -249,13 +253,15 @@ async function checkAndShowUI() {
 
 async function loadTopics() {
   authStatus.textContent = 'Đang tải...';
+  folderSelect.disabled  = true;
   topicSelect.disabled   = true;
   saveButton.disabled    = true;
 
   const response = await send('get-app-topics');
   if (!response?.ok) {
     topicsReady = false;
-    topicSelect.innerHTML = '<option>Chưa kết nối</option>';
+    folderSelect.innerHTML = '<option>Chưa kết nối</option>';
+    topicSelect.innerHTML  = '<option>Chưa kết nối</option>';
     const isAuthError = (response?.error || '').includes('đăng nhập');
     if (isAuthError) { checkAndShowUI(); return; }
     authStatus.textContent = 'Lỗi kết nối';
@@ -263,20 +269,69 @@ async function loadTopics() {
     return;
   }
 
-  const topics = response.data || [];
-  if (!topics.length) {
+  _allTopics = response.data || [];
+  if (!_allTopics.length) {
     topicsReady = false;
-    topicSelect.innerHTML  = '<option>Chưa có topic</option>';
+    folderSelect.innerHTML = '<option>Chưa có thư mục</option>';
+    topicSelect.innerHTML  = '<option>Chưa có chủ đề</option>';
     authStatus.textContent = 'Đã đăng nhập';
     setStatus('App chưa có topic để thêm từ.', 'error');
     return;
   }
 
+  // Nhóm topics theo category / thư mục
+  _foldersMap = {};
+  _allTopics.forEach(t => {
+    const folder = (t.category || 'General English').trim();
+    if (!_foldersMap[folder]) _foldersMap[folder] = [];
+    _foldersMap[folder].push(t);
+  });
+
+  const folderNames = Object.keys(_foldersMap).sort((a, b) => {
+    if (a.toLowerCase() === 'cam') return -1;
+    if (b.toLowerCase() === 'cam') return 1;
+    if (a.toLowerCase() === 'ielts') return -1;
+    if (b.toLowerCase() === 'ielts') return 1;
+    return a.localeCompare(b, 'vi');
+  });
+
+  folderSelect.innerHTML = folderNames.map(f => 
+    `<option value="${esc(f)}">📁 ${esc(f)} (${_foldersMap[f].length})</option>`
+  ).join('');
+  folderSelect.disabled = false;
+
+  // Khôi phục folder & topic đã chọn trước đó (nếu có)
+  const saved = await chrome.storage.local.get(['last_folder', 'last_topic_id']).catch(() => ({}));
+  let activeFolder = saved.last_folder && _foldersMap[saved.last_folder] ? saved.last_folder : folderNames[0];
+  folderSelect.value = activeFolder;
+
+  renderTopicsForFolder(activeFolder, saved.last_topic_id);
+
   topicsReady            = true;
   authStatus.textContent = 'Đã đăng nhập';
-  topicSelect.disabled   = false;
-  topicSelect.innerHTML  = topics.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
   setStatus('', '');
+  updateSaveState();
+}
+
+function renderTopicsForFolder(folderName, targetTopicId = null) {
+  const topicsInFolder = _foldersMap[folderName] || [];
+  if (!topicsInFolder.length) {
+    topicSelect.innerHTML = '<option value="">(Không có chủ đề)</option>';
+    topicSelect.disabled  = true;
+    updateSaveState();
+    return;
+  }
+
+  topicSelect.innerHTML = topicsInFolder.map(t => 
+    `<option value="${esc(t.id)}">${esc(t.name)}</option>`
+  ).join('');
+  topicSelect.disabled = false;
+
+  if (targetTopicId && topicsInFolder.some(t => t.id === targetTopicId)) {
+    topicSelect.value = targetTopicId;
+  } else {
+    topicSelect.value = topicsInFolder[0].id;
+  }
   updateSaveState();
 }
 
@@ -328,7 +383,16 @@ async function runLookup(term) {
 // ── Event listeners ───────────────────────────────────────────────────────
 searchForm.addEventListener('submit', e => { e.preventDefault(); runLookup(termInput.value); });
 
-topicSelect.addEventListener('change', updateSaveState);
+folderSelect.addEventListener('change', () => {
+  const selectedFolder = folderSelect.value;
+  renderTopicsForFolder(selectedFolder);
+  chrome.storage.local.set({ last_folder: selectedFolder, last_topic_id: topicSelect.value });
+});
+
+topicSelect.addEventListener('change', () => {
+  updateSaveState();
+  chrome.storage.local.set({ last_topic_id: topicSelect.value });
+});
 
 saveButton.addEventListener('click', async () => {
   if (!currentResult || !topicSelect.value) return;
@@ -343,6 +407,7 @@ saveButton.addEventListener('click', async () => {
   });
   if (response?.ok) {
     setStatus('Đã lưu vào app ✓', 'success');
+    chrome.storage.local.set({ last_folder: folderSelect.value, last_topic_id: topicSelect.value });
   } else {
     setStatus(response?.error || 'Không lưu được từ.', 'error');
   }

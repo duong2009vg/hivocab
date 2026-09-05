@@ -59,9 +59,10 @@ export default async function handler(req, res) {
         return res.status(200).json({
             ok: true,
             topics: (topics || []).map(t => ({
-                id:   t.id,
-                name: t.name,
-                icon: t.icon || 'folder',
+                id:       t.id,
+                name:     t.name,
+                icon:     t.icon || 'folder',
+                category: t.category || 'General English',
             })),
         });
     } catch (err) {

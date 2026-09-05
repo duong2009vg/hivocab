@@ -103,16 +103,26 @@
   margin-bottom: 12px;
 }
 
-/* Topic select */
+/* Topic and folder selects */
+.hi-vocab-select-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
 .hi-vocab-panel select {
   width: 100%;
-  padding: 8px 10px;
+  padding: 7px 9px;
   border: 1px solid #cbd5da;
-  border-radius: 9px;
+  border-radius: 8px;
   background: white;
   color: #152027;
   font-size: 12px;
   outline: none;
+  transition: border-color 0.15s;
+}
+.hi-vocab-panel select:focus {
+  border-color: #0b6b91;
 }
 
 /* Actions */

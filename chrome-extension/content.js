@@ -102,17 +102,69 @@
   }
 
   // ── Load topics ───────────────────────────────────────────────────────────
-  async function loadTopics(selectEl) {
+  async function loadTopics(folderSelectEl, topicSelectEl) {
     const response = await send('get-app-topics');
     if (!response?.ok) throw new Error(response?.error || 'Chưa đăng nhập. Vui lòng đăng nhập để lưu từ.');
     const topics = response.data || [];
     if (!topics.length) {
-      selectEl.innerHTML = '<option value="">Chưa có chủ đề nào</option>';
-      selectEl.disabled  = true;
+      folderSelectEl.innerHTML = '<option value="">Chưa có thư mục</option>';
+      topicSelectEl.innerHTML  = '<option value="">Chưa có chủ đề nào</option>';
+      folderSelectEl.disabled  = true;
+      topicSelectEl.disabled   = true;
       return [];
     }
-    selectEl.innerHTML = topics.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
-    selectEl.disabled  = false;
+
+    const foldersMap = {};
+    topics.forEach(t => {
+      const folder = (t.category || 'General English').trim();
+      if (!foldersMap[folder]) foldersMap[folder] = [];
+      foldersMap[folder].push(t);
+    });
+
+    const folderNames = Object.keys(foldersMap).sort((a, b) => {
+      if (a.toLowerCase() === 'cam') return -1;
+      if (b.toLowerCase() === 'cam') return 1;
+      if (a.toLowerCase() === 'ielts') return -1;
+      if (b.toLowerCase() === 'ielts') return 1;
+      return a.localeCompare(b, 'vi');
+    });
+
+    folderSelectEl.innerHTML = folderNames.map(f => 
+      `<option value="${esc(f)}">📁 ${esc(f)} (${foldersMap[f].length})</option>`
+    ).join('');
+    folderSelectEl.disabled = false;
+
+    function renderTopics(selectedFolder, targetTopicId = null) {
+      const list = foldersMap[selectedFolder] || [];
+      if (!list.length) {
+        topicSelectEl.innerHTML = '<option value="">(Không có chủ đề)</option>';
+        topicSelectEl.disabled  = true;
+        return;
+      }
+      topicSelectEl.innerHTML = list.map(t => `<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');
+      topicSelectEl.disabled  = false;
+      if (targetTopicId && list.some(t => t.id === targetTopicId)) {
+        topicSelectEl.value = targetTopicId;
+      } else {
+        topicSelectEl.value = list[0].id;
+      }
+    }
+
+    const saved = await chrome.storage.local.get(['last_folder', 'last_topic_id']).catch(() => ({}));
+    let activeFolder = saved.last_folder && foldersMap[saved.last_folder] ? saved.last_folder : folderNames[0];
+    folderSelectEl.value = activeFolder;
+    renderTopics(activeFolder, saved.last_topic_id);
+
+    folderSelectEl.onchange = () => {
+      const f = folderSelectEl.value;
+      renderTopics(f);
+      chrome.storage.local.set({ last_folder: f, last_topic_id: topicSelectEl.value });
+    };
+
+    topicSelectEl.onchange = () => {
+      chrome.storage.local.set({ last_topic_id: topicSelectEl.value });
+    };
+
     return topics;
   }
 
@@ -237,30 +289,39 @@
       </div>
       <div id="hiv-meaning" class="hi-vocab-meaning">${esc(data.meaning || 'Đang tra nghĩa...')}</div>
       <div id="hiv-example" class="hi-vocab-example">${esc(data.example || '')}</div>
-      <select id="hiv-topics" aria-label="Chọn topic" disabled><option>Đang tải topic...</option></select>
+      <div class="hi-vocab-select-row">
+        <select id="hiv-folder" aria-label="Chọn thư mục" disabled><option>Đang tải thư mục...</option></select>
+        <select id="hiv-topics" aria-label="Chọn chủ đề" disabled><option>Chọn thư mục trước...</option></select>
+      </div>
       <div class="hi-vocab-actions">
         <button id="hiv-add" class="hi-vocab-add" disabled>⬇ Lưu vào app</button>
       </div>
       <div id="hiv-status" class="hi-vocab-status"></div>`;
     root.appendChild(panel);
 
-    const audioBtn = panel.querySelector('#hiv-audio');
-    const select   = panel.querySelector('#hiv-topics');
-    const status   = panel.querySelector('#hiv-status');
-    const addBtn   = panel.querySelector('#hiv-add');
+    const audioBtn  = panel.querySelector('#hiv-audio');
+    const folderSel = panel.querySelector('#hiv-folder');
+    const select    = panel.querySelector('#hiv-topics');
+    const status    = panel.querySelector('#hiv-status');
+    const addBtn    = panel.querySelector('#hiv-add');
 
     // Closure luôn đọc current mới nhất (được cập nhật sau lookup)
     audioBtn.onclick = () => speakWord(current.word, current.audioEl, current.audioUrl);
 
-    loadTopics(select).then(topics => {
-      if (topics?.length && current?.meaning) addBtn.disabled = false;
+    loadTopics(folderSel, select).then(topics => {
+      if (topics?.length && current?.meaning && select.value) addBtn.disabled = false;
     }).catch(err => {
       status.textContent = err.message;
+      folderSel.disabled = true;
       select.disabled    = true;
       addBtn.disabled    = true;
       if (err.message.includes('đăng nhập') || err.message.includes('Chưa đăng nhập')) {
         status.innerHTML = `<a href="${APP_URL}" target="_blank" style="color:#0b6b91;font-weight:600;text-decoration:underline">Mở app để đăng nhập</a>`;
       }
+    });
+
+    select.addEventListener('change', () => {
+      if (current?.meaning && select.value) addBtn.disabled = false;
     });
 
     addBtn.onclick = async () => {
@@ -278,6 +339,7 @@
       if (response?.ok) {
         status.style.color = '#19734b';
         status.textContent = `Đã lưu "${current.word}" ✓`;
+        chrome.storage.local.set({ last_folder: folderSel.value, last_topic_id: select.value });
         setTimeout(closePanel, 1200);
       } else {
         addBtn.disabled    = false;

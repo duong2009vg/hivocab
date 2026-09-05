@@ -2424,10 +2424,19 @@ window.addEventListener('hashchange', () => {
         <input type="hidden" id="new-topic-icon" value="folder"/>
       </div>
       <div>
-        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Danh mục</label>
-        <input id="new-topic-category" type="text" maxlength="80" list="topic-category-options" placeholder="Ví dụ: IELTS/TOEIC"
-               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors text-sm"/>
-        <datalist id="topic-category-options"></datalist>
+        <div class="flex items-center justify-between mb-2">
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider">Thư mục / Danh mục</label>
+          <button type="button" onclick="window.toggleCustomCategoryInput()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+            <span class="material-symbols-outlined text-[14px]">add</span>Thư mục mới
+          </button>
+        </div>
+        <select id="new-topic-category-select" onchange="window.onTopicCategorySelectChange()"
+                class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface transition-colors text-sm cursor-pointer mb-2">
+        </select>
+        <div id="new-topic-category-custom-wrap" class="hidden">
+          <input id="new-topic-category-custom" type="text" maxlength="60" placeholder="Nhập tên thư mục mới (ví dụ: TOEIC, Giao tiếp...)"
+                 class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-2.5 rounded-t-lg outline-none text-on-surface transition-colors text-sm"/>
+        </div>
       </div>
       <div id="create-topic-error" class="text-error text-sm hidden"></div>
       <div class="flex gap-3 mt-2">
@@ -3027,6 +3036,35 @@ const TOPIC_ICONS = [
     'school','language','psychology','eco','local_fire_department','rocket_launch'
 ];
 
+window.toggleCustomCategoryInput = function(forceShow = null) {
+    const wrap  = document.getElementById('new-topic-category-custom-wrap');
+    const sel   = document.getElementById('new-topic-category-select');
+    const input = document.getElementById('new-topic-category-custom');
+    if (!wrap) return;
+
+    const shouldShow = forceShow !== null ? forceShow : wrap.classList.contains('hidden');
+    if (shouldShow) {
+        wrap.classList.remove('hidden');
+        if (sel) sel.value = '__custom__';
+        setTimeout(() => input?.focus(), 100);
+    } else {
+        wrap.classList.add('hidden');
+        if (sel && sel.value === '__custom__') {
+            sel.selectedIndex = 0;
+        }
+    }
+};
+
+window.onTopicCategorySelectChange = function() {
+    const sel = document.getElementById('new-topic-category-select');
+    if (!sel) return;
+    if (sel.value === '__custom__') {
+        window.toggleCustomCategoryInput(true);
+    } else {
+        window.toggleCustomCategoryInput(false);
+    }
+};
+
 window.openCreateTopicModal = function() {
     const modal = document.getElementById('modal-create-topic');
     if (!modal) return;
@@ -3041,10 +3079,50 @@ window.openCreateTopicModal = function() {
             </button>
         `).join('');
     }
-    // Pre-select current category in dropdown
-    const catSel = document.getElementById('new-topic-category');
-    _renderTopicCategoryDatalist();
-    if (catSel) catSel.value = window._activeCategory !== 'all' ? window._activeCategory : 'General English';
+    
+    // Render folder/category dropdown
+    const catSel = document.getElementById('new-topic-category-select');
+    if (catSel) {
+        const catSet = new Set();
+        (window._allTopics || []).forEach(t => {
+            const c = (t.category || '').trim();
+            if (c) catSet.add(c);
+        });
+        const defaultCats = [
+            'CAM',
+            'IELTS',
+            'Oxford 3000',
+            'Idioms & Collocations',
+            'THPT/ĐGNL',
+            'General English',
+            'CEFR',
+            'Grammar'
+        ];
+        defaultCats.forEach(c => catSet.add(c));
+
+        const sortedCats = Array.from(catSet).sort((a, b) => {
+            if (a.toLowerCase() === 'cam') return -1;
+            if (b.toLowerCase() === 'cam') return 1;
+            if (a.toLowerCase() === 'ielts') return -1;
+            if (b.toLowerCase() === 'ielts') return 1;
+            return a.localeCompare(b, 'vi');
+        });
+
+        catSel.innerHTML = sortedCats.map(c => `<option value="${_esc(c)}">📁 ${c}</option>`).join('') +
+                           `<option value="__custom__">➕ Tạo thư mục mới...</option>`;
+
+        let defaultCat = window._activeCategory && window._activeCategory !== 'all'
+            ? window._activeCategory
+            : (sortedCats[0] || 'General English');
+
+        const match = sortedCats.find(c => c.toLowerCase() === defaultCat.toLowerCase());
+        catSel.value = match || sortedCats[0];
+    }
+
+    window.toggleCustomCategoryInput(false);
+    const customInput = document.getElementById('new-topic-category-custom');
+    if (customInput) customInput.value = '';
+
     document.getElementById('new-topic-icon').value = 'folder';
     document.getElementById('new-topic-name').value = '';
     const err = document.getElementById('create-topic-error');
@@ -3072,15 +3150,25 @@ window.selectTopicIcon = function(icon) {
 };
 
 window.submitCreateTopic = async function() {
-    const nameEl = document.getElementById('new-topic-name');
-    const iconEl = document.getElementById('new-topic-icon');
-    const catEl  = document.getElementById('new-topic-category');
-    const errEl  = document.getElementById('create-topic-error');
-    const btn    = document.getElementById('create-topic-submit');
+    const nameEl      = document.getElementById('new-topic-name');
+    const iconEl      = document.getElementById('new-topic-icon');
+    const catSel      = document.getElementById('new-topic-category-select');
+    const customInput = document.getElementById('new-topic-category-custom');
+    const errEl       = document.getElementById('create-topic-error');
+    const btn         = document.getElementById('create-topic-submit');
 
     const name = nameEl?.value.trim();
     const icon = iconEl?.value || 'folder';
-    const category = catEl?.value.trim() || 'General English';
+
+    let category = catSel?.value || 'General English';
+    if (category === '__custom__') {
+        category = (customInput?.value || '').trim();
+        if (!category) {
+            if (errEl) { errEl.textContent = 'Vui lòng nhập tên thư mục mới.'; errEl.classList.remove('hidden'); }
+            customInput?.focus();
+            return;
+        }
+    }
 
     if (!name) {
         if (errEl) { errEl.textContent = 'Vui lòng nhập tên chủ đề.'; errEl.classList.remove('hidden'); }
@@ -3094,7 +3182,8 @@ window.submitCreateTopic = async function() {
 
         const newTopic = await HiDB.createTopic(name, icon, category);
 
-        // Refresh cache để tab danh mục và click vào topic mới đều đúng state.
+        // Tự động chuyển tab đang xem sang đúng thư mục vừa tạo để người dùng thấy ngay chủ đề mới!
+        window._activeCategory = category;
         window._allTopics = [];
         await window._renderTopicsGrid();
         window.closeCreateTopicModal();

@@ -148,17 +148,49 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    // Lấy danh sách topics
+    // Lấy danh sách topics (kèm category / thư mục)
     if (message?.type === 'get-app-topics') {
         (async () => {
             const token = await getValidToken();
             if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Vui lòng đăng nhập lại.' });
-            const data = await apiGet('/topics', token);
-            if (!data.ok) {
-                if (/invalid|expired/i.test(data.error || '')) await clearSession();
-                return sendResponse({ ok: false, error: data.error || 'Không tải được topic.' });
+
+            let topics = [];
+            try {
+                const data = await apiGet('/topics', token);
+                if (data.ok && Array.isArray(data.topics) && data.topics.length > 0) {
+                    topics = data.topics;
+                }
+            } catch (_) {}
+
+            // Nếu api chưa trả về category (ví dụ: cache cũ), query trực tiếp từ Supabase REST
+            const needsCategory = !topics.length || !topics.some(t => t.category);
+            if (needsCategory) {
+                try {
+                    const sbRes = await fetch('https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/topics?select=id,name,icon,category,created_at&order=created_at.asc', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
+                        }
+                    });
+                    if (sbRes.ok) {
+                        const sbData = await sbRes.json();
+                        if (Array.isArray(sbData) && sbData.length > 0) {
+                            topics = sbData.map(t => ({
+                                id:       t.id,
+                                name:     t.name,
+                                icon:     t.icon || 'folder',
+                                category: t.category || 'General English',
+                            }));
+                        }
+                    }
+                } catch (_) {}
             }
-            sendResponse({ ok: true, data: data.topics });
+
+            if (!topics.length) {
+                return sendResponse({ ok: false, error: 'Không tải được topic.' });
+            }
+
+            sendResponse({ ok: true, data: topics });
         })().catch(err => sendResponse({ ok: false, error: err.message }));
         return true;
     }

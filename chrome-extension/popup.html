@@ -89,9 +89,20 @@
             <span id="authStatus">Đang tải...</span>
           </div>
         </div>
-        <select id="topicSelect" disabled>
-          <option>Đang tải topic...</option>
-        </select>
+        <div class="folder-topic-group">
+          <div class="selector-field">
+            <label for="folderSelect" class="selector-label">Thư mục</label>
+            <select id="folderSelect" disabled>
+              <option>Đang tải thư mục...</option>
+            </select>
+          </div>
+          <div class="selector-field">
+            <label for="topicSelect" class="selector-label">Chủ đề</label>
+            <select id="topicSelect" disabled>
+              <option>Chọn thư mục trước...</option>
+            </select>
+          </div>
+        </div>
         <button id="saveButton" class="save-button" type="button" disabled>Lưu từ này</button>
         <p id="statusText" class="status-text"></p>
       </section>
