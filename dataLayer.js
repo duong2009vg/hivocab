@@ -55,6 +55,9 @@ window.HiDB = (() => {
         clearCache('lessons:');
         clearCache('topic-words:');
         clearCache('lesson-words:');
+        clearCache('cam-hierarchy:');
+        clearCache('passage-words:');
+        clearCache('test-words:');
     }
 
 
@@ -354,16 +357,21 @@ window.HiDB = (() => {
      * @param {Object} wordData - { word, phonetic?, meaning, exampleSentence? }
      * @returns {Promise<Object>}
      */
-    async function addWord(topicId, { word, phonetic = '', meaning, exampleSentence = '' }) {
+    async function addWord(topicId, { word, phonetic = '', meaning, exampleSentence = '', passageId = null }) {
+        const payload = {
+            topic_id:        topicId,
+            word,
+            phonetic,
+            meaning,
+            example_sentence: _isEnglishExample(exampleSentence) ? exampleSentence : '',
+        };
+        if (passageId) {
+            payload.passage_id = passageId;
+        }
+
         const { data, error } = await _getClient()
             .from('words')
-            .insert({
-                topic_id:        topicId,
-                word,
-                phonetic,
-                meaning,
-                example_sentence: _isEnglishExample(exampleSentence) ? exampleSentence : '',
-            })
+            .insert(payload)
             .select()
             .single();
 
@@ -612,6 +620,264 @@ window.HiDB = (() => {
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
+                level:           progress?.level          ?? 0,
+                nextReviewAt:    progress?.next_review_at  ?? null,
+                lastReviewedAt:  progress?.last_reviewed_at ?? null,
+                reviewCount:     progress?.review_count     ?? 0,
+                isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
+            };
+        }));
+    }
+
+    /**
+     * Lấy cấu trúc phân cấp Cambridge (Tests -> Passages) của một chủ đề.
+     * Trả về null nếu topic không có tests/passages (ví dụ Non-CAM topic).
+     *
+     * @param {string} topicId
+     * @returns {Promise<{ tests: Array, unlinkedWords: Array, totalWords: number, progress: number } | null>}
+     */
+    async function getCamHierarchy(topicId) {
+        const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `cam-hierarchy:${user?.id || 'anon'}:${topicId}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
+        const client = _getClient();
+
+        // 1. Lấy danh sách tests của topic
+        const { data: testsData, error: testsError } = await client
+            .from('tests')
+            .select('id, name, test_order')
+            .eq('topic_id', topicId)
+            .order('test_order', { ascending: true });
+
+        if (testsError || !testsData || testsData.length === 0) {
+            return null; // Không có tests -> fallback về giao diện lesson thường
+        }
+
+        // 2. Lấy danh sách passages của topic
+        const { data: passagesData, error: passagesError } = await client
+            .from('passages')
+            .select('id, test_id, passage_number, title, topic_label')
+            .eq('topic_id', topicId)
+            .order('passage_number', { ascending: true });
+
+        if (passagesError || !passagesData || passagesData.length === 0) {
+            return null;
+        }
+
+        // 3. Lấy words trong topic kèm passage_id & progress của user
+        const { data: wordsData, error: wordsError } = await client
+            .from('words')
+            .select(`
+                id,
+                passage_id,
+                word,
+                phonetic,
+                meaning,
+                example_sentence,
+                word_order,
+                created_at,
+                word_progress ( level, user_id )
+            `)
+            .eq('topic_id', topicId)
+            .order('word_order', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+
+        if (wordsError) throw wordsError;
+
+        const allWords = wordsData || [];
+        const passageWordsMap = new Map();
+        const unlinkedWords = [];
+
+        for (const w of allWords) {
+            const userProgress = user
+                ? (w.word_progress || []).find(p => p.user_id === user.id)
+                : null;
+            const wordObj = {
+                id:              w.id,
+                word:            w.word,
+                phonetic:        w.phonetic,
+                meaning:         w.meaning,
+                exampleSentence: w.example_sentence,
+                passageId:       w.passage_id,
+                level:           userProgress?.level ?? 0,
+            };
+
+            if (w.passage_id) {
+                if (!passageWordsMap.has(w.passage_id)) {
+                    passageWordsMap.set(w.passage_id, []);
+                }
+                passageWordsMap.get(w.passage_id).push(wordObj);
+            } else {
+                unlinkedWords.push(wordObj);
+            }
+        }
+
+        // Map passages theo test_id
+        const passagesByTest = new Map();
+        for (const p of passagesData) {
+            const wordsInP = passageWordsMap.get(p.id) || [];
+            const totalWords = wordsInP.length;
+            const totalLevel = wordsInP.reduce((sum, item) => sum + item.level, 0);
+            const progress = totalWords > 0 ? Math.round((totalLevel / (totalWords * 5)) * 100) : 0;
+
+            const passageObj = {
+                id:            p.id,
+                testId:        p.test_id,
+                passageNumber: p.passage_number,
+                title:         p.title || `Passage ${p.passage_number}`,
+                topicLabel:    p.topic_label || '',
+                totalWords,
+                progress,
+                wordIds:       wordsInP.map(w => w.id),
+            };
+
+            if (!passagesByTest.has(p.test_id)) {
+                passagesByTest.set(p.test_id, []);
+            }
+            passagesByTest.get(p.test_id).push(passageObj);
+        }
+
+        let grandTotalWords = 0;
+        let grandTotalLevel = 0;
+
+        const tests = testsData.map(t => {
+            const passages = passagesByTest.get(t.id) || [];
+            passages.sort((a, b) => a.passageNumber - b.passageNumber);
+
+            const testWordsCount = passages.reduce((sum, p) => sum + p.totalWords, 0);
+            const testWords = passages.flatMap(p => passageWordsMap.get(p.id) || []);
+            const testTotalLevel = testWords.reduce((sum, item) => sum + item.level, 0);
+            const testProgress = testWordsCount > 0 ? Math.round((testTotalLevel / (testWordsCount * 5)) * 100) : 0;
+
+            grandTotalWords += testWordsCount;
+            grandTotalLevel += testTotalLevel;
+
+            return {
+                id:         t.id,
+                name:       t.name,
+                testOrder:  t.test_order,
+                totalWords: testWordsCount,
+                progress:   testProgress,
+                passages,
+            };
+        });
+
+        grandTotalWords += unlinkedWords.length;
+        grandTotalLevel += unlinkedWords.reduce((sum, item) => sum + item.level, 0);
+        const overallProgress = grandTotalWords > 0 ? Math.round((grandTotalLevel / (grandTotalWords * 5)) * 100) : 0;
+
+        const result = {
+            tests,
+            unlinkedWords,
+            totalWords: grandTotalWords,
+            progress:   overallProgress,
+        };
+
+        return _cacheSet(cacheKey, result);
+    }
+
+    /**
+     * Lấy danh sách từ trong một passage cụ thể kèm user progress.
+     *
+     * @param {string} passageId
+     * @returns {Promise<Array>}
+     */
+    async function getWordsInPassage(passageId) {
+        const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `passage-words:${user?.id || 'anon'}:${passageId}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
+        const client = _getClient();
+        const { data, error } = await client
+            .from('words')
+            .select(`
+                id,
+                word,
+                phonetic,
+                meaning,
+                example_sentence,
+                passage_id,
+                word_order,
+                created_at,
+                word_progress ( level, next_review_at, last_reviewed_at, review_count )
+            `)
+            .eq('passage_id', passageId)
+            .order('word_order', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        return _cacheSet(cacheKey, (data || []).map(w => {
+            const progress = (w.word_progress || [])[0] || null;
+            return {
+                id:              w.id,
+                word:            w.word,
+                phonetic:        w.phonetic,
+                meaning:         w.meaning,
+                exampleSentence: w.example_sentence,
+                passageId:       w.passage_id,
+                level:           progress?.level          ?? 0,
+                nextReviewAt:    progress?.next_review_at  ?? null,
+                lastReviewedAt:  progress?.last_reviewed_at ?? null,
+                reviewCount:     progress?.review_count     ?? 0,
+                isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
+            };
+        }));
+    }
+
+    /**
+     * Lấy toàn bộ từ trong một Test (bao gồm cả 3 passages).
+     *
+     * @param {string} testId
+     * @returns {Promise<Array>}
+     */
+    async function getWordsInTest(testId) {
+        const user = await getCurrentUser().catch(() => null);
+        const cacheKey = `test-words:${user?.id || 'anon'}:${testId}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
+        const client = _getClient();
+        const { data: passages, error: pErr } = await client
+            .from('passages')
+            .select('id')
+            .eq('test_id', testId);
+
+        if (pErr) throw pErr;
+        const pIds = (passages || []).map(p => p.id);
+        if (pIds.length === 0) return [];
+
+        const { data, error } = await client
+            .from('words')
+            .select(`
+                id,
+                word,
+                phonetic,
+                meaning,
+                example_sentence,
+                passage_id,
+                word_order,
+                created_at,
+                word_progress ( level, next_review_at, last_reviewed_at, review_count )
+            `)
+            .in('passage_id', pIds)
+            .order('word_order', { ascending: true, nullsFirst: false })
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+
+        return _cacheSet(cacheKey, (data || []).map(w => {
+            const progress = (w.word_progress || [])[0] || null;
+            return {
+                id:              w.id,
+                word:            w.word,
+                phonetic:        w.phonetic,
+                meaning:         w.meaning,
+                exampleSentence: w.example_sentence,
+                passageId:       w.passage_id,
                 level:           progress?.level          ?? 0,
                 nextReviewAt:    progress?.next_review_at  ?? null,
                 lastReviewedAt:  progress?.last_reviewed_at ?? null,
@@ -1253,6 +1519,9 @@ window.HiDB = (() => {
         deleteWord,
         getLessonsInTopic,
         getWordsInLesson,
+        getCamHierarchy,
+        getWordsInPassage,
+        getWordsInTest,
 
         // SM-2 Core
         getWordsDueForReview,

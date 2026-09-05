@@ -1026,7 +1026,19 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
             </div>
         </div>
 
-        <!-- Danh sách Lessons -->
+        <!-- Test Tabs Selector (dành riêng cho danh mục Cambridge IELTS) -->
+        <div id="cam-test-tabs-container" class="hidden flex-col gap-2.5">
+            <div class="flex items-center justify-between px-1">
+                <span class="text-xs font-bold uppercase tracking-wider text-outline flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[15px]">quiz</span>
+                    Chọn bài Test
+                </span>
+                <span id="cam-test-info" class="text-xs font-medium text-on-surface-variant">4 bài Test · 12 bài đọc</span>
+            </div>
+            <div id="cam-test-tabs" class="flex gap-2.5 overflow-x-auto pb-1 scrollbar-hide"></div>
+        </div>
+
+        <!-- Danh sách Lessons hoặc Passages -->
         <div id="lessons-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <div class="flex items-center justify-center py-12 col-span-3">
                 <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
@@ -1086,7 +1098,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <div class="absolute -top-8 -right-8 w-28 h-28 bg-primary-container/20 rounded-full blur-2xl pointer-events-none"></div>
                 <div class="flex items-start justify-between">
                     <div class="flex-1 min-w-0 pr-3">
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold tracking-wider uppercase mb-2">Lesson</span>
+                        <span id="ld-badge-mobile" class="inline-flex items-center px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold tracking-wider uppercase mb-2">Lesson</span>
                         <h2 id="ld-title-mobile" class="text-2xl font-bold text-on-surface leading-tight">Lesson 1</h2>
                         <p id="ld-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">0 từ vựng</p>
                     </div>
@@ -1963,9 +1975,17 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
     const typeMap = ['flashcard', 'mcq', 'fill', 'listen'];
     const forcedType = typeMap[exerciseTypeIndex] || 'flashcard';
 
+    const topicId     = window._currentTopicId;
+    const passageId   = window._currentPassageId;
+    const lessonIndex = window._currentLessonIndex !== undefined ? window._currentLessonIndex : null;
+    const testId      = window._currentTestId;
+
+    // Return target when closing practice
+    const returnTarget = (passageId || lessonIndex !== null) ? 'lesson-detail' : (topicId ? 'topic-detail' : 'dashboard');
+    document.getElementById('learning-close-btn').setAttribute('onclick', `navigateTo('${returnTarget}')`);
+
     document.getElementById('learning-progress-container').style.display = 'flex';
     document.getElementById('learning-streak-container').style.display  = 'flex';
-    document.getElementById('learning-close-btn').setAttribute('onclick', "navigateTo('lesson-detail')");
     navigateTo('learning');
 
     document.querySelectorAll('.exercise-step').forEach(el => el.classList.add('hidden'));
@@ -1982,32 +2002,34 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
         HiSessionUI.init();
         container.innerHTML = `<div class="flex items-center justify-center mt-24"><span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span></div>`;
 
-        const topicId     = window._currentTopicId;
-        const lessonIndex = window._currentLessonIndex ?? 0;
-        const lessonKey   = topicId ? `${topicId}::${lessonIndex}` : null;
+        let rawWords = null;
+        const lessonKey = passageId ? `passage:${passageId}` : (lessonIndex !== null ? `${topicId}::${lessonIndex}` : (testId ? `test:${testId}` : null));
 
-        // Dùng cache chỉ khi cache thuộc đúng lesson đang mở; nếu khác lesson thì fetch lại.
-        let rawWords = lessonKey && window._currentLessonWordsKey === lessonKey
-            ? window._currentLessonWords
-            : null;
-
-        if (!rawWords || rawWords.length === 0) {
-            if (topicId) {
-                rawWords = await HiDB.getWordsInLesson(topicId, lessonIndex);
-                if (window._currentTopicId !== topicId || window._currentLessonIndex !== lessonIndex) {
-                    return;
-                }
-                window._currentLessonWords = rawWords || [];
-                window._currentLessonWordsKey = lessonKey;
-            } else {
-                rawWords = await HiDB.getWordsDueForReview(20);
-                window._currentLessonWords = [];
-                window._currentLessonWordsKey = null;
-            }
+        if (lessonKey && window._currentLessonWordsKey === lessonKey && window._currentLessonWords && window._currentLessonWords.length > 0) {
+            rawWords = window._currentLessonWords;
         }
 
         if (!rawWords || rawWords.length === 0) {
-            container.innerHTML = '<div class="text-center mt-20 text-on-surface-variant"><h2 class="font-bold text-xl mb-2">Không có từ để luyện tập</h2><p>Thêm từ mới vào chủ đề trước.</p></div>';
+            if (passageId === '__unlinked__') {
+                const hier = window._camHierarchy || (typeof HiDB.getCamHierarchy === 'function' ? await HiDB.getCamHierarchy(topicId) : null);
+                rawWords = hier?.unlinkedWords || [];
+            } else if (passageId && typeof HiDB.getWordsInPassage === 'function') {
+                rawWords = await HiDB.getWordsInPassage(passageId);
+            } else if (lessonIndex !== null && typeof HiDB.getWordsInLesson === 'function') {
+                rawWords = await HiDB.getWordsInLesson(topicId, lessonIndex);
+            } else if (testId && typeof HiDB.getWordsInTest === 'function') {
+                rawWords = await HiDB.getWordsInTest(testId);
+            } else if (topicId && typeof HiDB.getWordsInTopic === 'function') {
+                rawWords = await HiDB.getWordsInTopic(topicId);
+            } else {
+                rawWords = await HiDB.getWordsDueForReview(20);
+            }
+            window._currentLessonWords = rawWords || [];
+            window._currentLessonWordsKey = lessonKey;
+        }
+
+        if (!rawWords || rawWords.length === 0) {
+            container.innerHTML = '<div class="text-center mt-20 text-on-surface-variant"><h2 class="font-bold text-xl mb-2">Không có từ để luyện tập</h2><p>Phần này chưa có từ vựng.</p></div>';
             return;
         }
 
@@ -2810,10 +2832,17 @@ window._openTopic = function(topicId, topicName, category) {
         topicName = cached?.name || '—';
         category  = cached?.category || 'general';
     }
-    window._currentTopicId   = topicId;
-    window._currentTopicName = topicName;
-    window._currentCategory  = category;
-    window._currentLessonWords = [];
+    window._currentTopicId        = topicId;
+    window._currentTopicName      = topicName;
+    window._currentCategory       = category;
+    window._currentPassageId      = null;
+    window._currentPassageNumber  = null;
+    window._currentPassageTitle   = null;
+    window._currentTopicLabel     = null;
+    window._currentTestId         = null;
+    window._currentTestIndex      = 0;
+    window._currentLessonIndex    = null;
+    window._currentLessonWords    = [];
     window._currentLessonWordsKey = null;
     navigateTo('topic-detail');
 };
@@ -2839,7 +2868,9 @@ window._loadLessons = async function() {
     const sidebarName = document.getElementById('sub-sidebar-topic-name');
     if (sidebarName) sidebarName.textContent = topicName;
 
-    const listEl = document.getElementById('lessons-list');
+    const testTabsContainer = document.getElementById('cam-test-tabs-container');
+    const testTabsEl        = document.getElementById('cam-test-tabs');
+    const listEl            = document.getElementById('lessons-list');
     if (!listEl) return;
 
     // Skeleton
@@ -2848,11 +2879,75 @@ window._loadLessons = async function() {
     </div>`;
 
     if (!topicId) {
+        if (testTabsContainer) testTabsContainer.classList.add('hidden');
         listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-on-surface-variant">Không tìm thấy chủ đề.</div>`;
         return;
     }
 
     try {
+        // Kiểm tra xem chủ đề có phân cấp Cambridge (Tests -> Passages) hay không
+        let camHierarchy = null;
+        if (typeof HiDB !== 'undefined' && typeof HiDB.getCamHierarchy === 'function') {
+            camHierarchy = await HiDB.getCamHierarchy(topicId);
+        }
+
+        // ============================================================
+        // TRƯỜNG HỢP 1: Chế độ Cambridge IELTS (Có phân cấp Test -> Passage)
+        // ============================================================
+        if (camHierarchy && camHierarchy.tests && camHierarchy.tests.length > 0) {
+            window._camHierarchy = camHierarchy;
+            if (testTabsContainer) {
+                testTabsContainer.classList.remove('hidden');
+                testTabsContainer.classList.add('flex');
+            }
+
+            const totalTests = camHierarchy.tests.length;
+            const totalPassages = camHierarchy.tests.reduce((sum, t) => sum + (t.passages?.length || 0), 0);
+            const totalWords = camHierarchy.totalWords || 0;
+
+            const testInfoEl = document.getElementById('cam-test-info');
+            if (testInfoEl) {
+                testInfoEl.textContent = `${totalTests} bài Test · ${totalPassages} bài đọc`;
+            }
+
+            ['td-subtitle','td-subtitle-mobile'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = `${totalTests} bài Test · ${totalPassages} bài đọc · ${totalWords} từ vựng`;
+            });
+
+            // Đảm bảo testIndex hợp lệ
+            if (window._currentTestIndex === null || window._currentTestIndex === undefined || window._currentTestIndex >= totalTests) {
+                window._currentTestIndex = 0;
+            }
+
+            // Render Test Tabs
+            if (testTabsEl) {
+                testTabsEl.innerHTML = camHierarchy.tests.map((t, idx) => {
+                    const active = idx === window._currentTestIndex;
+                    return `
+                    <button onclick="window._selectCamTest(${idx})"
+                        class="flex items-center gap-2 px-4 py-2 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap transition-all duration-200 shrink-0
+                               ${active ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container text-on-surface-variant hover:bg-primary/10 hover:text-primary border border-outline-variant/30'}">
+                        <span>${_esc(t.name)}</span>
+                        <span class="text-[11px] px-2 py-0.5 rounded-full ${active ? 'bg-white/20 text-white' : 'bg-surface-container-high text-on-surface-variant'}">${t.totalWords} từ</span>
+                    </button>`;
+                }).join('');
+            }
+
+            // Render Passages cho Test đang chọn
+            window._renderCamPassages(window._currentTestIndex);
+            return;
+        }
+
+        // ============================================================
+        // TRƯỜNG HỢP 2: Chủ đề Non-CAM (Oxford 3000, IELTS, Idioms, v.v.)
+        // ============================================================
+        if (testTabsContainer) {
+            testTabsContainer.classList.add('hidden');
+            testTabsContainer.classList.remove('flex');
+        }
+        window._camHierarchy = null;
+
         const lessons = typeof HiDB !== 'undefined'
             ? await HiDB.getLessonsInTopic(topicId)
             : [];
@@ -2872,7 +2967,7 @@ window._loadLessons = async function() {
             if (el) el.textContent = `${lessons.length} lesson · ${totalWords} từ`;
         });
 
-        // Lưu lessons vào cache để _openLesson tra cứu (tránh lỗi quote trong onclick)
+        // Lưu lessons vào cache để _openLesson tra cứu
         window._lessonsCache = window._lessonsCache || {};
         window._lessonsCache[topicId] = lessons;
 
@@ -2902,28 +2997,177 @@ window._loadLessons = async function() {
         console.error('[_loadLessons]', err);
         listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-error">
             <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
-            Lỗi tải lessons: ${_esc(err.message)}
+            Lỗi tải bài học: ${_esc(err.message)}
         </div>`;
     }
 };
 
-// ── MỞ LESSON ────────────────────────────────────────────────────
+// ── CHỌN TEST TRONG CAMBRIDGE TOPIC ──────────────────────────────
+window._selectCamTest = function(testIndex) {
+    window._currentTestIndex = testIndex;
+    const camHierarchy = window._camHierarchy;
+    if (!camHierarchy || !camHierarchy.tests) return;
+
+    // Cập nhật giao diện tabs
+    const tabsEl = document.getElementById('cam-test-tabs');
+    if (tabsEl) {
+        tabsEl.querySelectorAll('button').forEach((btn, idx) => {
+            const active = idx === testIndex;
+            btn.className = `flex items-center gap-2 px-4 py-2 rounded-full text-xs md:text-sm font-semibold whitespace-nowrap transition-all duration-200 shrink-0 ${active ? 'bg-primary text-on-primary shadow-md' : 'bg-surface-container text-on-surface-variant hover:bg-primary/10 hover:text-primary border border-outline-variant/30'}`;
+            const badge = btn.querySelector('span:last-child');
+            if (badge) {
+                badge.className = `text-[11px] px-2 py-0.5 rounded-full ${active ? 'bg-white/20 text-white' : 'bg-surface-container-high text-on-surface-variant'}`;
+            }
+        });
+    }
+
+    window._renderCamPassages(testIndex);
+};
+
+// ── RENDER CÁC PASSAGE CỦA TEST HIỆN TẠI ────────────────────────
+window._renderCamPassages = function(testIndex = 0) {
+    const topicId = window._currentTopicId;
+    const camHierarchy = window._camHierarchy;
+    if (!camHierarchy || !camHierarchy.tests) return;
+
+    const currentTest = camHierarchy.tests[testIndex] || camHierarchy.tests[0];
+    if (!currentTest) return;
+
+    window._currentTestId   = currentTest.id;
+    window._currentTestName = currentTest.name;
+
+    const listEl = document.getElementById('lessons-list');
+    if (!listEl) return;
+
+    const passages = currentTest.passages || [];
+
+    let html = passages.map(p => {
+        const prog = p.progress || 0;
+        const barColor = prog >= 80 ? 'bg-green-500' : prog >= 40 ? 'bg-primary' : 'bg-yellow-400';
+        return `
+        <div onclick="window._openPassage('${topicId}', '${p.id}', '${currentTest.id}', ${p.passageNumber}, '${_esc(p.title)}', '${_esc(p.topicLabel)}', '${_esc(currentTest.name)}')"
+             class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
+            <div>
+                <!-- Top row: Badge Passage X + Progress % -->
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary">
+                        <span class="material-symbols-outlined text-[15px]">article</span>
+                        Passage ${p.passageNumber}
+                    </span>
+                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">${prog}%</span>
+                </div>
+                <!-- Title & Topic Label -->
+                <h3 class="text-base md:text-lg font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                    ${_esc(p.title)}
+                </h3>
+                ${p.topicLabel ? `
+                <p class="text-xs text-outline mt-2 line-clamp-2 flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-[14px]">label</span>
+                    ${_esc(p.topicLabel)}
+                </p>` : ''}
+            </div>
+            
+            <!-- Bottom: Word count & progress bar -->
+            <div class="mt-4 pt-3 border-t border-outline-variant/10 flex flex-col gap-2">
+                <div class="flex justify-between items-center text-xs text-on-surface-variant">
+                    <span class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px]">menu_book</span>
+                        ${p.totalWords} từ vựng
+                    </span>
+                    <span class="font-bold text-primary flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                        Học ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    </span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+                    <div class="h-full ${barColor} rounded-full transition-all duration-700" style="width:${prog}%"></div>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Nếu có từ vựng bổ sung/unlinked (ví dụ từ người dùng tự lưu vào CAM folder)
+    if (camHierarchy.unlinkedWords && camHierarchy.unlinkedWords.length > 0) {
+        const unlinkedCount = camHierarchy.unlinkedWords.length;
+        html += `
+        <div onclick="window._openUnlinkedWords('${topicId}')"
+             class="col-span-1 sm:col-span-2 lg:col-span-3 cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-dashed border-outline-variant/50 soft-shadow flex items-center justify-between transition-all duration-300 hover:border-primary hover:shadow-md fade-in">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined">library_add_check</span>
+                </div>
+                <div>
+                    <h4 class="font-bold text-on-surface group-hover:text-primary transition-colors text-sm md:text-base">Từ vựng tự thêm / Bổ sung</h4>
+                    <p class="text-xs text-on-surface-variant mt-0.5">${unlinkedCount} từ do bạn tự lưu vào chủ đề này</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1 text-primary text-xs font-bold">
+                <span>Xem từ</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </div>
+        </div>`;
+    }
+
+    listEl.innerHTML = html;
+};
+
+// ── MỞ PASSAGE (Cambridge) ───────────────────────────────────────
+window._openPassage = function(topicId, passageId, testId, passageNumber, passageTitle, topicLabel, testName) {
+    const topicName = window._currentTopicName || '—';
+    window._currentTopicId        = topicId;
+    window._currentPassageId      = passageId;
+    window._currentTestId         = testId;
+    window._currentTestName       = testName;
+    window._currentPassageNumber  = passageNumber;
+    window._currentPassageTitle   = passageTitle;
+    window._currentTopicLabel     = topicLabel;
+    window._currentLessonIndex    = null; // Clear non-CAM lesson index
+    window._currentLessonName     = `Passage ${passageNumber}: ${passageTitle}`;
+    window._currentLessonWords    = [];
+    window._currentLessonWordsKey = null;
+
+    navigateTo('lesson-detail');
+};
+
+// ── MỞ TỪ VỰNG TỰ THÊM (Unlinked words) ──────────────────────────
+window._openUnlinkedWords = function(topicId) {
+    const topicName = window._currentTopicName || '—';
+    window._currentTopicId        = topicId;
+    window._currentPassageId      = '__unlinked__';
+    window._currentTestId         = null;
+    window._currentTestName       = null;
+    window._currentPassageNumber  = null;
+    window._currentPassageTitle   = 'Từ vựng tự thêm / Bổ sung';
+    window._currentTopicLabel     = 'Từ người dùng tự lưu';
+    window._currentLessonIndex    = null;
+    window._currentLessonName     = 'Từ vựng tự thêm / Bổ sung';
+    window._currentLessonWords    = [];
+    window._currentLessonWordsKey = null;
+
+    navigateTo('lesson-detail');
+};
+
+// ── MỞ LESSON (Non-CAM) ──────────────────────────────────────────
 window._openLesson = function(topicId, lessonIndex) {
-    // Tra cứu tên từ cache (tránh lỗi quote khi truyền string qua onclick)
+    // Tra cứu tên từ cache
     const cachedLessons = window._lessonsCache?.[topicId] || [];
     const lesson = cachedLessons.find(l => l.index === lessonIndex);
     const lessonName = lesson?.name || `Lesson ${lessonIndex + 1}`;
 
-    // topicName lấy từ state hiện tại của topic-detail
     const topicName = window._currentTopicName || '—';
 
-    window._currentTopicId     = topicId;
-    window._currentLessonIndex = lessonIndex;
-    window._currentLessonName  = lessonName;
+    window._currentTopicId        = topicId;
+    window._currentPassageId      = null;
+    window._currentTestId         = null;
+    window._currentTestName       = null;
+    window._currentPassageNumber  = null;
+    window._currentPassageTitle   = null;
+    window._currentTopicLabel     = null;
+    window._currentLessonIndex    = lessonIndex;
+    window._currentLessonName     = lessonName;
     window._currentLessonProgress = Math.round(lesson?.progress || 0);
-    window._currentLessonWords = [];
+    window._currentLessonWords    = [];
     window._currentLessonWordsKey = null;
-    // _currentTopicName đã được set khi _openTopic, giữ nguyên
+
     navigateTo('lesson-detail');
 };
 
@@ -2931,23 +3175,39 @@ window._openLesson = function(topicId, lessonIndex) {
 window._loadLessonWords = async function() {
     const topicId     = window._currentTopicId;
     const topicName   = window._currentTopicName   || '—';
-    const lessonIndex = window._currentLessonIndex  ?? 0;
-    const lessonName  = window._currentLessonName   || `Lesson ${lessonIndex + 1}`;
+    const passageId   = window._currentPassageId;
+    const lessonIndex = window._currentLessonIndex;
+    const lessonName  = window._currentLessonName   || (passageId ? 'Passage' : `Lesson ${(lessonIndex ?? 0) + 1}`);
 
-    // Cập nhật labels
-    ['ld-title','ld-title-mobile','ld-mobile-header-title','ld-sidebar-lesson'].forEach(id => {
+    // Cập nhật tiêu đề trang
+    ['ld-title','ld-title-mobile','ld-mobile-header-title'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.textContent = lessonName;
     });
-    const sidebarTopic = document.getElementById('ld-sidebar-topic');
-    if (sidebarTopic) sidebarTopic.textContent = topicName;
 
-    // Cập nhật progress mobile từ lesson data nếu có
-    const prog = window._currentLessonProgress ?? 0;
-    const pctEl = document.getElementById('ld-progress-pct-mobile');
-    const barEl = document.getElementById('ld-progress-bar-mobile');
-    if (pctEl) pctEl.textContent = prog + '%';
-    if (barEl) barEl.style.width = prog + '%';
+    // Cập nhật sidebar
+    const sidebarTopic = document.getElementById('ld-sidebar-topic');
+    if (sidebarTopic) {
+        if (passageId && window._currentTestName) {
+            sidebarTopic.textContent = `${topicName} · ${window._currentTestName}`;
+        } else {
+            sidebarTopic.textContent = topicName;
+        }
+    }
+    const sidebarLesson = document.getElementById('ld-sidebar-lesson');
+    if (sidebarLesson) sidebarLesson.textContent = lessonName;
+
+    // Cập nhật badge trên mobile header card
+    const badgeMobile = document.getElementById('ld-badge-mobile');
+    if (badgeMobile) {
+        if (passageId === '__unlinked__') {
+            badgeMobile.textContent = 'Bổ sung';
+        } else if (passageId) {
+            badgeMobile.textContent = `Passage ${window._currentPassageNumber || ''}`.trim();
+        } else {
+            badgeMobile.textContent = 'Lesson';
+        }
+    }
 
     const listEl = document.getElementById('lesson-words-list');
     if (!listEl) return;
@@ -2957,31 +3217,52 @@ window._loadLessonWords = async function() {
     </div>`;
 
     if (!topicId && topicId !== 0) {
-        listEl.innerHTML = `<p class="text-center py-12 text-on-surface-variant">Không tìm thấy lesson.</p>`;
+        listEl.innerHTML = `<p class="text-center py-12 text-on-surface-variant">Không tìm thấy bài học.</p>`;
         return;
     }
 
     try {
-        const words = typeof HiDB !== 'undefined'
-            ? await HiDB.getWordsInLesson(topicId, lessonIndex)
-            : [];
-
-        if (window._currentTopicId !== topicId || window._currentLessonIndex !== lessonIndex) {
-            return;
+        let words = [];
+        if (passageId === '__unlinked__') {
+            const hier = window._camHierarchy || (typeof HiDB !== 'undefined' && typeof HiDB.getCamHierarchy === 'function' ? await HiDB.getCamHierarchy(topicId) : null);
+            words = hier?.unlinkedWords || [];
+        } else if (passageId) {
+            words = typeof HiDB !== 'undefined' && typeof HiDB.getWordsInPassage === 'function'
+                ? await HiDB.getWordsInPassage(passageId)
+                : [];
+        } else {
+            words = typeof HiDB !== 'undefined' && typeof HiDB.getWordsInLesson === 'function'
+                ? await HiDB.getWordsInLesson(topicId, lessonIndex ?? 0)
+                : [];
         }
 
         window._currentLessonWords = words;
-        window._currentLessonWordsKey = `${topicId}::${lessonIndex}`;
+        window._currentLessonWordsKey = passageId ? `passage:${passageId}` : `${topicId}::${lessonIndex ?? 0}`;
 
+        // Cập nhật subtitle
+        let subtitle = `${words.length} từ vựng`;
+        if (passageId && window._currentTopicLabel) {
+            subtitle = `${window._currentTopicLabel} · ${words.length} từ vựng`;
+        }
         ['ld-subtitle','ld-subtitle-mobile'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.textContent = `${words.length} từ vựng`;
+            if (el) el.textContent = subtitle;
         });
+
+        // Cập nhật progress trên mobile card
+        if (words.length > 0) {
+            const totalLevel = words.reduce((sum, w) => sum + (w.level || 0), 0);
+            const prog = Math.round((totalLevel / (words.length * 5)) * 100);
+            const pctEl = document.getElementById('ld-progress-pct-mobile');
+            const barEl = document.getElementById('ld-progress-bar-mobile');
+            if (pctEl) pctEl.textContent = prog + '%';
+            if (barEl) barEl.style.width = prog + '%';
+        }
 
         if (!words || words.length === 0) {
             listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
                 <span class="material-symbols-outlined text-[48px] opacity-30">inbox</span>
-                <p class="font-semibold">Lesson này chưa có từ vựng.</p>
+                <p class="font-semibold">Phần này chưa có từ vựng.</p>
             </div>`;
             return;
         }

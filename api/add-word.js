@@ -34,7 +34,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: 'Supabase not configured' });
     }
 
-    const { topicId, word, phonetic = '', meaning, exampleSentence = '' } = req.body || {};
+    const { topicId, word, phonetic = '', meaning, exampleSentence = '', passageId, passage_id } = req.body || {};
     if (!topicId || !word || !meaning) {
         return res.status(400).json({ ok: false, error: 'Missing required fields: topicId, word, meaning' });
     }
@@ -50,6 +50,18 @@ export default async function handler(req, res) {
 
         if (!userRes.ok) return res.status(401).json({ ok: false, error: 'Invalid or expired token' });
 
+        const targetPassageId = passageId || passage_id || null;
+        const insertPayload = {
+            topic_id:         topicId,
+            word:             String(word).trim(),
+            phonetic:         String(phonetic || '').trim(),
+            meaning:          String(meaning).trim(),
+            example_sentence: isEnglishExample(exampleSentence) ? String(exampleSentence).trim() : '',
+        };
+        if (targetPassageId) {
+            insertPayload.passage_id = targetPassageId;
+        }
+
         // Insert từ vào Supabase
         const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/words`, {
             method: 'POST',
@@ -59,13 +71,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
                 'Prefer': 'return=minimal',
             },
-            body: JSON.stringify({
-                topic_id:         topicId,
-                word:             String(word).trim(),
-                phonetic:         String(phonetic || '').trim(),
-                meaning:          String(meaning).trim(),
-                example_sentence: isEnglishExample(exampleSentence) ? String(exampleSentence).trim() : '',
-            }),
+            body: JSON.stringify(insertPayload),
         });
 
         if (!insertRes.ok) {
