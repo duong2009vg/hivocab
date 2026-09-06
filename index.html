@@ -184,42 +184,73 @@ html.dark .topic-card-surface .bg-surface-container-highest {
     perspective: 1200px;
     -webkit-perspective: 1200px;
     width: 100%;
-    display: flex;
-    justify-content: center;
+    max-width: 580px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    position: relative;
+    box-sizing: border-box;
 }
 
 .flashcard-3d-card {
     position: relative;
     width: 100%;
-    min-height: 400px;
-    height: 430px;
+    min-height: 420px;
+    height: 450px;
     cursor: pointer;
     transform-style: preserve-3d;
     -webkit-transform-style: preserve-3d;
-    transition: transform 0.7s cubic-bezier(0.34, 1.35, 0.64, 1), box-shadow 0.35s ease;
-    border-radius: 1.25rem;
+    transition: transform 0.65s cubic-bezier(0.34, 1.35, 0.64, 1), box-shadow 0.3s ease;
+    border-radius: 1.5rem;
     user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    box-sizing: border-box;
 }
 
 @media (max-width: 640px) {
+    .flashcard-scene {
+        max-width: 100%;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
     .flashcard-3d-card {
         min-height: 380px;
-        height: 395px;
+        height: clamp(380px, 60vh, 440px);
+        border-radius: 1.25rem;
     }
 }
 
-/* Hover elevation when facing front */
-.flashcard-3d-card:not(.is-flipped):hover {
-    transform: translateY(-4px);
+/* Hover elevation (only on desktop/devices with true hover) */
+@media (hover: hover) {
+    .flashcard-3d-card:not(.is-flipped):hover {
+        transform: translateY(-4px);
+    }
+    .flashcard-3d-card.is-flipped:hover {
+        transform: rotateY(180deg) translateY(-4px);
+    }
+    .flashcard-3d-card:hover .flashcard-sheen {
+        opacity: 1;
+        animation: flashcardSheen 1.5s ease-in-out infinite;
+    }
+    .flashcard-3d-card:hover .flashcard-flip-pill {
+        transform: scale(1.05);
+        box-shadow: 0 4px 16px rgba(0, 97, 146, 0.2);
+    }
+}
+
+/* Touch active tactile feedback */
+.flashcard-3d-card:active {
+    transform: scale(0.985);
+}
+.flashcard-3d-card.is-flipped:active {
+    transform: rotateY(180deg) scale(0.985);
 }
 
 /* Flipped state */
 .flashcard-3d-card.is-flipped {
     transform: rotateY(180deg);
-}
-
-.flashcard-3d-card.is-flipped:hover {
-    transform: rotateY(180deg) translateY(-4px);
 }
 
 /* Faces */
@@ -228,21 +259,22 @@ html.dark .topic-card-surface .bg-surface-container-highest {
     inset: 0;
     width: 100%;
     height: 100%;
-    border-radius: 1.25rem;
+    border-radius: 1.5rem;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 1.75rem 1.5rem;
+    padding: 1.5rem 1.25rem;
     overflow: hidden;
-    box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
     .flashcard-face {
-        padding: 2.25rem 2rem;
+        padding: 2rem 1.75rem;
     }
 }
 
@@ -262,15 +294,15 @@ html.dark .topic-card-surface .bg-surface-container-highest {
 .flashcard-front {
     transform: rotateY(0deg);
     z-index: 2;
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1px solid rgba(112, 120, 129, 0.22);
 }
 
 html.dark .flashcard-front {
-    background: rgba(30, 41, 59, 0.92);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.94);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .flashcard-front::after {
@@ -304,17 +336,12 @@ html.dark .flashcard-back {
 .flashcard-sheen {
     position: absolute;
     inset: 0;
-    border-radius: 1.25rem;
+    border-radius: 1.5rem;
     background: linear-gradient(115deg, transparent 25%, rgba(255, 255, 255, 0.25) 50%, transparent 75%);
     pointer-events: none;
     opacity: 0;
     transform: translateX(-100%);
     transition: opacity 0.3s;
-}
-
-.flashcard-3d-card:hover .flashcard-sheen {
-    opacity: 1;
-    animation: flashcardSheen 1.5s ease-in-out infinite;
 }
 
 @keyframes flashcardSheen {
@@ -324,11 +351,6 @@ html.dark .flashcard-back {
 
 .flashcard-flip-pill {
     transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.flashcard-3d-card:hover .flashcard-flip-pill {
-    transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(0, 97, 146, 0.2);
 }
 
 /* ============================================================
@@ -1779,12 +1801,12 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 </header>
 
 <main id="learning-main" class="pt-24 md:pt-[100px] pb-12 md:pb-xl px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto flex flex-col gap-6 md:gap-10 items-center min-h-[100dvh]">
-<div id="exercise-container"></div>
+<div id="exercise-container" class="w-full max-w-2xl mx-auto flex flex-col items-center"></div>
 
 <!-- BÀI 1: Flashcard -->
 <section id="exercise-0" class="exercise-step hidden w-full flex flex-col items-center gap-3 fade-in h-full">
 <div class="text-on-surface-variant font-label-sm text-[10px] md:text-xs uppercase tracking-widest opacity-60">Bài tập: Thẻ ghi nhớ</div>
-<div class="flashcard-scene max-w-xl">
+<div class="flashcard-scene w-full max-w-xl mx-auto">
 <div id="flashcard" class="flashcard-3d-card" onclick="window.flipCard()">
 <div class="flashcard-sheen"></div>
 <div id="card-front" class="flashcard-face flashcard-front">

@@ -157,10 +157,10 @@ const HiSessionUI = (() => {
     function _renderFlashcard(item) {
         const d = item.exerciseData;
         _container.innerHTML = `
-        <div class="w-full flex flex-col items-center gap-3 fade-in">
+        <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 fade-in px-1 sm:px-3">
             <div class="${CSS.label}">Bài tập: Thẻ ghi nhớ</div>
 
-            <div class="flashcard-scene max-w-xl">
+            <div class="flashcard-scene w-full max-w-xl mx-auto">
                 <div id="flashcard-card"
                      class="flashcard-3d-card"
                      onclick="HiSessionUI._flipCard()"
@@ -173,23 +173,24 @@ const HiSessionUI = (() => {
                     <!-- MẶT TRƯỚC: hiển thị nghĩa tiếng Việt -->
                     <div id="card-front" class="flashcard-face flashcard-front">
                         <div class="flex items-center justify-between w-full">
-                            <span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">${d.frontLabel}</span>
-                            <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-on-surface-variant bg-surface-container-high/80 px-2.5 py-1 rounded-full">
+                            <span class="text-on-surface-variant text-[11px] sm:text-xs font-semibold uppercase tracking-wider">${d.frontLabel}</span>
+                            <span class="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant bg-surface-container-high/80 px-2.5 py-0.5 rounded-full">
                                 <span class="material-symbols-outlined text-[14px]">touch_app</span>
                                 Chạm để lật
                             </span>
                         </div>
 
-                        <div class="my-auto text-center py-4 flex flex-col items-center justify-center">
-                            <h2 class="font-bold text-on-surface text-3xl sm:text-4xl md:text-5xl leading-tight">
+                        <div class="my-auto text-center py-3 flex flex-col items-center justify-center px-2 w-full">
+                            <h2 class="font-bold text-on-surface text-2xl sm:text-3xl md:text-4xl text-center leading-snug break-words max-w-full">
                                 ${_esc(d.frontWord)}
                             </h2>
                         </div>
 
                         <div class="flex justify-center w-full">
-                            <button class="flashcard-flip-pill bg-primary text-on-primary px-6 py-2.5 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none">
+                            <button class="flashcard-flip-pill bg-primary text-on-primary px-5 py-2.5 sm:px-7 sm:py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none">
                                 <span class="material-symbols-outlined text-[18px]">visibility</span>
-                                Nhấn xem đáp án <kbd class="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono">Space</kbd>
+                                <span>Nhấn xem đáp án</span>
+                                <kbd class="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono">Space</kbd>
                             </button>
                         </div>
                     </div>
@@ -197,58 +198,58 @@ const HiSessionUI = (() => {
                     <!-- MẶT SAU: hiển thị từ tiếng Anh + audio + phonetic + example + rate buttons -->
                     <div id="card-back" class="flashcard-face flashcard-back">
                         <div class="flex items-center justify-between w-full">
-                            <span class="text-primary font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                            <span class="text-primary font-bold text-xs uppercase tracking-wider flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
                                 ${d.backLabel}
                             </span>
                             <button onclick="event.stopPropagation(); HiSessionUI._flipCard()"
                                     title="Lật lại mặt trước"
-                                    class="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant hover:text-primary transition-colors bg-surface-container-high/60 hover:bg-surface-container-high px-2 py-0.5 rounded-full">
+                                    class="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant hover:text-primary transition-colors bg-surface-container-high/70 hover:bg-surface-container-high px-2.5 py-1 rounded-full active:scale-95 touch-manipulation">
                                 <span class="material-symbols-outlined text-[14px]">undo</span>
-                                Lật lại
+                                <span>Lật lại</span>
                             </button>
                         </div>
 
-                        <div class="my-auto text-center py-2 flex flex-col items-center justify-center">
-                            <div class="flex items-center justify-center gap-3 mb-1">
-                                <h2 class="font-bold text-primary text-3xl sm:text-4xl md:text-5xl text-center">
+                        <div class="my-auto text-center py-2 flex flex-col items-center justify-center px-2 w-full">
+                            <div class="flex items-center justify-center gap-2 sm:gap-3 mb-1 max-w-full">
+                                <h2 class="font-bold text-primary text-2xl sm:text-3xl md:text-4xl text-center break-words leading-tight">
                                     ${_esc(d.backWord)}
                                 </h2>
                                 <button onclick="event.stopPropagation(); HiSessionUI._speak('${_esc(d.backWord)}')"
                                         title="Nghe phát âm"
-                                        class="p-2 md:p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:scale-95 transition-all shrink-0">
-                                    <span class="material-symbols-outlined text-[22px] md:text-[24px]">volume_up</span>
+                                        class="p-2 sm:p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:scale-90 transition-all shrink-0 touch-manipulation">
+                                    <span class="material-symbols-outlined text-[22px] sm:text-[24px]">volume_up</span>
                                 </button>
                             </div>
 
                             ${d.phonetic
-                                ? `<p class="text-on-surface-variant mb-3 font-mono text-sm md:text-base">${_esc(d.phonetic)}</p>`
+                                ? `<p class="text-on-surface-variant font-mono text-xs sm:text-sm mt-0.5 mb-2">${_esc(d.phonetic)}</p>`
                                 : '<div class="mb-2"></div>'
                             }
 
                             ${d.exampleSentence
-                                ? `<div class="max-w-md mx-auto px-4 py-2 rounded-xl bg-surface-container-lowest/60 border border-outline-variant/30 text-center mb-1">
-                                    <p class="text-xs md:text-sm text-on-surface/80 italic line-clamp-2">"${_esc(d.exampleSentence)}"</p>
+                                ? `<div class="w-full max-w-md mx-auto px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/30 text-center mb-1">
+                                    <p class="text-[11px] sm:text-xs md:text-sm text-on-surface/85 italic line-clamp-3 leading-relaxed">"${_esc(d.exampleSentence)}"</p>
                                    </div>`
                                 : ''
                             }
                         </div>
 
-                        <div class="flex w-full flex-row justify-center gap-2 md:gap-3">
+                        <div class="flex w-full flex-row justify-center gap-2 sm:gap-3">
                             <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('hard')"
-                                class="flex-1 px-3 py-3 md:px-6 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                class="flex-1 min-h-[44px] py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm touch-manipulation">
                                 <span>Khó</span>
-                                <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">1</kbd>
+                                <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">1</kbd>
                             </button>
                             <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('good')"
-                                class="flex-1 px-3 py-3 md:px-6 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-secondary-container text-on-secondary-container hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                class="flex-1 min-h-[44px] py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-secondary-container text-on-secondary-container hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm touch-manipulation">
                                 <span>Tốt</span>
-                                <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">2</kbd>
+                                <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">2</kbd>
                             </button>
                             <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('easy')"
-                                class="flex-1 px-3 py-3 md:px-6 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-primary text-on-primary hover:bg-surface-tint active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                class="flex-1 min-h-[44px] py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-primary text-on-primary hover:bg-surface-tint active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm touch-manipulation">
                                 <span>Dễ</span>
-                                <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono font-normal">3</kbd>
+                                <kbd class="hidden md:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono font-normal">3</kbd>
                             </button>
                         </div>
                     </div>
@@ -270,6 +271,7 @@ const HiSessionUI = (() => {
             }
         }
     }
+
     /** Xử lý rating flashcard */
     function _onFlashcardRate(rating) {
         if (_isShowingFeedback) return;
