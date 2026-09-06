@@ -265,14 +265,14 @@
       </div>
       <div id="hiv-status" class="hi-vocab-status"></div>
 
-      <!-- Pop-up Modal bên trong panel: Step 1 Chọn Folder -> Step 2 Chọn Topic -->
+      <!-- Pop-up Modal bên trong panel: Step 1 Folder -> Step 2 Topic -> Step 3 Test -> Step 4 Passage -->
       <div id="hiv-modal" class="hi-vocab-modal" style="display:none">
         <div class="hi-vocab-modal-header">
-          <button id="hiv-modal-back" class="hi-vocab-modal-back" type="button" style="display:none" title="Quay lại danh sách thư mục">
+          <button id="hiv-modal-back" class="hi-vocab-modal-back" type="button" style="display:none" title="Quay lại">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-            <span>Thư mục</span>
+            <span id="hiv-modal-back-label">Thư mục</span>
           </button>
           <div class="hi-vocab-modal-title-wrap">
             <div id="hiv-modal-title" class="hi-vocab-modal-title">Chọn thư mục</div>
@@ -292,8 +292,18 @@
           </div>
           <!-- Step 2: Chủ đề -->
           <div id="hiv-step-topics" style="display:none">
-            <div class="hi-vocab-step-hint" id="hiv-topic-step-hint">Chọn chủ đề để lưu từ ngay:</div>
+            <div class="hi-vocab-step-hint" id="hiv-topic-step-hint">Chọn chủ đề:</div>
             <div id="hiv-topic-list" class="hi-vocab-picker-list"></div>
+          </div>
+          <!-- Step 3: Test -->
+          <div id="hiv-step-tests" style="display:none">
+            <div class="hi-vocab-step-hint" id="hiv-test-step-hint">Chọn bài test:</div>
+            <div id="hiv-test-list" class="hi-vocab-picker-list"></div>
+          </div>
+          <!-- Step 4: Passage -->
+          <div id="hiv-step-passages" style="display:none">
+            <div class="hi-vocab-step-hint" id="hiv-passage-step-hint">Chọn passage để lưu từ:</div>
+            <div id="hiv-passage-list" class="hi-vocab-picker-list"></div>
           </div>
         </div>
         <div id="hiv-modal-status" class="hi-vocab-modal-status" style="display:none"></div>
@@ -301,20 +311,31 @@
 
     root.appendChild(panel);
 
-    const audioBtn      = panel.querySelector('#hiv-audio');
-    const closeBtn      = panel.querySelector('#hiv-close');
-    const openSaveBtn   = panel.querySelector('#hiv-open-save');
-    const statusEl      = panel.querySelector('#hiv-status');
-    const modalEl       = panel.querySelector('#hiv-modal');
-    const modalBackBtn  = panel.querySelector('#hiv-modal-back');
-    const modalCloseBtn = panel.querySelector('#hiv-modal-close');
-    const modalTitle    = panel.querySelector('#hiv-modal-title');
-    const modalSubtitle = panel.querySelector('#hiv-modal-subtitle');
-    const stepFolders   = panel.querySelector('#hiv-step-folders');
-    const stepTopics    = panel.querySelector('#hiv-step-topics');
-    const folderListEl  = panel.querySelector('#hiv-folder-list');
-    const topicListEl   = panel.querySelector('#hiv-topic-list');
-    const modalStatus   = panel.querySelector('#hiv-modal-status');
+    const audioBtn         = panel.querySelector('#hiv-audio');
+    const closeBtn         = panel.querySelector('#hiv-close');
+    const openSaveBtn      = panel.querySelector('#hiv-open-save');
+    const statusEl         = panel.querySelector('#hiv-status');
+    const modalEl          = panel.querySelector('#hiv-modal');
+    const modalBackBtn     = panel.querySelector('#hiv-modal-back');
+    const modalBackLabel   = panel.querySelector('#hiv-modal-back-label');
+    const modalCloseBtn    = panel.querySelector('#hiv-modal-close');
+    const modalTitle       = panel.querySelector('#hiv-modal-title');
+    const modalSubtitle    = panel.querySelector('#hiv-modal-subtitle');
+    const stepFolders      = panel.querySelector('#hiv-step-folders');
+    const stepTopics       = panel.querySelector('#hiv-step-topics');
+    const stepTests        = panel.querySelector('#hiv-step-tests');
+    const stepPassages     = panel.querySelector('#hiv-step-passages');
+    const folderListEl     = panel.querySelector('#hiv-folder-list');
+    const topicListEl      = panel.querySelector('#hiv-topic-list');
+    const testListEl       = panel.querySelector('#hiv-test-list');
+    const passageListEl    = panel.querySelector('#hiv-passage-list');
+    const modalStatus      = panel.querySelector('#hiv-modal-status');
+
+    let currentStep        = 'folder'; // 'folder' | 'topic' | 'test' | 'passage'
+    let currentFolder      = null;
+    let currentTopic       = null;
+    let currentTest        = null;
+    const topicTestsCache  = new Map();
 
     audioBtn.onclick = () => speakWord(current.word, current.audioEl, current.audioUrl);
     closeBtn.onclick = () => closePanel();
@@ -329,16 +350,34 @@
     };
 
     modalBackBtn.onclick = () => {
-      renderFolderStep();
+      handleModalBack();
     };
 
+    function handleModalBack() {
+      if (currentStep === 'passage') {
+        const tests = topicTestsCache.get(currentTopic?.id) || [];
+        renderTestStep(currentTopic, tests);
+      } else if (currentStep === 'test') {
+        selectFolder(currentFolder);
+      } else {
+        renderFolderStep();
+      }
+    }
+
     function renderFolderStep() {
-      modalBackBtn.style.display = 'none';
-      modalTitle.textContent     = 'Chọn thư mục';
-      modalSubtitle.textContent  = current?.word ? `Từ: "${current.word}"` : 'Lưu vào bộ từ vựng';
-      stepFolders.style.display  = 'block';
-      stepTopics.style.display   = 'none';
-      modalStatus.style.display  = 'none';
+      currentStep   = 'folder';
+      currentFolder = null;
+      currentTopic  = null;
+      currentTest   = null;
+
+      modalBackBtn.style.display   = 'none';
+      modalTitle.textContent       = 'Chọn thư mục';
+      modalSubtitle.textContent    = current?.word ? `Từ: "${current.word}"` : 'Lưu vào bộ từ vựng';
+      stepFolders.style.display    = 'block';
+      stepTopics.style.display     = 'none';
+      stepTests.style.display      = 'none';
+      stepPassages.style.display   = 'none';
+      modalStatus.style.display    = 'none';
 
       if (!cachedFoldersMap) {
         folderListEl.innerHTML = '<div class="hi-vocab-loading">Đang tải danh sách thư mục...</div>';
@@ -380,12 +419,21 @@
     }
 
     function selectFolder(folderName) {
-      modalBackBtn.style.display = 'inline-flex';
-      modalTitle.textContent     = folderName;
-      modalSubtitle.textContent  = 'Chọn chủ đề để lưu từ';
-      stepFolders.style.display  = 'none';
-      stepTopics.style.display   = 'block';
-      modalStatus.style.display  = 'none';
+      currentStep   = 'topic';
+      currentFolder = folderName;
+      currentTopic  = null;
+      currentTest   = null;
+
+      modalBackBtn.style.display   = 'inline-flex';
+      if (modalBackLabel) modalBackLabel.textContent = 'Thư mục';
+
+      modalTitle.textContent       = folderName;
+      modalSubtitle.textContent    = 'Chọn chủ đề';
+      stepFolders.style.display    = 'none';
+      stepTopics.style.display     = 'block';
+      stepTests.style.display      = 'none';
+      stepPassages.style.display   = 'none';
+      modalStatus.style.display    = 'none';
 
       const topicsInFolder = cachedFoldersMap?.[folderName] || [];
       if (!topicsInFolder.length) {
@@ -399,39 +447,165 @@
             <span class="hi-vocab-picker-icon">📖</span>
             <span class="hi-vocab-picker-name">${esc(t.name)}</span>
           </div>
-          <span class="hi-vocab-save-badge">+ Lưu</span>
+          <span class="hi-vocab-picker-badge">Chọn ›</span>
         </button>
       `).join('');
 
       topicListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
-        btn.onclick = () => saveWordToTopic(btn.dataset.topicId, btn.dataset.topicName);
+        btn.onclick = () => selectTopic({ id: btn.dataset.topicId, name: btn.dataset.topicName });
       });
     }
 
-    async function saveWordToTopic(topicId, topicName) {
-      if (!current || !topicId) return;
+    async function selectTopic(topic) {
+      currentTopic = topic;
+      currentTest  = null;
 
       modalStatus.style.display = 'block';
       modalStatus.style.color   = '#0b6b91';
-      modalStatus.textContent   = `Đang lưu vào "${topicName}"...`;
+      modalStatus.textContent   = 'Đang kiểm tra cấu trúc đề thi...';
 
       const topicBtns = topicListEl.querySelectorAll('.hi-vocab-picker-item');
       topicBtns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.6'; });
 
-      const response = await send('add-to-app', {
+      let tests = topicTestsCache.get(topic.id);
+      if (tests === undefined) {
+        try {
+          const res = await send('get-topic-tests', { topicId: topic.id });
+          if (res?.ok && res.data?.hasTests) {
+            tests = res.data.tests || [];
+          } else {
+            tests = [];
+          }
+        } catch (_) {
+          tests = [];
+        }
+        topicTestsCache.set(topic.id, tests);
+      }
+
+      topicBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+      modalStatus.style.display = 'none';
+
+      if (tests && tests.length > 0) {
+        renderTestStep(topic, tests);
+      } else {
+        saveWordToTopic(topic.id, topic.name, null);
+      }
+    }
+
+    function renderTestStep(topic, tests) {
+      currentStep = 'test';
+      currentTest = null;
+
+      modalBackBtn.style.display   = 'inline-flex';
+      if (modalBackLabel) modalBackLabel.textContent = 'Chủ đề';
+
+      modalTitle.textContent       = topic.name;
+      modalSubtitle.textContent    = 'Chọn bài Test';
+      stepFolders.style.display    = 'none';
+      stepTopics.style.display     = 'none';
+      stepTests.style.display      = 'block';
+      stepPassages.style.display   = 'none';
+      modalStatus.style.display    = 'none';
+
+      if (!tests.length) {
+        testListEl.innerHTML = '<div class="hi-vocab-loading">Chưa có bài test nào</div>';
+        return;
+      }
+
+      testListEl.innerHTML = tests.map(t => `
+        <button type="button" class="hi-vocab-picker-item" data-test-id="${esc(t.id)}">
+          <div class="hi-vocab-picker-left">
+            <span class="hi-vocab-picker-icon">📝</span>
+            <span class="hi-vocab-picker-name">${esc(t.name)}</span>
+          </div>
+          <span class="hi-vocab-picker-badge">${(t.passages || []).length} passage ›</span>
+        </button>
+      `).join('');
+
+      testListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
+        const test = tests.find(t => t.id === btn.dataset.testId);
+        btn.onclick = () => selectTest(test);
+      });
+    }
+
+    function selectTest(test) {
+      if (!test) return;
+      currentTest = test;
+      renderPassageStep(test);
+    }
+
+    function renderPassageStep(test) {
+      currentStep = 'passage';
+
+      modalBackBtn.style.display   = 'inline-flex';
+      if (modalBackLabel) modalBackLabel.textContent = 'Test';
+
+      modalTitle.textContent       = `${currentTopic.name} · ${test.name}`;
+      modalSubtitle.textContent    = 'Chọn passage để lưu từ';
+      stepFolders.style.display    = 'none';
+      stepTopics.style.display     = 'none';
+      stepTests.style.display      = 'none';
+      stepPassages.style.display   = 'block';
+      modalStatus.style.display    = 'none';
+
+      const passages = test.passages || [];
+      if (!passages.length) {
+        passageListEl.innerHTML = '<div class="hi-vocab-loading">Bài test này chưa có passage nào</div>';
+        return;
+      }
+
+      passageListEl.innerHTML = passages.map(p => `
+        <button type="button" class="hi-vocab-picker-item" data-passage-id="${esc(p.id)}" data-passage-title="${esc(p.title)}">
+          <div class="hi-vocab-picker-left">
+            <span class="hi-vocab-picker-icon">📄</span>
+            <span class="hi-vocab-picker-name">${esc(p.title || `Passage ${p.passageNumber}`)}</span>
+          </div>
+          <span class="hi-vocab-save-badge">+ Lưu</span>
+        </button>
+      `).join('');
+
+      passageListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
+        btn.onclick = () => saveWordToTopic(
+          currentTopic.id,
+          currentTopic.name,
+          btn.dataset.passageId,
+          btn.dataset.passageTitle,
+          test.name
+        );
+      });
+    }
+
+    async function saveWordToTopic(topicId, topicName, passageId = null, passageTitle = null, testName = null) {
+      if (!current || !topicId) return;
+
+      const targetLabel = passageTitle
+        ? `${topicName} · ${testName} · ${passageTitle}`
+        : topicName;
+
+      modalStatus.style.display = 'block';
+      modalStatus.style.color   = '#0b6b91';
+      modalStatus.textContent   = `Đang lưu vào "${targetLabel}"...`;
+
+      const allBtns = modalEl.querySelectorAll('.hi-vocab-picker-item');
+      allBtns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.6'; });
+
+      const payload = {
         topicId,
         word:            current.word,
         phonetic:        current.phonetic,
         meaning:         current.meaning,
         exampleSentence: current.example,
-      });
+      };
+      if (passageId) payload.passageId = passageId;
+
+      const response = await send('add-to-app', payload);
 
       if (response?.ok) {
-        showSuccessAnimation(current.word, topicName, () => {
+        showSuccessAnimation(current.word, targetLabel, () => {
           closePanel();
         });
       } else {
-        topicBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+        allBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
         modalStatus.style.color = '#ba4b29';
         modalStatus.textContent = response?.error || 'Không lưu được từ.';
       }

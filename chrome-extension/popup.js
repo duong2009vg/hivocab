@@ -31,18 +31,26 @@ const authStatus       = document.getElementById('authStatus');
 
 const saveModal        = document.getElementById('saveModal');
 const modalBackBtn     = document.getElementById('modalBackBtn');
+const modalBackLabel   = document.getElementById('modalBackLabel');
 const modalCloseBtn    = document.getElementById('modalCloseBtn');
 const modalTitle       = document.getElementById('modalTitle');
 const modalSubtitle    = document.getElementById('modalSubtitle');
 const folderStepView   = document.getElementById('folderStepView');
 const topicStepView    = document.getElementById('topicStepView');
+const testStepView     = document.getElementById('testStepView');
+const passageStepView  = document.getElementById('passageStepView');
 const modalFolderList  = document.getElementById('modalFolderList');
 const modalTopicList   = document.getElementById('modalTopicList');
+const modalTestList    = document.getElementById('modalTestList');
+const modalPassageList = document.getElementById('modalPassageList');
 const modalStatus      = document.getElementById('modalStatus');
 
 let _allTopics       = [];
 let _foldersMap      = {};
 let _currentFolder   = null;
+let _currentTopic    = null;
+let _currentTest     = null;
+let _topicTestsCache = new Map();
 
 // ── Message helper ────────────────────────────────────────────────────────
 function send(type, payload = {}) {
@@ -310,14 +318,33 @@ function closeSaveModal() {
   modalStatus.style.display = 'none';
 }
 
+let _currentStep = 'folder'; // 'folder' | 'topic' | 'test' | 'passage'
+
+function handleModalBack() {
+  if (_currentStep === 'passage') {
+    const tests = _topicTestsCache.get(_currentTopic?.id) || [];
+    renderTestStep(_currentTopic, tests);
+  } else if (_currentStep === 'test') {
+    selectFolder(_currentFolder);
+  } else {
+    renderFolderStep();
+  }
+}
+
 function renderFolderStep() {
+  _currentStep   = 'folder';
   _currentFolder = null;
-  modalBackBtn.style.display = 'none';
-  modalTitle.textContent = 'Chọn thư mục';
-  modalSubtitle.textContent = currentResult?.word ? `Từ: "${currentResult.word}"` : 'Lưu vào bộ từ vựng';
-  folderStepView.style.display = 'block';
-  topicStepView.style.display = 'none';
-  modalStatus.style.display = 'none';
+  _currentTopic  = null;
+  _currentTest   = null;
+
+  modalBackBtn.style.display    = 'none';
+  modalTitle.textContent        = 'Chọn thư mục';
+  modalSubtitle.textContent     = currentResult?.word ? `Từ: "${currentResult.word}"` : 'Lưu vào bộ từ vựng';
+  folderStepView.style.display  = 'block';
+  topicStepView.style.display   = 'none';
+  testStepView.style.display    = 'none';
+  passageStepView.style.display = 'none';
+  modalStatus.style.display     = 'none';
 
   const folderNames = Object.keys(_foldersMap).sort((a, b) => {
     if (a.toLowerCase() === 'cam') return -1;
@@ -348,13 +375,21 @@ function renderFolderStep() {
 }
 
 function selectFolder(folderName) {
+  _currentStep   = 'topic';
   _currentFolder = folderName;
-  modalBackBtn.style.display = 'inline-flex';
-  modalTitle.textContent = folderName;
-  modalSubtitle.textContent = 'Chọn chủ đề để lưu từ';
-  folderStepView.style.display = 'none';
-  topicStepView.style.display = 'block';
-  modalStatus.style.display = 'none';
+  _currentTopic  = null;
+  _currentTest   = null;
+
+  modalBackBtn.style.display    = 'inline-flex';
+  if (modalBackLabel) modalBackLabel.textContent = 'Thư mục';
+
+  modalTitle.textContent        = folderName;
+  modalSubtitle.textContent     = 'Chọn chủ đề';
+  folderStepView.style.display  = 'none';
+  topicStepView.style.display   = 'block';
+  testStepView.style.display    = 'none';
+  passageStepView.style.display = 'none';
+  modalStatus.style.display     = 'none';
 
   const topicsInFolder = _foldersMap[folderName] || [];
   if (!topicsInFolder.length) {
@@ -368,39 +403,168 @@ function selectFolder(folderName) {
         <span class="picker-icon">📖</span>
         <span class="picker-name">${esc(t.name)}</span>
       </div>
-      <span class="picker-save-badge">+ Lưu</span>
+      <span class="picker-badge">Chọn ›</span>
     </button>
   `).join('');
 
   modalTopicList.querySelectorAll('.picker-item').forEach(btn => {
-    btn.onclick = () => saveWordToTopic(btn.dataset.topicId, btn.dataset.topicName);
+    btn.onclick = () => selectTopic({ id: btn.dataset.topicId, name: btn.dataset.topicName });
   });
 }
 
-async function saveWordToTopic(topicId, topicName) {
-  if (!currentResult || !topicId) return;
+async function selectTopic(topic) {
+  _currentTopic = topic;
+  _currentTest  = null;
 
   modalStatus.style.display = 'block';
   modalStatus.style.color = 'var(--primary)';
-  modalStatus.textContent = `Đang lưu vào "${topicName}"...`;
+  modalStatus.textContent = 'Đang kiểm tra cấu trúc đề thi...';
 
   const topicBtns = modalTopicList.querySelectorAll('.picker-item');
   topicBtns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.6'; });
 
-  const response = await send('add-to-app', {
+  // Kiểm tra cache hoặc gọi background để lấy tests
+  let tests = _topicTestsCache.get(topic.id);
+  if (tests === undefined) {
+    try {
+      const res = await send('get-topic-tests', { topicId: topic.id });
+      if (res?.ok && res.data?.hasTests) {
+        tests = res.data.tests || [];
+      } else {
+        tests = [];
+      }
+    } catch (_) {
+      tests = [];
+    }
+    _topicTestsCache.set(topic.id, tests);
+  }
+
+  topicBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+  modalStatus.style.display = 'none';
+
+  // Nếu chủ đề có cấu trúc Test -> Passage
+  if (tests && tests.length > 0) {
+    renderTestStep(topic, tests);
+  } else {
+    // Chủ đề thông thường -> Lưu trực tiếp
+    saveWordToTopic(topic.id, topic.name, null);
+  }
+}
+
+function renderTestStep(topic, tests) {
+  _currentStep = 'test';
+  _currentTest = null;
+
+  modalBackBtn.style.display    = 'inline-flex';
+  if (modalBackLabel) modalBackLabel.textContent = 'Chủ đề';
+
+  modalTitle.textContent        = topic.name;
+  modalSubtitle.textContent     = 'Chọn bài Test';
+  folderStepView.style.display  = 'none';
+  topicStepView.style.display   = 'none';
+  testStepView.style.display    = 'block';
+  passageStepView.style.display = 'none';
+  modalStatus.style.display     = 'none';
+
+  if (!tests.length) {
+    modalTestList.innerHTML = '<p class="status-text">Chưa có bài test nào</p>';
+    return;
+  }
+
+  modalTestList.innerHTML = tests.map(t => `
+    <button type="button" class="picker-item" data-test-id="${esc(t.id)}">
+      <div class="picker-item-left">
+        <span class="picker-icon">📝</span>
+        <span class="picker-name">${esc(t.name)}</span>
+      </div>
+      <span class="picker-badge">${(t.passages || []).length} passage ›</span>
+    </button>
+  `).join('');
+
+  modalTestList.querySelectorAll('.picker-item').forEach(btn => {
+    const test = tests.find(t => t.id === btn.dataset.testId);
+    btn.onclick = () => selectTest(test);
+  });
+}
+
+function selectTest(test) {
+  if (!test) return;
+  _currentTest = test;
+  renderPassageStep(test);
+}
+
+function renderPassageStep(test) {
+  _currentStep = 'passage';
+
+  modalBackBtn.style.display    = 'inline-flex';
+  if (modalBackLabel) modalBackLabel.textContent = 'Test';
+
+  modalTitle.textContent        = `${_currentTopic.name} · ${test.name}`;
+  modalSubtitle.textContent     = 'Chọn passage để lưu từ';
+  folderStepView.style.display  = 'none';
+  topicStepView.style.display   = 'none';
+  testStepView.style.display    = 'none';
+  passageStepView.style.display = 'block';
+  modalStatus.style.display     = 'none';
+
+  const passages = test.passages || [];
+  if (!passages.length) {
+    modalPassageList.innerHTML = '<p class="status-text">Bài test này chưa có passage nào</p>';
+    return;
+  }
+
+  modalPassageList.innerHTML = passages.map(p => `
+    <button type="button" class="picker-item" data-passage-id="${esc(p.id)}" data-passage-title="${esc(p.title)}">
+      <div class="picker-item-left">
+        <span class="picker-icon">📄</span>
+        <span class="picker-name">${esc(p.title || `Passage ${p.passageNumber}`)}</span>
+      </div>
+      <span class="picker-save-badge">+ Lưu</span>
+    </button>
+  `).join('');
+
+  modalPassageList.querySelectorAll('.picker-item').forEach(btn => {
+    btn.onclick = () => saveWordToTopic(
+      _currentTopic.id,
+      _currentTopic.name,
+      btn.dataset.passageId,
+      btn.dataset.passageTitle,
+      test.name
+    );
+  });
+}
+
+async function saveWordToTopic(topicId, topicName, passageId = null, passageTitle = null, testName = null) {
+  if (!currentResult || !topicId) return;
+
+  const targetLabel = passageTitle
+    ? `${topicName} · ${testName} · ${passageTitle}`
+    : topicName;
+
+  modalStatus.style.display = 'block';
+  modalStatus.style.color   = 'var(--primary)';
+  modalStatus.textContent   = `Đang lưu vào "${targetLabel}"...`;
+
+  const allBtns = saveModal.querySelectorAll('.picker-item');
+  allBtns.forEach(b => { b.style.pointerEvents = 'none'; b.style.opacity = '0.6'; });
+
+  const payload = {
     topicId,
     word:            currentResult.word,
     phonetic:        currentResult.phonetic,
     meaning:         currentResult.meaning,
     exampleSentence: currentResult.example,
-  });
+  };
+  if (passageId) payload.passageId = passageId;
+
+  const response = await send('add-to-app', payload);
 
   if (response?.ok) {
-    showPopupSuccessAnimation(currentResult.word, topicName, () => {
+    showPopupSuccessAnimation(currentResult.word, targetLabel, () => {
       window.close();
     });
   } else {
-    topicBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
+    allBtns.forEach(b => { b.style.pointerEvents = ''; b.style.opacity = ''; });
     modalStatus.style.color = 'var(--danger)';
     modalStatus.textContent = response?.error || 'Không lưu được từ.';
   }
@@ -489,7 +653,7 @@ if (modalCloseBtn) {
   modalCloseBtn.addEventListener('click', closeSaveModal);
 }
 if (modalBackBtn) {
-  modalBackBtn.addEventListener('click', renderFolderStep);
+  modalBackBtn.addEventListener('click', handleModalBack);
 }
 if (saveModal) {
   saveModal.addEventListener('click', e => {

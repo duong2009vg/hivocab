@@ -195,17 +195,111 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    // Lưu từ vào topic
+    // Lấy cấu trúc Tests & Passages của một topic (nếu có)
+    if (message?.type === 'get-topic-tests') {
+        (async () => {
+            const topicId = message.payload?.topicId;
+            if (!topicId) return sendResponse({ ok: false, error: 'Thiếu topicId.' });
+
+            const token = await getValidToken();
+            const headers = {
+                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
+            };
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+
+            try {
+                // 1. Query danh sách tests của topic
+                const testsRes = await fetch(`https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/tests?topic_id=eq.${topicId}&select=id,name,test_order&order=test_order.asc`, { headers });
+                if (!testsRes.ok) {
+                    return sendResponse({ ok: true, data: { hasTests: false, tests: [] } });
+                }
+                const testsData = await testsRes.json();
+                if (!Array.isArray(testsData) || testsData.length === 0) {
+                    return sendResponse({ ok: true, data: { hasTests: false, tests: [] } });
+                }
+
+                // 2. Query danh sách passages của topic
+                const passagesRes = await fetch(`https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/passages?topic_id=eq.${topicId}&select=id,test_id,passage_number,title&order=passage_number.asc`, { headers });
+                const passagesData = passagesRes.ok ? await passagesRes.json() : [];
+
+                const passagesByTest = {};
+                (passagesData || []).forEach(p => {
+                    if (!passagesByTest[p.test_id]) passagesByTest[p.test_id] = [];
+                    passagesByTest[p.test_id].push({
+                        id:            p.id,
+                        passageNumber: p.passage_number,
+                        title:         p.title || `Passage ${p.passage_number}`,
+                    });
+                });
+
+                const tests = testsData.map(t => ({
+                    id:        t.id,
+                    name:      t.name,
+                    testOrder: t.test_order,
+                    passages:  passagesByTest[t.id] || []
+                }));
+
+                sendResponse({ ok: true, data: { hasTests: true, tests } });
+            } catch (err) {
+                sendResponse({ ok: false, error: err.message });
+            }
+        })().catch(err => sendResponse({ ok: false, error: err.message }));
+        return true;
+    }
+
+    // Lưu từ vào topic / passage
     if (message?.type === 'add-to-app') {
         (async () => {
             const token = await getValidToken();
             if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Vui lòng đăng nhập lại.' });
-            const data = await apiPost('/add-word', token, message.payload || {});
-            if (!data.ok) {
-                if (/invalid|expired/i.test(data.error || '')) await clearSession();
-                return sendResponse({ ok: false, error: data.error || 'Không lưu được từ.' });
+
+            const payload = message.payload || {};
+            let resData = null;
+
+            // Thử qua API backend trước
+            try {
+                resData = await apiPost('/add-word', token, payload);
+            } catch (_) {}
+
+            // Nếu API backend thành công
+            if (resData?.ok) {
+                return sendResponse({ ok: true });
             }
-            sendResponse({ ok: true });
+
+            // Fallback: Lưu trực tiếp vào Supabase REST nếu API server lỗi hoặc chưa deploy
+            try {
+                const insertPayload = {
+                    topic_id:         payload.topicId,
+                    word:             String(payload.word || '').trim(),
+                    phonetic:         String(payload.phonetic || '').trim(),
+                    meaning:          String(payload.meaning || '').trim(),
+                    example_sentence: String(payload.exampleSentence || '').trim(),
+                };
+                if (payload.passageId) {
+                    insertPayload.passage_id = payload.passageId;
+                }
+
+                const sbRes = await fetch('https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU',
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal',
+                    },
+                    body: JSON.stringify(insertPayload),
+                });
+
+                if (sbRes.ok) {
+                    return sendResponse({ ok: true });
+                } else {
+                    const errText = await sbRes.text();
+                    if (/jwt|expired|invalid/i.test(errText)) await clearSession();
+                    return sendResponse({ ok: false, error: `Lỗi Supabase: ${errText}` });
+                }
+            } catch (err) {
+                return sendResponse({ ok: false, error: err.message });
+            }
         })().catch(err => sendResponse({ ok: false, error: err.message }));
         return true;
     }

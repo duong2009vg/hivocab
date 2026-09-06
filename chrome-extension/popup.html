@@ -100,11 +100,11 @@
       <div class="save-modal-card">
         <!-- Modal Header -->
         <div class="save-modal-header">
-          <button id="modalBackBtn" class="modal-nav-btn" type="button" style="display:none" title="Quay lại danh sách thư mục">
+          <button id="modalBackBtn" class="modal-nav-btn" type="button" style="display:none" title="Quay lại">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="15 18 9 12 15 6"/>
             </svg>
-            <span>Thư mục</span>
+            <span id="modalBackLabel">Thư mục</span>
           </button>
           <div class="modal-title-wrap">
             <h3 id="modalTitle">Chọn thư mục</h3>
@@ -129,8 +129,24 @@
 
           <!-- Step 2: Chọn Chủ Đề -->
           <div id="topicStepView" class="modal-step-view" style="display:none">
-            <div class="list-hint" id="topicStepHint">Chọn chủ đề để lưu từ ngay:</div>
+            <div class="list-hint" id="topicStepHint">Chọn chủ đề:</div>
             <div id="modalTopicList" class="picker-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 3: Chọn Bài Test -->
+          <div id="testStepView" class="modal-step-view" style="display:none">
+            <div class="list-hint" id="testStepHint">Chọn bài test:</div>
+            <div id="modalTestList" class="picker-list">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Step 4: Chọn Passage -->
+          <div id="passageStepView" class="modal-step-view" style="display:none">
+            <div class="list-hint" id="passageStepHint">Chọn passage để lưu từ:</div>
+            <div id="modalPassageList" class="picker-list">
               <!-- Rendered by JS -->
             </div>
           </div>
