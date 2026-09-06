@@ -2461,7 +2461,7 @@ window.addEventListener('hashchange', () => {
     </div>
 
     <!-- ── STEP 1a: Form Tạo Chủ đề ───────────────────────── -->
-    <div id="ct-step-topic" class="hidden p-6 md:p-8">
+    <div id="ct-step-topic" class="hidden p-6 md:p-8 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center gap-2 mb-6">
         <button onclick="window._goToModalStep('back')" class="p-1.5 rounded-full text-outline hover:bg-surface-container-low transition-colors -ml-1">
           <span class="material-symbols-outlined text-[20px]">arrow_back</span>
@@ -2474,7 +2474,7 @@ window.addEventListener('hashchange', () => {
       <div class="flex flex-col gap-4">
         <div>
           <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Tên chủ đề</label>
-          <input id="new-topic-name" type="text" maxlength="60" placeholder="Ví dụ: IELTS Vocabulary"
+          <input id="new-topic-name" type="text" maxlength="60" placeholder="Ví dụ: CAM 22 Test 1"
                  class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"
                  onkeydown="if(event.key==='Enter') window.submitCreateTopic()"/>
         </div>
@@ -2485,10 +2485,39 @@ window.addEventListener('hashchange', () => {
         </div>
         <div>
           <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Thư mục</label>
-          <select id="new-topic-category-select"
+          <select id="new-topic-category-select" onchange="window._onTopicCategoryChange()"
                   class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface transition-colors text-sm cursor-pointer">
           </select>
         </div>
+
+        <!-- Cấu hình Test → Passage (Tùy chọn cấu trúc đề thi cho chủ đề này) -->
+        <div id="topic-exam-config" class="p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-low/50">
+          <label class="flex items-center justify-between cursor-pointer select-none">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">account_tree</span>
+              </div>
+              <div>
+                <span class="font-bold text-xs md:text-sm text-on-surface block">Cấu trúc Test → Passage</span>
+                <span class="text-[11px] text-on-surface-variant block">Chia đề thi và bài đọc (Cambridge / VOL)</span>
+              </div>
+            </div>
+            <input type="checkbox" id="topic-exam-checkbox" onchange="window._onTopicExamCheckboxChange()" class="accent-secondary w-4 h-4 rounded cursor-pointer shrink-0"/>
+          </label>
+          <div id="topic-exam-fields" class="hidden mt-3 pt-3 border-t border-outline-variant/20 flex gap-4">
+            <div class="flex-1">
+              <label class="block text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5">Số đề (Tests)</label>
+              <input id="topic-num-tests" type="number" min="1" max="20" value="4"
+                     class="w-full bg-surface border border-outline-variant/30 focus:border-secondary px-3 py-2 rounded-lg outline-none text-on-surface text-sm font-bold text-center transition-colors"/>
+            </div>
+            <div class="flex-1">
+              <label class="block text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5">Số Passage / đề</label>
+              <input id="topic-num-passages" type="number" min="1" max="10" value="3"
+                     class="w-full bg-surface border border-outline-variant/30 focus:border-secondary px-3 py-2 rounded-lg outline-none text-on-surface text-sm font-bold text-center transition-colors"/>
+            </div>
+          </div>
+        </div>
+
         <div id="create-topic-error" class="text-error text-sm hidden"></div>
         <div class="flex gap-3 mt-2">
           <button onclick="window._goToModalStep('back')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Quay lại</button>
@@ -2536,22 +2565,9 @@ window.addEventListener('hashchange', () => {
               <input type="radio" name="folder-type" value="exam" class="mt-0.5 accent-secondary shrink-0"/>
               <div>
                 <p class="font-bold text-sm text-on-surface">Thư mục đề thi <span class="text-[10px] font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded-full ml-1">Test → Passage</span></p>
-                <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Phân cấp Test → Passage — phù hợp Cambridge, đề VOL…</p>
+                <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Phân cấp Test → Passage — mỗi chủ đề tùy chọn số Test và Passage riêng.</p>
               </div>
             </label>
-          </div>
-        </div>
-        <!-- Cấu hình Tests & Passages (chỉ hiện khi chọn exam) -->
-        <div id="folder-exam-config" class="hidden bg-surface-container-low/60 rounded-xl p-4 flex gap-4 border border-outline-variant/20">
-          <div class="flex-1">
-            <label class="block text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5">Số đề (Tests)</label>
-            <input id="folder-num-tests" type="number" min="1" max="10" value="4"
-                   class="w-full bg-surface border border-outline-variant/30 focus:border-secondary px-3 py-2 rounded-lg outline-none text-on-surface text-sm font-bold text-center transition-colors"/>
-          </div>
-          <div class="flex-1">
-            <label class="block text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5">Số Passage / đề</label>
-            <input id="folder-num-passages" type="number" min="1" max="10" value="3"
-                   class="w-full bg-surface border border-outline-variant/30 focus:border-secondary px-3 py-2 rounded-lg outline-none text-on-surface text-sm font-bold text-center transition-colors"/>
           </div>
         </div>
         <div id="create-folder-error" class="text-error text-sm hidden"></div>
@@ -2564,7 +2580,37 @@ window.addEventListener('hashchange', () => {
 
   </div>
 </div>
-
+<!-- ==================== MODAL: ĐỔI TÊN PASSAGE ==================== -->
+<div id="modal-rename-passage" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
+  <div class="w-full max-w-sm bg-surface rounded-2xl p-6 soft-shadow fade-in">
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[20px]">edit_note</span>
+        </div>
+        <h2 class="text-lg font-bold text-on-surface">Đổi tên Passage</h2>
+      </div>
+      <button onclick="window._closeRenamePassage()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <input type="hidden" id="rename-passage-id"/>
+    <div class="mb-4">
+      <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Tên mới</label>
+      <input id="rename-passage-input" type="text" maxlength="100" placeholder="Ví dụ: URBAN FARMING"
+             class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors font-medium"
+             onkeydown="if(event.key==='Enter') window._submitRenamePassage()"/>
+    </div>
+    <div id="rename-passage-error" class="text-error text-sm mb-3 hidden"></div>
+    <div class="flex gap-3">
+      <button onclick="window._closeRenamePassage()" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Hủy</button>
+      <button onclick="window._submitRenamePassage()" id="rename-passage-submit"
+              class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-surface-tint transition-colors flex items-center justify-center gap-1.5">
+        <span class="material-symbols-outlined text-[16px]">check</span>Lưu tên
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ==================== MODAL: IELTS TARGET & COUNTDOWN ==================== -->
 <div id="modal-ielts-goal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
@@ -2796,6 +2842,14 @@ function _topicCategoryIcon(category) {
     return 'folder';
 }
 
+function _getSavedFolders() {
+    try {
+        return JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+    } catch {
+        return [];
+    }
+}
+
 function _buildTopicCategories(topics = []) {
     const seen = new Set();
     const categories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
@@ -2805,6 +2859,19 @@ function _buildTopicCategories(topics = []) {
         if (seen.has(key)) return;
         seen.add(key);
         categories.push({ id: value, label: value, icon: _topicCategoryIcon(value) });
+    });
+    // Bổ sung các thư mục do người dùng tạo (kể cả khi chưa có chủ đề)
+    _getSavedFolders().forEach(f => {
+        if (!f?.name) return;
+        const key = f.name.trim().toLowerCase();
+        if (!seen.has(key)) {
+            seen.add(key);
+            categories.push({
+                id: f.name,
+                label: f.name,
+                icon: f.isExam ? 'menu_book' : 'folder'
+            });
+        }
     });
     window._topicCategories = categories;
     return categories;
@@ -3145,13 +3212,20 @@ window._renderCamPassages = function(testIndex = 0) {
         <div onclick="window._openPassage('${topicId}', '${p.id}', '${currentTest.id}', ${p.passageNumber}, '${_esc(p.title)}', '${_esc(p.topicLabel)}', '${_esc(currentTest.name)}')"
              class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
             <div>
-                <!-- Top row: Badge Passage X + Progress % -->
+                <!-- Top row: Badge Passage X + Rename + Progress % -->
                 <div class="flex items-center justify-between gap-2 mb-3">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary">
                         <span class="material-symbols-outlined text-[15px]">article</span>
                         Passage ${p.passageNumber}
                     </span>
-                    <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">${prog}%</span>
+                    <div class="flex items-center gap-1.5">
+                        <button onclick="event.stopPropagation(); window._openRenamePassage('${p.id}', '${_esc(p.title)}')"
+                                class="w-7 h-7 flex items-center justify-center rounded-lg text-outline hover:text-primary hover:bg-primary/10 transition-all"
+                                title="Đổi tên passage">
+                            <span class="material-symbols-outlined text-[16px]">edit</span>
+                        </button>
+                        <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">${prog}%</span>
+                    </div>
                 </div>
                 <!-- Title & Topic Label -->
                 <h3 class="text-base md:text-lg font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">
@@ -3415,13 +3489,50 @@ const TOPIC_ICONS = [
 ];
 
 // Wizard state
-let _modalCurrentStep = 'step-0'; // 'step-0' | 'step-topic' | 'step-folder'
+let _modalCurrentStep = 'step-0';
+
+// Registry of exam-style folder names (persisted in session; 'CAM' is always exam-style)
+window._examFolders = window._examFolders || new Set(['cam']);
+
+function _saveFolder(name, isExam) {
+    if (!name) return;
+    const folders = _getSavedFolders().filter(f => f.name.toLowerCase() !== name.toLowerCase());
+    folders.push({ name, isExam: !!isExam });
+    try {
+        localStorage.setItem('hivocab_user_folders', JSON.stringify(folders));
+    } catch(e) {}
+}
+
+// Helper: register a folder as exam-style (called when user creates one)
+function _registerExamFolder(folderName) {
+    if (!folderName) return;
+    window._examFolders.add(folderName.trim().toLowerCase());
+}
+
+// Helper: check if a category name is exam-style
+function _isExamFolder(catName) {
+    if (!catName) return false;
+    const lower = catName.trim().toLowerCase();
+    if (lower === 'cam' || lower.includes('cambridge')) return true;
+
+    // Check localStorage saved folders
+    const saved = _getSavedFolders();
+    const match = saved.find(f => f.name.toLowerCase() === lower);
+    if (match) return match.isExam;
+
+    if (window._examFolders?.has(lower)) return true;
+
+    // Also auto-detect: if any topic in this category has tests
+    return (window._allTopics || []).some(t =>
+        (t.category || '').toLowerCase() === lower && t._hasTests
+    );
+}
 
 // Helper: render icon picker (reusable)
 function _renderIconPicker(selectedIcon = 'folder') {
     const picker = document.getElementById('icon-picker');
     if (!picker) return;
-    picker.innerHTML = TOPIC_ICONS.map((ic, i) => `
+    picker.innerHTML = TOPIC_ICONS.map(ic => `
         <button type="button" data-icon="${ic}" onclick="window.selectTopicIcon('${ic}')"
             class="icon-pick-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all
                    ${ic === selectedIcon ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-primary/10 hover:text-primary'}">
@@ -3432,21 +3543,26 @@ function _renderIconPicker(selectedIcon = 'folder') {
 }
 
 // Helper: render folder dropdown for "Tạo Chủ đề" step
-function _renderCategoryDropdown() {
+function _renderCategoryDropdown(preselectCat) {
     const catSel = document.getElementById('new-topic-category-select');
     if (!catSel) return;
-    const catSet = new Set();
-    (window._allTopics || []).forEach(t => {
-        const c = (t.category || '').trim();
-        if (c) catSet.add(c);
-    });
+    const catMap = new Map();
     const defaultCats = [
         'CAM','IELTS','Oxford 3000','Idioms & Collocations',
         'THPT/ĐGNL','General English','CEFR','Grammar'
     ];
-    defaultCats.forEach(c => catSet.add(c));
+    defaultCats.forEach(c => catMap.set(c.toLowerCase(), c));
 
-    const sortedCats = Array.from(catSet).sort((a, b) => {
+    (window._allTopics || []).forEach(t => {
+        const c = (t.category || '').trim();
+        if (c) catMap.set(c.toLowerCase(), c);
+    });
+
+    _getSavedFolders().forEach(f => {
+        if (f?.name) catMap.set(f.name.trim().toLowerCase(), f.name.trim());
+    });
+
+    const sortedCats = Array.from(catMap.values()).sort((a, b) => {
         if (a.toLowerCase() === 'cam') return -1;
         if (b.toLowerCase() === 'cam') return 1;
         if (a.toLowerCase() === 'ielts') return -1;
@@ -3454,63 +3570,83 @@ function _renderCategoryDropdown() {
         return a.localeCompare(b, 'vi');
     });
 
-    catSel.innerHTML = sortedCats.map(c => `<option value="${_esc(c)}">📁 ${c}</option>`).join('');
+    catSel.innerHTML = sortedCats.map(c => {
+        const isExam = _isExamFolder(c);
+        return `<option value="${_esc(c)}">${isExam ? '🗂️' : '📁'} ${c}${isExam ? ' (đề thi)' : ''}</option>`;
+    }).join('');
 
-    let defaultCat = window._activeCategory && window._activeCategory !== 'all'
-        ? window._activeCategory
-        : (sortedCats[0] || 'General English');
+    let defaultCat = preselectCat
+        || (window._activeCategory && window._activeCategory !== 'all' ? window._activeCategory : null)
+        || sortedCats[0]
+        || 'General English';
     const match = sortedCats.find(c => c.toLowerCase() === defaultCat.toLowerCase());
     catSel.value = match || sortedCats[0];
 }
 
+// Called when the folder dropdown changes in Step 1a
+window._onTopicCategoryChange = function() {
+    const catSel = document.getElementById('new-topic-category-select');
+    const checkbox = document.getElementById('topic-exam-checkbox');
+    const fields = document.getElementById('topic-exam-fields');
+    if (!catSel || !checkbox) return;
+    const isExam = _isExamFolder(catSel.value);
+    checkbox.checked = isExam;
+    if (fields) {
+        if (isExam) fields.classList.remove('hidden');
+        else fields.classList.add('hidden');
+    }
+};
+
+// Checkbox toggle for exam structure in Step 1a
+window._onTopicExamCheckboxChange = function() {
+    const checkbox = document.getElementById('topic-exam-checkbox');
+    const fields = document.getElementById('topic-exam-fields');
+    if (checkbox && fields) {
+        if (checkbox.checked) fields.classList.remove('hidden');
+        else fields.classList.add('hidden');
+    }
+};
+
 // Navigate between wizard steps
-window._goToModalStep = function(step) {
-    // Hide all steps
+window._goToModalStep = function(step, preselectCat) {
     ['ct-step-0', 'ct-step-topic', 'ct-step-folder'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
     });
 
-    if (step === 'back') {
-        step = 'step-0';
-    }
+    if (step === 'back') step = 'step-0';
 
     if (step === 'topic') {
         _modalCurrentStep = 'step-topic';
-        const el = document.getElementById('ct-step-topic');
-        if (el) el.classList.remove('hidden');
+        document.getElementById('ct-step-topic')?.classList.remove('hidden');
         _renderIconPicker('menu_book');
-        _renderCategoryDropdown();
+        _renderCategoryDropdown(preselectCat);
         document.getElementById('new-topic-name').value = '';
         const err = document.getElementById('create-topic-error');
         if (err) err.classList.add('hidden');
+        // Check if pre-selected category is exam-style
+        window._onTopicCategoryChange();
         setTimeout(() => document.getElementById('new-topic-name')?.focus(), 100);
 
     } else if (step === 'folder') {
         _modalCurrentStep = 'step-folder';
-        const el = document.getElementById('ct-step-folder');
-        if (el) el.classList.remove('hidden');
-        // Reset folder form
+        document.getElementById('ct-step-folder')?.classList.remove('hidden');
         document.getElementById('new-folder-name').value = '';
         const err = document.getElementById('create-folder-error');
         if (err) err.classList.add('hidden');
-        // Reset radio to "normal"
         window._selectFolderType('normal', true);
         setTimeout(() => document.getElementById('new-folder-name')?.focus(), 100);
 
     } else {
-        // step-0
         _modalCurrentStep = 'step-0';
-        const el = document.getElementById('ct-step-0');
-        if (el) el.classList.remove('hidden');
+        document.getElementById('ct-step-0')?.classList.remove('hidden');
     }
 };
 
-// Toggle folder type radio + show/hide config panel
+// Toggle folder type radio highlight (Step 1b — no config panel needed)
 window._selectFolderType = function(type, silent = false) {
     const normalLabel = document.getElementById('folder-type-normal-label');
     const examLabel   = document.getElementById('folder-type-exam-label');
-    const examConfig  = document.getElementById('folder-exam-config');
     const normalRadio = document.querySelector('input[name="folder-type"][value="normal"]');
     const examRadio   = document.querySelector('input[name="folder-type"][value="exam"]');
 
@@ -3520,14 +3656,12 @@ window._selectFolderType = function(type, silent = false) {
         normalLabel?.classList.add('border-outline-variant/30');
         examLabel?.classList.remove('border-outline-variant/30');
         examLabel?.classList.add('border-secondary', 'bg-secondary/5');
-        examConfig?.classList.remove('hidden');
     } else {
         if (normalRadio) normalRadio.checked = true;
         examLabel?.classList.remove('border-secondary', 'bg-secondary/5');
         examLabel?.classList.add('border-outline-variant/30');
         normalLabel?.classList.remove('border-outline-variant/30');
         normalLabel?.classList.add('border-primary', 'bg-primary/5');
-        examConfig?.classList.add('hidden');
     }
 };
 
@@ -3560,15 +3694,17 @@ window.selectTopicIcon = function(icon) {
 
 // Submit: Tạo Chủ đề (Step 1a)
 window.submitCreateTopic = async function() {
-    const nameEl  = document.getElementById('new-topic-name');
-    const iconEl  = document.getElementById('new-topic-icon');
-    const catSel  = document.getElementById('new-topic-category-select');
-    const errEl   = document.getElementById('create-topic-error');
-    const btn     = document.getElementById('create-topic-submit');
+    const nameEl    = document.getElementById('new-topic-name');
+    const iconEl    = document.getElementById('new-topic-icon');
+    const catSel    = document.getElementById('new-topic-category-select');
+    const errEl     = document.getElementById('create-topic-error');
+    const btn       = document.getElementById('create-topic-submit');
+    const checkbox  = document.getElementById('topic-exam-checkbox');
 
     const name     = nameEl?.value.trim();
     const icon     = iconEl?.value || 'menu_book';
     const category = catSel?.value || 'General English';
+    const isExam   = checkbox ? checkbox.checked : false;
 
     if (!name) {
         if (errEl) { errEl.textContent = 'Vui lòng nhập tên chủ đề.'; errEl.classList.remove('hidden'); }
@@ -3576,16 +3712,30 @@ window.submitCreateTopic = async function() {
         return;
     }
 
+    let numTests = 4, numPassages = 3;
+    if (isExam) {
+        numTests    = Math.max(1, Math.min(20, parseInt(document.getElementById('topic-num-tests')?.value) || 4));
+        numPassages = Math.max(1, Math.min(10, parseInt(document.getElementById('topic-num-passages')?.value) || 3));
+    }
+
     try {
         if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
         if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
 
-        await HiDB.createTopic(name, icon, category);
+        const newTopic = await HiDB.createTopic(name, icon, category);
+
+        if (isExam) {
+            await HiDB.createCamFolder(newTopic.id, numTests, numPassages);
+        }
 
         window._activeCategory = category;
         window._allTopics = [];
         await window._renderTopicsGrid();
         window.closeCreateTopicModal();
+
+        if (typeof _dictToast === 'function') {
+            _dictToast(`Đã tạo chủ đề "${name}"`);
+        }
 
     } catch(err) {
         if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
@@ -3594,11 +3744,11 @@ window.submitCreateTopic = async function() {
     }
 };
 
-// Submit: Tạo Thư mục (Step 1b) — normal OR exam-style
+// Submit: Tạo Thư mục (Step 1b) — tạo folder, chuyển sang tạo chủ đề
 window.submitCreateFolder = async function() {
-    const nameEl  = document.getElementById('new-folder-name');
-    const errEl   = document.getElementById('create-folder-error');
-    const btn     = document.getElementById('create-folder-submit');
+    const nameEl    = document.getElementById('new-folder-name');
+    const errEl     = document.getElementById('create-folder-error');
+    const btn       = document.getElementById('create-folder-submit');
     const examRadio = document.querySelector('input[name="folder-type"][value="exam"]');
 
     const folderName = nameEl?.value.trim();
@@ -3610,30 +3760,25 @@ window.submitCreateFolder = async function() {
         return;
     }
 
-    let numTests    = 4;
-    let numPassages = 3;
-    if (isExam) {
-        numTests    = Math.max(1, Math.min(10, parseInt(document.getElementById('folder-num-tests')?.value) || 4));
-        numPassages = Math.max(1, Math.min(10, parseInt(document.getElementById('folder-num-passages')?.value) || 3));
-    }
-
     try {
         if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
-        if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
 
-        // Tạo topic đại diện cho thư mục (không có nội dung từ vựng, chỉ là container)
-        const newTopic = await HiDB.createTopic(folderName, 'folder', folderName);
+        // Ghi nhớ loại folder trong persistent storage và runtime
+        _saveFolder(folderName, isExam);
+        if (isExam) _registerExamFolder(folderName);
 
-        if (isExam) {
-            // Tự động tạo tests và passages
-            await HiDB.createCamFolder(newTopic.id, numTests, numPassages);
-        }
-
-        // Refresh và chuyển sang tab thư mục mới
+        // Cập nhật tab danh mục trên giao diện
         window._activeCategory = folderName;
-        window._allTopics = [];
+        window._allTopics = window._allTopics || [];
+        window._renderCategoryTabs();
         await window._renderTopicsGrid();
-        window.closeCreateTopicModal();
+
+        // Chuyển thẳng sang bước "Tạo Chủ đề" với thư mục này được chọn sẵn
+        window._goToModalStep('topic', folderName);
+
+        if (typeof _dictToast === 'function') {
+            _dictToast(`Đã tạo thư mục "${folderName}". Hãy tạo chủ đề đầu tiên!`);
+        }
 
     } catch(err) {
         if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
@@ -3641,6 +3786,78 @@ window.submitCreateFolder = async function() {
         if (btn) { btn.disabled = false; btn.textContent = 'Tạo thư mục'; }
     }
 };
+
+// ── Đổi tên Passage ────────────────────────────────────────────
+window._openRenamePassage = function(passageId, currentTitle) {
+    const modal = document.getElementById('modal-rename-passage');
+    const input = document.getElementById('rename-passage-input');
+    const idEl  = document.getElementById('rename-passage-id');
+    const err   = document.getElementById('rename-passage-error');
+    if (!modal) return;
+    if (idEl)  idEl.value  = passageId;
+    if (input) { input.value = currentTitle || ''; }
+    if (err)   err.classList.add('hidden');
+    modal.style.display = 'flex';
+    setTimeout(() => input?.select(), 100);
+};
+
+window._closeRenamePassage = function() {
+    const modal = document.getElementById('modal-rename-passage');
+    if (modal) modal.style.display = 'none';
+};
+
+window._submitRenamePassage = async function() {
+    const passageId = document.getElementById('rename-passage-id')?.value;
+    const input     = document.getElementById('rename-passage-input');
+    const errEl     = document.getElementById('rename-passage-error');
+    const btn       = document.getElementById('rename-passage-submit');
+    const newTitle  = input?.value.trim();
+
+    if (!newTitle) {
+        if (errEl) { errEl.textContent = 'Vui lòng nhập tên cho passage.'; errEl.classList.remove('hidden'); }
+        input?.focus();
+        return;
+    }
+
+    try {
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span> Đang lưu...'; }
+        if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
+
+        await HiDB.updatePassageTitle(passageId, newTitle);
+
+        // Update trong _camHierarchy cache để re-render ngay lập tức
+        if (window._camHierarchy?.tests) {
+            for (const test of window._camHierarchy.tests) {
+                const p = (test.passages || []).find(p => p.id === passageId);
+                if (p) { p.title = newTitle; break; }
+            }
+        }
+        // Cập nhật tiêu đề nếu đang mở đúng passage này
+        if (window._currentPassageId === passageId) {
+            window._currentPassageTitle = newTitle;
+            window._currentLessonName = `Passage ${window._currentPassageNumber || ''}: ${newTitle}`;
+            ['ld-title','ld-title-mobile','ld-mobile-header-title'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = window._currentLessonName;
+            });
+            const sidebarLesson = document.getElementById('ld-sidebar-lesson');
+            if (sidebarLesson) sidebarLesson.textContent = window._currentLessonName;
+        }
+
+        window._closeRenamePassage();
+        window._renderCamPassages(window._currentTestIndex || 0);
+
+        if (typeof _dictToast === 'function') {
+            _dictToast(`Đã đổi tên thành "${newTitle}"`);
+        }
+
+    } catch(err) {
+        if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>Lưu tên'; }
+    }
+};
+
 
 window.addTopicCard = function(topic) {
     const grid = document.getElementById('topics-grid');

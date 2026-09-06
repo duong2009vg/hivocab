@@ -941,6 +941,23 @@ window.HiDB = (() => {
         return { tests: createdTests, passages: createdPassages };
     }
 
+    /**
+     * Đổi tên một passage.
+     *
+     * @param {string} passageId - UUID của passage
+     * @param {string} newTitle  - Tên mới
+     * @returns {Promise<void>}
+     */
+    async function updatePassageTitle(passageId, newTitle) {
+        const { error } = await _getClient()
+            .from('passages')
+            .update({ title: newTitle.trim() })
+            .eq('id', passageId);
+
+        if (error) throw error;
+        _invalidateVocabularyCache();
+    }
+
 
     // ============================================================
     // PHẦN 5: WORD PROGRESS & SM-2 CORE
@@ -1565,6 +1582,7 @@ window.HiDB = (() => {
         getTopics,
         createTopic,
         createCamFolder,
+        updatePassageTitle,
         deleteTopic,
 
         // Words
