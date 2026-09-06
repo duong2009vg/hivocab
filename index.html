@@ -179,6 +179,158 @@ html.dark .topic-card-surface .bg-surface-container-highest {
 }
 .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
 
+/* ── HI FLASHCARD 3D FLIP SYSTEM ───────────────────────── */
+.flashcard-scene {
+    perspective: 1200px;
+    -webkit-perspective: 1200px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.flashcard-3d-card {
+    position: relative;
+    width: 100%;
+    min-height: 400px;
+    height: 430px;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    -webkit-transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(0.34, 1.35, 0.64, 1), box-shadow 0.35s ease;
+    border-radius: 1.25rem;
+    user-select: none;
+}
+
+@media (max-width: 640px) {
+    .flashcard-3d-card {
+        min-height: 380px;
+        height: 395px;
+    }
+}
+
+/* Hover elevation when facing front */
+.flashcard-3d-card:not(.is-flipped):hover {
+    transform: translateY(-4px);
+}
+
+/* Flipped state */
+.flashcard-3d-card.is-flipped {
+    transform: rotateY(180deg);
+}
+
+.flashcard-3d-card.is-flipped:hover {
+    transform: rotateY(180deg) translateY(-4px);
+}
+
+/* Faces */
+.flashcard-face {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 1.25rem;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1.75rem 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 12px 36px -6px rgba(0, 0, 0, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.04);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .flashcard-face {
+        padding: 2.25rem 2rem;
+    }
+}
+
+/* Decorative glass top border sheen */
+.flashcard-face::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.85), transparent);
+    pointer-events: none;
+}
+
+/* FRONT FACE */
+.flashcard-front {
+    transform: rotateY(0deg);
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(112, 120, 129, 0.22);
+}
+
+html.dark .flashcard-front {
+    background: rgba(30, 41, 59, 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.flashcard-front::after {
+    content: '';
+    position: absolute;
+    bottom: -30px;
+    right: -30px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 97, 146, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* BACK FACE */
+.flashcard-back {
+    transform: rotateY(180deg);
+    z-index: 1;
+    background: linear-gradient(155deg, rgba(255, 255, 255, 0.98) 0%, #f0fdf9 50%, #e0f2fe 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1.5px solid rgba(0, 97, 146, 0.3);
+}
+
+html.dark .flashcard-back {
+    background: linear-gradient(155deg, #1e293b 0%, #172554 50%, #0c4a6e 100%);
+    border-color: rgba(56, 189, 248, 0.3);
+}
+
+/* Light reflection sheen */
+.flashcard-sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: 1.25rem;
+    background: linear-gradient(115deg, transparent 25%, rgba(255, 255, 255, 0.25) 50%, transparent 75%);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: opacity 0.3s;
+}
+
+.flashcard-3d-card:hover .flashcard-sheen {
+    opacity: 1;
+    animation: flashcardSheen 1.5s ease-in-out infinite;
+}
+
+@keyframes flashcardSheen {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.flashcard-flip-pill {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.flashcard-3d-card:hover .flashcard-flip-pill {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(0, 97, 146, 0.2);
+}
+
 /* ============================================================
    THEME SYSTEM
    ============================================================ */
@@ -1632,20 +1784,38 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 <!-- BÀI 1: Flashcard -->
 <section id="exercise-0" class="exercise-step hidden w-full flex flex-col items-center gap-3 fade-in h-full">
 <div class="text-on-surface-variant font-label-sm text-[10px] md:text-xs uppercase tracking-widest opacity-60">Bài tập: Thẻ ghi nhớ</div>
-<div id="flashcard" class="w-full bg-surface-container-lowest/80 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl soft-shadow flex flex-col min-h-[360px] md:min-h-[400px] relative overflow-hidden cursor-pointer transition-all" onclick="window.flipCard()">
-<div id="card-front" class="flex-1 flex flex-col items-center justify-center p-6 md:p-8 z-10 bg-surface-container-lowest">
-<span class="text-on-surface-variant text-sm mb-4">Dịch sang tiếng Anh</span>
-<h2 class="font-bold text-on-surface text-3xl sm:text-5xl mb-8 text-center leading-tight">Trùng hợp</h2>
-<button class="bg-primary text-on-primary px-6 py-2.5 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm"><span class="material-symbols-outlined text-[18px]">visibility</span> Nhấn xem đáp án</button>
+<div class="flashcard-scene max-w-xl">
+<div id="flashcard" class="flashcard-3d-card" onclick="window.flipCard()">
+<div class="flashcard-sheen"></div>
+<div id="card-front" class="flashcard-face flashcard-front">
+<div class="flex items-center justify-between w-full">
+<span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">Dịch sang tiếng Anh</span>
+<span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-on-surface-variant bg-surface-container-high/80 px-2.5 py-1 rounded-full"><span class="material-symbols-outlined text-[14px]">touch_app</span> Chạm để lật</span>
 </div>
-<div id="card-back" class="hidden flex-1 flex flex-col items-center justify-center p-6 md:p-8 z-10 bg-primary-fixed/20">
-<span class="text-on-surface-variant text-sm mb-4">Đáp án</span>
-<h2 class="font-bold text-primary text-3xl sm:text-5xl mb-2 text-center">Coincidence</h2>
-<p class="text-on-surface-variant mb-8 font-mono text-sm md:text-base">/koʊˈɪn.sɪ.dəns/</p>
-<div class="flex w-full md:w-auto flex-row justify-center gap-2 md:gap-4">
-<button onclick="event.stopPropagation(); window.rateCard('hard'); window.handleExerciseComplete();" class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed">Khó</button>
-<button onclick="event.stopPropagation(); window.rateCard('good'); window.handleExerciseComplete();" class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-secondary-container text-on-secondary-container">Tốt</button>
-<button onclick="event.stopPropagation(); window.rateCard('easy'); window.handleExerciseComplete();" class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-primary text-on-primary">Dễ</button>
+<div class="my-auto text-center py-4 flex flex-col items-center justify-center">
+<h2 class="font-bold text-on-surface text-3xl sm:text-4xl md:text-5xl leading-tight">Trùng hợp</h2>
+</div>
+<div class="flex justify-center w-full">
+<button class="flashcard-flip-pill bg-primary text-on-primary px-6 py-2.5 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none"><span class="material-symbols-outlined text-[18px]">visibility</span> Nhấn xem đáp án</button>
+</div>
+</div>
+<div id="card-back" class="flashcard-face flashcard-back">
+<div class="flex items-center justify-between w-full">
+<span class="text-primary font-bold text-xs uppercase tracking-wider flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> Đáp án</span>
+<span class="text-on-surface-variant text-xs">Mặt sau</span>
+</div>
+<div class="my-auto text-center py-2 flex flex-col items-center justify-center">
+<div class="flex items-center justify-center gap-3 mb-1">
+<h2 class="font-bold text-primary text-3xl sm:text-4xl text-center">Coincidence</h2>
+<button onclick="event.stopPropagation(); window.HiSpeak && window.HiSpeak('Coincidence')" title="Nghe phát âm" class="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0"><span class="material-symbols-outlined text-[22px]">volume_up</span></button>
+</div>
+<p class="text-on-surface-variant mb-3 font-mono text-sm md:text-base">/koʊˈɪn.sɪ.dəns/</p>
+</div>
+<div class="flex w-full flex-row justify-center gap-2 md:gap-3">
+<button onclick="event.stopPropagation(); window.rateCard('hard'); window.handleExerciseComplete();" class="flex-1 px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed">Khó</button>
+<button onclick="event.stopPropagation(); window.rateCard('good'); window.handleExerciseComplete();" class="flex-1 px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-secondary-container text-on-secondary-container">Tốt</button>
+<button onclick="event.stopPropagation(); window.rateCard('easy'); window.handleExerciseComplete();" class="flex-1 px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-primary text-on-primary">Dễ</button>
+</div>
 </div>
 </div>
 </div>
@@ -2095,8 +2265,13 @@ window.updateProgress = function() {
 };
 
 window.flipCard = function(){
- const f=document.getElementById('card-front'),b=document.getElementById('card-back');
- if(f&&b){f.classList.toggle('hidden');b.classList.toggle('hidden')}
+    const card = document.getElementById('flashcard-card') || document.getElementById('flashcard');
+    if (card) {
+        card.classList.toggle('is-flipped');
+    } else {
+        const f = document.getElementById('card-front'), b = document.getElementById('card-back');
+        if (f && b) { f.classList.toggle('hidden'); b.classList.toggle('hidden'); }
+    }
 };
 
 window.rateCard = function(level){};

@@ -44,8 +44,10 @@ const HiSessionUI = (() => {
     let _container = null;
 
     // State UI local
+    // State UI local
     let _selectedMCQIndex = null;
     let _isShowingFeedback = false;
+    let _keyListenerAttached = false;
 
     // ----------------------------------------------------------
     // INIT
@@ -64,6 +66,49 @@ const HiSessionUI = (() => {
         _selectedMCQIndex = null;
         _isShowingFeedback = false;
         _updateProgress();
+
+        if (!_keyListenerAttached) {
+            window.addEventListener('keydown', _handleFlashcardKeydown);
+            _keyListenerAttached = true;
+        }
+    }
+
+    /**
+     * Bắt phím tắt cho Flashcard:
+     * - Phím Space hoặc Enter: Lật thẻ qua lại
+     * - Phím 1, 2, 3: Đánh giá Khó (1), Tốt (2), Dễ (3) khi thẻ đang ở mặt sau
+     */
+    function _handleFlashcardKeydown(e) {
+        const tag = e.target?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
+
+        const card = document.getElementById('flashcard-card');
+        if (!card) return;
+
+        if (e.target?.tagName === 'BUTTON' && e.target.id !== 'flashcard-card') {
+            return;
+        }
+
+        const isFlipped = card.classList.contains('is-flipped');
+
+        if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            _flipCard();
+            return;
+        }
+
+        if (isFlipped && !_isShowingFeedback) {
+            if (e.key === '1') {
+                e.preventDefault();
+                _onFlashcardRate('hard');
+            } else if (e.key === '2') {
+                e.preventDefault();
+                _onFlashcardRate('good');
+            } else if (e.key === '3') {
+                e.preventDefault();
+                _onFlashcardRate('easy');
+            }
+        }
     }
 
     // ----------------------------------------------------------
@@ -115,79 +160,116 @@ const HiSessionUI = (() => {
         <div class="w-full flex flex-col items-center gap-3 fade-in">
             <div class="${CSS.label}">Bài tập: Thẻ ghi nhớ</div>
 
-            <div id="flashcard-card"
-                 class="${CSS.card} flex flex-col min-h-[360px] md:min-h-[400px] relative overflow-hidden cursor-pointer transition-all"
-                 onclick="HiSessionUI._flipCard()">
+            <div class="flashcard-scene max-w-xl">
+                <div id="flashcard-card"
+                     class="flashcard-3d-card"
+                     onclick="HiSessionUI._flipCard()"
+                     tabindex="0"
+                     role="button"
+                     aria-label="Thẻ ghi nhớ - Nhấn hoặc bấm Space để lật thẻ">
 
-                <!-- MẶT TRƯỚC: hiển thị nghĩa tiếng Việt -->
-                <div id="card-front"
-                     class="flex-1 flex flex-col items-center justify-center p-6 md:p-8 z-10 bg-surface-container-lowest rounded-2xl">
-                    <span class="text-on-surface-variant text-sm mb-4">${d.frontLabel}</span>
-                    <h2 class="font-bold text-on-surface text-3xl sm:text-5xl mb-8 text-center leading-tight">
-                        ${_esc(d.frontWord)}
-                    </h2>
-                    <button class="bg-primary text-on-primary px-6 py-2.5 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none">
-                        <span class="material-symbols-outlined text-[18px]">visibility</span>
-                        Nhấn xem đáp án
-                    </button>
-                </div>
+                    <div class="flashcard-sheen"></div>
 
-                <!-- MẶT SAU: hiển thị từ tiếng Anh + rate buttons -->
-                <div id="card-back"
-                     class="hidden flex-1 flex flex-col items-center justify-center p-6 md:p-8 z-10 bg-primary-fixed/20 rounded-2xl">
-                    <span class="text-on-surface-variant text-sm mb-4">${d.backLabel}</span>
-                    <div class="flex items-center justify-center gap-3 mb-2">
-                        <h2 class="font-bold text-primary text-3xl sm:text-5xl text-center">
-                            ${_esc(d.backWord)}
-                        </h2>
-                        <button onclick="event.stopPropagation(); HiSessionUI._speak('${_esc(d.backWord)}')"
-                                title="Nghe phát âm"
-                                class="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors shrink-0">
-                            <span class="material-symbols-outlined text-[22px]">volume_up</span>
-                        </button>
+                    <!-- MẶT TRƯỚC: hiển thị nghĩa tiếng Việt -->
+                    <div id="card-front" class="flashcard-face flashcard-front">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="text-on-surface-variant text-xs font-semibold uppercase tracking-wider">${d.frontLabel}</span>
+                            <span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-on-surface-variant bg-surface-container-high/80 px-2.5 py-1 rounded-full">
+                                <span class="material-symbols-outlined text-[14px]">touch_app</span>
+                                Chạm để lật
+                            </span>
+                        </div>
+
+                        <div class="my-auto text-center py-4 flex flex-col items-center justify-center">
+                            <h2 class="font-bold text-on-surface text-3xl sm:text-4xl md:text-5xl leading-tight">
+                                ${_esc(d.frontWord)}
+                            </h2>
+                        </div>
+
+                        <div class="flex justify-center w-full">
+                            <button class="flashcard-flip-pill bg-primary text-on-primary px-6 py-2.5 md:px-8 md:py-3 rounded-full text-xs md:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none">
+                                <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                Nhấn xem đáp án <kbd class="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono">Space</kbd>
+                            </button>
+                        </div>
                     </div>
-                    ${d.phonetic
-                        ? `<p class="text-on-surface-variant mb-6 font-mono text-sm md:text-base">${_esc(d.phonetic)}</p>`
-                        : '<div class="mb-6"></div>'
-                    }
-                    <div class="flex w-full md:w-auto flex-row justify-center gap-2 md:gap-4">
-                        <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('hard')"
-                            class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90 transition-opacity">
-                            Khó
-                        </button>
-                        <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('good')"
-                            class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-secondary-container text-on-secondary-container hover:opacity-90 transition-opacity">
-                            Tốt
-                        </button>
-                        <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('easy')"
-                            class="flex-1 md:flex-none px-4 py-3 md:px-8 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-primary text-on-primary hover:bg-surface-tint transition-colors">
-                            Dễ
-                        </button>
+
+                    <!-- MẶT SAU: hiển thị từ tiếng Anh + audio + phonetic + example + rate buttons -->
+                    <div id="card-back" class="flashcard-face flashcard-back">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="text-primary font-bold text-xs uppercase tracking-wider flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px] text-primary">check_circle</span>
+                                ${d.backLabel}
+                            </span>
+                            <button onclick="event.stopPropagation(); HiSessionUI._flipCard()"
+                                    title="Lật lại mặt trước"
+                                    class="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant hover:text-primary transition-colors bg-surface-container-high/60 hover:bg-surface-container-high px-2 py-0.5 rounded-full">
+                                <span class="material-symbols-outlined text-[14px]">undo</span>
+                                Lật lại
+                            </button>
+                        </div>
+
+                        <div class="my-auto text-center py-2 flex flex-col items-center justify-center">
+                            <div class="flex items-center justify-center gap-3 mb-1">
+                                <h2 class="font-bold text-primary text-3xl sm:text-4xl md:text-5xl text-center">
+                                    ${_esc(d.backWord)}
+                                </h2>
+                                <button onclick="event.stopPropagation(); HiSessionUI._speak('${_esc(d.backWord)}')"
+                                        title="Nghe phát âm"
+                                        class="p-2 md:p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:scale-95 transition-all shrink-0">
+                                    <span class="material-symbols-outlined text-[22px] md:text-[24px]">volume_up</span>
+                                </button>
+                            </div>
+
+                            ${d.phonetic
+                                ? `<p class="text-on-surface-variant mb-3 font-mono text-sm md:text-base">${_esc(d.phonetic)}</p>`
+                                : '<div class="mb-2"></div>'
+                            }
+
+                            ${d.exampleSentence
+                                ? `<div class="max-w-md mx-auto px-4 py-2 rounded-xl bg-surface-container-lowest/60 border border-outline-variant/30 text-center mb-1">
+                                    <p class="text-xs md:text-sm text-on-surface/80 italic line-clamp-2">"${_esc(d.exampleSentence)}"</p>
+                                   </div>`
+                                : ''
+                            }
+                        </div>
+
+                        <div class="flex w-full flex-row justify-center gap-2 md:gap-3">
+                            <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('hard')"
+                                class="flex-1 px-3 py-3 md:px-6 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                <span>Khó</span>
+                                <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">1</kbd>
+                            </button>
+                            <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('good')"
+                                class="flex-1 px-3 py-3 md:px-6 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-secondary-container text-on-secondary-container hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                <span>Tốt</span>
+                                <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">2</kbd>
+                            </button>
+                            <button onclick="event.stopPropagation(); HiSessionUI._onFlashcardRate('easy')"
+                                class="flex-1 px-3 py-3 md:px-6 md:py-3 rounded-xl md:rounded-full text-xs md:text-sm font-bold bg-primary text-on-primary hover:bg-surface-tint active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm">
+                                <span>Dễ</span>
+                                <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono font-normal">3</kbd>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>`;
-        // Phát âm tự động khi lật thẻ (sau render)
-        // Sẽ được gọi từ _flipCard
     }
 
-    /** Lật card */
+    /** Lật card sống động 3D */
     function _flipCard() {
-        const front = document.getElementById('card-front');
-        const back  = document.getElementById('card-back');
-        if (front && back) {
-            front.classList.toggle('hidden');
-            back.classList.toggle('hidden');
-            // Phát âm khi lật sang mặt sau
-            if (!back.classList.contains('hidden')) {
-                const item = HiSession.getCurrentItem();
-                if (item?.exerciseData?.backWord) {
-                    _speak(item.exerciseData.backWord);
-                }
+        const card = document.getElementById('flashcard-card');
+        if (!card) return;
+        const isFlipped = card.classList.toggle('is-flipped');
+        // Phát âm khi lật sang mặt sau
+        if (isFlipped) {
+            const item = HiSession.getCurrentItem();
+            if (item?.exerciseData?.backWord) {
+                _speak(item.exerciseData.backWord);
             }
         }
     }
-
     /** Xử lý rating flashcard */
     function _onFlashcardRate(rating) {
         if (_isShowingFeedback) return;

@@ -91,11 +91,12 @@ const HiSession = (() => {
             // Back: t? ti?ng Anh + phi�n �m + n�t Hard/Good/Easy
             case 'flashcard':
                 return {
-                    frontLabel:  'Dịch sang tiếng Anh',
-                    frontWord:   word.meaning,
-                    backLabel:   'Đáp án',
-                    backWord:    word.word,
-                    phonetic:    word.phonetic || '',
+                    frontLabel:      'Dịch sang tiếng Anh',
+                    frontWord:       word.meaning,
+                    backLabel:       'Đáp án',
+                    backWord:        word.word,
+                    phonetic:        word.phonetic || '',
+                    exampleSentence: word.example_sentence || '',
                 };
 
             // -- MCQ ----------------------------------------------
