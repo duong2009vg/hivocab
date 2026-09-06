@@ -2422,52 +2422,149 @@ window.addEventListener('hashchange', () => {
   </div>
 </div>
 
-<!-- ==================== MODAL: TẠO CHỦ ĐỀ ==================== -->
+<!-- ==================== MODAL: TẠO CHỦ ĐỀ / THƯ MỤC ==================== -->
 <div id="modal-create-topic" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
-  <div class="w-full max-w-md bg-surface rounded-2xl p-6 md:p-8 soft-shadow fade-in">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold text-on-surface">Tạo chủ đề mới</h2>
-      <button onclick="window.closeCreateTopicModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div class="flex flex-col gap-4">
-      <div>
-        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Tên chủ đề</label>
-        <input id="new-topic-name" type="text" maxlength="60" placeholder="Ví dụ: IELTS Vocabulary"
-               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"
-               onkeydown="if(event.key==='Enter') window.submitCreateTopic()"/>
+  <div class="w-full max-w-md bg-surface rounded-2xl soft-shadow fade-in overflow-hidden">
+
+    <!-- ── STEP 0: Chọn loại ───────────────────────────────── -->
+    <div id="ct-step-0" class="p-6 md:p-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-on-surface">Bạn muốn tạo gì?</h2>
+        <button onclick="window.closeCreateTopicModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
       </div>
-      <div>
-        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-3">Biểu tượng</label>
-        <div class="grid grid-cols-6 gap-2" id="icon-picker">
-          <!-- icons rendered by JS -->
-        </div>
-        <input type="hidden" id="new-topic-icon" value="folder"/>
-      </div>
-      <div>
-        <div class="flex items-center justify-between mb-2">
-          <label class="block text-xs font-bold text-outline uppercase tracking-wider">Thư mục / Danh mục</label>
-          <button type="button" onclick="window.toggleCustomCategoryInput()" class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
-            <span class="material-symbols-outlined text-[14px]">add</span>Thư mục mới
-          </button>
-        </div>
-        <select id="new-topic-category-select" onchange="window.onTopicCategorySelectChange()"
-                class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface transition-colors text-sm cursor-pointer mb-2">
-        </select>
-        <div id="new-topic-category-custom-wrap" class="hidden">
-          <input id="new-topic-category-custom" type="text" maxlength="60" placeholder="Nhập tên thư mục mới (ví dụ: TOEIC, Giao tiếp...)"
-                 class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-2.5 rounded-t-lg outline-none text-on-surface transition-colors text-sm"/>
-        </div>
-      </div>
-      <div id="create-topic-error" class="text-error text-sm hidden"></div>
-      <div class="flex gap-3 mt-2">
-        <button onclick="window.closeCreateTopicModal()" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Hủy</button>
-        <button onclick="window.submitCreateTopic()" id="create-topic-submit" class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-surface-tint transition-colors">Tạo chủ đề</button>
+      <div class="grid grid-cols-2 gap-3">
+        <!-- Card Tạo Chủ đề -->
+        <button onclick="window._goToModalStep('topic')"
+                class="group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-outline-variant/30 hover:border-primary hover:bg-primary/5 transition-all text-center active:scale-95">
+          <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-all">
+            <span class="material-symbols-outlined text-[26px]">menu_book</span>
+          </div>
+          <div>
+            <p class="font-bold text-sm text-on-surface">Tạo Chủ đề</p>
+            <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Thêm vào thư mục có sẵn</p>
+          </div>
+        </button>
+        <!-- Card Tạo Thư mục -->
+        <button onclick="window._goToModalStep('folder')"
+                class="group flex flex-col items-center gap-3 p-5 rounded-2xl border-2 border-outline-variant/30 hover:border-secondary hover:bg-secondary/5 transition-all text-center active:scale-95">
+          <div class="w-12 h-12 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-on-secondary transition-all">
+            <span class="material-symbols-outlined text-[26px]">folder_open</span>
+          </div>
+          <div>
+            <p class="font-bold text-sm text-on-surface">Tạo Thư mục</p>
+            <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Tạo danh mục mới</p>
+          </div>
+        </button>
       </div>
     </div>
+
+    <!-- ── STEP 1a: Form Tạo Chủ đề ───────────────────────── -->
+    <div id="ct-step-topic" class="hidden p-6 md:p-8">
+      <div class="flex items-center gap-2 mb-6">
+        <button onclick="window._goToModalStep('back')" class="p-1.5 rounded-full text-outline hover:bg-surface-container-low transition-colors -ml-1">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+        </button>
+        <h2 class="text-xl font-bold text-on-surface">Tạo Chủ đề mới</h2>
+        <button onclick="window.closeCreateTopicModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors ml-auto">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Tên chủ đề</label>
+          <input id="new-topic-name" type="text" maxlength="60" placeholder="Ví dụ: IELTS Vocabulary"
+                 class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"
+                 onkeydown="if(event.key==='Enter') window.submitCreateTopic()"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-3">Biểu tượng</label>
+          <div class="grid grid-cols-6 gap-2" id="icon-picker"><!-- icons by JS --></div>
+          <input type="hidden" id="new-topic-icon" value="folder"/>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Thư mục</label>
+          <select id="new-topic-category-select"
+                  class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface transition-colors text-sm cursor-pointer">
+          </select>
+        </div>
+        <div id="create-topic-error" class="text-error text-sm hidden"></div>
+        <div class="flex gap-3 mt-2">
+          <button onclick="window._goToModalStep('back')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Quay lại</button>
+          <button onclick="window.submitCreateTopic()" id="create-topic-submit" class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:bg-surface-tint transition-colors">Tạo chủ đề</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STEP 1b: Form Tạo Thư mục ──────────────────────── -->
+    <div id="ct-step-folder" class="hidden p-6 md:p-8">
+      <div class="flex items-center gap-2 mb-6">
+        <button onclick="window._goToModalStep('back')" class="p-1.5 rounded-full text-outline hover:bg-surface-container-low transition-colors -ml-1">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+        </button>
+        <h2 class="text-xl font-bold text-on-surface">Tạo Thư mục mới</h2>
+        <button onclick="window.closeCreateTopicModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors ml-auto">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Tên thư mục</label>
+          <input id="new-folder-name" type="text" maxlength="60" placeholder="Ví dụ: CAM 22, TOEIC 2025..."
+                 class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"
+                 onkeydown="if(event.key==='Enter') window.submitCreateFolder()"/>
+        </div>
+        <!-- Radio: loại thư mục -->
+        <div>
+          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-3">Loại thư mục</label>
+          <div class="flex flex-col gap-2">
+            <!-- Option A: Thường -->
+            <label id="folder-type-normal-label"
+                   class="flex items-start gap-3 p-3.5 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer transition-all"
+                   onclick="window._selectFolderType('normal')">
+              <input type="radio" name="folder-type" value="normal" checked class="mt-0.5 accent-primary shrink-0"/>
+              <div>
+                <p class="font-bold text-sm text-on-surface">Thư mục thông thường</p>
+                <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Danh sách chủ đề phẳng — phù hợp Oxford, IELTS, Idioms…</p>
+              </div>
+            </label>
+            <!-- Option B: Kiểu đề thi -->
+            <label id="folder-type-exam-label"
+                   class="flex items-start gap-3 p-3.5 rounded-xl border-2 border-outline-variant/30 cursor-pointer transition-all"
+                   onclick="window._selectFolderType('exam')">
+              <input type="radio" name="folder-type" value="exam" class="mt-0.5 accent-secondary shrink-0"/>
+              <div>
+                <p class="font-bold text-sm text-on-surface">Thư mục đề thi <span class="text-[10px] font-bold text-secondary bg-secondary/10 px-1.5 py-0.5 rounded-full ml-1">Test → Passage</span></p>
+                <p class="text-[11px] text-on-surface-variant mt-0.5 leading-snug">Phân cấp Test → Passage — phù hợp Cambridge, đề VOL…</p>
+              </div>
+            </label>
+          </div>
+        </div>
+        <!-- Cấu hình Tests & Passages (chỉ hiện khi chọn exam) -->
+        <div id="folder-exam-config" class="hidden bg-surface-container-low/60 rounded-xl p-4 flex gap-4 border border-outline-variant/20">
+          <div class="flex-1">
+            <label class="block text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5">Số đề (Tests)</label>
+            <input id="folder-num-tests" type="number" min="1" max="10" value="4"
+                   class="w-full bg-surface border border-outline-variant/30 focus:border-secondary px-3 py-2 rounded-lg outline-none text-on-surface text-sm font-bold text-center transition-colors"/>
+          </div>
+          <div class="flex-1">
+            <label class="block text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5">Số Passage / đề</label>
+            <input id="folder-num-passages" type="number" min="1" max="10" value="3"
+                   class="w-full bg-surface border border-outline-variant/30 focus:border-secondary px-3 py-2 rounded-lg outline-none text-on-surface text-sm font-bold text-center transition-colors"/>
+          </div>
+        </div>
+        <div id="create-folder-error" class="text-error text-sm hidden"></div>
+        <div class="flex gap-3 mt-2">
+          <button onclick="window._goToModalStep('back')" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Quay lại</button>
+          <button onclick="window.submitCreateFolder()" id="create-folder-submit" class="flex-1 py-3 rounded-xl bg-secondary text-on-secondary font-bold text-sm hover:opacity-90 transition-all">Tạo thư mục</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
+
 
 <!-- ==================== MODAL: IELTS TARGET & COUNTDOWN ==================== -->
 <div id="modal-ielts-goal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
@@ -3310,106 +3407,136 @@ window.filterLessonWords = function() {
     });
 };
 
-// ── Topic Creation Modal ────────────────────────────────────────
+// ── Topic / Folder Creation Wizard ──────────────────────────────
 const TOPIC_ICONS = [
     'work','flight_takeoff','science','palette','menu_book','sports_soccer',
     'music_note','computer','fitness_center','restaurant','favorite','star',
     'school','language','psychology','eco','local_fire_department','rocket_launch'
 ];
 
-window.toggleCustomCategoryInput = function(forceShow = null) {
-    const wrap  = document.getElementById('new-topic-category-custom-wrap');
-    const sel   = document.getElementById('new-topic-category-select');
-    const input = document.getElementById('new-topic-category-custom');
-    if (!wrap) return;
+// Wizard state
+let _modalCurrentStep = 'step-0'; // 'step-0' | 'step-topic' | 'step-folder'
 
-    const shouldShow = forceShow !== null ? forceShow : wrap.classList.contains('hidden');
-    if (shouldShow) {
-        wrap.classList.remove('hidden');
-        if (sel) sel.value = '__custom__';
-        setTimeout(() => input?.focus(), 100);
+// Helper: render icon picker (reusable)
+function _renderIconPicker(selectedIcon = 'folder') {
+    const picker = document.getElementById('icon-picker');
+    if (!picker) return;
+    picker.innerHTML = TOPIC_ICONS.map((ic, i) => `
+        <button type="button" data-icon="${ic}" onclick="window.selectTopicIcon('${ic}')"
+            class="icon-pick-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all
+                   ${ic === selectedIcon ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-primary/10 hover:text-primary'}">
+            <span class="material-symbols-outlined text-[20px]">${ic}</span>
+        </button>
+    `).join('');
+    document.getElementById('new-topic-icon').value = selectedIcon;
+}
+
+// Helper: render folder dropdown for "Tạo Chủ đề" step
+function _renderCategoryDropdown() {
+    const catSel = document.getElementById('new-topic-category-select');
+    if (!catSel) return;
+    const catSet = new Set();
+    (window._allTopics || []).forEach(t => {
+        const c = (t.category || '').trim();
+        if (c) catSet.add(c);
+    });
+    const defaultCats = [
+        'CAM','IELTS','Oxford 3000','Idioms & Collocations',
+        'THPT/ĐGNL','General English','CEFR','Grammar'
+    ];
+    defaultCats.forEach(c => catSet.add(c));
+
+    const sortedCats = Array.from(catSet).sort((a, b) => {
+        if (a.toLowerCase() === 'cam') return -1;
+        if (b.toLowerCase() === 'cam') return 1;
+        if (a.toLowerCase() === 'ielts') return -1;
+        if (b.toLowerCase() === 'ielts') return 1;
+        return a.localeCompare(b, 'vi');
+    });
+
+    catSel.innerHTML = sortedCats.map(c => `<option value="${_esc(c)}">📁 ${c}</option>`).join('');
+
+    let defaultCat = window._activeCategory && window._activeCategory !== 'all'
+        ? window._activeCategory
+        : (sortedCats[0] || 'General English');
+    const match = sortedCats.find(c => c.toLowerCase() === defaultCat.toLowerCase());
+    catSel.value = match || sortedCats[0];
+}
+
+// Navigate between wizard steps
+window._goToModalStep = function(step) {
+    // Hide all steps
+    ['ct-step-0', 'ct-step-topic', 'ct-step-folder'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+
+    if (step === 'back') {
+        step = 'step-0';
+    }
+
+    if (step === 'topic') {
+        _modalCurrentStep = 'step-topic';
+        const el = document.getElementById('ct-step-topic');
+        if (el) el.classList.remove('hidden');
+        _renderIconPicker('menu_book');
+        _renderCategoryDropdown();
+        document.getElementById('new-topic-name').value = '';
+        const err = document.getElementById('create-topic-error');
+        if (err) err.classList.add('hidden');
+        setTimeout(() => document.getElementById('new-topic-name')?.focus(), 100);
+
+    } else if (step === 'folder') {
+        _modalCurrentStep = 'step-folder';
+        const el = document.getElementById('ct-step-folder');
+        if (el) el.classList.remove('hidden');
+        // Reset folder form
+        document.getElementById('new-folder-name').value = '';
+        const err = document.getElementById('create-folder-error');
+        if (err) err.classList.add('hidden');
+        // Reset radio to "normal"
+        window._selectFolderType('normal', true);
+        setTimeout(() => document.getElementById('new-folder-name')?.focus(), 100);
+
     } else {
-        wrap.classList.add('hidden');
-        if (sel && sel.value === '__custom__') {
-            sel.selectedIndex = 0;
-        }
+        // step-0
+        _modalCurrentStep = 'step-0';
+        const el = document.getElementById('ct-step-0');
+        if (el) el.classList.remove('hidden');
     }
 };
 
-window.onTopicCategorySelectChange = function() {
-    const sel = document.getElementById('new-topic-category-select');
-    if (!sel) return;
-    if (sel.value === '__custom__') {
-        window.toggleCustomCategoryInput(true);
+// Toggle folder type radio + show/hide config panel
+window._selectFolderType = function(type, silent = false) {
+    const normalLabel = document.getElementById('folder-type-normal-label');
+    const examLabel   = document.getElementById('folder-type-exam-label');
+    const examConfig  = document.getElementById('folder-exam-config');
+    const normalRadio = document.querySelector('input[name="folder-type"][value="normal"]');
+    const examRadio   = document.querySelector('input[name="folder-type"][value="exam"]');
+
+    if (type === 'exam') {
+        if (examRadio) examRadio.checked = true;
+        normalLabel?.classList.remove('border-primary', 'bg-primary/5');
+        normalLabel?.classList.add('border-outline-variant/30');
+        examLabel?.classList.remove('border-outline-variant/30');
+        examLabel?.classList.add('border-secondary', 'bg-secondary/5');
+        examConfig?.classList.remove('hidden');
     } else {
-        window.toggleCustomCategoryInput(false);
+        if (normalRadio) normalRadio.checked = true;
+        examLabel?.classList.remove('border-secondary', 'bg-secondary/5');
+        examLabel?.classList.add('border-outline-variant/30');
+        normalLabel?.classList.remove('border-outline-variant/30');
+        normalLabel?.classList.add('border-primary', 'bg-primary/5');
+        examConfig?.classList.add('hidden');
     }
 };
 
+// Open modal — always start at Step 0
 window.openCreateTopicModal = function() {
     const modal = document.getElementById('modal-create-topic');
     if (!modal) return;
-    // Render icon picker
-    const picker = document.getElementById('icon-picker');
-    if (picker) {
-        picker.innerHTML = TOPIC_ICONS.map((ic, i) => `
-            <button type="button" data-icon="${ic}" onclick="window.selectTopicIcon('${ic}')"
-                class="icon-pick-btn w-10 h-10 rounded-xl flex items-center justify-center transition-all
-                       ${i === 0 ? 'bg-primary text-on-primary' : 'bg-surface-container-low text-on-surface-variant hover:bg-primary/10 hover:text-primary'}">
-                <span class="material-symbols-outlined text-[20px]">${ic}</span>
-            </button>
-        `).join('');
-    }
-    
-    // Render folder/category dropdown
-    const catSel = document.getElementById('new-topic-category-select');
-    if (catSel) {
-        const catSet = new Set();
-        (window._allTopics || []).forEach(t => {
-            const c = (t.category || '').trim();
-            if (c) catSet.add(c);
-        });
-        const defaultCats = [
-            'CAM',
-            'IELTS',
-            'Oxford 3000',
-            'Idioms & Collocations',
-            'THPT/ĐGNL',
-            'General English',
-            'CEFR',
-            'Grammar'
-        ];
-        defaultCats.forEach(c => catSet.add(c));
-
-        const sortedCats = Array.from(catSet).sort((a, b) => {
-            if (a.toLowerCase() === 'cam') return -1;
-            if (b.toLowerCase() === 'cam') return 1;
-            if (a.toLowerCase() === 'ielts') return -1;
-            if (b.toLowerCase() === 'ielts') return 1;
-            return a.localeCompare(b, 'vi');
-        });
-
-        catSel.innerHTML = sortedCats.map(c => `<option value="${_esc(c)}">📁 ${c}</option>`).join('') +
-                           `<option value="__custom__">➕ Tạo thư mục mới...</option>`;
-
-        let defaultCat = window._activeCategory && window._activeCategory !== 'all'
-            ? window._activeCategory
-            : (sortedCats[0] || 'General English');
-
-        const match = sortedCats.find(c => c.toLowerCase() === defaultCat.toLowerCase());
-        catSel.value = match || sortedCats[0];
-    }
-
-    window.toggleCustomCategoryInput(false);
-    const customInput = document.getElementById('new-topic-category-custom');
-    if (customInput) customInput.value = '';
-
-    document.getElementById('new-topic-icon').value = 'folder';
-    document.getElementById('new-topic-name').value = '';
-    const err = document.getElementById('create-topic-error');
-    if (err) err.classList.add('hidden');
     modal.style.display = 'flex';
-    setTimeout(() => document.getElementById('new-topic-name')?.focus(), 100);
+    window._goToModalStep('step-0');
 };
 
 window.closeCreateTopicModal = function() {
@@ -3422,34 +3549,26 @@ window.selectTopicIcon = function(icon) {
     document.querySelectorAll('.icon-pick-btn').forEach(btn => {
         const isSelected = btn.dataset.icon === icon;
         btn.className = btn.className
-            .replace('bg-primary text-on-primary', '')
-            .replace('bg-surface-container-low text-on-surface-variant', '');
+            .replace(/bg-primary\s+text-on-primary/g, '')
+            .replace(/bg-surface-container-low\s+text-on-surface-variant/g, '')
+            .trim();
         btn.className += isSelected
             ? ' bg-primary text-on-primary'
             : ' bg-surface-container-low text-on-surface-variant';
     });
 };
 
+// Submit: Tạo Chủ đề (Step 1a)
 window.submitCreateTopic = async function() {
-    const nameEl      = document.getElementById('new-topic-name');
-    const iconEl      = document.getElementById('new-topic-icon');
-    const catSel      = document.getElementById('new-topic-category-select');
-    const customInput = document.getElementById('new-topic-category-custom');
-    const errEl       = document.getElementById('create-topic-error');
-    const btn         = document.getElementById('create-topic-submit');
+    const nameEl  = document.getElementById('new-topic-name');
+    const iconEl  = document.getElementById('new-topic-icon');
+    const catSel  = document.getElementById('new-topic-category-select');
+    const errEl   = document.getElementById('create-topic-error');
+    const btn     = document.getElementById('create-topic-submit');
 
-    const name = nameEl?.value.trim();
-    const icon = iconEl?.value || 'folder';
-
-    let category = catSel?.value || 'General English';
-    if (category === '__custom__') {
-        category = (customInput?.value || '').trim();
-        if (!category) {
-            if (errEl) { errEl.textContent = 'Vui lòng nhập tên thư mục mới.'; errEl.classList.remove('hidden'); }
-            customInput?.focus();
-            return;
-        }
-    }
+    const name     = nameEl?.value.trim();
+    const icon     = iconEl?.value || 'menu_book';
+    const category = catSel?.value || 'General English';
 
     if (!name) {
         if (errEl) { errEl.textContent = 'Vui lòng nhập tên chủ đề.'; errEl.classList.remove('hidden'); }
@@ -3461,9 +3580,8 @@ window.submitCreateTopic = async function() {
         if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
         if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
 
-        const newTopic = await HiDB.createTopic(name, icon, category);
+        await HiDB.createTopic(name, icon, category);
 
-        // Tự động chuyển tab đang xem sang đúng thư mục vừa tạo để người dùng thấy ngay chủ đề mới!
         window._activeCategory = category;
         window._allTopics = [];
         await window._renderTopicsGrid();
@@ -3473,6 +3591,54 @@ window.submitCreateTopic = async function() {
         if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
     } finally {
         if (btn) { btn.disabled = false; btn.textContent = 'Tạo chủ đề'; }
+    }
+};
+
+// Submit: Tạo Thư mục (Step 1b) — normal OR exam-style
+window.submitCreateFolder = async function() {
+    const nameEl  = document.getElementById('new-folder-name');
+    const errEl   = document.getElementById('create-folder-error');
+    const btn     = document.getElementById('create-folder-submit');
+    const examRadio = document.querySelector('input[name="folder-type"][value="exam"]');
+
+    const folderName = nameEl?.value.trim();
+    const isExam     = examRadio?.checked || false;
+
+    if (!folderName) {
+        if (errEl) { errEl.textContent = 'Vui lòng nhập tên thư mục.'; errEl.classList.remove('hidden'); }
+        nameEl?.focus();
+        return;
+    }
+
+    let numTests    = 4;
+    let numPassages = 3;
+    if (isExam) {
+        numTests    = Math.max(1, Math.min(10, parseInt(document.getElementById('folder-num-tests')?.value) || 4));
+        numPassages = Math.max(1, Math.min(10, parseInt(document.getElementById('folder-num-passages')?.value) || 3));
+    }
+
+    try {
+        if (btn) { btn.disabled = true; btn.textContent = 'Đang tạo...'; }
+        if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
+
+        // Tạo topic đại diện cho thư mục (không có nội dung từ vựng, chỉ là container)
+        const newTopic = await HiDB.createTopic(folderName, 'folder', folderName);
+
+        if (isExam) {
+            // Tự động tạo tests và passages
+            await HiDB.createCamFolder(newTopic.id, numTests, numPassages);
+        }
+
+        // Refresh và chuyển sang tab thư mục mới
+        window._activeCategory = folderName;
+        window._allTopics = [];
+        await window._renderTopicsGrid();
+        window.closeCreateTopicModal();
+
+    } catch(err) {
+        if (errEl) { errEl.textContent = err.message; errEl.classList.remove('hidden'); }
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = 'Tạo thư mục'; }
     }
 };
 

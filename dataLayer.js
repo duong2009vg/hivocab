@@ -888,6 +888,60 @@ window.HiDB = (() => {
     }
 
 
+    /**
+     * Tạo cấu trúc Test → Passage cho một Cambridge-style folder.
+     * Gọi sau khi đã tạo topic (dùng createTopic).
+     *
+     * @param {string} topicId      - ID của topic vừa tạo
+     * @param {number} numTests     - Số lượng tests (1–10)
+     * @param {number} numPassages  - Số passage mỗi test (1–10, mặc định 3)
+     * @returns {Promise<{ tests: Array, passages: Array }>}
+     */
+    async function createCamFolder(topicId, numTests = 4, numPassages = 3) {
+        const client = _getClient();
+
+        // 1. Tạo tests
+        const testsToInsert = Array.from({ length: numTests }, (_, i) => ({
+            topic_id:   topicId,
+            name:       `Test ${i + 1}`,
+            test_order: i + 1,
+        }));
+
+        const { data: createdTests, error: testsError } = await client
+            .from('tests')
+            .insert(testsToInsert)
+            .select('id, name, test_order');
+
+        if (testsError) throw testsError;
+
+        // 2. Tạo passages cho mỗi test
+        const passagesToInsert = [];
+        for (const test of createdTests) {
+            for (let p = 1; p <= numPassages; p++) {
+                passagesToInsert.push({
+                    test_id:        test.id,
+                    topic_id:       topicId,
+                    passage_number: p,
+                    title:          `Passage ${p}`,
+                    topic_label:    '',
+                });
+            }
+        }
+
+        const { data: createdPassages, error: passagesError } = await client
+            .from('passages')
+            .insert(passagesToInsert)
+            .select('id, test_id, passage_number, title');
+
+        if (passagesError) throw passagesError;
+
+        // Invalidate cache cho topic này
+        _invalidateVocabularyCache();
+
+        return { tests: createdTests, passages: createdPassages };
+    }
+
+
     // ============================================================
     // PHẦN 5: WORD PROGRESS & SM-2 CORE
     // ============================================================
@@ -1510,6 +1564,7 @@ window.HiDB = (() => {
         // Topics
         getTopics,
         createTopic,
+        createCamFolder,
         deleteTopic,
 
         // Words
