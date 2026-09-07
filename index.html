@@ -3016,6 +3016,7 @@ window._activeCategory = 'all';
 window._allTopics      = [];
 window._topicCategories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
 const DEFAULT_TOPIC_CATEGORIES = [
+    'Destination C1-C2',
     'General English',
     'IELTS/TOEIC',
     'Oxford 3000',
@@ -3032,6 +3033,7 @@ function _topicCategoryValue(category) {
 
 function _topicCategoryIcon(category) {
     const compact = _topicCategoryValue(category).toLowerCase().replace(/[\s/_-]+/g, '');
+    if (compact.includes('dest')) return 'school';
     if (compact === 'cam' || compact.includes('cambridge')) return 'menu_book';
     if (compact.includes('ielts') || compact.includes('toeic')) return 'military_tech';
     if (compact.includes('cefr')) return 'workspace_premium';
@@ -3747,7 +3749,7 @@ function _renderCategoryDropdown(preselectCat) {
     if (!catSel) return;
     const catMap = new Map();
     const defaultCats = [
-        'CAM','IELTS','Oxford 3000','Idioms & Collocations',
+        'CAM','Destination C1-C2','IELTS','Oxford 3000','Idioms & Collocations',
         'THPT/ĐGNL','General English','CEFR','Grammar'
     ];
     defaultCats.forEach(c => catMap.set(c.toLowerCase(), c));
