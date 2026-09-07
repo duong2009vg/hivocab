@@ -37,7 +37,7 @@ const HiSessionUI = (() => {
         mcqOptSelected:'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-primary bg-primary/8 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
         mcqOptCorrect: 'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-green-500 bg-green-50 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
         mcqOptWrong:   'mcq-opt w-full text-left p-4 md:p-5 md:min-h-[90px] rounded-xl border-2 border-error bg-error-container/30 flex flex-row md:flex-col items-center justify-between md:justify-center md:text-center gap-2 transition-all',
-        fillInput:     'fill-input w-[clamp(1.45rem,calc((100vw-3.5rem)/var(--fill-max-word-len,10)),2rem)] h-10 sm:w-12 sm:h-14 bg-[#F5F5F5] rounded-t border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0 transition-colors',
+        fillInput:     'fill-input w-[clamp(1.75rem,calc((100vw-4.5rem)/var(--fill-max-word-len,10)),2.75rem)] h-11 sm:h-14 rounded-xl bg-surface-container-lowest border-2 border-outline-variant/40 focus:border-primary focus:bg-primary/5 focus:shadow-sm text-center font-bold text-base sm:text-2xl text-on-surface uppercase outline-none px-0 transition-all select-all',
     };
 
     // Container element (set trong init)
@@ -83,7 +83,15 @@ const HiSessionUI = (() => {
         if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
 
         const card = document.getElementById('flashcard-card');
-        if (!card) return;
+        if (!card) {
+            // Hỗ trợ phím Space để nghe lại phát âm trong bài Luyện nghe
+            const listenBtn = document.getElementById('listen-play-btn');
+            if (listenBtn && (e.code === 'Space' || e.key === ' ')) {
+                e.preventDefault();
+                _onListenPlay();
+            }
+            return;
+        }
 
         if (e.target?.tagName === 'BUTTON' && e.target.id !== 'flashcard-card') {
             return;
@@ -428,75 +436,78 @@ const HiSessionUI = (() => {
     function _renderFill(item) {
         const d = item.exerciseData;
 
-        // Tạo input boxes cho từng chữ cái, thêm dấu cách phân tách giữa các từ
+        // Tạo input boxes cho từng chữ cái, thêm khoảng cách phân tách giữa các từ
         let fillIndex = 0;
         const answerParts = Array.isArray(d.answerParts) && d.answerParts.length
             ? d.answerParts
             : String(d.answer || '').trim().split(/\s+/).filter(Boolean);
         const maxPartLen = Math.max(1, ...answerParts.map(part => String(part || '').length));
         const inputsHTML = answerParts.map((part) => `
-            <span class="inline-flex gap-0.5 sm:gap-1 md:gap-2 flex-wrap justify-center max-w-full" data-fill-word>
+            <span class="inline-flex gap-1 sm:gap-1.5 md:gap-2 flex-nowrap justify-center max-w-full" data-fill-word>
                 ${part.split('').map(() => {
                     const idx = fillIndex++;
-                    return `<input type="text" maxlength="1"
+                    return `<input type="text" maxlength="2"
                            data-fill-index="${idx}"
                            class="${CSS.fillInput}"
-                           autocomplete="off" autocorrect="off" spellcheck="false"/>`;
+                           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"/>`;
                 }).join('')}
             </span>
-        `).join('<span class="w-3 md:w-5 shrink-0" aria-hidden="true"></span>');
+        `).join('<span class="w-2.5 sm:w-4 md:w-5 shrink-0" aria-hidden="true"></span>');
 
         const totalLetters = d.letters || answerParts.join('').length;
-        const boxesClass = totalLetters > 8
-            ? 'flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end overflow-hidden'
-            : 'flex gap-y-3 gap-x-1 md:gap-x-2 justify-center flex-wrap max-w-full items-end overflow-hidden';
         const fillMaxWordLen = Math.min(Math.max(maxPartLen, 6), 18);
 
         _container.innerHTML = `
-        <div class="w-full flex flex-col items-center gap-3 fade-in">
+        <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 fade-in px-1 sm:px-3">
             <div class="${CSS.label}">Bài tập: Điền vào chỗ trống</div>
 
-            <div class="${CSS.card} p-5 md:p-8 flex flex-col items-center min-h-[300px] justify-center">
+            <div class="${CSS.card} p-5 sm:p-7 md:p-8 flex flex-col items-center min-h-[300px] justify-between max-w-xl mx-auto w-full">
 
                 <!-- Gợi ý nghĩa + nút phát âm -->
                 <div class="text-center mb-6 w-full">
                     <div class="flex items-center justify-center gap-2 mb-3">
-                        <p class="text-sm text-on-surface-variant font-medium">Điền từ tiếng Anh có nghĩa:</p>
+                        <p class="text-xs sm:text-sm text-on-surface-variant font-medium">Điền từ tiếng Anh có nghĩa:</p>
                         <button onclick="HiSessionUI._speak('${_esc(d.answer)}')"
                                 title="Nghe phát âm từ cần điền"
-                                class="p-1.5 rounded-full bg-surface-container-low text-primary hover:bg-primary/10 transition-colors">
+                                class="p-1.5 rounded-full bg-surface-container-low text-primary hover:bg-primary/10 transition-colors active:scale-95 touch-manipulation">
                             <span class="material-symbols-outlined text-[18px]">volume_up</span>
                         </button>
                     </div>
                     ${d.sentence
-                        ? `<p class="text-base md:text-xl text-on-surface leading-relaxed mx-auto">
+                        ? `<p class="text-base sm:text-lg md:text-xl text-on-surface leading-relaxed mx-auto max-w-lg">
                                ${_buildSentenceHTML(d.sentence)}
                            </p>`
-                        : `<p class="text-base md:text-xl text-on-surface-variant leading-relaxed mx-auto">
+                        : `<p class="text-base sm:text-lg md:text-xl text-on-surface-variant leading-relaxed mx-auto max-w-lg">
                                ${_esc(d.meaningHint)}
                            </p>`
                     }
 
                     <!-- AI Hint button -->
                     <button onclick="HiSessionUI._getAIHint()"
-                            class="mt-4 text-primary font-bold text-xs md:text-sm flex items-center justify-center gap-1 hover:bg-primary-container/10 px-3 py-2 rounded-lg mx-auto w-max transition-colors">
+                            class="mt-3 text-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-1 hover:bg-primary-container/10 px-3 py-1.5 rounded-xl mx-auto w-max transition-colors active:scale-95 touch-manipulation">
                         <span class="material-symbols-outlined text-[16px]">lightbulb</span>
                         Xin gợi ý AI
                     </button>
                     <div id="ai-hint-container"
-                         class="mt-3 text-xs md:text-sm text-on-surface-variant hidden bg-surface-container-low p-3 rounded-lg border border-outline-variant/30 w-full text-left">
+                         class="mt-3 text-xs sm:text-sm text-on-surface-variant hidden bg-surface-container-low p-3 rounded-xl border border-outline-variant/30 w-full text-left">
                     </div>
                 </div>
 
-                <!-- Input boxes từng chữ cái -->
-                <div class="${boxesClass}" id="fill-boxes" style="--fill-max-word-len:${fillMaxWordLen}">
+                <!-- Input boxes từng chữ cái (ngăn gãy dòng giữa từ) -->
+                <div class="flex gap-y-3 gap-x-1.5 sm:gap-x-2 justify-center flex-wrap max-w-full items-center my-2 p-1 overflow-x-auto select-none" id="fill-boxes" style="--fill-max-word-len:${fillMaxWordLen}">
                     ${inputsHTML}
                 </div>
 
+                <!-- Ghi chú điều hướng -->
+                <p class="text-[11px] text-outline text-center mt-2 mb-4">
+                    Gõ ký tự sẽ tự chuyển ô • Nhấn <kbd class="px-1.5 py-0.5 rounded bg-surface-container-low font-mono text-[10px]">Backspace</kbd> để lùi
+                </p>
+
                 <!-- Nút kiểm tra -->
-                <div class="mt-8 w-full">
-                    <button onclick="HiSessionUI._onFillCheck()" class="${CSS.btnPrimary}">
-                        Kiểm tra
+                <div class="w-full max-w-md">
+                    <button onclick="HiSessionUI._onFillCheck()" class="${CSS.btnPrimary} flex items-center justify-center gap-2 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        <span>Kiểm tra</span>
                     </button>
                 </div>
             </div>
@@ -512,61 +523,107 @@ const HiSessionUI = (() => {
             /_{2,}(?:\s+_{2,})*/g,
             (placeholder) => placeholder.split(/\s+/).map(part => {
                 const width = Math.max(2.5, Math.min(part.length * 0.75, 7));
-                return `<span class="inline-block border-b-2 border-outline-variant mx-1 align-bottom text-transparent" style="width:${width}em">${part}</span>`;
+                return `<span class="inline-block border-b-2 border-primary mx-1 align-bottom text-transparent font-bold" style="width:${width}em">${part}</span>`;
             }).join(' ')
         );
     }
 
-    /** Keyboard navigation giữa các ô fill */
+    /** Keyboard navigation mượt mà giữa các ô fill */
     function _bindFillInputs() {
-        const inputs = document.querySelectorAll('[data-fill-index]');
+        const inputs = Array.from(document.querySelectorAll('[data-fill-index]'));
+        if (!inputs.length) return;
+
         inputs.forEach((input, idx) => {
+            // Khi focus: tự bôi đen để gõ đè được ngay
+            input.addEventListener('focus', () => {
+                input.select();
+            });
+
+            // Khi click: cũng select
+            input.addEventListener('click', () => {
+                input.select();
+            });
+
             // Auto-advance khi nhập ký tự
             input.addEventListener('input', (e) => {
-                const val = e.target.value;
-                // Chỉ giữ ký tự cuối nếu user paste nhiều chữ
+                const val = input.value;
+                if (!val) return;
+
+                // Nếu paste cả chuỗi dài
                 if (val.length > 1) {
-                    // Điền cascade từ vị trí hiện tại
-                    const chars = val.toUpperCase().replace(/\s+/g, '').split('');
-                    inputs.forEach((inp, i) => {
-                        if (i >= idx && chars[i - idx] !== undefined) {
-                            inp.value = chars[i - idx];
-                        }
-                    });
-                    // Focus vào ô tiếp theo sau paste
-                    const nextIdx = Math.min(idx + chars.length, inputs.length - 1);
-                    inputs[nextIdx]?.focus();
-                } else if (val.length === 1 && idx < inputs.length - 1) {
-                    inputs.forEach((inp, i) => {
-                        if (i >= idx && chars[i - idx] !== undefined) {
-                            inp.value = chars[i - idx];
-                        }
-                    });
-                    // Focus vào ô tiếp theo sau paste
-                    const nextIdx = Math.min(idx + chars.length, inputs.length - 1);
-                    inputs[nextIdx]?.focus();
-                } else if (val.length === 1 && idx < inputs.length - 1) {
+                    const chars = val.toUpperCase().replace(/[^A-Z0-9]/g, '').split('');
+                    if (chars.length > 1) {
+                        chars.forEach((c, i) => {
+                            if (inputs[idx + i]) {
+                                inputs[idx + i].value = c;
+                            }
+                        });
+                        const nextIdx = Math.min(idx + chars.length, inputs.length - 1);
+                        inputs[nextIdx]?.focus();
+                        inputs[nextIdx]?.select();
+                        return;
+                    }
+                }
+
+                // Gõ 1 ký tự: lấy ký tự vừa gõ, viết hoa
+                const char = val.slice(-1).toUpperCase();
+                input.value = char;
+
+                // Tự động nhảy sang ô tiếp theo
+                if (idx < inputs.length - 1) {
                     inputs[idx + 1].focus();
+                    inputs[idx + 1].select();
                 }
             });
 
-            // Backspace → về ô trước
+            // Phím điều hướng & Backspace
             input.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                if (e.key === 'Backspace') {
+                    if (!input.value && idx > 0) {
+                        // Ô hiện tại đã rỗng -> lùi về ô trước và xóa ô trước
+                        e.preventDefault();
+                        inputs[idx - 1].focus();
+                        inputs[idx - 1].value = '';
+                    } else if (input.value) {
+                        // Xóa ô hiện tại
+                        input.value = '';
+                        e.preventDefault();
+                    }
+                } else if (e.key === 'ArrowLeft' && idx > 0) {
+                    e.preventDefault();
                     inputs[idx - 1].focus();
-                }
-                // Enter → kiểm tra
-                if (e.key === 'Enter') {
+                    inputs[idx - 1].select();
+                } else if (e.key === 'ArrowRight' && idx < inputs.length - 1) {
+                    e.preventDefault();
+                    inputs[idx + 1].focus();
+                    inputs[idx + 1].select();
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
                     _onFillCheck();
                 }
             });
         });
 
-        // Auto-focus ô đầu tiên
-        inputs[0]?.focus();
+        // Click vào vùng chứa -> auto focus ô trống đầu tiên
+        const fillBoxesContainer = document.getElementById('fill-boxes');
+        if (fillBoxesContainer) {
+            fillBoxesContainer.addEventListener('click', (e) => {
+                if (e.target.tagName !== 'INPUT') {
+                    const firstEmpty = inputs.find(inp => !inp.value.trim()) || inputs[inputs.length - 1];
+                    firstEmpty?.focus();
+                    firstEmpty?.select();
+                }
+            });
+        }
+
+        // Auto-focus ô đầu tiên sau render
+        setTimeout(() => {
+            inputs[0]?.focus();
+            inputs[0]?.select();
+        }, 120);
     }
 
-    /** Kiểm tra đáp án fill-in-blank */
+        /** Kiểm tra đáp án fill-in-blank */
     function _onFillCheck() {
         if (_isShowingFeedback) return;
         _isShowingFeedback = true;
@@ -691,49 +748,104 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         const d = item.exerciseData;
 
         _container.innerHTML = `
-        <div class="w-full flex flex-col items-center gap-3 fade-in">
-            <div class="${CSS.label}">Bài tập: Luyện nghe</div>
+        <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 fade-in px-1 sm:px-3">
+            <div class="${CSS.label}">Bài tập: Luyện nghe & Điền từ</div>
 
-            <div class="${CSS.card} p-6 md:p-8 flex flex-col items-center min-h-[360px] md:min-h-[400px] justify-center">
+            <div class="${CSS.card} p-5 sm:p-7 md:p-8 flex flex-col items-center min-h-[380px] md:min-h-[420px] justify-between max-w-xl mx-auto w-full">
 
-                <span class="text-on-surface-variant text-sm md:text-base mb-6 md:mb-10 block text-center">
-                    Nghe và nhập từ bạn nghe được
-                </span>
+                <!-- Header bài nghe -->
+                <div class="text-center w-full">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary bg-primary/10 px-3 py-1 rounded-full mb-2">
+                        <span class="material-symbols-outlined text-[15px]">hearing</span>
+                        Luyện phản xạ nghe
+                    </span>
+                    <h3 class="text-base sm:text-lg md:text-xl font-bold text-on-surface">Nghe và nhập từ bạn nghe được</h3>
+                    <p class="text-xs text-on-surface-variant mt-0.5">Lắng nghe phát âm chuẩn và gõ lại chính xác từ vựng</p>
+                </div>
 
-                <!-- Nút phát âm thanh -->
-                <button id="listen-play-btn"
-                        onclick="HiSessionUI._onListenPlay()"
-                        class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_8px_24px_rgba(0,129,192,0.3)] hover:scale-105 active:scale-95 transition-all mb-6 md:mb-10 group">
-                    <span class="material-symbols-outlined icon-fill text-[40px] md:text-[48px] ml-1 md:ml-2">play_arrow</span>
-                </button>
+                <!-- Trung tâm âm thanh sống động (Audio Station) -->
+                <div class="my-4 flex flex-col items-center justify-center relative w-full">
+                    <!-- Ripple effect rings -->
+                    <div class="relative flex items-center justify-center mb-4">
+                        <div id="listen-ripple" class="absolute w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-primary/15 transition-all scale-100 opacity-0 pointer-events-none"></div>
 
-                <!-- Phiên âm hint (ẩn ban đầu, hiện sau lần nghe đầu) -->
-                <p id="listen-phonetic" class="text-on-surface-variant font-mono text-sm mb-4 opacity-0 transition-opacity duration-500">
-                    ${d.phonetic ? _esc(d.phonetic) : ''}
-                </p>
-
-                <!-- Input nhập từ -->
-                <div class="w-full max-w-md relative mb-6 md:mb-10">
-                    <input id="listen-input"
-                           type="text"
-                           placeholder="Nhập từ bằng tiếng Anh..."
-                           autocomplete="off" autocorrect="off" spellcheck="false"
-                           onkeydown="if(event.key==='Enter') HiSessionUI._onListenCheck()"
-                           class="w-full bg-[#F5F5F5] border-0 border-b-2 border-outline-variant focus:border-primary focus:ring-0 rounded-t-lg px-4 md:px-6 py-3 md:py-4 font-body-lg text-center text-on-surface placeholder:text-outline-variant/70 transition-colors outline-none"/>
-                    <!-- Nút phát chậm -->
-                    <div class="absolute right-2 md:right-3 top-1/2 -translate-y-1/2">
-                        <button onclick="HiSessionUI._onListenSlow()"
-                                title="Phát chậm"
-                                class="text-outline-variant hover:text-primary p-2 transition-colors rounded-full">
-                            <span class="material-symbols-outlined text-[18px] md:text-[20px]">speed</span>
+                        <!-- Main Speaker Button -->
+                        <button id="listen-play-btn"
+                                onclick="HiSessionUI._onListenPlay()"
+                                title="Bấm để nghe phát âm chuẩn (Phím Space)"
+                                class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-primary to-primary-tint text-on-primary flex items-center justify-center shadow-[0_8px_25px_rgba(0,97,146,0.35)] hover:scale-105 active:scale-95 transition-all z-10 touch-manipulation group">
+                            <span class="material-symbols-outlined text-[36px] sm:text-[44px] group-hover:scale-110 transition-transform">volume_up</span>
                         </button>
+                    </div>
+
+                    <!-- Thanh sóng âm động -->
+                    <div id="listen-soundwave" class="flex items-center gap-1 h-5 mb-3 opacity-0 transition-opacity">
+                        <span class="w-1 bg-primary rounded-full animate-pulse h-2.5"></span>
+                        <span class="w-1 bg-primary rounded-full animate-pulse h-4.5"></span>
+                        <span class="w-1 bg-primary rounded-full animate-pulse h-5"></span>
+                        <span class="w-1 bg-primary rounded-full animate-pulse h-3.5"></span>
+                        <span class="w-1 bg-primary rounded-full animate-pulse h-2"></span>
+                    </div>
+
+                    <!-- Cặp nút tốc độ: Chuẩn (1.0x) & Chậm (0.6x) -->
+                    <div class="flex items-center justify-center gap-2 sm:gap-3 w-full max-w-xs">
+                        <button onclick="HiSessionUI._onListenPlay()"
+                                class="flex-1 py-2 px-3 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 touch-manipulation">
+                            <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                            <span>Chuẩn (1.0x)</span>
+                        </button>
+                        <button onclick="HiSessionUI._onListenSlow()"
+                                class="flex-1 py-2 px-3 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface text-xs sm:text-sm font-bold border border-outline-variant/30 flex items-center justify-center gap-1.5 transition-all active:scale-95 touch-manipulation">
+                            <span>🐢</span>
+                            <span>Chậm (0.6x)</span>
+                        </button>
+                    </div>
+
+                    <!-- Phiên âm IPA & Gợi ý nghĩa -->
+                    <div class="mt-2.5 flex flex-col items-center gap-1">
+                        <p id="listen-phonetic" class="text-on-surface-variant font-mono text-xs sm:text-sm transition-opacity opacity-0">
+                            ${d.phonetic ? `/${_esc(d.phonetic)}/` : ''}
+                        </p>
+                        <button id="listen-hint-toggle"
+                                onclick="HiSessionUI._toggleListenHint()"
+                                class="text-[11px] font-semibold text-outline hover:text-primary transition-colors flex items-center gap-1 py-0.5">
+                            <span class="material-symbols-outlined text-[14px]">lightbulb</span>
+                            <span>Xem gợi ý nghĩa</span>
+                        </button>
+                        <div id="listen-meaning-box" class="hidden text-xs text-primary font-medium bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/20 mt-1 fade-in">
+                            Nghĩa: <strong>${_esc(d.meaning || '')}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input nhập từ hiện đại -->
+                <div class="w-full max-w-md relative mb-3">
+                    <div class="relative flex items-center w-full rounded-2xl bg-surface-container-lowest border-2 border-outline-variant/30 focus-within:border-primary focus-within:shadow-md transition-all">
+                        <span class="material-symbols-outlined text-outline ml-3.5 text-[20px] select-none">headphones</span>
+                        <input id="listen-input"
+                               type="text"
+                               placeholder="Gõ từ tiếng Anh nghe được..."
+                               autocomplete="off" autocorrect="off" spellcheck="false"
+                               oninput="HiSessionUI._onListenInputChange(this)"
+                               onkeydown="if(event.key==='Enter') HiSessionUI._onListenCheck(); if((event.ctrlKey || event.altKey) && event.code==='Space') { event.preventDefault(); HiSessionUI._onListenPlay(); }"
+                               class="w-full bg-transparent px-3 py-3 sm:py-3.5 font-body-lg text-base sm:text-lg font-bold text-center text-on-surface placeholder:text-outline-variant/70 placeholder:font-normal outline-none"/>
+                        <button id="listen-clear-btn"
+                                onclick="HiSessionUI._clearListenInput()"
+                                class="hidden p-1 mr-3 text-outline hover:text-on-surface transition-colors rounded-full">
+                            <span class="material-symbols-outlined text-[18px]">cancel</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between text-[11px] text-outline px-2 mt-1.5">
+                        <span>Nhấn <kbd class="px-1.5 py-0.5 rounded bg-surface-container-low font-mono text-[10px]">Enter</kbd> để nộp</span>
+                        <span class="hidden sm:inline">Phím <kbd class="px-1.5 py-0.5 rounded bg-surface-container-low font-mono text-[10px]">Space</kbd> để nghe lại</span>
                     </div>
                 </div>
 
                 <!-- Nút kiểm tra -->
                 <div class="w-full max-w-md">
-                    <button onclick="HiSessionUI._onListenCheck()" class="${CSS.btnPrimary}">
-                        Kiểm tra
+                    <button onclick="HiSessionUI._onListenCheck()" class="${CSS.btnPrimary} flex items-center justify-center gap-2 shadow-sm">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                        <span>Kiểm tra đáp án</span>
                     </button>
                 </div>
             </div>
@@ -745,24 +857,36 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
 
     let _listenPlayCount = 0;
 
+    function _animateSoundWave(durationMs = 1200) {
+        const ripple = document.getElementById('listen-ripple');
+        const wave = document.getElementById('listen-soundwave');
+        if (ripple) {
+            ripple.classList.remove('opacity-0', 'scale-100');
+            ripple.classList.add('opacity-100', 'scale-125');
+        }
+        if (wave) wave.classList.remove('opacity-0');
+
+        setTimeout(() => {
+            if (ripple) {
+                ripple.classList.remove('opacity-100', 'scale-125');
+                ripple.classList.add('opacity-0', 'scale-100');
+            }
+            if (wave) wave.classList.add('opacity-0');
+        }, durationMs);
+    }
+
     function _onListenPlay() {
         const item = HiSession.getCurrentItem();
         if (!item || item.exerciseType !== 'listen') return;
 
-        HiSession.speakWord(item.exerciseData.wordToSpeak, 0.85);
+        HiSession.speakWord(item.exerciseData.wordToSpeak, 0.9);
         _listenPlayCount++;
+        _animateSoundWave(1200);
 
         // Hiện phonetic sau lần nghe đầu tiên
         if (_listenPlayCount >= 1) {
             const phoneticEl = document.getElementById('listen-phonetic');
             if (phoneticEl) phoneticEl.style.opacity = '1';
-        }
-
-        // Animate nút play
-        const btn = document.getElementById('listen-play-btn');
-        if (btn) {
-            btn.classList.add('scale-95', 'bg-primary/80');
-            setTimeout(() => btn.classList.remove('scale-95', 'bg-primary/80'), 300);
         }
 
         // Focus vào input sau khi phát
@@ -772,7 +896,35 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
     function _onListenSlow() {
         const item = HiSession.getCurrentItem();
         if (!item) return;
-        HiSession.speakWord(item.exerciseData.wordToSpeak, 0.5);
+        HiSession.speakWord(item.exerciseData.wordToSpeak, 0.55);
+        _animateSoundWave(1800);
+        setTimeout(() => document.getElementById('listen-input')?.focus(), 500);
+    }
+
+    function _toggleListenHint() {
+        const box = document.getElementById('listen-meaning-box');
+        if (box) box.classList.toggle('hidden');
+    }
+
+    function _onListenInputChange(input) {
+        const clearBtn = document.getElementById('listen-clear-btn');
+        if (clearBtn) {
+            if (input.value.trim()) {
+                clearBtn.classList.remove('hidden');
+            } else {
+                clearBtn.classList.add('hidden');
+            }
+        }
+    }
+
+    function _clearListenInput() {
+        const input = document.getElementById('listen-input');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+        const clearBtn = document.getElementById('listen-clear-btn');
+        if (clearBtn) clearBtn.classList.add('hidden');
     }
 
     function _onListenCheck() {
@@ -783,7 +935,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         const typed = inputEl.value.trim();
         if (!typed) {
             inputEl.classList.add('border-error');
-            inputEl.placeholder = 'Hãy nhập từ bạn nghe được...';
+            inputEl.placeholder = 'Hãy gõ từ bạn nghe được...';
             return;
         }
 
@@ -794,10 +946,12 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
 
         inputEl.disabled = true;
         if (result.correct) {
-            inputEl.className = inputEl.className + ' border-green-500 bg-green-50 text-green-700';
+            inputEl.parentElement?.classList.add('border-green-500', 'bg-green-50/50');
+            inputEl.classList.add('text-green-700');
         } else {
-            inputEl.className = inputEl.className + ' border-error bg-error-container/20 text-error';
-            inputEl.value = result.correctAnswer; // Hiện đáp án đúng
+            inputEl.parentElement?.classList.add('border-error', 'bg-error-container/20');
+            inputEl.classList.add('text-error');
+            inputEl.value = result.correctAnswer;
         }
 
         if (result.skipped) {
@@ -809,7 +963,7 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         }
     }
 
-    // ----------------------------------------------------------
+        // ----------------------------------------------------------
     // RENDER: COMPLETION (Hoàn thành phiên)
     // ----------------------------------------------------------
 
@@ -1010,6 +1164,9 @@ Example format: "Bắt đầu bằng "${firstLetter}", gồm ${letters} chữ c�
         _onListenPlay,
         _onListenSlow,
         _onListenCheck,
+        _toggleListenHint,
+        _onListenInputChange,
+        _clearListenInput,
         _speak,
         _showSkipFeedback,
     };

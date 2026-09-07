@@ -298,15 +298,15 @@ const HiDashboard = (() => {
             } else {
                 // Cấp 3 (25+ từ): Lửa rực cháy gradient
                 levelClass = 'bg-gradient-to-br from-amber-500 via-orange-500 to-[#FF5722] text-white font-bold shadow-[0_3px_12px_rgba(255,87,34,0.45)]';
-                flameIcon = '<span class="absolute -top-1 -right-1 text-[10px]">🔥</span>';
+                flameIcon = '<span class="absolute top-0.5 right-0.5 text-[9px] pointer-events-none select-none">🔥</span>';
             }
 
-            const todayRing = isToday ? 'ring-2 ring-primary ring-offset-2 ring-offset-surface z-10 font-black' : '';
+            const todayRing = isToday ? 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2 ring-offset-surface z-10 font-black' : '';
 
             const tooltipText = `Ngày ${day}/${month}: ${wordsCount > 0 ? `Đã ôn ${wordsCount} từ 🔥` : 'Chưa có phiên học'}`;
 
             html += `
-                <div class="relative group/day aspect-square flex flex-col items-center justify-center rounded-lg text-xs md:text-sm cursor-pointer transition-all duration-200 hover:scale-105 ${levelClass} ${todayRing}"
+                <div class="relative group/day aspect-square flex flex-col items-center justify-center rounded-lg sm:rounded-xl text-[11px] sm:text-xs md:text-sm cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation select-none ${levelClass} ${todayRing}"
                      title="${tooltipText}"
                      onclick="HiDashboard.showDayDetail('${dateStr}', ${wordsCount})">
                     <span>${day}</span>

@@ -961,52 +961,53 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         </div>
 
         <!-- HÀNG 2: LỊCH GIỮ LỬA & MỤC TIÊU IELTS -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8">
             
             <!-- THẺ 1: LỊCH GIỮ LỬA (FLAME ACTIVITY CALENDAR) -->
-            <section class="glass-card rounded-xl p-5 md:p-6 lg:p-7 lg:col-span-7 flex flex-col justify-between relative overflow-hidden">
+            <section class="glass-card rounded-2xl p-4 sm:p-5 md:p-6 lg:p-7 lg:col-span-7 flex flex-col justify-between relative overflow-hidden">
                 <div>
-                    <!-- Header Lịch -->
-                    <div class="flex items-center justify-between gap-2 mb-4">
+                    <!-- Header Lịch: Responsive Đa Tầng cho Mobile -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center text-[#FF5722]">
-                                <span class="material-symbols-outlined text-[22px] icon-fill">local_fire_department</span>
+                            <div class="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-[#FF5722] shrink-0">
+                                <span class="material-symbols-outlined text-[24px] icon-fill">local_fire_department</span>
                             </div>
                             <div>
-                                <h3 class="text-base md:text-lg font-bold text-on-surface flex items-center gap-2">
-                                    Lịch giữ lửa
-                                    <span class="inline-flex items-center gap-1 text-xs font-bold text-[#FF5722] bg-orange-500/10 px-2.5 py-0.5 rounded-full">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h3 class="text-base sm:text-lg font-bold text-on-surface">Lịch giữ lửa</h3>
+                                    <span class="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-[#FF5722] bg-orange-500/10 px-2.5 py-0.5 rounded-full">
                                         <span id="flame-streak-count">0</span> ngày liên tiếp
                                     </span>
-                                </h3>
-                                <p class="text-xs text-on-surface-variant">Mức độ chuyên cần ôn luyện mỗi ngày</p>
+                                </div>
+                                <p class="text-[11px] sm:text-xs text-on-surface-variant">Mức độ chuyên cần ôn luyện mỗi ngày</p>
                             </div>
                         </div>
-                        <!-- Bộ chuyển tháng -->
-                        <div class="flex items-center gap-1 bg-surface-container-low px-2 py-1 rounded-xl border border-outline-variant/20">
-                            <button onclick="calPrevMonth()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Tháng trước">
+                        
+                        <!-- Bộ chuyển tháng: Căn chỉnh ngay ngắn, chống tràn viền -->
+                        <div class="flex items-center justify-between sm:justify-end gap-1 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-outline-variant/20 self-start sm:self-auto w-full sm:w-auto">
+                            <button onclick="calPrevMonth()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors touch-manipulation" title="Tháng trước">
                                 <span class="material-symbols-outlined text-[18px]">chevron_left</span>
                             </button>
-                            <span id="flame-calendar-title" class="text-xs font-bold text-on-surface min-w-[90px] text-center select-none">Tháng ..., ....</span>
-                            <button onclick="calNextMonth()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors" title="Tháng sau">
+                            <span id="flame-calendar-title" class="text-xs font-bold text-on-surface min-w-[95px] text-center select-none">Tháng ..., ....</span>
+                            <button onclick="calNextMonth()" class="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors touch-manipulation" title="Tháng sau">
                                 <span class="material-symbols-outlined text-[18px]">chevron_right</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Ngày trong tuần header (T2 .. CN) -->
-                    <div class="grid grid-cols-7 gap-1.5 md:gap-2 mb-2 text-center">
-                        <span class="text-[11px] font-bold text-outline uppercase">T2</span>
-                        <span class="text-[11px] font-bold text-outline uppercase">T3</span>
-                        <span class="text-[11px] font-bold text-outline uppercase">T4</span>
-                        <span class="text-[11px] font-bold text-outline uppercase">T5</span>
-                        <span class="text-[11px] font-bold text-outline uppercase">T6</span>
-                        <span class="text-[11px] font-bold text-outline uppercase">T7</span>
-                        <span class="text-[11px] font-bold text-primary uppercase">CN</span>
+                    <div class="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 mb-2 text-center select-none">
+                        <span class="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T2</span>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T3</span>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T4</span>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T5</span>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T6</span>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T7</span>
+                        <span class="text-[10px] sm:text-[11px] font-bold text-primary uppercase py-0.5">CN</span>
                     </div>
 
                     <!-- Lưới ngày (render bởi HiDashboard.renderFlameCalendar) -->
-                    <div id="flame-calendar-grid" class="grid grid-cols-7 gap-1.5 md:gap-2 min-h-[190px]">
+                    <div id="flame-calendar-grid" class="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 min-h-[190px]">
                         <!-- Rendered by JS -->
                     </div>
 
@@ -1014,89 +1015,89 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                     <div id="flame-calendar-hint" class="hidden mt-3 p-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface text-center border border-outline-variant/20 fade-in"></div>
                 </div>
 
-                <!-- Footer Chú thích cấp độ lửa & Thống kê tháng -->
-                <div class="mt-4 pt-3 border-t border-outline-variant/15 flex flex-wrap items-center justify-between gap-3 text-xs">
-                    <div class="flex items-center gap-2 text-outline text-[11px]">
-                        <span>Mức độ:</span>
+                <!-- Footer Chú thích cấp độ lửa & Thống kê tháng: 2 tầng cho mobile -->
+                <div class="mt-4 pt-3 border-t border-outline-variant/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                    <div class="flex items-center gap-1.5 sm:gap-2 text-outline text-[10px] sm:text-[11px] flex-wrap">
+                        <span class="font-medium">Mức độ:</span>
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-surface-container-low border border-outline-variant/20 inline-block"></span> 0</span>
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-orange-500/20 border border-orange-500/40 inline-block"></span> 1-9</span>
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-orange-500 inline-block"></span> 10-24</span>
                         <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-amber-500 to-[#FF5722] inline-block"></span> 25+🔥</span>
                     </div>
-                    <div class="flex items-center gap-3 text-on-surface-variant font-medium">
-                        <span>Đã học: <strong id="flame-active-days" class="text-on-surface font-bold">0 ngày</strong></span>
-                        <span>•</span>
-                        <span>Tổng: <strong id="flame-month-words" class="text-primary font-bold">0 từ</strong></span>
+                    <div class="flex items-center gap-2 sm:gap-3 text-on-surface-variant font-medium text-[11px] sm:text-xs">
+                        <span class="bg-surface-container-low px-2 py-0.5 rounded-md">Đã học: <strong id="flame-active-days" class="text-on-surface font-bold">0 ngày</strong></span>
+                        <span class="bg-primary/10 px-2 py-0.5 rounded-md text-primary">Tổng: <strong id="flame-month-words" class="font-bold">0 từ</strong></span>
                     </div>
                 </div>
             </section>
 
             <!-- THẺ 2: MỤC TIÊU IELTS & ĐẾM NGƯỢC NGÀY THI -->
-            <section class="glass-card rounded-xl p-5 md:p-6 lg:p-7 lg:col-span-5 flex flex-col justify-between relative overflow-hidden">
+            <section class="glass-card rounded-2xl p-4 sm:p-5 md:p-6 lg:p-7 lg:col-span-5 flex flex-col justify-between relative overflow-hidden">
                 <!-- TRẠNG THÁI: ĐÃ CÓ MỤC TIÊU -->
                 <div id="ielts-goal-set-card" class="flex flex-col h-full justify-between gap-4">
                     <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                                    <span class="material-symbols-outlined text-[22px] icon-fill">military_tech</span>
+                        <div class="flex items-center justify-between mb-3 gap-2">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                    <span class="material-symbols-outlined text-[24px] icon-fill">military_tech</span>
                                 </div>
                                 <div>
-                                    <h3 class="text-base md:text-lg font-bold text-on-surface">Mục tiêu IELTS</h3>
-                                    <p class="text-xs text-on-surface-variant">Lộ trình bứt phá điểm số</p>
+                                    <h3 class="text-base sm:text-lg font-bold text-on-surface">Mục tiêu IELTS</h3>
+                                    <p class="text-[11px] sm:text-xs text-on-surface-variant">Lộ trình bứt phá điểm số</p>
                                 </div>
                             </div>
-                            <button onclick="openIELTSGoalModal()" class="text-xs font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">edit</span>Đổi mục tiêu
+                            <button onclick="openIELTSGoalModal()" class="text-xs font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shrink-0 touch-manipulation active:scale-95">
+                                <span class="material-symbols-outlined text-[15px]">edit</span>
+                                <span>Đổi mục tiêu</span>
                             </button>
                         </div>
 
                         <!-- Banner Đếm ngược ngày thi -->
-                        <div class="bg-gradient-to-br from-primary/10 via-surface-container-low to-primary-fixed/20 p-4 rounded-xl border border-primary/20 flex items-center justify-between gap-3 relative overflow-hidden mb-4">
-                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl"></div>
+                        <div class="bg-gradient-to-br from-primary/10 via-surface-container-low to-primary-fixed/20 p-3.5 sm:p-4 rounded-xl border border-primary/20 flex items-center justify-between gap-3 relative overflow-hidden mb-3 sm:mb-4">
+                            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
                             <div>
-                                <span class="text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">Thời gian đếm ngược</span>
+                                <span class="text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">Thời gian đếm ngược</span>
                                 <div class="flex items-baseline gap-1.5">
-                                    <span id="ielts-countdown-days" class="text-3xl md:text-4xl font-extrabold text-on-surface font-mono">0</span>
-                                    <span id="ielts-countdown-label" class="text-xs md:text-sm font-semibold text-outline">Ngày nữa</span>
+                                    <span id="ielts-countdown-days" class="text-2xl sm:text-3xl md:text-4xl font-black text-on-surface font-mono">0</span>
+                                    <span id="ielts-countdown-label" class="text-xs sm:text-sm font-semibold text-outline">Ngày nữa</span>
                                 </div>
-                                <p class="text-[11px] text-on-surface-variant mt-1 flex items-center gap-1">
+                                <p class="text-[10px] sm:text-[11px] text-on-surface-variant mt-1 flex items-center gap-1">
                                     <span class="material-symbols-outlined text-[13px] text-primary">event</span>
                                     Ngày thi: <span id="ielts-exam-date-text" class="font-bold text-on-surface">—</span>
                                 </p>
                             </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold text-outline uppercase tracking-wider block mb-1">Mục tiêu</span>
-                                <div id="ielts-goal-overall-badge" class="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary font-black text-base md:text-lg shadow-sm">
+                            <div class="text-right shrink-0">
+                                <span class="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block mb-1">Mục tiêu</span>
+                                <div id="ielts-goal-overall-badge" class="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-primary text-on-primary font-black text-sm sm:text-base md:text-lg shadow-sm">
                                     Band 7.5
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Lưới 4 Kỹ năng -->
-                        <div class="grid grid-cols-4 gap-2 text-center">
-                            <div class="bg-surface-container-low/70 p-2.5 rounded-xl border border-outline-variant/15">
-                                <span class="text-[10px] font-bold text-outline uppercase block">Listening</span>
-                                <span id="ielts-skill-listening" class="text-base font-bold text-on-surface mt-0.5 block">7.5</span>
+                        <!-- Lưới 4 Kỹ năng (chữ thu gọn thông minh, chống gãy dòng trên mobile) -->
+                        <div class="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
+                            <div class="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                                <span class="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Listening</span>
+                                <span id="ielts-skill-listening" class="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">7.5</span>
                             </div>
-                            <div class="bg-surface-container-low/70 p-2.5 rounded-xl border border-outline-variant/15">
-                                <span class="text-[10px] font-bold text-outline uppercase block">Reading</span>
-                                <span id="ielts-skill-reading" class="text-base font-bold text-on-surface mt-0.5 block">7.5</span>
+                            <div class="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                                <span class="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Reading</span>
+                                <span id="ielts-skill-reading" class="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">7.5</span>
                             </div>
-                            <div class="bg-surface-container-low/70 p-2.5 rounded-xl border border-outline-variant/15">
-                                <span class="text-[10px] font-bold text-outline uppercase block">Writing</span>
-                                <span id="ielts-skill-writing" class="text-base font-bold text-on-surface mt-0.5 block">6.5</span>
+                            <div class="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                                <span class="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Writing</span>
+                                <span id="ielts-skill-writing" class="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">6.5</span>
                             </div>
-                            <div class="bg-surface-container-low/70 p-2.5 rounded-xl border border-outline-variant/15">
-                                <span class="text-[10px] font-bold text-outline uppercase block">Speaking</span>
-                                <span id="ielts-skill-speaking" class="text-base font-bold text-on-surface mt-0.5 block">6.5</span>
+                            <div class="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                                <span class="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Speaking</span>
+                                <span id="ielts-skill-speaking" class="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">6.5</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Lời nhắc động lực -->
                     <div class="pt-2 border-t border-outline-variant/15">
-                        <p id="ielts-goal-motto-text" class="text-xs italic text-on-surface-variant text-center line-clamp-2">
+                        <p id="ielts-goal-motto-text" class="text-[11px] sm:text-xs italic text-on-surface-variant text-center line-clamp-2">
                             “Học tập kiên trì, tự tin chinh phục mục tiêu IELTS!”
                         </p>
                     </div>
@@ -1104,15 +1105,16 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 
                 <!-- TRẠNG THÁI: CHƯA CÓ MỤC TIÊU -->
                 <div id="ielts-goal-unset-card" class="hidden flex-col items-center justify-center text-center py-6 h-full gap-3">
-                    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-1">
-                        <span class="material-symbols-outlined text-[32px] icon-fill">flag</span>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-1">
+                        <span class="material-symbols-outlined text-[28px] sm:text-[32px] icon-fill">flag</span>
                     </div>
-                    <h3 class="text-lg font-bold text-on-surface">Bạn chưa đặt mục tiêu IELTS</h3>
-                    <p class="text-xs text-on-surface-variant max-w-xs leading-relaxed">
+                    <h3 class="text-base sm:text-lg font-bold text-on-surface">Bạn chưa đặt mục tiêu IELTS</h3>
+                    <p class="text-xs text-on-surface-variant max-w-xs leading-relaxed px-2">
                         Thiết lập band điểm 4 kỹ năng và chọn ngày thi để đồng hồ đếm ngược tạo động lực học tập mỗi ngày!
                     </p>
-                    <button onclick="openIELTSGoalModal()" class="mt-2 bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-xs shadow-md hover:bg-surface-tint transition-all flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[18px]">add_task</span>Đặt mục tiêu IELTS ngay
+                    <button onclick="openIELTSGoalModal()" class="mt-2 w-full sm:w-auto bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md hover:bg-surface-tint transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-manipulation">
+                        <span class="material-symbols-outlined text-[18px]">add_task</span>
+                        <span>Đặt mục tiêu IELTS ngay</span>
                     </button>
                 </div>
             </section>
