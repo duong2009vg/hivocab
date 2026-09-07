@@ -95,8 +95,9 @@ const HiSession = (() => {
                     frontWord:       word.meaning,
                     backLabel:       'Đáp án',
                     backWord:        word.word,
+                    pos:             word.pos || '',
                     phonetic:        word.phonetic || '',
-                    exampleSentence: word.example_sentence || '',
+                    exampleSentence: word.example_sentence || word.exampleSentence || '',
                 };
 
             // -- MCQ ----------------------------------------------

@@ -314,6 +314,7 @@ window.HiDB = (() => {
             .select(`
                 id,
                 word,
+                pos,
                 phonetic,
                 meaning,
                 example_sentence,
@@ -330,6 +331,7 @@ window.HiDB = (() => {
             return {
                 id:              w.id,
                 word:            w.word,
+                pos:             w.pos || '',
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
@@ -434,7 +436,7 @@ window.HiDB = (() => {
         let query = _getClient()
             .from('words')
             .select(`
-                id, topic_id, word, phonetic, meaning, example_sentence,
+                id, topic_id, word, pos, phonetic, meaning, example_sentence,
                 topics!inner ( name ),
                 word_progress ( level, next_review_at, last_reviewed_at, review_count )
             `, { count: 'exact' })
@@ -455,6 +457,7 @@ window.HiDB = (() => {
                     id: row.id,
                     topicId: row.topic_id,
                     word: row.word,
+                    pos: row.pos || '',
                     phonetic: row.phonetic,
                     meaning: row.meaning,
                     exampleSentence: row.example_sentence,
@@ -503,7 +506,7 @@ window.HiDB = (() => {
         const client = _getClient();
         const queryWithLessonMeta = client
             .from('words')
-            .select(`id, word, phonetic, meaning, example_sentence, lesson_name, lesson_order, word_order,
+            .select(`id, word, pos, phonetic, meaning, example_sentence, lesson_name, lesson_order, word_order,
                 word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
             .eq('topic_id', topicId)
             .eq('lesson_order', lessonIndex)
@@ -518,7 +521,7 @@ window.HiDB = (() => {
         const LESSON_SIZE = 50;
         const fallback = await client
             .from('words')
-            .select(`id, word, phonetic, meaning, example_sentence,
+            .select(`id, word, pos, phonetic, meaning, example_sentence,
                 word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
             .eq('topic_id', topicId)
             .order('created_at', { ascending: true })
@@ -617,6 +620,7 @@ window.HiDB = (() => {
             return {
                 id:              w.id,
                 word:            w.word,
+                pos:             w.pos || '',
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
@@ -796,6 +800,7 @@ window.HiDB = (() => {
             .select(`
                 id,
                 word,
+                pos,
                 phonetic,
                 meaning,
                 example_sentence,
@@ -815,6 +820,7 @@ window.HiDB = (() => {
             return {
                 id:              w.id,
                 word:            w.word,
+                pos:             w.pos || '',
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,

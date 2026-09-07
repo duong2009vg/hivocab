@@ -2231,6 +2231,7 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
         const sessionWords = rawWords.map(w => ({
             wordId:          w.id || w.wordId,
             word:            w.word,
+            pos:             w.pos        || '',
             phonetic:        w.phonetic   || '',
             meaning:         w.meaning    || '',
             exampleSentence: w.exampleSentence || '',
@@ -3652,6 +3653,7 @@ window._loadLessonWords = async function() {
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="font-bold text-on-surface text-base group-hover:text-primary transition-colors">${_esc(w.word)}</span>
+                        ${w.pos ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">${_esc(w.pos)}</span>` : ''}
                         ${w.phonetic ? `<span class="text-sm text-outline">${_esc(w.phonetic)}</span>` : ''}
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
                         <button onclick="typeof HiDict!=='undefined'&&HiDict.playWordAudio('${_esc(w.word)}')"
@@ -4393,6 +4395,7 @@ window._renderVocabPage = function() {
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 flex-wrap mb-1">
                     <h2 class="text-lg md:text-2xl text-on-surface font-bold tracking-tight">${_esc(w.word)}</h2>
+                    ${w.pos ? `<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">${_esc(w.pos)}</span>` : ''}
                     ${w.phonetic ? `<span class="text-outline font-mono text-xs md:text-sm">${_esc(w.phonetic)}</span>` : ''}
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
                 </div>

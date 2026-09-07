@@ -230,10 +230,10 @@ const HiSessionUI = (() => {
                                 </button>
                             </div>
 
-                            ${d.phonetic
-                                ? `<p class="text-on-surface-variant font-mono text-xs sm:text-sm mt-0.5 mb-2">${_esc(d.phonetic)}</p>`
-                                : '<div class="mb-2"></div>'
-                            }
+                            <div class="flex items-center justify-center gap-2 flex-wrap mt-0.5 mb-2">
+                                ${d.pos ? `<span class="text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">${_esc(d.pos)}</span>` : ''}
+                                ${d.phonetic ? `<span class="text-on-surface-variant font-mono text-xs sm:text-sm">${_esc(d.phonetic)}</span>` : ''}
+                            </div>
 
                             ${d.exampleSentence
                                 ? `<div class="w-full max-w-md mx-auto px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/30 text-center mb-1">
