@@ -1,0 +1,26 @@
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Dependencies & Build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.vercel/
+
+# Python cache & temporary files
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+
+# Operating System & IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

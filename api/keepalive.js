@@ -1,13 +1,33 @@
+// Rate Limiting in-memory cache
+const rateLimitMap = new Map();
+function isRateLimited(ip, maxRequests = 10, windowMs = 60000) {
+    const now = Date.now();
+    const record = rateLimitMap.get(ip) || { count: 0, resetTime: now };
+    if (now - record.resetTime > windowMs) {
+        record.count = 1;
+        record.resetTime = now;
+    } else {
+        record.count += 1;
+    }
+    rateLimitMap.set(ip, record);
+    return record.count > maxRequests;
+}
+
 export default async function handler(req, res) {
     if (req.method !== 'GET' && req.method !== 'POST') {
         return res.status(405).json({ ok: false, error: 'Method not allowed' });
     }
 
-    const userAgent = req.headers['user-agent'] || '';
-    const isVercelCron = userAgent.includes('vercel-cron/1.0');
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+                     req.headers['x-real-ip'] ||
+                     'unknown-ip';
+
+    if (isRateLimited(clientIp, 10, 60000)) {
+        return res.status(429).json({ ok: false, error: 'Too many requests' });
+    }
 
     const cronSecret = process.env.CRON_SECRET;
-    if (!isVercelCron && cronSecret) {
+    if (cronSecret) {
         const auth = req.headers.authorization || '';
         if (auth !== `Bearer ${cronSecret}`) {
             return res.status(401).json({ ok: false, error: 'Unauthorized' });

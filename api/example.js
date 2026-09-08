@@ -11,17 +11,55 @@ function setCors(res) {
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
+// Rate Limiting in-memory cache
+const rateLimitMap = new Map();
+const CLEANUP_INTERVAL = 60000;
+let lastCleanup = Date.now();
+
+function isRateLimited(ip, maxRequests = 25, windowMs = 60000) {
+    const now = Date.now();
+    if (now - lastCleanup > CLEANUP_INTERVAL) {
+        for (const [key, record] of rateLimitMap.entries()) {
+            if (now - record.resetTime > windowMs) rateLimitMap.delete(key);
+        }
+        lastCleanup = now;
+    }
+
+    const record = rateLimitMap.get(ip) || { count: 0, resetTime: now };
+    if (now - record.resetTime > windowMs) {
+        record.count = 1;
+        record.resetTime = now;
+    } else {
+        record.count += 1;
+    }
+    rateLimitMap.set(ip, record);
+    return record.count > maxRequests;
+}
+
 export default async function handler(req, res) {
     setCors(res);
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
+    // Rate Limiting by IP
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+                     req.headers['x-real-ip'] ||
+                     req.socket?.remoteAddress ||
+                     'unknown-ip';
+
+    if (isRateLimited(clientIp, 25, 60000)) {
+        res.setHeader('Retry-After', '60');
+        return res.status(429).json({ ok: false, error: 'Too many requests. Please wait a minute.' });
+    }
+
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) return res.status(500).json({ ok: false, error: 'GROQ_API_KEY not configured' });
 
-    const term     = String(req.body?.term || '').trim().slice(0, 100);
+    const rawTerm = String(req.body?.term || '').trim();
+    // Sanitize term: keep alphanumeric, space, hyphens, apostrophes (max 80 chars)
+    const term = rawTerm.slice(0, 80).replace(/[^\w\s\-']/g, '').trim();
     const isPhrase = Boolean(req.body?.isPhrase);
-    if (!term) return res.status(400).json({ ok: false, error: 'Missing term' });
+    if (!term) return res.status(400).json({ ok: false, error: 'Missing or invalid term' });
 
     const label  = isPhrase ? 'phrase' : 'word';
     const prompt = `Write exactly one short, natural English example sentence that clearly uses the ${label} "${term}" in context. Return only the sentence — no quotes, no explanation, nothing else.`;

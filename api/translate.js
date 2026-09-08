@@ -17,6 +17,31 @@ function normalizeTexts(body) {
         .map(item => item.slice(0, MAX_TEXT_LENGTH));
 }
 
+// Rate Limiting in-memory cache
+const rateLimitMap = new Map();
+const CLEANUP_INTERVAL = 60000;
+let lastCleanup = Date.now();
+
+function isRateLimited(ip, maxRequests = 35, windowMs = 60000) {
+    const now = Date.now();
+    if (now - lastCleanup > CLEANUP_INTERVAL) {
+        for (const [key, record] of rateLimitMap.entries()) {
+            if (now - record.resetTime > windowMs) rateLimitMap.delete(key);
+        }
+        lastCleanup = now;
+    }
+
+    const record = rateLimitMap.get(ip) || { count: 0, resetTime: now };
+    if (now - record.resetTime > windowMs) {
+        record.count = 1;
+        record.resetTime = now;
+    } else {
+        record.count += 1;
+    }
+    rateLimitMap.set(ip, record);
+    return record.count > maxRequests;
+}
+
 export default async function handler(req, res) {
     setCors(res);
 
@@ -26,6 +51,17 @@ export default async function handler(req, res) {
 
     if (req.method !== 'POST') {
         return res.status(405).json({ ok: false, error: 'Method not allowed' });
+    }
+
+    // Rate Limiting by IP
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+                     req.headers['x-real-ip'] ||
+                     req.socket?.remoteAddress ||
+                     'unknown-ip';
+
+    if (isRateLimited(clientIp, 35, 60000)) {
+        res.setHeader('Retry-After', '60');
+        return res.status(429).json({ ok: false, error: 'Too many requests. Please wait a minute.' });
     }
 
     const apiKey = process.env.DEEPL_API_KEY;
