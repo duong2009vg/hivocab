@@ -190,15 +190,34 @@ window.HiDB = (() => {
      * Gửi email khôi phục / đặt lại mật khẩu.
      */
     async function resetPasswordForEmail(email) {
+        // Luôn sử dụng origin sạch để Supabase gắn token/code mà không gây lỗi phân giải RFC 6749
+        const redirectUrl = window.location.origin;
         const { data, error } = await _getClient().auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/#type=recovery`
+            redirectTo: redirectUrl
         });
         if (error) throw error;
         return data;
     }
 
     /**
-     * Cập nhật mật khẩu mới cho user đang có session (sau khi click link recovery).
+     * Xác thực bằng mã OTP (One-Time Password) 6 chữ số gửi qua email.
+     * Hữu ích khi link email bị bot scanner nuốt hoặc người dùng nhập mã thủ công.
+     */
+    async function verifyOtp({ email, token, type = 'recovery' }) {
+        const { data, error } = await _getClient().auth.verifyOtp({
+            email,
+            token,
+            type
+        });
+        if (error) throw error;
+        if (data?.session?.user) {
+            _currentUser = data.session.user;
+        }
+        return data;
+    }
+
+    /**
+     * Cập nhật mật khẩu mới cho user đang có session (sau khi click link recovery hoặc đổi mật khẩu trong Settings).
      */
     async function updateUserPassword(newPassword) {
         const { data, error } = await _getClient().auth.updateUser({ password: newPassword });
@@ -1628,8 +1647,10 @@ window.HiDB = (() => {
         signInWithPassword,
         signUpWithPassword,
         resetPasswordForEmail,
+        verifyOtp,
         updateUserPassword,
         signOut,
+        getClient: _getClient,
 
         // Topics
         getTopics,
