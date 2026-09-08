@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HiVocab - Admin Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#006192',
+                        'primary-dark': '#004a70',
+                        secondary: '#316762',
+                        surface: '#f8fafc',
+                        card: '#ffffff',
+                    },
+                    fontFamily: {
+                        sans: ['"Hanken Grotesk"', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- TOP HEADER -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-extrabold text-xl shadow-sm">
+                    Hi
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-lg text-slate-900 tracking-tight">HiVocab</span>
+                        <span class="bg-amber-100 text-amber-800 text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide border border-amber-300">Admin</span>
+                    </div>
+                    <p class="text-xs text-slate-500 hidden sm:block">Content Management System</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3" id="header-user-actions">
+                <a href="/" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary transition-colors py-2 px-3 rounded-lg hover:bg-slate-100">
+                    <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                    <span>Về Website Học</span>
+                </a>
+                <div id="admin-profile-badge" class="hidden items-center gap-2 pl-3 border-l border-slate-200">
+                    <span id="admin-email-display" class="text-xs font-medium text-slate-700"></span>
+                    <button onclick="handleLogout()" class="text-slate-500 hover:text-rose-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Đăng xuất">
+                        <span class="material-symbols-outlined text-[18px]">logout</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- 1. AUTH GATE: LOGIN VIEW (Hiện khi chưa đăng nhập) -->
+        <div id="view-login" class="hidden max-w-md mx-auto my-12 bg-white rounded-2xl p-8 shadow-sm border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
+                    <span class="material-symbols-outlined text-2xl">admin_panel_settings</span>
+                </div>
+                <h2 class="text-xl font-bold text-slate-900">Đăng nhập Quản Trị Viên</h2>
+                <p class="text-sm text-slate-500 mt-1">Chỉ tài khoản được cấp quyền Admin mới có thể truy cập.</p>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Email Quản trị</label>
+                    <input type="email" id="login-email" required placeholder="admin@hivocab.site" 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu</label>
+                    <input type="password" id="login-password" required placeholder="••••••••" 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+                </div>
+                <div id="login-error" class="hidden text-xs text-rose-600 bg-rose-50 border border-rose-200 p-2.5 rounded-xl font-medium"></div>
+                <button type="submit" id="btn-login" class="w-full py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-sm hover:bg-primary-dark transition-colors shadow-xs">
+                    Đăng nhập Admin
+                </button>
+            </form>
+        </div>
+
+        <!-- 2. ACCESS DENIED VIEW (Hiện khi đăng nhập nhưng không phải admin) -->
+        <div id="view-denied" class="hidden max-w-md mx-auto my-16 bg-white rounded-2xl p-8 shadow-sm border border-rose-200 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                <span class="material-symbols-outlined text-2xl">lock</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-900">Từ chối Truy cập</h2>
+            <p class="text-sm text-slate-600 mt-2">
+                Tài khoản <strong id="denied-email"></strong> không có quyền Quản trị viên (Admin).
+            </p>
+            <p class="text-xs text-slate-400 mt-1">Nếu bạn là chủ web, hãy kiểm tra lại phân quyền role trong bảng profiles.</p>
+            <div class="mt-6 flex justify-center gap-3">
+                <button onclick="handleLogout()" class="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs hover:bg-slate-200 transition-colors">
+                    Đăng xuất tài khoản này
+                </button>
+                <a href="/" class="px-4 py-2 rounded-xl bg-primary text-white font-semibold text-xs hover:bg-primary-dark transition-colors">
+                    Về trang chủ
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. ADMIN PORTAL CONTENT (Hiện khi đã xác thực admin thành công) -->
+        <div id="view-admin" class="hidden space-y-6">
+
+            <!-- TABS NAVIGATION -->
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 pb-3">
+                <nav class="flex space-x-2">
+                    <button onclick="switchTab('overview')" id="tab-overview" class="admin-tab px-4 py-2 rounded-xl text-sm font-bold transition-colors bg-primary text-white">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px]">dashboard</span>
+                            <span>Tổng quan</span>
+                        </span>
+                    </button>
+                    <button onclick="switchTab('tests')" id="tab-tests" class="admin-tab px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px]">menu_book</span>
+                            <span>Đề thi & Bài đọc (IELTS)</span>
+                        </span>
+                    </button>
+                    <button onclick="switchTab('words')" id="tab-words" class="admin-tab px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition-colors">
+                        <span class="inline-flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[18px]">translate</span>
+                            <span>Từ vựng Hệ thống</span>
+                        </span>
+                    </button>
+                </nav>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="openWordModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                        <span>Thêm Từ vựng</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: OVERVIEW -->
+            <section id="section-overview" class="space-y-6">
+                <!-- Stat Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tổng Topics</span>
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg">folder</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span id="stat-topics" class="text-2xl font-black text-slate-900">...</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tổng Từ vựng</span>
+                            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg">spellcheck</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span id="stat-words" class="text-2xl font-black text-slate-900">...</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Bộ Đề thi</span>
+                            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg">assignment</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span id="stat-tests" class="text-2xl font-black text-slate-900">...</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Bài đọc (Passages)</span>
+                            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg">article</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span id="stat-passages" class="text-2xl font-black text-slate-900">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Topics Banner -->
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs">
+                    <h3 class="font-bold text-base text-slate-900 mb-3 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-xl">verified_user</span>
+                        <span>Trạng thái Phân quyền Hệ thống</span>
+                    </h3>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Bạn đang đăng nhập dưới quyền <strong>Admin tối cao</strong>. Các quyền ghi trên toàn bộ bảng dữ liệu hệ thống (Cambridge Passages, Tests, Words) đã được mở khóa qua Database Row Level Security (RLS). Mọi thao tác thêm/sửa/xóa của bạn đều được áp dụng trực tiếp theo thời gian thực.
+                    </p>
+                </div>
+            </section>
+
+            <!-- TAB 2: TESTS & PASSAGES CMS -->
+            <section id="section-tests" class="hidden space-y-6">
+                <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-xs space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-900">Quản lý Đề thi Cambridge & Bài đọc</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Chọn Topic sách Cambridge để xem và quản lý các Test / Passages.</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <select id="cam-topic-select" onchange="loadTestsForTopic()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <option value="">Đang tải danh sách Cambridge...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Tests List & Passages Accordion -->
+                    <div id="tests-container" class="space-y-4 pt-2">
+                        <div class="text-center py-12 text-slate-400 text-sm">
+                            Vui lòng chọn một Topic sách Cambridge ở trên.
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: VOCABULARY CMS -->
+            <section id="section-words" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex flex-1 items-center gap-3">
+                        <div class="relative flex-1 max-w-md">
+                            <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-lg">search</span>
+                            <input type="text" id="words-search-input" onkeyup="handleWordSearch(event)" placeholder="Tìm từ tiếng Anh hoặc nghĩa tiếng Việt..." 
+                                   class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        </div>
+                        <select id="words-topic-filter" onchange="loadWordsList(1)" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <option value="">Tất cả Topics</option>
+                        </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="loadWordsList(1)" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors" title="Làm mới">
+                            <span class="material-symbols-outlined text-lg">refresh</span>
+                        </button>
+                        <button onclick="openWordModal()" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined text-base">add</span>
+                            <span>Thêm Từ Mới</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Words Table -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs text-slate-700">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+                                <tr>
+                                    <th class="py-3 px-4">Từ vựng (Word)</th>
+                                    <th class="py-3 px-4">Phiên âm</th>
+                                    <th class="py-3 px-4">Từ loại</th>
+                                    <th class="py-3 px-4">Nghĩa tiếng Việt</th>
+                                    <th class="py-3 px-4">Ví dụ</th>
+                                    <th class="py-3 px-4">Topic</th>
+                                    <th class="py-3 px-4 text-right">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="words-table-body" class="divide-y divide-slate-100 font-medium">
+                                <tr>
+                                    <td colspan="7" class="py-8 text-center text-slate-400">Đang tải dữ liệu từ vựng...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="px-4 py-3 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
+                        <span id="words-pagination-info">Trang 1</span>
+                        <div class="flex items-center gap-1">
+                            <button id="btn-prev-page" onclick="changeWordPage(-1)" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                Trước
+                            </button>
+                            <button id="btn-next-page" onclick="changeWordPage(1)" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                                Sau
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- MODAL: THÊM / SỬA TỪ VỰNG (VỚI AI AUTO-FILL) -->
+    <div id="modal-word" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 id="modal-word-title" class="font-bold text-base text-slate-900">Thêm Từ Vựng Mới</h3>
+                <button onclick="closeWordModal()" class="text-slate-400 hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <form id="word-form" onsubmit="handleSaveWord(event)" class="space-y-4">
+                <input type="hidden" id="edit-word-id">
+
+                <!-- Topic selector -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Thuộc Topic <span class="text-rose-500">*</span></label>
+                    <select id="modal-word-topic" required class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    </select>
+                </div>
+
+                <!-- Word Input + AI AUTO-FILL BUTTON -->
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700">Từ tiếng Anh (Word) <span class="text-rose-500">*</span></label>
+                        <button type="button" onclick="handleAiAutoFill()" id="btn-ai-fill" class="inline-flex items-center gap-1 text-xs font-bold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg border border-amber-200 transition-colors">
+                            <span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                            <span>AI Auto-Fill</span>
+                        </button>
+                    </div>
+                    <input type="text" id="modal-word-input" required placeholder="ví dụ: serendipity" 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    <p class="text-[11px] text-slate-400 mt-1">Gõ từ tiếng Anh rồi bấm "AI Auto-Fill" để hệ thống tự điền phiên âm, nghĩa và câu ví dụ.</p>
+                </div>
+
+                <!-- Phonetic & POS -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Phiên âm (Phonetic)</label>
+                        <input type="text" id="modal-word-phonetic" placeholder="/ˌser.ənˈdɪp.ə.ti/" 
+                               class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Từ loại (Part of Speech)</label>
+                        <input type="text" id="modal-word-pos" placeholder="noun, verb, adj..." 
+                               class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+                    </div>
+                </div>
+
+                <!-- Meaning -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Nghĩa tiếng Việt <span class="text-rose-500">*</span></label>
+                    <textarea id="modal-word-meaning" required rows="2" placeholder="Sự may mắn tình cờ phát hiện ra điều tốt đẹp..." 
+                              class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+                </div>
+
+                <!-- Example Sentence -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Câu ví dụ tiếng Anh</label>
+                    <textarea id="modal-word-example" rows="2" placeholder="Finding this wonderful café was pure serendipity." 
+                              class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20"></textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeWordModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition-colors">
+                        Hủy
+                    </button>
+                    <button type="submit" id="btn-save-word" class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark transition-colors shadow-xs">
+                        Lưu từ vựng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: SỬA PASSAGE -->
+    <div id="modal-passage" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 class="font-bold text-base text-slate-900">Cập nhật Bài đọc (Passage)</h3>
+                <button onclick="closePassageModal()" class="text-slate-400 hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <form onsubmit="handleSavePassage(event)" class="space-y-4">
+                <input type="hidden" id="edit-passage-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Tiêu đề bài đọc (Title)</label>
+                    <input type="text" id="modal-passage-title" required class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Chủ đề bài đọc (Topic Label)</label>
+                    <input type="text" id="modal-passage-label" placeholder="ví dụ: Biology, Environment..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20">
+                </div>
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closePassageModal()" class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Hủy</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CORE ADMIN JAVASCRIPT LOGIC -->
+    <script>
+        const SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+        
+        let sb = null;
+        let currentUser = null;
+        let allTopicsCache = [];
+        let currentWordsPage = 1;
+        const WORDS_PER_PAGE = 30;
+
+        // 1. INITIALIZE & AUTH CHECK
+        document.addEventListener('DOMContentLoaded', async () => {
+            sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            await checkAuth();
+        });
+
+        async function checkAuth() {
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session || !session.user) {
+                    showView('login');
+                    return;
+                }
+
+                currentUser = session.user;
+
+                // Kiểm tra role admin trong bảng profiles
+                const { data: profile, error } = await sb
+                    .from('profiles')
+                    .select('role')
+                    .eq('id', currentUser.id)
+                    .single();
+
+                if (error || !profile || profile.role !== 'admin') {
+                    document.getElementById('denied-email').textContent = currentUser.email || '';
+                    showView('denied');
+                    return;
+                }
+
+                // Hợp lệ: là Admin
+                document.getElementById('admin-email-display').textContent = currentUser.email;
+                document.getElementById('admin-profile-badge').classList.remove('hidden');
+                document.getElementById('admin-profile-badge').classList.add('flex');
+                showView('admin');
+
+                // Tải dữ liệu ban đầu
+                await loadOverviewStats();
+                await loadAllTopics();
+            } catch (err) {
+                console.error('Auth error:', err);
+                showView('login');
+            }
+        }
+
+        function showView(viewName) {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-denied').classList.add('hidden');
+            document.getElementById('view-admin').classList.add('hidden');
+
+            if (viewName === 'login') document.getElementById('view-login').classList.remove('hidden');
+            if (viewName === 'denied') document.getElementById('view-denied').classList.remove('hidden');
+            if (viewName === 'admin') document.getElementById('view-admin').classList.remove('hidden');
+        }
+
+        // 2. AUTH ACTIONS
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errEl = document.getElementById('login-error');
+            const btn = document.getElementById('btn-login');
+
+            errEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = 'Đang xác thực...';
+
+            try {
+                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                if (error) throw error;
+                await checkAuth();
+            } catch (err) {
+                errEl.textContent = err.message || 'Email hoặc mật khẩu không chính xác.';
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Đăng nhập Admin';
+            }
+        }
+
+        async function handleLogout() {
+            await sb.auth.signOut();
+            window.location.reload();
+        }
+
+        // 3. TABS SWITCHING
+        function switchTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(btn => {
+                btn.classList.remove('bg-primary', 'text-white');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-100');
+            });
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-primary', 'text-white');
+                activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+            }
+
+            document.getElementById('section-overview').classList.add('hidden');
+            document.getElementById('section-tests').classList.add('hidden');
+            document.getElementById('section-words').classList.add('hidden');
+
+            document.getElementById(`section-${tab}`).classList.remove('hidden');
+
+            if (tab === 'words' && !window._wordsLoaded) {
+                loadWordsList(1);
+                window._wordsLoaded = true;
+            }
+        }
+
+        // 4. OVERVIEW STATS
+        async function loadOverviewStats() {
+            try {
+                const [
+                    { count: topicsCount },
+                    { count: wordsCount },
+                    { count: testsCount },
+                    { count: passagesCount }
+                ] = await Promise.all([
+                    sb.from('topics').select('*', { count: 'exact', head: true }),
+                    sb.from('words').select('*', { count: 'exact', head: true }),
+                    sb.from('tests').select('*', { count: 'exact', head: true }),
+                    sb.from('passages').select('*', { count: 'exact', head: true }),
+                ]);
+
+                document.getElementById('stat-topics').textContent = (topicsCount || 0).toLocaleString();
+                document.getElementById('stat-words').textContent = (wordsCount || 0).toLocaleString();
+                document.getElementById('stat-tests').textContent = (testsCount || 0).toLocaleString();
+                document.getElementById('stat-passages').textContent = (passagesCount || 0).toLocaleString();
+            } catch (err) {
+                console.warn('Lỗi tải stats:', err);
+            }
+        }
+
+        // 5. TOPICS MANAGEMENT
+        async function loadAllTopics() {
+            try {
+                const { data, error } = await sb
+                    .from('topics')
+                    .select('id, name, category')
+                    .order('created_at', { ascending: true });
+
+                if (error) throw error;
+                allTopicsCache = data || [];
+
+                // Fill dropdowns
+                const camSelect = document.getElementById('cam-topic-select');
+                const wordsFilter = document.getElementById('words-topic-filter');
+                const modalTopic = document.getElementById('modal-word-topic');
+
+                camSelect.innerHTML = '<option value="">-- Chọn Topic Cambridge --</option>';
+                wordsFilter.innerHTML = '<option value="">Tất cả Topics</option>';
+                modalTopic.innerHTML = '<option value="">-- Chọn Topic --</option>';
+
+                allTopicsCache.forEach(t => {
+                    // Cambridge select
+                    if (t.name.toLowerCase().includes('cam') || t.category === 'Cambridge IELTS') {
+                        camSelect.innerHTML += `<option value="${t.id}">${escHtml(t.name)}</option>`;
+                    }
+                    // Words filter & modal
+                    wordsFilter.innerHTML += `<option value="${t.id}">${escHtml(t.name)}</option>`;
+                    modalTopic.innerHTML += `<option value="${t.id}">${escHtml(t.name)}</option>`;
+                });
+            } catch (err) {
+                console.error('loadAllTopics error:', err);
+            }
+        }
+
+        // 6. TESTS & PASSAGES CMS
+        async function loadTestsForTopic() {
+            const topicId = document.getElementById('cam-topic-select').value;
+            const container = document.getElementById('tests-container');
+
+            if (!topicId) {
+                container.innerHTML = '<div class="text-center py-12 text-slate-400 text-sm">Vui lòng chọn một Topic sách Cambridge ở trên.</div>';
+                return;
+            }
+
+            container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">Đang tải danh sách Tests...</div>';
+
+            try {
+                // Lấy tests
+                const { data: tests, error: testErr } = await sb
+                    .from('tests')
+                    .select('*')
+                    .eq('topic_id', topicId)
+                    .order('test_order', { ascending: true });
+
+                if (testErr) throw testErr;
+
+                // Lấy passages
+                const { data: passages, error: passErr } = await sb
+                    .from('passages')
+                    .select('*')
+                    .eq('topic_id', topicId)
+                    .order('passage_number', { ascending: true });
+
+                if (passErr) throw passErr;
+
+                if (!tests || tests.length === 0) {
+                    container.innerHTML = '<div class="text-center py-8 text-slate-400 text-xs">Chưa có Test nào trong Topic này.</div>';
+                    return;
+                }
+
+                let html = '';
+                tests.forEach(test => {
+                    const testPassages = (passages || []).filter(p => p.test_id === test.id);
+
+                    html += `
+                    <div class="border border-slate-200 rounded-2xl p-5 bg-slate-50/50 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">${test.test_order || 1}</span>
+                                <h4 class="font-bold text-sm text-slate-900">${escHtml(test.name)}</h4>
+                            </div>
+                            <span class="text-xs text-slate-500 font-medium">${testPassages.length} Bài đọc</span>
+                        </div>
+
+                        <!-- Passages Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+                    `;
+
+                    testPassages.forEach(p => {
+                        html += `
+                            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[11px] font-bold text-primary uppercase">Passage ${p.passage_number}</span>
+                                    <button onclick="openPassageModal('${p.id}', '${escAttr(p.title || '')}', '${escAttr(p.topic_label || '')}')" 
+                                            class="text-slate-400 hover:text-primary transition-colors" title="Sửa bài đọc">
+                                        <span class="material-symbols-outlined text-base">edit</span>
+                                    </button>
+                                </div>
+                                <h5 class="text-xs font-bold text-slate-900 line-clamp-2">${escHtml(p.title || 'Chưa đặt tiêu đề')}</h5>
+                                <p class="text-[11px] text-slate-500 line-clamp-1">${escHtml(p.topic_label || 'Chưa có nhãn')}</p>
+                            </div>
+                        `;
+                    });
+
+                    html += `
+                        </div>
+                    </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            } catch (err) {
+                container.innerHTML = `<div class="text-center py-8 text-rose-500 text-xs">Lỗi tải tests: ${escHtml(err.message)}</div>`;
+            }
+        }
+
+        function openPassageModal(id, title, label) {
+            document.getElementById('edit-passage-id').value = id;
+            document.getElementById('modal-passage-title').value = title;
+            document.getElementById('modal-passage-label').value = label;
+            document.getElementById('modal-passage').classList.remove('hidden');
+        }
+
+        function closePassageModal() {
+            document.getElementById('modal-passage').classList.add('hidden');
+        }
+
+        async function handleSavePassage(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-passage-id').value;
+            const title = document.getElementById('modal-passage-title').value.trim();
+            const topic_label = document.getElementById('modal-passage-label').value.trim();
+
+            try {
+                const { error } = await sb
+                    .from('passages')
+                    .update({ title, topic_label })
+                    .eq('id', id);
+
+                if (error) throw error;
+                closePassageModal();
+                await loadTestsForTopic();
+            } catch (err) {
+                alert('Lỗi cập nhật Passage: ' + err.message);
+            }
+        }
+
+        // 7. VOCABULARY CMS
+        async function loadWordsList(page = 1) {
+            currentWordsPage = page;
+            const topicId = document.getElementById('words-topic-filter').value;
+            const searchQuery = document.getElementById('words-search-input').value.trim();
+            const tbody = document.getElementById('words-table-body');
+
+            tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400">Đang tải dữ liệu từ vựng...</td></tr>';
+
+            try {
+                let query = sb.from('words').select('id, word, phonetic, pos, meaning, example_sentence, topic_id, topics(name)', { count: 'exact' });
+
+                if (topicId) query = query.eq('topic_id', topicId);
+                if (searchQuery) {
+                    query = query.or(`word.ilike.%${searchQuery}%,meaning.ilike.%${searchQuery}%`);
+                }
+
+                const from = (page - 1) * WORDS_PER_PAGE;
+                const to = from + WORDS_PER_PAGE - 1;
+
+                const { data, count, error } = await query
+                    .order('created_at', { ascending: false })
+                    .range(from, to);
+
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400">Không tìm thấy từ vựng nào.</td></tr>';
+                    document.getElementById('words-pagination-info').textContent = '0 từ';
+                    return;
+                }
+
+                document.getElementById('words-pagination-info').textContent = 
+                    `Hiển thị ${from + 1} - ${Math.min(to + 1, count)} / Tổng ${count} từ`;
+
+                document.getElementById('btn-prev-page').disabled = page <= 1;
+                document.getElementById('btn-next-page').disabled = to + 1 >= count;
+
+                let html = '';
+                data.forEach(item => {
+                    const topicName = item.topics?.name || 'Không rõ';
+                    html += `
+                        <tr class="hover:bg-slate-50/70 transition-colors">
+                            <td class="py-3 px-4 font-bold text-slate-900">${escHtml(item.word)}</td>
+                            <td class="py-3 px-4 text-slate-500 font-mono text-[11px]">${escHtml(item.phonetic || '')}</td>
+                            <td class="py-3 px-4"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[10px] font-semibold">${escHtml(item.pos || 'n/a')}</span></td>
+                            <td class="py-3 px-4 text-slate-700 max-w-xs truncate" title="${escAttr(item.meaning)}">${escHtml(item.meaning)}</td>
+                            <td class="py-3 px-4 text-slate-500 max-w-xs truncate text-[11px]" title="${escAttr(item.example_sentence || '')}">${escHtml(item.example_sentence || '')}</td>
+                            <td class="py-3 px-4 text-slate-500 text-[11px] max-w-[120px] truncate">${escHtml(topicName)}</td>
+                            <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <button onclick='openEditWordModal(${JSON.stringify(item)})' class="text-slate-400 hover:text-primary p-1 transition-colors" title="Sửa">
+                                    <span class="material-symbols-outlined text-base">edit</span>
+                                </button>
+                                <button onclick="handleDeleteWord('${item.id}', '${escAttr(item.word)}')" class="text-slate-400 hover:text-rose-600 p-1 transition-colors" title="Xóa">
+                                    <span class="material-symbols-outlined text-base">delete</span>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-rose-500">Lỗi: ${escHtml(err.message)}</td></tr>`;
+            }
+        }
+
+        let searchTimeout = null;
+        function handleWordSearch() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                loadWordsList(1);
+            }, 400);
+        }
+
+        function changeWordPage(delta) {
+            loadWordsList(currentWordsPage + delta);
+        }
+
+        // 8. WORD MODAL & AI AUTO-FILL
+        function openWordModal() {
+            document.getElementById('edit-word-id').value = '';
+            document.getElementById('modal-word-title').textContent = 'Thêm Từ Vựng Mới';
+            document.getElementById('modal-word-input').value = '';
+            document.getElementById('modal-word-phonetic').value = '';
+            document.getElementById('modal-word-pos').value = '';
+            document.getElementById('modal-word-meaning').value = '';
+            document.getElementById('modal-word-example').value = '';
+            document.getElementById('modal-word').classList.remove('hidden');
+        }
+
+        function openEditWordModal(wordObj) {
+            document.getElementById('edit-word-id').value = wordObj.id;
+            document.getElementById('modal-word-title').textContent = 'Sửa Từ Vựng: ' + wordObj.word;
+            document.getElementById('modal-word-topic').value = wordObj.topic_id;
+            document.getElementById('modal-word-input').value = wordObj.word || '';
+            document.getElementById('modal-word-phonetic').value = wordObj.phonetic || '';
+            document.getElementById('modal-word-pos').value = wordObj.pos || '';
+            document.getElementById('modal-word-meaning').value = wordObj.meaning || '';
+            document.getElementById('modal-word-example').value = wordObj.example_sentence || '';
+            document.getElementById('modal-word').classList.remove('hidden');
+        }
+
+        function closeWordModal() {
+            document.getElementById('modal-word').classList.add('hidden');
+        }
+
+        // AI AUTO-FILL FUNCTION
+        async function handleAiAutoFill() {
+            const word = document.getElementById('modal-word-input').value.trim();
+            if (!word) {
+                alert('Vui lòng nhập từ tiếng Anh trước khi bấm AI Auto-Fill!');
+                return;
+            }
+
+            const btn = document.getElementById('btn-ai-fill');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[14px] animate-spin">refresh</span><span>Đang tạo...</span>';
+
+            try {
+                // 1. Tra cứu Free Dictionary API để lấy phonetic & pos
+                try {
+                    const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+                    if (dictRes.ok) {
+                        const dictData = await dictRes.json();
+                        const entry = dictData[0];
+                        const phonetic = entry?.phonetic || entry?.phonetics?.find(p => p.text)?.text || '';
+                        const pos = entry?.meanings?.[0]?.partOfSpeech || '';
+                        if (phonetic && !document.getElementById('modal-word-phonetic').value) {
+                            document.getElementById('modal-word-phonetic').value = phonetic;
+                        }
+                        if (pos && !document.getElementById('modal-word-pos').value) {
+                            document.getElementById('modal-word-pos').value = pos;
+                        }
+                    }
+                } catch (_) {}
+
+                // 2. Gọi API Dịch thuật để lấy nghĩa tiếng Việt
+                try {
+                    const transRes = await fetch('/api/translate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: word, from: 'EN', to: 'VI' })
+                    });
+                    if (transRes.ok) {
+                        const transData = await transRes.json();
+                        if (transData.ok && transData.text && !document.getElementById('modal-word-meaning').value) {
+                            document.getElementById('modal-word-meaning').value = transData.text;
+                        }
+                    }
+                } catch (_) {}
+
+                // 3. Gọi Groq API để tạo câu ví dụ tự nhiên
+                try {
+                    const exRes = await fetch('/api/example', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ term: word })
+                    });
+                    if (exRes.ok) {
+                        const exData = await exRes.json();
+                        if (exData.ok && exData.sentence && !document.getElementById('modal-word-example').value) {
+                            document.getElementById('modal-word-example').value = exData.sentence;
+                        }
+                    }
+                } catch (_) {}
+
+            } catch (err) {
+                console.warn('AI fill error:', err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-[14px]">auto_awesome</span><span>AI Auto-Fill</span>';
+            }
+        }
+
+        async function handleSaveWord(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-word-id').value;
+            const topic_id = document.getElementById('modal-word-topic').value;
+            const word = document.getElementById('modal-word-input').value.trim();
+            const phonetic = document.getElementById('modal-word-phonetic').value.trim();
+            const pos = document.getElementById('modal-word-pos').value.trim();
+            const meaning = document.getElementById('modal-word-meaning').value.trim();
+            const example_sentence = document.getElementById('modal-word-example').value.trim();
+
+            const btn = document.getElementById('btn-save-word');
+            btn.disabled = true;
+            btn.textContent = 'Đang lưu...';
+
+            try {
+                const payload = {
+                    topic_id,
+                    word,
+                    phonetic,
+                    pos,
+                    meaning,
+                    example_sentence
+                };
+
+                if (id) {
+                    // Update
+                    const { error } = await sb.from('words').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    // Insert
+                    const { error } = await sb.from('words').insert([payload]);
+                    if (error) throw error;
+                }
+
+                closeWordModal();
+                await loadWordsList(currentWordsPage);
+                await loadOverviewStats();
+            } catch (err) {
+                alert('Lỗi lưu từ vựng: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Lưu từ vựng';
+            }
+        }
+
+        async function handleDeleteWord(id, wordName) {
+            if (!confirm(`Bạn có chắc chắn muốn xóa từ "${wordName}" không? Hành động này không thể hoàn tác.`)) {
+                return;
+            }
+
+            try {
+                const { error } = await sb.from('words').delete().eq('id', id);
+                if (error) throw error;
+                await loadWordsList(currentWordsPage);
+                await loadOverviewStats();
+            } catch (err) {
+                alert('Lỗi xóa từ: ' + err.message);
+            }
+        }
+
+        // UTILS
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function escAttr(str) {
+            if (!str) return '';
+            return String(str).replace(/"/g, '&quot;');
+        }
+    </script>
+</body>
+</html>
