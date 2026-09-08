@@ -164,6 +164,49 @@ window.HiDB = (() => {
     }
 
     /**
+     * Đăng nhập bằng Email & Mật khẩu.
+     */
+    async function signInWithPassword(email, password) {
+        const { data, error } = await _getClient().auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        _currentUser = data.user;
+        return data;
+    }
+
+    /**
+     * Đăng ký tài khoản mới bằng Email & Mật khẩu.
+     */
+    async function signUpWithPassword(email, password) {
+        const { data, error } = await _getClient().auth.signUp({
+            email,
+            password,
+            options: { emailRedirectTo: window.location.origin }
+        });
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Gửi email khôi phục / đặt lại mật khẩu.
+     */
+    async function resetPasswordForEmail(email) {
+        const { data, error } = await _getClient().auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/#type=recovery`
+        });
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Cập nhật mật khẩu mới cho user đang có session (sau khi click link recovery).
+     */
+    async function updateUserPassword(newPassword) {
+        const { data, error } = await _getClient().auth.updateUser({ password: newPassword });
+        if (error) throw error;
+        return data;
+    }
+
+    /**
      * Đăng xuất.
      */
     async function signOut() {
@@ -1582,6 +1625,10 @@ window.HiDB = (() => {
         // Auth
         getCurrentUser,
         signInWithGoogle,
+        signInWithPassword,
+        signUpWithPassword,
+        resetPasswordForEmail,
+        updateUserPassword,
         signOut,
 
         // Topics

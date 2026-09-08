@@ -871,23 +871,69 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 
 <!-- ==================== PAGE: LOGIN ==================== -->
 <div id="page-login" class="page">
-<main class="relative z-10 w-full min-h-screen flex items-center justify-center px-6 md:px-md bg-gradient-to-br from-[#1a1c2c] via-[#3a4a6b] to-[#7d87a8]">
-<div class="w-full max-w-md bg-surface/80 backdrop-blur-[24px] p-8 md:p-xl rounded-[24px] soft-shadow border border-white/50 fade-in">
-<div class="text-center mb-8 md:mb-lg">
-<img class="brand-logo mx-auto mb-3" src="logo-mark.svg" alt="Hi"/>
-<h2 class="font-headline-md text-xl md:text-headline-md text-on-surface">Chào mừng trở lại!</h2>
-<p class="font-body-md text-sm md:text-body-md text-on-surface-variant mt-2">Vui lòng đăng nhập để tiếp tục</p>
+<main class="relative z-10 w-full min-h-screen flex items-center justify-center px-4 md:px-6 py-10 bg-gradient-to-br from-[#1a1c2c] via-[#3a4a6b] to-[#7d87a8]">
+<div class="w-full max-w-md bg-surface/90 backdrop-blur-[24px] p-6 md:p-8 rounded-[24px] soft-shadow border border-white/50 fade-in">
+<div class="text-center mb-6">
+<img class="brand-logo mx-auto mb-2.5 h-10" src="logo-mark.svg" alt="Hi"/>
+<h2 id="auth-title" class="font-headline-md text-xl font-bold text-on-surface">Chào mừng trở lại!</h2>
+<p id="auth-subtitle" class="text-xs md:text-sm text-on-surface-variant mt-1">Đăng nhập để tiếp tục hành trình học từ vựng</p>
 </div>
-<button onclick="window.handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 py-3 md:py-[14px] px-md bg-surface-container-lowest border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors duration-200">
-<svg fill="none" height="20" viewBox="0 0 24 24" width="20" class="md:w-6 md:h-6"><path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.78 15.68 17.55V20.31H19.25C21.34 18.39 22.56 15.58 22.56 12.25Z" fill="#4285F4"/><path d="M12 23C14.97 23 17.46 22.02 19.25 20.31L15.68 17.55C14.71 18.2 13.46 18.59 12 18.59C9.17 18.59 6.78 16.68 5.92 14.11H2.23V16.97C4.03 20.54 7.71 23 12 23Z" fill="#34A853"/><path d="M5.92 14.11C5.7 13.45 5.57 12.74 5.57 12C5.57 11.26 5.7 10.55 5.92 9.89V7.03H2.23C1.49 8.5 1.05 10.2 1.05 12C1.05 13.8 1.49 15.5 2.23 16.97L5.92 14.11Z" fill="#FBBC05"/><path d="M12 5.41C13.62 5.41 15.07 5.96 16.21 7.05L19.34 3.92C17.45 2.16 14.97 1.05 12 1.05C7.71 1.05 4.03 3.46 2.23 7.03L5.92 9.89C6.78 7.32 9.17 5.41 12 5.41Z" fill="#EA4335"/></svg>
-<span class="font-label-sm text-xs md:text-label-sm text-on-surface uppercase tracking-wider">Tiếp tục với Google</span>
+
+<!-- GOOGLE LOGIN BUTTON -->
+<button onclick="window.handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 border border-outline-variant/60 rounded-xl transition-all shadow-xs">
+<svg fill="none" height="20" viewBox="0 0 24 24" width="20"><path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.78 15.68 17.55V20.31H19.25C21.34 18.39 22.56 15.58 22.56 12.25Z" fill="#4285F4"/><path d="M12 23C14.97 23 17.46 22.02 19.25 20.31L15.68 17.55C14.71 18.2 13.46 18.59 12 18.59C9.17 18.59 6.78 16.68 5.92 14.11H2.23V16.97C4.03 20.54 7.71 23 12 23Z" fill="#34A853"/><path d="M5.92 14.11C5.7 13.45 5.57 12.74 5.57 12C5.57 11.26 5.7 10.55 5.92 9.89V7.03H2.23C1.49 8.5 1.05 10.2 1.05 12C1.05 13.8 1.49 15.5 2.23 16.97L5.92 14.11Z" fill="#FBBC05"/><path d="M12 5.41C13.62 5.41 15.07 5.96 16.21 7.05L19.34 3.92C17.45 2.16 14.97 1.05 12 1.05C7.71 1.05 4.03 3.46 2.23 7.03L5.92 9.89C6.78 7.32 9.17 5.41 12 5.41Z" fill="#EA4335"/></svg>
+<span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Tiếp tục với Google</span>
 </button>
-<div id="login-status" class="mt-3 text-center text-sm text-on-surface-variant hidden"></div>
-<div class="mt-4 text-center"><a class="text-on-surface-variant text-sm hover:text-primary cursor-pointer" onclick="window.navigateTo('landing')">← Quay lại trang chủ</a></div>
+
+<div class="flex items-center my-4">
+<div class="flex-1 border-t border-outline-variant/30"></div>
+<span class="px-3 text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">hoặc email</span>
+<div class="flex-1 border-t border-outline-variant/30"></div>
+</div>
+
+<!-- AUTH MODE TOGGLE -->
+<div class="flex bg-surface-container-high/60 p-1 rounded-xl mb-4 border border-outline-variant/20">
+<button type="button" id="tab-auth-login" onclick="window.switchAuthMode('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-primary shadow-xs">Đăng nhập</button>
+<button type="button" id="tab-auth-signup" onclick="window.switchAuthMode('signup')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-on-surface-variant hover:text-on-surface">Đăng ký</button>
+</div>
+
+<!-- EMAIL / PASSWORD FORM -->
+<form id="email-auth-form" onsubmit="window.handleEmailAuth(event)" class="space-y-3">
+<div>
+<label class="block text-xs font-semibold text-on-surface mb-1">Email</label>
+<input type="email" id="auth-email" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+</div>
+
+<div>
+<div class="flex items-center justify-between mb-1">
+<label class="block text-xs font-semibold text-on-surface">Mật khẩu</label>
+<button type="button" id="link-forgot-pw" onclick="window.openForgotPasswordModal()" class="text-[11px] text-primary hover:underline font-medium">Quên mật khẩu?</button>
+</div>
+<input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+</div>
+
+<!-- Confirm Password field (Only in Signup mode) -->
+<div id="field-confirm-password" class="hidden">
+<label class="block text-xs font-semibold text-on-surface mb-1">Xác nhận mật khẩu</label>
+<input type="password" id="auth-confirm-password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+</div>
+
+<div id="auth-error" class="hidden text-xs text-error bg-error-container/40 border border-error/30 p-2.5 rounded-xl font-medium"></div>
+<div id="auth-success" class="hidden text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-medium"></div>
+
+<button type="submit" id="btn-auth-submit" class="w-full py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-dark transition-all shadow-xs">
+Đăng nhập
+</button>
+</form>
+
+<div class="mt-4 text-center">
+<a class="text-on-surface-variant text-xs hover:text-primary cursor-pointer transition-colors" onclick="window.navigateTo('landing')">← Quay lại trang chủ</a>
+</div>
+
 <!-- Dev mode toggle -->
-<div class="mt-6 pt-4 border-t border-outline-variant/20 text-center">
-  <button onclick="window.toggleDevMode()" id="dev-mode-btn" class="text-xs text-outline hover:text-primary transition-colors px-3 py-1.5 rounded-lg hover:bg-surface-container-low">
-    <span class="material-symbols-outlined text-[14px] align-middle">developer_mode</span>
+<div class="mt-5 pt-3 border-t border-outline-variant/20 text-center">
+  <button onclick="window.toggleDevMode()" id="dev-mode-btn" class="text-[11px] text-outline hover:text-primary transition-colors px-3 py-1 rounded-lg hover:bg-surface-container-low">
+    <span class="material-symbols-outlined text-[13px] align-middle">developer_mode</span>
     <span id="dev-mode-label">Chế độ Demo (offline)</span>
   </button>
 </div>
@@ -2955,21 +3001,259 @@ window.addEventListener('hashchange', () => {
   </div>
 </div>
 
+<!-- ==================== MODAL: QUÊN MẬT KHẨU ==================== -->
+<div id="modal-forgot-password" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
+  <div class="bg-surface p-6 rounded-2xl max-w-sm w-full soft-shadow border border-outline-variant/30 space-y-4">
+    <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+      <h3 class="font-bold text-base text-on-surface">Quên mật khẩu</h3>
+      <button onclick="window.closeForgotPasswordModal()" class="text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <p class="text-xs text-on-surface-variant leading-relaxed">
+      Nhập địa chỉ email của bạn. Chúng tôi sẽ gửi một liên kết khôi phục để bạn đặt lại mật khẩu mới.
+    </p>
+    <form onsubmit="window.handleForgotPassword(event)" class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-on-surface mb-1">Email tài khoản</label>
+        <input type="email" id="forgot-email" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+      </div>
+      <div id="forgot-msg" class="hidden text-xs p-2.5 rounded-xl font-medium"></div>
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="window.closeForgotPasswordModal()" class="px-3.5 py-2 rounded-xl text-xs font-semibold text-on-surface-variant hover:bg-surface-container-low">Hủy</button>
+        <button type="submit" id="btn-forgot-submit" class="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark shadow-xs">Gửi email</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== MODAL: ĐẶT LẠI MẬT KHẨU MỚI ==================== -->
+<div id="modal-reset-password" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(8px)">
+  <div class="bg-surface p-6 rounded-2xl max-w-sm w-full soft-shadow border border-outline-variant/40 space-y-4">
+    <div class="text-center">
+      <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
+        <span class="material-symbols-outlined text-xl">lock_reset</span>
+      </div>
+      <h3 class="font-bold text-base text-on-surface">Đặt lại Mật khẩu Mới</h3>
+      <p class="text-xs text-on-surface-variant mt-1">Nhập mật khẩu mới cho tài khoản của bạn (tối thiểu 6 ký tự).</p>
+    </div>
+    <form onsubmit="window.handleResetPassword(event)" class="space-y-3">
+      <div>
+        <label class="block text-xs font-semibold text-on-surface mb-1">Mật khẩu mới</label>
+        <input type="password" id="reset-new-password" required minlength="6" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-on-surface mb-1">Xác nhận mật khẩu mới</label>
+        <input type="password" id="reset-confirm-password" required minlength="6" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+      </div>
+      <div id="reset-msg" class="hidden text-xs p-2.5 rounded-xl font-medium"></div>
+      <button type="submit" id="btn-reset-submit" class="w-full py-2.5 rounded-xl bg-primary text-white text-xs font-bold hover:bg-primary-dark shadow-xs transition-all">
+        Lưu Mật khẩu Mới
+      </button>
+    </form>
+  </div>
+</div>
+
 <script>
+// ── Auth Mode State (login / signup) ───────────────────────────
+window._authMode = 'login';
+window.switchAuthMode = function(mode) {
+    window._authMode = mode;
+    const tabLogin = document.getElementById('tab-auth-login');
+    const tabSignup = document.getElementById('tab-auth-signup');
+    const confirmField = document.getElementById('field-confirm-password');
+    const btnSubmit = document.getElementById('btn-auth-submit');
+    const authTitle = document.getElementById('auth-title');
+    const authSubtitle = document.getElementById('auth-subtitle');
+    const errBox = document.getElementById('auth-error');
+    const successBox = document.getElementById('auth-success');
+    if (errBox) errBox.classList.add('hidden');
+    if (successBox) successBox.classList.add('hidden');
+
+    if (mode === 'login') {
+        tabLogin.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-primary shadow-xs';
+        tabSignup.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-on-surface-variant hover:text-on-surface';
+        confirmField.classList.add('hidden');
+        document.getElementById('auth-confirm-password').removeAttribute('required');
+        btnSubmit.textContent = 'Đăng nhập';
+        authTitle.textContent = 'Chào mừng trở lại!';
+        authSubtitle.textContent = 'Đăng nhập để tiếp tục hành trình học từ vựng';
+        document.getElementById('link-forgot-pw').classList.remove('hidden');
+    } else {
+        tabSignup.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-primary shadow-xs';
+        tabLogin.className = 'flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-on-surface-variant hover:text-on-surface';
+        confirmField.classList.remove('hidden');
+        document.getElementById('auth-confirm-password').setAttribute('required', 'true');
+        btnSubmit.textContent = 'Tạo tài khoản';
+        authTitle.textContent = 'Tạo tài khoản mới';
+        authSubtitle.textContent = 'Bắt đầu học từ vựng hiệu quả với HiVocab';
+        document.getElementById('link-forgot-pw').classList.add('hidden');
+    }
+};
+
+// ── Email / Password Auth Submit ──────────────────────────────
+window.handleEmailAuth = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const confirmPw = document.getElementById('auth-confirm-password').value;
+    const errBox = document.getElementById('auth-error');
+    const successBox = document.getElementById('auth-success');
+    const btn = document.getElementById('btn-auth-submit');
+
+    errBox.classList.add('hidden');
+    successBox.classList.add('hidden');
+
+    if (window._authMode === 'signup') {
+        if (password.length < 6) {
+            errBox.textContent = 'Mật khẩu phải có ít nhất 6 ký tự.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+        if (password !== confirmPw) {
+            errBox.textContent = 'Mật khẩu xác nhận không khớp.';
+            errBox.classList.remove('hidden');
+            return;
+        }
+    }
+
+    btn.disabled = true;
+    const originalText = btn.textContent;
+    btn.textContent = 'Đang xử lý...';
+
+    try {
+        if (typeof HiDB === 'undefined') throw new Error('Hệ thống cơ sở dữ liệu chưa sẵn sàng.');
+
+        if (window._authMode === 'login') {
+            await HiDB.signInWithPassword(email, password);
+            window.navigateTo('dashboard');
+        } else {
+            const res = await HiDB.signUpWithPassword(email, password);
+            if (res?.session) {
+                window.navigateTo('dashboard');
+            } else {
+                successBox.textContent = 'Đăng ký thành công! Vui lòng kiểm tra hộp thư email để kích hoạt tài khoản.';
+                successBox.classList.remove('hidden');
+            }
+        }
+    } catch(err) {
+        errBox.textContent = err.message || 'Thao tác không thành công. Vui lòng thử lại.';
+        errBox.classList.remove('hidden');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+    }
+};
+
+// ── Forgot Password Modal Handlers ────────────────────────────
+window.openForgotPasswordModal = function() {
+    const email = document.getElementById('auth-email')?.value?.trim() || '';
+    if (email) document.getElementById('forgot-email').value = email;
+    const msg = document.getElementById('forgot-msg');
+    if (msg) msg.classList.add('hidden');
+    const modal = document.getElementById('modal-forgot-password');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeForgotPasswordModal = function() {
+    const modal = document.getElementById('modal-forgot-password');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.handleForgotPassword = async function(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgot-email').value.trim();
+    const msg = document.getElementById('forgot-msg');
+    const btn = document.getElementById('btn-forgot-submit');
+    btn.disabled = true;
+    btn.textContent = 'Đang gửi...';
+
+    try {
+        await HiDB.resetPasswordForEmail(email);
+        msg.textContent = 'Đã gửi liên kết đặt lại mật khẩu! Vui lòng kiểm tra hòm thư của bạn.';
+        msg.className = 'text-xs p-2.5 rounded-xl font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+    } catch(err) {
+        msg.textContent = err.message || 'Không thể gửi email khôi phục.';
+        msg.className = 'text-xs p-2.5 rounded-xl font-medium bg-rose-50 text-rose-600 border border-rose-200 block';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Gửi email';
+    }
+};
+
+// ── Reset Password Modal Handlers ─────────────────────────────
+window.openResetPasswordModal = function() {
+    const modal = document.getElementById('modal-reset-password');
+    if (!modal) return;
+    const msg = document.getElementById('reset-msg');
+    if (msg) msg.classList.add('hidden');
+    document.getElementById('reset-new-password').value = '';
+    document.getElementById('reset-confirm-password').value = '';
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeResetPasswordModal = function() {
+    const modal = document.getElementById('modal-reset-password');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+};
+
+window.handleResetPassword = async function(e) {
+    e.preventDefault();
+    const newPw = document.getElementById('reset-new-password').value;
+    const confirmPw = document.getElementById('reset-confirm-password').value;
+    const msg = document.getElementById('reset-msg');
+    const btn = document.getElementById('btn-reset-submit');
+
+    if (newPw.length < 6) {
+        msg.textContent = 'Mật khẩu phải có tối thiểu 6 ký tự.';
+        msg.className = 'text-xs p-2.5 rounded-xl font-medium bg-rose-50 text-rose-600 border border-rose-200 block';
+        return;
+    }
+    if (newPw !== confirmPw) {
+        msg.textContent = 'Mật khẩu xác nhận không trùng khớp.';
+        msg.className = 'text-xs p-2.5 rounded-xl font-medium bg-rose-50 text-rose-600 border border-rose-200 block';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Đang lưu mật khẩu...';
+
+    try {
+        await HiDB.updateUserPassword(newPw);
+        msg.textContent = 'Đổi mật khẩu thành công! Đang chuyển hướng...';
+        msg.className = 'text-xs p-2.5 rounded-xl font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+        setTimeout(() => {
+            window.closeResetPasswordModal();
+            window.navigateTo('dashboard');
+        }, 1500);
+    } catch(err) {
+        msg.textContent = err.message || 'Không thể đổi mật khẩu.';
+        msg.className = 'text-xs p-2.5 rounded-xl font-medium bg-rose-50 text-rose-600 border border-rose-200 block';
+        btn.disabled = false;
+        btn.textContent = 'Lưu Mật khẩu Mới';
+    }
+};
+
 // ── Google Login ────────────────────────────────────────────────
 window.handleGoogleLogin = async function() {
-    const statusEl = document.getElementById('login-status');
-    if (statusEl) { statusEl.classList.remove('hidden'); statusEl.textContent = 'Đang kết nối...'; }
+    const statusEl = document.getElementById('auth-error');
+    if (statusEl) { statusEl.classList.add('hidden'); }
     try {
-        if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng. Bật chế độ Demo.');
+        if (typeof HiDB === 'undefined') throw new Error('Backend chưa sẵn sàng.');
         await HiDB.signInWithGoogle();
-        // Nếu là mock (signIn không redirect), navigate thẳng
         if (window._mockActive) {
             window.navigateTo('dashboard');
         }
-        // Nếu là Supabase thật → sẽ redirect sang Google OAuth
     } catch(err) {
-        if (statusEl) { statusEl.textContent = '⚠ ' + err.message; statusEl.className = 'mt-3 text-center text-sm text-error'; }
+        if (statusEl) { 
+            statusEl.textContent = '⚠ ' + err.message; 
+            statusEl.classList.remove('hidden'); 
+        }
     }
 };
 
@@ -5039,11 +5323,27 @@ document.addEventListener("DOMContentLoaded", async () => {
         localStorage.removeItem('hi_use_mock');
         
         
+        // Kiểm tra nếu vào link đặt lại mật khẩu từ email
+        if (window.location.hash.includes('type=recovery')) {
+            window.openResetPasswordModal();
+        }
+
         // Thiết lập lắng nghe trạng thái đăng nhập để xử lý luồng OAuth hoặc khi đăng nhập thay đổi
         HiDB.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY' || window.location.hash.includes('type=recovery')) {
+                console.log('AuthStateChange: Yêu cầu đặt lại mật khẩu');
+                window.openResetPasswordModal();
+                return;
+            }
+
             if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
                 const user = session?.user;
                 if (user) {
+                    if (window.location.hash.includes('type=recovery')) {
+                        window.openResetPasswordModal();
+                        return;
+                    }
+
                     console.log('AuthStateChange: Đã đăng nhập:', user.email);
                     _updateProfileUI(user);
 
