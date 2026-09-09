@@ -1199,6 +1199,7 @@ window.HiDB = (() => {
                 words (
                     id,
                     word,
+                    pos,
                     phonetic,
                     meaning,
                     example_sentence,
@@ -1218,6 +1219,7 @@ window.HiDB = (() => {
             .map(p => ({
                 wordId:          p.words.id,
                 word:            p.words.word,
+                pos:             p.words.pos || '',
                 phonetic:        p.words.phonetic,
                 meaning:         p.words.meaning,
                 exampleSentence: p.words.example_sentence,
