@@ -734,8 +734,9 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 <!-- ==================== PAGE: LANDING ==================== -->
 <div id="page-landing" class="page active font-inter">
 <section class="relative min-h-screen flex flex-col pt-6 pb-24 px-8 overflow-hidden bg-[#7d87a8]">
-    <div class="absolute inset-0 z-0">
-        <video class="w-full h-full object-cover object-center" autoplay loop muted playsinline poster="https://lh3.googleusercontent.com/aida/ADBb0uhkQ-SWl_FPVWwghRQHGn4zD1C28mjjiL7hNqnm98nzQwWxuSOYM2dkdyuzKDsqmNpj8pscKgWhoRBaO8c6o6AmpJNATkPay7qNvNpISsqJwaZepLQ4oCLEHSQBpDDtchVSdHLjCmuCHnzNfryuJ2cnNvMb77YZfJt8tJNtU3G9Ejsr0bslBpefUX1F6Y6zTFKNbmnbEEgUtIVJZJ0zPVn--N8efsDTX4ob8lYUEOr03GIiXzbleII-wKjyPW8vnXdH5aSDRbzPfQ">
+    <div class="absolute inset-0 z-0 bg-cover bg-center" style="background-image: url('/background-poster.jpg');">
+        <video class="w-full h-full object-cover object-center" autoplay loop muted playsinline preload="auto" poster="/background-poster.jpg" id="landing-bg-video">
+            <source src="background.webm" type="video/webm">
             <source src="background.mp4" type="video/mp4">
         </video>
         <div class="absolute inset-0 bg-gradient-to-r from-[#1a1c2c]/60 to-transparent w-full lg:w-1/2"></div>
