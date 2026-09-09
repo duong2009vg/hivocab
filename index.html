@@ -689,6 +689,10 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">search</span><span>Tra từ</span></a>
     </div>
     <div class="mt-auto shrink-0 flex flex-col gap-base pt-md border-t border-outline-variant/20">
+        <button onclick="window.openWelcomeModal()" class="w-full flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 bg-amber-500/10 text-amber-900 border border-amber-400/30 hover:bg-amber-500/20 cursor-pointer text-xs font-bold text-left mb-1 shadow-2xs">
+            <span class="text-base">🎁</span>
+            <span class="truncate">Quà tặng 2T & Zalo Admin</span>
+        </button>
         <a onclick="navigateTo('settings')" id="nav-desktop-settings" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">settings</span><span>Cài đặt</span></a>
         <a onclick="window.handleLogout()" class="flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">logout</span><span>Đăng xuất</span></a>
     </div>
@@ -704,6 +708,9 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
                 <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
             </div>
+            <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 bg-amber-50/80 hover:bg-amber-100 transition-colors font-bold border-b border-outline-variant/15">
+                <span class="text-base">🎁</span><span>Quà tặng & Zalo Admin</span>
+            </button>
             <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container transition-colors">
                 <span class="material-symbols-outlined text-[18px] text-on-surface-variant">settings</span>Cài đặt
             </button>
@@ -3347,7 +3354,166 @@ window.addEventListener('hashchange', () => {
   </div>
 </div>
 
+<!-- ==================== MODAL: THÔNG BÁO RA MẮT & TẶNG 2 THÁNG FULL TÍNH NĂNG ==================== -->
+<div id="modal-welcome-announcement" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(15,23,42,0.68);backdrop-filter:blur(8px)">
+  <div class="bg-surface rounded-3xl max-w-md w-full soft-shadow border border-outline-variant/30 overflow-hidden fade-in relative max-h-[92vh] flex flex-col my-auto">
+    
+    <!-- Nút đóng (X) -->
+    <button onclick="window.closeWelcomeModal(true)" class="absolute top-3.5 right-3.5 z-20 w-8 h-8 rounded-full bg-white/80 hover:bg-white text-on-surface-variant hover:text-on-surface flex items-center justify-center shadow-xs backdrop-blur-xs transition-colors" title="Đóng thông báo">
+      <span class="material-symbols-outlined text-[20px]">close</span>
+    </button>
+
+    <!-- Header với ảnh cute mascot -->
+    <div class="relative bg-gradient-to-br from-amber-50 via-sky-50 to-blue-50 p-5 sm:p-6 text-center flex flex-col items-center justify-center border-b border-outline-variant/15 shrink-0">
+      <div class="relative w-36 h-36 sm:w-44 sm:h-44 rounded-3xl overflow-hidden shadow-xl shadow-amber-500/15 ring-4 ring-white">
+        <img src="/welcome-mascot.jpg" alt="HiVocab Cute Mascot" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500"/>
+      </div>
+      <div class="inline-flex items-center gap-1.5 mt-3.5 px-3 py-1 rounded-full bg-amber-100/90 border border-amber-300 text-amber-900 text-[11px] font-black tracking-wide uppercase shadow-2xs">
+        <span>✨ Thông Báo Ra Mắt & Quà Tặng ✨</span>
+      </div>
+    </div>
+
+    <!-- Nội dung thông báo cuộn được -->
+    <div class="p-5 sm:p-6 space-y-4 overflow-y-auto custom-scrollbar flex-1">
+      <div class="text-center space-y-1.5">
+        <h3 class="text-xl sm:text-2xl font-black text-on-surface tracking-tight">Chào mừng bạn đến với HiVocab! 🎉</h3>
+        <p class="text-xs text-on-surface-variant leading-relaxed font-medium">
+          HiVocab vừa chính thức ra mắt phiên bản trải nghiệm. Nền tảng còn rất mới nên trong quá trình sử dụng có thể sẽ còn một số lỗi phát sinh hoặc giao diện đang tiếp tục được hoàn thiện.
+        </p>
+      </div>
+
+      <!-- Khung Quà Tặng 2 Tháng Full Tính Năng -->
+      <div class="bg-gradient-to-br from-emerald-50 via-teal-50 to-blue-50 border border-emerald-200 rounded-2xl p-4 shadow-2xs space-y-2">
+        <div class="flex items-center gap-2 text-emerald-900 font-black text-sm">
+          <span class="text-xl">🎁</span>
+          <span>TẶNG BẠN 2 THÁNG FULL TÍNH NĂNG!</span>
+        </div>
+        <p class="text-xs text-slate-700 leading-relaxed font-medium">
+          Để tri ân những học viên đồng hành đầu tiên, HiVocab dành tặng bạn <strong>trọn vẹn 2 tháng sử dụng 100% tính năng cao cấp</strong> không giới hạn:
+        </p>
+        <ul class="text-[11px] text-slate-600 font-semibold space-y-1 pl-1">
+          <li class="flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span>Kho 66.000+ từ vựng Cam 10–21 & IELTS Actual Tests Vol 1–9</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span>Chế độ Đọc Chủ Động & Che Bản Dịch (Curtain Reading Song Ngữ)</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span>5 chế độ luyện tập: Flashcard, Trắc nghiệm, Điền từ, Nghe chép chính tả</span>
+          </li>
+          <li class="flex items-center gap-1.5">
+            <span class="text-emerald-600 font-bold">✓</span>
+            <span>Ghi nhớ ngắt quãng Spaced Repetition (SRS SM-2)</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Khung Hỗ Trợ Zalo Admin -->
+      <div class="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Hỗ trợ kỹ thuật & Báo lỗi</span>
+          <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-100/70 px-2 py-0.5 rounded-md">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Admin trực 24/7</span>
+          </span>
+        </div>
+
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-blue-600 text-white font-black text-xs flex items-center justify-center flex-shrink-0 shadow-xs">
+              Zalo
+            </div>
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-on-surface">Zalo Admin:</p>
+              <p class="text-xs font-black text-primary font-mono tracking-wider">0846 407 898</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button type="button" onclick="window.copyAdminZalo()" class="px-2.5 py-1.5 rounded-xl border border-outline-variant/40 hover:bg-surface-container text-on-surface text-[11px] font-bold transition-colors">
+              <span id="btn-copy-zalo-text">Sao chép</span>
+            </button>
+            <a href="https://zalo.me/0846407898" target="_blank" rel="noopener noreferrer" 
+               class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition-colors shadow-2xs flex items-center gap-1">
+              <span>Mở Zalo</span>
+              <span class="material-symbols-outlined text-[14px]">arrow_outward</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nút hành động chính -->
+      <div class="pt-2 space-y-2">
+        <button type="button" onclick="window.closeWelcomeModal(true)" 
+                class="w-full py-3 px-4 rounded-xl bg-primary text-on-primary font-bold text-xs hover:bg-primary-container active:scale-[0.99] transition-all shadow-md shadow-primary/20 flex items-center justify-center gap-2 uppercase tracking-wide">
+          <span>Đã hiểu & Bắt đầu học ngay</span>
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </button>
+        <p class="text-[10px] text-center text-on-surface-variant">
+          Bạn có thể mở lại thông báo này bất cứ lúc nào trong menu bên trái.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 <script>
+// ==========================================
+// WELCOME GIFT & ANNOUNCEMENT MODAL LOGIC
+// ==========================================
+window.openWelcomeModal = function() {
+    const modal = document.getElementById('modal-welcome-announcement');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+};
+
+window.closeWelcomeModal = function(markAsSeen = true) {
+    const modal = document.getElementById('modal-welcome-announcement');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    if (markAsSeen) {
+        try {
+            localStorage.setItem('hivocab_welcome_gift_seen_v1', 'true');
+        } catch (e) {}
+    }
+};
+
+window.copyAdminZalo = function() {
+    const phone = '0846407898';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(phone).then(() => {
+            const btnText = document.getElementById('btn-copy-zalo-text');
+            if (btnText) {
+                btnText.textContent = 'Đã chép!';
+                setTimeout(() => { btnText.textContent = 'Sao chép'; }, 2000);
+            }
+        }).catch(() => {
+            prompt('Số Zalo Admin HiVocab:', phone);
+        });
+    } else {
+        prompt('Số Zalo Admin HiVocab:', phone);
+    }
+};
+
+window.checkAndShowWelcomeModal = function() {
+    try {
+        const hasSeen = localStorage.getItem('hivocab_welcome_gift_seen_v1');
+        if (!hasSeen) {
+            setTimeout(() => {
+                window.openWelcomeModal();
+            }, 800);
+        }
+    } catch (e) {
+        window.openWelcomeModal();
+    }
+};
+
 // ── Auth Mode State (login / signup) ───────────────────────────
 window._authMode = 'login';
 window.switchAuthMode = function(mode) {
@@ -6025,6 +6191,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     } catch(e) {
         console.error("Lỗi kết nối database:", e);
+    }
+
+    // Hiển thị thông báo chào mừng ra mắt website & tặng quà 2 tháng cho người dùng
+    if (typeof window.checkAndShowWelcomeModal === 'function') {
+        window.checkAndShowWelcomeModal();
     }
 });
 
