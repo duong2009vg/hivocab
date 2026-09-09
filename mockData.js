@@ -309,23 +309,7 @@ const HiMock = (() => {
                 };
             }).filter(Boolean);
 
-            // Thêm từ mới nếu chưa đủ
-            const learnedIds = new Set(progress.filter(p => p.user_id === userId).map(p => p.word_id));
-            const remaining  = limit - dueWords.length;
-            const newWords   = words
-                .filter(w => !learnedIds.has(w.id))
-                .slice(0, remaining)
-                .map(w => {
-                    const t = topics.find(t => t.id === w.topic_id);
-                    return {
-                        wordId: w.id, word: w.word, phonetic: w.phonetic,
-                        meaning: w.meaning, exampleSentence: w.example_sentence,
-                        level: 0, isNew: true,
-                        topic: t ? { id: t.id, name: t.name, icon: t.icon } : null,
-                    };
-                });
-
-            return [...dueWords, ...newWords];
+            return dueWords.slice(0, limit);
         },
 
         reviewWord: async (wordId, rating) => {

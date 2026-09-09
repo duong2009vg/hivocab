@@ -1066,56 +1066,22 @@ window.HiDB = (() => {
 
         if (e1) throw e1;
 
-        // Query từ chưa có progress nào (chưa học lần nào)
-        const learnedWordIds = dueWords.map(p => p.words.id);
-        const remainingLimit = limit - dueWords.length;
+        // Chỉ lấy các từ đã học và đã đến hạn ôn tập (Spaced Repetition SM-2)
+        const formattedDue = (dueWords || [])
+            .filter(p => p && p.words)
+            .map(p => ({
+                wordId:          p.words.id,
+                word:            p.words.word,
+                phonetic:        p.words.phonetic,
+                meaning:         p.words.meaning,
+                exampleSentence: p.words.example_sentence,
+                level:           p.level,
+                nextReviewAt:    p.next_review_at,
+                isNew:           false,
+                topic:           p.words.topics,
+            }));
 
-        let newWords = [];
-        if (remainingLimit > 0) {
-            const { data: allWords, error: e2 } = await _getClient()
-                .from('words')
-                .select(`
-                    id,
-                    word,
-                    phonetic,
-                    meaning,
-                    example_sentence,
-                    word_progress ( user_id ),
-                    topics ( id, name, icon )
-                `)
-                .limit(remainingLimit + learnedWordIds.length + 10); // buffer
-
-            if (e2) throw e2;
-
-            // Lọc từ user chưa từng học
-            newWords = (allWords || [])
-                .filter(w => !(w.word_progress || []).some(p => p.user_id === user.id))
-                .slice(0, remainingLimit)
-                .map(w => ({
-                    wordId:          w.id,
-                    word:            w.word,
-                    phonetic:        w.phonetic,
-                    meaning:         w.meaning,
-                    exampleSentence: w.example_sentence,
-                    level:           0,   // chưa học
-                    isNew:           true,
-                    topic:           w.topics,
-                }));
-        }
-
-        const formattedDue = dueWords.map(p => ({
-            wordId:          p.words.id,
-            word:            p.words.word,
-            phonetic:        p.words.phonetic,
-            meaning:         p.words.meaning,
-            exampleSentence: p.words.example_sentence,
-            level:           p.level,
-            nextReviewAt:    p.next_review_at,
-            isNew:           false,
-            topic:           p.words.topics,
-        }));
-
-        return [...formattedDue, ...newWords];
+        return formattedDue;
     }
 
     /**

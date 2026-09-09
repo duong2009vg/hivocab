@@ -95,8 +95,10 @@ const HiDashboard = (() => {
         _renderLevelBar('lv2', lv2, maxCount, 'bg-yellow-400');
         _renderLevelBar('lv1', lv1, maxCount, 'bg-red-500');
 
-        // ── 5. Hero card: ready vs countdown ─────────────────────────────────
-        if (wordsDueCount > 0) {
+        // ── 5. Hero card: empty vs ready vs countdown ─────────────────────────────────
+        if (total === 0) {
+            _showEmptyState();
+        } else if (wordsDueCount > 0) {
             _showReadyState();
         } else {
             // Tính thời gian ôn tập kế tiếp
@@ -151,17 +153,31 @@ const HiDashboard = (() => {
     // HERO CARD: ĐIỀU KHIỂN TRẠNG THÁI
     // ----------------------------------------------------------
 
+    function _showEmptyState() {
+        stopCountdown();
+        const ready     = document.getElementById('dash-ready-state');
+        const countdown = document.getElementById('dash-countdown-state');
+        const empty     = document.getElementById('dash-empty-state');
+        if (ready)     { ready.classList.add('hidden');     ready.classList.remove('flex'); }
+        if (countdown) { countdown.classList.add('hidden'); countdown.classList.remove('flex'); }
+        if (empty)     { empty.classList.remove('hidden');  empty.classList.add('flex'); }
+    }
+
     function _showReadyState() {
         stopCountdown();
         const ready     = document.getElementById('dash-ready-state');
         const countdown = document.getElementById('dash-countdown-state');
-        if (ready)     { ready.classList.remove('hidden');    ready.classList.add('flex'); }
-        if (countdown) { countdown.classList.add('hidden');   countdown.classList.remove('flex'); }
+        const empty     = document.getElementById('dash-empty-state');
+        if (empty)     { empty.classList.add('hidden');     empty.classList.remove('flex'); }
+        if (ready)     { ready.classList.remove('hidden');  ready.classList.add('flex'); }
+        if (countdown) { countdown.classList.add('hidden'); countdown.classList.remove('flex'); }
     }
 
     function _showCountdownState(nextTime) {
         const ready     = document.getElementById('dash-ready-state');
         const countdown = document.getElementById('dash-countdown-state');
+        const empty     = document.getElementById('dash-empty-state');
+        if (empty)     { empty.classList.add('hidden');        empty.classList.remove('flex'); }
         if (ready)     { ready.classList.add('hidden');        ready.classList.remove('flex'); }
         if (countdown) { countdown.classList.remove('hidden'); countdown.classList.add('flex'); }
 
@@ -605,7 +621,7 @@ const HiDashboard = (() => {
         const streakEl = document.getElementById(EL.streakBadge);
         if (streakEl) streakEl.textContent = '0 Ngày';
 
-        _showReadyState();
+        _showEmptyState();
 
         const dueTextEl = document.getElementById(EL.wordsDueText);
         if (dueTextEl) dueTextEl.textContent = 'Thêm từ vựng mới để bắt đầu hành trình học tập!';

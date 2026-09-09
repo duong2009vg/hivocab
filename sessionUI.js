@@ -1232,15 +1232,53 @@ window.startSession = async function() {
         const words = await HiDB.getWordsDueForReview(20);
 
         if (!words || words.length === 0) {
-            document.getElementById('exercise-container').innerHTML = `
-                <div class="text-center mt-20 fade-in">
-                    <span class="material-symbols-outlined text-[64px] text-outline mb-4 block">check_circle</span>
-                    <h2 class="text-2xl font-bold text-on-surface mb-2">Tất cả đã ôn xong!</h2>
-                    <p class="text-on-surface-variant mb-8">Không có từ nào cần ôn lúc này. Hãy quay lại sau.</p>
-                    <button onclick="navigateTo('dashboard')" class="bg-primary text-on-primary px-8 py-3 rounded-full font-bold">
-                        Về Trang chủ
-                    </button>
-                </div>`;
+            let totalLearned = 0;
+            try {
+                const stats = await HiDB.getDashboardStats();
+                const { lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = stats.memoryLevels || {};
+                totalLearned = lv1 + lv2 + lv3 + lv4 + lv5;
+            } catch (_) {}
+
+            const container = document.getElementById('exercise-container');
+            if (totalLearned === 0) {
+                container.innerHTML = `
+                    <div class="text-center mt-20 fade-in max-w-md mx-auto px-4">
+                        <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-[48px] text-primary icon-fill">school</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-on-surface mb-2">Chưa có từ vựng để ôn tập</h2>
+                        <p class="text-on-surface-variant mb-8 text-sm md:text-base leading-relaxed">
+                            Bạn chưa có từ vựng nào trong danh sách ôn tập. Hãy chọn một chủ đề để bắt đầu học những từ mới đầu tiên nhé!
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <button onclick="navigateTo('topics')" class="bg-primary text-on-primary px-8 py-3 rounded-xl font-bold shadow-[0_4px_20px_rgba(0,97,146,0.3)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-lg">explore</span>Khám phá chủ đề
+                            </button>
+                            <button onclick="navigateTo('dashboard')" class="bg-surface-container-high text-on-surface hover:bg-surface-container-highest px-6 py-3 rounded-xl font-bold transition-all">
+                                Về Trang chủ
+                            </button>
+                        </div>
+                    </div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="text-center mt-20 fade-in max-w-md mx-auto px-4">
+                        <div class="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-[48px] text-green-500 icon-fill">check_circle</span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-on-surface mb-2">Tất cả đã ôn xong!</h2>
+                        <p class="text-on-surface-variant mb-8 text-sm md:text-base leading-relaxed">
+                            Không có từ nào cần ôn lúc này. Bạn đã hoàn thành xuất sắc các mục tiêu củng cố hôm nay! Hãy quay lại sau hoặc học thêm chủ đề mới.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <button onclick="navigateTo('topics')" class="bg-primary text-on-primary px-8 py-3 rounded-xl font-bold shadow-[0_4px_20px_rgba(0,97,146,0.3)] hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined text-lg">explore</span>Học thêm chủ đề mới
+                            </button>
+                            <button onclick="navigateTo('dashboard')" class="bg-surface-container-high text-on-surface hover:bg-surface-container-highest px-6 py-3 rounded-xl font-bold transition-all">
+                                Về Trang chủ
+                            </button>
+                        </div>
+                    </div>`;
+            }
             return;
         }
 
