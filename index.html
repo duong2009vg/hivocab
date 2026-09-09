@@ -1317,9 +1317,15 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <h2 id="ld-title" class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Lesson 1</h2>
                 <p id="ld-subtitle" class="text-on-surface-variant mt-sm">0 từ vựng</p>
             </div>
-            <div class="relative w-full lg:w-72">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                <input id="ld-search" oninput="window.filterLessonWords()" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary border-t-0 border-l-0 border-r-0 rounded-t-DEFAULT pl-10 pr-4 py-3 text-base text-on-surface placeholder:text-outline focus:ring-0 transition-colors" placeholder="Tìm kiếm từ vựng..." type="text"/>
+            <div class="flex items-center gap-3">
+                <button id="btn-read-passage" onclick="window._openCurrentPassageReader()" class="hidden bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-4 py-3 rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">menu_book</span>
+                    <span>Đọc bài song ngữ</span>
+                </button>
+                <div class="relative w-full lg:w-72">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+                    <input id="ld-search" oninput="window.filterLessonWords()" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary border-t-0 border-l-0 border-r-0 rounded-t-DEFAULT pl-10 pr-4 py-3 text-base text-on-surface placeholder:text-outline focus:ring-0 transition-colors" placeholder="Tìm kiếm từ vựng..." type="text"/>
+                </div>
             </div>
         </div>
 
@@ -1353,6 +1359,10 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <!-- CTA button -->
                 <button onclick="startSinglePractice(0)" class="mt-5 w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 text-sm">
                     Bắt đầu học
+                </button>
+                <button id="btn-read-passage-mobile" onclick="window._openCurrentPassageReader()" class="hidden w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2.5 rounded-xl transition-colors active:scale-95 text-xs flex items-center justify-center gap-1.5">
+                    <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                    <span>Đọc bài đọc song ngữ</span>
                 </button>
             </div>
 
@@ -2977,6 +2987,45 @@ window.addEventListener('hashchange', () => {
   </div>
 </div>
 
+<!-- ==================== MODAL: ĐỌC BÀI SONG NGỮ ==================== -->
+<div id="modal-passage-reader" onclick="if(event.target === this) window._closePassageReader()" class="fixed inset-0 z-[9999] hidden items-center justify-center p-3 md:p-6" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px)">
+  <div class="w-full max-w-5xl bg-surface rounded-2xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden border border-outline-variant/30 fade-in">
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-outline-variant/20 bg-surface-container-low/70 shrink-0">
+      <div class="flex items-center gap-3 min-w-0 pr-2">
+        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+          <span class="material-symbols-outlined text-[22px]">menu_book</span>
+        </div>
+        <div class="min-w-0">
+          <h2 id="reader-title" class="text-base md:text-lg font-bold text-on-surface truncate leading-tight">Bài đọc song ngữ</h2>
+          <p id="reader-subtitle" class="text-xs text-on-surface-variant truncate mt-0.5">—</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- View mode buttons (desktop) -->
+        <div class="hidden sm:flex bg-surface-container rounded-xl p-1 border border-outline-variant/30 text-xs font-semibold">
+          <button id="reader-btn-bilingual" onclick="window._setReaderViewMode('bilingual')" class="px-3 py-1 rounded-lg bg-primary text-on-primary shadow-sm transition-all">Song ngữ</button>
+          <button id="reader-btn-en" onclick="window._setReaderViewMode('en')" class="px-3 py-1 rounded-lg text-on-surface-variant hover:text-primary transition-all">English</button>
+          <button id="reader-btn-vi" onclick="window._setReaderViewMode('vi')" class="px-3 py-1 rounded-lg text-on-surface-variant hover:text-primary transition-all">Tiếng Việt</button>
+        </div>
+        <button onclick="window._closePassageReader()" class="p-2 rounded-full text-outline hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
+    <!-- Mobile view mode selector -->
+    <div class="sm:hidden flex border-b border-outline-variant/20 px-4 py-2 bg-surface-container-lowest gap-2 text-xs font-semibold">
+      <button id="reader-btn-bilingual-m" onclick="window._setReaderViewMode('bilingual')" class="flex-1 py-1.5 rounded-lg bg-primary text-on-primary transition-all">Song ngữ</button>
+      <button id="reader-btn-en-m" onclick="window._setReaderViewMode('en')" class="flex-1 py-1.5 rounded-lg bg-surface-container text-on-surface-variant transition-all">English</button>
+      <button id="reader-btn-vi-m" onclick="window._setReaderViewMode('vi')" class="flex-1 py-1.5 rounded-lg bg-surface-container text-on-surface-variant transition-all">Tiếng Việt</button>
+    </div>
+    <!-- Content container -->
+    <div id="reader-content" class="flex-1 overflow-y-auto p-5 md:p-8 text-on-surface text-sm md:text-base leading-relaxed">
+      <!-- Injected via JavaScript -->
+    </div>
+  </div>
+</div>
+
 <!-- ==================== MODAL: IELTS TARGET & COUNTDOWN ==================== -->
 <div id="modal-ielts-goal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
   <div class="w-full max-w-lg bg-surface rounded-2xl p-6 md:p-8 soft-shadow fade-in max-h-[90vh] overflow-y-auto">
@@ -3662,6 +3711,8 @@ window._activeCategory = 'all';
 window._allTopics      = [];
 window._topicCategories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
 const DEFAULT_TOPIC_CATEGORIES = [
+    'IELTS Actual Tests',
+    'CAM',
     'Destination C1-C2',
     'General English',
     'IELTS/TOEIC',
@@ -3679,6 +3730,7 @@ function _topicCategoryValue(category) {
 
 function _topicCategoryIcon(category) {
     const compact = _topicCategoryValue(category).toLowerCase().replace(/[\s/_-]+/g, '');
+    if (compact.includes('actual') || compact.includes('vol')) return 'library_books';
     if (compact.includes('dest')) return 'school';
     if (compact === 'cam' || compact.includes('cambridge')) return 'menu_book';
     if (compact.includes('ielts') || compact.includes('toeic')) return 'military_tech';
@@ -3788,12 +3840,24 @@ window._renderTopicsGrid = async function() {
             ...t,
             category: _topicCategoryValue(t.category),
         }));
+
+        // Sắp xếp tự nhiên theo tên (Unit 02..26, IELTS Vol 1..9, CAM 10..21)
+        tableCategories.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
+
         window._allTopics = tableCategories;
         window._renderCategoryTabs();
 
         const filtered = window._activeCategory === 'all'
             ? tableCategories
             : tableCategories.filter(t => t.category === window._activeCategory);
+
+        // Đảm bảo filtered luôn theo thứ tự tự nhiên chuẩn xác
+        filtered.sort((a, b) => {
+            if (window._activeCategory === 'all' && a.category !== b.category) {
+                return (a.category || '').localeCompare(b.category || '');
+            }
+            return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
+        });
 
         if (!filtered || filtered.length === 0) {
             const catLabel = window._topicCategories.find(c => c.id === window._activeCategory)?.label || window._activeCategory || 'danh mục này';
@@ -4066,6 +4130,12 @@ window._renderCamPassages = function(testIndex = 0) {
                         Passage ${p.passageNumber}
                     </span>
                     <div class="flex items-center gap-1.5">
+                        ${p.contentEn || p.contentVi ? `
+                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}')"
+                                class="w-7 h-7 flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-all"
+                                title="Đọc bài song ngữ">
+                            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                        </button>` : ''}
                         <button onclick="event.stopPropagation(); window._openRenamePassage('${p.id}', '${_esc(p.title)}')"
                                 class="w-7 h-7 flex items-center justify-center rounded-lg text-outline hover:text-primary hover:bg-primary/10 transition-all"
                                 title="Đổi tên passage">
@@ -4266,6 +4336,17 @@ window._loadLessonWords = async function() {
             const el = document.getElementById(id);
             if (el) el.textContent = subtitle;
         });
+
+        // Cập nhật hiển thị nút Đọc bài song ngữ
+        const btnDesk = document.getElementById('btn-read-passage');
+        const btnMob  = document.getElementById('btn-read-passage-mobile');
+        if (passageId && passageId !== '__unlinked__') {
+            if (btnDesk) { btnDesk.classList.remove('hidden'); btnDesk.classList.add('flex'); }
+            if (btnMob)  { btnMob.classList.remove('hidden'); btnMob.classList.add('flex'); }
+        } else {
+            if (btnDesk) { btnDesk.classList.add('hidden'); btnDesk.classList.remove('flex'); }
+            if (btnMob)  { btnMob.classList.add('hidden'); btnMob.classList.remove('flex'); }
+        }
 
         // Cập nhật progress trên mobile card
         if (words.length > 0) {
@@ -4706,6 +4787,161 @@ window._submitRenamePassage = async function() {
     }
 };
 
+// ── Đọc bài đọc song ngữ ───────────────────────────────────────
+window._readerViewMode = 'bilingual';
+window._currentReaderPassage = null;
+
+window._openPassageReader = async function(passageId) {
+    const modal = document.getElementById('modal-passage-reader');
+    const titleEl = document.getElementById('reader-title');
+    const subEl = document.getElementById('reader-subtitle');
+    const contentEl = document.getElementById('reader-content');
+    if (!modal) return;
+
+    modal.style.display = 'flex';
+    if (contentEl) {
+        contentEl.innerHTML = `<div class="flex items-center justify-center py-20"><span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span></div>`;
+    }
+
+    // Tìm trong cache _camHierarchy trước
+    let pObj = null;
+    if (window._camHierarchy?.tests) {
+        for (const t of window._camHierarchy.tests) {
+            const found = (t.passages || []).find(p => p.id === passageId);
+            if (found) {
+                pObj = { ...found, testName: t.name };
+                break;
+            }
+        }
+    }
+
+    // Nếu không có nội dung trong cache, fetch từ HiDB.getPassage
+    if (!pObj || (!pObj.contentEn && !pObj.contentVi)) {
+        if (typeof HiDB !== 'undefined' && typeof HiDB.getPassage === 'function') {
+            try {
+                const fetched = await HiDB.getPassage(passageId);
+                if (fetched) {
+                    pObj = {
+                        ...(pObj || {}),
+                        title: fetched.title,
+                        passageNumber: fetched.passage_number,
+                        contentEn: fetched.content_en,
+                        contentVi: fetched.content_vi,
+                        testName: pObj?.testName || window._currentTestName || 'Test'
+                    };
+                }
+            } catch (err) {
+                console.warn('Could not fetch passage details:', err);
+            }
+        }
+    }
+
+    window._currentReaderPassage = pObj;
+
+    if (titleEl) titleEl.textContent = pObj?.title || `Passage ${pObj?.passageNumber || ''}`;
+    if (subEl) subEl.textContent = `${window._currentTopicName || 'IELTS'} · ${pObj?.testName || 'Test'} · Passage ${pObj?.passageNumber || ''}`;
+
+    window._renderReaderContent();
+};
+
+window._openCurrentPassageReader = function() {
+    const passageId = window._currentPassageId;
+    if (passageId && passageId !== '__unlinked__') {
+        window._openPassageReader(passageId);
+    }
+};
+
+window._closePassageReader = function() {
+    const modal = document.getElementById('modal-passage-reader');
+    if (modal) modal.style.display = 'none';
+};
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('modal-passage-reader');
+        if (modal && modal.style.display === 'flex') {
+            window._closePassageReader();
+        }
+    }
+});
+
+window._setReaderViewMode = function(mode) {
+    window._readerViewMode = mode;
+    ['bilingual', 'en', 'vi'].forEach(m => {
+        const btn = document.getElementById(`reader-btn-${m}`);
+        const btnM = document.getElementById(`reader-btn-${m}-m`);
+        const active = m === mode;
+        if (btn) {
+            btn.className = active
+                ? 'px-3 py-1 rounded-lg bg-primary text-on-primary shadow-sm transition-all'
+                : 'px-3 py-1 rounded-lg text-on-surface-variant hover:text-primary transition-all';
+        }
+        if (btnM) {
+            btnM.className = active
+                ? 'flex-1 py-1.5 rounded-lg bg-primary text-on-primary transition-all'
+                : 'flex-1 py-1.5 rounded-lg bg-surface-container text-on-surface-variant transition-all';
+        }
+    });
+    window._renderReaderContent();
+};
+
+window._renderReaderContent = function() {
+    const contentEl = document.getElementById('reader-content');
+    if (!contentEl) return;
+    const p = window._currentReaderPassage;
+    if (!p || (!p.contentEn && !p.contentVi)) {
+        contentEl.innerHTML = `<div class="text-center py-16 text-on-surface-variant"><span class="material-symbols-outlined text-[48px] opacity-30 mb-2 block">article</span>Chưa có nội dung bài đọc cho phần này.</div>`;
+        return;
+    }
+
+    const enText = (p.contentEn || '').trim();
+    const viText = (p.contentVi || '').trim();
+
+    const enParas = enText ? enText.split(/\n\s*\n|\r\n\r\n/).map(s => s.trim()).filter(Boolean) : [];
+    const viParas = viText ? viText.split(/\n\s*\n|\r\n\r\n/).map(s => s.trim()).filter(Boolean) : [];
+
+    const mode = window._readerViewMode || 'bilingual';
+
+    if (mode === 'en') {
+        contentEl.innerHTML = `
+            <div class="max-w-3xl mx-auto flex flex-col gap-4 font-normal text-on-surface leading-relaxed text-base">
+                ${enParas.map(para => `<p class="text-justify">${_esc(para)}</p>`).join('')}
+            </div>`;
+        return;
+    }
+
+    if (mode === 'vi') {
+        contentEl.innerHTML = `
+            <div class="max-w-3xl mx-auto flex flex-col gap-4 font-normal text-on-surface leading-relaxed text-base">
+                ${viParas.map(para => `<p class="text-justify">${_esc(para)}</p>`).join('')}
+            </div>`;
+        return;
+    }
+
+    // Bilingual mode: Parallel paragraphs
+    const maxParas = Math.max(enParas.length, viParas.length);
+    let html = `<div class="flex flex-col gap-6">`;
+    for (let i = 0; i < maxParas; i++) {
+        const enP = enParas[i] || '';
+        const viP = viParas[i] || '';
+        if (!enP && !viP) continue;
+        const enHtml = enP ? `<p class="text-justify font-normal text-sm md:text-base">${_esc(enP)}</p>` : `<p class="text-xs text-outline italic py-2">—</p>`;
+        const viHtml = viP ? `<p class="text-justify font-normal text-sm md:text-base">${_esc(viP)}</p>` : `<p class="text-xs text-outline italic py-2">—</p>`;
+        html += `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4 border-b border-outline-variant/15 last:border-b-0">
+            <div class="p-3.5 bg-surface-container-low/50 rounded-xl leading-relaxed text-on-surface">
+                <span class="text-[10px] font-bold text-primary uppercase tracking-wider block mb-1.5">English</span>
+                ${enHtml}
+            </div>
+            <div class="p-3.5 bg-surface-container-lowest/60 border border-outline-variant/20 rounded-xl leading-relaxed text-on-surface">
+                <span class="text-[10px] font-bold text-secondary uppercase tracking-wider block mb-1.5">Bản dịch tiếng Việt</span>
+                ${viHtml}
+            </div>
+        </div>`;
+    }
+    html += `</div>`;
+    contentEl.innerHTML = html;
+};
 
 window.addTopicCard = function(topic) {
     const grid = document.getElementById('topics-grid');

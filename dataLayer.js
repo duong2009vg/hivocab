@@ -314,6 +314,10 @@ window.HiDB = (() => {
                 createdAt:  topic.created_at,
             };
         });
+
+        // Sắp xếp chủ đề tự nhiên theo tên (Unit 02..26, IELTS Vol 1..9, CAM 10..21)
+        topics.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
+
         return _cacheSet(cacheKey, topics);
     }
 
@@ -371,23 +375,42 @@ window.HiDB = (() => {
         const cached = _cacheGet(cacheKey);
         if (cached) return cached;
 
-        const { data, error } = await _getClient()
-            .from('words')
-            .select(`
-                id,
-                word,
-                pos,
-                phonetic,
-                meaning,
-                example_sentence,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )
-            `)
-            .eq('topic_id', topicId)
-            .order('created_at', { ascending: true });
+        const client = _getClient();
+        let allData = [];
+        let from = 0;
+        const PAGE_SIZE = 1000;
+        let hasMore = true;
 
-        if (error) throw error;
+        while (hasMore) {
+            const { data, error } = await client
+                .from('words')
+                .select(`
+                    id,
+                    word,
+                    pos,
+                    phonetic,
+                    meaning,
+                    example_sentence,
+                    word_progress ( level, next_review_at, last_reviewed_at, review_count )
+                `)
+                .eq('topic_id', topicId)
+                .order('created_at', { ascending: true })
+                .range(from, from + PAGE_SIZE - 1);
 
-        return _cacheSet(cacheKey, data.map(w => {
+            if (error) throw error;
+            if (data && data.length > 0) {
+                allData.push(...data);
+                if (data.length < PAGE_SIZE) {
+                    hasMore = false;
+                } else {
+                    from += PAGE_SIZE;
+                }
+            } else {
+                hasMore = false;
+            }
+        }
+
+        return _cacheSet(cacheKey, allData.map(w => {
             // Lấy progress của user hiện tại (nếu có)
             const progress = (w.word_progress || [])[0] || null;
             return {
@@ -543,25 +566,45 @@ window.HiDB = (() => {
      */
     async function getWordsForLessonQuery(topicId) {
         const client = _getClient();
-        const queryWithLessonMeta = client
-            .from('words')
-            .select(`id, lesson_name, lesson_order, word_order, word_progress ( level, user_id )`)
-            .eq('topic_id', topicId)
-            .order('lesson_order', { ascending: true, nullsFirst: false })
-            .order('word_order', { ascending: true, nullsFirst: false })
-            .order('created_at', { ascending: true });
+        let words = [];
+        let from = 0;
+        const PAGE_SIZE = 1000;
+        let hasMore = true;
 
-        const result = await queryWithLessonMeta;
-        if (!result.error) return { words: result.data || [], hasLessonMeta: true };
+        while (hasMore) {
+            const { data, error } = await client
+                .from('words')
+                .select(`id, lesson_name, lesson_order, word_order, word_progress ( level, user_id )`)
+                .eq('topic_id', topicId)
+                .order('lesson_order', { ascending: true, nullsFirst: false })
+                .order('word_order', { ascending: true, nullsFirst: false })
+                .order('created_at', { ascending: true })
+                .range(from, from + PAGE_SIZE - 1);
 
-        const fallback = await client
-            .from('words')
-            .select(`id, word_progress ( level, user_id )`)
-            .eq('topic_id', topicId)
-            .order('created_at', { ascending: true });
+            if (error) {
+                // Fallback without lesson_name / lesson_order if schema is older
+                const { data: fallback, error: fbErr } = await client
+                    .from('words')
+                    .select(`id, word_progress ( level, user_id )`)
+                    .eq('topic_id', topicId)
+                    .order('created_at', { ascending: true });
+                if (fbErr) throw fbErr;
+                return { words: fallback || [], hasLessonMeta: false };
+            }
 
-        if (fallback.error) throw fallback.error;
-        return { words: fallback.data || [], hasLessonMeta: false };
+            if (data && data.length > 0) {
+                words.push(...data);
+                if (data.length < PAGE_SIZE) {
+                    hasMore = false;
+                } else {
+                    from += PAGE_SIZE;
+                }
+            } else {
+                hasMore = false;
+            }
+        }
+
+        return { words, hasLessonMeta: true };
     }
 
     async function getLessonWordsQuery(topicId, lessonIndex) {
@@ -724,7 +767,7 @@ window.HiDB = (() => {
         // 2. Lấy danh sách passages của topic
         const { data: passagesData, error: passagesError } = await client
             .from('passages')
-            .select('id, test_id, passage_number, title, topic_label')
+            .select('id, test_id, passage_number, title, topic_label, content_en, content_vi')
             .eq('topic_id', topicId)
             .order('passage_number', { ascending: true });
 
@@ -732,61 +775,139 @@ window.HiDB = (() => {
             return null;
         }
 
-        // 3. Lấy words trong topic kèm passage_id & progress của user
-        const { data: wordsData, error: wordsError } = await client
-            .from('words')
-            .select(`
-                id,
-                passage_id,
-                word,
-                phonetic,
-                meaning,
-                example_sentence,
-                word_order,
-                created_at,
-                word_progress ( level, user_id )
-            `)
-            .eq('topic_id', topicId)
-            .order('word_order', { ascending: true, nullsFirst: false })
-            .order('created_at', { ascending: true });
+        // 3. Lấy thống kê từ vựng & tiến độ theo passage
+        let passageStats = null;
+        try {
+            const { data: rpcStats, error: rpcErr } = await client
+                .rpc('get_cam_passage_stats', { p_topic_id: topicId });
+            if (!rpcErr && Array.isArray(rpcStats)) {
+                passageStats = new Map();
+                for (const row of rpcStats) {
+                    passageStats.set(row.passage_id, {
+                        totalWords: Number(row.total_words || 0),
+                        progress: Number(row.progress || 0)
+                    });
+                }
+            }
+        } catch (rpcEx) {
+            console.warn('[getCamHierarchy] RPC get_cam_passage_stats error, falling back:', rpcEx);
+        }
 
-        if (wordsError) throw wordsError;
-
-        const allWords = wordsData || [];
         const passageWordsMap = new Map();
         const unlinkedWords = [];
 
-        for (const w of allWords) {
-            const userProgress = user
-                ? (w.word_progress || []).find(p => p.user_id === user.id)
-                : null;
-            const wordObj = {
-                id:              w.id,
-                word:            w.word,
-                phonetic:        w.phonetic,
-                meaning:         w.meaning,
-                exampleSentence: w.example_sentence,
-                passageId:       w.passage_id,
-                level:           userProgress?.level ?? 0,
-            };
+        if (passageStats) {
+            // Lấy từ vựng unlinked (nếu có - thường chỉ trong các CAM folder người dùng tự tạo)
+            const { data: unlinkedData } = await client
+                .from('words')
+                .select(`
+                    id,
+                    word,
+                    phonetic,
+                    meaning,
+                    example_sentence,
+                    created_at,
+                    word_progress ( level, user_id )
+                `)
+                .eq('topic_id', topicId)
+                .is('passage_id', null)
+                .order('created_at', { ascending: true });
 
-            if (w.passage_id) {
-                if (!passageWordsMap.has(w.passage_id)) {
-                    passageWordsMap.set(w.passage_id, []);
+            for (const w of (unlinkedData || [])) {
+                const userProgress = user
+                    ? (w.word_progress || []).find(p => p.user_id === user.id)
+                    : null;
+                unlinkedWords.push({
+                    id:              w.id,
+                    word:            w.word,
+                    phonetic:        w.phonetic,
+                    meaning:         w.meaning,
+                    exampleSentence: w.example_sentence,
+                    passageId:       null,
+                    level:           userProgress?.level ?? 0,
+                });
+            }
+        } else {
+            // Fallback: Phân trang để vượt qua giới hạn 1,000 dòng của PostgREST
+            const PAGE_SIZE = 1000;
+            let from = 0;
+            let hasMore = true;
+            const allWords = [];
+
+            while (hasMore) {
+                const { data: chunk, error: chunkErr } = await client
+                    .from('words')
+                    .select(`
+                        id,
+                        passage_id,
+                        word,
+                        phonetic,
+                        meaning,
+                        example_sentence,
+                        word_order,
+                        created_at,
+                        word_progress ( level, user_id )
+                    `)
+                    .eq('topic_id', topicId)
+                    .order('created_at', { ascending: true })
+                    .range(from, from + PAGE_SIZE - 1);
+
+                if (chunkErr) throw chunkErr;
+                if (chunk && chunk.length > 0) {
+                    allWords.push(...chunk);
+                    if (chunk.length < PAGE_SIZE) {
+                        hasMore = false;
+                    } else {
+                        from += PAGE_SIZE;
+                    }
+                } else {
+                    hasMore = false;
                 }
-                passageWordsMap.get(w.passage_id).push(wordObj);
-            } else {
-                unlinkedWords.push(wordObj);
+            }
+
+            for (const w of allWords) {
+                const userProgress = user
+                    ? (w.word_progress || []).find(p => p.user_id === user.id)
+                    : null;
+                const wordObj = {
+                    id:              w.id,
+                    word:            w.word,
+                    phonetic:        w.phonetic,
+                    meaning:         w.meaning,
+                    exampleSentence: w.example_sentence,
+                    passageId:       w.passage_id,
+                    level:           userProgress?.level ?? 0,
+                };
+
+                if (w.passage_id) {
+                    if (!passageWordsMap.has(w.passage_id)) {
+                        passageWordsMap.set(w.passage_id, []);
+                    }
+                    passageWordsMap.get(w.passage_id).push(wordObj);
+                } else {
+                    unlinkedWords.push(wordObj);
+                }
             }
         }
 
         // Map passages theo test_id
         const passagesByTest = new Map();
         for (const p of passagesData) {
-            const wordsInP = passageWordsMap.get(p.id) || [];
-            const totalWords = wordsInP.length;
-            const totalLevel = wordsInP.reduce((sum, item) => sum + item.level, 0);
-            const progress = totalWords > 0 ? Math.round((totalLevel / (totalWords * 5)) * 100) : 0;
+            let totalWords = 0;
+            let progress = 0;
+            let wordIds = [];
+
+            if (passageStats && passageStats.has(p.id)) {
+                const st = passageStats.get(p.id);
+                totalWords = st.totalWords;
+                progress   = st.progress;
+            } else {
+                const wordsInP = passageWordsMap.get(p.id) || [];
+                totalWords = wordsInP.length;
+                const totalLevel = wordsInP.reduce((sum, item) => sum + item.level, 0);
+                progress = totalWords > 0 ? Math.round((totalLevel / (totalWords * 5)) * 100) : 0;
+                wordIds = wordsInP.map(w => w.id);
+            }
 
             const passageObj = {
                 id:            p.id,
@@ -794,9 +915,11 @@ window.HiDB = (() => {
                 passageNumber: p.passage_number,
                 title:         p.title || `Passage ${p.passage_number}`,
                 topicLabel:    p.topic_label || '',
+                contentEn:     p.content_en || '',
+                contentVi:     p.content_vi || '',
                 totalWords,
                 progress,
-                wordIds:       wordsInP.map(w => w.id),
+                wordIds,
             };
 
             if (!passagesByTest.has(p.test_id)) {
@@ -813,12 +936,14 @@ window.HiDB = (() => {
             passages.sort((a, b) => a.passageNumber - b.passageNumber);
 
             const testWordsCount = passages.reduce((sum, p) => sum + p.totalWords, 0);
-            const testWords = passages.flatMap(p => passageWordsMap.get(p.id) || []);
-            const testTotalLevel = testWords.reduce((sum, item) => sum + item.level, 0);
-            const testProgress = testWordsCount > 0 ? Math.round((testTotalLevel / (testWordsCount * 5)) * 100) : 0;
+            let testProgress = 0;
+            if (testWordsCount > 0) {
+                const totalPoints = passages.reduce((sum, p) => sum + (p.progress * p.totalWords), 0);
+                testProgress = Math.round(totalPoints / testWordsCount);
+            }
 
             grandTotalWords += testWordsCount;
-            grandTotalLevel += testTotalLevel;
+            grandTotalLevel += (testProgress * testWordsCount);
 
             return {
                 id:         t.id,
@@ -831,8 +956,8 @@ window.HiDB = (() => {
         });
 
         grandTotalWords += unlinkedWords.length;
-        grandTotalLevel += unlinkedWords.reduce((sum, item) => sum + item.level, 0);
-        const overallProgress = grandTotalWords > 0 ? Math.round((grandTotalLevel / (grandTotalWords * 5)) * 100) : 0;
+        grandTotalLevel += unlinkedWords.reduce((sum, item) => sum + ((item.level / 5) * 100), 0);
+        const overallProgress = grandTotalWords > 0 ? Math.round(grandTotalLevel / grandTotalWords) : 0;
 
         const result = {
             tests,
@@ -894,6 +1019,27 @@ window.HiDB = (() => {
                 isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
             };
         }));
+    }
+
+    /**
+     * Lấy chi tiết passage kèm nội dung song ngữ (content_en, content_vi).
+     *
+     * @param {string} passageId
+     * @returns {Promise<Object|null>}
+     */
+    async function getPassage(passageId) {
+        const client = _getClient();
+        const { data, error } = await client
+            .from('passages')
+            .select('id, test_id, topic_id, passage_number, title, topic_label, content_en, content_vi')
+            .eq('id', passageId)
+            .single();
+
+        if (error) {
+            console.error('[HiDB.getPassage] error:', error);
+            return null;
+        }
+        return data;
     }
 
     /**
@@ -1634,6 +1780,7 @@ window.HiDB = (() => {
         getWordsInLesson,
         getCamHierarchy,
         getWordsInPassage,
+        getPassage,
         getWordsInTest,
 
         // SM-2 Core

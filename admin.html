@@ -563,6 +563,7 @@
 
                 if (error) throw error;
                 allTopicsCache = data || [];
+                allTopicsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
 
                 // Fill dropdowns
                 const camSelect = document.getElementById('cam-topic-select');
@@ -574,8 +575,8 @@
                 modalTopic.innerHTML = '<option value="">-- Chọn Topic --</option>';
 
                 allTopicsCache.forEach(t => {
-                    // Cambridge select
-                    if (t.name.toLowerCase().includes('cam') || t.category === 'Cambridge IELTS') {
+                    // Cambridge / IELTS Vol select
+                    if (t.name.toLowerCase().includes('cam') || t.category === 'Cambridge IELTS' || t.name.toLowerCase().includes('vol') || t.category === 'IELTS Actual Tests') {
                         camSelect.innerHTML += `<option value="${t.id}">${escHtml(t.name)}</option>`;
                     }
                     // Words filter & modal
