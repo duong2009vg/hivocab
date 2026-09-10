@@ -116,7 +116,36 @@ tailwind.config={
 .soft-shadow:hover{box-shadow:0 20px 60px rgba(0,0,0,0.06),0 8px 24px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.03);transform:translateY(-2px);transition:all .3s ease}
 .page{display:none;min-height:100vh}.page.active{display:block}
 #page-thpt-room{display:none!important}
-#page-thpt-room.active{display:flex!important}
+#page-thpt-room.active{
+    display:flex!important;
+    flex-direction:column!important;
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    height:100vh!important;
+    max-height:100vh!important;
+    overflow:hidden!important;
+    z-index:999!important;
+    user-select:auto!important;
+}
+#exam-split-container{
+    display:flex!important;
+    flex:1 1 0%!important;
+    min-height:0!important;
+    height:calc(100vh - 46px - 44px)!important;
+    overflow:hidden!important;
+    position:relative!important;
+}
+#exam-left-col, #exam-right-col{
+    min-height:0!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+}
+.opt-btn{
+    user-select:none;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background-color:rgba(112,120,129,0.2);border-radius:9999px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease-out both}
@@ -1769,7 +1798,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 </div>
 
 <!-- ==================== PAGE: PHÒNG THI THPT (CBT EXAM ROOM) ==================== -->
-<div id="page-thpt-room" class="page fixed inset-0 z-[100] bg-[#f4f6f9] flex-col h-screen w-screen overflow-hidden select-none">
+<div id="page-thpt-room" class="page fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col h-screen w-screen overflow-hidden">
     <!-- Top Header: Siêu gọn gàng 1 hàng duy nhất (~46px), tối ưu không gian hiển thị bài thi -->
     <header class="h-[46px] min-h-[46px] max-h-[46px] bg-[#1a365d] text-white px-3 md:px-5 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-sm z-30 select-none">
         <!-- Left: Kỳ thi & Thí sinh -->

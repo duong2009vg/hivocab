@@ -442,30 +442,42 @@
         // ==========================================
         buildExamSections() {
             if (!this.currentExam) return [];
+            if (this.currentExam.sections && this.currentExam.sections.length > 0) {
+                this.examSections = this.currentExam.sections.map((s, idx) => ({
+                    index: s.part || (idx + 1),
+                    part: s.part || (idx + 1),
+                    type: s.type || 'reading',
+                    group: s.name || `Phần ${idx + 1}`,
+                    name: s.name || `Phần ${idx + 1}`,
+                    startQ: s.start_q,
+                    endQ: s.end_q,
+                    instruction: s.instruction || '',
+                    title: s.title || '',
+                    paragraphs: s.paragraphs || [],
+                    rawText: s.raw_text || ''
+                }));
+                return this.examSections;
+            }
+
             const sections = [];
             let currentSec = null;
-
-            this.currentExam.questions.forEach((q, idx) => {
+            this.currentExam.questions.forEach((q) => {
                 const grpName = q.group || 'Ngữ Liệu Đề Thi';
                 if (!currentSec || currentSec.group !== grpName) {
                     currentSec = {
                         index: sections.length + 1,
                         group: grpName,
+                        name: grpName,
                         startQ: q.number,
                         endQ: q.number,
-                        passage: q.passage || '',
                         questions: [q.number]
                     };
                     sections.push(currentSec);
                 } else {
                     currentSec.endQ = q.number;
                     currentSec.questions.push(q.number);
-                    if (!currentSec.passage && q.passage) {
-                        currentSec.passage = q.passage;
-                    }
                 }
             });
-
             this.examSections = sections;
             return sections;
         },
@@ -484,6 +496,20 @@
             return items;
         },
 
+        formatBlanksInHtml(text, startQ, endQ) {
+            if (!text) return '';
+            let escaped = this.escHtml(text);
+            // Replace blanks: (18), (18) _____, _____ (18) _____, (18) ...
+            escaped = escaped.replace(/(?:\b|\()([1-9]|[1-3][0-9]|40)\)?(?:\s*_{2,}|\s*\.{3,})|(?:\b|\()([1-9]|[1-3][0-9]|40)\)/g, (match, p1, p2) => {
+                const num = parseInt(p1 || p2, 10);
+                if (num >= (startQ || 1) && num <= (endQ || 40)) {
+                    return `<button type="button" onclick="window.ThptExam.jumpToQuestion(${num})" class="inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md bg-blue-100 hover:bg-blue-200 border border-blue-300 text-blue-800 font-mono font-bold text-xs shadow-2xs cursor-pointer transition-all">(${num}) _______</button>`;
+                }
+                return match;
+            });
+            return escaped;
+        },
+
         renderAllPassages() {
             const contentPane = document.getElementById('exam-passage-content');
             const navPillsPane = document.getElementById('exam-passage-nav-pills');
@@ -494,13 +520,13 @@
             // 1. Render Nav Pills
             if (navPillsPane) {
                 let pillsHtml = '';
-                sections.forEach((sec, idx) => {
+                sections.forEach((sec) => {
                     const shortName = `P.${sec.index} (${sec.startQ}-${sec.endQ})`;
                     pillsHtml += `
                     <button type="button" onclick="window.ThptExam.jumpToPassageSection(${sec.index})" 
                             id="passage-pill-${sec.index}"
                             class="passage-pill-btn px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap transition-all border border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-700 cursor-pointer shrink-0 font-sans"
-                            title="${this.escAttr(sec.group)}">
+                            title="${this.escAttr(sec.name || sec.group)}">
                         ${shortName}
                     </button>`;
                 });
@@ -509,17 +535,20 @@
 
             // 2. Render Full Continuous Passages
             let contentHtml = '';
-            sections.forEach((sec, idx) => {
+            sections.forEach((sec) => {
                 const secQuestions = this.currentExam.questions.filter(q => q.number >= sec.startQ && q.number <= sec.endQ);
-                const arrQuestions = secQuestions.filter(q => q.is_arrangement && q.arrangement_sentences);
+                const isArrangementSec = (sec.type === 'arrangement') || secQuestions.some(q => q.is_arrangement);
 
-                if (arrQuestions.length > 0) {
+                if (isArrangementSec) {
                     // Dedicated Sentence Arrangement Section
                     let arrCardsHtml = '';
-                    arrQuestions.forEach(q => {
-                        const parsedSentences = this.parseArrangementSentences(q.arrangement_sentences);
+                    secQuestions.forEach(q => {
+                        const sentences = (q.arrangement_sentences && q.arrangement_sentences.length > 0)
+                            ? q.arrangement_sentences 
+                            : this.parseArrangementSentences(q.prompt);
+
                         let sHtml = '';
-                        parsedSentences.forEach(item => {
+                        sentences.forEach(item => {
                             sHtml += `
                             <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/90 hover:bg-blue-50/50 hover:border-blue-300 transition-colors">
                                 <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
@@ -530,11 +559,6 @@
                                 </div>
                             </div>`;
                         });
-
-                        let salutation = '';
-                        if (q.prompt && !q.prompt.startsWith('Chọn đáp án') && !q.prompt.startsWith('Sắp xếp') && q.prompt.length < 120) {
-                            salutation = `<div class="font-bold text-slate-800 italic text-sm pb-1">${this.escHtml(q.prompt)}</div>`;
-                        }
 
                         arrCardsHtml += `
                         <div id="passage-q-${q.number}" 
@@ -549,11 +573,11 @@
                                     </span>
                                 </div>
                                 <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 font-sans">
-                                    Sentence Arrangement
+                                    Sắp xếp logic
                                 </span>
                             </div>
 
-                            ${salutation}
+                            ${q.arrangement_context ? `<div class="font-bold text-slate-800 italic text-sm pb-1">${this.escHtml(q.arrangement_context)}</div>` : ''}
 
                             <div class="space-y-2">
                                 ${sHtml}
@@ -569,7 +593,7 @@
                                     ${sec.index}
                                 </span>
                                 <h3 class="font-bold text-xs uppercase tracking-wide text-slate-800 truncate">
-                                    ${this.escHtml(sec.group)}
+                                    ${this.escHtml(sec.name || sec.group)}
                                 </h3>
                             </div>
                             <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
@@ -577,9 +601,9 @@
                             </span>
                         </div>
 
-                        ${sec.passage && sec.passage.trim().length > 10 ? `
-                        <div class="text-xs text-slate-500 font-medium italic pb-1">
-                            ${this.escHtml(sec.passage)}
+                        ${sec.instruction ? `
+                        <div class="text-xs text-slate-500 font-medium italic pb-1 font-serif leading-relaxed">
+                            ${this.escHtml(sec.instruction)}
                         </div>` : ''}
 
                         <div class="space-y-3">
@@ -587,10 +611,34 @@
                         </div>
                     </div>`;
                 } else {
-                    // Regular Reading Passage
-                    const passageText = sec.passage && sec.passage.trim().length > 10 
-                        ? sec.passage 
-                        : 'Phần này bao gồm các câu hỏi độc lập (xem chi tiết ở cột bên phải).';
+                    // Authentic Reading / Leaflet / Cloze Passage
+                    let parasHtml = '';
+                    if (sec.paragraphs && sec.paragraphs.length > 0) {
+                        sec.paragraphs.forEach(p => {
+                            p = p.trim();
+                            if (!p) return;
+                            const isBullet = p.startsWith('•') || p.startsWith('- ') || /^[1-6]\.\s+/.test(p);
+                            if (isBullet) {
+                                parasHtml += `
+                                <div class="flex items-start gap-2.5 text-sm text-slate-800 my-2 pl-2 leading-relaxed font-sans">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0 mt-2"></span>
+                                    <div class="flex-1">${this.formatBlanksInHtml(p.replace(/^[•\-\*]\s*|^[1-6]\.\s*/, ''), sec.startQ, sec.endQ)}</div>
+                                </div>`;
+                            } else {
+                                parasHtml += `
+                                <p class="text-justify text-sm text-slate-800 leading-relaxed indent-6 my-2.5 font-sans">
+                                    ${this.formatBlanksInHtml(p, sec.startQ, sec.endQ)}
+                                </p>`;
+                            }
+                        });
+                    } else if (sec.rawText) {
+                        parasHtml = `
+                        <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text">
+                            ${this.formatBlanksInHtml(sec.rawText, sec.startQ, sec.endQ)}
+                        </div>`;
+                    } else {
+                        parasHtml = '<p class="text-xs text-slate-500 italic">Phần này bao gồm các câu hỏi độc lập (xem chi tiết ở cột bên phải).</p>';
+                    }
 
                     contentHtml += `
                     <div id="passage-sec-${sec.index}" 
@@ -601,7 +649,7 @@
                                     ${sec.index}
                                 </span>
                                 <h3 class="font-bold text-xs uppercase tracking-wide text-slate-800 truncate">
-                                    ${this.escHtml(sec.group)}
+                                    ${this.escHtml(sec.name || sec.group)}
                                 </h3>
                             </div>
                             <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
@@ -609,9 +657,19 @@
                             </span>
                         </div>
 
-                        <!-- Nội dung bài đọc đầy đủ: Hiện đại, font-sans, leading-relaxed -->
-                        <div class="text-slate-800 leading-relaxed font-sans whitespace-pre-line text-sm q-text-size select-text">
-                            ${this.escHtml(passageText)}
+                        ${sec.instruction ? `
+                        <div class="italic text-slate-600 text-xs mb-2 font-serif leading-relaxed border-l-2 border-blue-400 pl-2.5 py-0.5 bg-blue-50/40 rounded-r">
+                            ${this.escHtml(sec.instruction)}
+                        </div>` : ''}
+
+                        ${sec.title ? `
+                        <h4 class="text-center font-black text-sm uppercase tracking-wider text-slate-900 my-3 pb-1 border-b border-slate-100">
+                            ${this.escHtml(sec.title)}
+                        </h4>` : ''}
+
+                        <!-- Real Exam Paper Typography -->
+                        <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text space-y-1">
+                            ${parasHtml}
                         </div>
                     </div>`;
                 }
@@ -720,7 +778,7 @@
                     ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white"></span>' 
                     : '';
 
-                html += `<button type="button" onclick="window.ThptExam.jumpToQuestion(${i})" class="${cls}">${i}${flagDot}</button>`;
+                html += `<button type="button" id="palette-btn-${i}" onclick="window.ThptExam.jumpToQuestion(${i})" class="${cls}">${i}${flagDot}</button>`;
             }
 
             palette.innerHTML = html;
@@ -729,6 +787,22 @@
         renderQuestionsList() {
             const container = document.getElementById('exam-questions-list');
             if (!container || !this.currentExam) return;
+
+            // Attach event delegation listener once for rock-solid answer selection
+            if (!this.listListenerAttached) {
+                this.listListenerAttached = true;
+                container.addEventListener('click', (e) => {
+                    if (this.isReviewMode) return;
+                    const btn = e.target.closest('.opt-btn');
+                    if (btn) {
+                        const qNum = parseInt(btn.getAttribute('data-q'), 10);
+                        const optLetter = btn.getAttribute('data-opt');
+                        if (qNum && optLetter) {
+                            this.selectAnswer(qNum, optLetter);
+                        }
+                    }
+                });
+            }
 
             let html = '';
             this.currentExam.questions.forEach((q, idx) => {
@@ -742,11 +816,11 @@
                     promptHtml = `
                     <div class="space-y-1.5 font-sans">
                         <div class="font-bold text-sm text-slate-900 leading-relaxed q-text-size">
-                            <strong>Question ${qNum}.</strong> Chọn phương án sắp xếp các câu ở cột bên trái theo thứ tự đúng:
+                            <strong>Question ${qNum}.</strong> Chọn phương án sắp xếp các câu ở cột bên trái theo đúng trật tự logic để tạo thành văn bản hoàn chỉnh:
                         </div>
                         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
                             <span class="material-symbols-outlined text-[14px]">west</span>
-                            <span>Xem các câu <strong>a, b, c, d, e</strong> ở cột bên trái</span>
+                            <span>Xem các câu <strong>(a, b, c, d, e)</strong> ở cột bên trái</span>
                         </div>
                     </div>`;
                 } else {
@@ -799,27 +873,27 @@
                 const isSelected = (selectedOpt === letter);
                 const isCorrect = (q.correct_answer === letter);
 
-                let optClass = 'flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans ';
+                let optClass = 'opt-btn w-full text-left flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans ';
                 let radioCircle = '';
 
                 if (this.isReviewMode) {
                     if (isCorrect) {
                         optClass += 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold';
-                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">check</span></span>`;
+                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">check</span></span>`;
                     } else if (isSelected && !isCorrect) {
                         optClass += 'bg-rose-50 border-rose-400 text-rose-950';
-                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-rose-600 bg-rose-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">close</span></span>`;
+                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-rose-600 bg-rose-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">close</span></span>`;
                     } else {
                         optClass += 'bg-white border-slate-200 text-slate-600 opacity-60';
-                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
+                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
                     }
                 } else {
                     if (isSelected) {
                         optClass += 'bg-blue-50/90 border-blue-600 text-blue-950 font-bold shadow-xs ring-1 ring-blue-500/30';
-                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5 bg-white"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></span>`;
+                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5 bg-white"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></span>`;
                     } else {
                         optClass += 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800';
-                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
+                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
                     }
                 }
 
@@ -828,14 +902,19 @@
                     : '';
 
                 html += `
-                <div ${clickAction} class="${optClass}">
-                    <input type="radio" class="sr-only" name="radio_q_${q.number}" value="${letter}" ${isSelected ? 'checked' : ''} />
+                <button type="button" 
+                        id="opt-${q.number}-${letter}"
+                        ${clickAction}
+                        data-q="${q.number}" 
+                        data-opt="${letter}"
+                        class="${optClass}">
+                    <input type="radio" class="sr-only pointer-events-none" name="radio_q_${q.number}" value="${letter}" ${isSelected ? 'checked' : ''} />
                     ${radioCircle}
-                    <div class="flex-1 q-text-size">
+                    <div class="flex-1 q-text-size pointer-events-none">
                         <span class="font-bold mr-1.5 text-slate-900">${letter}.</span>
                         <span>${this.escHtml(optText)}</span>
                     </div>
-                </div>`;
+                </button>`;
             });
 
             return html;
@@ -862,15 +941,60 @@
         // 9. TƯƠNG TÁC THÍ SINH
         // ==========================================
         selectAnswer(qNum, optLetter) {
-            if (this.isReviewMode) return;
+            if (this.isReviewMode || !this.currentExam) return;
 
             this.userAnswers[qNum] = optLetter;
             this.currentQIndex = qNum - 1;
 
-            this.renderSingleQuestion(qNum);
-            this.renderPalette();
+            // 1. Direct DOM update for option buttons
+            ['A', 'B', 'C', 'D'].forEach(letter => {
+                const btn = document.getElementById(`opt-${qNum}-${letter}`);
+                if (!btn) return;
+                const isSel = (letter === optLetter);
+                const radio = btn.querySelector('input[type="radio"]');
+                if (radio) radio.checked = isSel;
+
+                const circle = btn.querySelector('.radio-circle');
+                if (isSel) {
+                    btn.className = 'opt-btn w-full text-left flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans bg-blue-50/90 border-blue-600 text-blue-950 font-bold shadow-xs ring-1 ring-blue-500/30';
+                    if (circle) {
+                        circle.className = 'radio-circle w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5 bg-white';
+                        circle.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>';
+                    }
+                } else {
+                    btn.className = 'opt-btn w-full text-left flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800';
+                    if (circle) {
+                        circle.className = 'radio-circle w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5';
+                        circle.innerHTML = '';
+                    }
+                }
+            });
+
+            // 2. Direct DOM update for palette button
+            const palBtn = document.getElementById(`palette-btn-${qNum}`);
+            if (palBtn) {
+                const isFlagged = !!this.flaggedQuestions[qNum];
+                const flagDot = isFlagged ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white"></span>' : '';
+                palBtn.className = 'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-extrabold text-xs transition-all relative cursor-pointer select-none shrink-0 font-sans bg-emerald-600 text-white shadow-2xs ring-2 ring-blue-600 ring-offset-2';
+                palBtn.innerHTML = `${qNum}${flagDot}`;
+            }
+
+            // 3. Highlight active card
+            document.querySelectorAll('[id^="q-card-"]').forEach(c => c.classList.remove('ring-2', 'ring-blue-500/40'));
+            const currentCard = document.getElementById(`q-card-${qNum}`);
+            if (currentCard) currentCard.classList.add('ring-2', 'ring-blue-500/40');
+
+            // 4. Update Header indicators
+            const numEl = document.getElementById('exam-current-q-num');
+            if (numEl) numEl.textContent = qNum;
             this.updateProgressCounter();
-            this.saveProgress(false);
+
+            // 5. Safe Storage Save
+            try {
+                this.saveProgress(false);
+            } catch(e) {
+                console.warn('Storage save failed:', e);
+            }
         },
 
         renderSingleQuestion(qNum) {
@@ -896,7 +1020,9 @@
             this.flaggedQuestions[qNum] = !this.flaggedQuestions[qNum];
             this.renderPalette();
             this.renderSingleQuestion(qNum);
-            this.saveProgress(false);
+            try {
+                this.saveProgress(false);
+            } catch(e) {}
         },
 
         jumpToQuestion(qNum) {
