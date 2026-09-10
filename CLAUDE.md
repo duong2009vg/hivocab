@@ -218,6 +218,7 @@ Không cần API key, không giới hạn request.
 6. Mọi exercise phải qua **HiSession + HiSessionUI**, không render thẳng HTML
 7. Khi thêm UI mới phải dùng đúng **class Tailwind** từ design system, không dùng inline style
 8. Responsive: luôn có cả class `md:` và mobile class
+9. **Git workflow**: Sau khi hoàn thành bất kỳ tính năng hoặc sửa lỗi nào, mặc định tự động commit và push lên GitHub (`origin main`).
 
 ---
 
