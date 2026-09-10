@@ -29,6 +29,7 @@
         revealedParas: new Set(),   // Set lưu index các đoạn tiếng Việt đã được mở
         highlightVocab: true,       // Bật/tắt highlight từ vựng
         gapItems: [],               // Danh sách câu đục lỗ
+        currentGapIndex: 0,         // Index câu hỏi đục lỗ hiện tại đang làm
         gapStats: { total: 0, correct: 0, hinted: 0 }
     };
 
@@ -688,6 +689,7 @@
         });
 
         state.gapItems = items;
+        state.currentGapIndex = 0;
         state.gapStats = {
             total: items.length,
             correct: 0,
@@ -718,9 +720,53 @@
         const correctCount = items.filter(it => it.isCorrect).length;
         const progressPct = Math.round((correctCount / total) * 100);
 
+        // Đảm bảo currentGapIndex nằm trong giới hạn hợp lệ
+        if (typeof state.currentGapIndex !== 'number' || state.currentGapIndex < 0 || state.currentGapIndex >= total) {
+            const firstUnfinished = items.findIndex(it => !it.isCorrect);
+            state.currentGapIndex = firstUnfinished !== -1 ? firstUnfinished : 0;
+        }
+
+        // Màn hình hoàn thành nếu tất cả các câu đã trả lời đúng
+        if (correctCount === total && total > 0) {
+            container.innerHTML = `
+            <div class="max-w-2xl mx-auto w-full pb-20 fade-in">
+                <div class="bg-gradient-to-br from-green-500/20 via-surface to-primary/20 border-2 border-green-500/40 rounded-3xl p-8 md:p-10 text-center soft-shadow mt-6">
+                    <span class="text-6xl mb-4 block animate-bounce">🎉</span>
+                    <h3 class="text-2xl md:text-3xl font-bold text-on-surface mb-2">Xuất sắc! Bạn đã hoàn thành</h3>
+                    <p class="text-sm md:text-base text-on-surface-variant mb-6 max-w-md mx-auto">
+                        Bạn đã trả lời chính xác toàn bộ <strong>${total} / ${total} câu</strong> đục lỗ trong ngữ cảnh bài đọc IELTS này.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <button onclick="window.switchBilingualTab('reading')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm shadow-md hover:bg-surface-tint active:scale-95 transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">menu_book</span>
+                            <span>Đọc lại bài đọc</span>
+                        </button>
+                        <button onclick="window.resetGapExercises()" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface font-bold text-sm active:scale-95 transition-all flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">refresh</span>
+                            <span>Làm lại bài tập</span>
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+            return;
+        }
+
+        const idx = state.currentGapIndex;
+        const item = items[idx];
+        const isDone = item.isCorrect;
+        const isRevealed = item.isRevealed;
+
+        // Gợi ý chữ cái đầu
+        let hintDisplay = '';
+        if (item.hintLevel > 0) {
+            const letters = item.blankWord.slice(0, item.hintLevel);
+            const underscores = '_ '.repeat(Math.max(0, item.blankWord.length - item.hintLevel));
+            hintDisplay = `${letters} ${underscores}`.trim();
+        }
+
         let html = `
-        <div class="max-w-4xl mx-auto w-full pb-20">
-            <!-- Header thống kê bài tập -->
+        <div class="max-w-3xl mx-auto w-full pb-20">
+            <!-- Header thống kê bài tập & Dải chọn câu hỏi (Stepper) -->
             <div class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-2xl p-5 md:p-6 mb-6 soft-shadow">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
@@ -729,7 +775,7 @@
                         </span>
                         <h2 class="text-xl md:text-2xl font-bold text-on-surface leading-tight">Bài tập Đục Lỗ Song Ngữ</h2>
                         <p class="text-xs text-on-surface-variant mt-1">
-                            Điền từ vựng còn thiếu vào câu văn IELTS gốc dựa vào gợi ý nghĩa tiếng Việt.
+                            Điền từ còn thiếu vào câu văn IELTS gốc dựa vào gợi ý nghĩa tiếng Việt.
                         </p>
                     </div>
 
@@ -750,68 +796,83 @@
                         <div class="bg-primary h-2 rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
                     </div>
                 </div>
+
+                <!-- Dải nút chọn câu hỏi nhanh (Stepper) -->
+                <div class="mt-4 pt-3 border-t border-outline-variant/15 flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-none">
+                    <span class="text-[11px] font-bold text-outline uppercase tracking-wider mr-1 shrink-0">Câu:</span>
+                    ${items.map((it, i) => {
+                        const isCurr = i === idx;
+                        const itDone = it.isCorrect;
+                        const itRev  = it.isRevealed;
+                        let btnClass = '';
+                        if (isCurr) {
+                            btnClass = 'bg-primary text-on-primary font-bold shadow-sm ring-2 ring-primary/40 ring-offset-1';
+                        } else if (itDone) {
+                            btnClass = 'bg-green-600 text-white font-bold';
+                        } else if (itRev) {
+                            btnClass = 'bg-yellow-500/20 text-yellow-800 font-semibold border border-yellow-500/40';
+                        } else {
+                            btnClass = 'bg-surface-container text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-medium';
+                        }
+                        return `
+                            <button onclick="window.goToGapItem(${i})"
+                                class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs flex items-center justify-center shrink-0 transition-all active:scale-95 ${btnClass}"
+                                title="Chuyển đến câu ${i + 1}">
+                                ${itDone && !isCurr ? '<span class="material-symbols-outlined text-[15px]">check</span>' : (i + 1)}
+                            </button>`;
+                    }).join('')}
+                </div>
             </div>
 
-            <!-- Danh sách các câu đục lỗ -->
-            <div class="flex flex-col gap-4">`;
-
-        items.forEach((item, idx) => {
-            const isDone = item.isCorrect;
-            const isRevealed = item.isRevealed;
-
-            // Gợi ý chữ cái đầu
-            let hintDisplay = '';
-            if (item.hintLevel > 0) {
-                const letters = item.blankWord.slice(0, item.hintLevel);
-                const underscores = '_ '.repeat(Math.max(0, item.blankWord.length - item.hintLevel));
-                hintDisplay = `${letters} ${underscores}`.trim();
-            }
-
-            html += `
-            <div id="gap-card-${idx}" class="bg-surface-container-lowest/90 backdrop-blur-sm border ${
+            <!-- Card Pop-up hiển thị câu hiện tại -->
+            <div id="gap-card-${idx}" class="bg-surface-container-lowest/90 backdrop-blur-xl border ${
                 isDone
                     ? 'border-green-500/40 bg-green-500/5'
                     : isRevealed
                     ? 'border-yellow-500/40 bg-yellow-500/5'
                     : 'border-outline-variant/20'
-            } rounded-2xl p-5 md:p-6 soft-shadow transition-all">
-                
+            } rounded-2xl p-6 sm:p-8 soft-shadow transition-all fade-in">
+
                 <!-- Tiêu đề câu & STT -->
-                <div class="flex items-center justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-lg ${isDone ? 'bg-green-600 text-white' : 'bg-primary/10 text-primary'} text-xs font-bold flex items-center justify-center shrink-0">
-                            ${isDone ? '<span class="material-symbols-outlined text-[16px]">check</span>' : (idx + 1)}
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-outline-variant/15">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-8 h-8 rounded-xl ${isDone ? 'bg-green-600 text-white' : 'bg-primary/10 text-primary'} text-sm font-bold flex items-center justify-center shrink-0 shadow-sm">
+                            ${isDone ? '<span class="material-symbols-outlined text-[18px]">check</span>' : (idx + 1)}
                         </span>
-                        <span class="text-xs font-bold text-outline uppercase tracking-wider">Câu ${idx + 1}</span>
+                        <div>
+                            <span class="text-xs font-bold text-outline uppercase tracking-wider block">Câu hỏi ${idx + 1} / ${total}</span>
+                            <span class="text-[11px] text-on-surface-variant font-medium">Luyện từ trong ngữ cảnh</span>
+                        </div>
                     </div>
 
                     <div class="flex items-center gap-2">
-                        ${item.pos ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant">${escapeHtml(item.pos)}</span>` : ''}
+                        ${item.pos ? `<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant">${escapeHtml(item.pos)}</span>` : ''}
                         ${item.phonetic ? `<span class="font-mono text-xs text-outline">${escapeHtml(item.phonetic)}</span>` : ''}
-                        <button onclick="window.HiSpeak && window.HiSpeak('${escapeHtml(item.targetWord)}')" class="p-1 rounded-full text-outline hover:text-primary transition-colors" title="Nghe từ">
-                            <span class="material-symbols-outlined text-[18px]">volume_up</span>
+                        <button onclick="window.HiSpeak && window.HiSpeak('${escapeHtml(item.targetWord)}')" class="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-all active:scale-95" title="Nghe phát âm">
+                            <span class="material-symbols-outlined text-[20px]">volume_up</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Câu văn tiếng Anh có ô trống điền từ -->
-                <div class="text-on-surface text-base md:text-lg leading-relaxed mb-4">
+                <div class="text-on-surface text-lg sm:text-xl leading-relaxed my-6 font-normal">
                     <span>${escapeHtml(item.sentenceBefore)}</span>
-                    
-                    <span class="inline-block align-baseline mx-1">
+
+                    <span class="inline-block align-baseline mx-1.5">
                         <input id="gap-input-${idx}"
                             type="text"
                             value="${escapeHtml(item.userAnswer || (isDone || isRevealed ? item.blankWord : ''))}"
                             ${isDone ? 'disabled' : ''}
+                            autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"
                             onkeydown="if(event.key==='Enter') window.checkGapItem(${idx})"
-                            class="px-3 py-1 rounded-lg text-center font-bold text-base md:text-lg border-2 transition-all outline-none ${
+                            class="px-3.5 py-1.5 rounded-xl text-center font-bold text-base sm:text-xl border-2 transition-all outline-none ${
                                 isDone
                                     ? 'border-green-600 bg-green-100 text-green-800'
                                     : isRevealed
                                     ? 'border-yellow-500 bg-yellow-100 text-yellow-800'
-                                    : 'border-primary/40 bg-surface-container-low focus:border-primary focus:bg-surface text-on-surface'
+                                    : 'border-primary/40 bg-surface-container-low focus:border-primary focus:bg-surface text-on-surface focus:shadow-md'
                             }"
-                            style="min-width: ${Math.max(100, item.blankWord.length * 14)}px; max-width: 220px;"
+                            style="min-width: ${Math.max(110, item.blankWord.length * 15)}px; max-width: 260px;"
                             placeholder="${hintDisplay || '...'}" />
                     </span>
 
@@ -819,61 +880,113 @@
                 </div>
 
                 <!-- Gợi ý nghĩa tiếng Việt đối chiếu -->
-                <div class="bg-surface-container-low/60 rounded-xl p-3 mb-3 flex items-start gap-2 text-xs md:text-sm">
-                    <span class="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">lightbulb</span>
+                <div class="bg-surface-container-low/70 rounded-xl p-4 mb-6 flex items-start gap-2.5 text-xs sm:text-sm border border-outline-variant/20">
+                    <span class="material-symbols-outlined text-[20px] text-tertiary shrink-0 mt-0.5">lightbulb</span>
                     <div>
                         <span class="text-outline font-semibold">Gợi ý nghĩa:</span>
                         <span class="font-bold text-on-surface ml-1">${escapeHtml(item.meaning)}</span>
-                        ${hintDisplay ? `<span class="block mt-1 text-xs text-primary font-mono font-bold">Ký tự bắt đầu: ${hintDisplay}</span>` : ''}
+                        ${hintDisplay ? `<span class="block mt-1.5 text-xs text-primary font-mono font-bold">Ký tự gợi ý: ${hintDisplay}</span>` : ''}
                     </div>
                 </div>
+
+                <!-- Feedback khi làm đúng -->
+                ${isDone ? `
+                <div class="mb-5 p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-green-700 flex items-center justify-between text-xs sm:text-sm font-bold fade-in">
+                    <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                        <span>Chính xác! Từ cần điền là: <strong>${escapeHtml(item.blankWord)}</strong></span>
+                    </span>
+                    <button onclick="window.nextGapItem(${idx})" class="px-3 py-1 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors flex items-center gap-1">
+                        <span>Câu tiếp</span>
+                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                    </button>
+                </div>` : ''}
 
                 <!-- Các nút hành động cho từng câu -->
-                <div class="flex items-center justify-between gap-2 pt-2 border-t border-outline-variant/15 flex-wrap">
+                <div class="flex items-center justify-between gap-3 pt-3 border-t border-outline-variant/15 flex-wrap">
+                    <!-- Trái: Gợi ý và Đáp án -->
                     <div class="flex items-center gap-2">
                         ${!isDone ? `
-                        <button onclick="window.hintGapItem(${idx})" class="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-semibold flex items-center gap-1 transition-colors">
-                            <span class="material-symbols-outlined text-[15px]">tips_and_updates</span>
+                        <button onclick="window.hintGapItem(${idx})" class="px-3.5 py-2 rounded-xl bg-surface-container hover:bg-primary/10 text-on-surface-variant hover:text-primary text-xs font-semibold flex items-center gap-1.5 transition-colors border border-outline-variant/20">
+                            <span class="material-symbols-outlined text-[16px]">tips_and_updates</span>
                             <span>Gợi ý (${item.hintLevel}/${item.blankWord.length})</span>
                         </button>
-                        <button onclick="window.revealGapItem(${idx})" class="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-semibold flex items-center gap-1 transition-colors">
-                            <span class="material-symbols-outlined text-[15px]">visibility</span>
+                        <button onclick="window.revealGapItem(${idx})" class="px-3.5 py-2 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface-variant text-xs font-semibold flex items-center gap-1.5 transition-colors border border-outline-variant/20">
+                            <span class="material-symbols-outlined text-[16px]">visibility</span>
                             <span>Xem đáp án</span>
-                        </button>` : `
-                        <span class="text-xs text-green-700 font-bold flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
-                            <span>Chính xác!</span>
-                        </span>`}
+                        </button>` : ''}
                     </div>
 
-                    ${!isDone ? `
-                    <button onclick="window.checkGapItem(${idx})"
-                        class="px-5 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs md:text-sm hover:bg-surface-tint active:scale-95 transition-all shadow-sm flex items-center gap-1">
-                        <span>Kiểm tra</span>
-                        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-                    </button>` : ''}
+                    <!-- Phải: Điều hướng trước/sau và Kiểm tra -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.prevGapItem(${idx})" ${idx === 0 ? 'disabled' : ''}
+                            class="px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+                                idx === 0 ? 'opacity-40 cursor-not-allowed text-outline' : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant active:scale-95'
+                            }">
+                            <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                            <span>Câu trước</span>
+                        </button>
+
+                        ${!isDone ? `
+                        <button onclick="window.checkGapItem(${idx})"
+                            class="px-6 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs sm:text-sm hover:bg-surface-tint active:scale-95 transition-all shadow-sm flex items-center gap-1.5">
+                            <span>Kiểm tra</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>` : `
+                        <button onclick="window.nextGapItem(${idx})"
+                            class="px-6 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs sm:text-sm hover:bg-surface-tint active:scale-95 transition-all shadow-sm flex items-center gap-1.5">
+                            <span>Tiếp tục</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </button>`}
+                    </div>
                 </div>
 
-            </div>`;
-        });
+            </div>
+        </div>`;
 
-        // Banner hoàn thành nếu làm đúng hết
-        if (correctCount === total && total > 0) {
-            html += `
-            <div class="bg-gradient-to-br from-green-500/20 via-surface to-primary/20 border-2 border-green-500/40 rounded-2xl p-8 text-center soft-shadow mt-6 fade-in">
-                <span class="text-5xl mb-3 block">🎉</span>
-                <h3 class="text-2xl font-bold text-on-surface mb-2">Xuất sắc! Bạn đã hoàn thành bài tập</h3>
-                <p class="text-sm text-on-surface-variant mb-6">Bạn đã nắm vững toàn bộ ${total} từ vựng trong ngữ cảnh bài đọc IELTS này.</p>
-                <div class="flex items-center justify-center gap-3">
-                    <button onclick="window.switchBilingualTab('reading')" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm shadow-md">Đọc lại bài đọc</button>
-                    <button onclick="window.resetGapExercises()" class="px-6 py-2.5 rounded-xl bg-surface-container text-on-surface font-bold text-sm">Làm lại bài tập</button>
-                </div>
-            </div>`;
+        container.innerHTML = html;
+
+        // Auto focus vào ô input câu hiện tại
+        setTimeout(() => {
+            const inp = document.getElementById(`gap-input-${idx}`);
+            if (inp && !inp.disabled) {
+                inp.focus();
+                inp.select();
+            }
+        }, 100);
+    }
+
+    // Điều hướng câu
+    window.goToGapItem = function(targetIdx) {
+        const total = (state.gapItems || []).length;
+        if (targetIdx >= 0 && targetIdx < total) {
+            state.currentGapIndex = targetIdx;
+            renderGapFillView();
+        }
+    };
+
+    window.nextGapItem = function(currentIdx) {
+        const total = (state.gapItems || []).length;
+        // Ưu tiên chuyển sang câu chưa làm tiếp theo
+        let nextIdx = state.gapItems.findIndex((it, i) => i > currentIdx && !it.isCorrect);
+        if (nextIdx === -1) {
+            nextIdx = state.gapItems.findIndex(it => !it.isCorrect);
         }
 
-        html += `</div></div>`;
-        container.innerHTML = html;
-    }
+        if (nextIdx !== -1) {
+            window.goToGapItem(nextIdx);
+        } else if (currentIdx < total - 1) {
+            window.goToGapItem(currentIdx + 1);
+        } else {
+            renderGapFillView();
+        }
+    };
+
+    window.prevGapItem = function(currentIdx) {
+        if (currentIdx > 0) {
+            window.goToGapItem(currentIdx - 1);
+        }
+    };
 
     // Kiểm tra câu trả lời
     window.checkGapItem = function(idx) {
@@ -894,24 +1007,32 @@
         if (isMatch) {
             item.isCorrect = true;
             if (window.HiSpeak) window.HiSpeak(item.targetWord);
-            renderGapFillView();
 
-            // Tự động focus sang ô input tiếp theo chưa làm
+            // Phản hồi trực quan màu xanh ngay lập tức
+            if (input) {
+                input.className = 'px-3.5 py-1.5 rounded-xl text-center font-bold text-base sm:text-xl border-2 border-green-600 bg-green-100 text-green-800';
+            }
+
+            // Tự động nhảy sang câu tiếp theo sau 750ms
             setTimeout(() => {
-                const nextItemIdx = state.gapItems.findIndex((it, i) => i > idx && !it.isCorrect);
-                if (nextItemIdx !== -1) {
-                    const nextInput = document.getElementById(`gap-input-${nextItemIdx}`);
-                    if (nextInput) {
-                        nextInput.focus();
-                        nextInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
+                const total = state.gapItems.length;
+                let nextIdx = state.gapItems.findIndex((it, i) => i > idx && !it.isCorrect);
+                if (nextIdx === -1) {
+                    nextIdx = state.gapItems.findIndex(it => !it.isCorrect);
                 }
-            }, 100);
+
+                if (nextIdx !== -1) {
+                    state.currentGapIndex = nextIdx;
+                }
+                renderGapFillView();
+            }, 750);
+
         } else {
-            // Lỗi: hiệu ứng rung nhẹ
+            // Lỗi: hiệu ứng rung nhẹ viền đỏ
             if (input) {
                 input.classList.add('border-error', 'animate-pulse');
                 setTimeout(() => input.classList.remove('border-error', 'animate-pulse'), 800);
+                input.select();
             }
         }
     };
@@ -925,7 +1046,11 @@
         renderGapFillView();
         setTimeout(() => {
             const input = document.getElementById(`gap-input-${idx}`);
-            if (input) input.focus();
+            if (input) {
+                input.focus();
+                // Tự điền phần ký tự đã gợi ý vào ô input để người dùng gõ tiếp
+                input.value = item.blankWord.slice(0, item.hintLevel);
+            }
         }, 50);
     };
 
@@ -947,6 +1072,7 @@
             it.userAnswer = '';
             it.hintLevel = 0;
         });
+        state.currentGapIndex = 0;
         renderGapFillView();
     };
 

@@ -166,13 +166,19 @@ const HiSession = (() => {
 
             // -- LISTEN -------------------------------------------
             // Ph�t �m thanh ? user nh?p l?i t? nghe du?c
-            case 'listen':
+            case 'listen': {
+                const answerText = word.word || '';
                 return {
-                    wordToSpeak: word.word,
-                    answer:      word.word,
-                    hint:        `Nghĩa: ${word.meaning}`,  // hiển thị sau lần nghe đầu
+                    wordToSpeak: answerText,
+                    answer:      answerText,
+                    meaning:     word.meaning || '',
+                    hint:        `Nghĩa: ${word.meaning || ''}`,
                     phonetic:    word.phonetic || '',
+                    letters:     _countAnswerLetters(answerText),
+                    answerParts: _splitAnswerParts(answerText),
+                    hasSpaces:   /\s/.test(answerText.trim()),
                 };
+            }
 
             default:
                 throw new Error(`[HiSession] Unknown exercise type: ${type}`);
