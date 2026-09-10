@@ -273,6 +273,11 @@
                 return;
             }
 
+            if (window.innerWidth < 768) {
+                const proceed = confirm('Giao diện thi thử trắc nghiệm máy tính (CBT) được thiết kế tối ưu cho máy tính / laptop hoặc màn hình lớn.\n\nBạn có muốn tiếp tục làm bài trên điện thoại không?');
+                if (!proceed) return;
+            }
+
             this.currentExam = exam;
             this.currentQIndex = 0;
             this.isReviewMode = false;

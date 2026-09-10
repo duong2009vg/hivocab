@@ -502,6 +502,7 @@ window.HiDB = (() => {
                     id: row.id,
                     topicId: row.topic_id,
                     word: row.word,
+                    pos: row.pos || '',
                     phonetic: row.phonetic,
                     meaning: row.meaning,
                     exampleSentence: row.example_sentence,

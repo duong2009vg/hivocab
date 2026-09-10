@@ -514,6 +514,31 @@ def extract_one_exam(rel_path, exam_index):
             sec_title = p_lines[0]
             passage_raw = '\n'.join(p_lines[1:])
 
+        instruction_cleaner = re.compile(
+            r'^\s*[\(\[\{]?\s*'
+            r'(?:(?:on\s+)?(?:your\s+)?(?:answer\s+)?sheet\s+)?'
+            r'(?:(?:to\s+)?(?:indicate|choose|select|mark|arrange)\s+)?'
+            r'(?:(?:the\s+)?(?:correct\s+|best\s+)?(?:option|answer|letter|arrangement(?:\s+of\s+(?:utterances|sentences)(?:\s+or)?)?)\s+)?'
+            r'(?:(?:that\s+)?(?:best\s+fits|to)\s+)?'
+            r'(?:(?:sentences\s+)?to\s+make\s+a\s+(?:meaningful|cohesive\s+and\s+coherent)\s+(?:exchange|text|paragraph|letter)(?:\s+or\s+(?:text|exchange))?\s*(?:in\s+each\s+of\s+the\s+following\s+questions?)?\.?\s*)?'
+            r'(?:(?:each\s+of\s+the|each\s+of|each|the)\s+)?'
+            r'(?:(?:following|numbered)\s+)*'
+            r'(?:blanks?|questions?|items?)\s*'
+            r'(?:from\s+\d+\s+to\s+\d+|\d+\s+to\s+\d+)?'
+            r'[\)\]\}\.:\-\–\s]*',
+            re.IGNORECASE
+        )
+
+        def clean_passage_str(t):
+            if not t: return ''
+            for _ in range(4):
+                prev = t
+                t = instruction_cleaner.sub('', t).strip()
+                if t == prev: break
+            if len(t) < 15 and any(k in t.lower() for k in ['exchange', 'blank', 'question', 'option']):
+                return ''
+            return t
+
         if sec_arr:
             stype = "arrangement"
             sname = f"Phần {part_num}: Sắp Xếp Câu & Đoạn Văn (Câu {sq} - {eq})"
@@ -522,9 +547,12 @@ def extract_one_exam(rel_path, exam_index):
             if not instruction_text:
                 instruction_text = "Mark the letter A, B, C, or D on your answer sheet to indicate the correct arrangement of the sentences to make a meaningful paragraph/letter in each of the following questions."
         else:
-            paras = reflow_paragraphs(passage_raw)
+            paras = [clean_passage_str(p) for p in reflow_paragraphs(passage_raw)]
+            paras = [p for p in paras if p]
             if not paras and passage_raw:
-                paras = [re.sub(r'\s+', ' ', passage_raw).strip()]
+                cl = clean_passage_str(re.sub(r'\s+', ' ', passage_raw).strip())
+                if cl: paras = [cl]
+            passage_raw = '\n\n'.join(paras)
 
             if eq - sq + 1 >= 7:
                 stype = "reading"
@@ -552,7 +580,7 @@ def extract_one_exam(rel_path, exam_index):
     for q in range(1, 41):
         q_data = parsed_questions[q]
         sec_match = next((s for s in final_sections if s["start_q"] <= q <= s["end_q"]), final_sections[0])
-        passage_str = '\n\n'.join(sec_match["paragraphs"]) if sec_match["paragraphs"] else sec_match["raw_text"]
+        passage_str = "" if q_data["is_arrangement"] else ('\n\n'.join(sec_match["paragraphs"]) if sec_match["paragraphs"] else sec_match["raw_text"])
 
         final_questions.append({
             "number": q,

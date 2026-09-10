@@ -887,7 +887,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     <div class="flex justify-around items-center h-[60px] w-full px-1">
         <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">home</span><span class="text-[9px] mt-0.5 font-semibold">Trang chủ</span></a>
         <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="text-[9px] mt-0.5 font-semibold">Chủ đề</span></a>
-        <a onclick="navigateTo('exercises')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">school</span><span class="text-[9px] mt-0.5 font-semibold">Đề THPT</span></a>
+        <a onclick="navigateTo('vocabulary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">collections_bookmark</span><span class="text-[9px] mt-0.5 font-semibold">Sổ từ vựng</span></a>
         <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
         <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
     </div>
@@ -1918,6 +1918,15 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
             </div>
         </section>
 
+        <!-- Mobile Recommendation Notice -->
+        <div class="lg:hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-900 flex items-start gap-3 text-xs leading-relaxed">
+            <span class="material-symbols-outlined text-amber-600 shrink-0 text-xl">devices</span>
+            <div>
+                <p class="font-bold text-amber-950">Khuyến nghị thiết bị làm bài thi:</p>
+                <p class="text-amber-900 mt-0.5">Giao diện thi thử THPT Quốc Gia (CBT) được thiết kế chuyên biệt cho màn hình Máy tính (Desktop/Laptop) hoặc Tablet lớn. Vui lòng truy cập trên máy tính để có trải nghiệm thi tốt nhất.</p>
+            </div>
+        </div>
+
         <!-- THPT Exams Grid -->
         <div id="thpt-exams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <div class="flex items-center justify-center py-16 col-span-full">
@@ -2169,10 +2178,10 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 <div id="page-vocabulary" class="page">
 <main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-5 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
-        <header class="hidden lg:flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-2 lg:gap-4">
             <div>
-                <h1 class="font-headline-lg text-headline-lg text-on-surface">Kho từ vựng</h1>
-                <p id="vocab-subtitle" class="text-on-surface-variant mt-1">Ôn tập và làm chủ các từ đã lưu.</p>
+                <h1 class="hidden lg:block font-headline-lg text-headline-lg text-on-surface">Kho từ vựng</h1>
+                <p id="vocab-subtitle" class="text-xs md:text-sm text-on-surface-variant mt-0.5">Ôn tập và làm chủ toàn bộ từ vựng trong kho dữ liệu.</p>
             </div>
         </header>
         <div class="relative w-full lg:w-96 mb-2">
@@ -3320,13 +3329,13 @@ window.addEventListener('hashchange', () => {
 
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dataLayer.js?v=20260609-lesson-fallback-v1"></script>
+<script src="dataLayer.js?v=20260910-vocab-rpc-v2"></script>
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
-<script src="thptExam.js?v=20260910_cbt_v12"></script>
+<script src="thptExam.js?v=20260910_cbt_v13"></script>
 <script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 <script src="bilingualReading.js?v=20260910-v1"></script>
 
@@ -5199,6 +5208,197 @@ window.filterLessonWords = function() {
     document.querySelectorAll('#lesson-words-list > div[class]').forEach(card => {
         card.style.display = (!q || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
     });
+};
+
+// ── SỔ TỪ VỰNG (VOCABULARY NOTEBOOK / KHO TỪ VỰNG) ──────────────
+window._vocabPageState = {
+    page: 1,
+    pageSize: 25,
+    search: '',
+    debounceTimer: null,
+    total: 0,
+    totalPages: 1,
+    isLoading: false
+};
+
+window._loadVocabularyPage = async function(page = 1, search = null) {
+    const listEl = document.getElementById('vocab-list');
+    const pagEl = document.getElementById('vocab-pagination');
+    const subtitleEl = document.getElementById('vocab-subtitle');
+    if (!listEl) return;
+
+    if (search !== null) {
+        window._vocabPageState.search = (search || '').trim();
+    }
+    const currentSearch = window._vocabPageState.search;
+    window._vocabPageState.page = page;
+    window._vocabPageState.isLoading = true;
+
+    listEl.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+            <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+            <p class="text-sm font-medium">Đang tải danh sách từ vựng...</p>
+        </div>
+    `;
+    if (pagEl) pagEl.classList.add('hidden');
+
+    try {
+        if (typeof HiDB === 'undefined' || typeof HiDB.getVocabularyPage !== 'function') {
+            throw new Error('Hệ thống dữ liệu HiDB chưa sẵn sàng.');
+        }
+
+        const res = await HiDB.getVocabularyPage(page, window._vocabPageState.pageSize, currentSearch);
+        const words = res?.words || [];
+        const total = res?.total || 0;
+        const totalPages = Math.max(1, Math.ceil(total / window._vocabPageState.pageSize));
+
+        window._vocabPageState.total = total;
+        window._vocabPageState.totalPages = totalPages;
+        window._vocabPageState.isLoading = false;
+
+        if (subtitleEl) {
+            if (currentSearch) {
+                subtitleEl.textContent = `Tìm thấy ${total.toLocaleString('vi-VN')} từ vựng phù hợp với "${currentSearch}".`;
+            } else {
+                subtitleEl.textContent = `Tổng cộng ${total.toLocaleString('vi-VN')} từ vựng trong toàn bộ kho dữ liệu.`;
+            }
+        }
+
+        if (words.length === 0) {
+            listEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3 bg-surface-container-lowest/50 rounded-2xl border border-outline-variant/20 p-8 text-center">
+                    <span class="material-symbols-outlined text-[52px] text-outline opacity-40">search_off</span>
+                    <h3 class="font-bold text-base text-on-surface">Không tìm thấy từ vựng nào</h3>
+                    <p class="text-xs text-on-surface-variant max-w-sm">Thử tìm kiếm với từ khóa khác hoặc xóa ô tìm kiếm để xem lại toàn bộ từ vựng.</p>
+                </div>
+            `;
+            if (pagEl) pagEl.classList.add('hidden');
+            return;
+        }
+
+        const lvLabel = ['Mới', '1h', '8h', '1 ngày', '1 tuần', '1 tháng'];
+        const lvColor = [
+            'bg-surface-container text-outline',
+            'bg-red-100 text-red-700',
+            'bg-yellow-100 text-yellow-700',
+            'bg-blue-100 text-blue-700',
+            'bg-green-100 text-green-700',
+            'bg-green-200 text-green-800'
+        ];
+
+        const startIndex = (page - 1) * window._vocabPageState.pageSize;
+
+        listEl.innerHTML = words.map((w, i) => {
+            const lv = Math.min(Math.max(w.level || 0, 0), 5);
+            const globalIndex = startIndex + i + 1;
+            const safeWord = (typeof _esc === 'function' ? _esc(w.word) : w.word) || '';
+            const safeMeaning = (typeof _esc === 'function' ? _esc(w.meaning) : w.meaning) || '';
+            const safeExample = (typeof _esc === 'function' ? _esc(w.exampleSentence || w.example_sentence || '') : (w.exampleSentence || w.example_sentence || ''));
+            const safeTopic = (typeof _esc === 'function' ? _esc(w.topicName || '') : (w.topicName || ''));
+            const safePos = (typeof _esc === 'function' ? _esc(w.pos || '') : (w.pos || ''));
+            const safePhonetic = (typeof _esc === 'function' ? _esc(w.phonetic || '') : (w.phonetic || ''));
+
+            return `
+            <div class="group bg-surface-container-lowest/90 backdrop-blur-sm border border-outline-variant/25 hover:border-primary/40 rounded-2xl p-4 md:p-5 flex items-start gap-4 soft-shadow hover:shadow-md transition-all">
+                <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-black text-xs md:text-sm flex items-center justify-center shrink-0 mt-0.5">
+                    ${globalIndex}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="font-bold text-on-surface text-base md:text-lg group-hover:text-primary transition-colors">${safeWord}</span>
+                        ${safePos ? `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">${safePos}</span>` : ''}
+                        ${safePhonetic ? `<span class="text-xs md:text-sm text-outline font-mono">${safePhonetic}</span>` : ''}
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
+                        ${safeTopic ? `<span class="hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant truncate max-w-[200px]" title="${safeTopic}">${safeTopic}</span>` : ''}
+                        <button onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio('${safeWord}')}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('${safeWord}');u.lang='en-US';window.speechSynthesis.speak(u);}"
+                            class="ml-auto p-1.5 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
+                            <span class="material-symbols-outlined text-[20px]">volume_up</span>
+                        </button>
+                    </div>
+                    <p class="text-sm md:text-base text-on-surface-variant mt-1.5 font-medium leading-relaxed">${safeMeaning}</p>
+                    ${safeExample ? `<p class="text-xs md:text-sm text-outline italic mt-1.5 leading-relaxed bg-surface-container-lowest/60 p-2 rounded-lg border border-outline-variant/15">${safeExample}</p>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        // Render Pagination Controls
+        if (pagEl && totalPages > 1) {
+            pagEl.classList.remove('hidden');
+            let pagHtml = '';
+
+            // Previous Button
+            pagHtml += `
+                <button onclick="window._loadVocabularyPage(${page - 1})"
+                        class="px-3 py-1.5 rounded-xl border border-outline-variant/40 text-xs font-bold transition-all ${page <= 1 ? 'opacity-40 cursor-not-allowed pointer-events-none text-outline' : 'hover:bg-primary/10 text-on-surface cursor-pointer'}">
+                    &larr; Trước
+                </button>
+            `;
+
+            // Smart page numbers
+            const pagesToShow = [];
+            for (let p = 1; p <= totalPages; p++) {
+                if (p === 1 || p === totalPages || (p >= page - 2 && p <= page + 2)) {
+                    pagesToShow.push(p);
+                } else if (pagesToShow[pagesToShow.length - 1] !== '...') {
+                    pagesToShow.push('...');
+                }
+            }
+
+            pagesToShow.forEach(p => {
+                if (p === '...') {
+                    pagHtml += `<span class="px-2 py-1 text-xs text-outline font-bold select-none">...</span>`;
+                } else if (p === page) {
+                    pagHtml += `
+                        <button class="w-8 h-8 rounded-xl bg-primary text-white font-bold text-xs shadow-xs pointer-events-none">
+                            ${p}
+                        </button>
+                    `;
+                } else {
+                    pagHtml += `
+                        <button onclick="window._loadVocabularyPage(${p})"
+                                class="w-8 h-8 rounded-xl border border-outline-variant/40 hover:bg-primary/10 text-on-surface font-semibold text-xs transition-colors cursor-pointer">
+                            ${p}
+                        </button>
+                    `;
+                }
+            });
+
+            // Next Button
+            pagHtml += `
+                <button onclick="window._loadVocabularyPage(${page + 1})"
+                        class="px-3 py-1.5 rounded-xl border border-outline-variant/40 text-xs font-bold transition-all ${page >= totalPages ? 'opacity-40 cursor-not-allowed pointer-events-none text-outline' : 'hover:bg-primary/10 text-on-surface cursor-pointer'}">
+                    Sau &rarr;
+                </button>
+            `;
+
+            pagEl.innerHTML = pagHtml;
+        } else if (pagEl) {
+            pagEl.classList.add('hidden');
+        }
+
+    } catch (err) {
+        console.error('[_loadVocabularyPage]', err);
+        window._vocabPageState.isLoading = false;
+        listEl.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-16 text-error gap-3 bg-red-50/50 rounded-2xl border border-red-200 p-6 text-center">
+                <span class="material-symbols-outlined text-[44px]">error</span>
+                <h3 class="font-bold text-sm">Không thể tải danh sách từ vựng</h3>
+                <p class="text-xs text-on-surface-variant">${typeof _esc === 'function' ? _esc(err.message) : err.message}</p>
+                <button onclick="window._loadVocabularyPage(${page})" class="mt-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer hover:bg-primary-dark transition-all">
+                    Thử lại
+                </button>
+            </div>
+        `;
+        if (pagEl) pagEl.classList.add('hidden');
+    }
+};
+
+window._filterVocabList = function() {
+    clearTimeout(window._vocabPageState.debounceTimer);
+    const searchVal = document.getElementById('vocab-search')?.value || '';
+    window._vocabPageState.debounceTimer = setTimeout(() => {
+        window._loadVocabularyPage(1, searchVal);
+    }, 300);
 };
 
 // ── Topic / Folder Creation Wizard ──────────────────────────────
