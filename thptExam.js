@@ -633,8 +633,13 @@
                         });
                     } else if (sec.rawText) {
                         parasHtml = `
-                        <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text">
+                        <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text whitespace-pre-line space-y-2">
                             ${this.formatBlanksInHtml(sec.rawText, sec.startQ, sec.endQ)}
+                        </div>`;
+                    } else if (secQuestions.length > 0 && secQuestions[0].passage) {
+                        parasHtml = `
+                        <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text whitespace-pre-line space-y-2">
+                            ${this.formatBlanksInHtml(secQuestions[0].passage, sec.startQ, sec.endQ)}
                         </div>`;
                     } else {
                         parasHtml = '<p class="text-xs text-slate-500 italic">Phần này bao gồm các câu hỏi độc lập (xem chi tiết ở cột bên phải).</p>';
@@ -753,32 +758,26 @@
                 const isFlagged = !!this.flaggedQuestions[i];
                 const isCurrent = (i === this.currentQIndex + 1);
 
-                let cls = 'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all relative cursor-pointer select-none shrink-0 font-sans ';
+                let cls = 'thpt-pal-btn';
 
                 if (this.isReviewMode && this.results) {
                     const isCorrect = this.results.details[i]?.isCorrect;
-                    if (isCorrect) {
-                        cls += 'bg-emerald-600 text-white shadow-xs font-black';
-                    } else {
-                        cls += 'bg-rose-600 text-white shadow-xs font-black';
-                    }
+                    cls += isCorrect ? ' correct' : ' wrong';
                 } else {
                     if (isAnswered) {
-                        cls += 'bg-emerald-600 text-white shadow-2xs font-extrabold';
-                    } else {
-                        cls += 'bg-white text-slate-700 border border-slate-300 hover:border-slate-400';
+                        cls += ' answered';
                     }
                 }
 
                 if (isCurrent) {
-                    cls += ' ring-2 ring-blue-600 ring-offset-2';
+                    cls += ' current';
                 }
 
                 const flagDot = isFlagged && !this.isReviewMode 
-                    ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white"></span>' 
+                    ? '<span class="thpt-flag-dot"></span>' 
                     : '';
 
-                html += `<button type="button" id="palette-btn-${i}" onclick="window.ThptExam.jumpToQuestion(${i})" class="${cls}">${i}${flagDot}</button>`;
+                html += `<button type="button" id="palette-btn-${i}" onclick="window.ThptExam.jumpToQuestion(${i})" class="${cls}" title="Câu ${i}">${i}${flagDot}</button>`;
             }
 
             palette.innerHTML = html;
@@ -873,27 +872,26 @@
                 const isSelected = (selectedOpt === letter);
                 const isCorrect = (q.correct_answer === letter);
 
-                let optClass = 'opt-btn w-full text-left flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans ';
+                let optClass = 'opt-btn';
                 let radioCircle = '';
 
                 if (this.isReviewMode) {
                     if (isCorrect) {
-                        optClass += 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold';
-                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">check</span></span>`;
+                        optClass += ' opt-correct';
+                        radioCircle = `<span class="opt-circle"><span class="material-symbols-outlined text-white text-[13px] font-black">check</span></span>`;
                     } else if (isSelected && !isCorrect) {
-                        optClass += 'bg-rose-50 border-rose-400 text-rose-950';
-                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-rose-600 bg-rose-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">close</span></span>`;
+                        optClass += ' opt-wrong';
+                        radioCircle = `<span class="opt-circle"><span class="material-symbols-outlined text-white text-[13px] font-black">close</span></span>`;
                     } else {
-                        optClass += 'bg-white border-slate-200 text-slate-600 opacity-60';
-                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
+                        optClass += ' opacity-50';
+                        radioCircle = `<span class="opt-circle"></span>`;
                     }
                 } else {
                     if (isSelected) {
-                        optClass += 'bg-blue-50/90 border-blue-600 text-blue-950 font-bold shadow-xs ring-1 ring-blue-500/30';
-                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5 bg-white"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></span>`;
+                        optClass += ' opt-selected';
+                        radioCircle = `<span class="opt-circle"><span class="opt-circle-dot"></span></span>`;
                     } else {
-                        optClass += 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800';
-                        radioCircle = `<span class="radio-circle w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
+                        radioCircle = `<span class="opt-circle"></span>`;
                     }
                 }
 
@@ -911,7 +909,7 @@
                     <input type="radio" class="sr-only pointer-events-none" name="radio_q_${q.number}" value="${letter}" ${isSelected ? 'checked' : ''} />
                     ${radioCircle}
                     <div class="flex-1 q-text-size pointer-events-none">
-                        <span class="font-bold mr-1.5 text-slate-900">${letter}.</span>
+                        <span class="font-bold mr-1 text-slate-900">${letter}.</span>
                         <span>${this.escHtml(optText)}</span>
                     </div>
                 </button>`;
@@ -946,7 +944,7 @@
             this.userAnswers[qNum] = optLetter;
             this.currentQIndex = qNum - 1;
 
-            // 1. Direct DOM update for option buttons
+            // 1. Direct DOM update for option buttons of this question
             ['A', 'B', 'C', 'D'].forEach(letter => {
                 const btn = document.getElementById(`opt-${qNum}-${letter}`);
                 if (!btn) return;
@@ -954,29 +952,28 @@
                 const radio = btn.querySelector('input[type="radio"]');
                 if (radio) radio.checked = isSel;
 
-                const circle = btn.querySelector('.radio-circle');
+                const circle = btn.querySelector('.opt-circle');
                 if (isSel) {
-                    btn.className = 'opt-btn w-full text-left flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans bg-blue-50/90 border-blue-600 text-blue-950 font-bold shadow-xs ring-1 ring-blue-500/30';
-                    if (circle) {
-                        circle.className = 'radio-circle w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5 bg-white';
-                        circle.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span>';
-                    }
+                    btn.classList.add('opt-selected');
+                    if (circle) circle.innerHTML = '<span class="opt-circle-dot"></span>';
                 } else {
-                    btn.className = 'opt-btn w-full text-left flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none font-sans bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800';
-                    if (circle) {
-                        circle.className = 'radio-circle w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5';
-                        circle.innerHTML = '';
-                    }
+                    btn.classList.remove('opt-selected');
+                    if (circle) circle.innerHTML = '';
                 }
             });
 
-            // 2. Direct DOM update for palette button
+            // 2. Direct DOM update for bottom palette button
             const palBtn = document.getElementById(`palette-btn-${qNum}`);
             if (palBtn) {
-                const isFlagged = !!this.flaggedQuestions[qNum];
-                const flagDot = isFlagged ? '<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-500 border border-white"></span>' : '';
-                palBtn.className = 'w-7 h-7 md:w-8 md:h-8 rounded-full flex items-center justify-center font-extrabold text-xs transition-all relative cursor-pointer select-none shrink-0 font-sans bg-emerald-600 text-white shadow-2xs ring-2 ring-blue-600 ring-offset-2';
-                palBtn.innerHTML = `${qNum}${flagDot}`;
+                palBtn.classList.add('answered');
+                palBtn.classList.add('current');
+            }
+            // Remove 'current' from other palette buttons
+            for (let i = 1; i <= this.currentExam.total_questions; i++) {
+                if (i !== qNum) {
+                    const otherBtn = document.getElementById(`palette-btn-${i}`);
+                    if (otherBtn) otherBtn.classList.remove('current');
+                }
             }
 
             // 3. Highlight active card
