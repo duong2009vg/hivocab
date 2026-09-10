@@ -1821,9 +1821,9 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     </header>
 
     <!-- Sub-Header / Control Toolbar -->
-    <div class="bg-white border-b border-slate-200 px-4 md:px-6 py-2 flex items-center justify-between shrink-0 shadow-xs">
+    <div class="bg-white border-b border-slate-200 px-4 md:px-6 py-2 flex items-center justify-between shrink-0 shadow-xs gap-2">
         <!-- Navigation Buttons -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 md:gap-2">
             <button onclick="window.ThptExam.prevQuestion()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
                 <span class="material-symbols-outlined text-[16px]">arrow_back</span>
                 <span class="hidden sm:inline">Quay lại</span>
@@ -1838,9 +1838,16 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
             </button>
         </div>
 
+        <!-- Mobile View Switcher (Visible only on small screens) -->
+        <div class="flex md:hidden items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[11px] font-bold">
+            <button type="button" id="btn-view-passage" onclick="window.ThptExam.setMobileView('passage')" class="px-2 py-1 rounded-md text-slate-600 hover:text-blue-700">Bài đọc</button>
+            <button type="button" id="btn-view-both" onclick="window.ThptExam.setMobileView('both')" class="px-2 py-1 rounded-md bg-white text-blue-700 shadow-xs">Cả hai</button>
+            <button type="button" id="btn-view-questions" onclick="window.ThptExam.setMobileView('questions')" class="px-2 py-1 rounded-md text-slate-600 hover:text-blue-700">Câu hỏi</button>
+        </div>
+
         <!-- Progress Counter -->
         <div class="text-xs text-slate-600 font-medium">
-            <span>Số câu đã trả lời: </span>
+            <span class="hidden sm:inline">Số câu đã làm: </span>
             <span id="exam-answered-count" class="font-black text-blue-700 text-sm">0 / 40</span>
         </div>
 
@@ -1856,32 +1863,34 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     </div>
 
     <!-- Main Body: Split View 2 Cột Độc Lập -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
-        <!-- Cột Trái: Ngữ liệu / Đoạn văn đề bài -->
-        <div class="w-full md:w-1/2 border-r border-slate-200 flex flex-col bg-white overflow-hidden">
-            <div class="px-5 py-2.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-blue-600 text-[18px]">article</span>
-                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700" id="exam-passage-group-title">Ngữ Liệu Đề Thi</span>
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+        <!-- Cột Trái: Ngữ liệu / Toàn bộ bài đọc có thể cuộn tự do -->
+        <div id="exam-left-col" class="w-full md:w-1/2 border-r border-slate-200 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full transition-all">
+            <div class="px-4 py-2 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0 gap-2">
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <span class="material-symbols-outlined text-blue-600 text-[18px]">menu_book</span>
+                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700 hidden sm:inline">Bài Đọc &amp; Ngữ Liệu</span>
                 </div>
-                <span class="text-[11px] text-slate-500 font-medium">Bài đọc / Nội dung đề bài</span>
+                <div id="exam-passage-nav-pills" class="flex items-center gap-1 overflow-x-auto scrollbar-hide py-0.5 max-w-full">
+                    <!-- Quick section jump buttons rendered by JS -->
+                </div>
             </div>
-            <div id="exam-passage-content" class="flex-1 overflow-y-auto p-5 md:p-6 select-text">
-                <!-- Rendered by JS -->
+            <div id="exam-passage-content" class="flex-1 overflow-y-auto p-4 md:p-6 select-text space-y-5">
+                <!-- All sections rendered continuously by JS so user can freely scroll through the entire exam -->
             </div>
         </div>
 
         <!-- Cột Phải: Câu hỏi & Phương án trắc nghiệm -->
-        <div class="w-full md:w-1/2 flex flex-col bg-slate-50/60 overflow-hidden">
-            <div class="px-5 py-2.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div id="exam-right-col" class="w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-1/2 md:h-full transition-all">
+            <div class="px-4 py-2 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-[18px]">checklist</span>
-                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Câu Hỏi &amp; Phương Án Trả Lời</span>
+                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Câu Hỏi &amp; Phương Án</span>
                 </div>
-                <span class="text-[11px] text-slate-500 font-medium">Bấm chọn A, B, C hoặc D</span>
+                <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">Chọn A, B, C, D (Phím tắt: 1, 2, 3, 4)</span>
             </div>
-            <div id="exam-questions-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5">
-                <!-- Rendered by JS -->
+            <div id="exam-questions-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+                <!-- Rendered by JS with ID q-options-X -->
             </div>
         </div>
     </div>

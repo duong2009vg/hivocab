@@ -18,6 +18,9 @@
         fontSizeLevel: 0,      // -1 (nhỏ), 0 (chuẩn), 1 (lớn), 2 (rất lớn)
         selectedCustomMinutes: 50,
         results: null,
+        mobileViewMode: 'both', // 'both' | 'passage' | 'questions'
+        examSections: [],      // Cached passage sections for the current exam
+        keyboardBound: false,
 
         // ==========================================
         // 1. KHỞI TẠO & NẠP DỮ LIỆU
@@ -33,7 +36,54 @@
             } catch (err) {
                 console.warn('Lỗi nạp thpt_exams.json:', err);
             }
+            this.setupKeyboardNavigation();
             this.renderExamsList();
+        },
+
+        setupKeyboardNavigation() {
+            if (this.keyboardBound) return;
+            this.keyboardBound = true;
+
+            window.addEventListener('keydown', (e) => {
+                const roomEl = document.getElementById('page-thpt-room');
+                if (!roomEl || !roomEl.classList.contains('active')) return;
+
+                // Bỏ qua nếu đang gõ trong input text/textarea
+                const tag = (e.target.tagName || '').toLowerCase();
+                if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+
+                const key = e.key;
+
+                // Chọn đáp án bằng phím A, B, C, D hoặc 1, 2, 3, 4
+                if (!this.isReviewMode) {
+                    const keyUpper = key.toUpperCase();
+                    if (['A', 'B', 'C', 'D'].includes(keyUpper)) {
+                        e.preventDefault();
+                        this.selectAnswer(this.currentQIndex + 1, keyUpper);
+                        return;
+                    }
+                    if (['1', '2', '3', '4'].includes(key)) {
+                        e.preventDefault();
+                        const mapKey = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
+                        this.selectAnswer(this.currentQIndex + 1, mapKey[key]);
+                        return;
+                    }
+                    if (key === 'f' || key === 'F') {
+                        e.preventDefault();
+                        this.toggleFlag(this.currentQIndex + 1);
+                        return;
+                    }
+                }
+
+                // Điều hướng câu hỏi
+                if (key === 'ArrowRight' || key === 'Enter') {
+                    e.preventDefault();
+                    this.nextQuestion();
+                } else if (key === 'ArrowLeft') {
+                    e.preventDefault();
+                    this.prevQuestion();
+                }
+            });
         },
 
         // ==========================================
@@ -152,9 +202,17 @@
             // Switch to Room View
             this.showRoomView();
 
+            // Render Passages (All sections continuous scroll)
+            this.renderAllPassages();
+
             // Render Questions & Palette
             this.renderQuestionsAndPalette();
-            this.syncPassageAndScroll(1);
+
+            // Reset mobile view
+            this.setMobileView('both');
+
+            // Jump to first question
+            this.jumpToQuestion(1);
         },
 
         setupCandidateInfo() {
@@ -177,9 +235,13 @@
         },
 
         showRoomView() {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            const roomEl = document.getElementById('page-thpt-room');
-            if (roomEl) roomEl.classList.add('active');
+            if (window.navigateTo) {
+                window.navigateTo('thpt-room', true);
+            } else {
+                document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                const roomEl = document.getElementById('page-thpt-room');
+                if (roomEl) roomEl.classList.add('active');
+            }
 
             // Hide main sidebar and mobile header
             const sidebar = document.getElementById('main-sidebar');
@@ -262,7 +324,129 @@
         },
 
         // ==========================================
-        // 5. RENDER BỐ CỤC 2 CỘT & PALETTE 40 CÂU
+        // 5. TOÀN BỘ BÀI ĐỌC (CỘT TRÁI - CUỘN TỰ DO)
+        // ==========================================
+        buildExamSections() {
+            if (!this.currentExam) return [];
+            const sections = [];
+            let currentSec = null;
+
+            this.currentExam.questions.forEach((q, idx) => {
+                const grpName = q.group || 'Ngữ Liệu Đề Thi';
+                if (!currentSec || currentSec.group !== grpName) {
+                    currentSec = {
+                        index: sections.length + 1,
+                        group: grpName,
+                        startQ: q.number,
+                        endQ: q.number,
+                        passage: q.passage || '',
+                        questions: [q.number]
+                    };
+                    sections.push(currentSec);
+                } else {
+                    currentSec.endQ = q.number;
+                    currentSec.questions.push(q.number);
+                    if (!currentSec.passage && q.passage) {
+                        currentSec.passage = q.passage;
+                    }
+                }
+            });
+
+            this.examSections = sections;
+            return sections;
+        },
+
+        renderAllPassages() {
+            const contentPane = document.getElementById('exam-passage-content');
+            const navPillsPane = document.getElementById('exam-passage-nav-pills');
+            if (!contentPane || !this.currentExam) return;
+
+            const sections = this.buildExamSections();
+
+            // 1. Render Nav Pills
+            if (navPillsPane) {
+                let pillsHtml = '';
+                sections.forEach((sec, idx) => {
+                    const shortName = `P.${sec.index} (${sec.startQ}-${sec.endQ})`;
+                    pillsHtml += `
+                    <button type="button" onclick="window.ThptExam.jumpToPassageSection(${sec.index})" 
+                            id="passage-pill-${sec.index}"
+                            class="passage-pill-btn px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap transition-all border border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-700 cursor-pointer shrink-0"
+                            title="${this.escAttr(sec.group)}">
+                        ${shortName}
+                    </button>`;
+                });
+                navPillsPane.innerHTML = pillsHtml;
+            }
+
+            // 2. Render Full Continuous Passages
+            let contentHtml = '';
+            sections.forEach((sec, idx) => {
+                const passageText = sec.passage && sec.passage.trim().length > 10 
+                    ? sec.passage 
+                    : 'Phần này bao gồm các câu hỏi độc lập (xem chi tiết ở cột bên phải).';
+
+                contentHtml += `
+                <div id="passage-sec-${sec.index}" 
+                     class="passage-sec-card p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3 transition-all duration-300">
+                    <div class="flex items-center justify-between pb-2.5 border-b border-slate-100 gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 font-black text-xs flex items-center justify-center shrink-0">
+                                ${sec.index}
+                            </span>
+                            <h3 class="font-bold text-xs uppercase tracking-wide text-slate-800 truncate">
+                                ${this.escHtml(sec.group)}
+                            </h3>
+                        </div>
+                        <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
+                            Câu ${sec.startQ} - ${sec.endQ}
+                        </span>
+                    </div>
+
+                    <!-- Nội dung bài đọc đầy đủ -->
+                    <div class="text-slate-800 leading-relaxed font-serif whitespace-pre-line text-sm q-text-size select-text">
+                        ${this.escHtml(passageText)}
+                    </div>
+                </div>`;
+            });
+
+            contentPane.innerHTML = contentHtml;
+        },
+
+        jumpToPassageSection(secIndex) {
+            const card = document.getElementById(`passage-sec-${secIndex}`);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Cập nhật trạng thái pill
+            document.querySelectorAll('.passage-pill-btn').forEach(btn => {
+                btn.className = 'passage-pill-btn px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap transition-all border border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-700 cursor-pointer shrink-0';
+            });
+            const activePill = document.getElementById(`passage-pill-${secIndex}`);
+            if (activePill) {
+                activePill.className = 'passage-pill-btn px-2.5 py-1 rounded-md text-[11px] font-black whitespace-nowrap transition-all border border-blue-600 bg-blue-600 text-white shadow-xs cursor-pointer shrink-0';
+            }
+
+            // Highlight card
+            document.querySelectorAll('.passage-sec-card').forEach(c => {
+                c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+            });
+            if (card) {
+                card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+            }
+        },
+
+        syncPassageAndScroll(qNum) {
+            if (!this.examSections || this.examSections.length === 0) return;
+            const targetSec = this.examSections.find(s => qNum >= s.startQ && qNum <= s.endQ);
+            if (targetSec) {
+                this.jumpToPassageSection(targetSec.index);
+            }
+        },
+
+        // ==========================================
+        // 6. RENDER CÂU HỎI & CHỌN ĐÁP ÁN
         // ==========================================
         renderQuestionsAndPalette() {
             if (!this.currentExam) return;
@@ -324,18 +508,18 @@
                 const isCurrent = (idx === this.currentQIndex);
 
                 html += `
-                <div id="q-card-${qNum}" class="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 transition-all ${isCurrent ? 'ring-2 ring-blue-500/30' : ''}">
+                <div id="q-card-${qNum}" class="p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 transition-all ${isCurrent ? 'ring-2 ring-blue-500/40' : ''}">
                     <div class="flex items-start justify-between gap-3">
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
                             <span class="w-6 h-6 rounded-lg bg-blue-50 text-blue-700 font-black text-xs flex items-center justify-center shrink-0">
                                 ${qNum}
                             </span>
-                            <span class="font-bold text-xs uppercase tracking-wider text-slate-500">
+                            <span class="font-bold text-xs uppercase tracking-wider text-slate-500 truncate">
                                 ${this.escHtml(q.group)}
                             </span>
                         </div>
                         <button type="button" onclick="window.ThptExam.toggleFlag(${qNum})" 
-                                class="p-1.5 rounded-lg transition-colors cursor-pointer ${isFlagged ? 'text-amber-500 bg-amber-50' : 'text-slate-400 hover:text-slate-600'}" 
+                                class="p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${isFlagged ? 'text-amber-500 bg-amber-50' : 'text-slate-400 hover:text-slate-600'}" 
                                 title="Đánh dấu câu hỏi cần xem lại">
                             <span class="material-symbols-outlined text-[18px]">${isFlagged ? 'flag' : 'outlined_flag'}</span>
                         </button>
@@ -346,8 +530,8 @@
                         <strong>Question ${qNum}.</strong> ${this.escHtml(q.prompt)}
                     </div>
 
-                    <!-- Options A, B, C, D -->
-                    <div class="space-y-2.5 pt-1">
+                    <!-- Options Container with explicit ID -->
+                    <div id="q-options-${qNum}" class="space-y-2.5 pt-1">
                         ${this.renderOptionsHtml(q, selectedOpt)}
                     </div>
 
@@ -368,37 +552,40 @@
                 const isSelected = (selectedOpt === letter);
                 const isCorrect = (q.correct_answer === letter);
 
-                let optClass = 'flex items-start gap-3 p-3 rounded-xl border text-xs font-medium transition-all cursor-pointer ';
+                let optClass = 'flex items-start gap-3 p-3.5 rounded-xl border text-xs font-medium transition-all cursor-pointer select-none ';
                 let radioCircle = '';
 
                 if (this.isReviewMode) {
                     if (isCorrect) {
-                        optClass += 'bg-emerald-50 border-emerald-300 text-emerald-950 font-bold';
-                        radioCircle = `<span class="w-4 h-4 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[12px] font-black">check</span></span>`;
+                        optClass += 'bg-emerald-50 border-emerald-400 text-emerald-950 font-bold';
+                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-emerald-600 bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">check</span></span>`;
                     } else if (isSelected && !isCorrect) {
-                        optClass += 'bg-rose-50 border-rose-300 text-rose-950';
-                        radioCircle = `<span class="w-4 h-4 rounded-full border-2 border-rose-600 bg-rose-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[12px] font-black">close</span></span>`;
+                        optClass += 'bg-rose-50 border-rose-400 text-rose-950';
+                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-rose-600 bg-rose-600 flex items-center justify-center shrink-0 mt-0.5"><span class="material-symbols-outlined text-white text-[13px] font-black">close</span></span>`;
                     } else {
                         optClass += 'bg-white border-slate-200 text-slate-600 opacity-60';
-                        radioCircle = `<span class="w-4 h-4 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
+                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
                     }
                 } else {
                     if (isSelected) {
-                        optClass += 'bg-blue-50/80 border-blue-500 text-blue-950 font-bold shadow-2xs';
-                        radioCircle = `<span class="w-4 h-4 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5"><span class="w-2 h-2 rounded-full bg-blue-600"></span></span>`;
+                        optClass += 'bg-blue-50/90 border-blue-600 text-blue-950 font-bold shadow-xs ring-1 ring-blue-500/30';
+                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-blue-600 flex items-center justify-center shrink-0 mt-0.5 bg-white"><span class="w-2.5 h-2.5 rounded-full bg-blue-600"></span></span>`;
                     } else {
-                        optClass += 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/70 text-slate-800';
-                        radioCircle = `<span class="w-4 h-4 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
+                        optClass += 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800';
+                        radioCircle = `<span class="w-5 h-5 rounded-full border-2 border-slate-300 shrink-0 mt-0.5"></span>`;
                     }
                 }
 
-                const clickAction = !this.isReviewMode ? `onclick="window.ThptExam.selectAnswer(${q.number}, '${letter}')"` : '';
+                const clickAction = !this.isReviewMode 
+                    ? `onclick="window.ThptExam.selectAnswer(${q.number}, '${letter}')"` 
+                    : '';
 
                 html += `
                 <div ${clickAction} class="${optClass}">
+                    <input type="radio" class="sr-only" name="radio_q_${q.number}" value="${letter}" ${isSelected ? 'checked' : ''} />
                     ${radioCircle}
                     <div class="flex-1 q-text-size">
-                        <span class="font-bold mr-1">${letter}.</span>
+                        <span class="font-bold mr-1.5 text-slate-900">${letter}.</span>
                         <span>${this.escHtml(optText)}</span>
                     </div>
                 </div>`;
@@ -425,7 +612,7 @@
         },
 
         // ==========================================
-        // 6. TƯƠNG TÁC THÍ SINH
+        // 7. TƯƠNG TÁC THÍ SINH
         // ==========================================
         selectAnswer(qNum, optLetter) {
             if (this.isReviewMode) return;
@@ -444,13 +631,14 @@
             if (!card || !this.currentExam) return;
 
             const q = this.currentExam.questions[qNum - 1];
-            const isFlagged = !!this.flaggedQuestions[qNum];
+            if (!q) return;
+
             const selectedOpt = this.userAnswers[qNum] || '';
             const isCurrent = (qNum - 1 === this.currentQIndex);
 
-            card.className = `p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 transition-all ${isCurrent ? 'ring-2 ring-blue-500/30' : ''}`;
+            card.className = `p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 transition-all ${isCurrent ? 'ring-2 ring-blue-500/40' : ''}`;
 
-            const optContainer = card.querySelector('.space-y-2.5');
+            const optContainer = document.getElementById(`q-options-${qNum}`);
             if (optContainer) {
                 optContainer.innerHTML = this.renderOptionsHtml(q, selectedOpt);
             }
@@ -465,7 +653,15 @@
         },
 
         jumpToQuestion(qNum) {
+            if (!this.currentExam) return;
+            const prevIndex = this.currentQIndex;
             this.currentQIndex = qNum - 1;
+
+            // Re-render prev and new active cards
+            if (prevIndex !== this.currentQIndex) {
+                this.renderSingleQuestion(prevIndex + 1);
+            }
+            this.renderSingleQuestion(qNum);
             this.renderPalette();
 
             const card = document.getElementById(`q-card-${qNum}`);
@@ -485,31 +681,6 @@
         nextQuestion() {
             if (this.currentExam && this.currentQIndex < this.currentExam.total_questions - 1) {
                 this.jumpToQuestion(this.currentQIndex + 2);
-            }
-        },
-
-        syncPassageAndScroll(qNum) {
-            if (!this.currentExam) return;
-            const q = this.currentExam.questions[qNum - 1];
-            if (!q) return;
-
-            const passagePane = document.getElementById('exam-passage-content');
-            const groupTitleEl = document.getElementById('exam-passage-group-title');
-
-            if (groupTitleEl) groupTitleEl.textContent = q.group || 'Ngữ Liệu Đề Thi';
-
-            if (passagePane) {
-                const passageText = q.passage || 'Bài thi không có đoạn văn chung cho câu hỏi này.';
-                passagePane.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
-                            <span class="material-symbols-outlined text-[16px]">menu_book</span>
-                            <span>Đang hiển thị ngữ liệu cho Câu ${qNum}</span>
-                        </div>
-                        <div class="text-slate-800 leading-relaxed font-serif whitespace-pre-line text-sm q-text-size">
-                            ${this.escHtml(passageText)}
-                        </div>
-                    </div>`;
             }
         },
 
@@ -540,8 +711,39 @@
             }
         },
 
+        setMobileView(mode) {
+            this.mobileViewMode = mode;
+            const leftCol = document.getElementById('exam-left-col');
+            const rightCol = document.getElementById('exam-right-col');
+            const btnPassage = document.getElementById('btn-view-passage');
+            const btnBoth = document.getElementById('btn-view-both');
+            const btnQuestions = document.getElementById('btn-view-questions');
+
+            if (!leftCol || !rightCol) return;
+
+            // Reset buttons styling
+            [btnPassage, btnBoth, btnQuestions].forEach(b => {
+                if (b) b.className = 'px-2 py-1 rounded-md text-slate-600 hover:text-blue-700 transition-colors';
+            });
+
+            if (mode === 'passage') {
+                leftCol.className = 'w-full md:w-1/2 border-r border-slate-200 flex flex-col bg-white overflow-hidden min-h-0 h-full transition-all';
+                rightCol.className = 'hidden md:flex w-full md:w-1/2 flex-col bg-slate-50/70 overflow-hidden min-h-0 md:h-full transition-all';
+                if (btnPassage) btnPassage.className = 'px-2 py-1 rounded-md bg-white text-blue-700 shadow-xs font-black';
+            } else if (mode === 'questions') {
+                leftCol.className = 'hidden md:flex w-full md:w-1/2 border-r border-slate-200 flex-col bg-white overflow-hidden min-h-0 md:h-full transition-all';
+                rightCol.className = 'w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-full transition-all';
+                if (btnQuestions) btnQuestions.className = 'px-2 py-1 rounded-md bg-white text-blue-700 shadow-xs font-black';
+            } else {
+                // Both 50/50
+                leftCol.className = 'w-full md:w-1/2 border-r border-slate-200 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full transition-all';
+                rightCol.className = 'w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-1/2 md:h-full transition-all';
+                if (btnBoth) btnBoth.className = 'px-2 py-1 rounded-md bg-white text-blue-700 shadow-xs font-black';
+            }
+        },
+
         // ==========================================
-        // 7. LƯU TIẾN ĐỘ & NỘP BÀI
+        // 8. LƯU TIẾN ĐỘ & NỘP BÀI
         // ==========================================
         saveProgress(notify = true) {
             if (!this.currentExam) return;
@@ -691,7 +893,7 @@
         },
 
         // ==========================================
-        // 8. TÙY CHỈNH THỜI GIAN THI
+        // 9. TÙY CHỈNH THỜI GIAN THI
         // ==========================================
         openCustomTimeModal(examId) {
             this.selectedExamIdForTime = examId;
@@ -714,7 +916,7 @@
         },
 
         // ==========================================
-        // 9. STORAGE
+        // 10. STORAGE & TIỆN ÍCH
         // ==========================================
         saveBestScore(examId, res) {
             try {
