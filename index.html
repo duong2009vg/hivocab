@@ -2721,6 +2721,7 @@ window.navigateTo = function(page, preserveHash = false){
     const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'game', 'dictionary', 'settings'];
     const isMainTab = mainTabs.includes(page);
     const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail');
+    const isExerciseDetail = (page === 'thpt-room');
     
     // Sidebar Desktop
     const sidebar = document.getElementById('main-sidebar');
@@ -2790,7 +2791,7 @@ window.navigateTo = function(page, preserveHash = false){
             const icon = a.querySelector('.material-symbols-outlined');
             if(icon) icon.classList.remove('icon-fill');
         });
-        const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(a => a.getAttribute('onclick').includes(activeTarget));
+        const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(a => (a.getAttribute('onclick') || '').includes(activeTarget));
         if (activeNav) {
             activeNav.classList.remove('text-on-surface-variant');
             activeNav.classList.add('text-primary');
@@ -3325,7 +3326,7 @@ window.addEventListener('hashchange', () => {
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
-<script src="thptExam.js?v=20260910_cbt_v7"></script>
+<script src="thptExam.js?v=20260910_cbt_v8"></script>
 <script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 <script src="bilingualReading.js?v=20260910-v1"></script>
 

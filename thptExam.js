@@ -292,30 +292,64 @@
                 this.timerSeconds = this.initialSeconds;
             }
 
-            // Start Timer
-            this.startTimer();
+            // 1. Start Timer
+            try {
+                this.startTimer();
+            } catch (err) {
+                console.error('[ThptExam] startTimer error:', err);
+            }
 
-            // Setup Candidate details
-            this.setupCandidateInfo();
+            // 2. Setup Candidate details
+            try {
+                this.setupCandidateInfo();
+            } catch (err) {
+                console.error('[ThptExam] setupCandidateInfo error:', err);
+            }
 
-            // Switch to Room View
-            this.showRoomView();
+            // 3. Switch to Room View
+            try {
+                this.showRoomView();
+            } catch (err) {
+                console.error('[ThptExam] showRoomView error:', err);
+                const roomEl = document.getElementById('page-thpt-room');
+                if (roomEl) roomEl.classList.add('active');
+            }
 
-            // Render Passages (All sections continuous scroll)
-            this.renderAllPassages();
+            // 4. Render Passages (All sections continuous scroll)
+            try {
+                this.renderAllPassages();
+            } catch (err) {
+                console.error('[ThptExam] renderAllPassages error:', err);
+            }
 
-            // Render Questions & Palette
-            this.renderQuestionsAndPalette();
+            // 5. Render Questions & Palette
+            try {
+                this.renderQuestionsAndPalette();
+            } catch (err) {
+                console.error('[ThptExam] renderQuestionsAndPalette error:', err);
+            }
 
-            // Init Draggable Split Resizer & Restore Palette state
-            this.initDraggableDivider();
-            this.restorePaletteState();
+            // 6. Init Draggable Split Resizer & Restore Palette state
+            try {
+                this.initDraggableDivider();
+            } catch (err) {
+                console.error('[ThptExam] initDraggableDivider error:', err);
+            }
+            try {
+                this.restorePaletteState();
+            } catch (err) {}
 
-            // Reset mobile view
-            this.setMobileView('both');
+            // 7. Reset mobile view
+            try {
+                this.setMobileView('both');
+            } catch (err) {}
 
-            // Jump to first question
-            this.jumpToQuestion(1);
+            // 8. Jump to first question
+            try {
+                this.jumpToQuestion(1);
+            } catch (err) {
+                console.error('[ThptExam] jumpToQuestion error:', err);
+            }
         },
 
         setupCandidateInfo() {
@@ -338,9 +372,16 @@
         },
 
         showRoomView() {
-            if (window.navigateTo) {
-                window.navigateTo('thpt-room', true);
-            } else {
+            try {
+                if (window.navigateTo) {
+                    window.navigateTo('thpt-room', true);
+                } else {
+                    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+                    const roomEl = document.getElementById('page-thpt-room');
+                    if (roomEl) roomEl.classList.add('active');
+                }
+            } catch (err) {
+                console.warn('[ThptExam] showRoomView navigateTo error, fallback to direct class manipulation:', err);
                 document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
                 const roomEl = document.getElementById('page-thpt-room');
                 if (roomEl) roomEl.classList.add('active');
@@ -548,14 +589,16 @@
                             : this.parseArrangementSentences(q.prompt);
 
                         let sHtml = '';
-                        sentences.forEach(item => {
+                        (sentences || []).forEach(item => {
+                            const letter = (item && typeof item === 'object' && item.letter) ? item.letter : (item ? item.letter || '' : '');
+                            const text = (item && typeof item === 'object' && item.text) ? item.text : String(item || '');
                             sHtml += `
                             <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/90 hover:bg-blue-50/50 hover:border-blue-300 transition-colors">
                                 <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                                    ${item.letter}
+                                    ${letter}
                                 </span>
                                 <div class="text-slate-800 text-sm leading-relaxed q-text-size select-text font-sans flex-1">
-                                    ${this.escHtml(item.text)}
+                                    ${this.escHtml(text)}
                                 </div>
                             </div>`;
                         });
@@ -613,9 +656,9 @@
                 } else {
                     // Authentic Reading / Leaflet / Cloze Passage
                     let parasHtml = '';
-                    if (sec.paragraphs && sec.paragraphs.length > 0) {
-                        sec.paragraphs.forEach(p => {
-                            p = p.trim();
+                    if (sec.paragraphs && Array.isArray(sec.paragraphs) && sec.paragraphs.length > 0) {
+                        sec.paragraphs.forEach(rawP => {
+                            const p = (typeof rawP === 'string' ? rawP : String(rawP || '')).trim();
                             if (!p) return;
                             const isBullet = p.startsWith('•') || p.startsWith('- ') || /^[1-6]\.\s+/.test(p);
                             if (isBullet) {
