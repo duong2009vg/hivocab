@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8"/>
@@ -684,7 +684,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <a onclick="window.navigateTo('dashboard')" id="nav-desktop-dashboard" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">home</span><span>Trang chủ</span></a>
         <a onclick="navigateTo('topics')" id="nav-desktop-topics" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">grid_view</span><span>Chủ đề</span></a>
         <a onclick="navigateTo('vocabulary')" id="nav-desktop-vocabulary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">auto_stories</span><span>Kho từ vựng</span></a>
-        <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">edit_note</span><span>Bài tập</span></a>
+        <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">school</span><span>Luyện Đề THPT</span></a>
         <a onclick="navigateTo('game')" id="nav-desktop-game" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">sports_esports</span><span>Game</span></a>
         <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">search</span><span>Tra từ</span></a>
     </div>
@@ -725,7 +725,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     <div class="flex justify-around items-center h-[60px] w-full px-1">
         <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">home</span><span class="text-[9px] mt-0.5 font-semibold">Trang chủ</span></a>
         <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="text-[9px] mt-0.5 font-semibold">Chủ đề</span></a>
-        <a onclick="navigateTo('exercises')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">edit_note</span><span class="text-[9px] mt-0.5 font-semibold">Bài tập</span></a>
+        <a onclick="navigateTo('exercises')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">school</span><span class="text-[9px] mt-0.5 font-semibold">Đề THPT</span></a>
         <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
         <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
     </div>
@@ -1736,35 +1736,164 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 </main>
 </div>
 
-<!-- ==================== PAGE: EXERCISES ==================== -->
+<!-- ==================== PAGE: EXERCISES (LUYỆN ĐỀ THPT QUỐC GIA) ==================== -->
 <div id="page-exercises" class="page">
 <main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
-    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
+    <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
 
         <!-- Header -->
-        <section class="flex flex-row justify-between items-center gap-2">
-            <div class="hidden md:block">
-                <h1 class="text-2xl font-bold text-on-surface">Bài tập</h1>
-                <p class="text-sm text-on-surface-variant mt-0.5">Luyện tập từ vựng qua các dạng bài tập đa dạng</p>
+        <section class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[30px]">school</span>
+                    <h1 class="text-2xl font-bold text-on-surface">Luyện Thi THPT Quốc Gia</h1>
+                </div>
+                <p class="text-sm text-on-surface-variant mt-1">Hệ thống phòng thi máy tính chuẩn Bộ GD&ĐT môn Tiếng Anh (40 câu / 50 phút)</p>
             </div>
-            <button onclick="window.openCreateExerciseModal()" class="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs md:text-sm px-4 py-2 md:px-5 md:py-2.5 rounded-lg transition-colors flex items-center gap-1 ml-auto">
-                <span class="material-symbols-outlined text-[16px] md:text-[18px]">add</span>Tạo bài tập
-            </button>
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 bg-surface-container-low px-3.5 py-2 rounded-xl border border-outline-variant/30">
+                <span class="material-symbols-outlined text-[18px] text-emerald-600">verified</span>
+                <span>Bộ đề thi chuẩn kèm đáp án &amp; giải thích chi tiết</span>
+            </div>
         </section>
 
-        <!-- Filter tabs -->
-        <div class="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" id="ex-filter-tabs">
-            <!-- rendered by JS -->
-        </div>
-
-        <!-- Exercise list -->
-        <div id="exercises-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="flex items-center justify-center py-16 col-span-3">
+        <!-- THPT Exams Grid -->
+        <div id="thpt-exams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div class="flex items-center justify-center py-16 col-span-full">
                 <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
             </div>
         </div>
     </div>
 </main>
+</div>
+
+<!-- ==================== PAGE: PHÒNG THI THPT (CBT EXAM ROOM) ==================== -->
+<div id="page-thpt-room" class="page fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col h-screen w-screen overflow-hidden select-none">
+    <!-- Top Header: Bộ GD&ĐT CBT Header Style -->
+    <header class="bg-[#1a365d] text-white px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-md">
+        <!-- Left: Kỳ thi & Thí sinh -->
+        <div class="flex items-center gap-3 md:gap-4 min-w-0">
+            <div class="w-9 h-9 rounded-lg bg-blue-600/40 border border-blue-400/30 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-[22px]">school</span>
+            </div>
+            <div class="min-w-0">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs md:text-sm font-black tracking-wide uppercase text-blue-200">KỲ THI TỐT NGHIỆP THPT</span>
+                    <span class="hidden sm:inline-block text-[10px] bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded font-semibold border border-blue-400/20">Môn Tiếng Anh</span>
+                </div>
+                <div class="flex items-center gap-3 text-[11px] md:text-xs text-slate-300 font-medium truncate">
+                    <span class="font-bold text-white" id="exam-candidate-name">Thí sinh</span>
+                    <span class="text-slate-400">•</span>
+                    <span id="exam-candidate-sbd" class="text-amber-300 font-mono font-bold">SBD: 10082401</span>
+                    <span class="hidden md:inline-block text-slate-400">•</span>
+                    <span id="exam-date" class="hidden md:inline-block">Ngày thi: Hôm nay</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center: Live Connection & Countdown Timer -->
+        <div class="flex items-center gap-3 md:gap-5">
+            <div class="hidden lg:flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>Hệ thống trực tuyến</span>
+            </div>
+
+            <div class="flex items-center gap-2 bg-[#0f2342] border border-blue-400/30 px-3.5 py-1.5 rounded-xl shadow-inner text-white">
+                <span class="material-symbols-outlined text-[20px] text-amber-400">timer</span>
+                <div class="text-right">
+                    <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold leading-none">Thời gian còn lại</div>
+                    <div id="exam-timer-display" class="font-mono text-lg md:text-xl font-black leading-tight tracking-wider text-amber-300">50:00</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Actions (Nộp bài / Thoát) -->
+        <div class="flex items-center gap-2 shrink-0">
+            <button onclick="window.ThptExam.confirmSubmit()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer">
+                <span class="material-symbols-outlined text-[18px]">send</span>
+                <span>NỘP BÀI</span>
+            </button>
+            <button onclick="window.ThptExam.exitRoom()" class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Thoát phòng thi">
+                <span class="material-symbols-outlined text-[22px]">logout</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Sub-Header / Control Toolbar -->
+    <div class="bg-white border-b border-slate-200 px-4 md:px-6 py-2 flex items-center justify-between shrink-0 shadow-xs">
+        <!-- Navigation Buttons -->
+        <div class="flex items-center gap-2">
+            <button onclick="window.ThptExam.prevQuestion()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                <span class="hidden sm:inline">Quay lại</span>
+            </button>
+            <button onclick="window.ThptExam.nextQuestion()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
+                <span class="hidden sm:inline">Tiếp theo</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </button>
+            <button onclick="window.ThptExam.saveProgress(true)" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ml-1" title="Lưu bài làm">
+                <span class="material-symbols-outlined text-[16px] text-emerald-600">save</span>
+                <span class="hidden md:inline">Lưu bài</span>
+            </button>
+        </div>
+
+        <!-- Progress Counter -->
+        <div class="text-xs text-slate-600 font-medium">
+            <span>Số câu đã trả lời: </span>
+            <span id="exam-answered-count" class="font-black text-blue-700 text-sm">0 / 40</span>
+        </div>
+
+        <!-- Font Scaling & Fullscreen -->
+        <div class="flex items-center gap-1.5">
+            <span class="hidden lg:inline text-[11px] text-slate-500 font-semibold mr-1">Cỡ chữ:</span>
+            <button onclick="window.ThptExam.changeFontSize(-1)" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer" title="Giảm cỡ chữ">A-</button>
+            <button onclick="window.ThptExam.changeFontSize(1)" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
+            <button onclick="window.ThptExam.toggleFullscreen()" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center transition-colors cursor-pointer ml-1" title="Toàn màn hình">
+                <span class="material-symbols-outlined text-[18px]">fullscreen</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Body: Split View 2 Cột Độc Lập -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- Cột Trái: Ngữ liệu / Đoạn văn đề bài -->
+        <div class="w-full md:w-1/2 border-r border-slate-200 flex flex-col bg-white overflow-hidden">
+            <div class="px-5 py-2.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-blue-600 text-[18px]">article</span>
+                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700" id="exam-passage-group-title">Ngữ Liệu Đề Thi</span>
+                </div>
+                <span class="text-[11px] text-slate-500 font-medium">Bài đọc / Nội dung đề bài</span>
+            </div>
+            <div id="exam-passage-content" class="flex-1 overflow-y-auto p-5 md:p-6 select-text">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Cột Phải: Câu hỏi & Phương án trắc nghiệm -->
+        <div class="w-full md:w-1/2 flex flex-col bg-slate-50/60 overflow-hidden">
+            <div class="px-5 py-2.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[18px]">checklist</span>
+                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Câu Hỏi &amp; Phương Án Trả Lời</span>
+                </div>
+                <span class="text-[11px] text-slate-500 font-medium">Bấm chọn A, B, C hoặc D</span>
+            </div>
+            <div id="exam-questions-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-5">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar: Dãy 40 số câu hỏi -->
+    <div class="bg-[#1e293b] text-white px-4 py-2.5 border-t border-slate-700 flex items-center gap-3 shrink-0 overflow-x-auto">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider shrink-0 mr-1">
+            <span class="material-symbols-outlined text-[18px] text-blue-400">grid_on</span>
+            <span class="hidden sm:inline">Dãy câu:</span>
+        </div>
+        <div id="exam-palette-container" class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-hide flex-1">
+            <!-- 40 Question Bubbles rendered by JS -->
+        </div>
+    </div>
 </div>
 
 <!-- ==================== PAGE: GAME ==================== -->
@@ -1871,42 +2000,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
             </div>
         </section>
     </div>
-</main>
-</div>
-
-<!-- ==================== PAGE: EXERCISE GROUP ==================== -->
-<div id="page-exercise-group" class="page">
-<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-6 py-3 flex items-center gap-4 shadow-sm">
-    <button onclick="navigateTo('exercises')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full">
-        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
-    </button>
-    <div class="flex-1 min-w-0">
-        <h1 id="exg-title" class="font-bold text-on-surface text-lg truncate">Bài tập</h1>
-        <p id="exg-subtitle" class="text-xs text-on-surface-variant truncate"></p>
-    </div>
-</header>
-<main class="pt-20 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 min-h-[100dvh]">
-    <div class="max-w-5xl mx-auto w-full flex flex-col gap-4 fade-in">
-        <div id="exercise-group-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div class="flex items-center justify-center py-16 col-span-3">
-                <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-            </div>
-        </div>
-    </div>
-</main>
-</div>
-
-<!-- ==================== PAGE: EXERCISE DETAIL ==================== -->
-<div id="page-exercise-detail" class="page">
-<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-6 py-3 flex items-center gap-4 shadow-sm">
-    <button onclick="window._backFromExerciseDetail()" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full">
-        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
-    </button>
-    <h1 id="exd-title" class="font-bold text-on-surface text-lg truncate flex-1">Bài tập</h1>
-    <span id="exd-progress-label" class="text-sm text-on-surface-variant font-medium shrink-0"></span>
-</header>
-<main class="pt-20 pb-12 px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto min-h-[100dvh] flex flex-col gap-6 items-center">
-    <div id="exd-container" class="w-full mt-4"></div>
 </main>
 </div>
 
@@ -2466,7 +2559,6 @@ window.navigateTo = function(page, preserveHash = false){
     const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'game', 'dictionary', 'settings'];
     const isMainTab = mainTabs.includes(page);
     const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail');
-    const isExerciseDetail = (page === 'exercise-group' || page === 'exercise-detail');
     
     // Sidebar Desktop
     const sidebar = document.getElementById('main-sidebar');
@@ -2478,7 +2570,7 @@ window.navigateTo = function(page, preserveHash = false){
     
     // Đổi Title Mobile Header
     if(isMainTab) {
-        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Bài tập', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
+        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Luyện Đề THPT', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
         const titleEl = document.getElementById('mobile-header-title');
         if(titleEl) {
             if(page === 'dashboard') {
@@ -2494,7 +2586,7 @@ window.navigateTo = function(page, preserveHash = false){
     // Mobile Bottom Nav
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if(bottomNav) {
-        bottomNav.style.display = (isMainTab || isTopicDetail || isExerciseDetail) ? '' : 'none';
+        bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
     }
     // Khi vào trang Topics: render tabs + grid
     if (page === 'topics') {
@@ -2507,38 +2599,10 @@ window.navigateTo = function(page, preserveHash = false){
     if (page === 'vocabulary') {
         setTimeout(() => window._loadVocabularyPage && window._loadVocabularyPage(), 0);
     }
-    // Khi vào exercise-detail: render bài tập
-    if (page === 'exercise-detail') {
-        setTimeout(() => window._renderExerciseDetail && window._renderExerciseDetail(), 0);
-    }
-    // Khi vào exercise-group: render các bài tập con trong folder
-    if (page === 'exercise-group') {
-        setTimeout(() => window._renderExerciseGroupPage && window._renderExerciseGroupPage(), 0);
-    }
-    // Khi vào trang Exercises: render danh sách bài tập
+    // Khi vào trang Exercises: render danh sách đề thi THPT Quốc Gia
     if (page === 'exercises') {
         setTimeout(() => {
-            // Render filter tabs
-            const tabsEl = document.getElementById('ex-filter-tabs');
-            if (tabsEl && tabsEl.innerHTML.trim() === '') {
-                const cats = [
-                    { id: 'all',    label: 'Tất cả',      icon: 'apps' },
-                    { id: 'vocab',  label: 'Từ vựng',     icon: 'translate' },
-                    { id: 'listen', label: 'Nghe - Viết', icon: 'hearing' },
-                    { id: 'review', label: 'Ôn tập',      icon: 'quiz' },
-                    { id: 'custom', label: 'Tùy chỉnh',   icon: 'edit_note' },
-                ];
-                window._activeExerciseCat = window._activeExerciseCat || 'all';
-                tabsEl.innerHTML = cats.map(c => {
-                    const isActive = c.id === window._activeExerciseCat;
-                    const base = 'exercise-cat-btn flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors';
-                    const cls  = isActive ? `${base} bg-primary text-on-primary` : `${base} bg-primary/10 text-primary`;
-                    return `<button class="${cls}" onclick="window._setExerciseCat('${c.id}', this)">
-                        <span class="material-symbols-outlined text-[16px]">${c.icon}</span>${c.label}
-                    </button>`;
-                }).join('');
-            }
-            window._renderExercisesPage && window._renderExercisesPage();
+            window.ThptExam && window.ThptExam.init();
         }, 0);
     }
     // Khi vào trang Game: reset màn chọn mode
@@ -3091,61 +3155,6 @@ window.addEventListener('hashchange', () => {
 });
 </script>
 
-<!-- ==================== EXERCISE MODAL ==================== -->
-<div id="modal-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-3 md:p-6" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)" onclick="if(event.target===this)window._closeExerciseModal()">
-  <div class="w-full max-w-2xl bg-surface rounded-2xl soft-shadow flex flex-col max-h-[92vh] overflow-hidden fade-in">
-
-    <!-- Modal header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20 shrink-0">
-      <div>
-        <p id="ex-modal-category" class="text-xs font-bold text-primary uppercase tracking-wider mb-0.5"></p>
-        <h2 id="ex-modal-title" class="text-lg md:text-xl font-bold text-on-surface"></h2>
-      </div>
-      <button onclick="window._closeExerciseModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-
-    <!-- Progress bar -->
-    <div class="h-1 bg-surface-container-high shrink-0">
-      <div id="ex-progress-bar" class="h-full bg-primary rounded-full transition-all duration-500" style="width:0%"></div>
-    </div>
-
-    <!-- Question counter -->
-    <div class="flex items-center justify-between px-6 pt-4 pb-1 shrink-0">
-      <span id="ex-q-counter" class="text-xs text-on-surface-variant font-semibold"></span>
-      <span id="ex-score-label" class="text-xs text-primary font-bold"></span>
-    </div>
-
-    <!-- Question content -->
-    <div id="ex-question-area" class="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
-      <!-- rendered by JS -->
-    </div>
-
-    <!-- Action footer -->
-    <div id="ex-footer" class="px-6 py-4 border-t border-outline-variant/20 shrink-0 flex gap-3">
-      <button id="ex-check-btn" onclick="window._checkExAnswer()" class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:opacity-90 transition-opacity">
-        Kiểm tra
-      </button>
-      <button id="ex-next-btn" onclick="window._nextExQuestion()" class="hidden flex-1 py-3 rounded-xl bg-surface-container text-on-surface font-bold text-sm hover:bg-surface-container-high transition-colors">
-        Tiếp theo →
-      </button>
-    </div>
-
-    <!-- Result screen (hidden until done) -->
-    <div id="ex-result-screen" class="hidden flex-1 flex flex-col items-center justify-center gap-5 px-6 py-10 text-center">
-      <span id="ex-result-emoji" class="text-6xl">🎉</span>
-      <h3 class="text-2xl font-bold text-on-surface">Hoàn thành bài tập!</h3>
-      <p id="ex-result-summary" class="text-on-surface-variant"></p>
-      <div class="flex gap-3 w-full max-w-xs">
-        <button onclick="window._closeExerciseModal()" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Đóng</button>
-        <button onclick="window._retryExercise()" class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:opacity-90 transition-opacity">Làm lại</button>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="dataLayer.js?v=20260609-lesson-fallback-v1"></script>
@@ -3154,87 +3163,123 @@ window.addEventListener('hashchange', () => {
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js"></script>
 <script src="sessionUI.js?v=20260617-fill-mobile-fit-v1"></script>
-<script src="exercises.js"></script>
+<script src="thptExam.js"></script>
 <script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 <script src="bilingualReading.js?v=20260910-v1"></script>
 
-<!-- ==================== MODAL: TẠO BÀI TẬP TÙY CHỈNH ==================== -->
-<div id="modal-create-exercise" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
-  <div class="w-full max-w-md bg-surface rounded-2xl p-6 md:p-8 soft-shadow fade-in">
-    <div class="flex items-center justify-between mb-6">
-      <h2 class="text-xl font-bold text-on-surface">Tạo bài tập mới</h2>
-      <button onclick="window._closeCreateExerciseModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+<!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
+<div id="modal-exam-confirm-submit" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">
+  <div class="w-full max-w-md bg-surface rounded-2xl p-6 soft-shadow space-y-4 fade-in">
+    <div class="flex items-center gap-3 text-amber-600">
+      <span class="material-symbols-outlined text-[32px]">help</span>
+      <h3 class="text-lg font-bold text-on-surface">Xác nhận nộp bài</h3>
     </div>
-    <div class="flex flex-col gap-4">
-      <div>
-        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Tên bài tập</label>
-        <input id="new-ex-title" type="text" maxlength="60" placeholder="Ví dụ: Luyện tập thì quá khứ"
-               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Mô tả ngắn</label>
-        <input id="new-ex-desc" type="text" maxlength="100" placeholder="Bài tập 15 câu..."
-               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"/>
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Nhóm <span class="text-outline font-normal normal-case tracking-normal">(tùy chọn)</span></label>
-        <input id="new-ex-group" type="text" maxlength="80" placeholder="Ví dụ: Business English, IELTS..."
-               class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface transition-colors"/>
-      </div>
-      <div id="create-ex-error" class="text-error text-sm hidden"></div>
-      <div class="flex gap-3 mt-2">
-        <button onclick="window._closeCreateExerciseModal()" class="flex-1 py-3 rounded-xl border border-outline-variant/30 text-on-surface-variant font-bold text-sm hover:bg-surface-container-low transition-colors">Hủy</button>
-        <button onclick="window._submitCreateExercise()" class="flex-1 py-3 rounded-xl bg-primary text-on-primary font-bold text-sm hover:opacity-90 transition-opacity">Tiếp tục</button>
-      </div>
+    <div id="exam-confirm-submit-msg" class="text-sm text-on-surface-variant leading-relaxed">
+      Bạn có chắc chắn muốn nộp bài thi?
+    </div>
+    <div class="flex items-center justify-end gap-3 pt-2">
+      <button onclick="window.ThptExam.closeSubmitConfirmModal()" class="px-4 py-2.5 rounded-xl border border-outline-variant/30 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer">
+        Tiếp tục làm bài
+      </button>
+      <button onclick="window.ThptExam.submitExam(false)" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-colors cursor-pointer">
+        Nộp bài ngay
+      </button>
     </div>
   </div>
 </div>
 
-<!-- ==================== MODAL: EXERCISE BUILDER (SOẠN CÂU HỎI) ==================== -->
-<div id="modal-exercise-builder" class="fixed inset-0 z-[9999] hidden items-center justify-center p-2 md:p-6" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
-  <div class="w-full max-w-4xl bg-surface rounded-2xl soft-shadow flex flex-col max-h-[95vh] h-full overflow-hidden fade-in">
-    <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/20 shrink-0">
-      <div>
-        <h2 id="builder-ex-title" class="text-lg md:text-xl font-bold text-on-surface">Đang soạn...</h2>
-        <p class="text-xs text-on-surface-variant">Thêm câu hỏi cho bài tập tùy chỉnh</p>
+<!-- ==================== MODAL: KẾT QUẢ BÀI THI THPT ==================== -->
+<div id="modal-exam-result" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(6px)">
+  <div class="w-full max-w-lg bg-surface rounded-3xl p-6 md:p-8 soft-shadow space-y-6 fade-in max-h-[95vh] overflow-y-auto">
+    <div class="text-center space-y-2">
+      <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-sm">
+        <span class="material-symbols-outlined text-[36px]">military_tech</span>
       </div>
-      <div class="flex items-center gap-3">
-        <button onclick="window._closeExerciseBuilder()" class="text-sm font-bold text-primary hover:underline">Xong (Đóng)</button>
+      <h2 class="text-xl md:text-2xl font-bold text-on-surface">Kết Quả Bài Thi</h2>
+      <p id="res-exam-title" class="text-xs text-on-surface-variant font-medium line-clamp-1"></p>
+    </div>
+
+    <!-- Điểm số chính -->
+    <div class="bg-surface-container-low rounded-2xl p-5 border border-outline-variant/30 text-center space-y-1">
+      <div class="text-xs text-on-surface-variant font-bold uppercase tracking-wider">Điểm số đạt được</div>
+      <div class="text-5xl font-black text-primary tracking-tight" id="res-score">0.00</div>
+      <div class="text-xs text-slate-500 font-medium">Thang điểm 10 chuẩn THPT Quốc Gia</div>
+    </div>
+
+    <!-- Thống kê chi tiết -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+      <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200">
+        <div class="text-[11px] text-emerald-700 font-bold">Số câu đúng</div>
+        <div id="res-correct-count" class="text-base font-black text-emerald-800 mt-0.5">0 / 40</div>
+      </div>
+      <div class="p-3 rounded-xl bg-rose-50 border border-rose-200">
+        <div class="text-[11px] text-rose-700 font-bold">Số câu sai</div>
+        <div id="res-wrong-count" class="text-base font-black text-rose-800 mt-0.5">0</div>
+      </div>
+      <div class="p-3 rounded-xl bg-blue-50 border border-blue-200">
+        <div class="text-[11px] text-blue-700 font-bold">Tỷ lệ đúng</div>
+        <div id="res-pct" class="text-base font-black text-blue-800 mt-0.5">0%</div>
+      </div>
+      <div class="p-3 rounded-xl bg-amber-50 border border-amber-200">
+        <div class="text-[11px] text-amber-700 font-bold">Thời gian làm</div>
+        <div id="res-time-spent" class="text-base font-black text-amber-800 mt-0.5">0p 0s</div>
       </div>
     </div>
 
-    <!-- Layout: 2 cột trên Desktop -->
-    <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
-      <!-- Cột trái: Form tạo câu hỏi -->
-      <div class="w-full lg:w-1/2 p-6 flex flex-col gap-4 border-r border-outline-variant/20 overflow-y-auto">
-        <h3 class="font-bold text-on-surface">Thêm câu hỏi mới</h3>
-        <div>
-          <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Loại câu hỏi</label>
-          <select id="builder-q-type" onchange="window._onBuilderTypeChange()" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary px-4 py-3 rounded-t-lg outline-none text-on-surface text-sm">
-            <option value="mcq">Trắc nghiệm (4 lựa chọn)</option>
-            <option value="fill_word">Điền từ (Từ nghĩa)</option>
-            <option value="fill_blank">Điền vào chỗ trống</option>
-          </select>
-        </div>
+    <!-- Nút hành động -->
+    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+      <button onclick="window.ThptExam.enterReviewMode()" class="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-[18px]">visibility</span>
+        <span>Xem Đáp Án &amp; Lời Giải</span>
+      </button>
+      <button onclick="window.ThptExam.retakeExam()" class="flex-1 py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer">
+        <span class="material-symbols-outlined text-[18px]">replay</span>
+        <span>Làm Lại Đề Này</span>
+      </button>
+      <button onclick="window.ThptExam.exitRoom()" class="sm:w-auto px-4 py-3 rounded-xl border border-outline-variant/40 text-on-surface-variant font-bold text-xs hover:bg-surface-container-high transition-colors cursor-pointer">
+        Trở Về
+      </button>
+    </div>
+  </div>
+</div>
 
-        <div id="builder-form-area" class="flex flex-col gap-4 mt-2">
-          <!-- Rendered by JS -->
-        </div>
-
-        <button onclick="window._submitAddQuestion()" class="mt-4 py-3 w-full rounded-xl bg-surface-container-highest text-on-surface font-bold text-sm hover:bg-primary hover:text-on-primary transition-colors border border-outline-variant/20">
-          + Thêm vào danh sách
-        </button>
+<!-- ==================== MODAL: TÙY CHỈNH THỜI GIAN THI ==================== -->
+<div id="modal-custom-exam-time" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">
+  <div class="w-full max-w-sm bg-surface rounded-2xl p-6 soft-shadow space-y-4 fade-in">
+    <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">timer</span>
+        <h3 class="text-base font-bold text-on-surface">Tùy chỉnh thời gian thi</h3>
       </div>
-
-      <!-- Cột phải: Danh sách câu hỏi đã thêm -->
-      <div class="w-full lg:w-1/2 p-6 bg-surface-container-lowest overflow-y-auto flex flex-col gap-4">
-        <h3 class="font-bold text-on-surface">Danh sách câu hỏi (<span id="builder-q-count">0</span>)</h3>
-        <div id="builder-q-list" class="flex flex-col gap-3">
-          <!-- Rendered by JS -->
-        </div>
-      </div>
+      <button onclick="window.ThptExam.closeCustomTimeModal()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+    <div class="space-y-2.5">
+      <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/30 hover:bg-surface-container cursor-pointer transition-colors">
+        <input type="radio" name="custom-exam-time" value="30" class="accent-primary" />
+        <span class="text-xs font-bold text-on-surface">30 phút (Luyện tốc độ cao)</span>
+      </label>
+      <label class="flex items-center gap-3 p-3 rounded-xl border-2 border-primary bg-primary/5 cursor-pointer transition-colors">
+        <input type="radio" name="custom-exam-time" value="50" checked class="accent-primary" />
+        <span class="text-xs font-bold text-primary">50 phút (Tiêu chuẩn Bộ GD&amp;ĐT)</span>
+      </label>
+      <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/30 hover:bg-surface-container cursor-pointer transition-colors">
+        <input type="radio" name="custom-exam-time" value="60" class="accent-primary" />
+        <span class="text-xs font-bold text-on-surface">60 phút (Luyện tập thư thả)</span>
+      </label>
+      <label class="flex items-center gap-3 p-3 rounded-xl border border-outline-variant/30 hover:bg-surface-container cursor-pointer transition-colors">
+        <input type="radio" name="custom-exam-time" value="0" class="accent-primary" />
+        <span class="text-xs font-bold text-on-surface">Không giới hạn thời gian</span>
+      </label>
+    </div>
+    <div class="flex items-center justify-end gap-2 pt-2">
+      <button onclick="window.ThptExam.closeCustomTimeModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer">
+        Hủy
+      </button>
+      <button onclick="window.ThptExam.submitCustomTime()" class="px-5 py-2.5 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary-dark transition-colors cursor-pointer">
+        Bắt Đầu Thi
+      </button>
     </div>
   </div>
 </div>
@@ -5515,618 +5560,8 @@ window.deleteTopicCard = async function(topicId) {
 };
 
 // ============================================================
-// EXERCISES PAGE  —  Render danh sách bài tập
 // ============================================================
-window._allExercises = null;
-window._exerciseGroupsCache = [];
-window._currentExerciseGroup = null;
-const UNGROUPED_EXERCISE_GROUP = 'Chưa phân loại';
-
-function _getExerciseGroupLabel(ex) {
-    const group = (ex.topic_group || '').trim();
-    return group || UNGROUPED_EXERCISE_GROUP;
-}
-
-function _buildExerciseGroups(exercises) {
-    const map = new Map();
-    exercises.forEach(ex => {
-        const label = _getExerciseGroupLabel(ex);
-        if (!map.has(label)) {
-            map.set(label, { label, items: [], totalQuestions: 0 });
-        }
-        const group = map.get(label);
-        group.items.push(ex);
-        group.totalQuestions += ex.questions?.length ?? 0;
-    });
-    return Array.from(map.values());
-}
-
-function _renderExerciseCard(ex, returnPage = 'exercises') {
-    const catIcon = { vocab: 'translate', listen: 'hearing', review: 'quiz', custom: 'edit_note' };
-    const catLabel = { vocab: 'Từ vựng', listen: 'Nghe - Viết', review: 'Ôn tập', custom: 'Tùy chỉnh' };
-    const icon  = ex.icon  || catIcon[ex.category]  || 'edit_note';
-    const label = catLabel[ex.category] || 'Tùy chỉnh';
-    const qCount = ex.questions?.length ?? 0;
-    return `
-    <div onclick="window._openExercise('${ex.id}', '${returnPage}')"
-         class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
-        <div class="flex items-start justify-between gap-2">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-primary text-[22px]">${icon}</span>
-            </div>
-            <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-secondary/10 text-secondary">${label}</span>
-        </div>
-        <div class="flex-1">
-            <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">${_esc(ex.title)}</h3>
-            ${ex.description ? `<p class="text-sm text-on-surface-variant mt-1 line-clamp-2">${_esc(ex.description)}</p>` : ''}
-        </div>
-        <div class="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/20">
-            <span class="text-xs text-outline">${qCount} câu hỏi</span>
-            <span class="material-symbols-outlined text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
-        </div>
-    </div>`;
-}
-
-window._renderExercisesPage = async function(filterCat) {
-    const grid = document.getElementById('exercises-list');
-    if (!grid) return;
-
-    grid.innerHTML = `<div class="flex items-center justify-center py-16 col-span-3">
-        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-    </div>`;
-
-    try {
-        // Dùng cache nếu có
-        if (!window._allExercises) {
-            window._allExercises = typeof HiDB !== 'undefined'
-                ? await HiDB.getCustomExercises()
-                : [];
-        }
-        let exercises = window._allExercises || [];
-
-        // Filter theo category tab nếu có
-        const cat = filterCat || window._activeExerciseCat || 'all';
-        if (cat !== 'all') {
-            exercises = exercises.filter(e => (e.category || 'custom') === cat);
-        }
-
-        if (exercises.length === 0) {
-            grid.innerHTML = `
-                <div class="col-span-3 flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
-                    <span class="material-symbols-outlined text-[56px] opacity-30">edit_note</span>
-                    <p class="font-semibold text-base">Chưa có bài tập nào</p>
-                    <p class="text-sm opacity-70">Hãy thêm từ vựng vào các chủ đề để tạo bài tập</p>
-                </div>`;
-            return;
-        }
-
-        const groups = _buildExerciseGroups(exercises);
-        window._exerciseGroupsCache = groups;
-
-        grid.innerHTML = groups.map((group, i) => {
-            return `
-            <div onclick="window._openExerciseGroupByIndex(${i})"
-                 class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in min-h-[180px]">
-                <div class="flex items-start justify-between gap-2">
-                    <div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-primary text-[26px]">folder</span>
-                    </div>
-                    <span class="text-[10px] font-bold px-2 py-1 rounded-full bg-secondary/10 text-secondary">${group.items.length} bài</span>
-                </div>
-                <div class="flex-1">
-                    <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2 text-lg">${_esc(group.label)}</h3>
-                    <p class="text-sm text-on-surface-variant mt-1">${group.totalQuestions} câu hỏi trong nhóm</p>
-                </div>
-                <div class="flex items-center justify-between mt-auto pt-2 border-t border-outline-variant/20">
-                    <span class="text-xs text-outline">Mở thư mục</span>
-                    <span class="material-symbols-outlined text-[18px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">arrow_forward</span>
-                </div>
-            </div>`;
-        }).join('');
-
-    } catch(err) {
-        console.error('[_renderExercisesPage]', err);
-        grid.innerHTML = `<div class="col-span-3 text-center py-12 text-error">
-            <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
-            Không thể tải bài tập: ${err.message}
-        </div>`;
-    }
-};
-
-window._openExerciseGroupByIndex = function(index) {
-    const group = window._exerciseGroupsCache?.[index];
-    if (!group) return;
-    window._currentExerciseGroup = group.label;
-    navigateTo('exercise-group');
-};
-
-window._renderExerciseGroupPage = async function() {
-    const listEl = document.getElementById('exercise-group-list');
-    const titleEl = document.getElementById('exg-title');
-    const subtitleEl = document.getElementById('exg-subtitle');
-    if (!listEl) return;
-
-    listEl.innerHTML = `<div class="flex items-center justify-center py-16 col-span-3">
-        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-    </div>`;
-
-    try {
-        if (!window._allExercises) {
-            window._allExercises = typeof HiDB !== 'undefined'
-                ? await HiDB.getCustomExercises()
-                : [];
-        }
-        const cat = window._activeExerciseCat || 'all';
-        let exercises = window._allExercises || [];
-        if (cat !== 'all') {
-            exercises = exercises.filter(e => (e.category || 'custom') === cat);
-        }
-
-        const groupLabel = window._currentExerciseGroup || UNGROUPED_EXERCISE_GROUP;
-        const items = exercises.filter(ex => _getExerciseGroupLabel(ex) === groupLabel);
-        const totalQuestions = items.reduce((sum, ex) => sum + (ex.questions?.length ?? 0), 0);
-
-        if (titleEl) titleEl.textContent = groupLabel;
-        if (subtitleEl) subtitleEl.textContent = `${items.length} bài tập · ${totalQuestions} câu hỏi`;
-
-        if (items.length === 0) {
-            listEl.innerHTML = `<div class="col-span-3 flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
-                <span class="material-symbols-outlined text-[56px] opacity-30">folder_open</span>
-                <p class="font-semibold text-base">Thư mục này chưa có bài tập nào</p>
-            </div>`;
-            return;
-        }
-
-        listEl.innerHTML = items.map(ex => _renderExerciseCard(ex, 'exercise-group')).join('');
-    } catch(err) {
-        listEl.innerHTML = `<div class="col-span-3 text-center py-12 text-error">
-            <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
-            Không thể tải thư mục bài tập: ${_esc(err.message)}
-        </div>`;
-    }
-};
-
-window._openExercise = function(exerciseId, returnPage = 'exercises') {
-    window._currentExerciseId = exerciseId;
-    window._exerciseReturnPage = returnPage;
-    navigateTo('exercise-detail');
-};
-
-window._backFromExerciseDetail = function() {
-    navigateTo(window._exerciseReturnPage || 'exercises');
-};
-
-// Filter tab exercises
-window._setExerciseCat = function(cat, btnEl) {
-    window._activeExerciseCat = cat;
-    window._allExercises = null; // clear cache để re-fetch với filter
-    window._exerciseGroupsCache = [];
-    // Update tab UI
-    document.querySelectorAll('.exercise-cat-btn').forEach(b => {
-        b.classList.remove('bg-primary', 'text-on-primary');
-        b.classList.add('bg-primary/10', 'text-primary');
-    });
-    if (btnEl) {
-        btnEl.classList.remove('bg-primary/10', 'text-primary');
-        btnEl.classList.add('bg-primary', 'text-on-primary');
-    }
-    window._renderExercisesPage(cat);
-};
-
-// Đóng modal khi click overlay
-document.getElementById('modal-create-topic')?.addEventListener('click', function(e) {
-    if (e.target === this) window.closeCreateTopicModal();
-});
-
-// ============================================================
-// VOCABULARY PAGE — Kho từ vựng động từ Supabase
-// ============================================================
-
-window._vocabAllWords   = null; // current server-side page
-window._vocabFiltered   = null;
-window._vocabTotal      = 0;
-window._vocabPage       = 1;
-window._vocabSearch     = '';
-window._vocabRequestId  = 0;
-window._vocabSearchTimer = null;
-const VOCAB_PAGE_SIZE   = 50;
-
-window._loadVocabularyPage = async function() {
-    const listEl     = document.getElementById('vocab-list');
-    const subtitleEl = document.getElementById('vocab-subtitle');
-    if (!listEl) return;
-
-    listEl.innerHTML = `<div class="flex items-center justify-center py-16">
-        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-    </div>`;
-    document.getElementById('vocab-pagination')?.classList.add('hidden');
-
-    try {
-        if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
-
-        const requestId = ++window._vocabRequestId;
-        const result = await HiDB.getVocabularyPage(
-            window._vocabPage,
-            VOCAB_PAGE_SIZE,
-            window._vocabSearch
-        );
-        if (requestId !== window._vocabRequestId) return;
-
-        window._vocabAllWords  = result.words || [];
-        window._vocabFiltered  = result.words || [];
-        window._vocabTotal     = result.total || 0;
-
-        if (subtitleEl) {
-            subtitleEl.textContent = `${window._vocabTotal} từ vựng${window._vocabSearch ? ` khớp với "${window._vocabSearch}"` : ' đã lưu.'}`;
-        }
-
-        window._renderVocabPage();
-
-    } catch (err) {
-        console.error('[_loadVocabularyPage]', err);
-        listEl.innerHTML = `<div class="text-center py-16 text-on-surface-variant">
-            <span class="material-symbols-outlined text-[48px] opacity-30 block mb-3">error_outline</span>
-            <p class="font-semibold">Không thể tải từ vựng</p>
-            <p class="text-sm mt-1">${_esc(err.message)}</p>
-        </div>`;
-    }
-};
-
-window._renderVocabPage = function() {
-    const listEl  = document.getElementById('vocab-list');
-    const paginEl = document.getElementById('vocab-pagination');
-    if (!listEl) return;
-
-    const words      = window._vocabFiltered || [];
-    const total      = window._vocabTotal || 0;
-    const totalPages = Math.max(1, Math.ceil(total / VOCAB_PAGE_SIZE));
-    const page       = Math.min(window._vocabPage, totalPages);
-    window._vocabPage = page;
-
-    const start = (page - 1) * VOCAB_PAGE_SIZE;
-    const slice = words;
-
-    if (total === 0) {
-        listEl.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
-            <span class="material-symbols-outlined text-[56px] opacity-30">auto_stories</span>
-            <p class="font-semibold text-base">Kho từ vựng trống</p>
-            <p class="text-sm opacity-70">Thêm từ vào chủ đề để hiện ở đây</p>
-        </div>`;
-        if (paginEl) paginEl.classList.add('hidden');
-        return;
-    }
-
-    const lvLabel = ['Mới', '1h', '8h', '1 ngày', '1 tuần', '1 tháng'];
-    const lvColor = [
-        'bg-surface-container text-outline',
-        'bg-red-100 text-red-700',
-        'bg-yellow-100 text-yellow-700',
-        'bg-blue-100 text-blue-700',
-        'bg-green-100 text-green-700',
-        'bg-green-200 text-green-800',
-    ];
-
-    listEl.innerHTML = slice.map((w, i) => {
-        const lv = Math.min(w.level || 0, 5);
-        return `
-        <div class="glass-card soft-shadow rounded-xl p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-3 group fade-in" style="animation-delay:${Math.min(i * 0.02, 0.4)}s">
-            <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap mb-1">
-                    <h2 class="text-lg md:text-2xl text-on-surface font-bold tracking-tight">${_esc(w.word)}</h2>
-                    ${w.pos ? `<span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">${_esc(w.pos)}</span>` : ''}
-                    ${w.phonetic ? `<span class="text-outline font-mono text-xs md:text-sm">${_esc(w.phonetic)}</span>` : ''}
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
-                </div>
-                <p class="text-sm md:text-base text-on-surface border-l-2 border-secondary-fixed-dim pl-3">${_esc(w.meaning)}</p>
-                ${w.exampleSentence ? `<p class="text-xs text-outline italic mt-1 line-clamp-1">${_esc(w.exampleSentence)}</p>` : ''}
-                ${w.topicName ? `<p class="text-[11px] text-primary/60 mt-1.5 font-medium">${_esc(w.topicName)}</p>` : ''}
-            </div>
-            <button onclick="typeof window.HiSpeak==='function'&&HiSpeak('${_esc(w.word)}')"
-                    class="shrink-0 p-2 rounded-full bg-surface-container-low text-primary hover:bg-primary-container/10 transition-colors self-start mt-1" title="Nghe phát âm">
-                <span class="material-symbols-outlined text-[20px]">volume_up</span>
-            </button>
-        </div>`;
-    }).join('');
-
-    // ── Pagination controls ────────────────────────────────────
-    if (!paginEl) return;
-    if (totalPages <= 1) { paginEl.classList.add('hidden'); return; }
-    paginEl.classList.remove('hidden');
-
-    const btnBase     = 'min-w-[36px] h-9 px-3 rounded-lg text-sm font-semibold transition-colors';
-    const btnActive   = 'bg-primary text-on-primary';
-    const btnNormal   = 'bg-surface-container text-on-surface hover:bg-surface-container-high';
-    const btnDisabled = 'bg-surface-container text-outline opacity-40 cursor-not-allowed';
-
-    const pageNums = new Set([1, totalPages]);
-    for (let p = Math.max(1, page - 2); p <= Math.min(totalPages, page + 2); p++) pageNums.add(p);
-    const sorted = [...pageNums].sort((a, b) => a - b);
-
-    let html = `<button onclick="window._vocabGoPage(${page - 1})"
-        class="${btnBase} ${page === 1 ? btnDisabled : btnNormal} flex items-center"
-        ${page === 1 ? 'disabled' : ''}>
-        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-    </button>`;
-
-    let prev = 0;
-    sorted.forEach(p => {
-        if (prev && p - prev > 1) html += `<span class="text-outline px-1 self-center">…</span>`;
-        html += `<button onclick="window._vocabGoPage(${p})"
-            class="${btnBase} ${p === page ? btnActive : btnNormal}">${p}</button>`;
-        prev = p;
-    });
-
-    html += `<button onclick="window._vocabGoPage(${page + 1})"
-        class="${btnBase} ${page === totalPages ? btnDisabled : btnNormal} flex items-center"
-        ${page === totalPages ? 'disabled' : ''}>
-        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-    </button>`;
-
-    html += `<span class="text-xs text-on-surface-variant w-full text-center mt-1">
-        ${start + 1}–${Math.min(start + VOCAB_PAGE_SIZE, total)} / ${total} từ
-    </span>`;
-
-    paginEl.innerHTML = html;
-    listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-};
-
-window._vocabGoPage = function(p) {
-    const total      = window._vocabTotal || 0;
-    const totalPages = Math.max(1, Math.ceil(total / VOCAB_PAGE_SIZE));
-    window._vocabPage = Math.max(1, Math.min(p, totalPages));
-    window._loadVocabularyPage();
-};
-
-window._filterVocabList = function() {
-    clearTimeout(window._vocabSearchTimer);
-    window._vocabSearchTimer = setTimeout(() => {
-        window._vocabSearch = (document.getElementById('vocab-search')?.value || '').trim();
-        window._vocabPage = 1;
-        window._loadVocabularyPage();
-    }, 300);
-};
-
-
-// ============================================================
-// EXERCISE DETAIL PAGE — Mở và chạy bài tập tùy chỉnh
-// ============================================================
-
-window._renderExerciseDetail = async function() {
-    const container = document.getElementById('exd-container');
-    const titleEl   = document.getElementById('exd-title');
-    if (!container) return;
-
-    container.innerHTML = `<div class="flex items-center justify-center py-16">
-        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-    </div>`;
-
-    const exerciseId = window._currentExerciseId;
-    if (!exerciseId) {
-        container.innerHTML = `<p class="text-center py-16 text-on-surface-variant">Không tìm thấy bài tập.</p>`;
-        return;
-    }
-
-    try {
-        if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
-
-        const exercises = await HiDB.getCustomExercises();
-        const ex = exercises.find(e => e.id === exerciseId);
-        if (!ex) throw new Error('Bài tập không tồn tại.');
-
-        if (titleEl) titleEl.textContent = ex.title;
-
-        if (!ex.questions || ex.questions.length === 0) {
-            container.innerHTML = `<div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3 text-center">
-                <span class="material-symbols-outlined text-[56px] opacity-30">quiz</span>
-                <p class="font-semibold">Bài tập này chưa có câu hỏi nào.</p>
-            </div>`;
-            return;
-        }
-
-        // Khởi tạo state bài tập
-        window._exdState = {
-            questions: ex.questions,
-            current:   0,
-            score:     0,
-            answered:  false,
-        };
-        window._renderExdQuestion();
-
-    } catch (err) {
-        console.error('[_renderExerciseDetail]', err);
-        container.innerHTML = `<div class="text-center py-16 text-error">
-            <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
-            <p>${_esc(err.message)}</p>
-        </div>`;
-    }
-};
-
-window._renderExdQuestion = function() {
-    const container = document.getElementById('exd-container');
-    const progressEl = document.getElementById('exd-progress-label');
-    if (!container || !window._exdState) return;
-
-    const { questions, current } = window._exdState;
-    const q = questions[current];
-    const total = questions.length;
-
-    if (progressEl) progressEl.textContent = `${current + 1} / ${total}`;
-
-    const optLetters = ['A', 'B', 'C', 'D'];
-
-    if (q.type === 'mcq' && q.options) {
-        const opts = q.options;
-        container.innerHTML = `
-        <div class="w-full flex flex-col gap-4 fade-in">
-            <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8 flex flex-col gap-5">
-                <p class="text-xs font-bold text-outline uppercase tracking-widest">Câu ${current + 1}</p>
-                <p class="text-base md:text-xl font-semibold text-on-surface leading-snug">${_esc(q.prompt)}</p>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3" id="exd-opts">
-                    ${opts.map((opt, i) => `
-                    <button onclick="window._exdSelectOpt(${i})"
-                            data-exd-opt="${i}"
-                            class="w-full text-left px-4 py-3 rounded-xl border border-outline-variant/40 bg-surface-container-lowest text-sm md:text-base text-on-surface hover:border-primary/40 hover:bg-primary/5 transition-all active:scale-[0.98] flex items-center gap-3">
-                        <span class="shrink-0 w-7 h-7 rounded-full border border-outline-variant/50 flex items-center justify-center text-xs font-bold text-outline">${optLetters[i]}</span>
-                        <span>${_esc(typeof opt === 'object' ? (opt.label || opt.text || opt.value || '') : opt)}</span>
-                    </button>`).join('')}
-                </div>
-                <!-- Feedback + hint (hidden until answered) -->
-                <div id="exd-feedback" class="hidden flex flex-col gap-3"></div>
-            </div>
-        </div>`;
-    } else {
-        // fill / text question
-        container.innerHTML = `
-        <div class="w-full flex flex-col gap-4 fade-in">
-            <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8 flex flex-col gap-5">
-                <p class="text-xs font-bold text-outline uppercase tracking-widest">Câu ${current + 1}</p>
-                <p class="text-base md:text-xl font-semibold text-on-surface leading-snug">${_esc(q.prompt)}</p>
-                <input id="exd-text-input" type="text" placeholder="Nhập câu trả lời..."
-                       autocomplete="off" spellcheck="false"
-                       onkeydown="if(event.key==='Enter') window._exdCheckText()"
-                       class="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant focus:border-primary rounded-t-lg px-4 py-3 text-on-surface placeholder:text-outline outline-none transition-colors"/>
-                <button onclick="window._exdCheckText()" class="w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
-                    Kiểm tra
-                </button>
-                <!-- Feedback + hint (hidden until answered) -->
-                <div id="exd-feedback" class="hidden flex flex-col gap-3"></div>
-            </div>
-        </div>`;
-        setTimeout(() => document.getElementById('exd-text-input')?.focus(), 100);
-    }
-};
-
-// Hiển thị feedback + hint + nút Tiếp theo sau khi trả lời
-function _exdShowFeedback(correct, q) {
-    const feedbackEl = document.getElementById('exd-feedback');
-    if (!feedbackEl) return;
-
-    const isLast = window._exdState.current >= window._exdState.questions.length - 1;
-    const nextLabel = isLast ? 'Xem kết quả' : 'Tiếp theo →';
-
-    const hintHTML = q.hint ? `
-        <div class="rounded-xl bg-surface-container p-4 border border-outline-variant/30">
-            <p class="text-xs font-bold text-primary uppercase tracking-wide mb-1.5 flex items-center gap-1">
-                <span class="material-symbols-outlined text-[15px]">lightbulb</span> Giải thích
-            </p>
-            <p class="text-sm text-on-surface leading-relaxed">${_esc(q.hint)}</p>
-        </div>` : '';
-
-    feedbackEl.innerHTML = `
-        ${correct
-            ? `<div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/30">
-                   <span class="material-symbols-outlined text-green-600 text-[20px]">check_circle</span>
-                   <span class="font-bold text-green-700 text-sm">Chính xác!</span>
-               </div>`
-            : `<div class="flex items-start gap-2 px-4 py-3 rounded-xl bg-error/10 border border-error/30">
-                   <span class="material-symbols-outlined text-error text-[20px] shrink-0 mt-0.5">cancel</span>
-                   <div>
-                       <p class="font-bold text-error text-sm">Chưa đúng</p>
-                       <p class="text-xs text-on-surface-variant mt-0.5">Đáp án: <strong class="text-on-surface">${_esc(q.answer)}</strong></p>
-                   </div>
-               </div>`
-        }
-        ${hintHTML}
-        <button onclick="window._exdAdvance()"
-                class="w-full bg-primary text-on-primary px-6 py-3.5 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors flex items-center justify-center gap-2">
-            ${nextLabel}
-            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-        </button>`;
-
-    feedbackEl.classList.remove('hidden');
-}
-
-window._exdSelectOpt = function(idx) {
-    if (window._exdState?.answered) return;
-    window._exdState.answered = true;
-
-    const q = window._exdState.questions[window._exdState.current];
-    const selectedValue = typeof q.options[idx] === 'object'
-        ? (q.options[idx].value ?? q.options[idx].text ?? q.options[idx].label)
-        : q.options[idx];
-    const correct = String(q.answer) === String(selectedValue);
-
-    // Highlight đáp án đúng/sai
-    document.querySelectorAll('[data-exd-opt]').forEach(btn => {
-        btn.disabled = true;
-        btn.onclick  = null;
-        const i   = Number(btn.dataset.exdOpt);
-        const val = typeof q.options[i] === 'object'
-            ? (q.options[i].value ?? q.options[i].text ?? q.options[i].label)
-            : q.options[i];
-        btn.classList.remove('hover:border-primary/40', 'hover:bg-primary/5', 'active:scale-[0.98]');
-        if (String(val) === String(q.answer)) {
-            btn.classList.add('border-green-500', 'bg-green-500/10', 'text-green-800');
-            btn.classList.remove('border-outline-variant/40');
-        } else if (i === idx && !correct) {
-            btn.classList.add('border-error', 'bg-error/10', 'text-error');
-            btn.classList.remove('border-outline-variant/40');
-        }
-    });
-
-    if (correct) window._exdState.score++;
-    _exdShowFeedback(correct, q);
-};
-
-window._exdCheckText = function() {
-    if (window._exdState?.answered) return;
-    const input = document.getElementById('exd-text-input');
-    if (!input) return;
-    const typed = input.value.trim();
-    if (!typed) { input.classList.add('border-error'); return; }
-
-    window._exdState.answered = true;
-    const q = window._exdState.questions[window._exdState.current];
-    const correct = typed.toLowerCase() === String(q.answer).toLowerCase();
-
-    // Disable input + highlight
-    input.disabled = true;
-    const checkBtn = input.nextElementSibling;
-    if (checkBtn && checkBtn.tagName === 'BUTTON') checkBtn.disabled = true;
-
-    if (correct) {
-        input.classList.add('border-green-500', 'bg-green-50');
-        window._exdState.score++;
-    } else {
-        input.classList.add('border-error', 'bg-red-50');
-    }
-
-    _exdShowFeedback(correct, q);
-};
-
-window._exdAdvance = function() {
-    const st = window._exdState;
-    if (!st) return;
-    st.current++;
-    st.answered = false;
-
-    if (st.current >= st.questions.length) {
-        // Màn hình kết quả
-        const pct = Math.round((st.score / st.questions.length) * 100);
-        const container = document.getElementById('exd-container');
-        const progressEl = document.getElementById('exd-progress-label');
-        if (progressEl) progressEl.textContent = '';
-        if (container) container.innerHTML = `
-        <div class="w-full flex flex-col items-center gap-5 mt-6 fade-in text-center px-4">
-            <div class="w-20 h-20 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center shadow-lg">
-                <span class="material-symbols-outlined text-[48px] icon-fill">${pct >= 70 ? 'check_circle' : 'sentiment_neutral'}</span>
-            </div>
-            <h2 class="text-2xl font-bold text-on-surface">Hoàn thành!</h2>
-            <p class="text-on-surface-variant">Bạn trả lời đúng <span class="font-bold text-primary text-xl">${st.score}/${st.questions.length}</span> câu (${pct}%)</p>
-            <div class="flex gap-3 mt-2">
-                <button onclick="window._renderExerciseDetail()" class="bg-primary/10 text-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-primary/20 transition-colors">
-                    Làm lại
-                </button>
-                <button onclick="window._backFromExerciseDetail()" class="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold text-sm hover:bg-surface-tint transition-colors">
-                    Về danh sách
-                </button>
-            </div>
-        </div>`;
-    } else {
-        window._renderExdQuestion();
-    }
-};
-
+// THPT EXAM MODULE  —  Moved to thptExam.js
 // ============================================================
 // DICTIONARY PAGE  —  Tra từ điển
 // ============================================================
