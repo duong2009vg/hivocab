@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="utf-8"/>
@@ -115,6 +115,8 @@ tailwind.config={
 .soft-shadow{box-shadow:0 10px 40px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.06),0 1px 1px rgba(0,0,0,0.02)}
 .soft-shadow:hover{box-shadow:0 20px 60px rgba(0,0,0,0.06),0 8px 24px rgba(0,0,0,0.08),0 2px 4px rgba(0,0,0,0.03);transform:translateY(-2px);transition:all .3s ease}
 .page{display:none;min-height:100vh}.page.active{display:block}
+#page-thpt-room{display:none!important}
+#page-thpt-room.active{display:flex!important}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background-color:rgba(112,120,129,0.2);border-radius:9999px}
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease-out both}
@@ -1767,7 +1769,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 </div>
 
 <!-- ==================== PAGE: PHÒNG THI THPT (CBT EXAM ROOM) ==================== -->
-<div id="page-thpt-room" class="page fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col h-screen w-screen overflow-hidden select-none">
+<div id="page-thpt-room" class="page fixed inset-0 z-[100] bg-[#f4f6f9] flex-col h-screen w-screen overflow-hidden select-none">
     <!-- Top Header: Bộ GD&ĐT CBT Header Style -->
     <header class="bg-[#1a365d] text-white px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-md">
         <!-- Left: Kỳ thi & Thí sinh -->
