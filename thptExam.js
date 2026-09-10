@@ -590,12 +590,22 @@
 
                         let sHtml = '';
                         (sentences || []).forEach(item => {
-                            const letter = (item && typeof item === 'object' && item.letter) ? item.letter : (item ? item.letter || '' : '');
-                            const text = (item && typeof item === 'object' && item.text) ? item.text : String(item || '');
+                            let letter = '';
+                            let text = '';
+                            if (item && typeof item === 'object') {
+                                letter = item.letter || '';
+                                text = item.text || '';
+                            } else if (typeof item === 'string') {
+                                text = item;
+                            }
+                            letter = String(letter || '').trim();
+                            text = String(text || '').trim();
+                            if (!text) return;
+
                             sHtml += `
                             <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/90 hover:bg-blue-50/50 hover:border-blue-300 transition-colors">
                                 <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                                    ${letter}
+                                    ${this.escHtml(letter)}
                                 </span>
                                 <div class="text-slate-800 text-sm leading-relaxed q-text-size select-text font-sans flex-1">
                                     ${this.escHtml(text)}
@@ -656,16 +666,32 @@
                 } else {
                     // Authentic Reading / Leaflet / Cloze Passage
                     let parasHtml = '';
+                    const isReadingComprehension = (sec.type === 'reading') && Array.isArray(sec.paragraphs) && sec.paragraphs.length > 1;
+
                     if (sec.paragraphs && Array.isArray(sec.paragraphs) && sec.paragraphs.length > 0) {
-                        sec.paragraphs.forEach(rawP => {
+                        sec.paragraphs.forEach((rawP, pIdx) => {
                             const p = (typeof rawP === 'string' ? rawP : String(rawP || '')).trim();
                             if (!p) return;
                             const isBullet = p.startsWith('•') || p.startsWith('- ') || /^[1-6]\.\s+/.test(p);
+                            const isHeader = !isBullet && p.length < 50 && (p.endsWith(':') || p === p.toUpperCase());
+
                             if (isBullet) {
                                 parasHtml += `
                                 <div class="flex items-start gap-2.5 text-sm text-slate-800 my-2 pl-2 leading-relaxed font-sans">
                                     <span class="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0 mt-2"></span>
                                     <div class="flex-1">${this.formatBlanksInHtml(p.replace(/^[•\-\*]\s*|^[1-6]\.\s*/, ''), sec.startQ, sec.endQ)}</div>
+                                </div>`;
+                            } else if (isReadingComprehension && !isHeader) {
+                                parasHtml += `
+                                <div class="reading-para-block my-3 p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
+                                    <div class="flex items-center gap-1.5 mb-1.5 select-none">
+                                        <span class="inline-flex items-center text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100/80 border border-blue-200 px-2 py-0.5 rounded-md">
+                                            Đoạn ${pIdx + 1}
+                                        </span>
+                                    </div>
+                                    <p class="text-justify text-sm text-slate-800 leading-relaxed select-text font-sans">
+                                        ${this.formatBlanksInHtml(p, sec.startQ, sec.endQ)}
+                                    </p>
                                 </div>`;
                             } else {
                                 parasHtml += `
@@ -855,6 +881,9 @@
 
                 let promptHtml = '';
                 if (q.is_arrangement) {
+                    const lettersStr = (q.arrangement_sentences && q.arrangement_sentences.length > 0)
+                        ? q.arrangement_sentences.map(s => s.letter).join(', ')
+                        : 'a, b, c, d, e';
                     promptHtml = `
                     <div class="space-y-1.5 font-sans">
                         <div class="font-bold text-sm text-slate-900 leading-relaxed q-text-size">
@@ -862,7 +891,7 @@
                         </div>
                         <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
                             <span class="material-symbols-outlined text-[14px]">west</span>
-                            <span>Xem các câu <strong>(a, b, c, d, e)</strong> ở cột bên trái</span>
+                            <span>Xem các câu <strong>(${lettersStr})</strong> ở cột bên trái</span>
                         </div>
                     </div>`;
                 } else {
