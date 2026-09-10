@@ -1770,139 +1770,146 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 
 <!-- ==================== PAGE: PHÒNG THI THPT (CBT EXAM ROOM) ==================== -->
 <div id="page-thpt-room" class="page fixed inset-0 z-[100] bg-[#f4f6f9] flex-col h-screen w-screen overflow-hidden select-none">
-    <!-- Top Header: Bộ GD&ĐT CBT Header Style -->
-    <header class="bg-[#1a365d] text-white px-4 md:px-6 py-2.5 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-md">
+    <!-- Top Header: Siêu gọn gàng 1 hàng duy nhất (~46px), tối ưu không gian hiển thị bài thi -->
+    <header class="h-[46px] min-h-[46px] max-h-[46px] bg-[#1a365d] text-white px-3 md:px-5 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-sm z-30 select-none">
         <!-- Left: Kỳ thi & Thí sinh -->
-        <div class="flex items-center gap-3 md:gap-4 min-w-0">
-            <div class="w-9 h-9 rounded-lg bg-blue-600/40 border border-blue-400/30 flex items-center justify-center shrink-0">
-                <span class="material-symbols-outlined text-white text-[22px]">school</span>
+        <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-blue-600/40 border border-blue-400/30 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-white text-[18px]">school</span>
             </div>
-            <div class="min-w-0">
-                <div class="flex items-center gap-2">
-                    <span class="text-xs md:text-sm font-black tracking-wide uppercase text-blue-200">KỲ THI TỐT NGHIỆP THPT</span>
-                    <span class="hidden sm:inline-block text-[10px] bg-blue-500/30 text-blue-200 px-2 py-0.5 rounded font-semibold border border-blue-400/20">Môn Tiếng Anh</span>
-                </div>
-                <div class="flex items-center gap-3 text-[11px] md:text-xs text-slate-300 font-medium truncate">
-                    <span class="font-bold text-white" id="exam-candidate-name">Thí sinh</span>
-                    <span class="text-slate-400">•</span>
-                    <span id="exam-candidate-sbd" class="text-amber-300 font-mono font-bold">SBD: 10082401</span>
-                    <span class="hidden md:inline-block text-slate-400">•</span>
-                    <span id="exam-date" class="hidden md:inline-block">Ngày thi: Hôm nay</span>
-                </div>
+            <div class="min-w-0 flex items-center gap-2">
+                <span class="text-xs font-black tracking-wide uppercase text-blue-200 truncate">THPT TIẾNG ANH</span>
+                <span id="exam-candidate-sbd" class="text-amber-300 font-mono font-bold text-[11px] bg-[#0f2342] px-2 py-0.5 rounded border border-blue-400/20 shrink-0">SBD: 10082401</span>
+                <span id="exam-candidate-name" class="hidden xl:inline-block text-xs text-slate-300 font-medium truncate max-w-[120px]">Thí sinh</span>
+                <span id="exam-date" class="hidden"></span>
             </div>
         </div>
 
-        <!-- Center: Live Connection & Countdown Timer -->
-        <div class="flex items-center gap-3 md:gap-5">
-            <div class="hidden lg:flex items-center gap-2 text-xs font-semibold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span>Hệ thống trực tuyến</span>
+        <!-- Center: Điều hướng câu hỏi + Đồng hồ bấm giờ + Tiến độ -->
+        <div class="flex items-center gap-1.5 md:gap-3">
+            <!-- Quick Question Switcher -->
+            <div class="flex items-center bg-[#0f2342] border border-blue-400/30 rounded-lg p-0.5">
+                <button type="button" onclick="window.ThptExam.prevQuestion()" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-md transition-colors cursor-pointer" title="Câu trước (←)">
+                    <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                </button>
+                <div class="px-2 text-[11px] font-mono font-bold text-blue-100 whitespace-nowrap">
+                    Câu <span id="exam-current-q-num">1</span>/40
+                </div>
+                <button type="button" onclick="window.ThptExam.nextQuestion()" class="w-7 h-7 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded-md transition-colors cursor-pointer" title="Câu kế tiếp (→ hoặc Enter)">
+                    <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                </button>
             </div>
 
-            <div class="flex items-center gap-2 bg-[#0f2342] border border-blue-400/30 px-3.5 py-1.5 rounded-xl shadow-inner text-white">
-                <span class="material-symbols-outlined text-[20px] text-amber-400">timer</span>
-                <div class="text-right">
-                    <div class="text-[9px] uppercase tracking-wider text-slate-400 font-bold leading-none">Thời gian còn lại</div>
-                    <div id="exam-timer-display" class="font-mono text-lg md:text-xl font-black leading-tight tracking-wider text-amber-300">50:00</div>
-                </div>
+            <!-- Timer Display -->
+            <div class="flex items-center gap-1.5 bg-[#0f2342] border border-blue-400/30 px-2.5 py-1 rounded-lg shadow-inner text-white">
+                <span class="material-symbols-outlined text-[16px] text-amber-400">timer</span>
+                <span id="exam-timer-display" class="font-mono text-xs md:text-sm font-black tracking-wider text-amber-300">50:00</span>
+            </div>
+
+            <!-- Progress Badge -->
+            <div class="hidden sm:flex items-center gap-1 text-[11px] font-bold text-blue-200 bg-blue-900/50 border border-blue-400/20 px-2.5 py-1 rounded-lg">
+                <span class="material-symbols-outlined text-[14px] text-emerald-400">task_alt</span>
+                <span id="exam-answered-count">0 / 40</span>
             </div>
         </div>
 
-        <!-- Right: Actions (Nộp bài / Thoát) -->
-        <div class="flex items-center gap-2 shrink-0">
-            <button onclick="window.ThptExam.confirmSubmit()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer">
-                <span class="material-symbols-outlined text-[18px]">send</span>
+        <!-- Right: Tiện ích & Nộp bài -->
+        <div class="flex items-center gap-1 md:gap-2 shrink-0">
+            <!-- Mobile View Switcher (Visible only on small screens) -->
+            <div class="flex md:hidden items-center bg-[#0f2342] border border-blue-400/30 p-0.5 rounded-lg text-[10px] font-bold">
+                <button type="button" id="btn-view-passage" onclick="window.ThptExam.setMobileView('passage')" class="px-1.5 py-0.5 rounded text-slate-300 hover:text-white">Đọc</button>
+                <button type="button" id="btn-view-both" onclick="window.ThptExam.setMobileView('both')" class="px-1.5 py-0.5 rounded bg-blue-600 text-white">2 bên</button>
+                <button type="button" id="btn-view-questions" onclick="window.ThptExam.setMobileView('questions')" class="px-1.5 py-0.5 rounded text-slate-300 hover:text-white">Câu</button>
+            </div>
+
+            <!-- Font size -->
+            <div class="hidden lg:flex items-center gap-0.5 bg-[#0f2342] border border-blue-400/30 p-0.5 rounded-lg">
+                <button onclick="window.ThptExam.changeFontSize(-1)" class="w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Giảm cỡ chữ">A-</button>
+                <button onclick="window.ThptExam.changeFontSize(1)" class="w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
+            </div>
+
+            <!-- Fullscreen -->
+            <button onclick="window.ThptExam.toggleFullscreen()" class="hidden sm:flex w-7 h-7 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 items-center justify-center transition-colors cursor-pointer" title="Toàn màn hình">
+                <span class="material-symbols-outlined text-[18px]">fullscreen</span>
+            </button>
+
+            <!-- Toggle Palette Button -->
+            <button onclick="window.ThptExam.togglePalette()" id="btn-header-toggle-palette" class="px-2 py-1 rounded-lg bg-blue-900/60 hover:bg-blue-800/80 border border-blue-400/30 text-blue-200 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer" title="Bật/Tắt bảng 40 câu hỏi">
+                <span class="material-symbols-outlined text-[16px]">grid_view</span>
+                <span class="hidden md:inline">Bảng câu</span>
+            </button>
+
+            <!-- Submit Button -->
+            <button onclick="window.ThptExam.confirmSubmit()" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer">
+                <span class="material-symbols-outlined text-[16px]">send</span>
                 <span>NỘP BÀI</span>
             </button>
-            <button onclick="window.ThptExam.exitRoom()" class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Thoát phòng thi">
-                <span class="material-symbols-outlined text-[22px]">logout</span>
+
+            <!-- Exit Button -->
+            <button onclick="window.ThptExam.exitRoom()" class="p-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Thoát phòng thi">
+                <span class="material-symbols-outlined text-[20px]">close</span>
             </button>
         </div>
     </header>
 
-    <!-- Sub-Header / Control Toolbar -->
-    <div class="bg-white border-b border-slate-200 px-4 md:px-6 py-2 flex items-center justify-between shrink-0 shadow-xs gap-2">
-        <!-- Navigation Buttons -->
-        <div class="flex items-center gap-1.5 md:gap-2">
-            <button onclick="window.ThptExam.prevQuestion()" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
-                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-                <span class="hidden sm:inline">Quay lại</span>
-            </button>
-            <button onclick="window.ThptExam.nextQuestion()" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer">
-                <span class="hidden sm:inline">Tiếp theo</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </button>
-            <button onclick="window.ThptExam.saveProgress(true)" class="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer ml-1" title="Lưu bài làm">
-                <span class="material-symbols-outlined text-[16px] text-emerald-600">save</span>
-                <span class="hidden md:inline">Lưu bài</span>
-            </button>
-        </div>
-
-        <!-- Mobile View Switcher (Visible only on small screens) -->
-        <div class="flex md:hidden items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[11px] font-bold">
-            <button type="button" id="btn-view-passage" onclick="window.ThptExam.setMobileView('passage')" class="px-2 py-1 rounded-md text-slate-600 hover:text-blue-700">Bài đọc</button>
-            <button type="button" id="btn-view-both" onclick="window.ThptExam.setMobileView('both')" class="px-2 py-1 rounded-md bg-white text-blue-700 shadow-xs">Cả hai</button>
-            <button type="button" id="btn-view-questions" onclick="window.ThptExam.setMobileView('questions')" class="px-2 py-1 rounded-md text-slate-600 hover:text-blue-700">Câu hỏi</button>
-        </div>
-
-        <!-- Progress Counter -->
-        <div class="text-xs text-slate-600 font-medium">
-            <span class="hidden sm:inline">Số câu đã làm: </span>
-            <span id="exam-answered-count" class="font-black text-blue-700 text-sm">0 / 40</span>
-        </div>
-
-        <!-- Font Scaling & Fullscreen -->
-        <div class="flex items-center gap-1.5">
-            <span class="hidden lg:inline text-[11px] text-slate-500 font-semibold mr-1">Cỡ chữ:</span>
-            <button onclick="window.ThptExam.changeFontSize(-1)" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer" title="Giảm cỡ chữ">A-</button>
-            <button onclick="window.ThptExam.changeFontSize(1)" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
-            <button onclick="window.ThptExam.toggleFullscreen()" class="w-8 h-8 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center justify-center transition-colors cursor-pointer ml-1" title="Toàn màn hình">
-                <span class="material-symbols-outlined text-[18px]">fullscreen</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Main Body: Split View 2 Cột Độc Lập -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0">
+    <!-- Main Body: Split View 2 Cột Độc Lập với Thanh Ngăn Cách Kéo Thả -->
+    <div id="exam-split-container" class="flex-1 flex flex-col md:flex-row overflow-hidden min-h-0 relative">
         <!-- Cột Trái: Ngữ liệu / Toàn bộ bài đọc có thể cuộn tự do -->
-        <div id="exam-left-col" class="w-full md:w-1/2 border-r border-slate-200 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full transition-all">
-            <div class="px-4 py-2 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0 gap-2">
+        <div id="exam-left-col" class="w-full md:w-1/2 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full">
+            <div class="px-3 md:px-4 py-1.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0 gap-2">
                 <div class="flex items-center gap-1.5 shrink-0">
                     <span class="material-symbols-outlined text-blue-600 text-[18px]">menu_book</span>
-                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700 hidden sm:inline">Bài Đọc &amp; Ngữ Liệu</span>
+                    <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Ngữ Liệu Đề Bài</span>
                 </div>
                 <div id="exam-passage-nav-pills" class="flex items-center gap-1 overflow-x-auto scrollbar-hide py-0.5 max-w-full">
                     <!-- Quick section jump buttons rendered by JS -->
                 </div>
             </div>
-            <div id="exam-passage-content" class="flex-1 overflow-y-auto p-4 md:p-6 select-text space-y-5">
-                <!-- All sections rendered continuously by JS so user can freely scroll through the entire exam -->
+            <div id="exam-passage-content" class="flex-1 overflow-y-auto p-4 md:p-6 select-text space-y-5 font-sans leading-relaxed text-slate-800">
+                <!-- Continuous passage sections and sentence arrangement cards rendered by JS -->
             </div>
         </div>
 
+        <!-- Draggable Split Divider (Thanh kéo ngăn cách trái/phải tùy chỉnh) -->
+        <div id="exam-drag-divider" 
+             class="hidden md:flex w-2 hover:w-2.5 bg-slate-200 hover:bg-blue-500 active:bg-blue-600 cursor-col-resize items-center justify-center transition-all group shrink-0 select-none z-20" 
+             title="Kéo sang trái hoặc phải để điều chỉnh tỷ lệ hiển thị 2 cột">
+            <div class="w-0.5 h-7 rounded-full bg-slate-400 group-hover:bg-white group-active:bg-white transition-colors pointer-events-none"></div>
+        </div>
+
         <!-- Cột Phải: Câu hỏi & Phương án trắc nghiệm -->
-        <div id="exam-right-col" class="w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-1/2 md:h-full transition-all">
-            <div class="px-4 py-2 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
+        <div id="exam-right-col" class="w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-1/2 md:h-full border-l border-slate-200 md:border-l-0">
+            <div class="px-3 md:px-4 py-1.5 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary text-[18px]">checklist</span>
                     <span class="font-bold text-xs uppercase tracking-wider text-slate-700">Câu Hỏi &amp; Phương Án</span>
                 </div>
-                <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">Chọn A, B, C, D (Phím tắt: 1, 2, 3, 4)</span>
+                <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">Phím tắt chọn đáp án: 1, 2, 3, 4 (hoặc A, B, C, D)</span>
             </div>
-            <div id="exam-questions-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+            <div id="exam-questions-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 font-sans">
                 <!-- Rendered by JS with ID q-options-X -->
             </div>
         </div>
     </div>
 
-    <!-- Bottom Bar: Dãy 40 số câu hỏi -->
-    <div class="bg-[#1e293b] text-white px-4 py-2.5 border-t border-slate-700 flex items-center gap-3 shrink-0 overflow-x-auto">
-        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider shrink-0 mr-1">
-            <span class="material-symbols-outlined text-[18px] text-blue-400">grid_on</span>
-            <span class="hidden sm:inline">Dãy câu:</span>
+    <!-- Bottom Bar: Dãy 40 số câu hỏi (Collapsible) -->
+    <div id="exam-bottom-bar" class="bg-[#1e293b] text-white border-t border-slate-700 shrink-0 transition-all duration-300 ease-in-out relative z-10">
+        <!-- Thanh toggle bar nhỏ xíu -->
+        <div class="flex items-center justify-between px-3 md:px-4 py-1 bg-[#0f172a] text-[11px] font-bold text-slate-300 border-b border-slate-700/60">
+            <div class="flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[15px] text-blue-400">grid_on</span>
+                <span>BẢNG 40 CÂU HỎI</span>
+            </div>
+            <button type="button" onclick="window.ThptExam.togglePalette()" class="text-slate-400 hover:text-white flex items-center gap-1 text-[11px] transition-colors cursor-pointer">
+                <span id="exam-palette-toggle-text">Thu gọn</span>
+                <span id="exam-palette-toggle-icon" class="material-symbols-outlined text-[16px]">expand_more</span>
+            </button>
         </div>
-        <div id="exam-palette-container" class="flex items-center gap-1.5 overflow-x-auto py-1 scrollbar-hide flex-1">
-            <!-- 40 Question Bubbles rendered by JS -->
+        <!-- Vùng chứa 40 nút tròn -->
+        <div id="exam-palette-wrapper" class="px-3 md:px-4 py-1.5 flex items-center gap-3 overflow-x-auto transition-all">
+            <div id="exam-palette-container" class="flex items-center gap-1.5 overflow-x-auto py-0.5 scrollbar-hide flex-1">
+                <!-- 40 Question Bubbles rendered by JS -->
+            </div>
         </div>
     </div>
 </div>
