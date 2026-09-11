@@ -281,6 +281,21 @@ tailwind.config={
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease-out both}
 
+/* Word/phrase highlight in THPT exam passages */
+mark.thpt-word-highlight{
+    background-color:#fde047;
+    color:#1c1917;
+    border-radius:3px;
+    padding:0 3px;
+    font-weight:700;
+    box-shadow:0 0 0 1.5px #ca8a04;
+    animation:hlPulse .5s ease-out both;
+}
+@keyframes hlPulse{
+    0%{background-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,0.4)}
+    100%{background-color:#fde047;box-shadow:0 0 0 1.5px #ca8a04}
+}
+
 .glass-nav { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
 .glass-button { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border: 1px solid rgba(255, 255, 255, 0.3); transition: all 0.2s ease-in-out; }
 .glass-button:hover { background: rgba(255, 255, 255, 0.25); }
@@ -3360,7 +3375,7 @@ window.addEventListener('hashchange', () => {
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js?v=20260911-v2"></script>
 <script src="sessionUI.js?v=20260911-v2"></script>
-<script src="thptExam.js?v=20260911_cbt_v14"></script>
+<script src="thptExam.js?v=20260912_para_hl_v15"></script>
 <script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 <script src="bilingualReading.js?v=20260911-v2"></script>
 

@@ -916,7 +916,146 @@
         },
 
         // ==========================================
-        // 8. RENDER CÂU HỎI & CHỌN ĐÁP ÁN
+        // 8. HIGHLIGHT TỪ/CỤM TỪ TRONG PASSAGE
+        // ==========================================
+
+        /**
+         * Parse a question prompt to extract word/phrase to highlight in passage.
+         * Handles patterns like:
+         *   "The word "blocked" in paragraph 2..."
+         *   "The phrase 'at risk' in paragraph 1..."
+         *   "The underlined word "schedule"..."
+         *   "The italicized word/phrase..."
+         * Returns: { word: string, paraIndex: number|null } or null
+         */
+        extractHighlightTarget(prompt) {
+            if (!prompt) return null;
+
+            // Patterns handled:
+            //  "The word "X" in paragraph N..."      (standard THPT)
+            //  "The phrase 'X' in paragraph N..."    (single quotes)
+            //  "What does the word 'X' in paragraph N refer to?"
+            // Unicode quote chars: \u201c\u201d = \u201c\u201d, \u2018\u2019 = \u2018\u2019
+            const wordPat = /(?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+[\u201c\u201d\u2018\u2019"']([^\u201c\u201d\u2018\u2019"'\n]{1,80})[\u201c\u201d\u2018\u2019"']/i;
+            const mWord = wordPat.exec(prompt);
+            if (!mWord) return null;
+
+            const word = mWord[1].trim();
+
+            // Try to get paragraph number
+            const paraPat = /in\s+paragraph\s+(\d+)/i;
+            const mPara = paraPat.exec(prompt);
+            const paraIndex = mPara ? (parseInt(mPara[1], 10) - 1) : null; // 0-based
+
+            return { word, paraIndex };
+        },
+
+        /**
+         * Clear any existing word highlights in the passage pane.
+         */
+        clearWordHighlights() {
+            document.querySelectorAll('.thpt-word-highlight').forEach(el => {
+                const parent = el.parentNode;
+                if (parent) {
+                    parent.replaceChild(document.createTextNode(el.textContent), el);
+                    parent.normalize();
+                }
+            });
+        },
+
+        /**
+         * Highlight a word/phrase within passage paragraphs.
+         * If paraIndex is given, only highlight in that paragraph block.
+         * Returns true if at least one match was found.
+         */
+        applyWordHighlight(word, paraIndex) {
+            if (!word) return false;
+            this.clearWordHighlights();
+
+            const passagePane = document.getElementById('exam-passage-content');
+            if (!passagePane) return false;
+
+            // Get all readable paragraph elements
+            const paraBlocks = passagePane.querySelectorAll(
+                '.reading-para-block p, .reading-para-block, p.text-justify, p.indent-6, p.leading-relaxed'
+            );
+
+            // Escape special regex characters in word
+            const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const wordRegex = new RegExp(`(${escapedWord})`, 'gi');
+
+            let found = false;
+            let firstMatch = null;
+
+            paraBlocks.forEach((block, idx) => {
+                // If paraIndex specified, only highlight in that paragraph
+                if (paraIndex !== null && idx !== paraIndex) return;
+
+                // Walk text nodes and wrap matches
+                const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, null);
+                const textNodes = [];
+                let node;
+                while ((node = walker.nextNode())) {
+                    textNodes.push(node);
+                }
+
+                textNodes.forEach(textNode => {
+                    const text = textNode.textContent;
+                    if (!wordRegex.test(text)) return;
+                    wordRegex.lastIndex = 0;
+
+                    const frag = document.createDocumentFragment();
+                    let lastIdx = 0;
+                    let match;
+                    wordRegex.lastIndex = 0;
+                    while ((match = wordRegex.exec(text)) !== null) {
+                        if (match.index > lastIdx) {
+                            frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
+                        }
+                        const mark = document.createElement('mark');
+                        mark.className = 'thpt-word-highlight';
+                        mark.textContent = match[1];
+                        frag.appendChild(mark);
+                        if (!firstMatch) firstMatch = mark;
+                        found = true;
+                        lastIdx = wordRegex.lastIndex;
+                    }
+                    if (lastIdx < text.length) {
+                        frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+                    }
+                    textNode.parentNode.replaceChild(frag, textNode);
+                });
+            });
+
+            // Scroll to first highlight in passage pane
+            if (firstMatch) {
+                firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            return found;
+        },
+
+        /**
+         * Apply highlight for current question if it has a word-reference prompt.
+         */
+        applyCurrentQuestionHighlight(qNum) {
+            if (!this.currentExam) return;
+            const q = this.currentExam.questions[qNum - 1];
+            if (!q || q.is_arrangement) {
+                this.clearWordHighlights();
+                return;
+            }
+
+            const target = this.extractHighlightTarget(q.prompt || '');
+            if (target) {
+                this.applyWordHighlight(target.word, target.paraIndex);
+            } else {
+                this.clearWordHighlights();
+            }
+        },
+
+        // ==========================================
+        // 8b. RENDER CÂU HỎI & CHỌN ĐÁP ÁN
         // ==========================================
         renderQuestionsAndPalette() {
             if (!this.currentExam) return;
@@ -1020,11 +1159,18 @@
                                 ${this.escHtml(q.group)}
                             </span>
                         </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" onclick="window.ThptExam.reportAnswer(${qNum})" 
+                                class="p-1.5 rounded-lg transition-colors cursor-pointer text-slate-300 hover:text-rose-500 hover:bg-rose-50" 
+                                title="Báo lỗi đáp án">
+                            <span class="material-symbols-outlined text-[16px]">report</span>
+                        </button>
                         <button type="button" onclick="window.ThptExam.toggleFlag(${qNum})" 
                                 class="p-1.5 rounded-lg transition-colors cursor-pointer shrink-0 ${isFlagged ? 'text-amber-500 bg-amber-50' : 'text-slate-400 hover:text-slate-600'}" 
                                 title="Đánh dấu câu hỏi cần xem lại">
                             <span class="material-symbols-outlined text-[18px]">${isFlagged ? 'flag' : 'outlined_flag'}</span>
                         </button>
+                        </div>
                     </div>
 
                     <!-- Prompt -->
@@ -1202,6 +1348,91 @@
             } catch(e) {}
         },
 
+        async reportAnswer(qNum) {
+            if (!this.currentExam) return;
+            const q = this.currentExam.questions[qNum - 1];
+            if (!q) return;
+
+            // Remove any existing report modal
+            const existing = document.getElementById('thpt-report-modal');
+            if (existing) existing.remove();
+
+            const curAns = q.correct_answer || '?';
+            const modal = document.createElement('div');
+            modal.id = 'thpt-report-modal';
+            modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 p-4';
+            modal.innerHTML = `
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4 font-sans">
+                <div class="flex items-center gap-2 text-rose-600">
+                    <span class="material-symbols-outlined text-[22px]">report</span>
+                    <h3 class="font-black text-base">Báo lỗi câu ${qNum}</h3>
+                </div>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Đáp án hệ thống: <strong class="text-blue-700">${curAns}</strong><br>
+                    Bạn cho rằng đáp án đúng là?
+                </p>
+                <div class="grid grid-cols-4 gap-2" id="report-ans-btns">
+                    ${['A','B','C','D'].map(l => `
+                    <button type="button" onclick="this.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('bg-rose-600','text-white','border-rose-600'));this.classList.add('bg-rose-600','text-white','border-rose-600');document.getElementById('report-sel-ans').value='${l}'"
+                        class="py-2 rounded-xl border-2 border-slate-200 text-slate-700 font-black text-sm transition-all hover:border-rose-400">${l}</button>`).join('')}
+                </div>
+                <input type="hidden" id="report-sel-ans" value="">
+                <textarea id="report-note" rows="2"
+                    placeholder="Giải thích thêm (không bắt buộc)"
+                    class="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-rose-400"></textarea>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="document.getElementById('thpt-report-modal').remove()"
+                        class="px-4 py-2 rounded-xl text-sm text-slate-600 hover:bg-slate-100 transition-colors">Huỷ</button>
+                    <button type="button" id="report-submit-btn"
+                        onclick="window.ThptExam._submitReport(${qNum}, '${q.correct_answer || ''}')"
+                        class="px-4 py-2 rounded-xl bg-rose-600 text-white text-sm font-bold hover:bg-rose-700 transition-colors">Gửi báo cáo</button>
+                </div>
+            </div>`;
+            document.body.appendChild(modal);
+            // Close on backdrop click
+            modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+        },
+
+        async _submitReport(qNum, systemAnswer) {
+            const selAns = (document.getElementById('report-sel-ans')?.value || '').trim();
+            const note = (document.getElementById('report-note')?.value || '').trim();
+            const btn = document.getElementById('report-submit-btn');
+
+            if (!selAns) {
+                alert('Vui lòng chọn đáp án bạn cho là đúng.');
+                return;
+            }
+            if (btn) { btn.disabled = true; btn.textContent = 'Đang gửi...'; }
+
+            try {
+                const supabase = window._supabaseClient || window.supabase;
+                if (supabase) {
+                    await supabase.from('answer_reports').insert([{
+                        exam_id: this.currentExam.id,
+                        question_number: qNum,
+                        system_answer: systemAnswer,
+                        reported_answer: selAns,
+                        note: note || null,
+                        created_at: new Date().toISOString()
+                    }]);
+                }
+            } catch(e) {
+                console.warn('Report save failed (table may not exist yet):', e);
+            }
+
+            const modal = document.getElementById('thpt-report-modal');
+            if (modal) {
+                modal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center font-sans space-y-3">
+                    <span class="material-symbols-outlined text-emerald-500 text-[48px]">check_circle</span>
+                    <p class="font-bold text-slate-800">Cảm ơn bạn đã báo cáo!</p>
+                    <p class="text-sm text-slate-500">Chúng tôi sẽ kiểm tra và cập nhật đáp án sớm nhất.</p>
+                    <button type="button" onclick="this.closest('.fixed').remove()"
+                        class="mt-2 px-6 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold">Đóng</button>
+                </div>`;
+            }
+        },
+
         jumpToQuestion(qNum) {
             if (!this.currentExam) return;
             const prevIndex = this.currentQIndex;
@@ -1224,6 +1455,10 @@
             }
 
             this.syncPassageAndScroll(qNum);
+
+            // Apply word highlight if question references "The word X in paragraph N"
+            // Small delay to let passage scroll settle first
+            setTimeout(() => this.applyCurrentQuestionHighlight(qNum), 300);
         },
 
         prevQuestion() {
