@@ -23,6 +23,7 @@
         examSections: [],      // Cached passage sections for current exam
         keyboardBound: false,
         dividerBound: false,
+        searchQuery: '',
 
         // ==========================================
         // 1. KHỞI TẠO & NẠP DỮ LIỆU
@@ -37,6 +38,15 @@
                 }
             } catch (err) {
                 console.warn('Lỗi nạp thpt_exams.json:', err);
+            }
+            const searchInput = document.getElementById('thpt-search-input');
+            const clearBtn = document.getElementById('thpt-search-clear');
+            if (searchInput) {
+                searchInput.value = this.searchQuery || '';
+                if (clearBtn) {
+                    if (this.searchQuery) clearBtn.classList.remove('hidden');
+                    else clearBtn.classList.add('hidden');
+                }
             }
             this.setupKeyboardNavigation();
             this.initDraggableDivider();
@@ -191,13 +201,54 @@
         },
 
         // ==========================================
-        // 4. RENDER THƯ VIỆN ĐỀ THI (#page-exercises)
+        // 4. RENDER THƯ VIỆN ĐỀ THI (#page-exercises) & TÌM KIẾM
         // ==========================================
+        removeAccents(str) {
+            return (str || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/đ/g, 'd')
+                .replace(/Đ/g, 'D')
+                .toLowerCase();
+        },
+
+        onSearchInput(value) {
+            this.searchQuery = (value || '').trim();
+            const clearBtn = document.getElementById('thpt-search-clear');
+            if (clearBtn) {
+                if (this.searchQuery) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+            }
+            this.renderExamsList();
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            const input = document.getElementById('thpt-search-input');
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            const clearBtn = document.getElementById('thpt-search-clear');
+            if (clearBtn) clearBtn.classList.add('hidden');
+            this.renderExamsList();
+        },
+
         renderExamsList() {
             const container = document.getElementById('thpt-exams-grid');
             if (!container) return;
 
+            const countEl = document.getElementById('thpt-search-count');
+
             if (!this.exams || this.exams.length === 0) {
+                if (countEl) {
+                    countEl.innerHTML = `
+                        <span class="material-symbols-outlined text-[16px] text-primary animate-spin">progress_activity</span>
+                        <span>Đang nạp bộ đề...</span>`;
+                }
                 container.innerHTML = `
                     <div class="col-span-full py-16 text-center text-on-surface-variant font-sans">
                         <span class="material-symbols-outlined text-4xl animate-spin text-primary">progress_activity</span>
@@ -208,8 +259,60 @@
 
             const bestScores = this.loadAllBestScores();
 
+            // Lọc danh sách đề thi theo từ khóa tìm kiếm (hỗ trợ tiếng Việt không dấu & có dấu)
+            const q = this.removeAccents(this.searchQuery);
+            const filteredExams = this.exams
+                .map((exam, origIdx) => ({ exam, origIdx }))
+                .filter(({ exam, origIdx }) => {
+                    if (!q) return true;
+                    const titleNorm = this.removeAccents(exam.title);
+                    const numStr = String(origIdx + 1);
+                    const deStr = `de ${numStr}`;
+                    const deThiStr = `de thi so ${numStr}`;
+                    const idNorm = this.removeAccents(exam.id);
+                    return titleNorm.includes(q) || 
+                           numStr === q || 
+                           deStr.includes(q) || 
+                           deThiStr.includes(q) || 
+                           idNorm.includes(q);
+                });
+
+            // Cập nhật số lượng đề tìm thấy
+            if (countEl) {
+                if (q) {
+                    countEl.innerHTML = `
+                        <span class="material-symbols-outlined text-[16px] text-primary">filter_list</span>
+                        <span>Tìm thấy <strong class="text-primary font-bold">${filteredExams.length}</strong> / ${this.exams.length} đề</span>`;
+                } else {
+                    countEl.innerHTML = `
+                        <span class="material-symbols-outlined text-[16px] text-primary">description</span>
+                        <span><strong>${this.exams.length}</strong> đề thi chính thức</span>`;
+                }
+            }
+
+            // Giao diện khi không tìm thấy kết quả phù hợp
+            if (filteredExams.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-14 px-6 text-center text-on-surface-variant font-sans bg-surface-container-lowest rounded-2xl border border-outline-variant/30 soft-shadow flex flex-col items-center justify-center gap-3 fade-in">
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center mb-1">
+                            <span class="material-symbols-outlined text-[32px]">search_off</span>
+                        </div>
+                        <h3 class="text-base font-bold text-on-surface">Không tìm thấy đề thi phù hợp</h3>
+                        <p class="text-xs text-on-surface-variant max-w-md leading-relaxed">
+                            Không có đề thi nào khớp với từ khóa "<span class="font-semibold text-on-surface">${this.escHtml(this.searchQuery)}</span>". Thử tìm kiếm theo tên trường, tỉnh/thành phố hoặc số thứ tự đề thi.
+                        </p>
+                        <div class="pt-2">
+                            <button onclick="window.ThptExam.clearSearch()" class="px-5 py-2.5 rounded-xl bg-primary text-on-primary hover:bg-surface-tint text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95">
+                                <span class="material-symbols-outlined text-[16px]">clear_all</span>
+                                <span>Xem tất cả đề thi</span>
+                            </button>
+                        </div>
+                    </div>`;
+                return;
+            }
+
             let html = '';
-            this.exams.forEach((exam, idx) => {
+            filteredExams.forEach(({ exam, origIdx }) => {
                 const best = bestScores[exam.id];
                 const bestBadge = best 
                     ? `<span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
@@ -221,11 +324,11 @@
                        </span>`;
 
                 html += `
-                <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 soft-shadow flex flex-col justify-between gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg font-sans">
+                <div class="bg-surface-container-lowest rounded-2xl p-5 border border-outline-variant/30 soft-shadow flex flex-col justify-between gap-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg font-sans fade-in">
                     <div class="space-y-3">
                         <div class="flex items-start justify-between gap-2">
                             <span class="px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-xs font-black tracking-wider uppercase">
-                                ĐỀ THI SỐ ${idx + 1}
+                                ĐỀ THI SỐ ${origIdx + 1}
                             </span>
                             <span class="text-xs text-on-surface-variant font-semibold flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[16px] text-amber-500">schedule</span>
@@ -247,12 +350,12 @@
 
                     <div class="pt-2 border-t border-outline-variant/20 flex items-center gap-2">
                         <button onclick="window.ThptExam.startExam('${exam.id}', 50)" 
-                                class="flex-1 py-2.5 px-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer">
+                                class="flex-1 py-2.5 px-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer active:scale-95">
                             <span class="material-symbols-outlined text-[16px]">play_arrow</span>
                             <span>Vào thi (50p)</span>
                         </button>
                         <button onclick="window.ThptExam.openCustomTimeModal('${exam.id}')" 
-                                class="p-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
+                                class="p-2.5 rounded-xl border border-outline-variant/30 text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer active:scale-95"
                                 title="Tùy chỉnh thời gian thi">
                             <span class="material-symbols-outlined text-[18px]">more_time</span>
                         </button>

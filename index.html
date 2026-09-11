@@ -1927,6 +1927,31 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
             </div>
         </div>
 
+        <!-- THPT Exams Search Bar -->
+        <div class="bg-surface-container-lowest/80 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl p-3 sm:p-4 soft-shadow flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none select-none">search</span>
+                <input id="thpt-search-input" 
+                       type="text" 
+                       oninput="window.ThptExam && window.ThptExam.onSearchInput(this.value)"
+                       onkeydown="if(event.key==='Escape') window.ThptExam && window.ThptExam.clearSearch()"
+                       placeholder="Tìm kiếm đề thi (theo tên trường, tỉnh/thành phố, số đề...)..."
+                       class="w-full bg-surface-container-low/60 border border-outline-variant/30 focus:border-primary focus:bg-surface-container-lowest rounded-xl pl-10 pr-9 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                       autocomplete="off" spellcheck="false" />
+                <button id="thpt-search-clear" 
+                        type="button"
+                        onclick="window.ThptExam && window.ThptExam.clearSearch()" 
+                        class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer" 
+                        title="Xóa tìm kiếm">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+            <div id="thpt-search-count" class="text-xs font-semibold text-on-surface-variant flex items-center gap-1.5 px-1 sm:px-2 shrink-0 select-none">
+                <span class="material-symbols-outlined text-[16px] text-primary">description</span>
+                <span>Đang tải danh sách đề...</span>
+            </div>
+        </div>
+
         <!-- THPT Exams Grid -->
         <div id="thpt-exams-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <div class="flex items-center justify-center py-16 col-span-full">
@@ -3335,7 +3360,7 @@ window.addEventListener('hashchange', () => {
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js?v=20260911-v2"></script>
 <script src="sessionUI.js?v=20260911-v2"></script>
-<script src="thptExam.js?v=20260910_cbt_v13"></script>
+<script src="thptExam.js?v=20260911_cbt_v14"></script>
 <script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 <script src="bilingualReading.js?v=20260911-v2"></script>
 
