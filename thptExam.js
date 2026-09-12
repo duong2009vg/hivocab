@@ -648,7 +648,17 @@
         formatBlanksInHtml(text, startQ, endQ) {
             if (!text) return '';
             let escaped = this.escHtml(text);
-            // Replace blanks: (18), (18) _____, _____ (18) _____, (18) ...
+
+            // 1. Format Markdown bold (**word**) -> authentic bold target word with amber accent
+            escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="thpt-bold-word font-bold text-slate-900 bg-amber-100/70 border-b-2 border-amber-500 px-1 py-0.5 rounded-xs shadow-2xs">$1</strong>');
+
+            // 2. Format Markdown underline (__sentence__) -> authentic underlined target sentence with blue accent
+            escaped = escaped.replace(/__(.+?)__/g, '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-semibold text-slate-900 bg-blue-50/70 px-1 py-0.5 rounded-xs">$1</u>');
+
+            // 3. Format [I], [II], [III], [IV], [V] insertion markers
+            escaped = escaped.replace(/\[(I{1,3}|IV|V)\]/g, '<span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1 rounded bg-slate-200 text-slate-800 font-black text-[11px] mx-1 select-none border border-slate-300 shadow-2xs">[$1]</span>');
+
+            // 4. Replace blanks: (18), (18) _____, _____ (18) _____, (18) ...
             escaped = escaped.replace(/(?:\b|\()([1-9]|[1-3][0-9]|40)\)?(?:\s*_{2,}|\s*\.{3,})|(?:\b|\()([1-9]|[1-3][0-9]|40)\)/g, (match, p1, p2) => {
                 const num = parseInt(p1 || p2, 10);
                 if (num >= (startQ || 1) && num <= (endQ || 40)) {
@@ -931,34 +941,40 @@
         extractHighlightTarget(prompt) {
             if (!prompt) return null;
 
-            // Patterns handled:
-            //  "The word "X" in paragraph N..."      (standard THPT)
-            //  "The phrase 'X' in paragraph N..."    (single quotes)
-            //  "What does the word 'X' in paragraph N refer to?"
-            // Unicode quote chars: \u201c\u201d = \u201c\u201d, \u2018\u2019 = \u2018\u2019
-            const wordPat = /(?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+[\u201c\u201d\u2018\u2019"']([^\u201c\u201d\u2018\u2019"'\n]{1,80})[\u201c\u201d\u2018\u2019"']/i;
-            const mWord = wordPat.exec(prompt);
-            if (!mWord) return null;
-
-            const word = mWord[1].trim();
-
             // Try to get paragraph number
             const paraPat = /in\s+paragraph\s+(\d+)/i;
             const mPara = paraPat.exec(prompt);
             const paraIndex = mPara ? (parseInt(mPara[1], 10) - 1) : null; // 0-based
 
-            return { word, paraIndex };
+            // 1. Check for word/phrase pattern
+            const wordPat = /(?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+[\u201c\u201d\u2018\u2019"']([^\u201c\u201d\u2018\u2019"'\n]{1,80})[\u201c\u201d\u2018\u2019"']/i;
+            const mWord = wordPat.exec(prompt);
+            if (mWord) {
+                return { type: 'word', word: mWord[1].trim(), paraIndex };
+            }
+
+            // 2. Check for underlined sentence pattern
+            const sentPat = /(?:underlined\s+sentence|câu\s+(?:được\s+)?gạch\s+chân)/i;
+            if (sentPat.test(prompt)) {
+                return { type: 'sentence', paraIndex };
+            }
+
+            return null;
         },
 
         /**
-         * Clear any existing word highlights in the passage pane.
+         * Clear any existing word/sentence highlights in the passage pane.
          */
         clearWordHighlights() {
             document.querySelectorAll('.thpt-word-highlight').forEach(el => {
-                const parent = el.parentNode;
-                if (parent) {
-                    parent.replaceChild(document.createTextNode(el.textContent), el);
-                    parent.normalize();
+                if (el.tagName === 'MARK') {
+                    const parent = el.parentNode;
+                    if (parent) {
+                        parent.replaceChild(document.createTextNode(el.textContent), el);
+                        parent.normalize();
+                    }
+                } else {
+                    el.classList.remove('thpt-word-highlight');
                 }
             });
         },
@@ -969,40 +985,62 @@
          * Returns true if at least one match was found.
          */
         applyWordHighlight(word, paraIndex) {
-            if (!word) return false;
             this.clearWordHighlights();
+            if (!word) return false;
 
-            const passagePane = document.getElementById('exam-passage-content');
-            if (!passagePane) return false;
+            const pane = document.getElementById('exam-passage-content');
+            if (!pane) return false;
 
-            // Get all readable paragraph elements
-            const paraBlocks = passagePane.querySelectorAll(
-                '.reading-para-block p, .reading-para-block, p.text-justify, p.indent-6, p.leading-relaxed'
-            );
+            let targetContainers = [];
+            if (paraIndex !== null && paraIndex >= 0) {
+                const paraBlocks = pane.querySelectorAll('.reading-para-block');
+                if (paraBlocks.length > paraIndex) {
+                    targetContainers = [paraBlocks[paraIndex]];
+                }
+            }
 
-            // Escape special regex characters in word
+            if (targetContainers.length === 0) {
+                targetContainers = Array.from(pane.querySelectorAll('.reading-para-block p, .reading-para-block, p.text-justify, .passage-sec-card p'));
+            }
+
+            if (targetContainers.length === 0) {
+                targetContainers = [pane];
+            }
+
             const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const wordRegex = new RegExp(`(${escapedWord})`, 'gi');
+            const wordRegex = new RegExp(`\\b(${escapedWord})\\b`, 'gi');
 
             let found = false;
             let firstMatch = null;
 
-            paraBlocks.forEach((block, idx) => {
-                // If paraIndex specified, only highlight in that paragraph
-                if (paraIndex !== null && idx !== paraIndex) return;
+            targetContainers.forEach(container => {
+                const walker = document.createTreeWalker(
+                    container,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode(node) {
+                            if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                            let parent = node.parentNode;
+                            while (parent && parent !== container) {
+                                if (parent.tagName === 'BUTTON' || parent.classList.contains('thpt-word-highlight')) {
+                                    return NodeFilter.FILTER_REJECT;
+                                }
+                                parent = parent.parentNode;
+                            }
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                    }
+                );
 
-                // Walk text nodes and wrap matches
-                const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, null);
                 const textNodes = [];
-                let node;
-                while ((node = walker.nextNode())) {
-                    textNodes.push(node);
+                let currentNode;
+                while ((currentNode = walker.nextNode())) {
+                    textNodes.push(currentNode);
                 }
 
                 textNodes.forEach(textNode => {
-                    const text = textNode.textContent;
+                    const text = textNode.nodeValue;
                     if (!wordRegex.test(text)) return;
-                    wordRegex.lastIndex = 0;
 
                     const frag = document.createDocumentFragment();
                     let lastIdx = 0;
@@ -1027,7 +1065,6 @@
                 });
             });
 
-            // Scroll to first highlight in passage pane
             if (firstMatch) {
                 firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
@@ -1036,7 +1073,7 @@
         },
 
         /**
-         * Apply highlight for current question if it has a word-reference prompt.
+         * Apply highlight for current question if it has a word-reference or sentence-reference prompt.
          */
         applyCurrentQuestionHighlight(qNum) {
             if (!this.currentExam) return;
@@ -1047,10 +1084,34 @@
             }
 
             const target = this.extractHighlightTarget(q.prompt || '');
-            if (target) {
-                this.applyWordHighlight(target.word, target.paraIndex);
-            } else {
+            if (!target) {
                 this.clearWordHighlights();
+                return;
+            }
+
+            if (target.type === 'word') {
+                this.applyWordHighlight(target.word, target.paraIndex);
+            } else if (target.type === 'sentence') {
+                this.clearWordHighlights();
+                const pane = document.getElementById('exam-passage-content');
+                if (!pane) return;
+
+                let el = null;
+                if (target.paraIndex !== null && target.paraIndex >= 0) {
+                    const paraBlocks = pane.querySelectorAll('.reading-para-block');
+                    if (paraBlocks.length > target.paraIndex) {
+                        el = paraBlocks[target.paraIndex].querySelector('.thpt-underlined-sentence') ||
+                             paraBlocks[target.paraIndex].querySelector('u');
+                    }
+                }
+                if (!el) {
+                    el = pane.querySelector('.thpt-underlined-sentence') || pane.querySelector('u');
+                }
+
+                if (el) {
+                    el.classList.add('thpt-word-highlight');
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             }
         },
 

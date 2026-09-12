@@ -281,7 +281,7 @@ tailwind.config={
 @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade-in{animation:fadeIn .4s ease-out both}
 
-/* Word/phrase highlight in THPT exam passages */
+/* Word/phrase and sentence highlights in THPT exam passages */
 mark.thpt-word-highlight{
     background-color:#fde047;
     color:#1c1917;
@@ -294,6 +294,30 @@ mark.thpt-word-highlight{
 @keyframes hlPulse{
     0%{background-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,0.4)}
     100%{background-color:#fde047;box-shadow:0 0 0 1.5px #ca8a04}
+}
+strong.thpt-bold-word {
+    font-weight: 800;
+    color: #0f172a;
+    background-color: #fef3c7;
+    border-bottom: 2px solid #f59e0b;
+    padding: 0 4px;
+    border-radius: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+u.thpt-underlined-sentence {
+    text-decoration: underline;
+    text-decoration-color: #2563eb;
+    text-decoration-thickness: 2.5px;
+    text-underline-offset: 4px;
+    font-weight: 600;
+    color: #0f172a;
+    background-color: #eff6ff;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+.thpt-underlined-sentence.thpt-word-highlight {
+    background-color: #fde047 !important;
+    text-decoration-color: #ca8a04 !important;
 }
 
 .glass-nav { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
@@ -3375,7 +3399,7 @@ window.addEventListener('hashchange', () => {
 <script src="dashboardStats.js"></script>
 <script src="sessionEngine.js?v=20260911-v2"></script>
 <script src="sessionUI.js?v=20260911-v2"></script>
-<script src="thptExam.js?v=20260912_para_hl_v15"></script>
+<script src="thptExam.js?v=20260912_bold_underline_v16"></script>
 <script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
 <script src="bilingualReading.js?v=20260911-v2"></script>
 
