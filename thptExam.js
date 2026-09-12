@@ -659,7 +659,8 @@
             escaped = escaped.replace(/\[(I{1,3}|IV|V)\]/g, '<span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1 rounded bg-slate-200 text-slate-800 font-black text-[11px] mx-1 select-none border border-slate-300 shadow-2xs">[$1]</span>');
 
             // 4. Replace blanks: (18), (18) _____, _____ (18) _____, (18) ...
-            escaped = escaped.replace(/(?:_{1,}\s*)?\(\s*([1-3][0-9]|40|[1-9])\s*\)(?:\s*_{1,}|\s*\.{2,})?/g, (match, p1) => {
+            // Absorb all leading and trailing underscore/dash/equal/dot sequences so no stray marks remain
+            escaped = escaped.replace(/(?:[=_~-]*_{1,}[=_~-]*\s*)*\(\s*([1-3][0-9]|40|[1-9])\s*\)(?:\s*(?:_{1,}|\.{2,}|[-=_~]{1,}))*/g, (match, p1) => {
                 const num = parseInt(p1, 10);
                 if (num >= (startQ || 1) && num <= (endQ || 40)) {
                     return `<button type="button" onclick="window.ThptExam.jumpToQuestion(${num})" class="inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md bg-blue-100 hover:bg-blue-200 border border-blue-300 text-blue-800 font-mono font-bold text-xs shadow-2xs cursor-pointer transition-all">(${num}) _______</button>`;
@@ -790,14 +791,14 @@
                         sec.paragraphs.forEach((rawP, pIdx) => {
                             const p = (typeof rawP === 'string' ? rawP : String(rawP || '')).trim();
                             if (!p) return;
-                            const isBullet = p.startsWith('•') || p.startsWith('- ') || /^[1-6]\.\s+/.test(p);
+                            const isBullet = /^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s+/.test(p);
                             const isHeader = !isBullet && p.length < 50 && (p.endsWith(':') || p === p.toUpperCase());
 
                             if (isBullet) {
                                 parasHtml += `
                                 <div class="flex items-start gap-2.5 text-sm text-slate-800 my-2 pl-2 leading-relaxed font-sans">
                                     <span class="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0 mt-2"></span>
-                                    <div class="flex-1">${this.formatBlanksInHtml(p.replace(/^[•\-\*]\s*|^[1-6]\.\s*/, ''), sec.startQ, sec.endQ)}</div>
+                                    <div class="flex-1">${this.formatBlanksInHtml(p.replace(/^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s*/, ''), sec.startQ, sec.endQ)}</div>
                                 </div>`;
                             } else if (isReadingComprehension && !isHeader) {
                                 parasHtml += `
@@ -810,6 +811,16 @@
                                     <p class="text-justify text-sm text-slate-800 leading-relaxed select-text font-sans">
                                         ${this.formatBlanksInHtml(p, sec.startQ, sec.endQ)}
                                     </p>
+                                </div>`;
+                            } else if (isHeader) {
+                                parasHtml += `
+                                <div class="font-bold text-slate-900 text-xs uppercase tracking-wide mt-3 mb-1 font-sans">
+                                    ${this.formatBlanksInHtml(p, sec.startQ, sec.endQ)}
+                                </div>`;
+                            } else if (/^\((?:Adapted|Source)[^)]*\)$/i.test(p) || /^(?:Adapted|Source)\s+from/i.test(p)) {
+                                parasHtml += `
+                                <div class="text-right text-xs text-slate-500 italic mt-2.5 font-serif select-text">
+                                    ${this.formatBlanksInHtml(p, sec.startQ, sec.endQ)}
                                 </div>`;
                             } else {
                                 parasHtml += `
