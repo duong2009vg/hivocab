@@ -652,8 +652,8 @@
             // 1. Format Markdown bold (**word**) -> authentic bold target word with amber accent
             escaped = escaped.replace(/\*\*(.+?)\*\*/g, '<strong class="thpt-bold-word font-bold text-slate-900 bg-amber-100/70 border-b-2 border-amber-500 px-1 py-0.5 rounded-xs shadow-2xs">$1</strong>');
 
-            // 2. Format Markdown underline (__sentence__) -> authentic underlined target sentence with blue accent
-            escaped = escaped.replace(/__(.+?)__/g, '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-semibold text-slate-900 bg-blue-50/70 px-1 py-0.5 rounded-xs">$1</u>');
+            // 2. Format authentic underlined target sentence ({{U}}sentence{{/U}}) with blue accent
+            escaped = escaped.replace(/\{\{U\}\}(.+?)\{\{\/U\}\}/g, '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-semibold text-slate-900 bg-blue-50/70 px-1 py-0.5 rounded-xs">$1</u>');
 
             // 3. Format [I], [II], [III], [IV], [V] insertion markers
             escaped = escaped.replace(/\[(I{1,3}|IV|V)\]/g, '<span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1 rounded bg-slate-200 text-slate-800 font-black text-[11px] mx-1 select-none border border-slate-300 shadow-2xs">[$1]</span>');
