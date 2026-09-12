@@ -1690,7 +1690,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 
         <!-- Toolbar: tạo chủ đề -->
         <section class="flex flex-row justify-between items-center gap-2">
-            <p class="text-sm md:text-base text-on-surface-variant hidden md:block">Quản lý và sắp xếp các lĩnh vực học tập của bạn.</p>
+            <p id="topics-page-subtitle" class="text-sm md:text-base text-on-surface-variant hidden md:block">Quản lý và sắp xếp các lĩnh vực học tập của bạn.</p>
             <button onclick="window.openCreateTopicModal()" class="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs md:text-sm px-4 py-2 md:px-5 md:py-2.5 rounded-lg transition-colors flex items-center gap-1 ml-auto">
                 <span class="material-symbols-outlined text-[16px] md:text-[18px]">add</span>Tạo chủ đề
             </button>
@@ -4654,6 +4654,13 @@ window._switchCategory = function(catId) {
     window._activeCategory = catId;
     window._renderCategoryTabs();
     window._renderTopicsGrid();
+    setTimeout(() => {
+        const tabs = document.querySelectorAll('#category-tabs .category-tab');
+        const activeTab = Array.from(tabs).find(btn => btn.getAttribute('data-cat') === String(catId));
+        if (activeTab) {
+            activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }, 60);
 };
 
 window._switchCategoryByIndex = function(index) {
@@ -4661,13 +4668,15 @@ window._switchCategoryByIndex = function(index) {
     window._switchCategory(cat?.id || 'all');
 };
 
-// Render topics grid filtered by active category
+// Render topics grid filtered by active category (hoặc danh sách thư mục khi ở tab "Tất cả")
 window._renderTopicsGrid = async function() {
     const grid = document.getElementById('topics-grid');
     if (!grid) return;
 
+    const subtitleEl = document.getElementById('topics-page-subtitle');
+
     // show spinner
-    grid.innerHTML = `<div class="flex items-center justify-center py-16 col-span-4">
+    grid.innerHTML = `<div class="flex items-center justify-center py-16 col-span-2 sm:col-span-3 lg:col-span-4">
         <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
     </div>`;
 
@@ -4691,22 +4700,103 @@ window._renderTopicsGrid = async function() {
         window._allTopics = tableCategories;
         window._renderCategoryTabs();
 
-        const filtered = window._activeCategory === 'all'
-            ? tableCategories
-            : tableCategories.filter(t => t.category === window._activeCategory);
-
-        // Đảm bảo filtered luôn theo thứ tự tự nhiên chuẩn xác
-        filtered.sort((a, b) => {
-            if (window._activeCategory === 'all' && a.category !== b.category) {
-                return (a.category || '').localeCompare(b.category || '');
+        // ══════════════════════════════════════════════════════════════
+        // CHẾ ĐỘ 1: TAB "TẤT CẢ" -> HIỂN THỊ DANH SÁCH THƯ MỤC (FOLDER CARDS)
+        // ══════════════════════════════════════════════════════════════
+        if (window._activeCategory === 'all') {
+            if (subtitleEl) {
+                subtitleEl.textContent = 'Khám phá và lựa chọn thư mục học tập của bạn.';
             }
-            return (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' });
-        });
+
+            const categories = _buildTopicCategories(tableCategories);
+            const folderList = categories.filter(c => c.id !== 'all');
+
+            // Sắp xếp thư mục theo thứ tự danh mục chuẩn (DEFAULT_TOPIC_CATEGORIES)
+            const defaultOrder = (typeof DEFAULT_TOPIC_CATEGORIES !== 'undefined' ? DEFAULT_TOPIC_CATEGORIES : []).map(c => c.toLowerCase());
+            folderList.sort((a, b) => {
+                const idxA = defaultOrder.indexOf(a.id.toLowerCase());
+                const idxB = defaultOrder.indexOf(b.id.toLowerCase());
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.label.localeCompare(b.label);
+            });
+
+            if (folderList.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+                        <span class="material-symbols-outlined text-[48px] opacity-40">folder_open</span>
+                        <p class="font-semibold">Chưa có thư mục nào</p>
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = folderList.map(cat => {
+                const catTopics = tableCategories.filter(t => t.category.toLowerCase() === cat.id.toLowerCase());
+                const count = catTopics.length;
+                const totalProgress = catTopics.reduce((sum, t) => sum + (t.progress || 0), 0);
+                const avgProgress = count > 0 ? Math.round(totalProgress / count) : 0;
+
+                return `
+                <div onclick="window._switchCategory('${_esc(cat.id)}');"
+                    class="folder-card-surface cursor-pointer group relative bg-surface-container-lowest/90 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[170px] md:min-h-[220px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-primary/40 fade-in">
+                    
+                    <!-- Top: Folder Icon & Topics Count Badge -->
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="w-10 h-10 md:w-13 md:h-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shrink-0">
+                            <span class="material-symbols-outlined text-[22px] md:text-[26px]">${cat.icon || 'folder'}</span>
+                        </div>
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold bg-surface-container-high/80 text-on-surface-variant border border-outline-variant/30 group-hover:border-primary/40 group-hover:text-primary transition-colors shrink-0">
+                            ${count} chủ đề
+                        </span>
+                    </div>
+
+                    <!-- Middle: Folder Title & Subtitle -->
+                    <div class="my-3">
+                        <h3 class="text-sm md:text-lg font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                            ${_esc(cat.label)}
+                        </h3>
+                        <p class="text-[11px] md:text-xs text-on-surface-variant line-clamp-1 mt-1 opacity-70">
+                            Nhấn để xem ${count} chủ đề học tập
+                        </p>
+                    </div>
+
+                    <!-- Bottom: Progress Bar & Forward Arrow -->
+                    <div class="mt-auto pt-2 flex flex-col gap-1.5">
+                        <div class="flex justify-between items-center text-[10px] md:text-xs text-on-surface-variant font-medium">
+                            <span>Tiến độ</span>
+                            <span class="text-primary font-bold">${avgProgress}%</span>
+                        </div>
+                        <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+                            <div class="h-full bg-primary rounded-full transition-all duration-500" style="width: ${avgProgress}%"></div>
+                        </div>
+                        <div class="flex items-center justify-end gap-1 text-[11px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity pt-1 -mb-1">
+                            <span>Mở thư mục</span>
+                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            return;
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // CHẾ ĐỘ 2: THƯ MỤC CỤ THỂ -> HIỂN THỊ DANH SÁCH CHỦ ĐỀ CON (TOPIC CARDS)
+        // ══════════════════════════════════════════════════════════════
+        const activeCatObj = window._topicCategories.find(c => c.id === window._activeCategory);
+        const catLabel = activeCatObj?.label || window._activeCategory || 'danh mục này';
+
+        const filtered = tableCategories.filter(t => t.category.toLowerCase() === window._activeCategory.toLowerCase());
+
+        if (subtitleEl) {
+            subtitleEl.innerHTML = `Thư mục: <strong class="text-on-surface">${_esc(catLabel)}</strong> &bull; ${filtered.length} chủ đề`;
+        }
+
+        filtered.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
 
         if (!filtered || filtered.length === 0) {
-            const catLabel = window._topicCategories.find(c => c.id === window._activeCategory)?.label || window._activeCategory || 'danh mục này';
             grid.innerHTML = `
-                <div class="col-span-4 flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
+                <div class="col-span-2 sm:col-span-3 lg:col-span-4 flex flex-col items-center justify-center py-16 text-on-surface-variant gap-3">
                     <span class="material-symbols-outlined text-[48px] opacity-40">folder_open</span>
                     <p class="font-semibold">Chưa có chủ đề nào trong ${_esc(catLabel)}</p>
                     <button onclick="window.openCreateTopicModal()" class="mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-5 py-2 rounded-lg transition-colors flex items-center gap-1">
@@ -4739,7 +4829,7 @@ window._renderTopicsGrid = async function() {
         }).join('');
 
     } catch(err) {
-        grid.innerHTML = `<div class="col-span-4 text-center py-12 text-error">${err.message}</div>`;
+        grid.innerHTML = `<div class="col-span-2 sm:col-span-3 lg:col-span-4 text-center py-12 text-error">${err.message}</div>`;
     }
 };
 
