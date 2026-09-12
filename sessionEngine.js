@@ -98,6 +98,7 @@ const HiSession = (() => {
                     pos:             word.pos || '',
                     phonetic:        word.phonetic || '',
                     exampleSentence: word.example_sentence || word.exampleSentence || '',
+                    imageUrl:        word.image_url || word.imageUrl || '',
                 };
 
             // -- MCQ ----------------------------------------------

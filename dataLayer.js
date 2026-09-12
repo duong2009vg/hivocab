@@ -522,7 +522,7 @@ window.HiDB = (() => {
         let query = _getClient()
             .from('words')
             .select(`
-                id, topic_id, word, pos, phonetic, meaning, example_sentence,
+                id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url,
                 topics!inner ( name ),
                 word_progress ( level, next_review_at, last_reviewed_at, review_count )
             `, { count: 'exact' })
@@ -547,6 +547,7 @@ window.HiDB = (() => {
                     phonetic: row.phonetic,
                     meaning: row.meaning,
                     exampleSentence: row.example_sentence,
+                    imageUrl: row.image_url || null,
                     topicName: row.topics?.name || '',
                     level: progress?.level ?? 0,
                     nextReviewAt: progress?.next_review_at ?? null,
@@ -612,7 +613,7 @@ window.HiDB = (() => {
         const client = _getClient();
         const queryWithLessonMeta = client
             .from('words')
-            .select(`id, word, pos, phonetic, meaning, example_sentence, lesson_name, lesson_order, word_order,
+            .select(`id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_name, lesson_order, word_order,
                 word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
             .eq('topic_id', topicId)
             .eq('lesson_order', lessonIndex)
@@ -627,7 +628,7 @@ window.HiDB = (() => {
         const LESSON_SIZE = 50;
         const fallback = await client
             .from('words')
-            .select(`id, word, pos, phonetic, meaning, example_sentence,
+            .select(`id, word, pos, phonetic, meaning, example_sentence, image_url,
                 word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
             .eq('topic_id', topicId)
             .order('created_at', { ascending: true })

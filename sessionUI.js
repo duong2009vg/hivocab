@@ -243,6 +243,16 @@ const HiSessionUI = (() => {
                                    </div>`
                                 : ''
                             }
+
+                            ${d.imageUrl
+                                ? `<div class="my-1 sm:my-1.5 flex justify-center w-full">
+                                    <img src="${_esc(d.imageUrl)}" alt="${_esc(d.backWord)}"
+                                         class="max-h-28 sm:max-h-36 max-w-full rounded-xl object-cover shadow-sm border border-outline-variant/20 hover:scale-[1.02] transition-transform"
+                                         loading="lazy"
+                                         onerror="this.parentElement.style.display='none'" />
+                                   </div>`
+                                : ''
+                            }
                         </div>
 
                         <div class="flex w-full flex-row justify-center gap-2 sm:gap-3">
