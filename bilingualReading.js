@@ -728,6 +728,10 @@
 
         // Màn hình hoàn thành nếu tất cả các câu đã trả lời đúng
         if (correctCount === total && total > 0) {
+            if (!state._completeSoundPlayed) {
+                state._completeSoundPlayed = true;
+                window.HiSound && window.HiSound.playComplete();
+            }
             container.innerHTML = `
             <div class="max-w-2xl mx-auto w-full pb-20 fade-in">
                 <div class="bg-gradient-to-br from-green-500/20 via-surface to-primary/20 border-2 border-green-500/40 rounded-3xl p-8 md:p-10 text-center soft-shadow mt-6">
@@ -1006,6 +1010,7 @@
 
         if (isMatch) {
             item.isCorrect = true;
+            window.HiSound && window.HiSound.playCorrect();
             if (window.HiSpeak) window.HiSpeak(item.targetWord);
 
             // Phản hồi trực quan màu xanh ngay lập tức
@@ -1028,6 +1033,7 @@
             }, 750);
 
         } else {
+            window.HiSound && window.HiSound.playIncorrect();
             // Lỗi: hiệu ứng rung nhẹ viền đỏ
             if (input) {
                 input.classList.add('border-error', 'animate-pulse');
@@ -1066,6 +1072,7 @@
 
     // Làm lại bài tập
     window.resetGapExercises = function() {
+        state._completeSoundPlayed = false;
         state.gapItems.forEach(it => {
             it.isCorrect = false;
             it.isRevealed = false;

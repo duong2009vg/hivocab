@@ -290,10 +290,13 @@ const HiSessionUI = (() => {
 
         if (result.isNewWord) {
             // Từ mới lv0: auto pass bất kể bấm gì
+            window.HiSound && window.HiSound.playCorrect();
             _showFeedbackOverlay(true, `✓ Từ mới — đã ghi nhận!`, () => render());
         } else if (result.correct) {
+            window.HiSound && window.HiSound.playCorrect();
             _showFeedbackOverlay(true, `+1 từ hoàn thành`, () => render());
         } else {
+            window.HiSound && window.HiSound.playIncorrect();
             _showFeedbackOverlay(false, `Hãy thử lại với dạng bài khác nhé!`, () => render());
         }
     }
@@ -392,6 +395,12 @@ const HiSessionUI = (() => {
             ?.findIndex(o => o.isCorrect) ?? -1;
 
         const result = HiSession.submitAnswer(_selectedMCQIndex);
+
+        if (result.correct) {
+            window.HiSound && window.HiSound.playCorrect();
+        } else {
+            window.HiSound && window.HiSound.playIncorrect();
+        }
 
         // Disable tất cả options
         document.querySelectorAll('.mcq-opt').forEach(btn => {
@@ -651,6 +660,12 @@ const HiSessionUI = (() => {
         }).join('');
 
         const result  = HiSession.submitAnswer(typed);
+
+        if (result.correct) {
+            window.HiSound && window.HiSound.playCorrect();
+        } else {
+            window.HiSound && window.HiSound.playIncorrect();
+        }
 
         // Visual feedback trên các ô
         inputs.forEach((inp, i) => {
@@ -1051,6 +1066,12 @@ const HiSessionUI = (() => {
 
         const result = HiSession.submitAnswer(typed);
 
+        if (result.correct) {
+            window.HiSound && window.HiSound.playCorrect();
+        } else {
+            window.HiSound && window.HiSound.playIncorrect();
+        }
+
         inputs.forEach((inp, i) => {
             if (result.correct) {
                 inp.className = CSS.fillInput + ' border-green-500 bg-green-50 text-green-700';
@@ -1077,6 +1098,9 @@ const HiSessionUI = (() => {
     function _renderCompletion() {
         const summary = HiSession.endSession();
         const progress = HiSession.getProgress();
+
+        // Phát âm thanh chúc mừng hoàn thành phiên học
+        window.HiSound && window.HiSound.playComplete();
 
         // Update progress bar lên 100%
         const bar = document.getElementById('learn-progress');

@@ -2624,7 +2624,12 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 <header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl px-4 md:px-gutter py-3 md:py-md flex items-center justify-between shadow-sm">
 <button id="learning-close-btn" onclick="window.navigateTo('dashboard')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full"><span class="material-symbols-outlined text-[20px] md:text-[24px]">close</span></button>
 <div id="learning-progress-container" class="flex-1 max-w-md mx-4 md:mx-md flex items-center gap-md"><div class="w-full h-1.5 md:h-2 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full transition-all duration-500" id="learn-progress" style="width:0%"></div></div></div>
-<div id="learning-streak-container" class="flex items-center gap-1 text-[#FF5722]"><span class="font-bold text-xs md:text-sm">12</span><span class="material-symbols-outlined icon-fill text-[18px] md:text-[20px]" style="filter:drop-shadow(0 2px 4px rgba(255,87,34,0.3))">local_fire_department</span></div>
+<div class="flex items-center gap-2">
+  <button onclick="window.HiSound && window.HiSound.toggleMute()" class="hi-sound-toggle-btn p-1.5 rounded-full hover:bg-surface-container text-primary transition-colors cursor-pointer" title="Tắt/Bật âm thanh học tập">
+    <span class="material-symbols-outlined text-[20px] md:text-[22px]">volume_up</span>
+  </button>
+  <div id="learning-streak-container" class="flex items-center gap-1 text-[#FF5722]"><span class="font-bold text-xs md:text-sm">12</span><span class="material-symbols-outlined icon-fill text-[18px] md:text-[20px]" style="filter:drop-shadow(0 2px 4px rgba(255,87,34,0.3))">local_fire_department</span></div>
+</div>
 </header>
 
 <main id="learning-main" class="pt-24 md:pt-[100px] pb-12 md:pb-xl px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto flex flex-col gap-6 md:gap-10 items-center min-h-[100dvh]">
@@ -3397,11 +3402,12 @@ window.addEventListener('hashchange', () => {
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
+<script src="soundEngine.js?v=20260912-v1"></script>
 <script src="sessionEngine.js?v=20260911-v2"></script>
-<script src="sessionUI.js?v=20260911-v2"></script>
+<script src="sessionUI.js?v=20260912-sound-v3"></script>
 <script src="thptExam.js?v=20260912_cloze_authentic_v20"></script>
-<script src="gameSession.js?v=20260617-ios-pwa-fit-v7"></script>
-<script src="bilingualReading.js?v=20260911-v2"></script>
+<script src="gameSession.js?v=20260912-sound-v1"></script>
+<script src="bilingualReading.js?v=20260912-sound-v1"></script>
 
 <!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
 <div id="modal-exam-confirm-submit" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">

@@ -546,7 +546,12 @@ const HiExercise = (() => {
         }
 
         _answered = true;
-        if (isCorrect) _score++;
+        if (isCorrect) {
+            _score++;
+            window.HiSound && window.HiSound.playCorrect();
+        } else {
+            window.HiSound && window.HiSound.playIncorrect();
+        }
 
         // Update score label
         document.getElementById('ex-score-label').textContent = `✓ ${_score} điểm`;
@@ -578,6 +583,9 @@ const HiExercise = (() => {
     function _showExResult() {
         const total = _currentExercise.questions.length;
         const pct   = Math.round((_score / total) * 100);
+
+        // Phát âm thanh hoàn thành bài tập
+        window.HiSound && window.HiSound.playComplete();
 
         document.getElementById('ex-progress-bar').style.width = '100%';
         document.getElementById('ex-question-area').classList.add('hidden');

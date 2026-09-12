@@ -414,12 +414,14 @@ window.HiGameSession = (() => {
         try {
             if (correct) {
                 _stats.correct += 1;
+                window.HiSound && window.HiSound.playCorrect();
                 if (!_reviewed.has(wordId)) {
                     _reviewed.add(wordId);
                     await HiDB.reviewWord(wordId, 'good');
                 }
             } else {
                 _stats.wrong += 1;
+                window.HiSound && window.HiSound.playIncorrect();
                 const count = (_failCounts.get(wordId) || 0) + 1;
                 _failCounts.set(wordId, count);
                 if (count >= 3 && !_reviewed.has(wordId)) {
