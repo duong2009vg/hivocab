@@ -13,6 +13,15 @@ yarn-debug.log*
 yarn-error.log*
 .vercel/
 
+# Unity WebGL Large Build Artifacts (hosted on Cloudflare R2)
+adventure-rabbit/Build/*.data
+adventure-rabbit/Build/*.wasm
+token value*.txt
+
+# Cloudflare Wrangler (auto-generated during build - không commit)
+.wrangler/
+wrangler.jsonc
+
 # Python cache & temporary files
 __pycache__/
 *.py[cod]

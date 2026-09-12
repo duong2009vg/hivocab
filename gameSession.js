@@ -4,7 +4,7 @@
 
 window.HiGameSession = (() => {
     const WORD_LIMIT = 20;
-    const UNITY_ROOT = 'adventure-rabbit';
+    const UNITY_ROOT = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/adventure-rabbit';
     const UNITY_BUILD_VERSION = '20260610-device-quiz-feedback-v2';
     const UNITY_LOADER = `${UNITY_ROOT}/Build/adventure-rabbit.loader.js?v=${UNITY_BUILD_VERSION}`;
 

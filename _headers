@@ -1,0 +1,31 @@
+# API endpoints — Không cache
+/api/*
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+
+# Media tĩnh — Cache 1 năm
+/*.mp4
+  Cache-Control: public, max-age=31536000, immutable
+/*.webm
+  Cache-Control: public, max-age=31536000, immutable
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpg
+  Cache-Control: public, max-age=31536000, immutable
+/*.jpeg
+  Cache-Control: public, max-age=31536000, immutable
+/*.wasm
+  Cache-Control: public, max-age=31536000, immutable
+/*.data
+  Cache-Control: public, max-age=31536000, immutable
+
+# JS & CSS — Cache 1 giờ, stale 1 ngày
+/*.js
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+/*.css
+  Cache-Control: public, max-age=3600, stale-while-revalidate=86400
+
+# HTML pages — Security headers
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
