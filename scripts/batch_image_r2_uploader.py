@@ -1,6 +1,7 @@
 """
 HiVocab Batch Image Pipeline: Contextual Image Search, WebP Conversion, Cloudflare R2 Upload & Supabase RPC Sync
 Categories: Oxford 3000 (1,761 words) & Destination C1-C2 (3,509 words)
+Thread-safe & Atomic cache persistence
 """
 
 import argparse
@@ -9,6 +10,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -72,6 +74,7 @@ BAD_PATTERNS = [
 
 CACHE_FILE_OXFORD = "data/image_cache_oxford3000.json"
 CACHE_FILE_DESTINATION = "data/image_cache_destination.json"
+cache_lock = threading.Lock()
 
 
 def get_cache_file(category):
@@ -83,15 +86,20 @@ def load_cache(cache_file):
         try:
             with open(cache_file, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
+        except Exception as e:
+            print(f"Warning: could not load cache {cache_file} ({e}), starting fresh")
             return {}
     return {}
 
 
 def save_cache(cache, cache_file):
     os.makedirs(os.path.dirname(cache_file), exist_ok=True)
-    with open(cache_file, "w", encoding="utf-8") as f:
-        json.dump(cache, f, ensure_ascii=False, indent=2)
+    temp_file = cache_file + ".tmp"
+    with cache_lock:
+        cache_copy = dict(cache)
+    with open(temp_file, "w", encoding="utf-8") as f:
+        json.dump(cache_copy, f, ensure_ascii=False, indent=2)
+    os.replace(temp_file, cache_file)
 
 
 def remove_accents(input_str):
@@ -101,7 +109,7 @@ def remove_accents(input_str):
 
 def clean_word(word):
     w = word.replace("ffsh", "fish").replace("ff", "f").replace("ﬂ", "fl").replace("ﬁ", "fi")
-    w = re.sub(r"\(.*?\)", "", w)  # remove (sb/sth)
+    w = re.sub(r"\(.*?\)", "", w)
     w = w.split("/")[0]
     w = re.sub(r"\s+", " ", w).strip()
     return w
@@ -333,7 +341,6 @@ def process_and_upload_to_r2(img_url, category_folder, topic_slug, word_slug):
 # ══════════════════════════════════════════════════════════════
 
 def sync_to_supabase(updates):
-    """Sync updates to Supabase via bulk_update_word_images RPC."""
     if not updates:
         return 0
     try:
@@ -359,15 +366,17 @@ def process_single_word(item, category_folder, cache):
     cache_key = f"{category_folder}:{topic_slug}:{word_slug}"
 
     # Check cache first
-    if cache_key in cache and cache[cache_key].get("status") == "success":
-        cached_url = cache[cache_key].get("r2_url")
+    with cache_lock:
+        cached_entry = cache.get(cache_key)
+    if cached_entry and cached_entry.get("status") == "success":
+        cached_url = cached_entry.get("r2_url")
         return {
             "id": w_id,
             "word": word,
             "image_url": cached_url,
             "status": "cached",
             "source": "cache",
-            "size_kb": cache[cache_key].get("size_kb", 0),
+            "size_kb": cached_entry.get("size_kb", 0),
         }
 
     # Search for image
@@ -393,7 +402,8 @@ def process_single_word(item, category_folder, cache):
             "source": search_layer,
             "size_kb": size_kb,
         }
-        cache[cache_key] = result
+        with cache_lock:
+            cache[cache_key] = result
         return result
     except Exception as e:
         return {
