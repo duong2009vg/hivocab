@@ -1,6 +1,6 @@
 const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-const TRANSLATE_URL = 'https://hivocab.vercel.app/api/translate';
-const EXAMPLE_URL   = 'https://hivocab.vercel.app/api/example';
+const TRANSLATE_URL = 'https://hivocab.site/api/translate';
+const EXAMPLE_URL   = 'https://hivocab.site/api/example';
 
 let requestId       = 0;
 let currentResult   = null;

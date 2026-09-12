@@ -1,5 +1,5 @@
-const APP_URL      = 'https://hivocab.vercel.app';
-const API_BASE_URL = 'https://hivocab.vercel.app/api';
+const APP_URL      = 'https://hivocab.site';
+const API_BASE_URL = 'https://hivocab.site/api';
 
 // ── Session storage helpers ───────────────────────────────────────────────
 
