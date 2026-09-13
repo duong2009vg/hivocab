@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
 <meta name="theme-color" content="#0f172a"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
@@ -6223,7 +6225,12 @@ window.dictPlayAudio = async function() {
 
 /** Escape HTML */
 function _escHtml(str) {
-    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return (str || '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;');
 }
 
 // ── MODAL: Lưu từ vào chủ đề ────────────────────────────────
@@ -6265,8 +6272,9 @@ window.dictOpenSaveModal = async function() {
             return;
         }
 
+        window._dictTopicsCache = topics;
         listEl.innerHTML = topics.map(t => `
-            <button onclick="window.dictSaveWord('${t.id}', '${_escHtml(t.name)}')"
+            <button onclick="window.dictSaveWord('${t.id}')"
                     class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-primary-container/10 text-left transition-colors group">
                 <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
                     <span class="material-symbols-outlined text-primary text-[18px]">${t.icon || 'folder'}</span>
@@ -6287,6 +6295,11 @@ window.dictOpenSaveModal = async function() {
 window.dictSaveWord = async function(topicId, topicName) {
     const r = window._dictCurrentResult;
     if (!r || !topicId) return;
+
+    if (!topicName) {
+        const found = (window._dictTopicsCache || window._allTopics || []).find(t => t.id === topicId);
+        topicName = found ? found.name : 'chủ đề';
+    }
 
     const errEl = document.getElementById('save-word-error');
 

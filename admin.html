@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
     <title>HiVocab - Admin Portal & Master Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1336,6 +1338,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         let currentTab = 'overview';
         let allTopicsCache = [];
         let allUsersCache = [];
+        let currentWordsCache = [];
         let currentWordsPage = 1;
         let wordsPerPage = 25;
         let wordsSearchTimeout = null;
@@ -1670,15 +1673,15 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                         <td class="py-3.5 px-4 text-slate-500 text-[11px]">${lastSignIn}</td>
                         <td class="py-3.5 px-4 text-right whitespace-nowrap">
                             <div class="flex items-center justify-end gap-1">
-                                <button onclick="openUserDetailModal('${u.user_id}', '${escAttr(u.email)}', ${u.total_words_learning || 0}, ${u.mastered_words || 0}, ${u.total_reviews || 0}, ${u.total_sessions || 0})" 
+                                <button onclick="openUserDetailModal('${u.user_id}')" 
                                         class="p-1.5 rounded-lg text-slate-500 hover:text-primary hover:bg-slate-100 transition-colors" title="Xem chi tiết lộ trình học">
                                     <span class="material-symbols-outlined text-[18px]">visibility</span>
                                 </button>
-                                <button onclick="handleToggleUserRole('${u.user_id}', '${u.role}', '${escAttr(u.email)}')" 
+                                <button onclick="handleToggleUserRole('${u.user_id}')" 
                                         class="p-1.5 rounded-lg text-slate-500 hover:text-amber-600 hover:bg-slate-100 transition-colors" title="Đổi quyền Admin/User">
                                     <span class="material-symbols-outlined text-[18px]">shield_person</span>
                                 </button>
-                                <button onclick="handleResetUserProgress('${u.user_id}', '${escAttr(u.email)}')" 
+                                <button onclick="handleResetUserProgress('${u.user_id}')" 
                                         class="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-slate-100 transition-colors" title="Reset toàn bộ tiến độ học">
                                     <span class="material-symbols-outlined text-[18px]">restart_alt</span>
                                 </button>
@@ -1691,7 +1694,14 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             tbody.innerHTML = html;
         }
 
-        async function openUserDetailModal(userId, email, totalWords, mastered, reviews, sessions) {
+        async function openUserDetailModal(userId, legacyEmail, legacyTotal, legacyMastered, legacyReviews, legacySessions) {
+            const u = allUsersCache.find(x => x.user_id === userId) || {};
+            const email = u.email || legacyEmail || '';
+            const totalWords = u.total_words_learning !== undefined ? u.total_words_learning : (legacyTotal || 0);
+            const mastered = u.mastered_words !== undefined ? u.mastered_words : (legacyMastered || 0);
+            const reviews = u.total_reviews !== undefined ? u.total_reviews : (legacyReviews || 0);
+            const sessions = u.total_sessions !== undefined ? u.total_sessions : (legacySessions || 0);
+
             document.getElementById('user-detail-email').textContent = email;
             document.getElementById('user-detail-total-words').textContent = Number(totalWords).toLocaleString();
             document.getElementById('user-detail-mastered').textContent = Number(mastered).toLocaleString();
@@ -1806,7 +1816,10 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             }
         }
 
-        function handleToggleUserRole(userId, currentRole, email) {
+        function handleToggleUserRole(userId, legacyRole, legacyEmail) {
+            const u = allUsersCache.find(x => x.user_id === userId) || {};
+            const currentRole = u.role || legacyRole || 'user';
+            const email = u.email || legacyEmail || '';
             const nextRole = currentRole === 'admin' ? 'user' : 'admin';
             const actionText = nextRole === 'admin' ? 'thăng cấp làm ADMIN' : 'chuyển về USER thông thường';
 
@@ -1838,7 +1851,9 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             });
         }
 
-        function handleResetUserProgress(userId, email) {
+        function handleResetUserProgress(userId, legacyEmail) {
+            const u = allUsersCache.find(x => x.user_id === userId) || {};
+            const email = u.email || legacyEmail || '';
             showConfirmModal({
                 title: 'Reset Tiến Độ Học Tập',
                 message: `CẢNH BÁO: Toàn bộ tiến độ học từ vựng và lịch sử phiên ôn tập của <strong>${escHtml(email)}</strong> sẽ bị xóa sạch để học lại từ đầu. Hành động này không thể hoàn tác!`,
@@ -2071,6 +2086,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                     .range(from, to);
 
                 if (error) throw error;
+                currentWordsCache = data || [];
 
                 if (!data || data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Không tìm thấy từ vựng nào.</td></tr>';
@@ -2105,10 +2121,10 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                             </td>
                             <td class="py-3 px-4 text-slate-500 text-[11px] max-w-[140px] truncate">${escHtml(topicName)}</td>
                             <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <button onclick='openEditWordModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="text-slate-400 hover:text-primary p-1 transition-colors" title="Sửa">
+                                <button onclick="openEditWordModal('${item.id}')" class="text-slate-400 hover:text-primary p-1 transition-colors" title="Sửa">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </button>
-                                <button onclick="handleDeleteWord('${item.id}', '${escAttr(item.word)}')" class="text-slate-400 hover:text-rose-600 p-1 transition-colors" title="Xóa">
+                                <button onclick="handleDeleteWord('${item.id}')" class="text-slate-400 hover:text-rose-600 p-1 transition-colors" title="Xóa">
                                     <span class="material-symbols-outlined text-[18px]">delete</span>
                                 </button>
                             </td>
@@ -2149,9 +2165,15 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             document.getElementById('modal-word').classList.remove('hidden');
         }
 
-        function openEditWordModal(wordObj) {
-            document.getElementById('edit-word-id').value = wordObj.id;
-            document.getElementById('modal-word-title').textContent = 'Sửa Từ Vựng: ' + wordObj.word;
+        function openEditWordModal(wordObjOrId) {
+            let wordObj = {};
+            if (typeof wordObjOrId === 'string') {
+                wordObj = currentWordsCache.find(w => w.id === wordObjOrId) || {};
+            } else if (typeof wordObjOrId === 'object' && wordObjOrId !== null) {
+                wordObj = wordObjOrId;
+            }
+            document.getElementById('edit-word-id').value = wordObj.id || '';
+            document.getElementById('modal-word-title').textContent = 'Sửa Từ Vựng: ' + (wordObj.word || '');
             document.getElementById('modal-word-topic').value = wordObj.topic_id || '';
             document.getElementById('modal-word-input').value = wordObj.word || '';
             document.getElementById('modal-word-phonetic').value = wordObj.phonetic || '';
@@ -2271,6 +2293,10 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         }
 
         function handleDeleteWord(id, wordName) {
+            if (!wordName) {
+                const found = currentWordsCache.find(w => w.id === id);
+                wordName = found ? found.word : 'từ này';
+            }
             showConfirmModal({
                 title: 'Xóa Từ Vựng',
                 message: `Bạn có chắc chắn muốn xóa từ <strong>"${escHtml(wordName)}"</strong> khỏi hệ thống?`,
@@ -2784,17 +2810,23 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         }
 
         function escHtml(str) {
-            if (!str) return '';
+            if (str === null || str === undefined) return '';
             return String(str)
                 .replace(/&/g, '&amp;')
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;');
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function escAttr(str) {
-            if (!str) return '';
-            return String(str).replace(/"/g, '&quot;');
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
 
         function formatTimeAgo(dateStr) {
