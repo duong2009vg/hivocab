@@ -1754,13 +1754,27 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <h2 id="td-title" class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">—</h2>
                 <p id="td-subtitle" class="text-on-surface-variant mt-sm">Chọn một lesson để bắt đầu học</p>
             </div>
+            <div class="flex items-center gap-3">
+                <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span>Thêm từ vựng</span>
+                </button>
+            </div>
         </div>
 
         <!-- Mobile header card -->
         <div class="flex flex-col lg:hidden gap-3 mt-2">
             <div class="bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-2xl p-5 soft-shadow">
-                <h2 id="td-title-mobile" class="text-2xl font-bold text-on-surface leading-tight">—</h2>
-                <p id="td-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">Chọn một lesson để bắt đầu học</p>
+                <div class="flex items-start justify-between gap-3">
+                    <div class="flex-1 min-w-0">
+                        <h2 id="td-title-mobile" class="text-2xl font-bold text-on-surface leading-tight truncate">—</h2>
+                        <p id="td-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">Chọn một lesson để bắt đầu học</p>
+                    </div>
+                    <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">add</span>
+                        <span>Thêm từ</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1823,6 +1837,10 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <p id="ld-subtitle" class="text-on-surface-variant mt-sm">0 từ vựng</p>
             </div>
             <div class="flex items-center gap-3">
+                <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span>Thêm từ vựng</span>
+                </button>
                 <button id="btn-read-passage" onclick="window.startBilingualReading()" class="hidden bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-4 py-3 rounded-xl transition-colors flex items-center gap-1.5 shrink-0">
                     <span class="material-symbols-outlined text-[18px]">menu_book</span>
                     <span>Đọc bài song ngữ</span>
@@ -1864,6 +1882,10 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <!-- CTA button -->
                 <button onclick="startSinglePractice(0)" class="mt-5 w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 text-sm">
                     Bắt đầu học
+                </button>
+                <button onclick="window.openAddWordModal()" class="w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2.5 rounded-xl transition-colors active:scale-95 text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    <span>Thêm từ vựng mới</span>
                 </button>
                 <button id="btn-read-passage-mobile" onclick="window.startBilingualReading()" class="hidden w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2.5 rounded-xl transition-colors active:scale-95 text-xs flex items-center justify-center gap-1.5">
                     <span class="material-symbols-outlined text-[16px]">menu_book</span>
@@ -3623,6 +3645,115 @@ window.addEventListener('hashchange', () => {
         </button>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- ==================== MODAL: THÊM TỪ VỰNG TRỰC TIẾP (KÈM AI AUTO-FILL) ==================== -->
+<div id="modal-add-word" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
+  <div class="w-full max-w-lg bg-surface rounded-3xl soft-shadow fade-in overflow-hidden border border-outline-variant/30 flex flex-col max-h-[90vh]">
+    
+    <!-- Modal Header -->
+    <div class="px-6 py-5 border-b border-outline-variant/15 flex items-center justify-between shrink-0 bg-surface-container-lowest/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+          <span class="material-symbols-outlined text-[22px]">post_add</span>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-on-surface leading-tight">Thêm từ vựng mới</h2>
+          <p id="add-word-topic-badge" class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
+            <span class="material-symbols-outlined text-[13px] text-primary">folder</span>
+            <span id="add-word-topic-name" class="font-medium truncate max-w-[240px]">Chủ đề hiện tại</span>
+          </p>
+        </div>
+      </div>
+      <button onclick="window.closeAddWordModal()" class="w-9 h-9 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-low transition-colors cursor-pointer">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Form -->
+    <form id="form-add-word" onsubmit="window.submitAddWord(event)" class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+      
+      <!-- English Word + AI Auto-Fill Button -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="add-word-english" class="text-xs font-bold text-outline uppercase tracking-wider">
+            Từ tiếng Anh / Cụm từ <span class="text-rose-500">*</span>
+          </label>
+          <button type="button" id="btn-ai-autofill" onclick="window.triggerAiLookup()" 
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/15 via-primary/10 to-primary/20 text-primary hover:from-amber-500/25 hover:to-primary/30 border border-primary/25 transition-all active:scale-95 shadow-2xs cursor-pointer">
+            <span class="material-symbols-outlined text-[16px] text-amber-500" id="ai-fill-icon">auto_awesome</span>
+            <span id="ai-fill-text">✨ AI Điền tự động</span>
+          </button>
+        </div>
+        <div class="relative">
+          <input type="text" id="add-word-english" required placeholder="Ví dụ: resilient, breakthrough, persist..."
+                 autocomplete="off"
+                 class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-4 py-3 text-sm text-on-surface font-semibold placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                 onkeydown="if(event.key==='Enter'&&event.ctrlKey){event.preventDefault();window.triggerAiLookup();}"/>
+        </div>
+        <p class="text-[11px] text-on-surface-variant mt-1.5 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[14px] text-outline">lightbulb</span>
+          <span>Gõ từ rồi bấm <strong class="text-primary font-semibold">✨ AI Điền tự động</strong> (hoặc nhấn <kbd class="px-1 py-0.5 rounded bg-surface-container text-[10px] font-mono">Ctrl+Enter</kbd>) để tự động điền.</span>
+        </p>
+      </div>
+
+      <!-- Phonetic IPA -->
+      <div>
+        <label for="add-word-phonetic" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Phiên âm IPA
+        </label>
+        <div class="relative flex items-center">
+          <input type="text" id="add-word-phonetic" placeholder="/rɪˈzɪl.jənt/"
+                 class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl pl-4 pr-11 py-2.5 text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"/>
+          <button type="button" onclick="window.previewAddWordAudio()" class="absolute right-2.5 p-1.5 rounded-lg text-outline hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer" title="Nghe phát âm thử">
+            <span class="material-symbols-outlined text-[18px]">volume_up</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vietnamese Meaning -->
+      <div>
+        <label for="add-word-meaning" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Nghĩa tiếng Việt <span class="text-rose-500">*</span>
+        </label>
+        <textarea id="add-word-meaning" required rows="2" placeholder="Ví dụ: kiên cường, có khả năng phục hồi nhanh..."
+                  class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"></textarea>
+      </div>
+
+      <!-- Example Sentence -->
+      <div>
+        <label for="add-word-example" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Câu ví dụ (tiếng Anh)
+        </label>
+        <textarea id="add-word-example" rows="2" placeholder="Ví dụ: She showed a resilient attitude in the face of difficulties."
+                  class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-4 py-2.5 text-sm text-on-surface placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"></textarea>
+      </div>
+
+      <!-- Hidden topicId and passageId -->
+      <input type="hidden" id="add-word-topic-id" value=""/>
+      <input type="hidden" id="add-word-passage-id" value=""/>
+
+      <!-- Error message alert -->
+      <div id="add-word-error" class="hidden text-xs text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl font-medium flex items-center gap-2">
+        <span class="material-symbols-outlined text-base shrink-0">error</span>
+        <span id="add-word-error-text" class="flex-1"></span>
+      </div>
+
+      <!-- Modal Footer Action Buttons -->
+      <div class="pt-3 border-t border-outline-variant/15 flex items-center justify-end gap-2.5 shrink-0">
+        <button type="button" onclick="window.closeAddWordModal()" 
+                class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer">
+          Hủy bỏ
+        </button>
+        <button type="submit" id="btn-submit-add-word"
+                class="px-5 py-2.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-surface-tint active:scale-95 transition-all shadow-sm shadow-primary/25 flex items-center gap-1.5 cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">check</span>
+          <span>Lưu từ vựng</span>
+        </button>
+      </div>
+    </form>
+
   </div>
 </div>
 
@@ -5699,6 +5830,273 @@ window.filterLessonWords = function() {
         card.style.display = (!q || card.textContent.toLowerCase().includes(q)) ? '' : 'none';
     });
 };
+
+// ── THÊM TỪ VỰNG TRỰC TIẾP & AI AUTO-FILL ───────────────────────
+window.openAddWordModal = function(topicId = null, passageId = null) {
+    const targetTopicId = topicId || window._currentTopicId;
+    const targetPassageId = (passageId !== null && passageId !== undefined)
+        ? passageId
+        : (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
+
+    const topicInput = document.getElementById('add-word-topic-id');
+    const passageInput = document.getElementById('add-word-passage-id');
+    if (topicInput) topicInput.value = targetTopicId || '';
+    if (passageInput) passageInput.value = targetPassageId || '';
+
+    // Cập nhật tên chủ đề / bài học hiển thị trên badge
+    const badgeNameEl = document.getElementById('add-word-topic-name');
+    if (badgeNameEl) {
+        let label = window._currentTopicName || 'Chủ đề hiện tại';
+        if (targetPassageId && window._currentPassageTitle) {
+            label += ` · Passage ${window._currentPassageNumber || ''}: ${window._currentPassageTitle}`.trim();
+        } else if (window._currentLessonName) {
+            label += ` · ${window._currentLessonName}`;
+        }
+        badgeNameEl.textContent = label;
+        badgeNameEl.title = label;
+    }
+
+    // Reset Form
+    const engInput = document.getElementById('add-word-english');
+    const phoInput = document.getElementById('add-word-phonetic');
+    const meaInput = document.getElementById('add-word-meaning');
+    const exaInput = document.getElementById('add-word-example');
+    const errEl    = document.getElementById('add-word-error');
+    if (engInput) engInput.value = '';
+    if (phoInput) phoInput.value = '';
+    if (meaInput) meaInput.value = '';
+    if (exaInput) exaInput.value = '';
+    if (errEl) errEl.classList.add('hidden');
+
+    // Reset AI Button state
+    const aiBtn  = document.getElementById('btn-ai-autofill');
+    const aiIcon = document.getElementById('ai-fill-icon');
+    const aiText = document.getElementById('ai-fill-text');
+    if (aiBtn) aiBtn.disabled = false;
+    if (aiIcon) {
+        aiIcon.textContent = 'auto_awesome';
+        aiIcon.classList.remove('animate-spin');
+    }
+    if (aiText) aiText.textContent = '✨ AI Điền tự động';
+
+    // Hiển thị modal
+    const modal = document.getElementById('modal-add-word');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    setTimeout(() => {
+        if (engInput) engInput.focus();
+    }, 120);
+};
+
+window.closeAddWordModal = function() {
+    const modal = document.getElementById('modal-add-word');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.previewAddWordAudio = function() {
+    const word = (document.getElementById('add-word-english')?.value || '').trim();
+    if (!word) return;
+    if (typeof HiDict !== 'undefined' && typeof HiDict.playWordAudio === 'function') {
+        HiDict.playWordAudio(word);
+    } else if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        window.speechSynthesis.speak(u);
+    }
+};
+
+window.triggerAiLookup = async function() {
+    const engInput = document.getElementById('add-word-english');
+    const phoInput = document.getElementById('add-word-phonetic');
+    const meaInput = document.getElementById('add-word-meaning');
+    const exaInput = document.getElementById('add-word-example');
+    const errEl    = document.getElementById('add-word-error');
+    const errText  = document.getElementById('add-word-error-text');
+
+    const word = (engInput?.value || '').trim();
+    if (!word) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng gõ từ tiếng Anh trước khi bấm AI Điền tự động.';
+            errEl.classList.remove('hidden');
+        }
+        if (engInput) engInput.focus();
+        return;
+    }
+
+    if (errEl) errEl.classList.add('hidden');
+
+    const aiBtn  = document.getElementById('btn-ai-autofill');
+    const aiIcon = document.getElementById('ai-fill-icon');
+    const aiText = document.getElementById('ai-fill-text');
+
+    if (aiBtn) aiBtn.disabled = true;
+    if (aiIcon) {
+        aiIcon.textContent = 'sync';
+        aiIcon.classList.add('animate-spin');
+    }
+    if (aiText) aiText.textContent = 'AI đang tra cứu...';
+
+    try {
+        const res = await fetch('/api/ai-lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ word })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+            throw new Error(data.error || 'Không thể tra cứu thông tin từ AI.');
+        }
+
+        const phonetic = data.phonetic || data.data?.phonetic || '';
+        const meaning  = data.meaning  || data.data?.meaning  || '';
+        const example  = data.example  || data.data?.example  || '';
+
+        if (phoInput && phonetic) phoInput.value = phonetic;
+        if (meaInput && meaning) meaInput.value = meaning;
+        if (exaInput && example) exaInput.value = example;
+
+        if (aiIcon) {
+            aiIcon.textContent = 'check';
+            aiIcon.classList.remove('animate-spin');
+        }
+        if (aiText) aiText.textContent = 'Đã điền thành công!';
+
+        setTimeout(() => {
+            if (aiIcon) aiIcon.textContent = 'auto_awesome';
+            if (aiText) aiText.textContent = '✨ AI Điền tự động';
+            if (aiBtn) aiBtn.disabled = false;
+        }, 1800);
+
+    } catch (err) {
+        console.error('[triggerAiLookup] Error:', err);
+        if (errEl && errText) {
+            errText.textContent = 'Lỗi tra cứu AI: ' + (err.message || 'Thất bại.');
+            errEl.classList.remove('hidden');
+        }
+        if (aiIcon) {
+            aiIcon.textContent = 'auto_awesome';
+            aiIcon.classList.remove('animate-spin');
+        }
+        if (aiText) aiText.textContent = '✨ AI Điền tự động';
+        if (aiBtn) aiBtn.disabled = false;
+    }
+};
+
+window.submitAddWord = async function(e) {
+    if (e) e.preventDefault();
+
+    const engInput = document.getElementById('add-word-english');
+    const phoInput = document.getElementById('add-word-phonetic');
+    const meaInput = document.getElementById('add-word-meaning');
+    const exaInput = document.getElementById('add-word-example');
+    const topicInput = document.getElementById('add-word-topic-id');
+    const passageInput = document.getElementById('add-word-passage-id');
+    const errEl    = document.getElementById('add-word-error');
+    const errText  = document.getElementById('add-word-error-text');
+    const submitBtn = document.getElementById('btn-submit-add-word');
+
+    const word = (engInput?.value || '').trim();
+    const phonetic = (phoInput?.value || '').trim();
+    const meaning = (meaInput?.value || '').trim();
+    const exampleSentence = (exaInput?.value || '').trim();
+    const topicId = topicInput?.value || window._currentTopicId;
+    const passageId = passageInput?.value || (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
+
+    if (!topicId) {
+        if (errEl && errText) {
+            errText.textContent = 'Không xác định được chủ đề để thêm từ.';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (!word) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng nhập từ tiếng Anh.';
+            errEl.classList.remove('hidden');
+        }
+        if (engInput) engInput.focus();
+        return;
+    }
+
+    if (!meaning) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng nhập nghĩa tiếng Việt.';
+            errEl.classList.remove('hidden');
+        }
+        if (meaInput) meaInput.focus();
+        return;
+    }
+
+    if (errEl) errEl.classList.add('hidden');
+
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">refresh</span><span>Đang lưu...</span>';
+    }
+
+    try {
+        if (typeof HiDB === 'undefined' || typeof HiDB.addWord !== 'function') {
+            throw new Error('Hệ thống dữ liệu HiDB chưa sẵn sàng.');
+        }
+
+        await HiDB.addWord(topicId, {
+            word,
+            phonetic,
+            meaning,
+            exampleSentence,
+            passageId: passageId || null
+        });
+
+        // Xóa cache lesson để lấy số lượng từ mới nhất
+        if (window._lessonsCache && window._lessonsCache[topicId]) {
+            delete window._lessonsCache[topicId];
+        }
+        window._camHierarchy = null;
+
+        // Đóng modal
+        window.closeAddWordModal();
+
+        // Toast thông báo
+        if (typeof _dictToast === 'function') {
+            _dictToast(`✓ Đã thêm từ "${word}" thành công!`);
+        } else if (typeof showToast === 'function') {
+            showToast(`Đã thêm từ "${word}" thành công!`, 'success');
+        }
+
+        // Cập nhật ngay danh sách từ / bài học tức thì mà không reload trang
+        const activePage = window._currentPage || (document.getElementById('page-lesson-detail')?.classList.contains('active') ? 'lesson-detail' : (document.getElementById('page-topic-detail')?.classList.contains('active') ? 'topic-detail' : ''));
+        if (activePage === 'lesson-detail' && typeof window._loadLessonWords === 'function') {
+            await window._loadLessonWords();
+        } else if (typeof window._loadLessons === 'function') {
+            await window._loadLessons();
+        }
+
+    } catch (err) {
+        console.error('[submitAddWord] Error:', err);
+        if (errEl && errText) {
+            errText.textContent = 'Lỗi lưu từ vựng: ' + (err.message || 'Thất bại.');
+            errEl.classList.remove('hidden');
+        }
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">check</span><span>Lưu từ vựng</span>';
+        }
+    }
+};
+
+// Đóng modal add-word khi click ra ngoài nền tối
+document.getElementById('modal-add-word')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeAddWordModal();
+});
 
 // ── SỔ TỪ VỰNG (VOCABULARY NOTEBOOK / KHO TỪ VỰNG) ──────────────
 window._vocabPageState = {
