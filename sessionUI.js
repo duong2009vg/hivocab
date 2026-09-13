@@ -317,8 +317,7 @@ const HiSessionUI = (() => {
         if (_isShowingFeedback) return;
         const result = HiSession.rateFlashcard(rating);
 
-        if (result.isNewWord) {
-            // Từ mới lv0: auto pass bất kể bấm gì
+        if (result.isNewWord && result.correct) {
             window.HiSound && window.HiSound.playCorrect();
             _showFeedbackOverlay(true, `✓ Từ mới — đã ghi nhận!`, () => render());
         } else if (result.correct) {
