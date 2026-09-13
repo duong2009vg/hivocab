@@ -1775,12 +1775,22 @@ window.HiDB = (() => {
     /**
      * Gửi báo cáo lỗi từ người dùng (icon lá cờ 🚩).
      */
-    async function submitBugReport({ reportType, featureContext, contextData = {}, description, userEmail = null, deviceInfo = null }) {
-        if (!description || !description.trim()) {
+    async function submitBugReport(params = {}) {
+        const description = String(params.description || params.content || '').trim();
+        if (!description) {
             throw new Error('Vui lòng nhập mô tả chi tiết lỗi.');
         }
 
-        const user = await getCurrentUser();
+        const reportType = params.reportType || params.report_type || 'other';
+        const featureContext = params.featureContext || params.feature_context || params.feature || 'general';
+        const contextData = params.contextData || params.context_data || {};
+        const userEmail = params.userEmail || params.user_email || null;
+        const deviceInfo = params.deviceInfo || params.device_info || null;
+
+        let user = null;
+        try {
+            user = await getCurrentUser();
+        } catch (e) {}
         const client = _getClient();
 
         const defaultDevice = {
@@ -1792,23 +1802,32 @@ window.HiDB = (() => {
             timestamp: new Date().toISOString()
         };
 
+        const payload = {
+            user_id: user?.id || null,
+            user_email: userEmail || user?.email || null,
+            report_type: reportType || 'other',
+            feature_context: featureContext || 'general',
+            context_data: contextData || {},
+            description: description,
+            device_info: deviceInfo || defaultDevice,
+            status: 'pending'
+        };
+
         const { data, error } = await client
             .from('user_bug_reports')
-            .insert({
-                user_id: user?.id || null,
-                user_email: userEmail || user?.email || null,
-                report_type: reportType || 'other',
-                feature_context: featureContext || 'general',
-                context_data: contextData || {},
-                description: description.trim(),
-                device_info: deviceInfo || defaultDevice,
-                status: 'pending'
-            })
+            .insert(payload)
             .select()
-            .single();
+            .maybeSingle();
 
-        if (error) throw error;
-        return data;
+        if (error) {
+            // Fallback nếu select bị từ chối bởi RLS
+            const retry = await client
+                .from('user_bug_reports')
+                .insert(payload);
+            if (retry.error) throw retry.error;
+            return { success: true };
+        }
+        return data || { success: true };
     }
 
     /**
@@ -1859,15 +1878,25 @@ window.HiDB = (() => {
     /**
      * Tự động ghi nhận log lỗi client (Crash / Unhandled Exceptions).
      */
-    async function logSystemError({ errorMessage, errorStack = null, component = 'general', url = null }) {
+    async function logSystemError(params = {}) {
         try {
+            const errorMessage = String(params.errorMessage || params.error_message || '').trim();
             if (!errorMessage) return;
+
+            const errorStack = params.errorStack || params.stack_trace || params.stack || null;
+            const component = params.component || 'general';
+            const url = params.url || (params.context && params.context.url) || window.location.href;
+
             const errorKey = `${component}:${errorMessage.slice(0, 100)}`;
             if (_recentErrorHashes.has(errorKey)) return;
             _recentErrorHashes.add(errorKey);
             setTimeout(() => _recentErrorHashes.delete(errorKey), 30000); // 30s dedup
 
-            const user = await getCurrentUser();
+            let user = null;
+            try {
+                user = await getCurrentUser();
+            } catch (e) {}
+
             await _getClient()
                 .from('system_error_logs')
                 .insert({

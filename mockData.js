@@ -479,6 +479,31 @@ const HiMock = (() => {
             _save(STORAGE_KEYS.exercises, exList);
         },
 
+        submitBugReport: async (params = {}) => {
+            const description = String(params.description || params.content || '').trim();
+            if (!description) throw new Error('Vui lòng nhập mô tả chi tiết lỗi.');
+            const reports = _load('hi_mock_bug_reports', []);
+            const newReport = {
+                id: 'rep_' + Date.now(),
+                user_id: null,
+                user_email: params.userEmail || params.user_email || 'guest@hivocab.site',
+                report_type: params.reportType || params.report_type || 'other',
+                feature_context: params.featureContext || params.feature_context || params.feature || 'general',
+                context_data: params.contextData || params.context_data || {},
+                description: description,
+                device_info: params.deviceInfo || params.device_info || {},
+                status: 'pending',
+                created_at: new Date().toISOString()
+            };
+            reports.unshift(newReport);
+            _save('hi_mock_bug_reports', reports);
+            return newReport;
+        },
+
+        logSystemError: async (params = {}) => {
+            console.log('[HiMock] logSystemError:', params);
+        },
+
         init: () => { console.log('[HiMock] Mock DB initialized'); },
     };
 

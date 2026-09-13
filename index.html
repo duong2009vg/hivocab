@@ -4478,9 +4478,13 @@ window.submitBugReportForm = async function(event) {
     try {
         if (window.HiDB && typeof window.HiDB.submitBugReport === 'function') {
             await window.HiDB.submitBugReport({
-                feature: feature,
-                report_type: reportType,
+                description: content,
                 content: content,
+                reportType: reportType,
+                report_type: reportType,
+                featureContext: feature,
+                feature: feature,
+                contextData: contextData,
                 context_data: contextData
             });
         }
@@ -4488,7 +4492,8 @@ window.submitBugReportForm = async function(event) {
         window.showHiToast('Cảm ơn bạn! Báo cáo đã được gửi tới đội ngũ kỹ thuật 🎉', 'success');
     } catch (err) {
         console.error('[BugReport] Submit error:', err);
-        window.showHiToast('Gửi báo cáo thất bại, vui lòng thử lại sau.', 'error');
+        const errMsg = err?.message || 'Gửi báo cáo thất bại, vui lòng thử lại sau.';
+        window.showHiToast(errMsg, 'error');
     } finally {
         if (btn) {
             btn.disabled = false;
