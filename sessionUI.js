@@ -190,7 +190,16 @@ const HiSessionUI = (() => {
                             </span>
                         </div>
 
-                        <div class="my-auto text-center py-3 flex flex-col items-center justify-center px-2 w-full">
+                        <div class="my-auto text-center py-2 flex flex-col items-center justify-center px-2 w-full">
+                            ${d.imageUrl
+                                ? `<div class="mb-3 flex justify-center w-full">
+                                    <img src="${_esc(d.imageUrl)}" alt="${_esc(d.frontWord)}"
+                                         class="max-h-36 sm:max-h-48 max-w-full rounded-2xl object-contain shadow-sm border border-outline-variant/20 hover:scale-[1.02] transition-transform"
+                                         loading="lazy"
+                                         onerror="this.parentElement.style.display='none'" />
+                                   </div>`
+                                : ''
+                            }
                             <h2 class="font-bold text-on-surface text-2xl sm:text-3xl md:text-4xl text-center leading-snug break-words max-w-full">
                                 ${_esc(d.frontWord)}
                             </h2>
@@ -247,7 +256,7 @@ const HiSessionUI = (() => {
                             ${d.imageUrl
                                 ? `<div class="my-1 sm:my-1.5 flex justify-center w-full">
                                     <img src="${_esc(d.imageUrl)}" alt="${_esc(d.backWord)}"
-                                         class="max-h-28 sm:max-h-36 max-w-full rounded-xl object-cover shadow-sm border border-outline-variant/20 hover:scale-[1.02] transition-transform"
+                                         class="max-h-24 sm:max-h-32 max-w-full rounded-xl object-contain shadow-sm border border-outline-variant/20 hover:scale-[1.02] transition-transform"
                                          loading="lazy"
                                          onerror="this.parentElement.style.display='none'" />
                                    </div>`

@@ -391,6 +391,7 @@ window.HiDB = (() => {
                     phonetic,
                     meaning,
                     example_sentence,
+                    image_url,
                     word_progress ( level, next_review_at, last_reviewed_at, review_count )
                 `)
                 .eq('topic_id', topicId)
@@ -420,6 +421,8 @@ window.HiDB = (() => {
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
+                imageUrl:        w.image_url || null,
+                image_url:       w.image_url || null,
                 level:           progress?.level          ?? 0,   // 0 = chưa học lần nào
                 nextReviewAt:    progress?.next_review_at  ?? null,
                 lastReviewedAt:  progress?.last_reviewed_at ?? null,
@@ -731,6 +734,8 @@ window.HiDB = (() => {
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
+                imageUrl:        w.image_url || w.imageUrl || null,
+                image_url:       w.image_url || w.imageUrl || null,
                 level:           progress?.level          ?? 0,
                 nextReviewAt:    progress?.next_review_at  ?? null,
                 lastReviewedAt:  progress?.last_reviewed_at ?? null,
@@ -808,6 +813,7 @@ window.HiDB = (() => {
                     phonetic,
                     meaning,
                     example_sentence,
+                    image_url,
                     created_at,
                     word_progress ( level, user_id )
                 `)
@@ -825,6 +831,8 @@ window.HiDB = (() => {
                     phonetic:        w.phonetic,
                     meaning:         w.meaning,
                     exampleSentence: w.example_sentence,
+                    imageUrl:        w.image_url || null,
+                    image_url:       w.image_url || null,
                     passageId:       null,
                     level:           userProgress?.level ?? 0,
                 });
@@ -846,6 +854,7 @@ window.HiDB = (() => {
                         phonetic,
                         meaning,
                         example_sentence,
+                        image_url,
                         word_order,
                         created_at,
                         word_progress ( level, user_id )
@@ -877,6 +886,8 @@ window.HiDB = (() => {
                     phonetic:        w.phonetic,
                     meaning:         w.meaning,
                     exampleSentence: w.example_sentence,
+                    imageUrl:        w.image_url || null,
+                    image_url:       w.image_url || null,
                     passageId:       w.passage_id,
                     level:           userProgress?.level ?? 0,
                 };
@@ -993,6 +1004,7 @@ window.HiDB = (() => {
                 phonetic,
                 meaning,
                 example_sentence,
+                image_url,
                 passage_id,
                 word_order,
                 created_at,
@@ -1013,6 +1025,8 @@ window.HiDB = (() => {
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
+                imageUrl:        w.image_url || null,
+                image_url:       w.image_url || null,
                 passageId:       w.passage_id,
                 level:           progress?.level          ?? 0,
                 nextReviewAt:    progress?.next_review_at  ?? null,
@@ -1074,6 +1088,7 @@ window.HiDB = (() => {
                 phonetic,
                 meaning,
                 example_sentence,
+                image_url,
                 passage_id,
                 word_order,
                 created_at,
@@ -1093,6 +1108,8 @@ window.HiDB = (() => {
                 phonetic:        w.phonetic,
                 meaning:         w.meaning,
                 exampleSentence: w.example_sentence,
+                imageUrl:        w.image_url || null,
+                image_url:       w.image_url || null,
                 passageId:       w.passage_id,
                 level:           progress?.level          ?? 0,
                 nextReviewAt:    progress?.next_review_at  ?? null,
@@ -1205,6 +1222,7 @@ window.HiDB = (() => {
                     phonetic,
                     meaning,
                     example_sentence,
+                    image_url,
                     topics ( id, name, icon )
                 )
             `)
@@ -1225,6 +1243,8 @@ window.HiDB = (() => {
                 phonetic:        p.words.phonetic,
                 meaning:         p.words.meaning,
                 exampleSentence: p.words.example_sentence,
+                imageUrl:        p.words.image_url || null,
+                image_url:       p.words.image_url || null,
                 level:           p.level,
                 nextReviewAt:    p.next_review_at,
                 isNew:           false,

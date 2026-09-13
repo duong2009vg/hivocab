@@ -3073,6 +3073,8 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
             phonetic:        w.phonetic   || '',
             meaning:         w.meaning    || '',
             exampleSentence: w.exampleSentence || w.example_sentence || '',
+            imageUrl:        w.imageUrl   || w.image_url || '',
+            image_url:       w.image_url  || w.imageUrl || '',
             level:           w.level      ?? 0,
         }));
 
@@ -3398,13 +3400,13 @@ window.addEventListener('hashchange', () => {
 
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dataLayer.js?v=20260910-vocab-rpc-v2"></script>
+<script src="dataLayer.js?v=20260913-img-v1"></script>
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260912-v1"></script>
-<script src="sessionEngine.js?v=20260911-v2"></script>
-<script src="sessionUI.js?v=20260912-sound-v3"></script>
+<script src="sessionEngine.js?v=20260913-img-v1"></script>
+<script src="sessionUI.js?v=20260913-img-v1"></script>
 <script src="thptExam.js?v=20260912_cloze_authentic_v20"></script>
 <script src="gameSession.js?v=20260912-sound-v1"></script>
 <script src="bilingualReading.js?v=20260912-sound-v1"></script>
@@ -5350,6 +5352,13 @@ window._loadLessonWords = async function() {
                     <p class="text-sm text-on-surface-variant mt-1">${_esc(w.meaning)}</p>
                     ${w.exampleSentence ? `<p class="text-sm text-outline italic mt-1 line-clamp-2">${_esc(w.exampleSentence)}</p>` : ''}
                 </div>
+                ${(w.imageUrl || w.image_url) ? `
+                <div class="hidden sm:flex shrink-0 self-center">
+                    <img src="${_esc(w.imageUrl || w.image_url)}" alt="${_esc(w.word)}"
+                         class="w-14 h-14 object-contain rounded-lg border border-outline-variant/20 bg-surface-container-low"
+                         loading="lazy"
+                         onerror="this.parentElement.style.display='none'" />
+                </div>` : ''}
             </div>`;
         }).join('');
 
