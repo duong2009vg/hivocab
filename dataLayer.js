@@ -1939,6 +1939,345 @@ window.HiDB = (() => {
         return true;
     }
 
+    // ============================================================
+    // COMMUNITY VOCABULARY LIBRARY (THREADS-STYLE)
+    // ============================================================
+
+    /**
+     * Lấy danh sách các bộ từ vựng công khai trên Thư viện Cộng đồng.
+     */
+    async function getPublicLibraryTopics({ tag = 'all', search = '', sort = 'popular', page = 1, pageSize = 20 } = {}) {
+        const client = _getClient();
+        let user = null;
+        try { user = await getCurrentUser(); } catch(e) {}
+
+        let query = client
+            .from('topics')
+            .select(`
+                id,
+                name,
+                icon,
+                category,
+                description,
+                author_name,
+                author_avatar,
+                is_public,
+                like_count,
+                clone_count,
+                comment_count,
+                tags,
+                created_at,
+                user_id
+            `, { count: 'exact' })
+            .eq('is_public', true);
+
+        // Lọc theo tag
+        if (tag && tag !== 'all' && tag !== 'Tất cả') {
+            query = query.contains('tags', [tag]);
+        }
+
+        // Tìm kiếm
+        if (search && search.trim()) {
+            const term = search.trim();
+            query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%,author_name.ilike.%${term}%`);
+        }
+
+        // Sắp xếp
+        if (sort === 'popular' || sort === 'likes') {
+            query = query.order('like_count', { ascending: false }).order('created_at', { ascending: false });
+        } else if (sort === 'clones') {
+            query = query.order('clone_count', { ascending: false }).order('created_at', { ascending: false });
+        } else {
+            query = query.order('created_at', { ascending: false });
+        }
+
+        const safePage = Math.max(1, Number(page) || 1);
+        const from = (safePage - 1) * pageSize;
+        const to = from + pageSize - 1;
+        query = query.range(from, to);
+
+        const { data, count, error } = await query;
+        if (error) throw error;
+
+        const topics = data || [];
+
+        // Lấy danh sách topic_id mà user hiện tại đã like
+        let userLikedTopicIds = new Set();
+        if (user?.id && topics.length > 0) {
+            const topicIds = topics.map(t => t.id);
+            const { data: likes } = await client
+                .from('topic_likes')
+                .select('topic_id')
+                .eq('user_id', user.id)
+                .in('topic_id', topicIds);
+            if (likes) {
+                userLikedTopicIds = new Set(likes.map(l => l.topic_id));
+            }
+        }
+
+        // Lấy 3-4 từ vựng xem trước (sneak peek) và đếm tổng số từ cho mỗi topic
+        const topicIds = topics.map(t => t.id);
+        let sampleWordsByTopic = {};
+        let wordCountByTopic = {};
+
+        if (topicIds.length > 0) {
+            const { data: wordsData } = await client
+                .from('words')
+                .select('id, topic_id, word, phonetic, meaning')
+                .in('topic_id', topicIds)
+                .limit(400);
+
+            (wordsData || []).forEach(w => {
+                if (!sampleWordsByTopic[w.topic_id]) sampleWordsByTopic[w.topic_id] = [];
+                if (sampleWordsByTopic[w.topic_id].length < 4) {
+                    sampleWordsByTopic[w.topic_id].push({
+                        word: w.word,
+                        phonetic: w.phonetic,
+                        meaning: w.meaning
+                    });
+                }
+                wordCountByTopic[w.topic_id] = (wordCountByTopic[w.topic_id] || 0) + 1;
+            });
+        }
+
+        const enrichedTopics = topics.map(t => ({
+            ...t,
+            totalWords: wordCountByTopic[t.id] || 0,
+            sneakPeekWords: sampleWordsByTopic[t.id] || [],
+            hasLiked: userLikedTopicIds.has(t.id)
+        }));
+
+        return {
+            topics: enrichedTopics,
+            total: count || enrichedTopics.length,
+            page: safePage,
+            pageSize
+        };
+    }
+
+    /**
+     * Lấy toàn bộ từ vựng và chi tiết của một topic trên thư viện (cho Thread Chain View).
+     */
+    async function getPublicTopicDetail(topicId) {
+        const client = _getClient();
+        let user = null;
+        try { user = await getCurrentUser(); } catch(e) {}
+
+        const { data: topic, error: topicErr } = await client
+            .from('topics')
+            .select('*')
+            .eq('id', topicId)
+            .single();
+
+        if (topicErr) throw topicErr;
+
+        // Lấy tất cả từ trong topic
+        const { data: words, error: wordsErr } = await client
+            .from('words')
+            .select('*')
+            .eq('topic_id', topicId)
+            .order('created_at', { ascending: true });
+
+        if (wordsErr) throw wordsErr;
+
+        let hasLiked = false;
+        if (user?.id) {
+            const { data: like } = await client
+                .from('topic_likes')
+                .select('topic_id')
+                .eq('topic_id', topicId)
+                .eq('user_id', user.id)
+                .maybeSingle();
+            hasLiked = !!like;
+        }
+
+        return {
+            ...topic,
+            hasLiked,
+            totalWords: (words || []).length,
+            words: words || []
+        };
+    }
+
+    /**
+     * Thả tim hoặc bỏ thả tim topic.
+     */
+    async function toggleTopicLike(topicId) {
+        const client = _getClient();
+        const user = await getCurrentUser();
+        if (!user) {
+            throw new Error('Vui lòng đăng nhập để thả tim bài đăng này!');
+        }
+
+        try {
+            const { data, error } = await client.rpc('toggle_topic_like', {
+                target_topic_id: topicId,
+                target_user_id: user.id
+            });
+            if (!error && data) {
+                return data;
+            }
+        } catch (rpcErr) {
+            console.warn('[toggleTopicLike] RPC fallback:', rpcErr);
+        }
+
+        const { data: existing } = await client
+            .from('topic_likes')
+            .select('topic_id')
+            .eq('topic_id', topicId)
+            .eq('user_id', user.id)
+            .maybeSingle();
+
+        if (existing) {
+            await client.from('topic_likes').delete().eq('topic_id', topicId).eq('user_id', user.id);
+            return { liked: false };
+        } else {
+            await client.from('topic_likes').insert({ topic_id: topicId, user_id: user.id });
+            return { liked: true };
+        }
+    }
+
+    /**
+     * Lấy danh sách bình luận của một topic.
+     */
+    async function getTopicComments(topicId) {
+        const client = _getClient();
+        const { data, error } = await client
+            .from('topic_comments')
+            .select('*')
+            .eq('topic_id', topicId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    /**
+     * Thêm bình luận hoặc mẹo nhớ cho một topic hoặc một từ.
+     */
+    async function addTopicComment({ topicId, wordId = null, content }) {
+        const text = String(content || '').trim();
+        if (!text) throw new Error('Nội dung bình luận không được để trống.');
+
+        const client = _getClient();
+        let user = null;
+        try { user = await getCurrentUser(); } catch(e) {}
+
+        const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Học viên HiVocab';
+        const userAvatar = user?.user_metadata?.avatar_url || null;
+
+        const { data, error } = await client
+            .from('topic_comments')
+            .insert({
+                topic_id: topicId,
+                word_id: wordId || null,
+                user_id: user?.id || null,
+                user_name: userName,
+                user_avatar: userAvatar,
+                content: text
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * 1-Click Clone bộ từ vựng từ Thư viện về kho cá nhân.
+     */
+    async function clonePublicTopic(topicId) {
+        const client = _getClient();
+        const user = await getCurrentUser();
+        if (!user) {
+            throw new Error('Vui lòng đăng nhập để lưu bộ từ này về kho cá nhân!');
+        }
+
+        const { data: newTopicId, error } = await client.rpc('clone_public_topic', {
+            target_topic_id: topicId,
+            target_user_id: user.id
+        });
+
+        if (error) throw error;
+
+        _topicsCache = null;
+        _invalidateVocabularyCache();
+        return newTopicId;
+    }
+
+    /**
+     * Đăng công khai một topic cá nhân lên Thư viện Cộng đồng.
+     */
+    async function publishTopic({ topicId, description = '', tags = [] }) {
+        const client = _getClient();
+        const user = await getCurrentUser();
+        if (!user) throw new Error('Vui lòng đăng nhập để đăng bộ từ!');
+
+        const authorName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Học viên HiVocab';
+        const authorAvatar = user?.user_metadata?.avatar_url || null;
+
+        const safeTags = Array.isArray(tags) ? tags : String(tags || '').split(',').map(t => t.trim()).filter(Boolean);
+
+        const { data, error } = await client
+            .from('topics')
+            .update({
+                is_public: true,
+                description: String(description || '').trim(),
+                author_name: authorName,
+                author_avatar: authorAvatar,
+                tags: safeTags
+            })
+            .eq('id', topicId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        _topicsCache = null;
+        return data;
+    }
+
+    /**
+     * Hủy công khai (chuyển về riêng tư).
+     */
+    async function unpublishTopic(topicId) {
+        const client = _getClient();
+        const { data, error } = await client
+            .from('topics')
+            .update({ is_public: false })
+            .eq('id', topicId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        _topicsCache = null;
+        return data;
+    }
+
+    /**
+     * Lấy danh sách các topic người dùng đã thích (Liked Topics).
+     */
+    async function getUserLikedTopics() {
+        const client = _getClient();
+        const user = await getCurrentUser();
+        if (!user) return [];
+
+        const { data: likes, error: likeErr } = await client
+            .from('topic_likes')
+            .select('topic_id')
+            .eq('user_id', user.id);
+
+        if (likeErr || !likes || likes.length === 0) return [];
+        const ids = likes.map(l => l.topic_id);
+
+        const { data: topics, error: topicErr } = await client
+            .from('topics')
+            .select('*')
+            .in('id', ids);
+
+        if (topicErr) throw topicErr;
+        return topics || [];
+    }
+
     // Export public API
     return {
         onAuthStateChange: (callback) => {
@@ -2011,6 +2350,17 @@ window.HiDB = (() => {
         logSystemError,
         getSystemErrorLogs,
         clearSystemErrorLogs,
+
+        // Community Library (Threads-style)
+        getPublicLibraryTopics,
+        getPublicTopicDetail,
+        toggleTopicLike,
+        getTopicComments,
+        addTopicComment,
+        clonePublicTopic,
+        publishTopic,
+        unpublishTopic,
+        getUserLikedTopics,
     };
 
 })();

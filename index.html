@@ -886,6 +886,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     <div class="flex flex-col gap-base flex-1 overflow-y-auto pr-2">
         <a onclick="window.navigateTo('dashboard')" id="nav-desktop-dashboard" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">home</span><span>Trang chủ</span></a>
         <a onclick="navigateTo('topics')" id="nav-desktop-topics" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">grid_view</span><span>Chủ đề</span></a>
+        <a onclick="navigateTo('library')" id="nav-desktop-library" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">explore</span><span>Thư viện</span></a>
         <a onclick="navigateTo('vocabulary')" id="nav-desktop-vocabulary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">auto_stories</span><span>Kho từ vựng</span></a>
         <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">school</span><span>Luyện Đề THPT</span></a>
         <a onclick="navigateTo('game')" id="nav-desktop-game" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">sports_esports</span><span>Game</span></a>
@@ -926,11 +927,12 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 
 <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe" style="display: none;">
     <div class="flex justify-around items-center h-[60px] w-full px-1">
-        <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">home</span><span class="text-[9px] mt-0.5 font-semibold">Trang chủ</span></a>
-        <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="text-[9px] mt-0.5 font-semibold">Chủ đề</span></a>
-        <a onclick="navigateTo('vocabulary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">collections_bookmark</span><span class="text-[9px] mt-0.5 font-semibold">Sổ từ vựng</span></a>
-        <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
-        <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-14 cursor-pointer"><span class="material-symbols-outlined text-[22px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
+        <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">home</span><span class="text-[9px] mt-0.5 font-semibold">Trang chủ</span></a>
+        <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="text-[9px] mt-0.5 font-semibold">Chủ đề</span></a>
+        <a onclick="navigateTo('library')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">explore</span><span class="text-[9px] mt-0.5 font-semibold">Thư viện</span></a>
+        <a onclick="navigateTo('vocabulary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">collections_bookmark</span><span class="text-[9px] mt-0.5 font-semibold">Sổ từ</span></a>
+        <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
+        <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
     </div>
 </nav>
 
@@ -1715,8 +1717,86 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 </main>
 </div>
 
+<!-- ==================== PAGE: THƯ VIỆN HỌC TẬP CỘNG ĐỒNG (THREADS-STYLE) ==================== -->
+<div id="page-library" class="page">
+<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-3 sm:px-4 flex flex-col items-center">
+    <div class="max-w-[620px] w-full flex flex-col gap-4 fade-in">
 
-            <!-- Thẻ chủ đề 1 -->
+        <!-- Threads-style Header & Tabs -->
+        <div class="w-full bg-surface/90 backdrop-blur-md sticky top-16 lg:top-0 z-30 pt-1 pb-3 border-b border-outline-variant/15 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-1 sm:gap-2">
+                <button id="lib-tab-feed" onclick="window.switchLibraryTab('feed')" class="px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer bg-primary text-on-primary shadow-xs">
+                    Khám phá
+                </button>
+                <button id="lib-tab-my" onclick="window.switchLibraryTab('my')" class="px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface">
+                    Bộ từ của tôi
+                </button>
+                <button id="lib-tab-liked" onclick="window.switchLibraryTab('liked')" class="px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all cursor-pointer text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface flex items-center gap-1">
+                    <span>Đã thích</span>
+                    <span class="material-symbols-outlined text-rose-500 text-[16px]">favorite</span>
+                </button>
+            </div>
+
+            <!-- Nút chia sẻ nhanh -->
+            <button onclick="window.openComposeThreadModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs transition-all active:scale-95 cursor-pointer shrink-0">
+                <span class="material-symbols-outlined text-[17px]">add_circle</span>
+                <span class="hidden sm:inline">Chia sẻ bộ từ</span>
+            </button>
+        </div>
+
+        <!-- Search bar + Sort filter -->
+        <div id="lib-search-container" class="flex items-center gap-2">
+            <div class="relative flex-1">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+                <input id="lib-search-input" type="text" placeholder="Tìm bộ từ, tác giả, #hashtag..." oninput="window.handleLibrarySearch(this.value)"
+                       class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm rounded-2xl bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:outline-hidden transition-all text-on-surface placeholder:text-outline"/>
+                <button id="lib-search-clear" onclick="window.clearLibrarySearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface cursor-pointer">
+                    <span class="material-symbols-outlined text-[16px]">close</span>
+                </button>
+            </div>
+            <select id="lib-sort-select" onchange="window.handleLibrarySortChange(this.value)" class="text-xs font-semibold py-2 px-3 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-on-surface-variant cursor-pointer focus:outline-hidden">
+                <option value="popular">🔥 Phổ biến nhất</option>
+                <option value="clones">📥 Tải nhiều nhất</option>
+                <option value="newest">⚡ Mới nhất</option>
+            </select>
+        </div>
+
+        <!-- Horizontal Trending Tag Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide select-none" id="lib-tags-bar">
+            <!-- Rendered by library.js -->
+        </div>
+
+        <!-- Quick Compose Post Card (Threads style trigger) -->
+        <div id="lib-quick-compose" class="bg-surface rounded-2xl p-3 sm:p-4 border border-outline-variant/20 shadow-xs flex items-center gap-3 cursor-pointer hover:border-outline-variant/40 transition-all" onclick="window.openComposeThreadModal()">
+            <div id="lib-quick-avatar" class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden bg-cover bg-center">
+                <span class="material-symbols-outlined text-[20px]">edit_note</span>
+            </div>
+            <p class="text-xs sm:text-sm text-outline flex-1 truncate">Chia sẻ bộ từ vựng tâm đắc của bạn lên cộng đồng...</p>
+            <button type="button" class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-bold text-xs shrink-0 active:scale-95 transition-transform cursor-pointer">
+                Đăng
+            </button>
+        </div>
+
+        <!-- Loading spinner -->
+        <div id="lib-loading-state" class="flex items-center justify-center py-16">
+            <span class="material-symbols-outlined text-primary text-[36px] animate-spin">refresh</span>
+        </div>
+
+        <!-- Feed list container -->
+        <div id="lib-feed-list" class="flex flex-col gap-3.5">
+            <!-- Thread cards rendered by library.js -->
+        </div>
+
+        <!-- Empty state -->
+        <div id="lib-empty-state" class="hidden flex flex-col items-center justify-center py-16 text-center text-outline">
+            <span class="material-symbols-outlined text-[48px] text-outline/50 mb-2">style</span>
+            <p class="text-sm font-bold text-on-surface">Chưa có bộ từ vựng nào</p>
+            <p class="text-xs text-on-surface-variant mt-1">Hãy là người đầu tiên chia sẻ kiến thức hữu ích đến mọi người!</p>
+        </div>
+
+    </div>
+</main>
+</div>
 
 <!-- ==================== PAGE: TOPIC DETAIL (hiện lesson list) ==================== -->
 <div id="page-topic-detail" class="page">
@@ -1754,7 +1834,11 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <h2 id="td-title" class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">—</h2>
                 <p id="td-subtitle" class="text-on-surface-variant mt-sm">Chọn một lesson để bắt đầu học</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-3.5 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shrink-0 cursor-pointer" title="Chia sẻ bộ từ lên Thư viện Cộng đồng">
+                    <span class="material-symbols-outlined text-[18px]">public</span>
+                    <span>Chia sẻ Thư viện</span>
+                </button>
                 <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     <span>Thêm từ vựng</span>
@@ -1770,10 +1854,15 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                         <h2 id="td-title-mobile" class="text-2xl font-bold text-on-surface leading-tight truncate">—</h2>
                         <p id="td-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">Chọn một lesson để bắt đầu học</p>
                     </div>
-                    <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer">
-                        <span class="material-symbols-outlined text-[16px]">add</span>
-                        <span>Thêm từ</span>
-                    </button>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary font-bold text-xs p-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Chia sẻ Thư viện">
+                            <span class="material-symbols-outlined text-[16px]">public</span>
+                        </button>
+                        <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer">
+                            <span class="material-symbols-outlined text-[16px]">add</span>
+                            <span>Thêm từ</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2835,22 +2924,24 @@ function _updateThemeBtns(active) {
 }
 
 window.navigateTo = function(page, preserveHash = false){
+    const pageName = (page || '').split('?')[0];
+
     // Gỡ bỏ sự kiện bàn phím phiên học khi rời trang learning
-    if (page !== 'learning' && typeof HiSessionUI !== 'undefined' && typeof HiSessionUI.destroy === 'function') {
+    if (pageName !== 'learning' && typeof HiSessionUI !== 'undefined' && typeof HiSessionUI.destroy === 'function') {
         HiSessionUI.destroy();
     }
 
     // Đóng tất cả trang
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    const el = document.getElementById('page-'+page);
+    const el = document.getElementById('page-'+pageName);
     if(el) { el.classList.add('active'); window.scrollTo(0,0); }
     if (!preserveHash) window.location.hash = page;
  
     // Điều khiển Component dùng chung (Navbar / Sidebar)
-    const mainTabs = ['dashboard', 'topics', 'vocabulary', 'exercises', 'game', 'dictionary', 'settings'];
-    const isMainTab = mainTabs.includes(page);
-    const isTopicDetail = (page === 'topic-detail' || page === 'lesson-detail');
-    const isExerciseDetail = (page === 'thpt-room');
+    const mainTabs = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'game', 'dictionary', 'settings'];
+    const isMainTab = mainTabs.includes(pageName);
+    const isTopicDetail = (pageName === 'topic-detail' || pageName === 'lesson-detail');
+    const isExerciseDetail = (pageName === 'thpt-room');
     
     // Sidebar Desktop
     const sidebar = document.getElementById('main-sidebar');
@@ -2862,15 +2953,15 @@ window.navigateTo = function(page, preserveHash = false){
     
     // Đổi Title Mobile Header
     if(isMainTab) {
-        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Luyện Đề THPT', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
+        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'library': 'Thư viện', 'vocabulary': 'Kho từ vựng', 'exercises': 'Luyện Đề THPT', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
         const titleEl = document.getElementById('mobile-header-title');
         if(titleEl) {
-            if(page === 'dashboard') {
+            if(pageName === 'dashboard') {
                 titleEl.className = "";
                 titleEl.innerHTML = '<img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/>';
             } else {
                 titleEl.className = "font-headline-md text-xl font-bold text-on-surface truncate";
-                titleEl.textContent = titles[page];
+                titleEl.textContent = titles[pageName];
             }
         }
     }
@@ -2881,38 +2972,44 @@ window.navigateTo = function(page, preserveHash = false){
         bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
     }
     // Khi vào trang Topics: render tabs + grid
-    if (page === 'topics') {
+    if (pageName === 'topics') {
         setTimeout(() => {
             window._renderCategoryTabs && window._renderCategoryTabs();
             window._renderTopicsGrid  && window._renderTopicsGrid();
         }, 0);
     }
+    // Khi vào trang Library: load Thư viện Cộng đồng
+    if (pageName === 'library') {
+        setTimeout(() => {
+            window.loadCommunityLibrary && window.loadCommunityLibrary();
+        }, 0);
+    }
     // Khi vào trang Vocabulary: load từ vựng thật
-    if (page === 'vocabulary') {
+    if (pageName === 'vocabulary') {
         setTimeout(() => window._loadVocabularyPage && window._loadVocabularyPage(), 0);
     }
     // Khi vào trang Exercises: render danh sách đề thi THPT Quốc Gia
-    if (page === 'exercises') {
+    if (pageName === 'exercises') {
         setTimeout(() => {
             window.ThptExam && window.ThptExam.init();
         }, 0);
     }
     // Khi vào trang Game: reset màn chọn mode
-    if (page === 'game') {
+    if (pageName === 'game') {
         setTimeout(() => window.HiGameSession && window.HiGameSession.renderGamePage(), 0);
     }
     // Khi vào topic-detail: load danh sách lesson
-    if (page === 'topic-detail') {
+    if (pageName === 'topic-detail') {
         window._loadLessons && window._loadLessons();
     }
     // Khi vào lesson-detail: load từ vựng
-    if (page === 'lesson-detail') {
+    if (pageName === 'lesson-detail') {
         window._loadLessonWords && window._loadLessonWords();
     }
 
     // Cập nhật trạng thái Active trên Menu
     if(isMainTab || isTopicDetail || isExerciseDetail) {
-        const activeTarget = isTopicDetail ? 'topics' : isExerciseDetail ? 'exercises' : page; 
+        const activeTarget = isTopicDetail ? 'topics' : isExerciseDetail ? 'exercises' : pageName; 
         
         document.querySelectorAll('.nav-item').forEach(a => {
             a.classList.remove('text-primary');
@@ -2943,15 +3040,15 @@ window.navigateTo = function(page, preserveHash = false){
         }
     }
     // Dừng countdown khi rời dashboard
-    if (page !== 'dashboard' && typeof HiDashboard !== 'undefined') {
+    if (pageName !== 'dashboard' && typeof HiDashboard !== 'undefined') {
         HiDashboard.stopCountdown();
     }
     // Refresh Dashboard stats khi vào trang dashboard
-    if (page === 'dashboard' && typeof HiDashboard !== 'undefined') {
+    if (pageName === 'dashboard' && typeof HiDashboard !== 'undefined') {
         HiDashboard.refresh();
     }
     // Khi vào Settings, load giá trị API key hiện tại
-    if (page === 'settings') {
+    if (pageName === 'settings') {
         window._loadSettingsPage();
     }
 };
@@ -3461,6 +3558,7 @@ window.addEventListener('hashchange', () => {
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
 <script src="gameSession.js?v=20260912-sound-v1"></script>
 <script src="bilingualReading.js?v=20260913-monitoring-v1"></script>
+<script src="library.js?v=20260913-v1"></script>
 
 <!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
 <div id="modal-exam-confirm-submit" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">
@@ -4319,6 +4417,111 @@ window.addEventListener('hashchange', () => {
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ==================== MODAL: THREAD CHAIN DETAIL VIEW ==================== -->
+<div id="modal-thread-detail" class="fixed inset-0 z-[10000] hidden items-center justify-center p-2 sm:p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
+  <div class="bg-surface rounded-3xl shadow-2xl border border-outline-variant/30 w-full max-w-[640px] max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <!-- Header with Close button -->
+    <div class="px-5 py-4 border-b border-outline-variant/15 flex items-center justify-between bg-surface/90 backdrop-blur-md sticky top-0 z-20">
+      <div class="flex items-center gap-2">
+        <button type="button" onclick="window.closeThreadDetail()" class="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-outline hover:text-on-surface transition-colors cursor-pointer" title="Đóng">
+          <span class="material-symbols-outlined text-xl">arrow_back</span>
+        </button>
+        <span class="font-bold text-sm text-on-surface">Chi tiết bộ từ vựng</span>
+      </div>
+      <button type="button" onclick="window.closeThreadDetail()" class="text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container cursor-pointer transition-colors">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Body (Scrollable Thread Chain) -->
+    <div class="p-4 sm:p-6 overflow-y-auto flex-1 overscroll-contain" id="thread-detail-content">
+      <!-- Rendered dynamically by library.js -->
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: CHIA SẺ BỘ TỪ LÊN THƯ VIỆN ==================== -->
+<div id="modal-compose-thread" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
+  <div class="bg-surface rounded-3xl shadow-2xl border border-outline-variant/30 w-full max-w-[540px] max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div class="px-5 py-4 border-b border-outline-variant/15 flex items-center justify-between bg-surface/90 backdrop-blur-md">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary text-xl">public</span>
+        <h3 class="font-bold text-sm sm:text-base text-on-surface">Chia sẻ bộ từ lên Thư viện mở</h3>
+      </div>
+      <button type="button" onclick="window.closeComposeThreadModal()" class="text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container cursor-pointer transition-colors">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <form onsubmit="event.preventDefault(); window.submitComposeThread();" class="p-5 overflow-y-auto flex flex-col gap-4">
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">1. Chọn bộ từ vựng của bạn *</label>
+        <select id="compose-topic-select" required class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden cursor-pointer">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">2. Lời giới thiệu / Mẹo học cùng bộ từ</label>
+        <textarea id="compose-desc-input" rows="3" placeholder="Chia sẻ nguồn tài liệu, band điểm phù hợp hoặc cách bạn ghi nhớ những từ này..."
+                  class="w-full text-xs sm:text-sm p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline resize-none"></textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">3. Thẻ chủ đề (Hashtags)</label>
+        <input id="compose-tags-input" type="text" placeholder="IELTS, Cam19, 7.5+, GiaoTiếp (phân cách bằng dấu phẩy)"
+               class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline"/>
+        <p class="text-[11px] text-outline mt-1">Giúp các bạn học viên khác dễ dàng tìm thấy bộ từ của bạn qua bộ lọc.</p>
+      </div>
+
+      <div class="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-on-surface-variant flex items-start gap-2">
+        <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5">info</span>
+        <span>Bộ từ sẽ xuất hiện công khai trên nguồn cấp Thư viện. Các bạn học viên khác có thể xem, thả tim và lưu về tài khoản để học Spaced Repetition.</span>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/15">
+        <button type="button" onclick="window.closeComposeThreadModal()" class="px-4 py-2.5 rounded-full text-xs font-bold text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer">
+          Hủy bỏ
+        </button>
+        <button id="compose-submit-btn" type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary font-bold text-xs sm:text-sm shadow-md hover:bg-surface-tint active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>Đăng lên Thư viện</span>
+          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ==================== MODAL: BÌNH LUẬN & MẸO HỌC (THREADS COMMENTS) ==================== -->
+<div id="modal-thread-comments" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
+  <div class="bg-surface rounded-3xl shadow-2xl border border-outline-variant/30 w-full max-w-[500px] max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div class="px-5 py-3.5 border-b border-outline-variant/15 flex items-center justify-between bg-surface/90 backdrop-blur-md">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="material-symbols-outlined text-primary text-xl">forum</span>
+        <h3 id="thread-comments-title" class="font-bold text-sm text-on-surface truncate">Bình luận & Mẹo học</h3>
+      </div>
+      <button type="button" onclick="window.closeThreadComments()" class="text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container cursor-pointer transition-colors">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+
+    <!-- Comments list -->
+    <div id="thread-comments-list" class="p-4 overflow-y-auto flex-1 flex flex-col overscroll-contain">
+      <!-- Rendered by JS -->
+    </div>
+
+    <!-- Comment input -->
+    <div class="p-3 sm:p-4 border-t border-outline-variant/15 bg-surface-container-lowest flex items-center gap-2">
+      <input id="thread-comment-input" type="text" placeholder="Để lại mẹo nhớ từ hoặc lời nhắn..." onkeydown="if(event.key==='Enter') window.submitThreadComment()"
+             class="flex-1 text-xs sm:text-sm px-3.5 py-2 rounded-full bg-surface border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline"/>
+      <button id="thread-comment-submit" type="button" onclick="window.submitThreadComment()"
+              class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 active:scale-90 transition-transform cursor-pointer shadow-xs">
+        <span class="material-symbols-outlined text-[18px]">send</span>
+      </button>
+    </div>
   </div>
 </div>
 

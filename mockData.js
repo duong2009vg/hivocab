@@ -504,6 +504,136 @@ const HiMock = (() => {
             console.log('[HiMock] logSystemError:', params);
         },
 
+        getPublicLibraryTopics: async ({ tag = 'all', search = '', sort = 'popular', page = 1, pageSize = 20 } = {}) => {
+            const topics = _load(STORAGE_KEYS.topics, SAMPLE_TOPICS);
+            const words = _load(STORAGE_KEYS.words, SAMPLE_WORDS);
+            const likes = _load('hi_mock_topic_likes', []);
+
+            let list = topics.map(t => {
+                const topicWords = words.filter(w => w.topicId === t.id);
+                return {
+                    id: t.id,
+                    name: t.name,
+                    icon: t.icon,
+                    category: t.category || 'General',
+                    description: t.description || 'Bộ từ vựng chia sẻ cộng đồng hữu ích cho việc tự học.',
+                    author_name: t.author_name || 'Học viên HiVocab',
+                    author_avatar: null,
+                    is_public: true,
+                    like_count: t.like_count || 12,
+                    clone_count: t.clone_count || 5,
+                    comment_count: t.comment_count || 1,
+                    tags: t.tags || ['IELTS', 'Vocab'],
+                    totalWords: topicWords.length,
+                    sneakPeekWords: topicWords.slice(0, 4).map(w => ({ word: w.word, phonetic: w.phonetic, meaning: w.meaning })),
+                    hasLiked: likes.includes(t.id)
+                };
+            });
+
+            if (tag && tag !== 'all' && tag !== 'Tất cả') {
+                list = list.filter(t => t.tags && t.tags.includes(tag));
+            }
+            if (search && search.trim()) {
+                const q = search.trim().toLowerCase();
+                list = list.filter(t => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q));
+            }
+
+            return {
+                topics: list,
+                total: list.length,
+                page,
+                pageSize
+            };
+        },
+
+        getPublicTopicDetail: async (topicId) => {
+            const topics = _load(STORAGE_KEYS.topics, SAMPLE_TOPICS);
+            const words = _load(STORAGE_KEYS.words, SAMPLE_WORDS);
+            const topic = topics.find(t => t.id === topicId) || topics[0];
+            const topicWords = words.filter(w => w.topicId === topicId);
+            return {
+                ...topic,
+                totalWords: topicWords.length,
+                words: topicWords,
+                hasLiked: false
+            };
+        },
+
+        toggleTopicLike: async (topicId) => {
+            let likes = _load('hi_mock_topic_likes', []);
+            let liked = false;
+            if (likes.includes(topicId)) {
+                likes = likes.filter(id => id !== topicId);
+                liked = false;
+            } else {
+                likes.push(topicId);
+                liked = true;
+            }
+            _save('hi_mock_topic_likes', likes);
+            return { liked };
+        },
+
+        getTopicComments: async (topicId) => {
+            const comments = _load('hi_mock_comments_' + topicId, [
+                { id: 'c1', user_name: 'Lan Anh', content: 'Bộ từ vựng này rất hữu ích, cảm ơn bạn đã chia sẻ!', created_at: new Date().toISOString() }
+            ]);
+            return comments;
+        },
+
+        addTopicComment: async ({ topicId, wordId = null, content }) => {
+            const comments = _load('hi_mock_comments_' + topicId, []);
+            const newComment = {
+                id: 'cm_' + Date.now(),
+                topic_id: topicId,
+                word_id: wordId,
+                user_name: 'Bạn',
+                content: content,
+                created_at: new Date().toISOString()
+            };
+            comments.push(newComment);
+            _save('hi_mock_comments_' + topicId, comments);
+            return newComment;
+        },
+
+        clonePublicTopic: async (topicId) => {
+            const topics = _load(STORAGE_KEYS.topics, SAMPLE_TOPICS);
+            const src = topics.find(t => t.id === topicId);
+            if (!src) throw new Error('Topic không tồn tại');
+            const newId = 'cloned_' + Date.now();
+            topics.push({
+                ...src,
+                id: newId,
+                name: src.name + ' (Bản sao)',
+                is_public: false
+            });
+            _save(STORAGE_KEYS.topics, topics);
+            return newId;
+        },
+
+        publishTopic: async ({ topicId, description = '', tags = [] }) => {
+            const topics = _load(STORAGE_KEYS.topics, SAMPLE_TOPICS);
+            const t = topics.find(x => x.id === topicId);
+            if (t) {
+                t.is_public = true;
+                t.description = description;
+                t.tags = tags;
+            }
+            _save(STORAGE_KEYS.topics, topics);
+            return t;
+        },
+
+        unpublishTopic: async (topicId) => {
+            const topics = _load(STORAGE_KEYS.topics, SAMPLE_TOPICS);
+            const t = topics.find(x => x.id === topicId);
+            if (t) t.is_public = false;
+            _save(STORAGE_KEYS.topics, topics);
+            return t;
+        },
+
+        getUserLikedTopics: async () => {
+            return [];
+        },
+
         init: () => { console.log('[HiMock] Mock DB initialized'); },
     };
 
