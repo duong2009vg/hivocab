@@ -1768,7 +1768,148 @@ window.HiDB = (() => {
         if (error) throw error;
     }
 
-    // Export public API
+    // ==========================================================
+    // BUG REPORTING & SYSTEM ERROR LOGGING
+    // ==========================================================
+
+    /**
+     * Gửi báo cáo lỗi từ người dùng (icon lá cờ 🚩).
+     */
+    async function submitBugReport({ reportType, featureContext, contextData = {}, description, userEmail = null, deviceInfo = null }) {
+        if (!description || !description.trim()) {
+            throw new Error('Vui lòng nhập mô tả chi tiết lỗi.');
+        }
+
+        const user = await getCurrentUser();
+        const client = _getClient();
+
+        const defaultDevice = {
+            url: window.location.href,
+            userAgent: navigator.userAgent,
+            screenWidth: window.innerWidth,
+            screenHeight: window.innerHeight,
+            platform: navigator.platform || '',
+            timestamp: new Date().toISOString()
+        };
+
+        const { data, error } = await client
+            .from('user_bug_reports')
+            .insert({
+                user_id: user?.id || null,
+                user_email: userEmail || user?.email || null,
+                report_type: reportType || 'other',
+                feature_context: featureContext || 'general',
+                context_data: contextData || {},
+                description: description.trim(),
+                device_info: deviceInfo || defaultDevice,
+                status: 'pending'
+            })
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    /**
+     * Admin lấy danh sách báo cáo lỗi người dùng.
+     */
+    async function getBugReports({ status = 'all', featureContext = 'all', limit = 50, offset = 0 } = {}) {
+        let query = _getClient()
+            .from('user_bug_reports')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (status && status !== 'all') {
+            query = query.eq('status', status);
+        }
+        if (featureContext && featureContext !== 'all') {
+            query = query.eq('feature_context', featureContext);
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+    }
+
+    /**
+     * Admin cập nhật trạng thái báo cáo (pending / resolved / dismissed) và ghi chú.
+     */
+    async function updateBugReportStatus(reportId, status, adminNote = null) {
+        const updatePayload = { status };
+        if (adminNote !== null && adminNote !== undefined) {
+            updatePayload.admin_note = adminNote;
+        }
+
+        const { data, error } = await _getClient()
+            .from('user_bug_reports')
+            .update(updatePayload)
+            .eq('id', reportId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    }
+
+    /** Throttle buffer cho log lỗi hệ thống để tránh spam */
+    const _recentErrorHashes = new Set();
+
+    /**
+     * Tự động ghi nhận log lỗi client (Crash / Unhandled Exceptions).
+     */
+    async function logSystemError({ errorMessage, errorStack = null, component = 'general', url = null }) {
+        try {
+            if (!errorMessage) return;
+            const errorKey = `${component}:${errorMessage.slice(0, 100)}`;
+            if (_recentErrorHashes.has(errorKey)) return;
+            _recentErrorHashes.add(errorKey);
+            setTimeout(() => _recentErrorHashes.delete(errorKey), 30000); // 30s dedup
+
+            const user = await getCurrentUser();
+            await _getClient()
+                .from('system_error_logs')
+                .insert({
+                    user_id: user?.id || null,
+                    user_email: user?.email || null,
+                    error_message: errorMessage.slice(0, 1000),
+                    error_stack: errorStack ? String(errorStack).slice(0, 4000) : null,
+                    component: component || 'general',
+                    url: url || window.location.href
+                });
+        } catch (err) {
+            console.warn('[logSystemError] Không thể ghi log:', err);
+        }
+    }
+
+    /**
+     * Admin lấy danh sách log lỗi hệ thống.
+     */
+    async function getSystemErrorLogs({ limit = 50, offset = 0 } = {}) {
+        const { data, error } = await _getClient()
+            .from('system_error_logs')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
+
+        if (error) throw error;
+        return data || [];
+    }
+
+    /**
+     * Admin xóa sạch log lỗi hệ thống.
+     */
+    async function clearSystemErrorLogs() {
+        const { error } = await _getClient()
+            .from('system_error_logs')
+            .delete()
+            .not('id', 'is', null);
+
+        if (error) throw error;
+        return true;
+    }
+
     // Export public API
     return {
         onAuthStateChange: (callback) => {
@@ -1833,6 +1974,14 @@ window.HiDB = (() => {
         addExerciseQuestion,
         deleteExerciseQuestion,
         deleteCustomExercise,
+
+        // Bug Reports & Error Logging
+        submitBugReport,
+        getBugReports,
+        updateBugReportStatus,
+        logSystemError,
+        getSystemErrorLogs,
+        clearSystemErrorLogs,
     };
 
 })();

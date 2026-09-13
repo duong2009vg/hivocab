@@ -1420,10 +1420,33 @@
             } catch(e) {}
         },
 
+        openCurrentQuestionReport() {
+            const qNum = (this.currentQIndex || 0) + 1;
+            this.reportAnswer(qNum);
+        },
+
         async reportAnswer(qNum) {
             if (!this.currentExam) return;
-            const q = this.currentExam.questions[qNum - 1];
+            const q = this.currentExam.questions ? this.currentExam.questions[qNum - 1] : null;
             if (!q) return;
+
+            if (typeof window.openBugReportModal === 'function') {
+                window.openBugReportModal({
+                    feature: 'thpt_exam',
+                    reportType: 'exam_question',
+                    title: `Đề ${this.currentExam.title || this.currentExam.id} - Câu ${qNum}`,
+                    contextData: {
+                        exam_id: this.currentExam.id,
+                        exam_title: this.currentExam.title,
+                        question_number: qNum,
+                        system_answer: q.correct_answer || '?',
+                        user_answer: this.userAnswers ? this.userAnswers[qNum] || '' : '',
+                        prompt: q.prompt ? q.prompt.substring(0, 160) : '',
+                        group: q.group || ''
+                    }
+                });
+                return;
+            }
 
             // Remove any existing report modal
             const existing = document.getElementById('thpt-report-modal');

@@ -1150,4 +1150,25 @@
         toggleEl(btnMob,  hasReadingContent, 'flex');
     };
 
+    // Expose current passage and report error helper
+    window.getCurrentBilingualPassage = () => state.currentPassage;
+
+    window.reportBilingualReadingError = function() {
+        const passage = state.currentPassage;
+        if (typeof window.openBugReportModal === 'function') {
+            window.openBugReportModal({
+                feature: 'bilingual_reading',
+                reportType: 'typo',
+                title: passage ? `Bài đọc: ${passage.title || passage.id}` : 'Bài đọc Song ngữ',
+                contextData: {
+                    passage_id: passage?.id,
+                    passage_title: passage?.title,
+                    test_name: passage?.testName,
+                    topic_name: passage?.topicName,
+                    active_tab: state.activeTab
+                }
+            });
+        }
+    };
+
 })(window);

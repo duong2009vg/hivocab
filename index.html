@@ -2063,6 +2063,11 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                 <button onclick="window.ThptExam.changeFontSize(1)" class="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
             </div>
 
+            <!-- Report Exam / Question -->
+            <button type="button" onclick="window.ThptExam && window.ThptExam.openCurrentQuestionReport ? window.ThptExam.openCurrentQuestionReport() : window.openBugReportModal({ feature: 'thpt_exam' })" class="p-1 rounded-lg text-slate-300 hover:text-amber-300 hover:bg-white/10 transition-colors cursor-pointer" title="Báo cáo lỗi câu hỏi/đề thi">
+                <span class="material-symbols-outlined text-[18px]">flag</span>
+            </button>
+
             <!-- Fullscreen -->
             <button onclick="window.ThptExam.toggleFullscreen()" class="hidden sm:flex w-6 h-6 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 items-center justify-center transition-colors cursor-pointer" title="Toàn màn hình">
                 <span class="material-symbols-outlined text-[16px]">fullscreen</span>
@@ -2329,6 +2334,12 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                                 title="Lưu từ vào chủ đề"
                                 class="w-12 h-12 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center hover:bg-primary/20 active:scale-95 transition-all">
                             <span class="material-symbols-outlined text-[22px]">add</span>
+                        </button>
+                        <!-- Report button -->
+                        <button id="dict-report-btn" onclick="window.dictReportWord && window.dictReportWord()"
+                                title="Báo lỗi từ điển này"
+                                class="w-12 h-12 rounded-full bg-surface-container text-on-surface-variant hover:text-red-600 hover:bg-red-50 border border-outline-variant/30 flex items-center justify-center active:scale-95 transition-all">
+                            <span class="material-symbols-outlined text-[20px]">flag</span>
                         </button>
                     </div>
                 </div>
@@ -2597,6 +2608,11 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <button id="br-view-en" onclick="window.setBilingualViewMode('en')" class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface text-xs font-semibold transition-all">English</button>
         <button id="br-view-vi" onclick="window.setBilingualViewMode('vi')" class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface text-xs font-semibold transition-all">Tiếng Việt</button>
       </div>
+
+      <!-- Report Button -->
+      <button onclick="window.reportBilingualReadingError && window.reportBilingualReadingError()" class="p-2 rounded-xl text-on-surface-variant hover:text-red-600 hover:bg-surface-container transition-colors cursor-pointer" title="Báo lỗi bài đọc này">
+        <span class="material-symbols-outlined text-[20px]">flag</span>
+      </button>
     </div>
   </header>
 
@@ -2608,9 +2624,12 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
       <button onclick="window.setBilingualViewMode('en')" class="px-2 py-1 rounded text-on-surface-variant">Anh</button>
       <button onclick="window.setBilingualViewMode('vi')" class="px-2 py-1 rounded text-on-surface-variant">Việt</button>
     </div>
-    <div class="flex items-center gap-1 font-bold text-on-surface-variant">
+    <div class="flex items-center gap-1.5 font-bold text-on-surface-variant">
       <button onclick="window.changeBilingualFontSize(-1)" class="p-1 px-2 hover:bg-surface-container rounded" title="Giảm cỡ chữ">A-</button>
       <button onclick="window.changeBilingualFontSize(1)" class="p-1 px-2 hover:bg-surface-container rounded" title="Tăng cỡ chữ">A+</button>
+      <button onclick="window.reportBilingualReadingError && window.reportBilingualReadingError()" class="p-1 px-1.5 hover:bg-surface-container text-outline hover:text-red-600 rounded cursor-pointer" title="Báo lỗi bài đọc">
+        <span class="material-symbols-outlined text-[18px]">flag</span>
+      </button>
     </div>
   </div>
 
@@ -2629,6 +2648,9 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 <div class="flex items-center gap-2">
   <button onclick="window.HiSound && window.HiSound.toggleMute()" class="hi-sound-toggle-btn p-1.5 rounded-full hover:bg-surface-container text-primary transition-colors cursor-pointer" title="Tắt/Bật âm thanh học tập">
     <span class="material-symbols-outlined text-[20px] md:text-[22px]">volume_up</span>
+  </button>
+  <button onclick="window.reportCurrentLearningError && window.reportCurrentLearningError()" class="p-1.5 rounded-full hover:bg-red-50 text-on-surface-variant hover:text-red-600 transition-colors cursor-pointer" title="Báo lỗi bài tập/từ vựng này">
+    <span class="material-symbols-outlined text-[20px] md:text-[22px]">flag</span>
   </button>
   <div id="learning-streak-container" class="flex items-center gap-1 text-[#FF5722]"><span class="font-bold text-xs md:text-sm">12</span><span class="material-symbols-outlined icon-fill text-[18px] md:text-[20px]" style="filter:drop-shadow(0 2px 4px rgba(255,87,34,0.3))">local_fire_department</span></div>
 </div>
@@ -3407,16 +3429,16 @@ window.addEventListener('hashchange', () => {
 
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dataLayer.js?v=20260913-qa-fix-v1"></script>
+<script src="dataLayer.js?v=20260913-monitoring-v1"></script>
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260912-v1"></script>
 <script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>
-<script src="sessionUI.js?v=20260913-qa-fix-v1"></script>
-<script src="thptExam.js?v=20260913-qa-fix-v1"></script>
+<script src="sessionUI.js?v=20260913-monitoring-v1"></script>
+<script src="thptExam.js?v=20260913-monitoring-v1"></script>
 <script src="gameSession.js?v=20260912-sound-v1"></script>
-<script src="bilingualReading.js?v=20260912-sound-v1"></script>
+<script src="bilingualReading.js?v=20260913-monitoring-v1"></script>
 
 <!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
 <div id="modal-exam-confirm-submit" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">
@@ -3532,6 +3554,75 @@ window.addEventListener('hashchange', () => {
         Bắt Đầu Thi
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: BÁO CÁO LỖI TOÀN DIỆN (BUG REPORT) ==================== -->
+<div id="modal-bug-report" class="fixed inset-0 z-[10000] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
+  <div class="w-full max-w-md bg-surface rounded-3xl p-6 sm:p-7 soft-shadow space-y-4 fade-in border border-outline-variant/30 text-on-surface">
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-outline-variant/20 pb-3">
+      <div class="flex items-center gap-2.5 text-red-600">
+        <div class="w-8 h-8 rounded-xl bg-red-100 flex items-center justify-center text-red-600">
+          <span class="material-symbols-outlined text-[20px]">flag</span>
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-on-surface leading-tight">Báo cáo Lỗi &amp; Góp ý</h3>
+          <p class="text-[11px] text-on-surface-variant font-medium">HiVocab Support Team</p>
+        </div>
+      </div>
+      <button type="button" onclick="window.closeBugReportModal()" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-surface-container cursor-pointer transition-colors">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Context Preview Chip -->
+    <div id="bug-report-context-chip" class="flex items-center gap-2 p-2.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/20 text-xs">
+      <span class="material-symbols-outlined text-primary text-[16px]">info</span>
+      <span id="bug-report-context-label" class="font-semibold text-on-surface truncate">Đang ghi nhận từ phiên học</span>
+    </div>
+
+    <!-- Form -->
+    <form id="bug-report-form" onsubmit="window.submitBugReportForm(event)" class="space-y-3.5">
+      <input type="hidden" id="bug-report-feature" value="general">
+      <input type="hidden" id="bug-report-context-json" value="{}">
+
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Loại vấn đề</label>
+        <select id="bug-report-type" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant/40 bg-surface text-xs font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary">
+          <option value="wrong_answer">Sai đáp án / Kết quả không chính xác</option>
+          <option value="exam_question">Lỗi câu hỏi trong Đề thi THPT</option>
+          <option value="typo">Lỗi chính tả / Ngữ pháp / Dịch thuật</option>
+          <option value="audio">Lỗi phát âm / Âm thanh</option>
+          <option value="ui_bug">Lỗi hiển thị / Giao diện / Nút bấm</option>
+          <option value="other">Góp ý cải tiến / Phản hồi khác</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Mô tả chi tiết</label>
+        <textarea id="bug-report-content" rows="3" required
+                  placeholder="Vui lòng mô tả chi tiết lỗi bạn gặp phải hoặc đáp án bạn cho là chính xác..."
+                  class="w-full p-3 rounded-xl border border-outline-variant/40 bg-surface text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none placeholder:text-outline font-medium"></textarea>
+      </div>
+
+      <!-- Auto capture note -->
+      <div class="flex items-center gap-2 text-[11px] text-outline">
+        <span class="material-symbols-outlined text-[14px]">devices</span>
+        <span>Hệ thống tự động đính kèm thiết bị, trình duyệt và URL.</span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button type="button" onclick="window.closeBugReportModal()" class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer">
+          Hủy
+        </button>
+        <button type="submit" id="btn-submit-bug-report" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-sm flex items-center gap-1.5 transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-[16px]">send</span>
+          <span>Gửi Báo Cáo</span>
+        </button>
+      </div>
+    </form>
   </div>
 </div>
 
@@ -4099,6 +4190,228 @@ window.addEventListener('hashchange', () => {
 
   </div>
 </div>
+
+<!-- ==================== GLOBAL FLOATING BUG REPORT BUTTON ==================== -->
+<button id="global-bug-report-btn" onclick="window.openBugReportModal()" 
+    class="fixed bottom-20 sm:bottom-6 right-5 z-[80] flex items-center gap-2 px-3 py-2 sm:px-3.5 sm:py-2.5 bg-surface/90 hover:bg-surface border border-outline-variant/40 rounded-full shadow-lg hover:shadow-xl backdrop-blur-md text-on-surface text-xs font-bold hover:text-red-600 transition-all cursor-pointer group select-none"
+    title="Báo lỗi hoặc góp ý phản hồi">
+    <span class="material-symbols-outlined text-red-500 text-[18px] group-hover:scale-110 transition-transform">flag</span>
+    <span class="hidden sm:inline text-on-surface-variant group-hover:text-on-surface">Báo lỗi &amp; Góp ý</span>
+</button>
+
+<script>
+// ============================================================
+// BUG REPORT & CLIENT MONITORING LOGIC
+// ============================================================
+window.showHiToast = function(msg, type = 'info') {
+    let toast = document.getElementById('hi-global-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'hi-global-toast';
+        toast.className = 'fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-[99999] text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-full shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2 max-w-[90vw] text-center';
+        document.body.appendChild(toast);
+    }
+    const bgClass = type === 'success' ? 'bg-emerald-600' : (type === 'error' ? 'bg-rose-600' : 'bg-slate-900');
+    toast.className = `fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-[99999] ${bgClass} text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-full shadow-2xl transition-all duration-300 opacity-0 pointer-events-none flex items-center gap-2 max-w-[90vw] text-center`;
+    toast.textContent = msg;
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, -8px)';
+    clearTimeout(window._hiToastTimer);
+    window._hiToastTimer = setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, 0)';
+    }, 3200);
+};
+
+window.openBugReportModal = function(params = {}) {
+    const modal = document.getElementById('modal-bug-report');
+    if (!modal) return;
+
+    let feature = params.feature || '';
+    let reportType = params.reportType || '';
+    let title = params.title || '';
+    let contextData = params.contextData || {};
+    let content = params.content || '';
+
+    // Auto-detect context from active page if not explicitly provided
+    if (!feature) {
+        const activePage = document.querySelector('.page.active')?.id || '';
+        if (activePage === 'page-learning') {
+            feature = 'learning_session';
+            reportType = reportType || 'wrong_answer';
+            const item = (typeof HiSession !== 'undefined' && typeof HiSession.getCurrentItem === 'function') ? HiSession.getCurrentItem() : null;
+            const w = item?.word?.word || item?.exerciseData?.word || item?.exerciseData?.answer || item?.exerciseData?.frontWord || '';
+            const m = item?.word?.meaning || item?.exerciseData?.meaning || item?.exerciseData?.frontWord || '';
+            title = w ? `Từ vựng: ${w}` : 'Phiên học từ vựng';
+            contextData = { word: w, meaning: m, exercise_type: item?.exerciseType || '' };
+        } else if (activePage === 'page-thpt-room') {
+            feature = 'thpt_exam';
+            reportType = reportType || 'exam_question';
+            if (window.ThptExam && window.ThptExam.currentExam) {
+                const qNum = (window.ThptExam.currentQIndex || 0) + 1;
+                const q = window.ThptExam.currentExam.questions?.[qNum - 1];
+                title = `Đề ${window.ThptExam.currentExam.title} - Câu ${qNum}`;
+                contextData = {
+                    exam_id: window.ThptExam.currentExam.id,
+                    exam_title: window.ThptExam.currentExam.title,
+                    question_number: qNum,
+                    system_answer: q?.correct_answer || '?',
+                    user_answer: window.ThptExam.userAnswers?.[qNum] || ''
+                };
+            } else {
+                title = 'Phòng thi THPT';
+            }
+        } else if (activePage === 'page-bilingual-reading') {
+            feature = 'bilingual_reading';
+            reportType = reportType || 'typo';
+            const passage = typeof window.getCurrentBilingualPassage === 'function' ? window.getCurrentBilingualPassage() : null;
+            title = passage ? `Bài đọc: ${passage.title || passage.id}` : 'Bài đọc Song ngữ';
+            contextData = { passage_id: passage?.id, passage_title: passage?.title };
+        } else if (activePage === 'page-dictionary') {
+            feature = 'dictionary';
+            reportType = reportType || 'typo';
+            const w = document.getElementById('dict-word')?.textContent?.trim() || '';
+            title = w ? `Tra từ: ${w}` : 'Tra từ điển';
+            contextData = { word: w };
+        } else {
+            feature = 'general';
+            reportType = reportType || 'other';
+            title = 'Phản hồi & Góp ý hệ thống';
+        }
+    }
+
+    const featureInput = document.getElementById('bug-report-feature');
+    if (featureInput) featureInput.value = feature;
+
+    const typeSelect = document.getElementById('bug-report-type');
+    if (typeSelect) {
+        if (reportType && [...typeSelect.options].some(o => o.value === reportType)) {
+            typeSelect.value = reportType;
+        } else {
+            typeSelect.value = 'other';
+        }
+    }
+
+    const contentArea = document.getElementById('bug-report-content');
+    if (contentArea) contentArea.value = content;
+
+    const chipLabel = document.getElementById('bug-report-context-label');
+    if (chipLabel) chipLabel.textContent = title || 'Phản hồi & Báo lỗi HiVocab';
+
+    const mergedContext = {
+        ...contextData,
+        title: title,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        screen: `${window.innerWidth}x${window.innerHeight}`,
+        timestamp: new Date().toISOString()
+    };
+    const contextInput = document.getElementById('bug-report-context-json');
+    if (contextInput) contextInput.value = JSON.stringify(mergedContext);
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => { contentArea?.focus(); }, 50);
+};
+
+window.closeBugReportModal = function() {
+    const modal = document.getElementById('modal-bug-report');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+window.submitBugReportForm = async function(event) {
+    if (event) event.preventDefault();
+    const btn = document.getElementById('btn-submit-bug-report');
+    const content = (document.getElementById('bug-report-content')?.value || '').trim();
+    if (!content) {
+        window.showHiToast('Vui lòng nhập nội dung mô tả lỗi!', 'error');
+        return;
+    }
+
+    const feature = document.getElementById('bug-report-feature')?.value || 'general';
+    const reportType = document.getElementById('bug-report-type')?.value || 'other';
+    let contextData = {};
+    try {
+        contextData = JSON.parse(document.getElementById('bug-report-context-json')?.value || '{}');
+    } catch (e) {}
+
+    const originalBtnHtml = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span> Đang gửi...`;
+    }
+
+    try {
+        if (window.HiDB && typeof window.HiDB.submitBugReport === 'function') {
+            await window.HiDB.submitBugReport({
+                feature: feature,
+                report_type: reportType,
+                content: content,
+                context_data: contextData
+            });
+        }
+        window.closeBugReportModal();
+        window.showHiToast('Cảm ơn bạn! Báo cáo đã được gửi tới đội ngũ kỹ thuật 🎉', 'success');
+    } catch (err) {
+        console.error('[BugReport] Submit error:', err);
+        window.showHiToast('Gửi báo cáo thất bại, vui lòng thử lại sau.', 'error');
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = originalBtnHtml;
+        }
+    }
+};
+
+// Close modal on backdrop click
+document.getElementById('modal-bug-report')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeBugReportModal();
+});
+
+// Global Error and Unhandled Rejection Logger
+window.addEventListener('error', (event) => {
+    try {
+        if (window.HiDB && typeof window.HiDB.logSystemError === 'function') {
+            window.HiDB.logSystemError({
+                error_message: event.message || 'Unknown JavaScript runtime error',
+                stack_trace: event.error?.stack || `${event.filename || ''}:${event.lineno || ''}:${event.colno || ''}`,
+                component: 'window.onerror',
+                severity: 'error',
+                context: {
+                    url: window.location.href,
+                    filename: event.filename,
+                    lineno: event.lineno,
+                    colno: event.colno,
+                    userAgent: navigator.userAgent
+                }
+            });
+        }
+    } catch (e) {}
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    try {
+        if (window.HiDB && typeof window.HiDB.logSystemError === 'function') {
+            const reason = event.reason;
+            const message = reason?.message || (typeof reason === 'string' ? reason : 'Unhandled Promise Rejection');
+            const stack = reason?.stack || '';
+            window.HiDB.logSystemError({
+                error_message: message,
+                stack_trace: stack,
+                component: 'unhandledrejection',
+                severity: 'error',
+                context: {
+                    url: window.location.href,
+                    userAgent: navigator.userAgent
+                }
+            });
+        }
+    } catch (e) {}
+});
+</script>
 
 <script>
 // ==========================================

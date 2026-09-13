@@ -21,6 +21,32 @@
 //      HiSession.startSession(words);
 //      HiSessionUI.render();
 // ============================================================
+// REPORT CURRENT LEARNING ERROR HELPER
+// ============================================================
+window.reportCurrentLearningError = function() {
+    const item = (typeof HiSession !== 'undefined' && typeof HiSession.getCurrentItem === 'function')
+        ? HiSession.getCurrentItem()
+        : null;
+    const wordObj = item?.word || {};
+    const exData = item?.exerciseData || {};
+    const word = wordObj.word || exData.word || exData.answer || exData.frontWord || '';
+    const meaning = wordObj.meaning || exData.meaning || exData.frontWord || '';
+
+    if (typeof window.openBugReportModal === 'function') {
+        window.openBugReportModal({
+            feature: 'learning_session',
+            reportType: 'wrong_answer',
+            title: word ? `Từ vựng: ${word}` : 'Phiên học từ vựng',
+            contextData: {
+                word: word,
+                meaning: meaning,
+                exercise_type: item?.exerciseType || 'unknown',
+                word_id: wordObj.id || wordObj.wordId,
+                topic_id: wordObj.topic_id
+            }
+        });
+    }
+};
 
 const HiSessionUI = (() => {
 
@@ -178,7 +204,13 @@ const HiSessionUI = (() => {
         const d = item.exerciseData;
         _container.innerHTML = `
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 fade-in px-1 sm:px-3">
-            <div class="${CSS.label}">Bài tập: Thẻ ghi nhớ</div>
+            <div class="w-full max-w-xl flex items-center justify-between px-1">
+                <div class="${CSS.label}">Bài tập: Thẻ ghi nhớ</div>
+                <button type="button" onclick="event.stopPropagation(); window.reportCurrentLearningError && window.reportCurrentLearningError()" class="p-1 rounded-lg text-outline hover:text-red-500 hover:bg-red-50/50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]" title="Báo lỗi bài tập này">
+                    <span class="material-symbols-outlined text-[15px]">flag</span>
+                    <span class="hidden sm:inline">Báo lỗi</span>
+                </button>
+            </div>
 
             <div class="flashcard-scene w-full max-w-xl mx-auto">
                 <div id="flashcard-card"
@@ -346,7 +378,13 @@ const HiSessionUI = (() => {
 
         _container.innerHTML = `
         <div class="w-full flex flex-col items-center gap-3 fade-in">
-            <div class="${CSS.label}">Bài tập: Trắc nghiệm</div>
+            <div class="w-full max-w-xl flex items-center justify-between px-1">
+                <div class="${CSS.label}">Bài tập: Trắc nghiệm</div>
+                <button type="button" onclick="event.stopPropagation(); window.reportCurrentLearningError && window.reportCurrentLearningError()" class="p-1 rounded-lg text-outline hover:text-red-500 hover:bg-red-50/50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]" title="Báo lỗi bài tập này">
+                    <span class="material-symbols-outlined text-[15px]">flag</span>
+                    <span class="hidden sm:inline">Báo lỗi</span>
+                </button>
+            </div>
 
             <div class="${CSS.card} p-6 md:p-8 flex flex-col">
                 <div class="text-center mb-5 md:mb-7">
@@ -499,7 +537,13 @@ const HiSessionUI = (() => {
 
         _container.innerHTML = `
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 fade-in px-1 sm:px-3">
-            <div class="${CSS.label}">Bài tập: Điền vào chỗ trống</div>
+            <div class="w-full max-w-xl flex items-center justify-between px-1">
+                <div class="${CSS.label}">Bài tập: Điền vào chỗ trống</div>
+                <button type="button" onclick="event.stopPropagation(); window.reportCurrentLearningError && window.reportCurrentLearningError()" class="p-1 rounded-lg text-outline hover:text-red-500 hover:bg-red-50/50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]" title="Báo lỗi bài tập này">
+                    <span class="material-symbols-outlined text-[15px]">flag</span>
+                    <span class="hidden sm:inline">Báo lỗi</span>
+                </button>
+            </div>
 
             <div class="${CSS.card} p-5 sm:p-7 md:p-8 flex flex-col items-center min-h-[300px] justify-between max-w-xl mx-auto w-full">
 
@@ -816,7 +860,13 @@ const HiSessionUI = (() => {
 
         _container.innerHTML = `
         <div class="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 fade-in px-1 sm:px-3">
-            <div class="${CSS.label}">Bài tập: Luyện nghe & Điền từ</div>
+            <div class="w-full max-w-xl flex items-center justify-between px-1">
+                <div class="${CSS.label}">Bài tập: Luyện nghe & Điền từ</div>
+                <button type="button" onclick="event.stopPropagation(); window.reportCurrentLearningError && window.reportCurrentLearningError()" class="p-1 rounded-lg text-outline hover:text-red-500 hover:bg-red-50/50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]" title="Báo lỗi bài tập này">
+                    <span class="material-symbols-outlined text-[15px]">flag</span>
+                    <span class="hidden sm:inline">Báo lỗi</span>
+                </button>
+            </div>
 
             <div class="${CSS.card} p-5 sm:p-7 md:p-8 flex flex-col items-center min-h-[380px] md:min-h-[420px] justify-between max-w-xl mx-auto w-full">
 
