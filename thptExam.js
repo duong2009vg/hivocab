@@ -31,7 +31,7 @@
         async init() {
             try {
                 if (this.exams.length === 0) {
-                    const res = await fetch('/data/thpt_exams.json?v=' + Date.now());
+                    const res = await fetch('data/thpt_exams.json?v=' + Date.now());
                     if (res.ok) {
                         this.exams = await res.json();
                     }

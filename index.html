@@ -2791,6 +2791,11 @@ function _updateThemeBtns(active) {
 }
 
 window.navigateTo = function(page, preserveHash = false){
+    // Gỡ bỏ sự kiện bàn phím phiên học khi rời trang learning
+    if (page !== 'learning' && typeof HiSessionUI !== 'undefined' && typeof HiSessionUI.destroy === 'function') {
+        HiSessionUI.destroy();
+    }
+
     // Đóng tất cả trang
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     const el = document.getElementById('page-'+page);
@@ -3402,14 +3407,14 @@ window.addEventListener('hashchange', () => {
 
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dataLayer.js?v=20260913-img-v1"></script>
+<script src="dataLayer.js?v=20260913-qa-fix-v1"></script>
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260912-v1"></script>
-<script src="sessionEngine.js?v=20260913-img-v1"></script>
-<script src="sessionUI.js?v=20260913-img-v1"></script>
-<script src="thptExam.js?v=20260912_cloze_authentic_v20"></script>
+<script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>
+<script src="sessionUI.js?v=20260913-qa-fix-v1"></script>
+<script src="thptExam.js?v=20260913-qa-fix-v1"></script>
 <script src="gameSession.js?v=20260912-sound-v1"></script>
 <script src="bilingualReading.js?v=20260912-sound-v1"></script>
 
@@ -5346,8 +5351,9 @@ window._loadLessonWords = async function() {
                         ${w.pos ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">${_esc(w.pos)}</span>` : ''}
                         ${w.phonetic ? `<span class="text-sm text-outline">${_esc(w.phonetic)}</span>` : ''}
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
-                        <button onclick="typeof HiDict!=='undefined'&&HiDict.playWordAudio('${_esc(w.word)}')"
-                            class="ml-auto p-1 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary" title="Phát âm">
+                        <button data-audio-word="${_esc(w.word)}"
+                            onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
+                            class="ml-auto p-1 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
                             <span class="material-symbols-outlined text-[18px]">volume_up</span>
                         </button>
                     </div>
@@ -5481,7 +5487,8 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
                         ${safePhonetic ? `<span class="text-xs md:text-sm text-outline font-mono">${safePhonetic}</span>` : ''}
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
                         ${safeTopic ? `<span class="hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant truncate max-w-[200px]" title="${safeTopic}">${safeTopic}</span>` : ''}
-                        <button onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio('${safeWord}')}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance('${safeWord}');u.lang='en-US';window.speechSynthesis.speak(u);}"
+                        <button data-audio-word="${safeWord}"
+                            onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
                             class="ml-auto p-1.5 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
                             <span class="material-symbols-outlined text-[20px]">volume_up</span>
                         </button>
@@ -6166,10 +6173,12 @@ function _dictRenderResult(r) {
     const synWrap = document.getElementById('dict-synonyms-wrap');
     const synEl   = document.getElementById('dict-synonyms');
     if (r.synonyms?.length > 0) {
-        synEl.innerHTML = r.synonyms.map(s =>
-            `<span class="px-3 py-1 rounded-full bg-secondary-container/60 text-on-secondary-container text-xs font-medium cursor-pointer hover:bg-secondary-container transition-colors"
-                   onclick="document.getElementById('dict-input').value='${s}'; window.dictSearch()">${s}</span>`
-        ).join('');
+        synEl.innerHTML = r.synonyms.map(s => {
+            const safeAttr = typeof _esc === 'function' ? _esc(s) : s;
+            return `<span class="px-3 py-1 rounded-full bg-secondary-container/60 text-on-secondary-container text-xs font-medium cursor-pointer hover:bg-secondary-container transition-colors"
+                          data-search-word="${safeAttr}"
+                          onclick="document.getElementById('dict-input').value=this.dataset.searchWord; window.dictSearch()">${safeAttr}</span>`;
+        }).join('');
         synWrap.classList.remove('hidden');
     } else {
         synWrap.classList.add('hidden');

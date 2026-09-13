@@ -463,28 +463,55 @@ const HiSession = (() => {
         // d? UI v?n hi?n th? d�ng/sai cho ngu?i d�ng th?y.
         const isNewWord = (item.word.level === 0) || (item.word.isNew === true);
         if (isNewWord) {
-            _state.completed.push({
-                word:     item.word,
-                rating:   'good',   // lv0 ? lv1
-                attempts: item.attempts,
-                isNew:    true,
-            });
+            if (correct) {
+                _state.completed.push({
+                    word:     item.word,
+                    rating:   'good',
+                    attempts: item.attempts,
+                    isNew:    true,
+                });
 
-            if (typeof HiDB !== 'undefined') {
-                HiDB.reviewWord(item.word.wordId, 'good')
-                    .catch(err => console.error('[HiSession] reviewWord (new word) error:', err));
+                if (typeof HiDB !== 'undefined') {
+                    HiDB.reviewWord(item.word.wordId, 'good')
+                        .catch(err => console.error('[HiSession] reviewWord (new word) error:', err));
+                }
+
+                _state.queueIndex++;
+
+                return {
+                    correct:       true,
+                    correctAnswer,
+                    feedback:      '✓ Chính xác!',
+                    rating:        'good',
+                    wordCompleted: true,
+                    isNewWord:     true,
+                };
+            } else {
+                // Làm sai: Tăng số lần fail, chuyển sang dạng bài khác và đưa về cuối queue
+                item.failCount = (item.failCount || 0) + 1;
+                let nextType;
+                if (_state.allowedType) {
+                    nextType = _state.allowedType;
+                } else {
+                    item.usedTypes.push(item.exerciseType);
+                    nextType = _pickNextType(item.usedTypes);
+                }
+                item.exerciseType = nextType;
+                item.exerciseData = _generateExerciseData(item.word, nextType, _state.allWords);
+
+                _state.queue.push(item);
+                _state.queueIndex++;
+
+                return {
+                    correct:          false,
+                    correctAnswer,
+                    feedback:         `✗ Đáp án: ${correctAnswer}`,
+                    wordCompleted:    false,
+                    nextExerciseType: nextType,
+                    failCount:        item.failCount,
+                    isNewWord:        true,
+                };
             }
-
-            _state.queueIndex++;
-
-            return {
-                correct:       correct,          // ? tr? v? k?t qu? TH?T
-                correctAnswer,
-                feedback:      correct ? '✓ Chính xác!' : `✗ Đáp án: ${correctAnswer}`,
-                rating:        'good',
-                wordCompleted: true,
-                isNewWord:     true,
-            };
         }
 
         // -- [B] SAI QU� 3 L?N: cho ph�p skip, reset v? lv1 ---------------

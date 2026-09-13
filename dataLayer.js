@@ -296,10 +296,10 @@ window.HiDB = (() => {
             const totalWords = words.length;
 
             const progresses = user
-                ? words.flatMap(w => w.word_progress).filter(p => p.user_id === user.id)
+                ? words.flatMap(w => w.word_progress || []).filter(p => p && p.user_id === user.id)
                 : [];
 
-            const totalLevel = progresses.reduce((sum, p) => sum + p.level, 0);
+            const totalLevel = progresses.reduce((sum, p) => sum + (p && p.level ? p.level : 0), 0);
             const progress   = totalWords > 0
                 ? Math.round((totalLevel / (totalWords * 5)) * 100)
                 : 0;
@@ -1362,13 +1362,26 @@ window.HiDB = (() => {
      * thay cho SELECT → UPDATE/INSERT cũ — tiết kiệm 1 round-trip,
      * đảm bảo atomic khi nhiều tab cùng mở.
      *
+     * Lấy ngày theo giờ địa phương (YYYY-MM-DD) tránh lệch múi giờ UTC.
+     * (private helper)
+     */
+    function _getLocalDateString(d = new Date()) {
+        const y  = d.getFullYear();
+        const m  = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${dd}`;
+    }
+
+    /**
+     * Ghi nhận 1 từ vừa học vào study_sessions của ngày hôm nay.
+     * Dùng RPC `increment_session` (atomic UPSERT).
      * Fallback về 2-query nếu RPC chưa deploy (tương thích ngược).
      * (private helper)
      */
     async function _logStudySession() {
         const user  = await getCurrentUser();
         if (!user) return;
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        const today = _getLocalDateString(); // YYYY-MM-DD (local time)
 
         try {
             // ── Cách tối ưu: 1 query atomic ────────────────────────
@@ -1478,20 +1491,12 @@ window.HiDB = (() => {
     function _calculateStreak(sessions) {
         if (!sessions.length) return 0;
 
-        // Lấy ngày hôm nay và hôm qua dưới dạng YYYY-MM-DD (local)
-        const _localDateStr = (d) => {
-            const y = d.getFullYear();
-            const m = String(d.getMonth() + 1).padStart(2, '0');
-            const dd = String(d.getDate()).padStart(2, '0');
-            return `${y}-${m}-${dd}`;
-        };
-
         const today     = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
 
-        const todayStr     = _localDateStr(today);
-        const yesterdayStr = _localDateStr(yesterday);
+        const todayStr     = _getLocalDateString(today);
+        const yesterdayStr = _getLocalDateString(yesterday);
 
         // Ngày gần nhất phải là hôm nay hoặc hôm qua mới giữ chuỗi
         const firstStr = sessions[0].session_date;
@@ -1504,7 +1509,7 @@ window.HiDB = (() => {
 
         for (let i = 1; i < sessions.length; i++) {
             const sd = sessions[i].session_date;
-            if (sd === _localDateStr(prev)) {
+            if (sd === _getLocalDateString(prev)) {
                 streak++;
                 prev.setDate(prev.getDate() - 1);
             } else {

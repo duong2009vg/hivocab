@@ -75,6 +75,16 @@ const HiSessionUI = (() => {
     }
 
     /**
+     * Dọn dẹp listener sự kiện bàn phím khi rời khỏi phiên học.
+     */
+    function destroy() {
+        if (_keyListenerAttached) {
+            window.removeEventListener('keydown', _handleFlashcardKeydown);
+            _keyListenerAttached = false;
+        }
+    }
+
+    /**
      * Bắt phím tắt cho Flashcard:
      * - Phím Space hoặc Enter: Lật thẻ qua lại
      * - Phím 1, 2, 3: Đánh giá Khó (1), Tốt (2), Dễ (3) khi thẻ đang ở mặt sau
@@ -582,7 +592,7 @@ const HiSessionUI = (() => {
 
                 // Nếu paste cả chuỗi dài
                 if (val.length > 1) {
-                    const chars = val.toUpperCase().replace(/[^A-Z0-9]/g, '').split('');
+                    const chars = val.toUpperCase().replace(/[^A-Z0-9\-']/g, '').split('');
                     if (chars.length > 1) {
                         chars.forEach((c, i) => {
                             if (inputs[idx + i]) {
@@ -986,7 +996,7 @@ const HiSessionUI = (() => {
                 if (!val) return;
 
                 if (val.length > 1) {
-                    const chars = val.toUpperCase().replace(/[^A-Z0-9]/g, '').split('');
+                    const chars = val.toUpperCase().replace(/[^A-Z0-9\-']/g, '').split('');
                     if (chars.length > 1) {
                         chars.forEach((c, i) => {
                             if (inputs[idx + i]) inputs[idx + i].value = c;
@@ -1302,6 +1312,7 @@ const HiSessionUI = (() => {
     // ----------------------------------------------------------
     return {
         init,
+        destroy,
         render,
 
         // Expose handlers cho inline onclick trong rendered HTML
