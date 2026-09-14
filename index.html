@@ -3625,7 +3625,7 @@ window.addEventListener('hashchange', () => {
 
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dataLayer.js?v=20260914-mobile-threads-v2"></script>
+<script src="dataLayer.js?v=20260914-topic-tests-fix-v5"></script>
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
@@ -3635,7 +3635,7 @@ window.addEventListener('hashchange', () => {
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
 <script src="gameSession.js?v=20260912-sound-v1"></script>
 <script src="bilingualReading.js?v=20260913-monitoring-v1"></script>
-<script src="library.js?v=20260914-mobile-threads-v2"></script>
+<script src="library.js?v=20260914-topic-tests-fix-v5"></script>
 
 <!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
 <div id="modal-exam-confirm-submit" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">
@@ -6617,6 +6617,107 @@ window.topicPickerSelectFolder = function(folderName) {
     `).join('');
 };
 
+window._fetchTopicTestsDirectly = async function(topicId) {
+    if (!topicId) return { hasTests: false, tests: [] };
+
+    // 1. Kiểm tra bộ nhớ cache
+    if (window._topicPickerState?.topicTestsCache?.has(topicId)) {
+        const c = window._topicPickerState.topicTestsCache.get(topicId);
+        if (Array.isArray(c) && c.length > 0) return { hasTests: true, tests: c };
+    }
+    if (window._cachedTopicTests?.has(topicId)) {
+        const c = window._cachedTopicTests.get(topicId);
+        if (c?.hasTests && Array.isArray(c.tests) && c.tests.length > 0) return c;
+    }
+
+    // 2. Thử qua HiDB.getTopicTests
+    try {
+        if (typeof HiDB !== 'undefined' && typeof HiDB.getTopicTests === 'function') {
+            const res = await HiDB.getTopicTests(topicId);
+            if (res?.hasTests && Array.isArray(res.tests) && res.tests.length > 0) {
+                window._topicPickerState?.topicTestsCache?.set(topicId, res.tests);
+                window._cachedTopicTests?.set(topicId, res);
+                return res;
+            }
+        }
+    } catch (e) {
+        console.warn('[_fetchTopicTestsDirectly:HiDB.getTopicTests]', e);
+    }
+
+    // 3. Fallback qua HiDB.getCamHierarchy
+    try {
+        if (typeof HiDB !== 'undefined' && typeof HiDB.getCamHierarchy === 'function') {
+            const hier = await HiDB.getCamHierarchy(topicId);
+            if (hier?.tests && Array.isArray(hier.tests) && hier.tests.length > 0) {
+                const tests = hier.tests.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    testOrder: t.testOrder || t.test_order || 1,
+                    passages: (t.passages || []).map(p => ({
+                        id: p.id,
+                        passageNumber: p.passageNumber || p.passage_number || 1,
+                        title: p.title || `Passage ${p.passageNumber || p.passage_number || 1}`
+                    }))
+                }));
+                const res = { hasTests: true, tests };
+                window._topicPickerState?.topicTestsCache?.set(topicId, tests);
+                window._cachedTopicTests?.set(topicId, res);
+                return res;
+            }
+        }
+    } catch (e) {
+        console.warn('[_fetchTopicTestsDirectly:getCamHierarchy]', e);
+    }
+
+    // 4. Fallback trực tiếp qua Supabase REST API (đảm bảo tải được ngay cả khi cache JS bị cũ)
+    try {
+        const supabaseUrl = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+        const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+        const headers = { 'apikey': anonKey, 'Authorization': `Bearer ${anonKey}` };
+
+        let token = null;
+        try {
+            if (typeof HiDB !== 'undefined' && typeof HiDB.getCurrentUser === 'function') {
+                const u = await HiDB.getCurrentUser();
+                if (u?.access_token) token = u.access_token;
+            }
+        } catch (_) {}
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const testsRes = await fetch(`${supabaseUrl}/rest/v1/tests?topic_id=eq.${topicId}&select=id,name,test_order&order=test_order.asc`, { headers });
+        if (testsRes.ok) {
+            const testsData = await testsRes.json();
+            if (Array.isArray(testsData) && testsData.length > 0) {
+                const passagesRes = await fetch(`${supabaseUrl}/rest/v1/passages?topic_id=eq.${topicId}&select=id,test_id,passage_number,title&order=passage_number.asc`, { headers });
+                const passagesData = passagesRes.ok ? await passagesRes.json() : [];
+                const passagesByTest = {};
+                (passagesData || []).forEach(p => {
+                    if (!passagesByTest[p.test_id]) passagesByTest[p.test_id] = [];
+                    passagesByTest[p.test_id].push({
+                        id: p.id,
+                        passageNumber: p.passage_number,
+                        title: p.title || `Passage ${p.passage_number}`
+                    });
+                });
+                const tests = testsData.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    testOrder: t.test_order,
+                    passages: passagesByTest[t.id] || []
+                }));
+                const res = { hasTests: true, tests };
+                window._topicPickerState?.topicTestsCache?.set(topicId, tests);
+                window._cachedTopicTests?.set(topicId, res);
+                return res;
+            }
+        }
+    } catch (e) {
+        console.warn('[_fetchTopicTestsDirectly:REST]', e);
+    }
+
+    return { hasTests: false, tests: [] };
+};
+
 window.topicPickerSelectTopic = async function(topicId) {
     const topic = (window._topicPickerState.allTopics || []).find(t => t.id === topicId);
     if (!topic) return;
@@ -6624,54 +6725,34 @@ window.topicPickerSelectTopic = async function(topicId) {
 
     const statusEl = document.getElementById('topic-picker-status');
     if (statusEl) {
-        statusEl.textContent = 'Đang kiểm tra cấu trúc bài thi...';
+        statusEl.innerHTML = `
+            <div class="flex items-center justify-center gap-2 text-primary font-medium py-1">
+                <span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
+                <span>Đang tải danh sách bài test...</span>
+            </div>
+        `;
         statusEl.classList.remove('hidden');
     }
 
     const isExamTopic = (topic.category === 'CAM' || topic.category === 'IELTS Actual Tests' || /CAM|VOL/i.test(topic.name));
 
-    let tests = window._topicPickerState.topicTestsCache.get(topic.id);
-    if (tests === undefined) {
-        try {
-            if (typeof HiDB !== 'undefined' && typeof HiDB.getTopicTests === 'function') {
-                const res = await HiDB.getTopicTests(topic.id);
-                tests = (res?.hasTests && res.tests) ? res.tests : [];
-            } else {
-                tests = [];
-            }
-        } catch (e) {
-            console.warn('[topicPicker:getTopicTests]', e);
-            tests = [];
-        }
-        if (tests && tests.length > 0) {
-            window._topicPickerState.topicTestsCache.set(topic.id, tests);
-        }
-    }
+    const res = await window._fetchTopicTestsDirectly(topic.id);
+    const tests = (res && res.hasTests && Array.isArray(res.tests)) ? res.tests : [];
 
     if (statusEl) statusEl.classList.add('hidden');
 
     if (tests && tests.length > 0) {
         window.renderTopicPickerTestStep(topic, tests);
     } else if (isExamTopic) {
-        // Thử lại nếu là đề thi CAM / VOL nhưng chưa tải được ngay
         if (statusEl) {
-            statusEl.textContent = 'Đang tải danh sách bài test...';
-            statusEl.classList.remove('hidden');
-        }
-        try {
-            const retryRes = await HiDB.getTopicTests(topic.id);
-            tests = (retryRes?.hasTests && retryRes.tests) ? retryRes.tests : [];
-            if (tests && tests.length > 0) {
-                window._topicPickerState.topicTestsCache.set(topic.id, tests);
-                if (statusEl) statusEl.classList.add('hidden');
-                window.renderTopicPickerTestStep(topic, tests);
-                return;
-            }
-        } catch (reErr) {
-            console.warn('[topicPicker:retry]', reErr);
-        }
-        if (statusEl) {
-            statusEl.textContent = 'Chủ đề này chưa có bài test nào.';
+            statusEl.innerHTML = `
+                <div class="flex items-center justify-between gap-3 text-xs bg-amber-500/10 border border-amber-500/20 text-amber-800 dark:text-amber-300 p-2.5 rounded-xl">
+                    <span>Không thể tải danh sách bài test cho "${_esc(topic.name)}".</span>
+                    <button type="button" onclick="window.topicPickerSelectTopic('${topic.id}')" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 rounded-lg font-bold transition-colors cursor-pointer shrink-0">
+                        Thử lại
+                    </button>
+                </div>
+            `;
             statusEl.classList.remove('hidden');
         }
     } else {
@@ -6836,18 +6917,11 @@ window._cachedTopicTests = window._cachedTopicTests || new Map();
 
 window._ensureTopicTests = async function(topicId) {
     if (!topicId) return { hasTests: false, tests: [] };
+    if (typeof window._fetchTopicTestsDirectly === 'function') {
+        return await window._fetchTopicTestsDirectly(topicId);
+    }
     if (window._cachedTopicTests.has(topicId)) {
         return window._cachedTopicTests.get(topicId);
-    }
-    try {
-        if (typeof HiDB !== 'undefined' && typeof HiDB.getTopicTests === 'function') {
-            const res = await HiDB.getTopicTests(topicId);
-            const data = (res && res.hasTests && Array.isArray(res.tests)) ? res : { hasTests: false, tests: [] };
-            window._cachedTopicTests.set(topicId, data);
-            return data;
-        }
-    } catch (e) {
-        console.warn('[_ensureTopicTests]', e);
     }
     return { hasTests: false, tests: [] };
 };

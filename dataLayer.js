@@ -28,7 +28,7 @@ window.HiDB = (() => {
         }
         return Promise.race([
             _readyPromise,
-            new Promise((_, reject) => setTimeout(() => {
+            new Promise((resolve, reject) => setTimeout(() => {
                 if (_supabase) resolve(_supabase);
                 else reject(new Error('[HiDB] Quá thời gian chờ khởi tạo Supabase.'));
             }, timeoutMs))
@@ -971,10 +971,12 @@ window.HiDB = (() => {
         if (!topicId) return { hasTests: false, tests: [] };
         const cacheKey = `topic_tests:${topicId}`;
         const cached = _cacheGet(cacheKey);
-        if (cached) return cached;
+        if (cached && cached.hasTests && Array.isArray(cached.tests) && cached.tests.length > 0) {
+            return cached;
+        }
 
         try {
-            await ensureReady();
+            await ensureReady().catch(() => null);
             const client = _getClient();
             const { data: testsData, error: testsErr } = await client
                 .from('tests')
@@ -982,34 +984,93 @@ window.HiDB = (() => {
                 .eq('topic_id', topicId)
                 .order('test_order', { ascending: true });
 
-            if (testsErr || !testsData || testsData.length === 0) {
-                return _cacheSet(cacheKey, { hasTests: false, tests: [] });
+            if (testsErr) {
+                console.warn('[getTopicTests] client error:', testsErr);
             }
 
-            const { data: passagesData } = await client
-                .from('passages')
-                .select('id, test_id, passage_number, title')
-                .eq('topic_id', topicId)
-                .order('passage_number', { ascending: true });
+            if (testsData && testsData.length > 0) {
+                const { data: passagesData } = await client
+                    .from('passages')
+                    .select('id, test_id, passage_number, title')
+                    .eq('topic_id', topicId)
+                    .order('passage_number', { ascending: true });
 
-            const passagesByTest = {};
-            (passagesData || []).forEach(p => {
-                if (!passagesByTest[p.test_id]) passagesByTest[p.test_id] = [];
-                passagesByTest[p.test_id].push({
-                    id: p.id,
-                    passageNumber: p.passage_number,
-                    title: p.title || `Passage ${p.passage_number}`
+                const passagesByTest = {};
+                (passagesData || []).forEach(p => {
+                    if (!passagesByTest[p.test_id]) passagesByTest[p.test_id] = [];
+                    passagesByTest[p.test_id].push({
+                        id: p.id,
+                        passageNumber: p.passage_number,
+                        title: p.title || `Passage ${p.passage_number}`
+                    });
                 });
-            });
 
-            const tests = testsData.map(t => ({
-                id: t.id,
-                name: t.name,
-                testOrder: t.test_order,
-                passages: passagesByTest[t.id] || []
-            }));
+                const tests = testsData.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    testOrder: t.test_order,
+                    passages: passagesByTest[t.id] || []
+                }));
 
-            return _cacheSet(cacheKey, { hasTests: true, tests });
+                return _cacheSet(cacheKey, { hasTests: true, tests });
+            }
+
+            // Fallback 1: Thử lấy qua getCamHierarchy nếu topic có cấu trúc exam
+            const camHier = await getCamHierarchy(topicId).catch(() => null);
+            if (camHier && camHier.tests && camHier.tests.length > 0) {
+                const tests = camHier.tests.map(t => ({
+                    id: t.id,
+                    name: t.name,
+                    testOrder: t.testOrder || t.test_order || 1,
+                    passages: (t.passages || []).map(p => ({
+                        id: p.id,
+                        passageNumber: p.passageNumber || p.passage_number || 1,
+                        title: p.title || `Passage ${p.passageNumber || p.passage_number || 1}`
+                    }))
+                }));
+                return _cacheSet(cacheKey, { hasTests: true, tests });
+            }
+
+            // Fallback 2: Thử fetch REST trực tiếp nếu Supabase JS client gặp vấn đề
+            if (typeof fetch === 'function') {
+                const supabaseUrl = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+                const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+                const headers = {
+                    'apikey': anonKey,
+                    'Authorization': `Bearer ${anonKey}`
+                };
+                const user = await getCurrentUser().catch(() => null);
+                if (user?.access_token) {
+                    headers['Authorization'] = `Bearer ${user.access_token}`;
+                }
+
+                const rTests = await fetch(`${supabaseUrl}/rest/v1/tests?topic_id=eq.${topicId}&select=id,name,test_order&order=test_order.asc`, { headers });
+                if (rTests.ok) {
+                    const tData = await rTests.json();
+                    if (Array.isArray(tData) && tData.length > 0) {
+                        const rPass = await fetch(`${supabaseUrl}/rest/v1/passages?topic_id=eq.${topicId}&select=id,test_id,passage_number,title&order=passage_number.asc`, { headers });
+                        const pData = rPass.ok ? await rPass.json() : [];
+                        const passagesByTest = {};
+                        (pData || []).forEach(p => {
+                            if (!passagesByTest[p.test_id]) passagesByTest[p.test_id] = [];
+                            passagesByTest[p.test_id].push({
+                                id: p.id,
+                                passageNumber: p.passage_number,
+                                title: p.title || `Passage ${p.passage_number}`
+                            });
+                        });
+                        const tests = tData.map(t => ({
+                            id: t.id,
+                            name: t.name,
+                            testOrder: t.test_order,
+                            passages: passagesByTest[t.id] || []
+                        }));
+                        return _cacheSet(cacheKey, { hasTests: true, tests });
+                    }
+                }
+            }
+
+            return { hasTests: false, tests: [] };
         } catch (err) {
             console.warn('[getTopicTests]', err);
             return { hasTests: false, tests: [] };
