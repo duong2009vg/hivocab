@@ -21,6 +21,7 @@
 
     // ── STATE QUẢN LÝ TẬP TRUNG ──────────────────────────────────────
     const state = {
+        previousPage: null,         // Lưu trang trước khi vào đọc song ngữ để quay lại chính xác
         currentPassage: null,       // { id, title, passageNumber, testName, topicName, contentEn, contentVi, ... }
         currentWords: [],           // Danh sách từ vựng của bài đọc
         activeTab: 'reading',       // 'reading' | 'gap-fill'
@@ -46,6 +47,15 @@
 
     // ── KHỞI ĐỘNG CHẾ ĐỘ ĐỌC TỪ TASKBAR / NÚT HỌC ───────────────────
     window.startBilingualReading = async function(passageId) {
+        // Ghi nhận trang hiện tại để nút Thoát quay lại đúng chỗ
+        const activePageEl = Array.from(document.querySelectorAll('.page')).find(p => p.classList.contains('active'));
+        if (activePageEl && activePageEl.id) {
+            const pid = activePageEl.id.replace('page-', '');
+            if (pid && pid !== 'bilingual-reading') {
+                state.previousPage = pid;
+            }
+        }
+
         // Xác định passageId mục tiêu
         let targetId = passageId;
 
@@ -61,8 +71,34 @@
             }
         }
 
+        // Fallback: nếu vẫn chưa có targetId nhưng có _currentTopicId -> thử tải phân cấp chủ đề
+        if (!targetId && window._currentTopicId) {
+            try {
+                if (typeof HiDB !== 'undefined' && typeof HiDB.getCamHierarchy === 'function') {
+                    const hier = await HiDB.getCamHierarchy(window._currentTopicId);
+                    if (hier?.tests) {
+                        window._camHierarchy = hier;
+                        for (const t of hier.tests) {
+                            const p = (t.passages || []).find(item => item.contentEn || item.id);
+                            if (p) {
+                                targetId = p.id;
+                                break;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('[startBilingualReading] Fallback query error:', e);
+            }
+        }
+
         if (!targetId) {
             console.warn('[startBilingualReading] Không tìm thấy passageId hợp lệ.');
+            if (typeof window.showToast === 'function') {
+                window.showToast('Chủ đề này chưa có bài đọc song ngữ.', 'info');
+            } else {
+                alert('Chủ đề này chưa có bài đọc song ngữ.');
+            }
             return;
         }
 
@@ -307,10 +343,14 @@
         const p = state.currentPassage;
         if (!p || (!p.contentEn && !p.contentVi)) {
             container.innerHTML = `
-                <div class="text-center py-20 text-on-surface-variant max-w-md mx-auto">
+                <div class="text-center py-20 text-on-surface-variant max-w-md mx-auto px-4">
                     <span class="material-symbols-outlined text-[52px] opacity-30 mb-3 block">menu_book</span>
                     <h3 class="font-bold text-lg text-on-surface mb-1">Chưa có nội dung bài đọc</h3>
-                    <p class="text-sm">Phần bài đọc này hiện chưa có dữ liệu song ngữ.</p>
+                    <p class="text-sm mb-6">Phần bài đọc này hiện chưa có dữ liệu song ngữ.</p>
+                    <button onclick="window.closeBilingualReading()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm shadow-md active:scale-95 transition-all inline-flex items-center gap-2 mx-auto cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                        <span>Quay lại bài học</span>
+                    </button>
                 </div>`;
             return;
         }
@@ -1085,8 +1125,15 @@
 
     // ── ĐÓNG TRANG ĐỌC & DỊCH (QUAY LẠI) ────────────────────────────
     window.closeBilingualReading = function() {
-        // Trở về bài học hoặc trang chi tiết chủ đề
-        if (window._currentPassageId) {
+        // Trở về trang trước đó nếu hợp lệ
+        if (state.previousPage && state.previousPage !== 'bilingual-reading') {
+            if (typeof window.navigateTo === 'function') {
+                window.navigateTo(state.previousPage);
+                return;
+            }
+        }
+        // Fallback theo context hiện tại
+        if (window._currentPassageId && window._currentPassageId !== '__unlinked__') {
             window.navigateTo('lesson-detail');
         } else if (window._currentTopicId) {
             window.navigateTo('topic-detail');
@@ -1098,7 +1145,7 @@
     // ── QUẢN LÝ ẨN / HIỆN NÚT TRÊN TASKBAR THEO ĐIỀU KIỆN ───────────
     /**
      * Kiểm tra xem topic hoặc passage hiện tại có bài đọc/bản dịch hay không.
-     * Chỉ hiển thị nút Đọc & Dịch khi có content_en và content_vi (hoặc thuộc IELTS Actual Tests).
+     * Chỉ hiển thị nút Đọc & Dịch khi có bài đọc hoặc thuộc chủ đề bài đọc (IELTS Vol, Cam, v.v.).
      */
     window.updateBilingualNavVisibility = function(topic, passage) {
         const subSidebarBtn = document.getElementById('sub-sidebar-reading-btn');
@@ -1110,23 +1157,27 @@
         let hasReadingContent = false;
 
         // 1. Kiểm tra passage cụ thể nếu có
-        if (passage && passage.contentEn && passage.contentVi) {
+        if (passage && (passage.contentEn || passage.contentVi || passage.content_en || passage.content_vi)) {
             hasReadingContent = true;
-        } else if (passage && (passage.content_en && passage.content_vi)) {
+        } else if (passage && passage.id && passage.id !== '__unlinked__') {
+            // Đang mở một passage cụ thể trong bộ đề -> luôn cho phép vào đọc
+            hasReadingContent = true;
+        } else if (window._currentPassageId && window._currentPassageId !== '__unlinked__') {
             hasReadingContent = true;
         }
 
         // 2. Kiểm tra topic nếu thuộc danh mục IELTS Actual Tests hoặc có tests/passages
         if (!hasReadingContent) {
-            const cat = topic?.category || window._currentCategoryName || '';
-            const isVolCategory = (cat === 'IELTS Actual Tests' || cat === 'IELTS Vol' || String(topic?.name || '').includes('Vol'));
+            const cat = String(topic?.category || window._currentCategory || window._currentCategoryName || '');
+            const topicName = String(topic?.name || window._currentTopicName || '');
+            const isVolCategory = (cat === 'IELTS Actual Tests' || cat === 'IELTS Vol' || cat.includes('Cam') || topicName.includes('Vol') || topicName.includes('Cam'));
             
             if (isVolCategory) {
                 hasReadingContent = true;
             } else if (window._camHierarchy?.tests) {
-                // Duyệt xem có bất kỳ bài đọc nào có contentEn và contentVi
+                // Duyệt xem có bài đọc nào trong hierarchy
                 hasReadingContent = window._camHierarchy.tests.some(t => 
-                    (t.passages || []).some(p => (p.contentEn && p.contentVi) || (p.content_en && p.content_vi))
+                    (t.passages || []).length > 0
                 );
             }
         }

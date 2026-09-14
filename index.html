@@ -380,7 +380,30 @@ html.dark .topic-card-surface .text-on-surface-variant {
 html.dark .topic-card-surface .bg-surface-container-highest {
     background-color: rgba(148, 163, 184, 0.22) !important;
 }
-.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+/* ── MOBILE TOUCH & PERFORMANCE OPTIMIZATIONS ──────────── */
+html, body, button, a, input, select, textarea, [role="button"], .cursor-pointer {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+.pt-safe {
+    padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
+}
+.pb-safe {
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
+}
+
+@media (max-width: 768px) {
+    /* Tắt blur tốn GPU trên mobile cho các thẻ bài học/từ vựng cuộn để đạt 60fps mượt mà */
+    .glass-card,
+    [class*="backdrop-blur"]:not(header):not(nav):not(#mobile-bottom-nav):not(#main-mobile-header):not(#sub-mobile-header):not(#lib-mobile-header):not(#br-floating-exit-btn) {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    body, .page, main, #lessons-list, #topics-grid, #bilingual-reading-body, #lesson-words-list {
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-y: contain;
+    }
+}
 
 /* ── HI FLASHCARD 3D FLIP SYSTEM ───────────────────────── */
 .flashcard-scene {
@@ -719,12 +742,12 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
     </div>
 </nav>
 
-<header id="main-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-4 justify-between items-center" style="display: none;">
+<header id="main-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-3.5 justify-between items-center pt-safe" style="display: none;">
     <div id="mobile-header-title"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></div>
     <div class="relative">
-        <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform" aria-label="Hồ sơ"><span class="material-symbols-outlined text-outline text-sm">person</span></button>
+        <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer" aria-label="Hồ sơ"><span class="material-symbols-outlined text-outline text-sm">person</span></button>
         <!-- Mobile profile dropdown -->
-        <div id="mobile-profile-dropdown" class="hidden absolute right-0 top-10 w-52 bg-surface rounded-xl shadow-xl border border-outline-variant/20 z-[200] overflow-hidden fade-in">
+        <div id="mobile-profile-dropdown" class="hidden absolute right-0 top-12 w-52 bg-surface rounded-xl shadow-xl border border-outline-variant/20 z-[200] overflow-hidden fade-in">
             <div class="px-4 py-3 border-b border-outline-variant/15">
                 <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
                 <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
@@ -743,7 +766,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </header>
 
 <!-- Dedicated Mobile Header for Library Page -->
-<header id="lib-mobile-header" class="lg:hidden fixed top-0 w-full z-40 bg-surface/95 dark:bg-black/95 backdrop-blur-xl border-b border-outline-variant/15 dark:border-neutral-800/80 px-3 h-14 flex items-center justify-between transition-all" style="display: none;">
+<header id="lib-mobile-header" class="lg:hidden fixed top-0 w-full z-40 bg-surface/95 dark:bg-black/95 backdrop-blur-xl border-b border-outline-variant/15 dark:border-neutral-800/80 px-3 flex items-center justify-between transition-all pt-safe" style="display: none; min-height: 3.75rem;">
     <!-- Left: Hamburger icon -->
     <button onclick="window.toggleMobileProfileDropdown()" class="w-10 h-10 flex items-center justify-center text-on-surface hover:opacity-75 transition-opacity cursor-pointer active:scale-95" aria-label="Menu">
         <svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round">
@@ -1721,12 +1744,14 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <!-- Sub Header Mobile dùng riêng cho Chi tiết chủ đề -->
-<header id="sub-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 py-3 items-center gap-3">
-    <button onclick="navigateTo('topics')" class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors"><span class="material-symbols-outlined">arrow_back</span></button>
-    <div id="td-mobile-header-title" class="font-bold text-on-surface truncate text-lg">Chi tiết chủ đề</div>
+<header id="sub-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 py-2.5 items-center gap-2 pt-safe">
+    <button onclick="navigateTo('topics')" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all active:scale-90 shrink-0 cursor-pointer" aria-label="Quay lại danh sách chủ đề">
+        <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+    </button>
+    <div id="td-mobile-header-title" class="font-bold text-on-surface truncate text-base sm:text-lg">Chi tiết chủ đề</div>
 </header>
 
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-24 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <!-- Desktop header -->
         <div class="hidden lg:flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -1812,12 +1837,14 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <!-- Mobile header -->
-<header class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 py-3 items-center gap-3">
-    <button onclick="navigateTo('topic-detail')" class="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors"><span class="material-symbols-outlined">arrow_back</span></button>
-    <div id="ld-mobile-header-title" class="font-bold text-on-surface truncate text-lg">Lesson 1</div>
+<header class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 py-2.5 items-center gap-2 pt-safe">
+    <button onclick="navigateTo('topic-detail')" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all active:scale-90 shrink-0 cursor-pointer" aria-label="Quay lại chủ đề">
+        <span class="material-symbols-outlined text-[24px]">arrow_back</span>
+    </button>
+    <div id="ld-mobile-header-title" class="font-bold text-on-surface truncate text-base sm:text-lg">Lesson 1</div>
 </header>
 
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-24 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <!-- Desktop header -->
         <div class="hidden lg:flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -2152,7 +2179,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: VOCABULARY ==================== -->
 <div id="page-vocabulary" class="page">
-<main class="lg:ml-64 min-h-screen pt-16 lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-5 lg:gap-6 fade-in">
         
         <!-- Header Section -->
@@ -2620,21 +2647,21 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <!-- ==================== PAGE: BILINGUAL READING & GAP-FILL ==================== -->
 <div id="page-bilingual-reading" class="page bg-background min-h-screen">
   <!-- Sticky Top Header -->
-  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-4 md:px-8 py-3 flex items-center justify-between gap-3 shadow-sm">
+  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 shadow-sm pt-safe">
     <!-- Left: Back button & Breadcrumb Title with Quick Switcher -->
-    <div class="flex items-center gap-3 min-w-0 flex-1">
-      <button id="br-back-btn" onclick="window.closeBilingualReading()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors shrink-0" title="Quay lại">
-        <span class="material-symbols-outlined text-[22px]">arrow_back</span>
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+      <button id="br-back-btn" onclick="window.closeBilingualReading()" class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:scale-90 transition-all shrink-0 cursor-pointer" title="Quay lại">
+        <span class="material-symbols-outlined text-[24px]">arrow_back</span>
       </button>
 
       <div class="min-w-0 relative">
         <div class="flex items-center gap-1.5">
-          <h1 id="br-header-title" class="font-bold text-base md:text-lg text-on-surface truncate leading-tight">Bài đọc song ngữ</h1>
-          <button id="br-passage-switcher-btn" onclick="window.togglePassageSwitcher()" class="p-1 rounded-md text-outline hover:text-primary hover:bg-primary/10 transition-colors shrink-0" title="Đổi bài đọc khác trong bộ đề">
+          <h1 id="br-header-title" class="font-bold text-sm sm:text-base md:text-lg text-on-surface truncate leading-tight">Bài đọc song ngữ</h1>
+          <button id="br-passage-switcher-btn" onclick="window.togglePassageSwitcher()" class="p-1 rounded-md text-outline hover:text-primary hover:bg-primary/10 transition-colors shrink-0 cursor-pointer" title="Đổi bài đọc khác trong bộ đề">
             <span class="material-symbols-outlined text-[18px]">expand_more</span>
           </button>
         </div>
-        <p id="br-header-meta" class="text-xs text-on-surface-variant truncate mt-0.5">—</p>
+        <p id="br-header-meta" class="text-[11px] sm:text-xs text-on-surface-variant truncate mt-0.5">—</p>
 
         <!-- Dropdown menu switcher -->
         <div id="br-passage-switcher-dropdown" class="hidden absolute left-0 top-full mt-2 w-72 sm:w-80 bg-surface/95 backdrop-blur-2xl border border-outline-variant/30 rounded-2xl shadow-2xl p-2 z-50 max-h-80 overflow-y-auto fade-in">
@@ -2645,34 +2672,43 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
     <!-- Center: Tab Switcher (Đọc chủ động vs Đục lỗ) -->
     <div class="flex bg-surface-container rounded-2xl p-1 border border-outline-variant/20 shrink-0">
-      <button id="br-tab-reading" onclick="window.switchBilingualTab('reading')" class="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary text-on-primary font-bold text-xs sm:text-sm shadow-sm transition-all">
-        <span class="material-symbols-outlined text-[18px]">menu_book</span>
+      <button id="br-tab-reading" onclick="window.switchBilingualTab('reading')" class="flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-primary text-on-primary font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 cursor-pointer">
+        <span class="material-symbols-outlined text-[17px]">menu_book</span>
         <span class="hidden sm:inline">Đọc chủ động</span>
       </button>
-      <button id="br-tab-gap" onclick="window.switchBilingualTab('gap-fill')" class="flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-semibold text-xs sm:text-sm transition-all">
-        <span class="material-symbols-outlined text-[18px]">edit_note</span>
+      <button id="br-tab-gap" onclick="window.switchBilingualTab('gap-fill')" class="flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-semibold text-xs sm:text-sm transition-all active:scale-95 cursor-pointer">
+        <span class="material-symbols-outlined text-[17px]">edit_note</span>
         <span class="hidden sm:inline">Đục lỗ song ngữ</span>
       </button>
     </div>
 
-    <!-- Right: Tools (Font size, View filter EN/VI/Song ngữ) -->
-    <div id="br-reading-tools" class="hidden md:flex items-center gap-2 shrink-0">
-      <!-- Font size adjustment -->
-      <div class="flex items-center bg-surface-container rounded-xl p-1 border border-outline-variant/20 text-xs font-bold text-on-surface-variant">
-        <button onclick="window.changeBilingualFontSize(-1)" class="px-2 py-1 hover:text-primary rounded" title="Giảm cỡ chữ">A-</button>
-        <button onclick="window.changeBilingualFontSize(1)" class="px-2 py-1 hover:text-primary rounded" title="Tăng cỡ chữ">A+</button>
+    <!-- Right: Tools + Prominent Exit Button -->
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <!-- Desktop Tools (Font size, View filter EN/VI/Song ngữ) -->
+      <div id="br-reading-tools" class="hidden md:flex items-center gap-2">
+        <!-- Font size adjustment -->
+        <div class="flex items-center bg-surface-container rounded-xl p-1 border border-outline-variant/20 text-xs font-bold text-on-surface-variant">
+          <button onclick="window.changeBilingualFontSize(-1)" class="px-2 py-1 hover:text-primary rounded cursor-pointer" title="Giảm cỡ chữ">A-</button>
+          <button onclick="window.changeBilingualFontSize(1)" class="px-2 py-1 hover:text-primary rounded cursor-pointer" title="Tăng cỡ chữ">A+</button>
+        </div>
+
+        <!-- View mode filter -->
+        <div class="flex bg-surface-container rounded-xl p-1 border border-outline-variant/20 text-xs font-semibold">
+          <button id="br-view-bilingual" onclick="window.setBilingualViewMode('bilingual')" class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs shadow-sm transition-all cursor-pointer">Song ngữ</button>
+          <button id="br-view-en" onclick="window.setBilingualViewMode('en')" class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface text-xs font-semibold transition-all cursor-pointer">English</button>
+          <button id="br-view-vi" onclick="window.setBilingualViewMode('vi')" class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface text-xs font-semibold transition-all cursor-pointer">Tiếng Việt</button>
+        </div>
+
+        <!-- Report Button -->
+        <button onclick="window.reportBilingualReadingError && window.reportBilingualReadingError()" class="p-2 rounded-xl text-on-surface-variant hover:text-red-600 hover:bg-surface-container transition-colors cursor-pointer" title="Báo lỗi bài đọc này">
+          <span class="material-symbols-outlined text-[20px]">flag</span>
+        </button>
       </div>
 
-      <!-- View mode filter -->
-      <div class="flex bg-surface-container rounded-xl p-1 border border-outline-variant/20 text-xs font-semibold">
-        <button id="br-view-bilingual" onclick="window.setBilingualViewMode('bilingual')" class="px-3 py-1.5 rounded-lg bg-primary text-on-primary font-bold text-xs shadow-sm transition-all">Song ngữ</button>
-        <button id="br-view-en" onclick="window.setBilingualViewMode('en')" class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface text-xs font-semibold transition-all">English</button>
-        <button id="br-view-vi" onclick="window.setBilingualViewMode('vi')" class="px-3 py-1.5 rounded-lg text-on-surface-variant hover:text-on-surface text-xs font-semibold transition-all">Tiếng Việt</button>
-      </div>
-
-      <!-- Report Button -->
-      <button onclick="window.reportBilingualReadingError && window.reportBilingualReadingError()" class="p-2 rounded-xl text-on-surface-variant hover:text-red-600 hover:bg-surface-container transition-colors cursor-pointer" title="Báo lỗi bài đọc này">
-        <span class="material-symbols-outlined text-[20px]">flag</span>
+      <!-- Prominent Exit Button (Always visible on mobile & desktop) -->
+      <button onclick="window.closeBilingualReading()" class="flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-error/10 hover:bg-error/20 active:bg-error/30 text-error font-bold text-xs sm:text-sm shrink-0 transition-all cursor-pointer active:scale-95" title="Thoát bài đọc">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+        <span>Thoát</span>
       </button>
     </div>
   </header>
@@ -2681,13 +2717,13 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
   <div class="md:hidden flex items-center justify-between px-4 py-2 bg-surface-container-low/70 border-b border-outline-variant/15 text-xs font-semibold">
     <div class="flex items-center gap-1">
       <span class="text-[11px] text-outline uppercase font-bold mr-1">Chế độ:</span>
-      <button onclick="window.setBilingualViewMode('bilingual')" class="px-2 py-1 rounded bg-primary/10 text-primary font-bold">Song ngữ</button>
-      <button onclick="window.setBilingualViewMode('en')" class="px-2 py-1 rounded text-on-surface-variant">Anh</button>
-      <button onclick="window.setBilingualViewMode('vi')" class="px-2 py-1 rounded text-on-surface-variant">Việt</button>
+      <button onclick="window.setBilingualViewMode('bilingual')" class="px-2 py-1 rounded bg-primary/10 text-primary font-bold cursor-pointer">Song ngữ</button>
+      <button onclick="window.setBilingualViewMode('en')" class="px-2 py-1 rounded text-on-surface-variant cursor-pointer">Anh</button>
+      <button onclick="window.setBilingualViewMode('vi')" class="px-2 py-1 rounded text-on-surface-variant cursor-pointer">Việt</button>
     </div>
     <div class="flex items-center gap-1.5 font-bold text-on-surface-variant">
-      <button onclick="window.changeBilingualFontSize(-1)" class="p-1 px-2 hover:bg-surface-container rounded" title="Giảm cỡ chữ">A-</button>
-      <button onclick="window.changeBilingualFontSize(1)" class="p-1 px-2 hover:bg-surface-container rounded" title="Tăng cỡ chữ">A+</button>
+      <button onclick="window.changeBilingualFontSize(-1)" class="p-1 px-2 hover:bg-surface-container rounded cursor-pointer" title="Giảm cỡ chữ">A-</button>
+      <button onclick="window.changeBilingualFontSize(1)" class="p-1 px-2 hover:bg-surface-container rounded cursor-pointer" title="Tăng cỡ chữ">A+</button>
       <button onclick="window.reportBilingualReadingError && window.reportBilingualReadingError()" class="p-1 px-1.5 hover:bg-surface-container text-outline hover:text-red-600 rounded cursor-pointer" title="Báo lỗi bài đọc">
         <span class="material-symbols-outlined text-[18px]">flag</span>
       </button>
@@ -2698,6 +2734,15 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
   <main id="bilingual-reading-body" class="px-4 sm:px-6 lg:px-12 py-6 md:py-8 min-h-[calc(100vh-64px)]">
     <!-- Nội dung render động qua bilingualReading.js -->
   </main>
+
+  <!-- Floating Exit Button on Mobile for seamless exit at any scroll position -->
+  <div class="md:hidden fixed bottom-6 right-4 z-50">
+    <button id="br-floating-exit-btn" onclick="window.closeBilingualReading()" 
+            class="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container-highest/95 text-error border border-error/30 shadow-2xl backdrop-blur-md active:scale-95 transition-all text-xs font-bold cursor-pointer">
+      <span class="material-symbols-outlined text-[18px]">close</span>
+      <span>Thoát bài đọc</span>
+    </button>
+  </div>
 </div>
 
 
@@ -5870,6 +5915,7 @@ window._openTopic = function(topicId, topicName, category) {
     window._currentTopicId        = topicId;
     window._currentTopicName      = topicName;
     window._currentCategory       = category;
+    window._currentCategoryName   = category;
     window._currentPassageId      = null;
     window._currentPassageNumber  = null;
     window._currentPassageTitle   = null;
@@ -5975,7 +6021,7 @@ window._loadLessons = async function() {
             // Cập nhật hiển thị nút Đọc & Dịch trên Sub-sidebar nếu có bài đọc
             if (typeof window.updateBilingualNavVisibility === 'function') {
                 window.updateBilingualNavVisibility(
-                    { category: window._currentCategoryName, name: topicName },
+                    { category: window._currentCategory || window._currentCategoryName, name: topicName },
                     null
                 );
             }
@@ -5994,7 +6040,7 @@ window._loadLessons = async function() {
         // Ẩn nút Đọc & Dịch với chủ đề Non-CAM
         if (typeof window.updateBilingualNavVisibility === 'function') {
             window.updateBilingualNavVisibility(
-                { category: window._currentCategoryName, name: topicName },
+                { category: window._currentCategory || window._currentCategoryName, name: topicName },
                 null
             );
         }
@@ -6108,12 +6154,13 @@ window._renderCamPassages = function(testIndex = 0) {
                     <div class="flex items-center gap-1.5">
                         ${p.contentEn || p.contentVi ? `
                         <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}')"
-                                class="w-7 h-7 flex items-center justify-center rounded-lg text-primary hover:bg-primary/10 transition-all"
+                                class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
                                 title="Đọc bài song ngữ">
-                            <span class="material-symbols-outlined text-[16px]">menu_book</span>
+                            <span class="material-symbols-outlined text-[15px]">menu_book</span>
+                            <span>Đọc bài</span>
                         </button>` : ''}
                         <button onclick="event.stopPropagation(); window._openRenamePassage('${p.id}', '${_esc(p.title)}')"
-                                class="w-7 h-7 flex items-center justify-center rounded-lg text-outline hover:text-primary hover:bg-primary/10 transition-all"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg text-outline hover:text-primary hover:bg-primary/10 transition-all cursor-pointer active:scale-95"
                                 title="Đổi tên passage">
                             <span class="material-symbols-outlined text-[16px]">edit</span>
                         </button>
@@ -6131,16 +6178,24 @@ window._renderCamPassages = function(testIndex = 0) {
                 </p>` : ''}
             </div>
             
-            <!-- Bottom: Word count & progress bar -->
-            <div class="mt-4 pt-3 border-t border-outline-variant/10 flex flex-col gap-2">
+            <!-- Bottom: Word count & action buttons -->
+            <div class="mt-4 pt-3 border-t border-outline-variant/10 flex flex-col gap-2.5">
                 <div class="flex justify-between items-center text-xs text-on-surface-variant">
-                    <span class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[15px]">menu_book</span>
+                    <span class="flex items-center gap-1 font-medium">
+                        <span class="material-symbols-outlined text-[15px]">school</span>
                         ${p.totalWords} từ vựng
                     </span>
-                    <span class="font-bold text-primary flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                        Học ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
-                    </span>
+                    <div class="flex items-center gap-2">
+                        ${p.contentEn || p.contentVi ? `
+                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}')"
+                                class="px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 transition-all flex items-center gap-1 active:scale-95 cursor-pointer">
+                            <span class="material-symbols-outlined text-[14px]">menu_book</span>
+                            <span>Đọc</span>
+                        </button>` : ''}
+                        <span class="font-bold text-primary flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                            Học ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                        </span>
+                    </div>
                 </div>
                 <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
                     <div class="h-full ${barColor} rounded-full transition-all duration-700" style="width:${prog}%"></div>
@@ -6323,7 +6378,7 @@ window._loadLessonWords = async function() {
         }
         if (typeof window.updateBilingualNavVisibility === 'function') {
             window.updateBilingualNavVisibility(
-                { category: window._currentCategoryName, name: topicName },
+                { category: window._currentCategory || window._currentCategoryName, name: topicName },
                 currPassageObj || (passageId && passageId !== '__unlinked__' ? { id: passageId } : null)
             );
         }
