@@ -687,188 +687,6 @@ html.dark[data-theme="amber"] .text-on-primary { color: #2d1a00 !important; }
 /* Smooth transition khi đổi theme */
 body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color 0.3s ease; }
 
-/* Mobile game: maximize the playable area and prevent browser gestures over Unity. */
-html[data-mobile-device="true"] {
-    overscroll-behavior: none;
-}
-html[data-mobile-device="true"] #game-stage {
-    gap: 0;
-}
-html[data-mobile-device="true"] #unity-wrap {
-    border-radius: 0 !important;
-}
-html[data-mobile-device="true"] #unity-canvas {
-    height: calc(100dvh - 58px) !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    touch-action: none;
-}
-html[data-mobile-device="true"].mobile-game-playing,
-html[data-mobile-device="true"].mobile-game-playing body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden !important;
-    overscroll-behavior: none;
-}
-html[data-mobile-device="true"].mobile-game-playing #main-mobile-header,
-html[data-mobile-device="true"].mobile-game-playing #mobile-bottom-nav {
-    display: none !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #page-game {
-    min-height: var(--game-vh, 100dvh) !important;
-    overflow: hidden !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #page-game main {
-    display: block !important;
-    width: var(--game-vw, 100vw) !important;
-    height: var(--game-vh, 100dvh) !important;
-    min-height: var(--game-vh, 100dvh) !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #page-game main > div {
-    width: var(--game-vw, 100vw) !important;
-    max-width: none !important;
-    height: var(--game-vh, 100dvh) !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    gap: 0 !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #game-stage {
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 9999 !important;
-    display: block !important;
-    width: var(--game-vw, 100vw) !important;
-    height: var(--game-vh, 100dvh) !important;
-    background: #172136 !important;
-    box-sizing: border-box !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
-html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
-html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
-    width: var(--game-vw, 100vw) !important;
-    height: var(--game-vh, 100dvh) !important;
-    min-height: 0 !important;
-    max-height: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #unity-wrap {
-    border: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-}
-html[data-mobile-device="true"].mobile-game-playing #unity-toolbar {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 20 !important;
-    height: calc(env(safe-area-inset-top) + 46px) !important;
-    padding: calc(env(safe-area-inset-top) + 6px) 10px 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-    pointer-events: none;
-}
-html[data-mobile-device="true"].mobile-game-playing #unity-toolbar button,
-html[data-mobile-device="true"].mobile-game-playing #unity-toolbar > .min-w-0,
-html[data-mobile-device="true"].mobile-game-playing #game-unity-title,
-html[data-mobile-device="true"].mobile-game-playing #unity-toolbar .h-1\.5 {
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-@supports (padding: max(0px)) {
-    html[data-mobile-device="true"].mobile-game-playing #game-stage {
-        padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left) !important;
-    }
-    html[data-mobile-device="true"].mobile-game-playing #unity-wrap,
-    html[data-mobile-device="true"].mobile-game-playing #unity-viewport,
-    html[data-mobile-device="true"].mobile-game-playing #unity-canvas {
-        width: calc(var(--game-vw, 100vw) - env(safe-area-inset-left) - env(safe-area-inset-right)) !important;
-        height: var(--game-vh, 100dvh) !important;
-    }
-}
-.mobile-game-rotate-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    background: #0f172a;
-    color: #f8fafc;
-    text-align: center;
-}
-html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rotate-overlay {
-    display: flex;
-}
-.mobile-game-rotate-card {
-    max-width: 320px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.75rem;
-}
-.mobile-game-rotate-icon {
-    width: 72px;
-    height: 72px;
-    border-radius: 9999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(144, 205, 255, 0.14);
-    color: var(--hi-p-dark);
-}
-#unity-wrap:fullscreen,
-#unity-wrap:-webkit-full-screen {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: #172136 !important;
-}
-#unity-wrap:fullscreen #unity-toolbar,
-#unity-wrap:-webkit-full-screen #unity-toolbar {
-    display: none !important;
-}
-#unity-wrap:fullscreen #unity-viewport,
-#unity-wrap:-webkit-full-screen #unity-viewport {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-}
-#unity-wrap:fullscreen #unity-canvas,
-#unity-wrap:-webkit-full-screen #unity-canvas {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    min-height: 0 !important;
-    max-height: none !important;
-}
-#unity-wrap.is-unity-fullscreen {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-}
-#unity-wrap.is-unity-fullscreen #unity-toolbar {
-    display: none !important;
-}
-#unity-wrap.is-unity-fullscreen #unity-viewport,
-#unity-wrap.is-unity-fullscreen #unity-canvas {
-    width: 100vw !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    min-height: 0 !important;
-    max-height: none !important;
-}
-@media (max-width: 1024px) {
-    html[data-mobile-device="true"] #game-stage { gap: 0; }
-}
 </style>
 </head>
 <body class="bg-background text-on-background font-hanken antialiased overflow-x-hidden transition-colors duration-300">
@@ -889,7 +707,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <a onclick="navigateTo('library')" id="nav-desktop-library" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">explore</span><span>Thư viện</span></a>
         <a onclick="navigateTo('vocabulary')" id="nav-desktop-vocabulary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">auto_stories</span><span>Kho từ vựng</span></a>
         <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">school</span><span>Luyện Đề THPT</span></a>
-        <a onclick="navigateTo('game')" id="nav-desktop-game" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">sports_esports</span><span>Game</span></a>
         <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-sm px-sm py-sm rounded-lg transition-all duration-200 text-on-surface-variant hover:bg-primary-container/10 cursor-pointer"><span class="material-symbols-outlined">search</span><span>Tra từ</span></a>
     </div>
     <div class="mt-auto shrink-0 flex flex-col gap-base pt-md border-t border-outline-variant/20">
@@ -953,7 +770,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="text-[9px] mt-0.5 font-semibold">Chủ đề</span></a>
         <a onclick="navigateTo('library')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">explore</span><span class="text-[9px] mt-0.5 font-semibold">Thư viện</span></a>
         <a onclick="navigateTo('vocabulary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">collections_bookmark</span><span class="text-[9px] mt-0.5 font-semibold">Sổ từ</span></a>
-        <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
         <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
     </div>
 </nav>
@@ -2274,112 +2090,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     </div>
 </div>
 
-<!-- ==================== PAGE: GAME ==================== -->
-<div id="page-game" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
-    <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
-        <header class="hidden lg:flex flex-col gap-1">
-            <h1 class="font-headline-lg text-headline-lg text-on-surface">Game</h1>
-            <p class="text-on-surface-variant">Chơi platformer, ăn xu, vượt quái và ôn từ vựng trong từng màn.</p>
-        </header>
-
-        <section id="game-home" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <button onclick="HiGameSession.loadLessonPicker()"
-                    class="text-left bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl border border-outline-variant/20 soft-shadow p-6 flex flex-col gap-4 hover:-translate-y-1 transition-all">
-                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[28px]">map</span>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-on-surface">Phiêu lưu theo bài học</h2>
-                    <p class="text-sm text-on-surface-variant mt-1">Chọn chủ đề và lesson, sau đó vượt màn bằng từ trong bài đó.</p>
-                </div>
-                <div class="flex items-center gap-2 text-primary font-bold text-sm mt-auto">
-                    Chọn bài học <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </div>
-            </button>
-
-            <button onclick="HiGameSession.startReviewMode()"
-                    class="text-left bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl border border-outline-variant/20 soft-shadow p-6 flex flex-col gap-4 hover:-translate-y-1 transition-all">
-                <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-[28px]">history_edu</span>
-                </div>
-                <div>
-                    <h2 class="text-xl font-bold text-on-surface">Ôn tập hôm nay</h2>
-                    <p class="text-sm text-on-surface-variant mt-1">Vào thẳng màn chơi với các từ đang đến hạn theo lịch SM-2.</p>
-                </div>
-                <div class="flex items-center gap-2 text-primary font-bold text-sm mt-auto">
-                    Bắt đầu chơi <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                </div>
-            </button>
-        </section>
-
-        <section id="game-lesson-picker" class="hidden bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl border border-outline-variant/20 soft-shadow p-5 md:p-6">
-            <div class="flex items-center justify-between gap-3 mb-5">
-                <div>
-                    <h2 class="text-lg font-bold text-on-surface">Chọn bài học</h2>
-                    <p class="text-sm text-on-surface-variant">Game sẽ dùng tối đa 20 từ trong lesson đã chọn.</p>
-                </div>
-                <button onclick="HiGameSession.backHome()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-3">
-                <select id="game-topic-select" onchange="HiGameSession.loadLessonsForTopic(this.value)"
-                        class="min-w-0 w-full rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
-                <select id="game-lesson-select"
-                        class="min-w-0 w-full rounded-xl bg-surface-container-low border border-outline-variant/30 px-4 py-3 text-on-surface"></select>
-                <button onclick="HiGameSession.startSelectedLesson()" class="bg-primary text-on-primary rounded-xl px-5 py-3 font-bold whitespace-nowrap">
-                    Chơi
-                </button>
-            </div>
-        </section>
-
-        <p id="game-status" class="text-sm text-on-surface-variant"></p>
-
-        <section id="game-stage" class="hidden flex flex-col gap-3">
-            <div id="mobile-game-rotate-overlay" class="mobile-game-rotate-overlay" aria-live="polite">
-                <div class="mobile-game-rotate-card">
-                    <div class="mobile-game-rotate-icon">
-                        <span class="material-symbols-outlined text-[40px]">screen_rotation</span>
-                    </div>
-                    <h2 class="text-xl font-bold">Xoay ngang để chơi game</h2>
-                    <p class="text-sm text-slate-300">Game sẽ tự bắt đầu sau khi điện thoại chuyển sang chế độ nằm ngang.</p>
-                </div>
-            </div>
-            <div id="unity-wrap" class="bg-[#172136] rounded-2xl border border-outline-variant/20 overflow-hidden soft-shadow">
-                <div id="unity-toolbar" class="flex items-center gap-3 justify-between px-3 md:px-5 py-3 border-b border-outline-variant/20">
-                    <button onclick="HiGameSession.backHome()" class="p-2 rounded-full text-on-surface-variant hover:bg-surface-container">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                    </button>
-                    <div class="min-w-0 flex-1">
-                        <div id="game-unity-title" class="text-sm font-bold text-white truncate">Adventure Rabbit</div>
-                        <div class="h-1.5 bg-surface-container-highest rounded-full overflow-hidden mt-1">
-                            <div id="unity-progress-bar" class="h-full bg-primary rounded-full transition-all" style="width:0%"></div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="HiGameSession.restartUnityLevel()" class="p-2 rounded-full text-white/80 hover:bg-white/10" title="Restart">
-                            <span class="material-symbols-outlined text-[20px]">restart_alt</span>
-                        </button>
-                        <button onclick="HiGameSession.fullscreenUnity()" class="p-2 rounded-full text-white/80 hover:bg-white/10" title="Fullscreen">
-                            <span class="material-symbols-outlined text-[20px]">fullscreen</span>
-                        </button>
-                    </div>
-                </div>
-                <div id="unity-viewport" class="relative w-full bg-[#172136]">
-                    <canvas id="unity-canvas" class="block w-full h-[calc(100dvh-210px)] min-h-[420px] max-h-[720px] bg-[#172136]"></canvas>
-                    <div id="unity-loading" class="hidden absolute inset-0 flex items-center justify-center bg-[#172136]/90 text-white">
-                        <div class="flex flex-col items-center gap-3">
-                            <span class="material-symbols-outlined text-[42px] animate-spin">progress_activity</span>
-                            <span class="text-sm font-bold">Đang tải Adventure Rabbit...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-</main>
-</div>
 
 <!-- ==================== PAGE: VOCABULARY ==================== -->
 <div id="page-vocabulary" class="page">
@@ -2998,6 +2708,12 @@ function _updateThemeBtns(active) {
 window.navigateTo = function(page, preserveHash = false){
     const pageName = (page || '').split('?')[0];
 
+    // Redirect game về dashboard vì tính năng game đã được gỡ bỏ hoàn toàn
+    if (pageName === 'game') {
+        window.navigateTo('dashboard', preserveHash);
+        return;
+    }
+
     // Gỡ bỏ sự kiện bàn phím phiên học khi rời trang learning
     if (pageName !== 'learning' && typeof HiSessionUI !== 'undefined' && typeof HiSessionUI.destroy === 'function') {
         HiSessionUI.destroy();
@@ -3010,7 +2726,7 @@ window.navigateTo = function(page, preserveHash = false){
     if (!preserveHash) window.location.hash = page;
  
     // Điều khiển Component dùng chung (Navbar / Sidebar)
-    const mainTabs = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'game', 'dictionary', 'settings'];
+    const mainTabs = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'dictionary', 'settings'];
     const isMainTab = mainTabs.includes(pageName);
     const isTopicDetail = (pageName === 'topic-detail' || pageName === 'lesson-detail');
     const isExerciseDetail = (pageName === 'thpt-room');
@@ -3036,7 +2752,7 @@ window.navigateTo = function(page, preserveHash = false){
     
     // Đổi Title Mobile Header
     if(isMainTab && pageName !== 'library') {
-        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Sổ từ', 'exercises': 'Luyện Đề THPT', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
+        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Sổ từ', 'exercises': 'Luyện Đề THPT', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
         const titleEl = document.getElementById('mobile-header-title');
         if(titleEl) {
             if(pageName === 'dashboard') {
@@ -3070,10 +2786,6 @@ window.navigateTo = function(page, preserveHash = false){
         setTimeout(() => {
             window.ThptExam && window.ThptExam.init();
         }, 0);
-    }
-    // Khi vào trang Game: reset màn chọn mode
-    if (pageName === 'game') {
-        setTimeout(() => window.HiGameSession && window.HiGameSession.renderGamePage(), 0);
     }
     // Khi vào topic-detail: load danh sách lesson
     if (pageName === 'topic-detail') {
@@ -3625,7 +3337,7 @@ window.addEventListener('hashchange', () => {
 
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="dataLayer.js?v=20260914-topic-tests-fix-v5"></script>
+<script src="dataLayer.js?v=20260914-remove-game-v6"></script>
 <script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
@@ -3633,9 +3345,8 @@ window.addEventListener('hashchange', () => {
 <script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>
 <script src="sessionUI.js?v=20260913-monitoring-v1"></script>
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
-<script src="gameSession.js?v=20260912-sound-v1"></script>
 <script src="bilingualReading.js?v=20260913-monitoring-v1"></script>
-<script src="library.js?v=20260914-topic-tests-fix-v5"></script>
+<script src="library.js?v=20260914-remove-game-v6"></script>
 
 <!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
 <div id="modal-exam-confirm-submit" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(4px)">
