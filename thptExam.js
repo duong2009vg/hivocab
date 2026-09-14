@@ -386,6 +386,13 @@
             this.isReviewMode = false;
             this.results = null;
 
+            const submitBtn = document.getElementById('btn-submit-exam');
+            if (submitBtn) submitBtn.classList.remove('hidden');
+            const reviewBtn = document.getElementById('btn-exam-review-score');
+            if (reviewBtn) reviewBtn.classList.add('hidden');
+            const timerWrap = document.getElementById('exam-timer-wrapper');
+            if (timerWrap) timerWrap.classList.remove('hidden');
+
             // Load saved progress or initialize
             const saved = this.loadSavedProgress(examId);
             if (saved && !saved.submitted) {
@@ -1147,13 +1154,30 @@
                 const isCurrent = (i === this.currentQIndex + 1);
 
                 let cls = 'thpt-pal-btn';
+                let btnTitle = `Câu ${i}`;
 
                 if (this.isReviewMode && this.results) {
-                    const isCorrect = this.results.details[i]?.isCorrect;
-                    cls += isCorrect ? ' correct' : ' wrong';
+                    const detail = this.results.details[i];
+                    const isCorrect = !!detail?.isCorrect;
+                    const userAns = detail?.userAns || '';
+                    const correctAns = detail?.correctAns || this.currentExam.questions[i - 1]?.correct_answer || '?';
+
+                    if (isCorrect) {
+                        cls += ' correct';
+                        btnTitle = `Câu ${i}: Đúng (+0.25đ) - Chọn ${userAns}`;
+                    } else if (userAns) {
+                        cls += ' wrong';
+                        btnTitle = `Câu ${i}: Sai (Bạn chọn ${userAns} · Đ/a ${correctAns})`;
+                    } else {
+                        cls += ' unanswered';
+                        btnTitle = `Câu ${i}: Chưa làm (Đáp án đúng: ${correctAns})`;
+                    }
                 } else {
                     if (isAnswered) {
                         cls += ' answered';
+                        btnTitle = `Câu ${i}: Đã làm (${this.userAnswers[i]})`;
+                    } else {
+                        btnTitle = `Câu ${i}: Chưa làm`;
                     }
                 }
 
@@ -1165,10 +1189,53 @@
                     ? '<span class="thpt-flag-dot"></span>' 
                     : '';
 
-                html += `<button type="button" id="palette-btn-${i}" onclick="window.ThptExam.jumpToQuestion(${i})" class="${cls}" title="Câu ${i}">${i}${flagDot}</button>`;
+                html += `<button type="button" id="palette-btn-${i}" onclick="window.ThptExam.jumpToQuestion(${i})" class="${cls}" title="${this.escAttr(btnTitle)}">${i}${flagDot}</button>`;
             }
 
             palette.innerHTML = html;
+        },
+
+        renderReviewBannerHtml(qNum, q) {
+            if (!this.isReviewMode || !this.results || !this.results.details) return '';
+            const detail = this.results.details[qNum];
+            const userAns = detail?.userAns || '';
+            const isCorrect = !!detail?.isCorrect;
+            const correctAns = q.correct_answer || detail?.correctAns || '';
+
+            if (!userAns) {
+                return `
+                <div class="flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 text-xs font-semibold select-none">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="material-symbols-outlined text-[17px] text-amber-600 shrink-0">help_outline</span>
+                        <span class="truncate">Bạn <strong>chưa trả lời</strong> câu này (0 điểm)</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-amber-800 bg-amber-200/60 px-2 py-0.5 rounded border border-amber-300 shrink-0">
+                        Đáp án đúng: <strong>${correctAns}</strong>
+                    </span>
+                </div>`;
+            } else if (isCorrect) {
+                return `
+                <div class="flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-900 text-xs font-semibold select-none">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="material-symbols-outlined text-[17px] text-emerald-600 shrink-0">check_circle</span>
+                        <span class="truncate">Chính xác! Bạn đã chọn <strong>${userAns}</strong> (+0.25 điểm)</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-emerald-800 bg-emerald-200/60 px-2 py-0.5 rounded border border-emerald-300 shrink-0">
+                        Đúng
+                    </span>
+                </div>`;
+            } else {
+                return `
+                <div class="flex items-center justify-between gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-900 text-xs font-semibold select-none">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="material-symbols-outlined text-[17px] text-rose-600 shrink-0">cancel</span>
+                        <span class="truncate">Chưa đúng! Bạn đã chọn <strong>${userAns}</strong> (0 điểm)</span>
+                    </div>
+                    <span class="text-[11px] font-bold text-rose-800 bg-rose-200/60 px-2 py-0.5 rounded border border-rose-300 shrink-0">
+                        Đáp án đúng: <strong>${correctAns}</strong>
+                    </span>
+                </div>`;
+            }
         },
 
         renderQuestionsList() {
@@ -1245,6 +1312,11 @@
                         </div>
                     </div>
 
+                    <!-- Review Mode: Question Status Banner -->
+                    <div id="q-review-banner-${qNum}">
+                        ${this.renderReviewBannerHtml(qNum, q)}
+                    </div>
+
                     <!-- Prompt -->
                     ${promptHtml}
 
@@ -1272,14 +1344,21 @@
 
                 let optClass = 'opt-btn';
                 let radioCircle = '';
+                let badgeHtml = '';
 
                 if (this.isReviewMode) {
                     if (isCorrect) {
                         optClass += ' opt-correct';
                         radioCircle = `<span class="opt-circle"><span class="material-symbols-outlined text-white text-[13px] font-black">check</span></span>`;
+                        if (isSelected) {
+                            badgeHtml = `<span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 ml-2 shadow-2xs"><span class="material-symbols-outlined text-[12px]">done_all</span>Bạn chọn (Đúng)</span>`;
+                        } else {
+                            badgeHtml = `<span class="text-[10px] font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 ml-2 shadow-2xs"><span class="material-symbols-outlined text-[12px]">verified</span>Đáp án chuẩn</span>`;
+                        }
                     } else if (isSelected && !isCorrect) {
                         optClass += ' opt-wrong';
                         radioCircle = `<span class="opt-circle"><span class="material-symbols-outlined text-white text-[13px] font-black">close</span></span>`;
+                        badgeHtml = `<span class="text-[10px] font-bold text-rose-800 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-md flex items-center gap-1 shrink-0 ml-2 shadow-2xs"><span class="material-symbols-outlined text-[12px]">close</span>Bạn đã chọn</span>`;
                     } else {
                         optClass += ' opacity-50';
                         radioCircle = `<span class="opt-circle"></span>`;
@@ -1303,13 +1382,16 @@
                         ${clickAction}
                         data-q="${q.number}" 
                         data-opt="${letter}"
-                        class="${optClass}">
-                    <input type="radio" class="sr-only pointer-events-none" name="radio_q_${q.number}" value="${letter}" ${isSelected ? 'checked' : ''} />
-                    ${radioCircle}
-                    <div class="flex-1 q-text-size pointer-events-none">
-                        <span class="font-bold mr-1 text-slate-900">${letter}.</span>
-                        <span>${this.escHtml(optText)}</span>
+                        class="${optClass} flex items-center justify-between">
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <input type="radio" class="sr-only pointer-events-none" name="radio_q_${q.number}" value="${letter}" ${isSelected ? 'checked' : ''} />
+                        ${radioCircle}
+                        <div class="flex-1 q-text-size pointer-events-none text-left">
+                            <span class="font-bold mr-1 text-slate-900">${letter}.</span>
+                            <span>${this.escHtml(optText)}</span>
+                        </div>
                     </div>
+                    ${badgeHtml}
                 </button>`;
             });
 
@@ -1403,6 +1485,11 @@
             const isCurrent = (qNum - 1 === this.currentQIndex);
 
             card.className = `p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 transition-all font-sans ${isCurrent ? 'ring-2 ring-blue-500/40' : ''}`;
+
+            const bannerEl = document.getElementById(`q-review-banner-${qNum}`);
+            if (bannerEl) {
+                bannerEl.innerHTML = this.renderReviewBannerHtml(qNum, q);
+            }
 
             const optContainer = document.getElementById(`q-options-${qNum}`);
             if (optContainer) {
@@ -1571,8 +1658,14 @@
         updateProgressCounter() {
             const el = document.getElementById('exam-answered-count');
             if (el && this.currentExam) {
-                const count = Object.keys(this.userAnswers).length;
-                el.textContent = `${count} / ${this.currentExam.total_questions}`;
+                if (this.isReviewMode && this.results) {
+                    el.innerHTML = `Đúng: <strong>${this.results.correct}</strong>/${this.results.total} (${this.results.score.toFixed(2)}đ)`;
+                    el.title = `Điểm số: ${this.results.score.toFixed(2)} / 10 (${this.results.correct}/${this.results.total} câu đúng)`;
+                } else {
+                    const count = Object.keys(this.userAnswers).length;
+                    el.innerHTML = `${count} / ${this.currentExam.total_questions}`;
+                    el.title = `Đã trả lời ${count}/${this.currentExam.total_questions} câu`;
+                }
             }
         },
 
@@ -1757,10 +1850,18 @@
             this.closeResultsModal();
             this.isReviewMode = true;
 
+            const submitBtn = document.getElementById('btn-submit-exam');
+            if (submitBtn) submitBtn.classList.add('hidden');
+            const reviewBtn = document.getElementById('btn-exam-review-score');
+            if (reviewBtn) reviewBtn.classList.remove('hidden');
+            const timerWrap = document.getElementById('exam-timer-wrapper');
+            if (timerWrap) timerWrap.classList.add('hidden');
+
             const nameEl = document.getElementById('exam-candidate-name');
             if (nameEl) nameEl.textContent = 'XEM LỜI GIẢI CHI TIẾT';
 
             this.renderQuestionsAndPalette();
+            this.updateProgressCounter();
             this.jumpToQuestion(1);
 
             if (window.showToast) {

@@ -269,6 +269,16 @@ tailwind.config={
     border-color:#dc2626!important;
     color:#ffffff!important;
 }
+.thpt-pal-btn.unanswered{
+    background-color:#1e293b!important;
+    border:1.5px dashed #64748b!important;
+    color:#94a3b8!important;
+}
+.thpt-pal-btn.unanswered:hover{
+    border-color:#cbd5e1!important;
+    color:#ffffff!important;
+    background-color:#334155!important;
+}
 .thpt-flag-dot{
     position:absolute;
     top:-2px;
@@ -2081,7 +2091,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
             </div>
 
             <!-- Timer Display -->
-            <div class="flex items-center gap-1 bg-[#0f2342] border border-blue-400/30 px-2 py-0.5 rounded-lg shadow-inner text-white">
+            <div id="exam-timer-wrapper" class="flex items-center gap-1 bg-[#0f2342] border border-blue-400/30 px-2 py-0.5 rounded-lg shadow-inner text-white">
                 <span class="material-symbols-outlined text-[15px] text-amber-400">timer</span>
                 <span id="exam-timer-display" class="font-mono text-xs md:text-sm font-black tracking-wider text-amber-300">50:00</span>
             </div>
@@ -2118,10 +2128,16 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
                 <span class="material-symbols-outlined text-[16px]">fullscreen</span>
             </button>
 
-            <!-- Submit Button -->
-            <button onclick="window.ThptExam.confirmSubmit()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer">
+            <!-- Submit Button (Test Mode) -->
+            <button id="btn-submit-exam" onclick="window.ThptExam.confirmSubmit()" class="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer">
                 <span class="material-symbols-outlined text-[14px]">send</span>
                 <span>NỘP BÀI</span>
+            </button>
+
+            <!-- Review Mode Score / Retake Button -->
+            <button id="btn-exam-review-score" onclick="window.ThptExam.showResultsModal(window.ThptExam.results)" class="hidden px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer" title="Xem lại bảng điểm &amp; thống kê">
+                <span class="material-symbols-outlined text-[14px]">military_tech</span>
+                <span>KẾT QUẢ</span>
             </button>
 
             <!-- Exit Button -->
