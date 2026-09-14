@@ -110,14 +110,31 @@
         renderTagsBar();
         updateTabButtonsUI();
 
-        // Update profile avatar on quick compose
+        // Đảm bảo HiDB đã hoàn tất khởi tạo trước khi gọi Supabase
+        if (typeof HiDB !== 'undefined' && HiDB.ensureReady) {
+            try { await HiDB.ensureReady(4000); } catch (e) {}
+        }
+
+        // Cập nhật thông tin và avatar người dùng trên compose box & floating dock
         try {
             if (typeof HiDB !== 'undefined' && HiDB.getCurrentUser) {
                 const user = await HiDB.getCurrentUser();
                 const avatarEl = document.getElementById('lib-quick-avatar');
-                if (avatarEl && user?.user_metadata?.avatar_url) {
-                    avatarEl.style.backgroundImage = `url('${user.user_metadata.avatar_url}')`;
-                    avatarEl.innerHTML = '';
+                const userEl = document.getElementById('lib-quick-username');
+                const dockAvatar = document.getElementById('lib-dock-avatar');
+                const name = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'hivocab';
+                const avatarUrl = user?.user_metadata?.avatar_url;
+
+                if (userEl) userEl.textContent = name;
+                if (avatarUrl) {
+                    if (avatarEl) {
+                        avatarEl.style.backgroundImage = `url('${avatarUrl}')`;
+                        avatarEl.innerHTML = '';
+                    }
+                    if (dockAvatar) {
+                        dockAvatar.style.backgroundImage = `url('${avatarUrl}')`;
+                        dockAvatar.innerHTML = '';
+                    }
                 }
             }
         } catch (e) {}
@@ -174,8 +191,9 @@
         const feedBtn = document.getElementById('lib-tab-feed');
         const myBtn = document.getElementById('lib-tab-my');
         const likedBtn = document.getElementById('lib-tab-liked');
+        const dockLikedBtn = document.getElementById('lib-dock-liked-btn');
 
-        const activeClass = 'bg-primary text-on-primary font-bold shadow-xs';
+        const activeClass = 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs';
         const inactiveClass = 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-semibold';
 
         [
@@ -184,8 +202,19 @@
             { el: likedBtn, active: state.currentTab === 'liked' }
         ].forEach(({ el, active }) => {
             if (!el) return;
-            el.className = `px-3.5 sm:px-4 py-2 rounded-full text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1 ${active ? activeClass : inactiveClass}`;
+            el.className = `px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1 ${active ? activeClass : inactiveClass}`;
         });
+
+        if (dockLikedBtn) {
+            const icon = dockLikedBtn.querySelector('span');
+            if (state.currentTab === 'liked') {
+                dockLikedBtn.className = 'text-rose-500 transition-colors cursor-pointer active:scale-90';
+                if (icon) icon.className = 'material-symbols-outlined text-[23px] fill-1 text-rose-500';
+            } else {
+                dockLikedBtn.className = 'text-white/70 hover:text-rose-400 transition-colors cursor-pointer active:scale-90';
+                if (icon) icon.className = 'material-symbols-outlined text-[23px]';
+            }
+        }
     }
 
     /**
@@ -194,6 +223,9 @@
     async function fetchPublicFeed() {
         setLoading(true);
         try {
+            if (typeof HiDB !== 'undefined' && HiDB.ensureReady) {
+                await HiDB.ensureReady(4000).catch(() => {});
+            }
             if (typeof HiDB !== 'undefined' && HiDB.getPublicLibraryTopics) {
                 const res = await HiDB.getPublicLibraryTopics({
                     tag: state.currentTag,
@@ -207,6 +239,11 @@
             renderFeedList(state.topics);
         } catch (err) {
             console.error('[Library] fetchPublicFeed error:', err);
+            if (!state._feedRetried) {
+                state._feedRetried = true;
+                setTimeout(() => fetchPublicFeed(), 1200);
+                return;
+            }
             renderFeedError(err.message || 'Không thể tải thư viện. Vui lòng thử lại.');
         } finally {
             setLoading(false);
@@ -326,112 +363,140 @@
             const initials = author.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'HI';
 
             return `
-                <article class="bg-surface rounded-2xl p-4 sm:p-5 border border-outline-variant/20 hover:border-outline-variant/40 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col gap-3 group" id="thread-card-${esc(topic.id)}">
-                    <!-- Author header -->
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
-                            <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-black text-xs shrink-0 overflow-hidden bg-cover bg-center border border-outline-variant/20"
+                <article class="thread-item px-3.5 sm:px-4 py-3.5 sm:py-4 transition-colors hover:bg-surface-container-lowest/40 dark:hover:bg-neutral-900/40 flex gap-3 sm:gap-3.5 relative" id="thread-card-${esc(topic.id)}">
+                    <!-- Left Column: Avatar + Badge + Thread Spine -->
+                    <div class="flex flex-col items-center shrink-0 w-9 sm:w-10">
+                        <!-- Avatar with + Badge -->
+                        <div class="relative cursor-pointer" onclick="window.openThreadDetail('${esc(topic.id)}')">
+                            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-black text-xs shrink-0 overflow-hidden bg-cover bg-center border border-outline-variant/20 shadow-2xs"
                                  ${avatar ? `style="background-image: url('${esc(avatar)}')"` : ''}>
                                 ${!avatar ? `<span>${esc(initials)}</span>` : ''}
                             </div>
-                            <div class="flex flex-col">
-                                <div class="flex items-center gap-1.5">
-                                    <span class="font-bold text-sm text-on-surface">${esc(author)}</span>
-                                    <span class="material-symbols-outlined text-[15px] text-blue-500 fill-1" title="Tác giả uy tín">verified</span>
+                            <!-- Plus (+) Badge Button -->
+                            <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
+                                    title="Lưu bộ từ về kho"
+                                    class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shadow-xs border-2 border-surface dark:border-black active:scale-90 transition-transform cursor-pointer">
+                                <span class="material-symbols-outlined text-[13px] font-bold leading-none">add</span>
+                            </button>
+                        </div>
+
+                        <!-- Vertical Spine Connector (Thread line) -->
+                        <div class="w-[2px] bg-neutral-200 dark:bg-neutral-800 rounded-full flex-1 my-2 min-h-[36px]"></div>
+
+                        <!-- Mini thread node preview -->
+                        <div class="w-3.5 h-3.5 rounded-full bg-surface-container-high/60 dark:bg-neutral-800/80 border border-outline-variant/20 flex items-center justify-center shrink-0">
+                            <div class="w-1.5 h-1.5 rounded-full bg-outline-variant/60"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Content + Word Card + Action Bar -->
+                    <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                        <!-- Header row: Author > Tag • timeAgo + Threads logo -->
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5 flex-wrap min-w-0">
+                                <span class="font-bold text-sm text-on-surface hover:underline cursor-pointer truncate" onclick="window.openThreadDetail('${esc(topic.id)}')">
+                                    ${esc(author)}
+                                </span>
+                                ${tags.length > 0 ? `
+                                    <span class="text-xs text-outline shrink-0">&gt;</span>
+                                    <span class="text-xs font-semibold text-primary hover:underline cursor-pointer truncate" onclick="window.filterLibraryTag('${esc(tags[0])}')">
+                                        #${esc(tags[0])}
+                                    </span>
+                                ` : ''}
+                                <span class="text-xs text-outline shrink-0">•</span>
+                                <span class="text-xs text-outline shrink-0">${esc(timeAgo)}</span>
+                            </div>
+
+                            <!-- Threads logo icon on top right -->
+                            <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)" class="text-outline hover:text-on-surface p-1 rounded-full cursor-pointer transition-colors" title="Chia sẻ">
+                                <svg class="w-4 h-4 fill-current opacity-70 hover:opacity-100" viewBox="0 0 24 24">
+                                    <path d="M12.186 24C5.467 24 0 18.533 0 11.814 0 5.095 5.467 0 12.186 0c6.643 0 11.814 5.095 11.814 11.814 0 4.887-2.618 8.877-6.88 10.366l-1.077-2.072c3.21-1.121 5.176-4.148 5.176-8.294 0-5.388-4.148-9.536-9.033-9.536-4.885 0-9.033 4.148-9.033 9.536 0 5.388 4.148 9.536 9.033 9.536 2.84 0 5.405-1.34 7.037-3.486l1.792 1.543C18.66 22.096 15.602 24 12.186 24zM12.186 16.702c-2.67 0-4.888-2.218-4.888-4.888 0-2.67 2.218-4.888 4.888-4.888 2.67 0 4.888 2.218 4.888 4.888 0 1.258-.475 2.454-1.332 3.359l-1.62-1.62a2.38 2.38 0 0 0 .543-1.739c0-1.325-1.074-2.399-2.399-2.399-1.325 0-2.399 1.074-2.399 2.399 0 1.325 1.074 2.399 2.399 2.399.537 0 1.033-.178 1.433-.48l1.62 1.62c-1.025.867-2.336 1.349-3.725 1.349z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Topic Title & Description (Clickable) -->
+                        <div class="cursor-pointer space-y-1" onclick="window.openThreadDetail('${esc(topic.id)}')">
+                            <h3 class="text-sm sm:text-[15px] font-bold text-on-surface hover:text-primary transition-colors leading-snug">
+                                ${esc(topic.name)}
+                            </h3>
+                            ${topic.description ? `
+                                <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed whitespace-pre-line line-clamp-3">
+                                    ${esc(topic.description)}
+                                </p>
+                            ` : ''}
+                        </div>
+
+                        <!-- Attached Vocabulary Card (Rounded-2xl preview container) -->
+                        ${sneakPeeks.length > 0 ? `
+                            <div onclick="window.openThreadDetail('${esc(topic.id)}')"
+                                 class="mt-1 rounded-2xl p-3 sm:p-3.5 bg-surface-container-low/80 dark:bg-[#141414] border border-outline-variant/20 dark:border-neutral-800 transition-all cursor-pointer shadow-2xs hover:border-outline-variant/40 space-y-2">
+                                <div class="flex items-center justify-between text-[11px] font-bold text-outline pb-1 border-b border-outline-variant/10 dark:border-neutral-800">
+                                    <span class="flex items-center gap-1.5 text-on-surface font-semibold">
+                                        <span class="material-symbols-outlined text-[15px] text-primary">auto_stories</span>
+                                        <span>${totalWords} từ vựng</span>
+                                    </span>
+                                    <span class="text-primary font-bold hover:underline flex items-center gap-0.5 text-[11px]">
+                                        Xem toàn bộ &rarr;
+                                    </span>
                                 </div>
-                                <span class="text-[11px] text-outline">${esc(timeAgo)} • Thư viện mở</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Word count badge -->
-                        <div class="px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-[11px] font-bold flex items-center gap-1 shrink-0">
-                            <span class="material-symbols-outlined text-[14px] text-primary">auto_stories</span>
-                            <span>${totalWords} từ</span>
-                        </div>
-                    </div>
-
-                    <!-- Topic Title & Description -->
-                    <div class="cursor-pointer" onclick="window.openThreadDetail('${esc(topic.id)}')">
-                        <h3 class="text-base sm:text-lg font-bold text-on-surface group-hover:text-primary transition-colors leading-snug">
-                            ${esc(topic.name)}
-                        </h3>
-                        ${topic.description ? `
-                            <p class="text-xs sm:text-sm text-on-surface-variant mt-1.5 line-clamp-3 leading-relaxed whitespace-pre-line">
-                                ${esc(topic.description)}
-                            </p>
-                        ` : ''}
-                    </div>
-
-                    <!-- Tags -->
-                    ${tags.length > 0 ? `
-                        <div class="flex flex-wrap gap-1.5 pt-0.5">
-                            ${tags.map(t => `
-                                <button type="button" onclick="window.filterLibraryTag('${esc(t)}')"
-                                    class="text-[11px] font-semibold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-0.5 rounded-full transition-colors">
-                                    #${esc(t)}
-                                </button>
-                            `).join('')}
-                        </div>
-                    ` : ''}
-
-                    <!-- Sneak Peek Words Box (Threads Chain preview) -->
-                    ${sneakPeeks.length > 0 ? `
-                        <div onclick="window.openThreadDetail('${esc(topic.id)}')"
-                            class="bg-surface-container-lowest hover:bg-surface-container-low/80 rounded-xl p-3 sm:p-3.5 border border-outline-variant/15 transition-colors cursor-pointer flex flex-col gap-2">
-                            <div class="flex items-center justify-between text-[11px] font-bold text-outline uppercase tracking-wider">
-                                <span>Xem trước từ vựng</span>
-                                <span class="text-primary hover:underline flex items-center gap-0.5">Xem toàn bộ ${totalWords} từ →</span>
-                            </div>
-                            <div class="flex flex-col gap-1.5 divide-y divide-outline-variant/10">
-                                ${sneakPeeks.map(w => `
-                                    <div class="pt-1.5 first:pt-0 flex items-center justify-between gap-2 text-xs">
-                                        <div class="flex items-center gap-2 min-w-0">
-                                            <button type="button" onclick="window.playWordAudio('${esc(w.word)}', event)"
-                                                class="w-6 h-6 rounded-full bg-surface-container-high hover:bg-primary/20 hover:text-primary flex items-center justify-center text-outline transition-colors shrink-0" title="Phát âm">
-                                                <span class="material-symbols-outlined text-[13px]">volume_up</span>
-                                            </button>
-                                            <span class="font-bold text-on-surface truncate">${esc(w.word)}</span>
-                                            ${w.phonetic ? `<span class="text-[11px] text-outline font-normal hidden sm:inline">${esc(w.phonetic)}</span>` : ''}
+                                <div class="flex flex-col gap-1 divide-y divide-outline-variant/10 dark:divide-neutral-800/60">
+                                    ${sneakPeeks.map(w => `
+                                        <div class="pt-1 first:pt-0 flex items-center justify-between gap-2 text-xs">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <button type="button" onclick="window.playWordAudio('${esc(w.word)}', event)"
+                                                        class="w-6 h-6 rounded-full bg-surface-container-high dark:bg-neutral-800 hover:bg-primary/20 hover:text-primary flex items-center justify-center text-outline transition-colors shrink-0" title="Phát âm">
+                                                    <span class="material-symbols-outlined text-[13px]">volume_up</span>
+                                                </button>
+                                                <span class="font-bold text-on-surface truncate">${esc(w.word)}</span>
+                                                ${w.phonetic ? `<span class="text-[11px] text-outline font-mono hidden sm:inline">${esc(w.phonetic)}</span>` : ''}
+                                            </div>
+                                            <span class="text-[11px] text-on-surface-variant font-medium truncate text-right max-w-[170px] sm:max-w-[240px]">${esc(w.meaning || '—')}</span>
                                         </div>
-                                        <span class="text-[11px] text-on-surface-variant font-medium truncate text-right max-w-[200px]">${esc(w.meaning || '—')}</span>
-                                    </div>
-                                `).join('')}
+                                    `).join('')}
+                                </div>
                             </div>
+                        ` : ''}
+
+                        <!-- Action Bar (Threads style ♡ 💬 🔁 ✈) -->
+                        <div class="flex items-center justify-between pt-2 text-on-surface-variant select-none">
+                            <div class="flex items-center gap-5 sm:gap-6">
+                                <!-- Like button -->
+                                <button type="button" onclick="window.handleThreadLike('${esc(topic.id)}', this)"
+                                        class="flex items-center gap-1 text-xs hover:text-rose-500 transition-colors cursor-pointer active:scale-90 ${hasLiked ? 'text-rose-500 font-bold' : 'text-on-surface-variant'}"
+                                        data-topic-id="${esc(topic.id)}" data-liked="${hasLiked}">
+                                    <span class="material-symbols-outlined text-[20px] ${hasLiked ? 'fill-1 text-rose-500' : ''}">favorite</span>
+                                    <span class="like-count text-xs">${likeCount || ''}</span>
+                                </button>
+
+                                <!-- Comment button -->
+                                <button type="button" onclick="window.openThreadComments('${esc(topic.id)}', '${esc(topic.name)}', event)"
+                                        class="flex items-center gap-1 text-xs hover:text-primary transition-colors cursor-pointer active:scale-90">
+                                    <span class="material-symbols-outlined text-[20px]">chat_bubble</span>
+                                    <span class="text-xs">${commentCount || ''}</span>
+                                </button>
+
+                                <!-- Repost / Clone button -->
+                                <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
+                                        class="flex items-center gap-1 text-xs hover:text-emerald-500 transition-colors cursor-pointer active:scale-90" title="Lưu về kho từ của tôi">
+                                    <span class="material-symbols-outlined text-[20px]">sync_alt</span>
+                                    <span class="clone-count text-xs">${cloneCount || ''}</span>
+                                </button>
+
+                                <!-- Share button -->
+                                <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)"
+                                        class="flex items-center gap-1 text-xs hover:text-primary transition-colors cursor-pointer active:scale-90" title="Chia sẻ liên kết">
+                                    <span class="material-symbols-outlined text-[19px]">send</span>
+                                </button>
+                            </div>
+
+                            <!-- Quick Clone Button for Desktop -->
+                            <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
+                                    class="hidden sm:flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-on-primary font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-2xs">
+                                <span class="material-symbols-outlined text-[15px]">bookmark_add</span>
+                                <span>Lưu về kho</span>
+                            </button>
                         </div>
-                    ` : ''}
-
-                    <!-- Action Bar (Threads style) -->
-                    <div class="flex items-center justify-between pt-1 border-t border-outline-variant/15 text-on-surface-variant">
-                        <div class="flex items-center gap-4 sm:gap-6">
-                            <!-- Like button -->
-                            <button type="button" onclick="window.handleThreadLike('${esc(topic.id)}', this)"
-                                class="flex items-center gap-1.5 text-xs font-semibold hover:text-rose-600 transition-colors cursor-pointer active:scale-95 ${hasLiked ? 'text-rose-600 font-bold' : ''}"
-                                data-topic-id="${esc(topic.id)}" data-liked="${hasLiked}">
-                                <span class="material-symbols-outlined text-[19px] ${hasLiked ? 'fill-1 text-rose-500' : ''}">favorite</span>
-                                <span class="like-count">${likeCount}</span>
-                            </button>
-
-                            <!-- Comment button -->
-                            <button type="button" onclick="window.openThreadComments('${esc(topic.id)}', '${esc(topic.name)}', event)"
-                                class="flex items-center gap-1.5 text-xs font-semibold hover:text-primary transition-colors cursor-pointer active:scale-95">
-                                <span class="material-symbols-outlined text-[19px]">chat_bubble</span>
-                                <span>${commentCount}</span>
-                            </button>
-
-                            <!-- Share button -->
-                            <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)"
-                                class="flex items-center gap-1.5 text-xs font-semibold hover:text-primary transition-colors cursor-pointer active:scale-95" title="Chia sẻ liên kết">
-                                <span class="material-symbols-outlined text-[19px]">share</span>
-                            </button>
-                        </div>
-
-                        <!-- Clone / Lưu về kho Button -->
-                        <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
-                            class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-on-primary font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-2xs">
-                            <span class="material-symbols-outlined text-[16px]">bookmark_add</span>
-                            <span>Lưu về kho</span>
-                            <span class="clone-count opacity-75 font-normal">(${cloneCount})</span>
-                        </button>
                     </div>
                 </article>
             `;
@@ -1129,26 +1194,68 @@
         }
     }
 
+    /**
+     * Toggle Mobile Search Container
+     */
+    function toggleLibrarySearchMobile() {
+        const searchContainer = document.getElementById('lib-search-container');
+        if (!searchContainer) return;
+        const isHidden = searchContainer.classList.contains('hidden');
+        if (isHidden) {
+            searchContainer.classList.remove('hidden');
+            const input = document.getElementById('lib-search-input');
+            if (input) input.focus();
+        } else {
+            searchContainer.classList.add('hidden');
+        }
+    }
+
     // Expose functions globally to window
-    window.loadCommunityLibrary     = loadCommunityLibrary;
-    window.switchLibraryTab        = switchLibraryTab;
-    window.filterLibraryTag        = filterLibraryTag;
-    window.handleLibrarySearch     = handleLibrarySearch;
-    window.clearLibrarySearch      = clearLibrarySearch;
-    window.handleLibrarySortChange = handleLibrarySortChange;
-    window.handleThreadLike        = handleThreadLike;
-    window.handleThreadClone       = handleThreadClone;
-    window.handleThreadShare       = handleThreadShare;
-    window.openThreadDetail        = openThreadDetail;
-    window.closeThreadDetail       = closeThreadDetail;
-    window.openComposeThreadModal  = openComposeThreadModal;
-    window.closeComposeThreadModal = closeComposeThreadModal;
-    window.submitComposeThread     = submitComposeThread;
-    window.handlePublishUserTopic  = handlePublishUserTopic;
-    window.handleUnpublishTopic    = handleUnpublishTopic;
-    window.openThreadComments      = openThreadComments;
-    window.closeThreadComments     = closeThreadComments;
-    window.submitThreadComment     = submitThreadComment;
-    window.playWordAudio           = playWordAudio;
+    window.loadCommunityLibrary        = loadCommunityLibrary;
+    window.switchLibraryTab           = switchLibraryTab;
+    window.filterLibraryTag           = filterLibraryTag;
+    window.handleLibrarySearch        = handleLibrarySearch;
+    window.clearLibrarySearch         = clearLibrarySearch;
+    window.handleLibrarySortChange    = handleLibrarySortChange;
+    window.handleThreadLike           = handleThreadLike;
+    window.handleThreadClone          = handleThreadClone;
+    window.handleThreadShare          = handleThreadShare;
+    window.openThreadDetail           = openThreadDetail;
+    window.closeThreadDetail          = closeThreadDetail;
+    window.openComposeThreadModal     = openComposeThreadModal;
+    window.closeComposeThreadModal    = closeComposeThreadModal;
+    window.submitComposeThread        = submitComposeThread;
+    window.handlePublishUserTopic     = handlePublishUserTopic;
+    window.handleUnpublishTopic       = handleUnpublishTopic;
+    window.openThreadComments         = openThreadComments;
+    window.closeThreadComments        = closeThreadComments;
+    window.submitThreadComment        = submitThreadComment;
+    window.playWordAudio              = playWordAudio;
+    window.toggleLibrarySearchMobile  = toggleLibrarySearchMobile;
+
+    // Tự động kiểm tra và khởi tạo khi người dùng đang ở trang hoặc hash library
+    function checkAutoInit() {
+        const hash = window.location.hash || '';
+        const pageEl = document.getElementById('page-library');
+        const isLibraryActive = (pageEl && pageEl.classList.contains('active')) || hash.includes('library');
+        if (isLibraryActive) {
+            setTimeout(() => {
+                loadCommunityLibrary();
+            }, 60);
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkAutoInit);
+    } else {
+        checkAutoInit();
+    }
+
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash || '';
+        if (hash.includes('library')) {
+            loadCommunityLibrary();
+        }
+    });
 
 })();

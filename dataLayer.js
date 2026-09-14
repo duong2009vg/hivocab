@@ -16,6 +16,24 @@ window.HiDB = (() => {
     // ----------------------------------------------------------
     let _supabase = null;
     let _currentUser;
+    let _readyPromise = null;
+    let _onReadyResolve = null;
+
+    function ensureReady(timeoutMs = 6000) {
+        if (_supabase) return Promise.resolve(_supabase);
+        if (!_readyPromise) {
+            _readyPromise = new Promise((resolve) => {
+                _onReadyResolve = resolve;
+            });
+        }
+        return Promise.race([
+            _readyPromise,
+            new Promise((_, reject) => setTimeout(() => {
+                if (_supabase) resolve(_supabase);
+                else reject(new Error('[HiDB] Quá thời gian chờ khởi tạo Supabase.'));
+            }, timeoutMs))
+        ]);
+    }
     const CACHE_TTL_MS = 5 * 60 * 1000;
     const _cache = new Map();
 
@@ -1652,6 +1670,9 @@ window.HiDB = (() => {
         }
         _supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         console.log('[HiDB] ✅ Khởi tạo thành công');
+        if (typeof _onReadyResolve === 'function') {
+            _onReadyResolve(_supabase);
+        }
         return _supabase;
     }
 
@@ -1947,6 +1968,7 @@ window.HiDB = (() => {
      * Lấy danh sách các bộ từ vựng công khai trên Thư viện Cộng đồng.
      */
     async function getPublicLibraryTopics({ tag = 'all', search = '', sort = 'popular', page = 1, pageSize = 20 } = {}) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         let user = null;
         try { user = await getCurrentUser(); } catch(e) {}
@@ -2290,6 +2312,8 @@ window.HiDB = (() => {
         },
         // Setup
         init,
+        ensureReady,
+        isReady: () => !!_supabase,
 
         // Auth
         getCurrentUser,
