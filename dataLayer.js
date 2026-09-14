@@ -1995,7 +1995,9 @@ window.HiDB = (() => {
 
         // Lọc theo tag
         if (tag && tag !== 'all' && tag !== 'Tất cả') {
-            query = query.contains('tags', [tag]);
+            const tLower = tag.toLowerCase();
+            const tUpper = tag.toUpperCase();
+            query = query.or(`tags.cs.{${tag}},tags.cs.{${tLower}},tags.cs.{${tUpper}}`);
         }
 
         // Tìm kiếm

@@ -103,6 +103,39 @@
     }
 
     /**
+     * Supabase Realtime channel lắng nghe sự kiện thay đổi trên bảng topics
+     */
+    let realtimeChannel = null;
+    function initRealtimeSubscription() {
+        if (realtimeChannel) return;
+        try {
+            if (typeof HiDB === 'undefined' || !HiDB.getClient) return;
+            const client = HiDB.getClient();
+            if (!client || typeof client.channel !== 'function') return;
+
+            realtimeChannel = client
+                .channel('realtime:community-topics')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'topics' }, (payload) => {
+                    console.log('[Community Library] Realtime update on topics:', payload.eventType);
+                    if (state.currentTab === 'feed') {
+                        fetchPublicFeed();
+                    } else if (state.currentTab === 'my') {
+                        fetchMyTopics();
+                    } else if (state.currentTab === 'liked') {
+                        fetchLikedTopics();
+                    }
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') {
+                        console.log('[Community Library] Realtime subscription active');
+                    }
+                });
+        } catch (err) {
+            console.warn('[Community Library] Realtime setup warning:', err);
+        }
+    }
+
+    /**
      * Initialize / Load Community Library
      */
     async function loadCommunityLibrary(tab) {
@@ -115,13 +148,15 @@
             try { await HiDB.ensureReady(4000); } catch (e) {}
         }
 
-        // Cập nhật thông tin và avatar người dùng trên compose box & floating dock
+        // Khởi tạo Supabase Realtime channel lắng nghe bài đăng mới
+        initRealtimeSubscription();
+
+        // Cập nhật thông tin và avatar người dùng trên compose box
         try {
             if (typeof HiDB !== 'undefined' && HiDB.getCurrentUser) {
                 const user = await HiDB.getCurrentUser();
                 const avatarEl = document.getElementById('lib-quick-avatar');
                 const userEl = document.getElementById('lib-quick-username');
-                const dockAvatar = document.getElementById('lib-dock-avatar');
                 const name = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'hivocab';
                 const avatarUrl = user?.user_metadata?.avatar_url;
 
@@ -130,10 +165,6 @@
                     if (avatarEl) {
                         avatarEl.style.backgroundImage = `url('${avatarUrl}')`;
                         avatarEl.innerHTML = '';
-                    }
-                    if (dockAvatar) {
-                        dockAvatar.style.backgroundImage = `url('${avatarUrl}')`;
-                        dockAvatar.innerHTML = '';
                     }
                 }
             }
@@ -191,7 +222,6 @@
         const feedBtn = document.getElementById('lib-tab-feed');
         const myBtn = document.getElementById('lib-tab-my');
         const likedBtn = document.getElementById('lib-tab-liked');
-        const dockLikedBtn = document.getElementById('lib-dock-liked-btn');
 
         const activeClass = 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold shadow-xs';
         const inactiveClass = 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface font-semibold';
@@ -204,17 +234,6 @@
             if (!el) return;
             el.className = `px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm transition-all cursor-pointer flex items-center gap-1 ${active ? activeClass : inactiveClass}`;
         });
-
-        if (dockLikedBtn) {
-            const icon = dockLikedBtn.querySelector('span');
-            if (state.currentTab === 'liked') {
-                dockLikedBtn.className = 'text-rose-500 transition-colors cursor-pointer active:scale-90';
-                if (icon) icon.className = 'material-symbols-outlined text-[23px] fill-1 text-rose-500';
-            } else {
-                dockLikedBtn.className = 'text-white/70 hover:text-rose-400 transition-colors cursor-pointer active:scale-90';
-                if (icon) icon.className = 'material-symbols-outlined text-[23px]';
-            }
-        }
     }
 
     /**
@@ -622,6 +641,8 @@
     function clearLibrarySearch() {
         const input = document.getElementById('lib-search-input');
         if (input) input.value = '';
+        const modalInput = document.getElementById('lib-modal-search-input');
+        if (modalInput) modalInput.value = '';
         state.searchQuery = '';
         const clearBtn = document.getElementById('lib-search-clear');
         if (clearBtn) clearBtn.classList.add('hidden');
@@ -631,6 +652,59 @@
     function handleLibrarySortChange(sort) {
         state.sortBy = sort;
         fetchPublicFeed();
+    }
+
+    /**
+     * Search Modal (Mobile & Spotlight)
+     */
+    function openLibrarySearchModal() {
+        const modal = document.getElementById('modal-library-search');
+        const input = document.getElementById('lib-modal-search-input');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+
+        if (input) {
+            input.value = state.searchQuery || '';
+            setTimeout(() => {
+                input.focus();
+                input.select();
+            }, 100);
+        }
+    }
+
+    function closeLibrarySearchModal() {
+        const modal = document.getElementById('modal-library-search');
+        if (!modal) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+
+    function handleModalLibrarySearch(val) {
+        state.searchQuery = val;
+        // Đồng bộ với input tìm kiếm dạng thường trên PC nếu có
+        const feedInput = document.getElementById('lib-search-input');
+        if (feedInput) feedInput.value = val;
+        const clearBtn = document.getElementById('lib-search-clear');
+        if (clearBtn) clearBtn.classList.toggle('hidden', !val || !val.trim());
+
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => {
+            fetchPublicFeed();
+        }, 300);
+    }
+
+    function clearModalLibrarySearch() {
+        const modalInput = document.getElementById('lib-modal-search-input');
+        if (modalInput) modalInput.value = '';
+        clearLibrarySearch();
+    }
+
+    function handleModalQuickTag(tag) {
+        closeLibrarySearchModal();
+        filterLibraryTag(tag);
     }
 
     /**
@@ -1231,7 +1305,12 @@
     window.closeThreadComments        = closeThreadComments;
     window.submitThreadComment        = submitThreadComment;
     window.playWordAudio              = playWordAudio;
-    window.toggleLibrarySearchMobile  = toggleLibrarySearchMobile;
+    window.toggleLibrarySearchMobile  = openLibrarySearchModal;
+    window.openLibrarySearchModal     = openLibrarySearchModal;
+    window.closeLibrarySearchModal    = closeLibrarySearchModal;
+    window.handleModalLibrarySearch   = handleModalLibrarySearch;
+    window.clearModalLibrarySearch    = clearModalLibrarySearch;
+    window.handleModalQuickTag        = handleModalQuickTag;
 
     // Tự động kiểm tra và khởi tạo khi người dùng đang ở trang hoặc hash library
     function checkAutoInit() {

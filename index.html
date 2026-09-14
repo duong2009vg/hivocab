@@ -925,9 +925,9 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
     </div>
 </header>
 
-<!-- Dedicated Threads Mobile Header for Library Page -->
+<!-- Dedicated Mobile Header for Library Page -->
 <header id="lib-mobile-header" class="lg:hidden fixed top-0 w-full z-40 bg-surface/95 dark:bg-black/95 backdrop-blur-xl border-b border-outline-variant/15 dark:border-neutral-800/80 px-3 h-14 flex items-center justify-between transition-all" style="display: none;">
-    <!-- Left: Hamburger icon (2 lines '=' like Threads) -->
+    <!-- Left: Hamburger icon -->
     <button onclick="window.toggleMobileProfileDropdown()" class="w-10 h-10 flex items-center justify-center text-on-surface hover:opacity-75 transition-opacity cursor-pointer active:scale-95" aria-label="Menu">
         <svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round">
             <line x1="4" y1="8" x2="20" y2="8"></line>
@@ -935,16 +935,14 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         </svg>
     </button>
 
-    <!-- Center: @threads typography logo -->
-    <div class="flex items-center gap-1.5 cursor-pointer select-none active:scale-95 transition-transform" onclick="window.switchLibraryTab('feed')">
-        <svg class="w-6 h-6 fill-current text-on-surface" viewBox="0 0 24 24">
-            <path d="M12.186 24C5.467 24 0 18.533 0 11.814 0 5.095 5.467 0 12.186 0c6.643 0 11.814 5.095 11.814 11.814 0 4.887-2.618 8.877-6.88 10.366l-1.077-2.072c3.21-1.121 5.176-4.148 5.176-8.294 0-5.388-4.148-9.536-9.033-9.536-4.885 0-9.033 4.148-9.033 9.536 0 5.388 4.148 9.536 9.033 9.536 2.84 0 5.405-1.34 7.037-3.486l1.792 1.543C18.66 22.096 15.602 24 12.186 24zM12.186 16.702c-2.67 0-4.888-2.218-4.888-4.888 0-2.67 2.218-4.888 4.888-4.888 2.67 0 4.888 2.218 4.888 4.888 0 1.258-.475 2.454-1.332 3.359l-1.62-1.62a2.38 2.38 0 0 0 .543-1.739c0-1.325-1.074-2.399-2.399-2.399-1.325 0-2.399 1.074-2.399 2.399 0 1.325 1.074 2.399 2.399 2.399.537 0 1.033-.178 1.433-.48l1.62 1.62c-1.025.867-2.336 1.349-3.725 1.349z"/>
-        </svg>
-        <span class="font-extrabold text-xl tracking-tight text-on-surface font-sans">threads</span>
+    <!-- Center: Hi Logo & Title -->
+    <div class="flex items-center gap-2 cursor-pointer select-none active:scale-95 transition-transform" onclick="window.switchLibraryTab('feed')">
+        <img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/>
+        <span class="font-extrabold text-base tracking-tight text-on-surface">Thư viện</span>
     </div>
 
-    <!-- Right: Search toggle icon -->
-    <button onclick="window.toggleLibrarySearchMobile()" class="w-10 h-10 flex items-center justify-center text-on-surface hover:opacity-75 transition-opacity cursor-pointer active:scale-95" aria-label="Tìm kiếm">
+    <!-- Right: Search Modal trigger -->
+    <button onclick="window.openLibrarySearchModal()" class="w-10 h-10 flex items-center justify-center text-on-surface hover:opacity-75 transition-opacity cursor-pointer active:scale-95" aria-label="Tìm kiếm">
         <span class="material-symbols-outlined text-[24px]">search</span>
     </button>
 </header>
@@ -957,37 +955,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
         <a onclick="navigateTo('vocabulary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">collections_bookmark</span><span class="text-[9px] mt-0.5 font-semibold">Sổ từ</span></a>
         <a onclick="navigateTo('game')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">sports_esports</span><span class="text-[9px] mt-0.5 font-semibold">Game</span></a>
         <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant w-12 cursor-pointer"><span class="material-symbols-outlined text-[20px]">search</span><span class="text-[9px] mt-0.5 font-semibold">Tra từ</span></a>
-    </div>
-</nav>
-
-<!-- Floating Pill Bottom Dock for Library Page (Threads Mobile style) -->
-<nav id="lib-floating-dock" class="lg:hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 rounded-full bg-neutral-900/95 dark:bg-[#181818]/95 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.45)] px-6 py-2.5 flex items-center justify-between gap-6 transition-all duration-300" style="display: none; width: min(320px, 88vw);">
-    <!-- Home button (navigates to Dashboard) -->
-    <button onclick="window.navigateTo('dashboard')" class="text-white/70 hover:text-white transition-colors cursor-pointer active:scale-90" title="Trang chủ" aria-label="Trang chủ">
-        <span class="material-symbols-outlined text-[23px]">home</span>
-    </button>
-
-    <!-- Search button (toggles Search bar in Library) -->
-    <button onclick="window.toggleLibrarySearchMobile()" class="text-white/70 hover:text-white transition-colors cursor-pointer active:scale-90" title="Tìm kiếm" aria-label="Tìm kiếm">
-        <span class="material-symbols-outlined text-[23px]">search</span>
-    </button>
-
-    <!-- Plus button (Create new thread / topic) -->
-    <button onclick="window.openComposeThreadModal()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all cursor-pointer active:scale-90 border border-white/15" title="Đăng bộ từ mới" aria-label="Tạo mới">
-        <span class="material-symbols-outlined text-[22px]">add</span>
-    </button>
-
-    <!-- Heart button (Liked topics filter) -->
-    <button id="lib-dock-liked-btn" onclick="window.switchLibraryTab('liked')" class="text-white/70 hover:text-rose-400 transition-colors cursor-pointer active:scale-90" title="Đã thích" aria-label="Đã thích">
-        <span class="material-symbols-outlined text-[23px]">favorite</span>
-    </button>
-
-    <!-- Profile button (with notification dot) -->
-    <div class="relative cursor-pointer active:scale-90 transition-transform" onclick="window.toggleMobileProfileDropdown()" title="Hồ sơ">
-        <div id="lib-dock-avatar" class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center overflow-hidden bg-cover bg-center border border-white/25">
-            <span class="material-symbols-outlined text-[15px] text-white">person</span>
-        </div>
-        <span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-rose-500 border border-neutral-900"></span>
     </div>
 </nav>
 
@@ -3005,20 +2972,17 @@ window.navigateTo = function(page, preserveHash = false){
     const sidebar = document.getElementById('main-sidebar');
     if(sidebar) sidebar.style.display = isMainTab ? '' : 'none';
     
-    // Mobile Top Header & Threads Mobile Header
+    // Mobile Top Header & Library Mobile Header
     const mobileHeader = document.getElementById('main-mobile-header');
     const libMobileHeader = document.getElementById('lib-mobile-header');
-    const libFloatingDock = document.getElementById('lib-floating-dock');
     const bottomNav = document.getElementById('mobile-bottom-nav');
 
     if (pageName === 'library') {
         if (mobileHeader) mobileHeader.style.display = 'none';
         if (libMobileHeader) libMobileHeader.style.display = 'flex';
-        if (bottomNav) bottomNav.style.display = 'none';
-        if (libFloatingDock) libFloatingDock.style.display = 'flex';
+        if (bottomNav) bottomNav.style.display = '';
     } else {
         if (libMobileHeader) libMobileHeader.style.display = 'none';
-        if (libFloatingDock) libFloatingDock.style.display = 'none';
         if (mobileHeader) mobileHeader.style.display = isMainTab ? '' : 'none';
         if (bottomNav) bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
     }
@@ -4587,6 +4551,31 @@ window.addEventListener('hashchange', () => {
               class="w-9 h-9 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 active:scale-90 transition-transform cursor-pointer shadow-xs">
         <span class="material-symbols-outlined text-[18px]">send</span>
       </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL: TÌM KIẾM THƯ VIỆN NỔI BẬT ==================== -->
+<div id="modal-library-search" class="fixed inset-0 z-[10000] hidden items-start justify-center pt-16 sm:pt-24 px-4" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)">
+  <div class="bg-surface rounded-2xl shadow-2xl border border-outline-variant/30 w-full max-w-[560px] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div class="p-4 flex items-center gap-3 border-b border-outline-variant/15">
+      <span class="material-symbols-outlined text-primary text-2xl shrink-0">search</span>
+      <input id="lib-modal-search-input" type="text" placeholder="Tìm bộ từ, tác giả, #hashtag..."
+             oninput="window.handleModalLibrarySearch(this.value)"
+             class="w-full text-sm sm:text-base bg-transparent border-0 focus:outline-hidden text-on-surface placeholder:text-outline" />
+      <button type="button" onclick="window.closeLibrarySearchModal()" class="p-1 rounded-full text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer shrink-0">
+        <span class="material-symbols-outlined text-xl">close</span>
+      </button>
+    </div>
+    <div class="px-4 py-3 bg-surface-container-low flex items-center justify-between text-xs text-on-surface-variant flex-wrap gap-2">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <span class="font-semibold text-outline">Gợi ý:</span>
+        <button type="button" onclick="window.handleModalQuickTag('IELTS')" class="px-2 py-0.5 rounded-full bg-surface hover:bg-surface-container text-primary font-semibold transition-colors cursor-pointer">#IELTS</button>
+        <button type="button" onclick="window.handleModalQuickTag('THPT-QG')" class="px-2 py-0.5 rounded-full bg-surface hover:bg-surface-container text-primary font-semibold transition-colors cursor-pointer">#THPT-QG</button>
+        <button type="button" onclick="window.handleModalQuickTag('C1-C2')" class="px-2 py-0.5 rounded-full bg-surface hover:bg-surface-container text-primary font-semibold transition-colors cursor-pointer">#C1-C2</button>
+        <button type="button" onclick="window.handleModalQuickTag('Destination')" class="px-2 py-0.5 rounded-full bg-surface hover:bg-surface-container text-primary font-semibold transition-colors cursor-pointer">#Destination</button>
+      </div>
+      <button type="button" onclick="window.clearModalLibrarySearch()" class="text-primary hover:underline font-semibold cursor-pointer shrink-0">Xóa</button>
     </div>
   </div>
 </div>
