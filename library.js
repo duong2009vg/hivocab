@@ -782,7 +782,7 @@
                 const countSpan = card.querySelector('.clone-count');
                 if (countSpan) {
                     const currentCount = parseInt(countSpan.textContent.replace(/\D/g, '') || '0', 10);
-                    countSpan.textContent = `(${currentCount + 1})`;
+                    countSpan.textContent = currentCount + 1;
                 }
             }
 
@@ -954,7 +954,7 @@
                                         <div class="flex items-center gap-2 flex-wrap">
                                             <span class="text-base sm:text-lg font-black text-on-surface font-hanken tracking-tight">${esc(w.word)}</span>
                                             ${w.phonetic ? `<span class="text-xs text-outline font-medium">/${esc(w.phonetic)}/</span>` : ''}
-                                            ${w.part_of_speech ? `<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-secondary/10 text-secondary">${esc(w.part_of_speech)}</span>` : ''}
+                                            ${(w.part_of_speech || w.pos) ? `<span class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-secondary/10 text-secondary">${esc(w.part_of_speech || w.pos)}</span>` : ''}
                                         </div>
 
                                         <button type="button" onclick="window.playWordAudio('${esc(w.word)}', event)"
@@ -969,9 +969,9 @@
                                     </p>
 
                                     <!-- Example sentence -->
-                                    ${w.example ? `
+                                    ${(w.example || w.example_sentence) ? `
                                         <div class="mt-2.5 pt-2 border-t border-outline-variant/10 text-xs">
-                                            <p class="text-on-surface italic">"${esc(w.example)}"</p>
+                                            <p class="text-on-surface italic">"${esc(w.example || w.example_sentence)}"</p>
                                             ${w.example_vi ? `<p class="text-outline mt-0.5">"${esc(w.example_vi)}"</p>` : ''}
                                         </div>
                                     ` : ''}

@@ -72,19 +72,43 @@ export default async function handler(req, res) {
         return res.status(429).json({ ok: false, error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau 1 phút.' });
     }
 
+    const rawWords = req.body?.words;
+    const isBatch = Array.isArray(rawWords) && rawWords.length > 0;
     const rawWord = String(req.body?.word || req.body?.term || '').trim();
     const word = rawWord.slice(0, 100).trim();
 
-    if (!word) {
-        return res.status(400).json({ ok: false, error: 'Vui lòng cung cấp từ hoặc cụm từ cần tra cứu.' });
+    if (!isBatch && !word) {
+        return res.status(400).json({ ok: false, error: 'Vui lòng cung cấp từ hoặc danh sách từ cần tra cứu.' });
     }
 
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-        return res.status(500).json({ ok: false, error: 'GROQ_API_KEY chưa được cấu hình trên server Vercel.' });
+        return res.status(500).json({ ok: false, error: 'GROQ_API_KEY chưa được cấu hình trên server.' });
     }
 
-    const prompt = `You are an English dictionary assistant. 
+    let prompt = '';
+    let wordList = [];
+    if (isBatch) {
+        wordList = rawWords.slice(0, 20).map(w => String(w).trim().slice(0, 100)).filter(Boolean);
+        prompt = `You are an English dictionary assistant.
+For each of the following English words: ${JSON.stringify(wordList)}, provide:
+1. IPA phonetic transcription (e.g. /.../)
+2. Most accurate and common Vietnamese meaning (concise, clear)
+3. One natural, short example sentence in English using this word.
+
+Respond ONLY with a valid JSON object with a "results" array:
+{
+  "results": [
+    {
+      "word": "word1",
+      "phonetic": "/.../",
+      "meaning": "nghĩa tiếng Việt",
+      "example": "English example"
+    }
+  ]
+}`;
+    } else {
+        prompt = `You are an English dictionary assistant. 
 For the English word or phrase "${word}", provide:
 1. IPA phonetic transcription (e.g. /.../)
 2. Most accurate and common Vietnamese meaning (short, clear)
@@ -96,6 +120,7 @@ Respond ONLY with a valid JSON object in this exact format:
   "meaning": "...",
   "example": "..."
 }`;
+    }
 
     try {
         let groqRes = await fetch(GROQ_URL, {
@@ -117,7 +142,7 @@ Respond ONLY with a valid JSON object in this exact format:
                     }
                 ],
                 response_format: { type: 'json_object' },
-                max_tokens: 250,
+                max_tokens: isBatch ? 1800 : 350,
                 temperature: 0.3,
             }),
         });
@@ -143,7 +168,7 @@ Respond ONLY with a valid JSON object in this exact format:
                         }
                     ],
                     response_format: { type: 'json_object' },
-                    max_tokens: 250,
+                    max_tokens: isBatch ? 1800 : 350,
                     temperature: 0.3,
                 }),
             });
@@ -161,6 +186,21 @@ Respond ONLY with a valid JSON object in this exact format:
 
         if (!parsed) {
             return res.status(500).json({ ok: false, error: 'Không thể phân tích dữ liệu JSON từ AI.' });
+        }
+
+        if (isBatch) {
+            const results = Array.isArray(parsed.results) ? parsed.results : (Array.isArray(parsed) ? parsed : []);
+            return res.status(200).json({
+                ok: true,
+                isBatch: true,
+                count: results.length,
+                results: results.map(item => ({
+                    word: String(item.word || '').trim(),
+                    phonetic: String(item.phonetic || '').trim(),
+                    meaning: String(item.meaning || '').trim(),
+                    example: String(item.example || '').trim()
+                }))
+            });
         }
 
         const phonetic = String(parsed.phonetic || '').trim();

@@ -2383,29 +2383,163 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 
 <!-- ==================== PAGE: VOCABULARY ==================== -->
 <div id="page-vocabulary" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-5 lg:px-12 flex flex-col">
-    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-2 lg:gap-4">
+<main class="lg:ml-64 min-h-screen pt-16 lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
+    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-5 lg:gap-6 fade-in">
+        
+        <!-- Header Section -->
+        <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 lg:gap-4">
             <div>
-                <h1 class="hidden lg:block font-headline-lg text-headline-lg text-on-surface">Kho từ vựng</h1>
-                <p id="vocab-subtitle" class="text-xs md:text-sm text-on-surface-variant mt-0.5">Ôn tập và làm chủ toàn bộ từ vựng trong kho dữ liệu.</p>
+                <div class="flex items-center gap-2.5">
+                    <h1 class="font-headline-lg text-xl sm:text-2xl lg:text-3xl font-extrabold text-on-surface tracking-tight">
+                        <span class="hidden lg:inline">Kho từ vựng</span>
+                        <span class="lg:hidden">Sổ từ cá nhân</span>
+                    </h1>
+                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                        Đã học
+                    </span>
+                </div>
+                <p id="vocab-subtitle" class="text-xs sm:text-sm text-on-surface-variant mt-1">
+                    Sổ tay ghi nhớ cá nhân · Chỉ hiển thị các từ vựng bạn đã học hoặc tự thêm.
+                </p>
+            </div>
+
+            <!-- Action Buttons (Desktop & Tablet) -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="window.openVocabAddModal()"
+                        class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-primary text-on-primary text-xs sm:text-sm font-bold flex items-center gap-1.5 shadow-md shadow-primary/25 hover:bg-surface-tint active:scale-95 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span>Thêm từ vựng</span>
+                </button>
+                <button onclick="window.openVocabBulkAddModal()"
+                        class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/30 text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
+                    <span>Thêm hàng loạt</span>
+                </button>
+                <button id="vocab-quick-review-btn" onclick="window.startVocabQuickReview()"
+                        class="hidden px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
+                    <span class="material-symbols-outlined text-[18px]">bolt</span>
+                    <span>Ôn tập nhanh</span>
+                </button>
             </div>
         </header>
-        <div class="relative w-full lg:w-96 mb-2">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-            <input id="vocab-search" oninput="window._filterVocabList()"
-                   class="w-full pl-10 pr-4 py-3 bg-surface-container-low border-b-2 border-transparent focus:border-secondary-fixed-dim focus:bg-surface transition-all outline-none rounded-t-sm placeholder:text-outline text-sm md:text-base"
-                   placeholder="Tìm kiếm từ ngữ, ý nghĩa..."/>
-        </div>
-        <div id="vocab-list" class="flex flex-col gap-4 flex-1">
-            <div class="flex items-center justify-center py-16">
-                <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+
+        <!-- Stats Bar: SRS Memory Widget (4 Cards) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+            <!-- Total Learned -->
+            <div class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow">
+                <div class="flex items-center justify-between text-outline text-xs">
+                    <span class="font-medium">Tổng từ đã học</span>
+                    <span class="material-symbols-outlined text-[18px] text-primary">collections_bookmark</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                    <span id="vocab-stat-total" class="text-xl sm:text-2xl font-black text-on-surface">0</span>
+                    <span class="text-[11px] text-outline font-semibold">từ</span>
+                </div>
+            </div>
+
+            <!-- Due for Review -->
+            <div id="vocab-stat-due-card" onclick="window.filterVocabLevel(-1)" class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow cursor-pointer hover:border-amber-500/40 transition-colors">
+                <div class="flex items-center justify-between text-outline text-xs">
+                    <span class="font-medium">Cần ôn hôm nay</span>
+                    <span class="material-symbols-outlined text-[18px] text-amber-500">alarm</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                    <span id="vocab-stat-due" class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">0</span>
+                    <span class="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-semibold">từ</span>
+                </div>
+            </div>
+
+            <!-- Learning (Lv 1-3) -->
+            <div onclick="window.filterVocabLevel('1-3')" class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow cursor-pointer hover:border-blue-500/40 transition-colors">
+                <div class="flex items-center justify-between text-outline text-xs">
+                    <span class="font-medium">Đang học (Lv 1-3)</span>
+                    <span class="material-symbols-outlined text-[18px] text-blue-500">psychology</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                    <span id="vocab-stat-learning" class="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400">0</span>
+                    <span class="text-[11px] text-blue-600/80 dark:text-blue-400/80 font-semibold">từ</span>
+                </div>
+            </div>
+
+            <!-- Mastered (Lv 4-5) -->
+            <div onclick="window.filterVocabLevel('4-5')" class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow cursor-pointer hover:border-emerald-500/40 transition-colors">
+                <div class="flex items-center justify-between text-outline text-xs">
+                    <span class="font-medium">Đã thuộc (Lv 4-5)</span>
+                    <span class="material-symbols-outlined text-[18px] text-emerald-500">verified</span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-1">
+                    <span id="vocab-stat-mastered" class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">0</span>
+                    <span class="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 font-semibold">từ</span>
+                </div>
             </div>
         </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+            <!-- Search Input -->
+            <div class="relative flex-1 max-w-md">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+                <input id="vocab-search" oninput="window._filterVocabList()"
+                       class="w-full pl-10 pr-9 py-2.5 bg-surface-container-low border border-outline-variant/25 focus:border-primary focus:bg-surface transition-all outline-none rounded-2xl text-xs sm:text-sm text-on-surface placeholder:text-outline/70 shadow-2xs"
+                       placeholder="Tìm kiếm từ vựng, nghĩa tiếng Việt..."/>
+                <button id="vocab-search-clear" onclick="window.clearVocabSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface p-1">
+                    <span class="material-symbols-outlined text-[16px]">close</span>
+                </button>
+            </div>
+
+            <!-- Topic Filter Dropdown -->
+            <div class="flex items-center gap-2">
+                <select id="vocab-topic-filter" onchange="window.onVocabTopicFilterChange(this.value)"
+                        class="bg-surface-container-low border border-outline-variant/25 rounded-2xl px-3 py-2 text-xs font-semibold text-on-surface focus:outline-none focus:border-primary cursor-pointer transition-colors shadow-2xs max-w-[200px] truncate">
+                    <option value="">📁 Tất cả chủ đề</option>
+                    <!-- Populated dynamically -->
+                </select>
+            </div>
+        </div>
+
+        <!-- Pill Filter Badges (Levels) -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scrollbar text-xs font-semibold no-scrollbar" id="vocab-level-pills">
+            <button onclick="window.filterVocabLevel(null)" data-level="all"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-primary text-on-primary shadow-xs shrink-0 cursor-pointer transition-all">
+                Tất cả
+            </button>
+            <button onclick="window.filterVocabLevel(-1)" data-level="-1"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all flex items-center gap-1">
+                <span>⏰ Cần ôn</span>
+            </button>
+            <button onclick="window.filterVocabLevel(1)" data-level="1"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
+                Mới (Lv 1)
+            </button>
+            <button onclick="window.filterVocabLevel('2-3')" data-level="2-3"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
+                Đang nhớ (Lv 2-3)
+            </button>
+            <button onclick="window.filterVocabLevel('4-5')" data-level="4-5"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
+                Thành thạo (Lv 4-5)
+            </button>
+        </div>
+
+        <!-- Vocabulary List Container -->
+        <div id="vocab-list" class="flex flex-col gap-3 flex-1 min-h-[300px]">
+            <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
+                <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+                <p class="text-xs sm:text-sm font-medium">Đang tải sổ từ của bạn...</p>
+            </div>
+        </div>
+
         <!-- Pagination -->
         <div id="vocab-pagination" class="hidden flex items-center justify-center gap-2 py-4 flex-wrap"></div>
     </div>
 </main>
+
+<!-- Mobile Floating Action Button (FAB) for adding words quickly -->
+<button onclick="window.openVocabAddModal()"
+        class="lg:hidden fixed bottom-20 right-5 z-40 w-13 h-13 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.35)] active:scale-90 transition-transform cursor-pointer border border-white/20"
+        title="Thêm từ mới vào Sổ từ" aria-label="Thêm từ vựng">
+    <span class="material-symbols-outlined text-[28px]">add</span>
+</button>
 </div>
 
 <!-- ==================== PAGE: DICTIONARY ==================== -->
@@ -2989,7 +3123,7 @@ window.navigateTo = function(page, preserveHash = false){
     
     // Đổi Title Mobile Header
     if(isMainTab && pageName !== 'library') {
-        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Kho từ vựng', 'exercises': 'Luyện Đề THPT', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
+        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Sổ từ', 'exercises': 'Luyện Đề THPT', 'game': 'Game', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
         const titleEl = document.getElementById('mobile-header-title');
         if(titleEl) {
             if(pageName === 'dashboard') {
@@ -3799,9 +3933,16 @@ window.addEventListener('hashchange', () => {
       </button>
     </div>
 
-    <!-- Modal Form -->
-    <form id="form-add-word" onsubmit="window.submitAddWord(event)" class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
-      
+      <!-- Topic selector (hiển thị khi mở từ trang Sổ từ mà chưa có sẵn topicId) -->
+      <div id="add-word-topic-select-container" class="hidden">
+        <label for="add-word-topic-select" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Lưu vào Chủ đề / Sổ từ <span class="text-rose-500">*</span>
+        </label>
+        <select id="add-word-topic-select" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+
       <!-- English Word + AI Auto-Fill Button -->
       <div>
         <div class="flex items-center justify-between mb-1.5">
@@ -3881,6 +4022,127 @@ window.addEventListener('hashchange', () => {
         </button>
       </div>
     </form>
+
+  </div>
+</div>
+
+<!-- ==================== MODAL: THÊM TỪ HÀNG LOẠT (BULK IMPORT) ==================== -->
+<div id="modal-bulk-add-word" class="fixed inset-0 z-[9999] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(8px)">
+  <div class="w-full max-w-2xl bg-surface rounded-3xl soft-shadow fade-in overflow-hidden border border-outline-variant/30 flex flex-col max-h-[92vh]">
+    
+    <!-- Header -->
+    <div class="px-5 sm:px-6 py-4 border-b border-outline-variant/15 flex items-center justify-between shrink-0 bg-surface-container-lowest/50">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+          <span class="material-symbols-outlined text-[24px]">playlist_add</span>
+        </div>
+        <div>
+          <h2 class="text-base sm:text-lg font-bold text-on-surface leading-tight">Thêm từ vựng hàng loạt</h2>
+          <p class="text-xs text-on-surface-variant mt-0.5">Dán danh sách từ vựng & AI tự động điền toàn bộ thông tin</p>
+        </div>
+      </div>
+      <button onclick="window.closeBulkAddModal()" class="w-9 h-9 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-low transition-colors cursor-pointer">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="p-5 sm:p-6 overflow-y-auto flex-1 custom-scrollbar space-y-4">
+      
+      <!-- Topic selector -->
+      <div>
+        <label for="bulk-add-topic-select" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Lưu vào Chủ đề / Sổ từ
+        </label>
+        <select id="bulk-add-topic-select" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
+          <!-- Populated dynamically -->
+        </select>
+      </div>
+
+      <!-- Textarea Input -->
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="bulk-add-textarea" class="text-xs font-bold text-outline uppercase tracking-wider">
+            Danh sách từ vựng (Tối đa 20 từ mỗi lượt)
+          </label>
+          <span id="bulk-word-count-badge" class="text-[11px] font-semibold text-outline">0 từ</span>
+        </div>
+        <textarea id="bulk-add-textarea" rows="5" oninput="window.updateBulkWordCount()"
+          placeholder="Nhập hoặc dán danh sách từ tiếng Anh (mỗi dòng 1 từ):&#10;resilient&#10;breakthrough&#10;ubiquitous&#10;&#10;Hoặc theo định dạng: từ - nghĩa (ví dụ: persistent - kiên trì)"
+          class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl p-3.5 text-xs sm:text-sm text-on-surface font-mono placeholder:text-outline/60 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all custom-scrollbar"></textarea>
+      </div>
+
+      <!-- Action buttons for parsing / AI fill -->
+      <div class="flex flex-wrap items-center gap-2 pt-1">
+        <button type="button" id="btn-bulk-ai-generate" onclick="window.generateBulkWordsAi()"
+          class="flex-1 min-w-[200px] px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500/15 via-primary/15 to-primary/25 text-primary hover:from-amber-500/25 hover:to-primary/35 border border-primary/30 transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+          <span class="material-symbols-outlined text-[18px] text-amber-500" id="bulk-ai-icon">auto_awesome</span>
+          <span id="bulk-ai-text">✨ AI Điền tự động hàng loạt</span>
+        </button>
+        <button type="button" onclick="window.parseBulkWordsRaw()"
+          class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-colors cursor-pointer">
+          Trích xuất từ danh sách
+        </button>
+        <button type="button" onclick="window.clearBulkWords()"
+          class="px-3 py-2.5 rounded-xl text-xs font-medium text-outline hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer">
+          Xóa trắng
+        </button>
+      </div>
+
+      <!-- Preview Table Container -->
+      <div id="bulk-preview-section" class="hidden flex-col gap-2 pt-2 border-t border-outline-variant/15">
+        <div class="flex items-center justify-between">
+          <h4 class="text-xs font-bold text-outline uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary">visibility</span>
+            <span>Xem trước danh sách (<span id="bulk-preview-count">0</span>)</span>
+          </h4>
+          <span class="text-[11px] text-outline">Bạn có thể sửa trực tiếp trên bảng</span>
+        </div>
+
+        <div class="border border-outline-variant/25 rounded-2xl overflow-hidden max-h-[300px] overflow-y-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead class="bg-surface-container sticky top-0 z-10 text-on-surface-variant font-bold border-b border-outline-variant/20">
+              <tr>
+                <th class="p-2.5 w-8 text-center">#</th>
+                <th class="p-2.5 min-w-[120px]">Từ tiếng Anh</th>
+                <th class="p-2.5 min-w-[100px]">Phiên âm</th>
+                <th class="p-2.5 min-w-[160px]">Nghĩa tiếng Việt</th>
+                <th class="p-2.5 min-w-[160px]">Ví dụ</th>
+                <th class="p-2.5 w-10 text-center"></th>
+              </tr>
+            </thead>
+            <tbody id="bulk-preview-tbody" class="divide-y divide-outline-variant/15 bg-surface-container-lowest/50">
+              <!-- Rows rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Error / Alert -->
+      <div id="bulk-add-error" class="hidden text-xs text-rose-700 bg-rose-50 border border-rose-200 p-3 rounded-xl font-medium flex items-center gap-2">
+        <span class="material-symbols-outlined text-base shrink-0">error</span>
+        <span id="bulk-add-error-text" class="flex-1"></span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-outline-variant/15 flex items-center justify-between shrink-0 bg-surface-container-lowest/50">
+      <div class="text-xs text-outline font-medium">
+        <span id="bulk-footer-summary">Chưa có từ nào sẵn sàng lưu</span>
+      </div>
+      <div class="flex items-center gap-2.5">
+        <button type="button" onclick="window.closeBulkAddModal()"
+          class="px-4 py-2.5 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors cursor-pointer">
+          Đóng
+        </button>
+        <button type="button" id="btn-submit-bulk-add" onclick="window.submitBulkAddWords()" disabled
+          class="px-5 py-2.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:bg-surface-tint active:scale-95 transition-all shadow-sm disabled:opacity-50 disabled:pointer-events-none flex items-center gap-1.5 cursor-pointer">
+          <span class="material-symbols-outlined text-[18px]">save</span>
+          <span id="bulk-submit-text">Lưu vào Sổ từ</span>
+        </button>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -6095,28 +6357,67 @@ window.filterLessonWords = function() {
 };
 
 // ── THÊM TỪ VỰNG TRỰC TIẾP & AI AUTO-FILL ───────────────────────
-window.openAddWordModal = function(topicId = null, passageId = null) {
-    const targetTopicId = topicId || window._currentTopicId;
+// ── THÊM TỪ VỰNG TRỰC TIẾP & AI AUTO-FILL ───────────────────────
+window.openAddWordModal = async function(topicId = null, passageId = null) {
+    const isVocabContext = !topicId && !window._currentTopicId;
+    let targetTopicId = topicId || (!isVocabContext ? window._currentTopicId : null);
     const targetPassageId = (passageId !== null && passageId !== undefined)
         ? passageId
         : (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
 
     const topicInput = document.getElementById('add-word-topic-id');
     const passageInput = document.getElementById('add-word-passage-id');
+    const badgeContainer = document.getElementById('add-word-topic-badge');
+    const selectContainer = document.getElementById('add-word-topic-select-container');
+    const selectEl = document.getElementById('add-word-topic-select');
+
     if (topicInput) topicInput.value = targetTopicId || '';
     if (passageInput) passageInput.value = targetPassageId || '';
 
-    // Cập nhật tên chủ đề / bài học hiển thị trên badge
-    const badgeNameEl = document.getElementById('add-word-topic-name');
-    if (badgeNameEl) {
-        let label = window._currentTopicName || 'Chủ đề hiện tại';
-        if (targetPassageId && window._currentPassageTitle) {
-            label += ` · Passage ${window._currentPassageNumber || ''}: ${window._currentPassageTitle}`.trim();
-        } else if (window._currentLessonName) {
-            label += ` · ${window._currentLessonName}`;
+    // Cấu hình Topic: Mở từ Sổ từ vs Mở từ Lesson
+    if (isVocabContext || !targetTopicId) {
+        if (badgeContainer) badgeContainer.classList.add('hidden');
+        if (selectContainer) selectContainer.classList.remove('hidden');
+
+        if (selectEl) {
+            selectEl.innerHTML = '<option value="">Đang tải danh sách chủ đề...</option>';
+            try {
+                let personalTopic = null;
+                if (typeof HiDB !== 'undefined' && typeof HiDB.ensureUserPersonalTopic === 'function') {
+                    personalTopic = await HiDB.ensureUserPersonalTopic().catch(() => null);
+                }
+                const allTopics = (typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function')
+                    ? await HiDB.getTopics().catch(() => [])
+                    : [];
+
+                let optionsHtml = '';
+                if (personalTopic) {
+                    optionsHtml += `<option value="${personalTopic.id}" selected>📝 ${personalTopic.name || 'Sổ tay từ vựng của tôi'}</option>`;
+                }
+                (allTopics || []).forEach(t => {
+                    if (personalTopic && t.id === personalTopic.id) return;
+                    optionsHtml += `<option value="${t.id}">📁 ${_esc(t.name)}</option>`;
+                });
+                selectEl.innerHTML = optionsHtml || '<option value="">Chưa có chủ đề</option>';
+                if (topicInput && personalTopic) topicInput.value = personalTopic.id;
+            } catch (e) {
+                console.warn('[openAddWordModal:topics]', e);
+            }
         }
-        badgeNameEl.textContent = label;
-        badgeNameEl.title = label;
+    } else {
+        if (selectContainer) selectContainer.classList.add('hidden');
+        if (badgeContainer) badgeContainer.classList.remove('hidden');
+        const badgeNameEl = document.getElementById('add-word-topic-name');
+        if (badgeNameEl) {
+            let label = window._currentTopicName || 'Chủ đề hiện tại';
+            if (targetPassageId && window._currentPassageTitle) {
+                label += ` · Passage ${window._currentPassageNumber || ''}: ${window._currentPassageTitle}`.trim();
+            } else if (window._currentLessonName) {
+                label += ` · ${window._currentLessonName}`;
+            }
+            badgeNameEl.textContent = label;
+            badgeNameEl.title = label;
+        }
     }
 
     // Reset Form
@@ -6152,6 +6453,10 @@ window.openAddWordModal = function(topicId = null, passageId = null) {
     setTimeout(() => {
         if (engInput) engInput.focus();
     }, 120);
+};
+
+window.openVocabAddModal = function() {
+    window.openAddWordModal(null, null);
 };
 
 window.closeAddWordModal = function() {
@@ -6229,7 +6534,7 @@ window.triggerAiLookup = async function() {
             aiIcon.textContent = 'check';
             aiIcon.classList.remove('animate-spin');
         }
-        if (aiText) aiText.textContent = 'Đã điền thành công!';
+        if (aiText) aiText.textContent = 'Đã điền xong!';
 
         setTimeout(() => {
             if (aiIcon) aiIcon.textContent = 'auto_awesome';
@@ -6260,6 +6565,7 @@ window.submitAddWord = async function(e) {
     const meaInput = document.getElementById('add-word-meaning');
     const exaInput = document.getElementById('add-word-example');
     const topicInput = document.getElementById('add-word-topic-id');
+    const selectEl   = document.getElementById('add-word-topic-select');
     const passageInput = document.getElementById('add-word-passage-id');
     const errEl    = document.getElementById('add-word-error');
     const errText  = document.getElementById('add-word-error-text');
@@ -6269,7 +6575,7 @@ window.submitAddWord = async function(e) {
     const phonetic = (phoInput?.value || '').trim();
     const meaning = (meaInput?.value || '').trim();
     const exampleSentence = (exaInput?.value || '').trim();
-    const topicId = topicInput?.value || window._currentTopicId;
+    const topicId = topicInput?.value || (selectEl && selectEl.value) || window._currentTopicId;
     const passageId = passageInput?.value || (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
 
     if (!topicId) {
@@ -6315,7 +6621,8 @@ window.submitAddWord = async function(e) {
             phonetic,
             meaning,
             exampleSentence,
-            passageId: passageId || null
+            passageId: passageId || null,
+            autoProgress: true
         });
 
         // Xóa cache lesson để lấy số lượng từ mới nhất
@@ -6334,12 +6641,17 @@ window.submitAddWord = async function(e) {
             showToast(`Đã thêm từ "${word}" thành công!`, 'success');
         }
 
-        // Cập nhật ngay danh sách từ / bài học tức thì mà không reload trang
-        const activePage = window._currentPage || (document.getElementById('page-lesson-detail')?.classList.contains('active') ? 'lesson-detail' : (document.getElementById('page-topic-detail')?.classList.contains('active') ? 'topic-detail' : ''));
-        if (activePage === 'lesson-detail' && typeof window._loadLessonWords === 'function') {
-            await window._loadLessonWords();
-        } else if (typeof window._loadLessons === 'function') {
-            await window._loadLessons();
+        // Cập nhật giao diện tức thì
+        const isVocabActive = document.getElementById('page-vocabulary')?.classList.contains('active');
+        if (isVocabActive && typeof window._loadVocabularyPage === 'function') {
+            await window._loadVocabularyPage(1);
+        } else {
+            const activePage = window._currentPage || (document.getElementById('page-lesson-detail')?.classList.contains('active') ? 'lesson-detail' : (document.getElementById('page-topic-detail')?.classList.contains('active') ? 'topic-detail' : ''));
+            if (activePage === 'lesson-detail' && typeof window._loadLessonWords === 'function') {
+                await window._loadLessonWords();
+            } else if (typeof window._loadLessons === 'function') {
+                await window._loadLessons();
+            }
         }
 
     } catch (err) {
@@ -6361,34 +6673,480 @@ document.getElementById('modal-add-word')?.addEventListener('click', function(e)
     if (e.target === this) window.closeAddWordModal();
 });
 
-// ── SỔ TỪ VỰNG (VOCABULARY NOTEBOOK / KHO TỪ VỰNG) ──────────────
+// ── MODAL: THÊM TỪ HÀNG LOẠT (BULK ADD) ─────────────────────────
+window._bulkWordsState = {
+    words: [],
+    isGenerating: false,
+    isSubmitting: false
+};
+
+window.openVocabBulkAddModal = async function() {
+    const modal = document.getElementById('modal-bulk-add-word');
+    if (!modal) return;
+
+    window._bulkWordsState.words = [];
+    window._bulkWordsState.isGenerating = false;
+    window._bulkWordsState.isSubmitting = false;
+
+    const textarea = document.getElementById('bulk-add-textarea');
+    if (textarea) textarea.value = '';
+    window.updateBulkWordCount();
+
+    const errEl = document.getElementById('bulk-add-error');
+    if (errEl) errEl.classList.add('hidden');
+
+    const previewSection = document.getElementById('bulk-preview-section');
+    if (previewSection) previewSection.classList.add('hidden');
+
+    const submitBtn = document.getElementById('btn-submit-bulk-add');
+    if (submitBtn) submitBtn.disabled = true;
+
+    const selectEl = document.getElementById('bulk-add-topic-select');
+    if (selectEl) {
+        selectEl.innerHTML = '<option value="">Đang tải chủ đề...</option>';
+        try {
+            let personalTopic = null;
+            if (typeof HiDB !== 'undefined' && typeof HiDB.ensureUserPersonalTopic === 'function') {
+                personalTopic = await HiDB.ensureUserPersonalTopic().catch(() => null);
+            }
+            const allTopics = (typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function')
+                ? await HiDB.getTopics().catch(() => [])
+                : [];
+
+            let optionsHtml = '';
+            if (personalTopic) {
+                optionsHtml += `<option value="${personalTopic.id}" selected>📝 ${personalTopic.name || 'Sổ tay từ vựng của tôi'}</option>`;
+            }
+            (allTopics || []).forEach(t => {
+                if (personalTopic && t.id === personalTopic.id) return;
+                optionsHtml += `<option value="${t.id}">📁 ${_esc(t.name)}</option>`;
+            });
+            selectEl.innerHTML = optionsHtml || '<option value="">Chưa có chủ đề</option>';
+        } catch (e) {
+            console.warn('[openVocabBulkAddModal]', e);
+        }
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    setTimeout(() => { if (textarea) textarea.focus(); }, 120);
+};
+
+window.closeBulkAddModal = function() {
+    const modal = document.getElementById('modal-bulk-add-word');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+};
+
+document.getElementById('modal-bulk-add-word')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeBulkAddModal();
+});
+
+window.updateBulkWordCount = function() {
+    const text = (document.getElementById('bulk-add-textarea')?.value || '').trim();
+    const lines = text ? text.split(/\r?\n/).map(l => l.trim()).filter(Boolean) : [];
+    const badge = document.getElementById('bulk-word-count-badge');
+    if (badge) {
+        badge.textContent = `${lines.length} từ`;
+        if (lines.length > 20) {
+            badge.className = 'text-[11px] font-bold text-rose-500';
+            badge.textContent = `${lines.length}/20 từ (vượt mức cho phép)`;
+        } else {
+            badge.className = 'text-[11px] font-semibold text-outline';
+        }
+    }
+};
+
+window.clearBulkWords = function() {
+    const textarea = document.getElementById('bulk-add-textarea');
+    if (textarea) textarea.value = '';
+    window._bulkWordsState.words = [];
+    window.renderBulkPreview();
+    window.updateBulkWordCount();
+};
+
+window.parseBulkWordsRaw = function() {
+    const text = (document.getElementById('bulk-add-textarea')?.value || '').trim();
+    const errEl = document.getElementById('bulk-add-error');
+    const errText = document.getElementById('bulk-add-error-text');
+    if (errEl) errEl.classList.add('hidden');
+
+    if (!text) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng dán danh sách từ vựng vào ô nhập trước.';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean).slice(0, 20);
+    const parsed = [];
+
+    lines.forEach(line => {
+        let word = '', meaning = '';
+        if (line.includes(' - ')) {
+            const parts = line.split(' - ');
+            word = parts[0].trim();
+            meaning = parts.slice(1).join(' - ').trim();
+        } else if (line.includes(' : ')) {
+            const parts = line.split(' : ');
+            word = parts[0].trim();
+            meaning = parts.slice(1).join(' : ').trim();
+        } else if (line.includes('\t')) {
+            const parts = line.split('\t');
+            word = parts[0].trim();
+            meaning = parts.slice(1).join(' ').trim();
+        } else {
+            word = line;
+            meaning = '';
+        }
+
+        if (word) {
+            parsed.push({
+                word,
+                phonetic: '',
+                meaning,
+                example: ''
+            });
+        }
+    });
+
+    window._bulkWordsState.words = parsed;
+    window.renderBulkPreview();
+};
+
+window.generateBulkWordsAi = async function() {
+    const text = (document.getElementById('bulk-add-textarea')?.value || '').trim();
+    const errEl = document.getElementById('bulk-add-error');
+    const errText = document.getElementById('bulk-add-error-text');
+    const aiBtn = document.getElementById('btn-bulk-ai-generate');
+    const aiIcon = document.getElementById('bulk-ai-icon');
+    const aiText = document.getElementById('bulk-ai-text');
+
+    if (errEl) errEl.classList.add('hidden');
+
+    if (!text) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng nhập hoặc dán ít nhất 1 từ tiếng Anh trước khi bấm AI Điền tự động.';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    const rawLines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+    const wordList = rawLines.map(l => {
+        if (l.includes(' - ')) return l.split(' - ')[0].trim();
+        if (l.includes(' : ')) return l.split(' : ')[0].trim();
+        if (l.includes('\t')) return l.split('\t')[0].trim();
+        return l;
+    }).filter(Boolean).slice(0, 20);
+
+    if (wordList.length === 0) return;
+
+    if (aiBtn) aiBtn.disabled = true;
+    if (aiIcon) {
+        aiIcon.textContent = 'sync';
+        aiIcon.classList.add('animate-spin');
+    }
+    if (aiText) aiText.textContent = `AI đang phân tích ${wordList.length} từ...`;
+
+    try {
+        const res = await fetch('/api/ai-lookup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ words: wordList })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+            throw new Error(data.error || 'Lỗi tra cứu hàng loạt từ AI.');
+        }
+
+        const results = data.results || [];
+        window._bulkWordsState.words = wordList.map(w => {
+            const match = results.find(r => r.word.toLowerCase() === w.toLowerCase()) || results.find(r => r.word.toLowerCase().includes(w.toLowerCase()));
+            return {
+                word: w,
+                phonetic: match?.phonetic || '',
+                meaning: match?.meaning || '',
+                example: match?.example || ''
+            };
+        });
+
+        window.renderBulkPreview();
+
+    } catch (err) {
+        console.error('[generateBulkWordsAi]', err);
+        if (errEl && errText) {
+            errText.textContent = 'Lỗi AI: ' + (err.message || 'Không thể tạo từ.');
+            errEl.classList.remove('hidden');
+        }
+    } finally {
+        if (aiBtn) aiBtn.disabled = false;
+        if (aiIcon) {
+            aiIcon.textContent = 'auto_awesome';
+            aiIcon.classList.remove('animate-spin');
+        }
+        if (aiText) aiText.textContent = '✨ AI Điền tự động hàng loạt';
+    }
+};
+
+window.renderBulkPreview = function() {
+    const previewSection = document.getElementById('bulk-preview-section');
+    const tbody = document.getElementById('bulk-preview-tbody');
+    const countEl = document.getElementById('bulk-preview-count');
+    const summaryEl = document.getElementById('bulk-footer-summary');
+    const submitBtn = document.getElementById('btn-submit-bulk-add');
+    const words = window._bulkWordsState.words || [];
+
+    if (words.length === 0) {
+        if (previewSection) previewSection.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = true;
+        if (summaryEl) summaryEl.textContent = 'Chưa có từ nào sẵn sàng lưu';
+        return;
+    }
+
+    if (previewSection) previewSection.classList.remove('hidden');
+    if (countEl) countEl.textContent = words.length;
+
+    const validCount = words.filter(w => w.word && w.meaning).length;
+    if (summaryEl) {
+        summaryEl.textContent = `${validCount}/${words.length} từ đã có đầy đủ nghĩa và sẵn sàng lưu`;
+    }
+    if (submitBtn) {
+        submitBtn.disabled = validCount === 0;
+    }
+
+    if (!tbody) return;
+    tbody.innerHTML = words.map((item, idx) => `
+        <tr class="hover:bg-primary/5 transition-colors">
+            <td class="p-2.5 text-center text-outline font-semibold">${idx + 1}</td>
+            <td class="p-2.5">
+                <input type="text" value="${_esc(item.word)}" oninput="window.updateBulkItem(${idx}, 'word', this.value)"
+                       class="w-full bg-transparent font-bold text-on-surface border-b border-transparent focus:border-primary outline-none text-xs"/>
+            </td>
+            <td class="p-2.5">
+                <input type="text" value="${_esc(item.phonetic || '')}" placeholder="/.../" oninput="window.updateBulkItem(${idx}, 'phonetic', this.value)"
+                       class="w-full bg-transparent font-mono text-outline border-b border-transparent focus:border-primary outline-none text-[11px]"/>
+            </td>
+            <td class="p-2.5">
+                <input type="text" value="${_esc(item.meaning || '')}" placeholder="Nhập nghĩa tiếng Việt" oninput="window.updateBulkItem(${idx}, 'meaning', this.value)"
+                       class="w-full bg-transparent font-medium text-on-surface border-b ${!item.meaning ? 'border-amber-400' : 'border-transparent'} focus:border-primary outline-none text-xs"/>
+            </td>
+            <td class="p-2.5">
+                <input type="text" value="${_esc(item.example || '')}" placeholder="Ví dụ tiếng Anh" oninput="window.updateBulkItem(${idx}, 'example', this.value)"
+                       class="w-full bg-transparent italic text-outline border-b border-transparent focus:border-primary outline-none text-[11px]"/>
+            </td>
+            <td class="p-2.5 text-center">
+                <button type="button" onclick="window.removeBulkItem(${idx})" class="p-1 text-outline hover:text-rose-500 rounded-lg hover:bg-rose-50 transition-colors" title="Xóa từ này">
+                    <span class="material-symbols-outlined text-[16px]">delete</span>
+                </button>
+            </td>
+        </tr>
+    `).join('');
+};
+
+window.updateBulkItem = function(idx, key, value) {
+    if (window._bulkWordsState.words[idx]) {
+        window._bulkWordsState.words[idx][key] = value;
+        const validCount = window._bulkWordsState.words.filter(w => w.word && w.meaning).length;
+        const summaryEl = document.getElementById('bulk-footer-summary');
+        const submitBtn = document.getElementById('btn-submit-bulk-add');
+        if (summaryEl) summaryEl.textContent = `${validCount}/${window._bulkWordsState.words.length} từ đã có đầy đủ nghĩa và sẵn sàng lưu`;
+        if (submitBtn) submitBtn.disabled = validCount === 0;
+    }
+};
+
+window.removeBulkItem = function(idx) {
+    window._bulkWordsState.words.splice(idx, 1);
+    window.renderBulkPreview();
+};
+
+window.submitBulkAddWords = async function() {
+    const topicSelect = document.getElementById('bulk-add-topic-select');
+    const topicId = topicSelect?.value;
+    const submitBtn = document.getElementById('btn-submit-bulk-add');
+    const submitText = document.getElementById('bulk-submit-text');
+    const errEl = document.getElementById('bulk-add-error');
+    const errText = document.getElementById('bulk-add-error-text');
+
+    if (errEl) errEl.classList.add('hidden');
+
+    if (!topicId) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng chọn một Chủ đề / Sổ từ để lưu.';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    const wordsToSave = (window._bulkWordsState.words || []).filter(w => w.word && w.meaning);
+    if (wordsToSave.length === 0) {
+        if (errEl && errText) {
+            errText.textContent = 'Không có từ nào hợp lệ (cần có cả từ tiếng Anh và nghĩa tiếng Việt).';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitText) submitText.textContent = `Đang lưu ${wordsToSave.length} từ...`;
+
+    try {
+        if (typeof HiDB === 'undefined' || typeof HiDB.addWordsBatch !== 'function') {
+            throw new Error('Hệ thống HiDB chưa hỗ trợ thêm hàng loạt.');
+        }
+
+        const saved = await HiDB.addWordsBatch(topicId, wordsToSave);
+
+        window.closeBulkAddModal();
+        if (typeof showToast === 'function') {
+            showToast(`✓ Đã thêm thành công ${saved.length || wordsToSave.length} từ vào Sổ từ!`, 'success');
+        }
+
+        if (typeof window._loadVocabularyPage === 'function') {
+            await window._loadVocabularyPage(1);
+        }
+
+    } catch (err) {
+        console.error('[submitBulkAddWords]', err);
+        if (errEl && errText) {
+            errText.textContent = 'Lỗi lưu từ hàng loạt: ' + (err.message || 'Thất bại.');
+            errEl.classList.remove('hidden');
+        }
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitText) submitText.textContent = 'Lưu vào Sổ từ';
+    }
+};
+
+// ── SỔ TỪ VỰNG CÁ NHÂN (PERSONAL VOCABULARY NOTEBOOK) ───────────
 window._vocabPageState = {
     page: 1,
     pageSize: 25,
     search: '',
+    levelFilter: null,
+    topicId: null,
     debounceTimer: null,
     total: 0,
     totalPages: 1,
-    isLoading: false
+    isLoading: false,
+    topicsLoaded: false
+};
+
+window.filterVocabLevel = function(level) {
+    window._vocabPageState.levelFilter = level;
+    document.querySelectorAll('#vocab-level-pills .vocab-pill').forEach(btn => {
+        const pillLevel = btn.dataset.level;
+        const isMatch = (level === null && pillLevel === 'all') || (String(level) === String(pillLevel));
+        if (isMatch) {
+            btn.className = 'vocab-pill px-3 py-1.5 rounded-full bg-primary text-on-primary shadow-xs shrink-0 cursor-pointer transition-all';
+        } else {
+            btn.className = 'vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all';
+        }
+    });
+    window._loadVocabularyPage(1);
+};
+
+window.onVocabTopicFilterChange = function(val) {
+    window._vocabPageState.topicId = val || null;
+    window._loadVocabularyPage(1);
+};
+
+window.clearVocabSearch = function() {
+    const input = document.getElementById('vocab-search');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('vocab-search-clear');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    window._loadVocabularyPage(1, '');
+};
+
+window.startVocabQuickReview = function() {
+    if (typeof window.navigateTo === 'function') {
+        window.navigateTo('dashboard');
+    }
+};
+
+window.deleteVocabWord = async function(wordId, wordText) {
+    if (!confirm(`Bạn có chắc chắn muốn xóa từ "${wordText}" khỏi Sổ từ cá nhân không?`)) return;
+    try {
+        if (typeof HiDB !== 'undefined' && typeof HiDB.deleteWord === 'function') {
+            await HiDB.deleteWord(wordId);
+            if (typeof showToast === 'function') {
+                showToast(`Đã xóa từ "${wordText}"`, 'info');
+            }
+            window._loadVocabularyPage(window._vocabPageState.page);
+        }
+    } catch (e) {
+        alert('Không thể xóa từ: ' + e.message);
+    }
 };
 
 window._loadVocabularyPage = async function(page = 1, search = null) {
     const listEl = document.getElementById('vocab-list');
     const pagEl = document.getElementById('vocab-pagination');
     const subtitleEl = document.getElementById('vocab-subtitle');
+    const clearSearchBtn = document.getElementById('vocab-search-clear');
     if (!listEl) return;
 
     if (search !== null) {
         window._vocabPageState.search = (search || '').trim();
     }
     const currentSearch = window._vocabPageState.search;
+    if (clearSearchBtn) {
+        clearSearchBtn.classList.toggle('hidden', !currentSearch);
+    }
+
     window._vocabPageState.page = page;
     window._vocabPageState.isLoading = true;
+
+    // Cập nhật stats bộ nhớ SM-2 song song
+    if (typeof HiDB !== 'undefined' && typeof HiDB.getLearnedVocabStats === 'function') {
+        HiDB.getLearnedVocabStats().then(stats => {
+            if (!stats) return;
+            const tEl = document.getElementById('vocab-stat-total');
+            const dEl = document.getElementById('vocab-stat-due');
+            const lEl = document.getElementById('vocab-stat-learning');
+            const mEl = document.getElementById('vocab-stat-mastered');
+            const qBtn = document.getElementById('vocab-quick-review-btn');
+
+            if (tEl) tEl.textContent = stats.total.toLocaleString('vi-VN');
+            if (dEl) dEl.textContent = stats.due.toLocaleString('vi-VN');
+            if (lEl) lEl.textContent = stats.learning.toLocaleString('vi-VN');
+            if (mEl) mEl.textContent = stats.mastered.toLocaleString('vi-VN');
+
+            if (qBtn) {
+                if (stats.due > 0) {
+                    qBtn.classList.remove('hidden');
+                    qBtn.querySelector('span:last-child').textContent = `Ôn tập ngay (${stats.due})`;
+                } else {
+                    qBtn.classList.add('hidden');
+                }
+            }
+        }).catch(err => console.warn('[vocabStats]', err));
+    }
+
+    // Tải danh sách topic cho filter dropdown nếu chưa có
+    if (!window._vocabPageState.topicsLoaded && typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function') {
+        HiDB.getTopics().then(topics => {
+            const filterSel = document.getElementById('vocab-topic-filter');
+            if (filterSel && topics && topics.length > 0) {
+                let opts = '<option value="">📁 Tất cả chủ đề</option>';
+                topics.forEach(t => {
+                    opts += `<option value="${t.id}">${_esc(t.name)}</option>`;
+                });
+                filterSel.innerHTML = opts;
+                window._vocabPageState.topicsLoaded = true;
+            }
+        }).catch(e => console.warn('[vocabTopicsFilter]', e));
+    }
 
     listEl.innerHTML = `
         <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3">
             <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-            <p class="text-sm font-medium">Đang tải danh sách từ vựng...</p>
+            <p class="text-xs sm:text-sm font-medium">Đang tải danh sách từ đã học...</p>
         </div>
     `;
     if (pagEl) pagEl.classList.add('hidden');
@@ -6398,7 +7156,13 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
             throw new Error('Hệ thống dữ liệu HiDB chưa sẵn sàng.');
         }
 
-        const res = await HiDB.getVocabularyPage(page, window._vocabPageState.pageSize, currentSearch);
+        const res = await HiDB.getVocabularyPage(
+            page,
+            window._vocabPageState.pageSize,
+            currentSearch,
+            window._vocabPageState.levelFilter,
+            window._vocabPageState.topicId
+        );
         const words = res?.words || [];
         const total = res?.total || 0;
         const totalPages = Math.max(1, Math.ceil(total / window._vocabPageState.pageSize));
@@ -6409,18 +7173,50 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
 
         if (subtitleEl) {
             if (currentSearch) {
-                subtitleEl.textContent = `Tìm thấy ${total.toLocaleString('vi-VN')} từ vựng phù hợp với "${currentSearch}".`;
+                subtitleEl.textContent = `Tìm thấy ${total.toLocaleString('vi-VN')} từ vựng trong sổ tay phù hợp với "${currentSearch}".`;
+            } else if (window._vocabPageState.levelFilter !== null) {
+                subtitleEl.textContent = `Lọc được ${total.toLocaleString('vi-VN')} từ vựng theo cấp độ ghi nhớ.`;
             } else {
-                subtitleEl.textContent = `Tổng cộng ${total.toLocaleString('vi-VN')} từ vựng trong toàn bộ kho dữ liệu.`;
+                subtitleEl.textContent = `Sổ tay cá nhân · Tổng cộng ${total.toLocaleString('vi-VN')} từ vựng bạn đã học và lưu trữ.`;
             }
         }
 
         if (words.length === 0) {
+            const isFilterActive = currentSearch || window._vocabPageState.levelFilter !== null || window._vocabPageState.topicId;
             listEl.innerHTML = `
-                <div class="flex flex-col items-center justify-center py-20 text-on-surface-variant gap-3 bg-surface-container-lowest/50 rounded-2xl border border-outline-variant/20 p-8 text-center">
-                    <span class="material-symbols-outlined text-[52px] text-outline opacity-40">search_off</span>
-                    <h3 class="font-bold text-base text-on-surface">Không tìm thấy từ vựng nào</h3>
-                    <p class="text-xs text-on-surface-variant max-w-sm">Thử tìm kiếm với từ khóa khác hoặc xóa ô tìm kiếm để xem lại toàn bộ từ vựng.</p>
+                <div class="flex flex-col items-center justify-center py-16 sm:py-20 text-on-surface-variant gap-4 bg-surface-container-lowest/60 rounded-3xl border border-outline-variant/20 p-6 sm:p-8 text-center max-w-lg mx-auto w-full my-4">
+                    <div class="w-16 h-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
+                        <span class="material-symbols-outlined text-[36px]">${isFilterActive ? 'search_off' : 'collections_bookmark'}</span>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base sm:text-lg text-on-surface">
+                            ${isFilterActive ? 'Không tìm thấy từ vựng phù hợp' : 'Sổ từ của bạn đang trống'}
+                        </h3>
+                        <p class="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
+                            ${isFilterActive 
+                                ? 'Thử xóa từ khóa tìm kiếm hoặc đổi bộ lọc cấp độ để xem lại các từ khác trong sổ tay.' 
+                                : 'Những từ bạn học trong mục Chủ đề sẽ tự động lưu vào đây. Bạn cũng có thể tự thêm từ vựng mới vào sổ tay ngay bây giờ!'}
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2.5 pt-2 flex-wrap justify-center">
+                        ${isFilterActive ? `
+                            <button onclick="window.clearVocabSearch(); window.filterVocabLevel(null);"
+                                    class="px-4 py-2 bg-surface-container text-on-surface font-semibold text-xs rounded-xl hover:bg-surface-container-high transition-colors cursor-pointer">
+                                Xóa tất cả bộ lọc
+                            </button>
+                        ` : `
+                            <button onclick="window.navigateTo('topics')"
+                                    class="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px] text-primary">explore</span>
+                                <span>Khám phá Chủ đề để học</span>
+                            </button>
+                            <button onclick="window.openVocabAddModal()"
+                                    class="px-4 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl shadow-xs hover:bg-surface-tint transition-all cursor-pointer flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-[16px]">add</span>
+                                <span>Thêm từ đầu tiên</span>
+                            </button>
+                        `}
+                    </div>
                 </div>
             `;
             if (pagEl) pagEl.classList.add('hidden');
@@ -6430,11 +7226,11 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
         const lvLabel = ['Mới', '1h', '8h', '1 ngày', '1 tuần', '1 tháng'];
         const lvColor = [
             'bg-surface-container text-outline',
-            'bg-red-100 text-red-700',
-            'bg-yellow-100 text-yellow-700',
-            'bg-blue-100 text-blue-700',
-            'bg-green-100 text-green-700',
-            'bg-green-200 text-green-800'
+            'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300',
+            'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300',
+            'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300',
+            'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300',
+            'bg-emerald-200 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
         ];
 
         const startIndex = (page - 1) * window._vocabPageState.pageSize;
@@ -6450,25 +7246,32 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
             const safePhonetic = (typeof _esc === 'function' ? _esc(w.phonetic || '') : (w.phonetic || ''));
 
             return `
-            <div class="group bg-surface-container-lowest/90 backdrop-blur-sm border border-outline-variant/25 hover:border-primary/40 rounded-2xl p-4 md:p-5 flex items-start gap-4 soft-shadow hover:shadow-md transition-all">
-                <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary font-black text-xs md:text-sm flex items-center justify-center shrink-0 mt-0.5">
+            <div class="group bg-surface-container-lowest/90 backdrop-blur-sm border border-outline-variant/20 hover:border-primary/40 rounded-2xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 soft-shadow hover:shadow-md transition-all">
+                <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 text-primary font-black text-xs sm:text-sm flex items-center justify-center shrink-0 mt-0.5">
                     ${globalIndex}
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <span class="font-bold text-on-surface text-base md:text-lg group-hover:text-primary transition-colors">${safeWord}</span>
-                        ${safePos ? `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">${safePos}</span>` : ''}
-                        ${safePhonetic ? `<span class="text-xs md:text-sm text-outline font-mono">${safePhonetic}</span>` : ''}
+                        <span class="font-bold text-on-surface text-base sm:text-lg group-hover:text-primary transition-colors tracking-tight">${safeWord}</span>
+                        ${safePos ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">${safePos}</span>` : ''}
+                        ${safePhonetic ? `<span class="text-xs sm:text-sm text-outline font-mono">${safePhonetic}</span>` : ''}
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
-                        ${safeTopic ? `<span class="hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant truncate max-w-[200px]" title="${safeTopic}">${safeTopic}</span>` : ''}
-                        <button data-audio-word="${safeWord}"
-                            onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
-                            class="ml-auto p-1.5 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
-                            <span class="material-symbols-outlined text-[20px]">volume_up</span>
-                        </button>
+                        ${safeTopic ? `<span class="hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-md bg-surface-container-high text-on-surface-variant truncate max-w-[180px]" title="${safeTopic}">${safeTopic}</span>` : ''}
+                        
+                        <div class="ml-auto flex items-center gap-1">
+                            <button data-audio-word="${safeWord}"
+                                onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
+                                class="p-1.5 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
+                                <span class="material-symbols-outlined text-[19px]">volume_up</span>
+                            </button>
+                            <button onclick="window.deleteVocabWord('${w.id}', '${safeWord}')"
+                                class="p-1.5 rounded-full hover:bg-rose-500/10 transition-colors text-outline hover:text-rose-500 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity" title="Xóa khỏi sổ từ">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                        </div>
                     </div>
-                    <p class="text-sm md:text-base text-on-surface-variant mt-1.5 font-medium leading-relaxed">${safeMeaning}</p>
-                    ${safeExample ? `<p class="text-xs md:text-sm text-outline italic mt-1.5 leading-relaxed bg-surface-container-lowest/60 p-2 rounded-lg border border-outline-variant/15">${safeExample}</p>` : ''}
+                    <p class="text-xs sm:text-sm text-on-surface-variant mt-1.5 font-medium leading-relaxed">${safeMeaning}</p>
+                    ${safeExample ? `<p class="text-xs sm:text-sm text-outline italic mt-1.5 leading-relaxed bg-surface-container-lowest/60 p-2 rounded-xl border border-outline-variant/15">${safeExample}</p>` : ''}
                 </div>
             </div>`;
         }).join('');
@@ -6478,7 +7281,6 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
             pagEl.classList.remove('hidden');
             let pagHtml = '';
 
-            // Previous Button
             pagHtml += `
                 <button onclick="window._loadVocabularyPage(${page - 1})"
                         class="px-3 py-1.5 rounded-xl border border-outline-variant/40 text-xs font-bold transition-all ${page <= 1 ? 'opacity-40 cursor-not-allowed pointer-events-none text-outline' : 'hover:bg-primary/10 text-on-surface cursor-pointer'}">
@@ -6486,7 +7288,6 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
                 </button>
             `;
 
-            // Smart page numbers
             const pagesToShow = [];
             for (let p = 1; p <= totalPages; p++) {
                 if (p === 1 || p === totalPages || (p >= page - 2 && p <= page + 2)) {
@@ -6515,7 +7316,6 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
                 }
             });
 
-            // Next Button
             pagHtml += `
                 <button onclick="window._loadVocabularyPage(${page + 1})"
                         class="px-3 py-1.5 rounded-xl border border-outline-variant/40 text-xs font-bold transition-all ${page >= totalPages ? 'opacity-40 cursor-not-allowed pointer-events-none text-outline' : 'hover:bg-primary/10 text-on-surface cursor-pointer'}">
@@ -6532,9 +7332,9 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
         console.error('[_loadVocabularyPage]', err);
         window._vocabPageState.isLoading = false;
         listEl.innerHTML = `
-            <div class="flex flex-col items-center justify-center py-16 text-error gap-3 bg-red-50/50 rounded-2xl border border-red-200 p-6 text-center">
+            <div class="flex flex-col items-center justify-center py-16 text-error gap-3 bg-red-50/50 dark:bg-red-950/20 rounded-3xl border border-red-200 dark:border-red-900/40 p-6 text-center">
                 <span class="material-symbols-outlined text-[44px]">error</span>
-                <h3 class="font-bold text-sm">Không thể tải danh sách từ vựng</h3>
+                <h3 class="font-bold text-sm">Không thể tải sổ từ vựng</h3>
                 <p class="text-xs text-on-surface-variant">${typeof _esc === 'function' ? _esc(err.message) : err.message}</p>
                 <button onclick="window._loadVocabularyPage(${page})" class="mt-2 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer hover:bg-primary-dark transition-all">
                     Thử lại

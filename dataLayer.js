@@ -462,16 +462,16 @@ window.HiDB = (() => {
      * Thêm từ vựng mới vào chủ đề.
      *
      * @param {string} topicId
-     * @param {Object} wordData - { word, phonetic?, meaning, exampleSentence? }
+     * @param {Object} wordData - { word, phonetic?, meaning, exampleSentence?, passageId?, autoProgress? }
      * @returns {Promise<Object>}
      */
-    async function addWord(topicId, { word, phonetic = '', meaning, exampleSentence = '', passageId = null }) {
+    async function addWord(topicId, { word, phonetic = '', meaning, exampleSentence = '', passageId = null, autoProgress = true }) {
         const payload = {
             topic_id:        topicId,
-            word,
-            phonetic,
-            meaning,
-            example_sentence: _isEnglishExample(exampleSentence) ? exampleSentence : '',
+            word:            String(word || '').trim(),
+            phonetic:        String(phonetic || '').trim(),
+            meaning:         String(meaning || '').trim(),
+            example_sentence: _isEnglishExample(exampleSentence) ? String(exampleSentence).trim() : '',
         };
         if (passageId) {
             payload.passage_id = passageId;
@@ -484,8 +484,180 @@ window.HiDB = (() => {
             .single();
 
         if (error) throw error;
+
+        // Tự động khởi tạo tiến độ học cho từ vựng cá nhân
+        if (autoProgress && data?.id) {
+            try {
+                const user = await getCurrentUser().catch(() => null);
+                if (user?.id) {
+                    await _getClient()
+                        .from('word_progress')
+                        .upsert({
+                            user_id: user.id,
+                            word_id: data.id,
+                            level: 1,
+                            next_review_at: new Date().toISOString(),
+                            review_count: 0,
+                            created_at: new Date().toISOString()
+                        }, { onConflict: 'user_id,word_id' });
+                }
+            } catch (pErr) {
+                console.warn('[addWord:autoProgress]', pErr);
+            }
+        }
+
         _invalidateVocabularyCache();
         return data;
+    }
+
+    /**
+     * Thêm từ vựng hàng loạt (Batch import) vào topic và tự động gắn tiến độ học.
+     * @param {string} topicId 
+     * @param {Array<{word: string, phonetic?: string, meaning: string, exampleSentence?: string}>} wordsList 
+     * @returns {Promise<Array<Object>>}
+     */
+    async function addWordsBatch(topicId, wordsList = []) {
+        if (!topicId) throw new Error('Thiếu topicId khi thêm từ hàng loạt');
+        if (!Array.isArray(wordsList) || wordsList.length === 0) return [];
+
+        const sanitized = wordsList
+            .filter(w => w && String(w.word || '').trim() && String(w.meaning || '').trim())
+            .map(w => ({
+                topic_id: topicId,
+                word: String(w.word).trim(),
+                phonetic: String(w.phonetic || '').trim(),
+                meaning: String(w.meaning).trim(),
+                example_sentence: _isEnglishExample(w.exampleSentence || w.example) ? String(w.exampleSentence || w.example).trim() : '',
+            }));
+
+        if (sanitized.length === 0) {
+            throw new Error('Danh sách từ không hợp lệ hoặc thiếu thông tin từ/nghĩa.');
+        }
+
+        // Insert vào bảng words
+        const { data: insertedWords, error: insErr } = await _getClient()
+            .from('words')
+            .insert(sanitized)
+            .select('id, word, meaning, topic_id');
+
+        if (insErr) throw insErr;
+
+        // Tự động khởi tạo tiến độ học cho tất cả các từ vừa thêm
+        const user = await getCurrentUser().catch(() => null);
+        if (user?.id && Array.isArray(insertedWords) && insertedWords.length > 0) {
+            const now = new Date().toISOString();
+            const progressRows = insertedWords.map(w => ({
+                user_id: user.id,
+                word_id: w.id,
+                level: 1,
+                next_review_at: now,
+                review_count: 0,
+                created_at: now
+            }));
+
+            const { error: progErr } = await _getClient()
+                .from('word_progress')
+                .upsert(progressRows, { onConflict: 'user_id,word_id' });
+
+            if (progErr) console.warn('[addWordsBatch:progress]', progErr);
+        }
+
+        _invalidateVocabularyCache();
+        return insertedWords || [];
+    }
+
+    /**
+     * Đảm bảo người dùng có một chủ đề cá nhân mặc định để lưu từ từ Sổ từ.
+     * @returns {Promise<{id: string, name: string, icon: string}>}
+     */
+    async function ensureUserPersonalTopic() {
+        const user = await getCurrentUser();
+        if (!user) throw new Error('Chưa đăng nhập');
+
+        // Tìm topic cá nhân có tên "Sổ tay từ vựng của tôi"
+        const { data: existing } = await _getClient()
+            .from('topics')
+            .select('id, name, icon')
+            .eq('user_id', user.id)
+            .ilike('name', '%Sổ tay từ vựng%')
+            .limit(1)
+            .maybeSingle();
+
+        if (existing) return existing;
+
+        // Hoặc lấy topic đầu tiên do user này tạo
+        const { data: firstTopic } = await _getClient()
+            .from('topics')
+            .select('id, name, icon')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: true })
+            .limit(1)
+            .maybeSingle();
+
+        if (firstTopic) return firstTopic;
+
+        // Chưa có -> Tạo mới chủ đề "Sổ tay từ vựng của tôi"
+        const { data: created, error } = await _getClient()
+            .from('topics')
+            .insert({
+                user_id: user.id,
+                name: 'Sổ tay từ vựng của tôi',
+                icon: 'collections_bookmark',
+                category: 'General English',
+                is_public: false,
+                description: 'Kho từ vựng cá nhân được tạo và lưu trữ qua Sổ từ.'
+            })
+            .select('id, name, icon')
+            .single();
+
+        if (error) throw error;
+        return created;
+    }
+
+    /**
+     * Lấy thống kê số liệu trí nhớ SM-2 cho trang Sổ từ của cá nhân.
+     * @returns {Promise<{total: number, due: number, learning: number, mastered: number}>}
+     */
+    async function getLearnedVocabStats() {
+        const user = await getCurrentUser().catch(() => null);
+        if (!user) {
+            return { total: 0, due: 0, learning: 0, mastered: 0 };
+        }
+
+        const now = new Date().toISOString();
+
+        // Lấy tất cả bản ghi word_progress của user
+        const { data, error } = await _getClient()
+            .from('word_progress')
+            .select('level, next_review_at')
+            .eq('user_id', user.id);
+
+        if (error || !data) {
+            return { total: 0, due: 0, learning: 0, mastered: 0 };
+        }
+
+        let due = 0;
+        let learning = 0;
+        let mastered = 0;
+
+        data.forEach(item => {
+            const lv = Number(item.level) || 0;
+            if (item.next_review_at && item.next_review_at <= now) {
+                due++;
+            }
+            if (lv >= 4) {
+                mastered++;
+            } else {
+                learning++;
+            }
+        });
+
+        return {
+            total: data.length,
+            due,
+            learning,
+            mastered
+        };
     }
 
     /**
@@ -501,20 +673,40 @@ window.HiDB = (() => {
         _invalidateVocabularyCache();
     }
 
-    async function getVocabularyPage(page = 1, pageSize = 50, search = '') {
+    /**
+     * Lấy danh sách từ vựng ĐÃ HỌC (hoặc do user tạo) cho trang Sổ từ / Kho từ vựng.
+     * @param {number} page
+     * @param {number} pageSize
+     * @param {string} search
+     * @param {number|null} levelFilter - null: tất cả, -1: cần ôn, 0-5: level cụ thể
+     * @param {string|null} topicIdFilter
+     * @returns {Promise<{words: Array, total: number, page: number, pageSize: number}>}
+     */
+    async function getVocabularyPage(page = 1, pageSize = 50, search = '', levelFilter = null, topicIdFilter = null) {
         const user = await getCurrentUser().catch(() => null);
         const safePage = Math.max(1, Number(page) || 1);
         const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 50));
         const safeSearch = String(search || '').trim();
-        const cacheKey = `vocabulary:${user?.id || 'anon'}:${safePage}:${safePageSize}:${safeSearch.toLowerCase()}`;
+        const safeLevel = (levelFilter !== undefined && levelFilter !== null && levelFilter !== '') ? Number(levelFilter) : null;
+        const safeTopicId = topicIdFilter ? String(topicIdFilter).trim() : null;
+
+        const cacheKey = `vocabulary:${user?.id || 'anon'}:${safePage}:${safePageSize}:${safeSearch.toLowerCase()}:${safeLevel}:${safeTopicId}`;
         const cached = _cacheGet(cacheKey);
         if (cached) return cached;
 
-        const { data: rpcRows, error: rpcError } = await _getClient().rpc('get_vocabulary_page', {
+        const rpcParams = {
             p_page: safePage,
             p_page_size: safePageSize,
             p_search: safeSearch,
-        });
+        };
+        if (safeLevel !== null && !isNaN(safeLevel)) {
+            rpcParams.p_level_filter = safeLevel;
+        }
+        if (safeTopicId) {
+            rpcParams.p_topic_id = safeTopicId;
+        }
+
+        const { data: rpcRows, error: rpcError } = await _getClient().rpc('get_vocabulary_page', rpcParams);
 
         if (!rpcError) {
             const rows = rpcRows || [];
@@ -539,24 +731,43 @@ window.HiDB = (() => {
             });
         }
 
+        // Fallback Supabase client-side query nếu RPC không khả dụng
         const start = (safePage - 1) * safePageSize;
         let query = _getClient()
             .from('words')
             .select(`
-                id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url,
-                topics!inner ( name ),
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )
-            `, { count: 'exact' })
-            .order('created_at', { ascending: true })
-            .range(start, start + safePageSize - 1);
+                id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
+                topics!inner ( id, name, user_id ),
+                word_progress!inner ( level, next_review_at, last_reviewed_at, review_count, user_id )
+            `, { count: 'exact' });
+
+        if (user?.id) {
+            query = query.eq('word_progress.user_id', user.id);
+        }
+
+        if (safeTopicId) {
+            query = query.eq('topic_id', safeTopicId);
+        }
+
+        if (safeLevel !== null && !isNaN(safeLevel)) {
+            if (safeLevel === -1) {
+                query = query.lte('word_progress.next_review_at', new Date().toISOString());
+            } else {
+                query = query.eq('word_progress.level', safeLevel);
+            }
+        }
 
         if (safeSearch) {
             const escaped = safeSearch.replace(/[,%_()]/g, ' ').trim();
             query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%`);
         }
 
+        query = query.order('created_at', { ascending: false })
+            .range(start, start + safePageSize - 1);
+
         const { data, error, count } = await query;
         if (error) throw error;
+
         return _cacheSet(cacheKey, {
             words: (data || []).map(row => {
                 const progress = (row.word_progress || [])[0] || null;
@@ -2002,8 +2213,10 @@ window.HiDB = (() => {
 
         // Tìm kiếm
         if (search && search.trim()) {
-            const term = search.trim();
-            query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%,author_name.ilike.%${term}%`);
+            const term = search.trim().replace(/[,()]/g, ' ').replace(/\s+/g, ' ').trim();
+            if (term) {
+                query = query.or(`name.ilike.%${term}%,description.ilike.%${term}%,author_name.ilike.%${term}%`);
+            }
         }
 
         // Sắp xếp
@@ -2083,6 +2296,7 @@ window.HiDB = (() => {
      * Lấy toàn bộ từ vựng và chi tiết của một topic trên thư viện (cho Thread Chain View).
      */
     async function getPublicTopicDetail(topicId) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         let user = null;
         try { user = await getCurrentUser(); } catch(e) {}
@@ -2127,6 +2341,7 @@ window.HiDB = (() => {
      * Thả tim hoặc bỏ thả tim topic.
      */
     async function toggleTopicLike(topicId) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         const user = await getCurrentUser();
         if (!user) {
@@ -2165,6 +2380,7 @@ window.HiDB = (() => {
      * Lấy danh sách bình luận của một topic.
      */
     async function getTopicComments(topicId) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         const { data, error } = await client
             .from('topic_comments')
@@ -2180,8 +2396,10 @@ window.HiDB = (() => {
      * Thêm bình luận hoặc mẹo nhớ cho một topic hoặc một từ.
      */
     async function addTopicComment({ topicId, wordId = null, content }) {
+        await ensureReady(4000).catch(() => {});
         const text = String(content || '').trim();
         if (!text) throw new Error('Nội dung bình luận không được để trống.');
+        if (text.length > 500) throw new Error('Bình luận không được vượt quá 500 ký tự.');
 
         const client = _getClient();
         let user = null;
@@ -2211,6 +2429,7 @@ window.HiDB = (() => {
      * 1-Click Clone bộ từ vựng từ Thư viện về kho cá nhân.
      */
     async function clonePublicTopic(topicId) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         const user = await getCurrentUser();
         if (!user) {
@@ -2233,6 +2452,7 @@ window.HiDB = (() => {
      * Đăng công khai một topic cá nhân lên Thư viện Cộng đồng.
      */
     async function publishTopic({ topicId, description = '', tags = [] }) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         const user = await getCurrentUser();
         if (!user) throw new Error('Vui lòng đăng nhập để đăng bộ từ!');
@@ -2264,6 +2484,7 @@ window.HiDB = (() => {
      * Hủy công khai (chuyển về riêng tư).
      */
     async function unpublishTopic(topicId) {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         const { data, error } = await client
             .from('topics')
@@ -2281,6 +2502,7 @@ window.HiDB = (() => {
      * Lấy danh sách các topic người dùng đã thích (Liked Topics).
      */
     async function getUserLikedTopics() {
+        await ensureReady(4000).catch(() => {});
         const client = _getClient();
         const user = await getCurrentUser();
         if (!user) return [];
@@ -2339,6 +2561,9 @@ window.HiDB = (() => {
         getWordsInTopic,
         getVocabularyPage,
         addWord,
+        addWordsBatch,
+        ensureUserPersonalTopic,
+        getLearnedVocabStats,
         deleteWord,
         getLessonsInTopic,
         getWordsInLesson,
