@@ -367,8 +367,13 @@ const HiMock = (() => {
             const nowTs = Date.now();
             const wordsDueCount = progress.filter(p => new Date(p.next_review_at).getTime() <= nowTs).length;
 
-            const memoryLevels = { lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
-            progress.forEach(p => { memoryLevels[`lv${p.level}`] = (memoryLevels[`lv${p.level}`] || 0) + 1; });
+            const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
+            progress.forEach(p => {
+                const lv = Number(p.level) ?? 0;
+                const key = `lv${lv}`;
+                if (memoryLevels[key] !== undefined) memoryLevels[key]++;
+                else memoryLevels.lv0++;
+            });
 
             // Tính streak
             let streak = 0;

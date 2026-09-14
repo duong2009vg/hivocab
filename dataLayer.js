@@ -627,9 +627,15 @@ window.HiDB = (() => {
         let due = 0;
         let learning = 0;
         let mastered = 0;
+        const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
 
         data.forEach(item => {
             const lv = Number(item.level) || 0;
+            if (lv >= 0 && lv <= 5) {
+                memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
+            } else {
+                memoryLevels.lv0++;
+            }
             if (item.next_review_at && item.next_review_at <= now) {
                 due++;
             }
@@ -644,7 +650,8 @@ window.HiDB = (() => {
             total: data.length,
             due,
             learning,
-            mastered
+            mastered,
+            memoryLevels
         };
     }
 
@@ -740,6 +747,8 @@ window.HiDB = (() => {
         if (safeLevel !== null && !isNaN(safeLevel)) {
             if (safeLevel === -1) {
                 query = query.lte('word_progress.next_review_at', new Date().toISOString());
+            } else if (safeLevel === 0) {
+                query = query.or('level.eq.0,level.is.null', { foreignTable: 'word_progress' });
             } else {
                 query = query.eq('word_progress.level', safeLevel);
             }
@@ -1790,13 +1799,36 @@ window.HiDB = (() => {
         // Phân bố level
         const { data: progressData } = await _getClient()
             .from('word_progress')
-            .select('level')
+            .select('word_id, level')
             .eq('user_id', user.id);
 
-        const memoryLevels = { lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
+        const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
+        const progressWordIds = new Set();
         (progressData || []).forEach(p => {
-            memoryLevels[`lv${p.level}`] = (memoryLevels[`lv${p.level}`] || 0) + 1;
+            if (p.word_id) progressWordIds.add(p.word_id);
+            const lv = Number(p.level) ?? 0;
+            if (lv >= 0 && lv <= 5) {
+                memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
+            } else {
+                memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
+            }
         });
+
+        // Đếm thêm các từ trong sổ tay cá nhân của user chưa có bản ghi word_progress (tính là Lv 0)
+        try {
+            const { data: userTopicWords } = await _getClient()
+                .from('words')
+                .select('id, topics!inner(user_id)')
+                .eq('topics.user_id', user.id);
+
+            if (userTopicWords && userTopicWords.length > 0) {
+                userTopicWords.forEach(w => {
+                    if (!progressWordIds.has(w.id)) {
+                        memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
+                    }
+                });
+            }
+        } catch (_) {}
 
         // Tính streak: đếm ngày liên tiếp từ hôm nay trở về trước
         const { data: sessions } = await _getClient()

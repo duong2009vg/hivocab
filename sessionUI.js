@@ -1445,8 +1445,8 @@ window.startSession = async function() {
             let totalLearned = 0;
             try {
                 const stats = await HiDB.getDashboardStats();
-                const { lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = stats.memoryLevels || {};
-                totalLearned = lv1 + lv2 + lv3 + lv4 + lv5;
+                const { lv0 = 0, lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = stats.memoryLevels || {};
+                totalLearned = lv0 + lv1 + lv2 + lv3 + lv4 + lv5;
             } catch (_) {}
 
             const container = document.getElementById('exercise-container');

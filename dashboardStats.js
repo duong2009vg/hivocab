@@ -31,8 +31,20 @@ const HiDashboard = (() => {
         memLv2Count:       'mem-lv2-count',
         memLv1Bar:         'mem-lv1-bar',
         memLv1Count:       'mem-lv1-count',
+        memLv0Bar:         'mem-lv0-bar',
+        memLv0Count:       'mem-lv0-count',
         // Tổng từ vựng đã học
         totalWordsLearned: 'dashboard-total-words',
+    };
+
+    // Bảng màu chuẩn hoá hài hòa cho 6 cấp độ SRS
+    const LEVEL_PALETTE = {
+        lv0: { color: '#94a3b8', name: 'Lvl 0' }, // Slate Gray (Chưa học / Mới tạo)
+        lv1: { color: '#f97316', name: 'Lvl 1' }, // Warm Coral Orange (Khởi động)
+        lv2: { color: '#f59e0b', name: 'Lvl 2' }, // Warm Amber Golden (Làm quen)
+        lv3: { color: '#0ea5e9', name: 'Lvl 3' }, // Vivid Sky Blue (Củng cố)
+        lv4: { color: '#a855f7', name: 'Lvl 4' }, // Rich Purple / Lilac (Vững vàng)
+        lv5: { color: '#10b981', name: 'Lvl 5' }  // Emerald Spring Green (Thành thạo)
     };
 
     // ----------------------------------------------------------
@@ -47,14 +59,48 @@ const HiDashboard = (() => {
     let _calCurrentDate = new Date(); // Tháng đang xem
 
     /**
+     * Render các cột viên thuốc đứng (Vertical Pill Bars) cho 6 cấp độ SRS.
+     * Hỗ trợ render cho Dashboard (prefix = '') hoặc Sổ từ (prefix = 'vocab-')
+     */
+    function renderSRSLevels(memoryLevels = {}, prefix = '') {
+        const { lv0 = 0, lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = memoryLevels;
+        const maxCount = Math.max(lv0, lv1, lv2, lv3, lv4, lv5, 1);
+
+        ['lv0', 'lv1', 'lv2', 'lv3', 'lv4', 'lv5'].forEach(lv => {
+            const count = memoryLevels[lv] || 0;
+            const cfg = LEVEL_PALETTE[lv];
+
+            const barEl   = document.getElementById(`${prefix}mem-${lv}-bar`);
+            const countEl = document.getElementById(`${prefix}mem-${lv}-count`);
+
+            if (countEl) {
+                const currentVal = parseInt(countEl.textContent, 10);
+                _animateNumber(countEl, isNaN(currentVal) ? 0 : currentVal, count, 600);
+            }
+
+            if (barEl) {
+                barEl.style.backgroundColor = cfg.color;
+                if (count === 0) {
+                    barEl.style.height = '10px';
+                    barEl.style.opacity = '0.65';
+                } else {
+                    const pct = Math.max(12, Math.round((count / maxCount) * 100));
+                    barEl.style.height = `${pct}%`;
+                    barEl.style.opacity = '1';
+                }
+            }
+        });
+    }
+
+    /**
      * Render số liệu thật từ stats object vào Dashboard UI.
      *
      * @param {{ wordsDueCount, streak, memoryLevels }} stats
      */
     async function _renderStats(stats) {
-        const { wordsDueCount, streak, memoryLevels } = stats;
-        const { lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = memoryLevels;
-        const total = lv1 + lv2 + lv3 + lv4 + lv5;
+        const { wordsDueCount, streak, memoryLevels = {} } = stats;
+        const { lv0 = 0, lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = memoryLevels;
+        const total = lv0 + lv1 + lv2 + lv3 + lv4 + lv5;
 
         // ── 1. Streak badge ──────────────────────────────────
         const streakEl = document.getElementById(EL.streakBadge);
@@ -86,16 +132,11 @@ const HiDashboard = (() => {
         const totalEl = document.getElementById(EL.totalWordsLearned);
         if (totalEl) _animateNumber(totalEl, 0, total, 800);
 
-        // ── 4. Memory level bars ─────────────────────────────
-        const maxCount = Math.max(lv1, lv2, lv3, lv4, lv5, 1); // tránh chia cho 0
+        // ── 4. Memory level vertical pill bars ───────────────
+        renderSRSLevels(memoryLevels, '');
+        renderSRSLevels(memoryLevels, 'vocab-');
 
-        _renderLevelBar('lv5', lv5, maxCount, 'bg-green-500');
-        _renderLevelBar('lv4', lv4, maxCount, 'bg-slate-700');
-        _renderLevelBar('lv3', lv3, maxCount, 'bg-blue-500');
-        _renderLevelBar('lv2', lv2, maxCount, 'bg-yellow-400');
-        _renderLevelBar('lv1', lv1, maxCount, 'bg-red-500');
-
-        // ── 5. Hero card: empty vs ready vs countdown ─────────────────────────────────
+        // ── 5. Hero card: empty vs ready vs countdown ────────
         if (total === 0) {
             _showEmptyState();
         } else if (wordsDueCount > 0) {
@@ -114,26 +155,7 @@ const HiDashboard = (() => {
         }
     }
 
-    /**
-     * Cập nhật một progress bar level nhớ.
-     */
-    function _renderLevelBar(lv, count, maxCount, colorCls) {
-        const barEl   = document.getElementById(`mem-${lv}-bar`);
-        const countEl = document.getElementById(`mem-${lv}-count`);
 
-        if (!barEl && !countEl) return;
-
-        const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
-
-        if (barEl) {
-            barEl.style.width = pct + '%';
-            barEl.className = `h-full ${colorCls} rounded-full transition-all duration-700`;
-        }
-
-        if (countEl) {
-            countEl.textContent = count;
-        }
-    }
 
     /**
      * Animate một số đếm lên.
@@ -626,12 +648,8 @@ const HiDashboard = (() => {
         const dueTextEl = document.getElementById(EL.wordsDueText);
         if (dueTextEl) dueTextEl.textContent = 'Thêm từ vựng mới để bắt đầu hành trình học tập!';
 
-        ['lv1', 'lv2', 'lv3', 'lv4', 'lv5'].forEach(lv => {
-            const barEl = document.getElementById(`mem-${lv}-bar`);
-            if (barEl) barEl.style.width = '0%';
-            const cntEl = document.getElementById(`mem-${lv}-count`);
-            if (cntEl) cntEl.textContent = '0';
-        });
+        renderSRSLevels({ lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 }, '');
+        renderSRSLevels({ lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 }, 'vocab-');
 
         const totalEl = document.getElementById(EL.totalWordsLearned);
         if (totalEl) totalEl.textContent = '0';
@@ -695,6 +713,8 @@ const HiDashboard = (() => {
         renderFallback,
         updateLearningStreak,
         stopCountdown,
+        renderSRSLevels,
+        LEVEL_PALETTE,
 
         // Flame Calendar
         renderFlameCalendar,
@@ -715,6 +735,7 @@ const HiDashboard = (() => {
 })();
 
 // Export global helper aliases for inline onclicks
+window.renderSRSLevels      = (levels, prefix) => HiDashboard.renderSRSLevels(levels, prefix);
 window.openIELTSGoalModal   = () => HiDashboard.openIELTSGoalModal();
 window.closeIELTSGoalModal  = () => HiDashboard.closeIELTSGoalModal();
 window.submitIELTSGoal      = () => HiDashboard.submitIELTSGoal();

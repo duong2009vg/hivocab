@@ -1349,14 +1349,73 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
                 </div>
             </section>
             
-            <section class="glass-card rounded-xl p-6 lg:p-8 lg:col-span-5 flex flex-col justify-between min-h-[260px] lg:min-h-[320px]">
-                <div class="mb-4"><h3 class="text-[10px] md:text-xs font-bold text-outline uppercase tracking-widest mb-1">Trạng thái bộ nhớ</h3><div class="text-lg md:text-xl font-bold text-on-surface">Phân bố từ vựng</div></div>
-                <div class="flex-1 flex flex-col justify-end gap-2 md:gap-3 mt-4 overflow-x-hidden">
-                    <div class="flex items-center gap-3 md:gap-md"><span class="w-12 md:w-16 text-xs md:text-sm text-on-surface-variant text-right">Cấp 5</span><div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div id="mem-lv5-bar" class="h-full bg-green-500 w-0 rounded-full transition-all duration-700"></div></div><span id="mem-lv5-count" class="w-6 md:w-8 text-xs md:text-sm font-bold text-on-surface text-right">0</span></div>
-                    <div class="flex items-center gap-3 md:gap-md"><span class="w-12 md:w-16 text-xs md:text-sm text-on-surface-variant text-right">Cấp 4</span><div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div id="mem-lv4-bar" class="h-full bg-slate-700 w-0 rounded-full transition-all duration-700"></div></div><span id="mem-lv4-count" class="w-6 md:w-8 text-xs md:text-sm font-bold text-on-surface text-right">0</span></div>
-                    <div class="flex items-center gap-3 md:gap-md"><span class="w-12 md:w-16 text-xs md:text-sm text-on-surface-variant text-right">Cấp 3</span><div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div id="mem-lv3-bar" class="h-full bg-blue-500 w-0 rounded-full transition-all duration-700"></div></div><span id="mem-lv3-count" class="w-6 md:w-8 text-xs md:text-sm font-bold text-on-surface text-right">0</span></div>
-                    <div class="flex items-center gap-3 md:gap-md"><span class="w-12 md:w-16 text-xs md:text-sm text-on-surface-variant text-right">Cấp 2</span><div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div id="mem-lv2-bar" class="h-full bg-yellow-400 w-0 rounded-full transition-all duration-700"></div></div><span id="mem-lv2-count" class="w-6 md:w-8 text-xs md:text-sm font-bold text-on-surface text-right">0</span></div>
-                    <div class="flex items-center gap-3 md:gap-md"><span class="w-12 md:w-16 text-xs md:text-sm text-on-surface-variant text-right">Cấp 1</span><div class="flex-1 h-1.5 bg-surface-container-high rounded-full overflow-hidden"><div id="mem-lv1-bar" class="h-full bg-red-500 w-0 rounded-full transition-all duration-700"></div></div><span id="mem-lv1-count" class="w-6 md:w-8 text-xs md:text-sm font-bold text-on-surface text-right">0</span></div>
+            <!-- THẺ PHÂN BỐ TỪ VỰNG THEO CẤP ĐỘ (VERTICAL PILL CHART) -->
+            <section class="glass-card rounded-2xl p-5 sm:p-6 lg:p-7 lg:col-span-5 flex flex-col justify-between min-h-[260px] lg:min-h-[320px] relative overflow-hidden">
+                <div class="flex items-center justify-between gap-2 mb-2 sm:mb-4">
+                    <div>
+                        <h3 class="text-[10px] md:text-xs font-extrabold text-outline uppercase tracking-wider mb-0.5">Trạng thái bộ nhớ</h3>
+                        <div class="text-base sm:text-lg lg:text-xl font-bold text-on-surface">Phân bố từ vựng theo cấp độ</div>
+                    </div>
+                    <button onclick="navigateTo('vocabulary')" class="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer shrink-0" title="Xem danh sách từ trong Sổ từ">
+                        Chi tiết <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                    </button>
+                </div>
+
+                <!-- 6 Cột Cấp độ (Lvl 0 -> Lvl 5) -->
+                <div class="flex-1 flex items-end justify-between gap-1.5 sm:gap-2 md:gap-3 pt-3 pb-1 select-none">
+                    <!-- Lvl 0 -->
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer" onclick="navigateTo('vocabulary'); setTimeout(() => window.filterVocabLevel(0), 150);" title="Cấp 0: Chưa học / Mới tạo - Bấm để lọc">
+                        <span id="mem-lv0-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                            <div id="mem-lv0-bar" class="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm" style="background-color: #94a3b8; height: 10px;"></div>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 0</span>
+                    </div>
+
+                    <!-- Lvl 1 -->
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer" onclick="navigateTo('vocabulary'); setTimeout(() => window.filterVocabLevel(1), 150);" title="Cấp 1: Mới bắt đầu ôn - Bấm để lọc">
+                        <span id="mem-lv1-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                            <div id="mem-lv1-bar" class="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm" style="background-color: #f97316; height: 10px;"></div>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 1</span>
+                    </div>
+
+                    <!-- Lvl 2 -->
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer" onclick="navigateTo('vocabulary'); setTimeout(() => window.filterVocabLevel(2), 150);" title="Cấp 2: Đang làm quen - Bấm để lọc">
+                        <span id="mem-lv2-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                            <div id="mem-lv2-bar" class="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm" style="background-color: #f59e0b; height: 10px;"></div>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 2</span>
+                    </div>
+
+                    <!-- Lvl 3 -->
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer" onclick="navigateTo('vocabulary'); setTimeout(() => window.filterVocabLevel(3), 150);" title="Cấp 3: Nhớ tương đối - Bấm để lọc">
+                        <span id="mem-lv3-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                            <div id="mem-lv3-bar" class="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm" style="background-color: #0ea5e9; height: 10px;"></div>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 3</span>
+                    </div>
+
+                    <!-- Lvl 4 -->
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer" onclick="navigateTo('vocabulary'); setTimeout(() => window.filterVocabLevel(4), 150);" title="Cấp 4: Ghi nhớ vững - Bấm để lọc">
+                        <span id="mem-lv4-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                            <div id="mem-lv4-bar" class="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm" style="background-color: #a855f7; height: 10px;"></div>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 4</span>
+                    </div>
+
+                    <!-- Lvl 5 -->
+                    <div class="flex-1 flex flex-col items-center group cursor-pointer" onclick="navigateTo('vocabulary'); setTimeout(() => window.filterVocabLevel(5), 150);" title="Cấp 5: Đã thành thạo - Bấm để lọc">
+                        <span id="mem-lv5-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                            <div id="mem-lv5-bar" class="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm" style="background-color: #10b981; height: 10px;"></div>
+                        </div>
+                        <span class="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 5</span>
+                    </div>
                 </div>
             </section>
         </div>
@@ -2124,11 +2183,108 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
                         class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/30 text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
                     <span class="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
                     <span>Thêm hàng loạt</span>
+                </button>
             </div>
         </header>
 
+        <!-- THẺ TỔNG QUAN SRS & PHÂN BỐ TỪ VỰNG THEO CẤP ĐỘ (Khớp ảnh mẫu) -->
+        <section class="bg-surface-container-lowest dark:bg-surface-container-low/60 rounded-3xl p-4 sm:p-6 border border-outline-variant/20 shadow-xs flex flex-col gap-3 sm:gap-4">
+            <!-- Header của thẻ -->
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary text-[22px] icon-fill">published_with_changes</span>
+                    <h2 class="font-bold text-sm sm:text-base text-on-surface">Tổng quan SRS</h2>
+                    <button type="button" onclick="window.openSRSExplainerModal()" class="text-outline hover:text-primary transition-colors p-1 rounded-full cursor-pointer flex items-center justify-center" title="Tìm hiểu về thuật toán ghi nhớ SRS & 6 cấp độ">
+                        <span class="material-symbols-outlined text-[18px]">help_outline</span>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="window._loadVocabularyPage(1)" class="text-outline hover:text-primary transition-colors p-1.5 rounded-full hover:bg-surface-container cursor-pointer flex items-center justify-center" title="Làm mới dữ liệu">
+                        <span class="material-symbols-outlined text-[18px]">refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card phân bố dạng viên thuốc (Match ảnh mẫu) -->
+            <div class="bg-surface-container-low/50 dark:bg-surface-container/30 rounded-2xl p-3 sm:p-5 border border-outline-variant/15">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[11px] sm:text-xs md:text-sm font-extrabold text-on-surface-variant tracking-wider uppercase">
+                        Phân bố từ vựng theo cấp độ
+                    </span>
+                    <span id="vocab-total-summary-badge" class="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full">
+                        0 từ
+                    </span>
+                </div>
+
+                <!-- 6 Cột viên thuốc Lvl 0 -> Lvl 5 -->
+                <div class="grid grid-cols-6 gap-1 sm:gap-2 md:gap-3 items-end pt-2 pb-1 select-none">
+                    <!-- Lvl 0 -->
+                    <div id="vocab-col-lv0" class="vocab-chart-col flex flex-col items-center group cursor-pointer p-1 sm:p-1.5 rounded-xl transition-all hover:bg-surface-container-high/60" onclick="window.filterVocabLevel(0)" title="Cấp 0: Chưa học / Mới tạo - Bấm để lọc">
+                        <span id="vocab-mem-lv0-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[95px] sm:h-[120px] md:h-[135px]">
+                            <div id="vocab-mem-lv0-bar" class="w-5 sm:w-6 md:w-7 rounded-full transition-all duration-700 ease-out shadow-xs group-hover:brightness-95" style="background-color: #94a3b8; height: 10px;"></div>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 0</span>
+                    </div>
+
+                    <!-- Lvl 1 -->
+                    <div id="vocab-col-lv1" class="vocab-chart-col flex flex-col items-center group cursor-pointer p-1 sm:p-1.5 rounded-xl transition-all hover:bg-surface-container-high/60" onclick="window.filterVocabLevel(1)" title="Cấp 1: Mới bắt đầu ôn - Bấm để lọc">
+                        <span id="vocab-mem-lv1-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[95px] sm:h-[120px] md:h-[135px]">
+                            <div id="vocab-mem-lv1-bar" class="w-5 sm:w-6 md:w-7 rounded-full transition-all duration-700 ease-out shadow-xs group-hover:brightness-95" style="background-color: #f97316; height: 10px;"></div>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 1</span>
+                    </div>
+
+                    <!-- Lvl 2 -->
+                    <div id="vocab-col-lv2" class="vocab-chart-col flex flex-col items-center group cursor-pointer p-1 sm:p-1.5 rounded-xl transition-all hover:bg-surface-container-high/60" onclick="window.filterVocabLevel(2)" title="Cấp 2: Đang làm quen - Bấm để lọc">
+                        <span id="vocab-mem-lv2-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[95px] sm:h-[120px] md:h-[135px]">
+                            <div id="vocab-mem-lv2-bar" class="w-5 sm:w-6 md:w-7 rounded-full transition-all duration-700 ease-out shadow-xs group-hover:brightness-95" style="background-color: #f59e0b; height: 10px;"></div>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 2</span>
+                    </div>
+
+                    <!-- Lvl 3 -->
+                    <div id="vocab-col-lv3" class="vocab-chart-col flex flex-col items-center group cursor-pointer p-1 sm:p-1.5 rounded-xl transition-all hover:bg-surface-container-high/60" onclick="window.filterVocabLevel(3)" title="Cấp 3: Nhớ tương đối - Bấm để lọc">
+                        <span id="vocab-mem-lv3-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[95px] sm:h-[120px] md:h-[135px]">
+                            <div id="vocab-mem-lv3-bar" class="w-5 sm:w-6 md:w-7 rounded-full transition-all duration-700 ease-out shadow-xs group-hover:brightness-95" style="background-color: #0ea5e9; height: 10px;"></div>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 3</span>
+                    </div>
+
+                    <!-- Lvl 4 -->
+                    <div id="vocab-col-lv4" class="vocab-chart-col flex flex-col items-center group cursor-pointer p-1 sm:p-1.5 rounded-xl transition-all hover:bg-surface-container-high/60" onclick="window.filterVocabLevel(4)" title="Cấp 4: Ghi nhớ vững - Bấm để lọc">
+                        <span id="vocab-mem-lv4-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[95px] sm:h-[120px] md:h-[135px]">
+                            <div id="vocab-mem-lv4-bar" class="w-5 sm:w-6 md:w-7 rounded-full transition-all duration-700 ease-out shadow-xs group-hover:brightness-95" style="background-color: #a855f7; height: 10px;"></div>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 4</span>
+                    </div>
+
+                    <!-- Lvl 5 -->
+                    <div id="vocab-col-lv5" class="vocab-chart-col flex flex-col items-center group cursor-pointer p-1 sm:p-1.5 rounded-xl transition-all hover:bg-surface-container-high/60" onclick="window.filterVocabLevel(5)" title="Cấp 5: Đã thành thạo - Bấm để lọc">
+                        <span id="vocab-mem-lv5-count" class="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">0</span>
+                        <div class="w-full flex items-end justify-center h-[95px] sm:h-[120px] md:h-[135px]">
+                            <div id="vocab-mem-lv5-bar" class="w-5 sm:w-6 md:w-7 rounded-full transition-all duration-700 ease-out shadow-xs group-hover:brightness-95" style="background-color: #10b981; height: 10px;"></div>
+                        </div>
+                        <span class="text-[10px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 5</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Heading: Danh sách từ đang học (Match ảnh mẫu) -->
+        <div class="flex items-center justify-between pt-1">
+            <h2 class="text-base sm:text-lg font-bold text-on-surface flex items-center gap-1.5">
+                <span>Danh sách từ đang học</span>
+                <span id="vocab-list-heading-count" class="text-xs sm:text-sm font-bold text-outline">(0)</span>
+            </h2>
+        </div>
+
         <!-- Filter & Search Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <!-- Search Input -->
             <div class="relative flex-1 max-w-md">
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
@@ -2160,17 +2316,29 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
                     class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all flex items-center gap-1">
                 <span>⏰ Cần ôn</span>
             </button>
+            <button onclick="window.filterVocabLevel(0)" data-level="0"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
+                Lvl 0
+            </button>
             <button onclick="window.filterVocabLevel(1)" data-level="1"
                     class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
-                Mới (Lv 1)
+                Lvl 1
             </button>
-            <button onclick="window.filterVocabLevel('2-3')" data-level="2-3"
+            <button onclick="window.filterVocabLevel(2)" data-level="2"
                     class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
-                Đang nhớ (Lv 2-3)
+                Lvl 2
             </button>
-            <button onclick="window.filterVocabLevel('4-5')" data-level="4-5"
+            <button onclick="window.filterVocabLevel(3)" data-level="3"
                     class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
-                Thành thạo (Lv 4-5)
+                Lvl 3
+            </button>
+            <button onclick="window.filterVocabLevel(4)" data-level="4"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
+                Lvl 4
+            </button>
+            <button onclick="window.filterVocabLevel(5)" data-level="5"
+                    class="vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all">
+                Lvl 5
             </button>
         </div>
 
@@ -2876,8 +3044,8 @@ window.startSession = async function() {
             let totalLearned = 0;
             try {
                 const stats = await HiDB.getDashboardStats();
-                const { lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = stats.memoryLevels || {};
-                totalLearned = lv1 + lv2 + lv3 + lv4 + lv5;
+                const { lv0 = 0, lv1 = 0, lv2 = 0, lv3 = 0, lv4 = 0, lv5 = 0 } = stats.memoryLevels || {};
+                totalLearned = lv0 + lv1 + lv2 + lv3 + lv4 + lv5;
             } catch (_) {}
 
             if (totalLearned === 0) {
@@ -4103,8 +4271,114 @@ window.addEventListener('hashchange', () => {
       </button>
     </div>
   </div>
-</div>
+<!-- ==================== MODAL: SRS EXPLAINER ==================== -->
+<div id="modal-srs-explainer" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
+  <div class="w-full max-w-lg bg-surface rounded-3xl p-6 md:p-8 soft-shadow fade-in max-h-[90vh] overflow-y-auto border border-outline-variant/20">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between mb-5 pb-3 border-b border-outline-variant/20">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+          <span class="material-symbols-outlined text-[24px] icon-fill">published_with_changes</span>
+        </div>
+        <div>
+          <h2 class="text-lg md:text-xl font-bold text-on-surface">Thuật toán ghi nhớ SRS</h2>
+          <p class="text-xs text-on-surface-variant">Hệ thống 6 cấp độ lặp lại ngắt quãng khoa học</p>
+        </div>
+      </div>
+      <button onclick="window.closeSRSExplainerModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors cursor-pointer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
 
+    <!-- Modal Content -->
+    <div class="flex flex-col gap-3.5 text-xs sm:text-sm text-on-surface-variant">
+      <p class="leading-relaxed">
+        Phương pháp <strong>Lặp lại ngắt quãng (Spaced Repetition System - SRS)</strong> tự động tối ưu hóa thời gian ôn tập cho từng từ vựng dựa trên đường cong lãng quên của não bộ, giúp ghi nhớ lâu dài với thời gian học ít nhất.
+      </p>
+
+      <div class="flex flex-col gap-2.5 mt-2">
+        <!-- Lvl 0 -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15">
+          <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: #94a3b8;"></span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-on-surface">Cấp 0 (Lvl 0) · Chưa học / Mới tạo</span>
+              <span class="text-[11px] font-semibold text-outline">Chưa bắt đầu</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant/80 mt-0.5">Từ vựng vừa lưu vào sổ từ hoặc chủ đề, chưa trải qua phiên ôn luyện nào.</p>
+          </div>
+        </div>
+
+        <!-- Lvl 1 -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15">
+          <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: #f97316;"></span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-on-surface">Cấp 1 (Lvl 1) · Khởi động</span>
+              <span class="text-[11px] font-semibold text-orange-600 dark:text-orange-400">Ôn sau 1 ngày</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant/80 mt-0.5">Mới bắt đầu ghi nhớ. Cần được củng cố ngay sau 24 giờ để không quên.</p>
+          </div>
+        </div>
+
+        <!-- Lvl 2 -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15">
+          <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: #f59e0b;"></span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-on-surface">Cấp 2 (Lvl 2) · Làm quen</span>
+              <span class="text-[11px] font-semibold text-amber-600 dark:text-amber-400">Ôn sau 3 ngày</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant/80 mt-0.5">Đã nhớ được nghĩa cơ bản, não bộ bắt đầu định hình đường dẫn liên kết từ vựng.</p>
+          </div>
+        </div>
+
+        <!-- Lvl 3 -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15">
+          <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: #0ea5e9;"></span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-on-surface">Cấp 3 (Lvl 3) · Củng cố</span>
+              <span class="text-[11px] font-semibold text-sky-600 dark:text-sky-400">Ôn sau 7 ngày</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant/80 mt-0.5">Ghi nhớ tương đối vững, nhận diện nhanh chóng trong ngữ cảnh câu văn.</p>
+          </div>
+        </div>
+
+        <!-- Lvl 4 -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15">
+          <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: #a855f7;"></span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-on-surface">Cấp 4 (Lvl 4) · Vững vàng</span>
+              <span class="text-[11px] font-semibold text-purple-600 dark:text-purple-400">Ôn sau 14 ngày</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant/80 mt-0.5">Trí nhớ dài hạn đã hình thành. Phản xạ tự nhiên khi gặp trong đề thi.</p>
+          </div>
+        </div>
+
+        <!-- Lvl 5 -->
+        <div class="flex items-start gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/15">
+          <span class="w-3.5 h-3.5 rounded-full shrink-0 mt-0.5" style="background-color: #10b981;"></span>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-on-surface">Cấp 5 (Lvl 5) · Thành thạo</span>
+              <span class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">Ôn sau 30+ ngày</span>
+            </div>
+            <p class="text-[11px] text-on-surface-variant/80 mt-0.5">Cấp độ cao nhất. Bạn đã hoàn toàn làm chủ từ vựng này trong mọi kỹ năng!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
+      <button onclick="window.closeSRSExplainerModal()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary text-xs sm:text-sm font-bold shadow-xs cursor-pointer hover:bg-surface-tint transition-colors">
+        Đã hiểu
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- ==================== MODAL: IELTS TARGET & COUNTDOWN ==================== -->
 <div id="modal-ielts-goal" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
@@ -7685,8 +7959,30 @@ window._vocabPageState = {
     topicsLoaded: false
 };
 
+window.openSRSExplainerModal = function() {
+    const m = document.getElementById('modal-srs-explainer');
+    if (m) {
+        m.classList.remove('hidden');
+        m.classList.add('flex');
+    }
+};
+
+window.closeSRSExplainerModal = function() {
+    const m = document.getElementById('modal-srs-explainer');
+    if (m) {
+        m.classList.add('hidden');
+        m.classList.remove('flex');
+    }
+};
+
 window.filterVocabLevel = function(level) {
+    // Nếu ấn lại chính level đang chọn thì quay về Tất cả (toggle)
+    if (window._vocabPageState.levelFilter === level && level !== null) {
+        level = null;
+    }
     window._vocabPageState.levelFilter = level;
+
+    // Cập nhật trạng thái pills
     document.querySelectorAll('#vocab-level-pills .vocab-pill').forEach(btn => {
         const pillLevel = btn.dataset.level;
         const isMatch = (level === null && pillLevel === 'all') || (String(level) === String(pillLevel));
@@ -7696,6 +7992,19 @@ window.filterVocabLevel = function(level) {
             btn.className = 'vocab-pill px-3 py-1.5 rounded-full bg-surface-container text-on-surface-variant hover:bg-surface-container-high shrink-0 cursor-pointer transition-all';
         }
     });
+
+    // Cập nhật viền active sáng cho các cột trong biểu đồ Sổ từ
+    for (let i = 0; i <= 5; i++) {
+        const col = document.getElementById(`vocab-col-lv${i}`);
+        if (col) {
+            if (level === i) {
+                col.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-surface', 'bg-primary/10', 'scale-105', 'shadow-xs');
+            } else {
+                col.classList.remove('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-surface', 'bg-primary/10', 'scale-105', 'shadow-xs');
+            }
+        }
+    }
+
     window._loadVocabularyPage(1);
 };
 
@@ -7810,6 +8119,29 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
         window._vocabPageState.total = total;
         window._vocabPageState.totalPages = totalPages;
         window._vocabPageState.isLoading = false;
+
+        // Cập nhật số lượng từ đang học vào heading
+        const headingCountEl = document.getElementById('vocab-list-heading-count');
+        if (headingCountEl) {
+            headingCountEl.textContent = `(${total.toLocaleString('vi-VN')})`;
+        }
+
+        // Đồng bộ số liệu biểu đồ SRS trên Sổ từ
+        try {
+            if (typeof HiDB !== 'undefined' && typeof HiDB.getDashboardStats === 'function') {
+                HiDB.getDashboardStats().then(stats => {
+                    if (stats && stats.memoryLevels) {
+                        const m = stats.memoryLevels;
+                        const totalSRS = (m.lv0||0) + (m.lv1||0) + (m.lv2||0) + (m.lv3||0) + (m.lv4||0) + (m.lv5||0);
+                        const summaryBadge = document.getElementById('vocab-total-summary-badge');
+                        if (summaryBadge) summaryBadge.textContent = `${totalSRS.toLocaleString('vi-VN')} từ`;
+                        if (typeof window.renderSRSLevels === 'function') {
+                            window.renderSRSLevels(m, 'vocab-');
+                        }
+                    }
+                }).catch(() => {});
+            }
+        } catch (_) {}
 
         if (subtitleEl) {
             if (currentSearch) {
