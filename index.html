@@ -385,9 +385,22 @@ html, body, button, a, input, select, textarea, [role="button"], .cursor-pointer
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
+/* ── DYNAMIC ISLAND & STATUS BAR SAFE AREA ────────────────── */
+:root {
+    --safe-area-top: env(safe-area-inset-top, 0px);
+}
+
 @media (max-width: 1023px) {
+    /* Cho toàn bộ các trang nội dung tự do bắt đầu từ đỉnh (Trang chủ, Chủ đề, Sổ từ, Luyện đề, Tra từ, Cài đặt) */
+    .mobile-page-top,
     .pt-safe {
-        padding-top: max(16px, env(safe-area-inset-top, 16px));
+        padding-top: max(calc(env(safe-area-inset-top, 0px) + 20px), 72px) !important;
+    }
+
+    /* Cho các thanh Header / Tabs bám dính ở đỉnh (Thư viện, Bài đọc song ngữ, Sub-header) */
+    .mobile-sticky-top,
+    .header-pt-safe {
+        padding-top: max(calc(env(safe-area-inset-top, 0px) + 12px), 58px) !important;
     }
 }
 .pb-safe {
@@ -745,7 +758,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <!-- Standalone Mobile Profile Dropdown -->
-<div id="mobile-profile-dropdown" class="hidden fixed right-4 top-14 sm:top-16 w-56 bg-surface rounded-2xl shadow-2xl border border-outline-variant/20 z-[9999] overflow-hidden fade-in">
+<div id="mobile-profile-dropdown" class="hidden fixed right-4 w-56 bg-surface rounded-2xl shadow-2xl border border-outline-variant/20 z-[9999] overflow-hidden fade-in" style="top: max(calc(env(safe-area-inset-top, 0px) + 20px), 72px);">
     <div class="px-4 py-3 border-b border-outline-variant/15">
         <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
         <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
@@ -1283,7 +1296,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: DASHBOARD ==================== -->
 <div id="page-dashboard" class="page">
-<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
@@ -1594,7 +1607,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: TOPICS ==================== -->
 <div id="page-topics" class="page">
-<main class="lg:ml-64 min-h-screen pt-safe pt-3 md:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-5 md:gap-6 fade-in">
 
         <!-- Header & Toolbar: Tạo chủ đề -->
@@ -1633,11 +1646,11 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: THƯ VIỆN HỌC TẬP CỘNG ĐỒNG (THREADS-STYLE) ==================== -->
 <div id="page-library" class="page bg-surface dark:bg-black">
-<main class="lg:ml-64 min-h-screen pt-safe pt-2 md:pt-6 pb-28 lg:pb-12 px-0 sm:px-4 flex flex-col items-center">
+<main class="lg:ml-64 min-h-screen lg:pt-6 pb-28 lg:pb-12 px-0 sm:px-4 flex flex-col items-center">
     <div class="max-w-[620px] w-full flex flex-col gap-0 sm:gap-4 fade-in">
 
         <!-- Threads-style Header & Tabs -->
-        <div class="w-full bg-surface/95 dark:bg-black/95 backdrop-blur-md sticky top-0 z-30 pt-safe pt-2 pb-2.5 border-b border-outline-variant/15 dark:border-neutral-800/80 flex items-center justify-between gap-2 px-3 sm:px-0">
+        <div class="w-full bg-surface/95 dark:bg-black/95 backdrop-blur-md sticky top-0 z-30 mobile-sticky-top lg:pt-2 pb-2.5 border-b border-outline-variant/15 dark:border-neutral-800/80 flex items-center justify-between gap-2 px-3 sm:px-0">
             <div class="flex items-center gap-1 sm:gap-2">
                 <button id="lib-tab-feed" onclick="window.switchLibraryTab('feed')" class="px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-xs">
                     Khám phá
@@ -1738,14 +1751,14 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <!-- Sub Header Mobile dùng riêng cho Chi tiết chủ đề -->
-<header id="sub-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 py-2.5 items-center gap-2 pt-safe">
+<header id="sub-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 pb-2.5 items-center gap-2 mobile-sticky-top">
     <button onclick="navigateTo('topics')" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all active:scale-90 shrink-0 cursor-pointer" aria-label="Quay lại danh sách chủ đề">
         <span class="material-symbols-outlined text-[24px]">arrow_back</span>
     </button>
     <div id="td-mobile-header-title" class="font-bold text-on-surface truncate text-base sm:text-lg">Chi tiết chủ đề</div>
 </header>
 
-<main class="lg:ml-64 min-h-screen pt-24 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-28 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <!-- Desktop header -->
         <div class="hidden lg:flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -1831,14 +1844,14 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <!-- Mobile header -->
-<header class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 py-2.5 items-center gap-2 pt-safe">
+<header class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 pb-2.5 items-center gap-2 mobile-sticky-top">
     <button onclick="navigateTo('topic-detail')" class="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all active:scale-90 shrink-0 cursor-pointer" aria-label="Quay lại chủ đề">
         <span class="material-symbols-outlined text-[24px]">arrow_back</span>
     </button>
     <div id="ld-mobile-header-title" class="font-bold text-on-surface truncate text-base sm:text-lg">Lesson 1</div>
 </header>
 
-<main class="lg:ml-64 min-h-screen pt-24 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-28 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <!-- Desktop header -->
         <div class="hidden lg:flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -1973,7 +1986,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: EXERCISES (LUYỆN ĐỀ THPT QUỐC GIA) ==================== -->
 <div id="page-exercises" class="page">
-<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
 
         <!-- Header -->
@@ -2173,7 +2186,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: VOCABULARY ==================== -->
 <div id="page-vocabulary" class="page">
-<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-5 lg:gap-6 fade-in">
         
         <!-- Header Section -->
@@ -2389,7 +2402,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: DICTIONARY ==================== -->
 <div id="page-dictionary" class="page">
-<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-3xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
 
         <!-- Header -->
@@ -2488,7 +2501,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 
 <div id="page-settings" class="page">
-<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <header class="flex flex-col gap-1">
             <h1 class="text-2xl lg:text-headline-lg font-bold text-on-surface">Cài đặt</h1>
@@ -2648,7 +2661,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <!-- ==================== PAGE: BILINGUAL READING & GAP-FILL ==================== -->
 <div id="page-bilingual-reading" class="page bg-background min-h-screen">
   <!-- Sticky Top Header -->
-  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 shadow-sm pt-safe">
+  <header class="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 sm:px-6 md:px-8 pb-2.5 sm:pb-3 flex items-center justify-between gap-2 sm:gap-3 shadow-sm mobile-sticky-top lg:pt-3">
     <!-- Left: Back button & Breadcrumb Title with Quick Switcher -->
     <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
       <button id="br-back-btn" onclick="window.closeBilingualReading()" class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:scale-90 transition-all shrink-0 cursor-pointer" title="Quay lại">
@@ -2749,8 +2762,8 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: LEARNING ==================== -->
 <div id="page-learning" class="page">
-<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl px-4 md:px-gutter py-3 md:py-md flex items-center justify-between shadow-sm">
-<button id="learning-close-btn" onclick="window.navigateTo('dashboard')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full"><span class="material-symbols-outlined text-[20px] md:text-[24px]">close</span></button>
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl px-4 md:px-gutter pb-3 md:py-md flex items-center justify-between shadow-sm mobile-sticky-top lg:pt-3">
+<button id="learning-close-btn" onclick="window.navigateTo('dashboard')" class="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full cursor-pointer"><span class="material-symbols-outlined text-[20px] md:text-[24px]">close</span></button>
 <div id="learning-progress-container" class="flex-1 max-w-md mx-4 md:mx-md flex items-center gap-md"><div class="w-full h-1.5 md:h-2 bg-surface-container-highest rounded-full overflow-hidden"><div class="h-full bg-primary rounded-full transition-all duration-500" id="learn-progress" style="width:0%"></div></div></div>
 <div class="flex items-center gap-2">
   <button onclick="window.HiSound && window.HiSound.toggleMute()" class="hi-sound-toggle-btn p-1.5 rounded-full hover:bg-surface-container text-primary transition-colors cursor-pointer" title="Tắt/Bật âm thanh học tập">
@@ -2763,7 +2776,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </div>
 </header>
 
-<main id="learning-main" class="pt-24 md:pt-[100px] pb-12 md:pb-xl px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto flex flex-col gap-6 md:gap-10 items-center min-h-[100dvh]">
+<main id="learning-main" class="pt-28 md:pt-[100px] pb-12 md:pb-xl px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto flex flex-col gap-6 md:gap-10 items-center min-h-[100dvh]">
 <div id="exercise-container" class="w-full max-w-2xl mx-auto flex flex-col items-center"></div>
 
 <!-- BÀI 1: Flashcard -->
