@@ -50,6 +50,7 @@
             }
             this.setupKeyboardNavigation();
             this.initDraggableDivider();
+            this.initDesktopScrollEnhancements();
             this.renderExamsList();
         },
 
@@ -94,6 +95,16 @@
                 } else if (key === 'ArrowLeft') {
                     e.preventDefault();
                     this.prevQuestion();
+                } else if (key === 'ArrowDown' || key === 'ArrowUp' || key === 'PageDown' || key === 'PageUp' || key === ' ') {
+                    // Cuộn / Lướt bằng phím trên PC
+                    const activePane = this._hoveredPane || document.getElementById('exam-questions-list') || document.getElementById('exam-passage-content');
+                    if (activePane) {
+                        e.preventDefault();
+                        const scrollAmt = (key === 'ArrowDown') ? 80 :
+                                          (key === 'ArrowUp') ? -80 :
+                                          (key === 'PageDown' || key === ' ') ? 320 : -320;
+                        activePane.scrollBy({ top: scrollAmt, behavior: 'smooth' });
+                    }
                 }
             });
         },
@@ -168,6 +179,106 @@
             window.addEventListener('touchmove', onMove, { passive: true });
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
+        },
+
+        // ==========================================
+        // 2b. TỐI ƯU CUỘN & LƯỚT XEM BÀI TRÊN PC (WHEEL FORWARDING & DRAG TO SCROLL)
+        // ==========================================
+        initDesktopScrollEnhancements() {
+            const leftCol = document.getElementById('exam-left-col');
+            const rightCol = document.getElementById('exam-right-col');
+            const passagePane = document.getElementById('exam-passage-content');
+            const questionsPane = document.getElementById('exam-questions-list');
+
+            // 1. Hover tracking cho phím cuộn (ArrowUp, ArrowDown, PageUp, PageDown)
+            if (leftCol && passagePane) {
+                leftCol.addEventListener('mouseenter', () => { this._hoveredPane = passagePane; });
+            }
+            if (rightCol && questionsPane) {
+                rightCol.addEventListener('mouseenter', () => { this._hoveredPane = questionsPane; });
+            }
+
+            // 2. Active Wheel Forwarding: lăn chuột ở bất cứ đâu trên cột (kể cả thanh tiêu đề hoặc lề) đều cuộn nội dung
+            if (leftCol && passagePane && !leftCol._wheelForwardBound) {
+                leftCol._wheelForwardBound = true;
+                leftCol.addEventListener('wheel', (e) => {
+                    if (e.target === leftCol || !passagePane.contains(e.target)) {
+                        passagePane.scrollTop += e.deltaY;
+                    }
+                }, { passive: true });
+            }
+
+            if (rightCol && questionsPane && !rightCol._wheelForwardBound) {
+                rightCol._wheelForwardBound = true;
+                rightCol.addEventListener('wheel', (e) => {
+                    if (e.target === rightCol || !questionsPane.contains(e.target)) {
+                        questionsPane.scrollTop += e.deltaY;
+                    }
+                }, { passive: true });
+            }
+
+            // 3. Mouse Drag-to-Scroll ("Lướt xem bài" bằng chuột / touchpad mượt mà như vuốt cảm ứng trên PC)
+            this.enableDragToScroll(passagePane);
+            this.enableDragToScroll(questionsPane);
+        },
+
+        enableDragToScroll(el) {
+            if (!el || el._dragToScrollBound) return;
+            el._dragToScrollBound = true;
+
+            let isDown = false;
+            let startY = 0;
+            let scrollTop = 0;
+            let isDragging = false;
+
+            el.addEventListener('mousedown', (e) => {
+                // Không can thiệp nếu nhấn chuột phải hoặc nút không phải chuột trái
+                if (e.button !== 0) return;
+
+                // Không can thiệp vào các nút bấm tương tác, ô chọn đáp án, link
+                if (e.target.closest('button, input, select, textarea, a, .opt-btn, .passage-pill-btn, [onclick]')) {
+                    return;
+                }
+
+                // Không can thiệp nếu người dùng đang bôi đen chọn văn bản
+                const sel = window.getSelection();
+                if (sel && sel.toString().length > 0) return;
+
+                isDown = true;
+                isDragging = false;
+                startY = e.pageY - el.offsetTop;
+                scrollTop = el.scrollTop;
+            });
+
+            const onMouseUpOrLeave = () => {
+                if (!isDown) return;
+                isDown = false;
+                if (isDragging) {
+                    isDragging = false;
+                    el.style.userSelect = '';
+                    el.style.cursor = '';
+                }
+            };
+
+            el.addEventListener('mouseleave', onMouseUpOrLeave);
+            window.addEventListener('mouseup', onMouseUpOrLeave);
+
+            el.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                const y = e.pageY - el.offsetTop;
+                const walk = y - startY;
+
+                // Chỉ kích hoạt lướt nếu kéo vượt quá 5px
+                if (!isDragging && Math.abs(walk) > 5) {
+                    isDragging = true;
+                    el.style.userSelect = 'none';
+                    el.style.cursor = 'grab';
+                }
+
+                if (isDragging) {
+                    el.scrollTop = scrollTop - walk;
+                }
+            });
         },
 
         // ==========================================
@@ -453,6 +564,11 @@
             try {
                 this.restorePaletteState();
             } catch (err) {}
+            try {
+                this.initDesktopScrollEnhancements();
+            } catch (err) {
+                console.error('[ThptExam] initDesktopScrollEnhancements error:', err);
+            }
 
             // 7. Reset mobile view
             try {
