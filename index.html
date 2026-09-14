@@ -385,8 +385,10 @@ html, body, button, a, input, select, textarea, [role="button"], .cursor-pointer
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
-.pt-safe {
-    padding-top: max(12px, env(safe-area-inset-top, 12px)) !important;
+@media (max-width: 1023px) {
+    .pt-safe {
+        padding-top: max(16px, env(safe-area-inset-top, 16px));
+    }
 }
 .pb-safe {
     padding-bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
@@ -742,50 +744,22 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
     </div>
 </nav>
 
-<header id="main-mobile-header" class="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-6 py-3.5 justify-between items-center pt-safe" style="display: none;">
-    <div id="mobile-header-title"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></div>
-    <div class="relative">
-        <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer" aria-label="Hồ sơ"><span class="material-symbols-outlined text-outline text-sm">person</span></button>
-        <!-- Mobile profile dropdown -->
-        <div id="mobile-profile-dropdown" class="hidden absolute right-0 top-12 w-52 bg-surface rounded-xl shadow-xl border border-outline-variant/20 z-[200] overflow-hidden fade-in">
-            <div class="px-4 py-3 border-b border-outline-variant/15">
-                <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
-                <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
-            </div>
-            <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 bg-amber-50/80 hover:bg-amber-100 transition-colors font-bold border-b border-outline-variant/15">
-                <span class="text-base">🎁</span><span>Quà tặng & Zalo Admin</span>
-            </button>
-            <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container transition-colors">
-                <span class="material-symbols-outlined text-[18px] text-on-surface-variant">settings</span>Cài đặt
-            </button>
-            <button onclick="window.handleLogout()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors border-t border-outline-variant/15">
-                <span class="material-symbols-outlined text-[18px]">logout</span>Đăng xuất
-            </button>
-        </div>
+<!-- Standalone Mobile Profile Dropdown -->
+<div id="mobile-profile-dropdown" class="hidden fixed right-4 top-14 sm:top-16 w-56 bg-surface rounded-2xl shadow-2xl border border-outline-variant/20 z-[9999] overflow-hidden fade-in">
+    <div class="px-4 py-3 border-b border-outline-variant/15">
+        <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
+        <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
     </div>
-</header>
-
-<!-- Dedicated Mobile Header for Library Page -->
-<header id="lib-mobile-header" class="lg:hidden fixed top-0 w-full z-40 bg-surface/95 dark:bg-black/95 backdrop-blur-xl border-b border-outline-variant/15 dark:border-neutral-800/80 px-3 flex items-center justify-between transition-all pt-safe" style="display: none; min-height: 3.75rem;">
-    <!-- Left: Hamburger icon -->
-    <button onclick="window.toggleMobileProfileDropdown()" class="w-10 h-10 flex items-center justify-center text-on-surface hover:opacity-75 transition-opacity cursor-pointer active:scale-95" aria-label="Menu">
-        <svg class="w-6 h-6 stroke-current" viewBox="0 0 24 24" fill="none" stroke-width="2.2" stroke-linecap="round">
-            <line x1="4" y1="8" x2="20" y2="8"></line>
-            <line x1="4" y1="16" x2="20" y2="16"></line>
-        </svg>
+    <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 bg-amber-50/80 hover:bg-amber-100 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
+        <span class="text-base">🎁</span><span>Quà tặng & Zalo Admin</span>
     </button>
-
-    <!-- Center: Hi Logo & Title -->
-    <div class="flex items-center gap-2 cursor-pointer select-none active:scale-95 transition-transform" onclick="window.switchLibraryTab('feed')">
-        <img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/>
-        <span class="font-extrabold text-base tracking-tight text-on-surface">Thư viện</span>
-    </div>
-
-    <!-- Right: Search Modal trigger -->
-    <button onclick="window.openLibrarySearchModal()" class="w-10 h-10 flex items-center justify-center text-on-surface hover:opacity-75 transition-opacity cursor-pointer active:scale-95" aria-label="Tìm kiếm">
-        <span class="material-symbols-outlined text-[24px]">search</span>
+    <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container transition-colors cursor-pointer">
+        <span class="material-symbols-outlined text-[18px] text-on-surface-variant">settings</span>Cài đặt
     </button>
-</header>
+    <button onclick="window.handleLogout()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors border-t border-outline-variant/15 cursor-pointer">
+        <span class="material-symbols-outlined text-[18px]">logout</span>Đăng xuất
+    </button>
+</div>
 
 <nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/80 backdrop-blur-xl border-t border-outline-variant/20 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe" style="display: none;">
     <div class="flex justify-around items-center h-[60px] w-full px-1">
@@ -1309,11 +1283,22 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: DASHBOARD ==================== -->
 <div id="page-dashboard" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-5 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
-        <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div><h1 class="text-2xl md:text-headline-lg font-bold text-on-surface">Trang chủ</h1><p class="text-sm md:text-body-lg text-on-surface-variant mt-1">Hôm nay là một ngày tuyệt vời để học.</p></div>
-            <div class="glass-card px-4 py-2 rounded-full flex items-center gap-2 self-start md:self-auto"><span class="material-symbols-outlined text-[#FF5722] icon-fill text-lg">local_fire_department</span><span id="dashboard-streak-badge" class="font-bold text-sm text-on-surface">— Ngày</span></div>
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+                <h1 class="text-2xl md:text-headline-lg font-bold text-on-surface">Trang chủ</h1>
+                <p class="text-sm md:text-body-lg text-on-surface-variant mt-0.5 sm:mt-1">Hôm nay là một ngày tuyệt vời để học.</p>
+            </div>
+            <div class="flex items-center gap-2.5 self-stretch sm:self-auto justify-between sm:justify-end">
+                <div class="glass-card px-4 py-2 rounded-full flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[#FF5722] icon-fill text-lg">local_fire_department</span>
+                    <span id="dashboard-streak-badge" class="font-bold text-sm text-on-surface">— Ngày</span>
+                </div>
+                <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
+                    <span class="material-symbols-outlined text-outline text-sm">person</span>
+                </button>
+            </div>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
@@ -1609,15 +1594,24 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: TOPICS ==================== -->
 <div id="page-topics" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-safe pt-3 md:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-5 md:gap-6 fade-in">
 
-        <!-- Toolbar: tạo chủ đề -->
-        <section class="flex flex-row justify-between items-center gap-2">
-            <p id="topics-page-subtitle" class="text-sm md:text-base text-on-surface-variant hidden md:block">Quản lý và sắp xếp các lĩnh vực học tập của bạn.</p>
-            <button onclick="window.openCreateTopicModal()" class="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs md:text-sm px-4 py-2 md:px-5 md:py-2.5 rounded-lg transition-colors flex items-center gap-1 ml-auto">
-                <span class="material-symbols-outlined text-[16px] md:text-[18px]">add</span>Tạo chủ đề
-            </button>
+        <!-- Header & Toolbar: Tạo chủ đề -->
+        <section class="flex items-center justify-between gap-3 pt-1">
+            <div class="min-w-0 flex-1">
+                <h1 class="text-2xl sm:text-headline-lg font-bold text-on-surface tracking-tight">Chủ đề</h1>
+                <p id="topics-page-subtitle" class="text-xs sm:text-sm text-on-surface-variant mt-0.5 truncate sm:whitespace-normal">Quản lý và sắp xếp các lĩnh vực học tập của bạn.</p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="window.openCreateTopicModal()" class="bg-primary text-on-primary hover:bg-primary/90 font-bold text-xs sm:text-sm px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl transition-all active:scale-95 shadow-sm flex items-center gap-1.5 cursor-pointer shrink-0">
+                    <span class="material-symbols-outlined text-[18px]">add</span>
+                    <span>Tạo chủ đề</span>
+                </button>
+                <button onclick="window.toggleMobileProfileDropdown()" class="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
+                    <span class="material-symbols-outlined text-outline text-sm">person</span>
+                </button>
+            </div>
         </section>
 
         <!-- Category Tabs -->
@@ -1639,11 +1633,11 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: THƯ VIỆN HỌC TẬP CỘNG ĐỒNG (THREADS-STYLE) ==================== -->
 <div id="page-library" class="page bg-surface dark:bg-black">
-<main class="lg:ml-64 min-h-screen pt-14 lg:pt-8 pb-28 lg:pb-12 px-0 sm:px-4 flex flex-col items-center">
+<main class="lg:ml-64 min-h-screen pt-safe pt-2 md:pt-6 pb-28 lg:pb-12 px-0 sm:px-4 flex flex-col items-center">
     <div class="max-w-[620px] w-full flex flex-col gap-0 sm:gap-4 fade-in">
 
         <!-- Threads-style Header & Tabs -->
-        <div class="w-full bg-surface/90 dark:bg-black/90 backdrop-blur-md sticky top-14 lg:top-0 z-30 pt-1 pb-2.5 border-b border-outline-variant/15 dark:border-neutral-800/80 flex items-center justify-between gap-2 px-3 sm:px-0">
+        <div class="w-full bg-surface/95 dark:bg-black/95 backdrop-blur-md sticky top-0 z-30 pt-safe pt-2 pb-2.5 border-b border-outline-variant/15 dark:border-neutral-800/80 flex items-center justify-between gap-2 px-3 sm:px-0">
             <div class="flex items-center gap-1 sm:gap-2">
                 <button id="lib-tab-feed" onclick="window.switchLibraryTab('feed')" class="px-3.5 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 shadow-xs">
                     Khám phá
@@ -1979,7 +1973,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: EXERCISES (LUYỆN ĐỀ THPT QUỐC GIA) ==================== -->
 <div id="page-exercises" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
 
         <!-- Header -->
@@ -2179,7 +2173,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: VOCABULARY ==================== -->
 <div id="page-vocabulary" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-32 lg:pb-14 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-5 lg:gap-6 fade-in">
         
         <!-- Header Section -->
@@ -2210,6 +2204,9 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
                         class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/30 text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
                     <span class="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
                     <span>Thêm hàng loạt</span>
+                </button>
+                <button onclick="window.toggleMobileProfileDropdown()" class="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
+                    <span class="material-symbols-outlined text-outline text-sm">person</span>
                 </button>
             </div>
         </header>
@@ -2392,13 +2389,13 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 <!-- ==================== PAGE: DICTIONARY ==================== -->
 <div id="page-dictionary" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-5 lg:px-12 flex flex-col">
+<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-3xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
 
-        <!-- Header (desktop) -->
-        <header class="hidden lg:flex flex-col gap-1">
-            <h1 class="font-headline-lg text-headline-lg text-on-surface">Tra từ</h1>
-            <p class="text-on-surface-variant">Dịch từ và cụm từ tiếng Anh sang tiếng Việt qua DeepL.</p>
+        <!-- Header -->
+        <header class="flex flex-col gap-1">
+            <h1 class="text-2xl lg:text-headline-lg font-bold text-on-surface">Tra từ</h1>
+            <p class="text-xs sm:text-sm text-on-surface-variant">Dịch từ và cụm từ tiếng Anh sang tiếng Việt qua DeepL.</p>
         </header>
 
         <!-- Search bar -->
@@ -2491,8 +2488,12 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 
 
 <div id="page-settings" class="page">
-<main class="lg:ml-64 min-h-screen pt-20 lg:pt-8 pb-28 lg:pb-12 px-6 lg:px-12 flex flex-col">
-    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-8 fade-in">
+<main class="lg:ml-64 min-h-screen pt-safe pt-4 lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
+    <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
+        <header class="flex flex-col gap-1">
+            <h1 class="text-2xl lg:text-headline-lg font-bold text-on-surface">Cài đặt</h1>
+            <p class="text-xs sm:text-sm text-on-surface-variant">Quản lý tài khoản và tuỳ chỉnh trải nghiệm học tập.</p>
+        </header>
         <div class="flex flex-col gap-6 flex-1">
 
             <!-- Giao diện -->
@@ -2948,34 +2949,10 @@ window.navigateTo = function(page, preserveHash = false){
     const sidebar = document.getElementById('main-sidebar');
     if(sidebar) sidebar.style.display = isMainTab ? '' : 'none';
     
-    // Mobile Top Header & Library Mobile Header
-    const mobileHeader = document.getElementById('main-mobile-header');
-    const libMobileHeader = document.getElementById('lib-mobile-header');
+    // Mobile Bottom Navigation
     const bottomNav = document.getElementById('mobile-bottom-nav');
-
-    if (pageName === 'library') {
-        if (mobileHeader) mobileHeader.style.display = 'none';
-        if (libMobileHeader) libMobileHeader.style.display = 'flex';
-        if (bottomNav) bottomNav.style.display = '';
-    } else {
-        if (libMobileHeader) libMobileHeader.style.display = 'none';
-        if (mobileHeader) mobileHeader.style.display = isMainTab ? '' : 'none';
-        if (bottomNav) bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
-    }
-    
-    // Đổi Title Mobile Header
-    if(isMainTab && pageName !== 'library') {
-        const titles = {'dashboard': 'Hi', 'topics': 'Chủ đề', 'vocabulary': 'Sổ từ', 'exercises': 'Luyện Đề THPT', 'dictionary': 'Tra từ', 'settings': 'Cài đặt'};
-        const titleEl = document.getElementById('mobile-header-title');
-        if(titleEl) {
-            if(pageName === 'dashboard') {
-                titleEl.className = "";
-                titleEl.innerHTML = '<img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/>';
-            } else {
-                titleEl.className = "font-headline-md text-xl font-bold text-on-surface truncate";
-                titleEl.textContent = titles[pageName] || '';
-            }
-        }
+    if (bottomNav) {
+        bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
     }
     // Khi vào trang Topics: render tabs + grid
     if (pageName === 'topics') {
@@ -9329,6 +9306,10 @@ window._updateProfileUI = function(user) {
     if (avatar) {
         if (avatarDesk) { avatarDesk.style.backgroundImage = `url('${avatar}')`; avatarDesk.innerHTML = ''; }
         if (avatarMob)  { avatarMob.style.backgroundImage  = `url('${avatar}')`; avatarMob.innerHTML = ''; }
+        document.querySelectorAll('.mobile-user-avatar').forEach(el => {
+            el.style.backgroundImage = `url('${avatar}')`;
+            el.innerHTML = '';
+        });
         if (libAvatarEl) { libAvatarEl.style.backgroundImage = `url('${avatar}')`; libAvatarEl.innerHTML = ''; }
         if (libDockAvatar) { libDockAvatar.style.backgroundImage = `url('${avatar}')`; libDockAvatar.innerHTML = ''; }
     }
@@ -9372,8 +9353,8 @@ window.toggleMobileProfileDropdown = function() {
 
 function _closeMobileDropdownOutside(e) {
     const dropdown = document.getElementById('mobile-profile-dropdown');
-    const avatar   = document.getElementById('mobile-profile-avatar');
-    if (dropdown && !dropdown.contains(e.target) && !avatar.contains(e.target)) {
+    const isAvatar = e.target.closest('#mobile-profile-avatar, .mobile-user-avatar');
+    if (dropdown && !dropdown.contains(e.target) && !isAvatar) {
         dropdown.classList.add('hidden');
     }
 }
