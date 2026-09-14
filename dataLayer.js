@@ -516,19 +516,24 @@ window.HiDB = (() => {
      * @param {Array<{word: string, phonetic?: string, meaning: string, exampleSentence?: string}>} wordsList 
      * @returns {Promise<Array<Object>>}
      */
-    async function addWordsBatch(topicId, wordsList = []) {
+    async function addWordsBatch(topicId, wordsList = [], passageId = null) {
         if (!topicId) throw new Error('Thiếu topicId khi thêm từ hàng loạt');
         if (!Array.isArray(wordsList) || wordsList.length === 0) return [];
 
         const sanitized = wordsList
             .filter(w => w && String(w.word || '').trim() && String(w.meaning || '').trim())
-            .map(w => ({
-                topic_id: topicId,
-                word: String(w.word).trim(),
-                phonetic: String(w.phonetic || '').trim(),
-                meaning: String(w.meaning).trim(),
-                example_sentence: _isEnglishExample(w.exampleSentence || w.example) ? String(w.exampleSentence || w.example).trim() : '',
-            }));
+            .map(w => {
+                const row = {
+                    topic_id: topicId,
+                    word: String(w.word).trim(),
+                    phonetic: String(w.phonetic || '').trim(),
+                    meaning: String(w.meaning).trim(),
+                    example_sentence: _isEnglishExample(w.exampleSentence || w.example) ? String(w.exampleSentence || w.example).trim() : '',
+                };
+                const pid = passageId || w.passageId || w.passage_id;
+                if (pid) row.passage_id = pid;
+                return row;
+            });
 
         if (sanitized.length === 0) {
             throw new Error('Danh sách từ không hợp lệ hoặc thiếu thông tin từ/nghĩa.');
@@ -538,7 +543,7 @@ window.HiDB = (() => {
         const { data: insertedWords, error: insErr } = await _getClient()
             .from('words')
             .insert(sanitized)
-            .select('id, word, meaning, topic_id');
+            .select('id, word, meaning, topic_id, passage_id');
 
         if (insErr) throw insErr;
 
@@ -568,7 +573,7 @@ window.HiDB = (() => {
 
     /**
      * Đảm bảo người dùng có một chủ đề cá nhân mặc định để lưu từ từ Sổ từ.
-     * @returns {Promise<{id: string, name: string, icon: string}>}
+     * @returns {Promise<{id: string, name: string, icon: string}|null>}
      */
     async function ensureUserPersonalTopic() {
         const user = await getCurrentUser();
@@ -594,24 +599,7 @@ window.HiDB = (() => {
             .limit(1)
             .maybeSingle();
 
-        if (firstTopic) return firstTopic;
-
-        // Chưa có -> Tạo mới chủ đề "Sổ tay từ vựng của tôi"
-        const { data: created, error } = await _getClient()
-            .from('topics')
-            .insert({
-                user_id: user.id,
-                name: 'Sổ tay từ vựng của tôi',
-                icon: 'collections_bookmark',
-                category: 'General English',
-                is_public: false,
-                description: 'Kho từ vựng cá nhân được tạo và lưu trữ qua Sổ từ.'
-            })
-            .select('id, name, icon')
-            .single();
-
-        if (error) throw error;
-        return created;
+        return firstTopic || null;
     }
 
     /**
@@ -972,6 +960,55 @@ window.HiDB = (() => {
                 isDue:           !progress || new Date(progress.next_review_at) <= new Date(),
             };
         }));
+    }
+
+    /**
+     * Lấy danh sách Tests và Passages của một topic (nếu có cấu trúc Test -> Passage).
+     * @param {string} topicId
+     * @returns {Promise<{ hasTests: boolean, tests: Array }>}
+     */
+    async function getTopicTests(topicId) {
+        if (!topicId) return { hasTests: false, tests: [] };
+        try {
+            const client = _getClient();
+            const { data: testsData, error: testsErr } = await client
+                .from('tests')
+                .select('id, name, test_order')
+                .eq('topic_id', topicId)
+                .order('test_order', { ascending: true });
+
+            if (testsErr || !testsData || testsData.length === 0) {
+                return { hasTests: false, tests: [] };
+            }
+
+            const { data: passagesData } = await client
+                .from('passages')
+                .select('id, test_id, passage_number, title')
+                .eq('topic_id', topicId)
+                .order('passage_number', { ascending: true });
+
+            const passagesByTest = {};
+            (passagesData || []).forEach(p => {
+                if (!passagesByTest[p.test_id]) passagesByTest[p.test_id] = [];
+                passagesByTest[p.test_id].push({
+                    id: p.id,
+                    passageNumber: p.passage_number,
+                    title: p.title || `Passage ${p.passage_number}`
+                });
+            });
+
+            const tests = testsData.map(t => ({
+                id: t.id,
+                name: t.name,
+                testOrder: t.test_order,
+                passages: passagesByTest[t.id] || []
+            }));
+
+            return { hasTests: true, tests };
+        } catch (err) {
+            console.warn('[getTopicTests]', err);
+            return { hasTests: false, tests: [] };
+        }
     }
 
     /**
@@ -2568,6 +2605,7 @@ window.HiDB = (() => {
         getLessonsInTopic,
         getWordsInLesson,
         getCamHierarchy,
+        getTopicTests,
         getWordsInPassage,
         getPassage,
         getWordsInTest,

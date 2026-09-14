@@ -2414,65 +2414,8 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                         class="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/30 text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
                     <span class="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
                     <span>Thêm hàng loạt</span>
-                </button>
-                <button id="vocab-quick-review-btn" onclick="window.startVocabQuickReview()"
-                        class="hidden px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-2xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 text-xs sm:text-sm font-bold flex items-center gap-1.5 active:scale-95 transition-all cursor-pointer">
-                    <span class="material-symbols-outlined text-[18px]">bolt</span>
-                    <span>Ôn tập nhanh</span>
-                </button>
             </div>
         </header>
-
-        <!-- Stats Bar: SRS Memory Widget (4 Cards) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
-            <!-- Total Learned -->
-            <div class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow">
-                <div class="flex items-center justify-between text-outline text-xs">
-                    <span class="font-medium">Tổng từ đã học</span>
-                    <span class="material-symbols-outlined text-[18px] text-primary">collections_bookmark</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span id="vocab-stat-total" class="text-xl sm:text-2xl font-black text-on-surface">0</span>
-                    <span class="text-[11px] text-outline font-semibold">từ</span>
-                </div>
-            </div>
-
-            <!-- Due for Review -->
-            <div id="vocab-stat-due-card" onclick="window.filterVocabLevel(-1)" class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow cursor-pointer hover:border-amber-500/40 transition-colors">
-                <div class="flex items-center justify-between text-outline text-xs">
-                    <span class="font-medium">Cần ôn hôm nay</span>
-                    <span class="material-symbols-outlined text-[18px] text-amber-500">alarm</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span id="vocab-stat-due" class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">0</span>
-                    <span class="text-[11px] text-amber-600/80 dark:text-amber-400/80 font-semibold">từ</span>
-                </div>
-            </div>
-
-            <!-- Learning (Lv 1-3) -->
-            <div onclick="window.filterVocabLevel('1-3')" class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow cursor-pointer hover:border-blue-500/40 transition-colors">
-                <div class="flex items-center justify-between text-outline text-xs">
-                    <span class="font-medium">Đang học (Lv 1-3)</span>
-                    <span class="material-symbols-outlined text-[18px] text-blue-500">psychology</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span id="vocab-stat-learning" class="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400">0</span>
-                    <span class="text-[11px] text-blue-600/80 dark:text-blue-400/80 font-semibold">từ</span>
-                </div>
-            </div>
-
-            <!-- Mastered (Lv 4-5) -->
-            <div onclick="window.filterVocabLevel('4-5')" class="bg-surface-container-lowest/80 backdrop-blur-sm p-3 sm:p-4 rounded-2xl border border-outline-variant/20 flex flex-col justify-between soft-shadow cursor-pointer hover:border-emerald-500/40 transition-colors">
-                <div class="flex items-center justify-between text-outline text-xs">
-                    <span class="font-medium">Đã thuộc (Lv 4-5)</span>
-                    <span class="material-symbols-outlined text-[18px] text-emerald-500">verified</span>
-                </div>
-                <div class="mt-2 flex items-baseline gap-1">
-                    <span id="vocab-stat-mastered" class="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">0</span>
-                    <span class="text-[11px] text-emerald-600/80 dark:text-emerald-400/80 font-semibold">từ</span>
-                </div>
-            </div>
-        </div>
 
         <!-- Filter & Search Toolbar -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
@@ -3910,6 +3853,70 @@ window.addEventListener('hashchange', () => {
   </div>
 </div>
 
+<!-- ==================== MODAL: BỘ CHỌN ĐÍCH LƯU PHÂN CẤP (FOLDER -> TOPIC -> TEST -> PASSAGE) ==================== -->
+<div id="modal-topic-picker" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(0,0,0,0.6);backdrop-filter:blur(6px)">
+  <div class="w-full max-w-md bg-surface rounded-3xl soft-shadow fade-in overflow-hidden border border-outline-variant/30 flex flex-col max-h-[85vh]">
+    
+    <!-- Header -->
+    <div class="px-5 py-4 border-b border-outline-variant/15 flex items-center justify-between shrink-0 bg-surface-container-lowest/60">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <button type="button" id="topic-picker-back-btn" onclick="window.topicPickerGoBack()" 
+                class="hidden p-1.5 -ml-1.5 rounded-xl text-outline hover:text-primary hover:bg-surface-container transition-colors items-center gap-1 cursor-pointer">
+          <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+          <span id="topic-picker-back-label" class="text-xs font-semibold">Quay lại</span>
+        </button>
+        <div class="min-w-0">
+          <h3 id="topic-picker-title" class="text-base font-bold text-on-surface leading-tight truncate">Chọn thư mục</h3>
+          <p id="topic-picker-subtitle" class="text-[11px] text-outline truncate mt-0.5">Chọn vị trí lưu từ vựng</p>
+        </div>
+      </div>
+      <button type="button" onclick="window.closeTopicPicker()" class="w-8 h-8 flex items-center justify-center rounded-full text-outline hover:bg-surface-container transition-colors cursor-pointer shrink-0 ml-2">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Body Views -->
+    <div class="p-4 sm:p-5 overflow-y-auto flex-1 custom-scrollbar">
+      <!-- Status message (loading / error) -->
+      <div id="topic-picker-status" class="hidden text-xs py-2 px-3 mb-3 rounded-xl bg-primary/10 text-primary font-medium text-center"></div>
+
+      <!-- Step 1: Folder view -->
+      <div id="topic-picker-step-folder" class="space-y-2">
+        <div id="topic-picker-folder-list" class="space-y-1.5">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Step 2: Topic view -->
+      <div id="topic-picker-step-topic" class="hidden space-y-2">
+        <div id="topic-picker-topic-list" class="space-y-1.5">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Step 3: Test view -->
+      <div id="topic-picker-step-test" class="hidden space-y-2">
+        <div id="topic-picker-test-list" class="space-y-1.5">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Step 4: Passage view -->
+      <div id="topic-picker-step-passage" class="hidden space-y-2">
+        <div id="topic-picker-passage-list" class="space-y-1.5">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer note -->
+    <div class="px-5 py-2.5 bg-surface-container-lowest/40 border-t border-outline-variant/10 text-[11px] text-outline text-center">
+      <span>Nhấp vào thư mục / bài học để chọn</span>
+    </div>
+
+  </div>
+</div>
+
 <!-- ==================== MODAL: THÊM TỪ VỰNG TRỰC TIẾP (KÈM AI AUTO-FILL) ==================== -->
 <div id="modal-add-word" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.55);backdrop-filter:blur(6px)">
   <div class="w-full max-w-lg bg-surface rounded-3xl soft-shadow fade-in overflow-hidden border border-outline-variant/30 flex flex-col max-h-[90vh]">
@@ -3933,14 +3940,25 @@ window.addEventListener('hashchange', () => {
       </button>
     </div>
 
-      <!-- Topic selector (hiển thị khi mở từ trang Sổ từ mà chưa có sẵn topicId) -->
-      <div id="add-word-topic-select-container" class="hidden">
-        <label for="add-word-topic-select" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
-          Lưu vào Chủ đề / Sổ từ <span class="text-rose-500">*</span>
+    <form id="form-add-word" onsubmit="window.submitAddWord(event)" class="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-4">
+      <!-- Destination Card: Thư mục / Chủ đề / Test / Passage -->
+      <div id="add-word-destination-section" class="hidden">
+        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Lưu vào Chủ đề / Bài học <span class="text-rose-500">*</span>
         </label>
-        <select id="add-word-topic-select" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
-          <!-- Populated dynamically -->
-        </select>
+        <button type="button" id="add-word-destination-card" onclick="window.openTopicPickerForSingleAdd()"
+                class="w-full bg-surface-container-low hover:bg-surface-container border border-outline-variant/30 hover:border-primary/50 rounded-2xl p-3 text-left flex items-center justify-between transition-all group cursor-pointer">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-[20px]" id="add-word-destination-icon">folder</span>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-outline font-medium" id="add-word-destination-path">Thư mục / Chủ đề</div>
+              <div class="text-sm font-bold text-on-surface truncate" id="add-word-destination-title">Bấm để chọn nơi lưu từ...</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] shrink-0 ml-2">navigate_next</span>
+        </button>
       </div>
 
       <!-- English Word + AI Auto-Fill Button -->
@@ -4049,14 +4067,26 @@ window.addEventListener('hashchange', () => {
     <!-- Body -->
     <div class="p-5 sm:p-6 overflow-y-auto flex-1 custom-scrollbar space-y-4">
       
-      <!-- Topic selector -->
-      <div>
-        <label for="bulk-add-topic-select" class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
-          Lưu vào Chủ đề / Sổ từ
+      <!-- Destination Card: Thư mục / Chủ đề / Test / Passage -->
+      <div id="bulk-add-destination-section">
+        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+          Lưu vào Chủ đề / Bài học <span class="text-rose-500">*</span>
         </label>
-        <select id="bulk-add-topic-select" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary focus:bg-surface rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer">
-          <!-- Populated dynamically -->
-        </select>
+        <button type="button" id="bulk-add-destination-card" onclick="window.openTopicPickerForBulkAdd()"
+                class="w-full bg-surface-container-low hover:bg-surface-container border border-outline-variant/30 hover:border-primary/50 rounded-2xl p-3 text-left flex items-center justify-between transition-all group cursor-pointer">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+              <span class="material-symbols-outlined text-[20px]" id="bulk-add-destination-icon">folder</span>
+            </div>
+            <div class="min-w-0">
+              <div class="text-[11px] text-outline font-medium" id="bulk-add-destination-path">Thư mục / Chủ đề</div>
+              <div class="text-sm font-bold text-on-surface truncate" id="bulk-add-destination-title">Bấm để chọn nơi lưu từ...</div>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] shrink-0 ml-2">navigate_next</span>
+        </button>
+        <input type="hidden" id="bulk-add-topic-id" value=""/>
+        <input type="hidden" id="bulk-add-passage-id" value=""/>
       </div>
 
       <!-- Textarea Input -->
@@ -6356,8 +6386,394 @@ window.filterLessonWords = function() {
     });
 };
 
+// ── BỘ CHỌN ĐÍCH LƯU PHÂN CẤP (HIERARCHICAL DESTINATION PICKER) ──
+window._topicPickerState = {
+    isOpen: false,
+    callback: null,
+    step: 'folder', // 'folder' | 'topic' | 'test' | 'passage'
+    options: {},
+    allTopics: [],
+    foldersMap: {},
+    currentFolder: null,
+    currentTopic: null,
+    currentTest: null,
+    topicTestsCache: new Map()
+};
+
+window.openTopicPicker = async function(callback, options = {}) {
+    window._topicPickerState.callback = callback;
+    window._topicPickerState.options = options || {};
+    window._topicPickerState.currentFolder = null;
+    window._topicPickerState.currentTopic = null;
+    window._topicPickerState.currentTest = null;
+
+    const modal = document.getElementById('modal-topic-picker');
+    if (!modal) return;
+
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    window._topicPickerState.isOpen = true;
+
+    const folderList = document.getElementById('topic-picker-folder-list');
+    if (folderList) {
+        folderList.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-10 text-outline gap-2">
+                <span class="material-symbols-outlined text-primary text-[28px] animate-spin">refresh</span>
+                <span class="text-xs font-medium">Đang tải danh sách thư mục...</span>
+            </div>
+        `;
+    }
+
+    try {
+        let topics = [];
+        if (typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function') {
+            topics = await HiDB.getTopics().catch(() => []);
+        }
+        window._topicPickerState.allTopics = topics || [];
+
+        const foldersMap = {};
+        (topics || []).forEach(t => {
+            const f = (t.category || 'General English').trim();
+            if (!foldersMap[f]) foldersMap[f] = [];
+            foldersMap[f].push(t);
+        });
+        window._topicPickerState.foldersMap = foldersMap;
+
+        window.renderTopicPickerFolderStep();
+    } catch (err) {
+        console.error('[openTopicPicker]', err);
+        const statusEl = document.getElementById('topic-picker-status');
+        if (statusEl) {
+            statusEl.textContent = 'Lỗi tải chủ đề: ' + (err.message || 'Thất bại');
+            statusEl.classList.remove('hidden');
+        }
+    }
+};
+
+window.closeTopicPicker = function() {
+    const modal = document.getElementById('modal-topic-picker');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+    window._topicPickerState.isOpen = false;
+};
+
+document.getElementById('modal-topic-picker')?.addEventListener('click', function(e) {
+    if (e.target === this) window.closeTopicPicker();
+});
+
+window.renderTopicPickerFolderStep = function() {
+    window._topicPickerState.step = 'folder';
+    window._topicPickerState.currentFolder = null;
+    window._topicPickerState.currentTopic = null;
+    window._topicPickerState.currentTest = null;
+
+    const backBtn = document.getElementById('topic-picker-back-btn');
+    const titleEl = document.getElementById('topic-picker-title');
+    const subtitleEl = document.getElementById('topic-picker-subtitle');
+    const statusEl = document.getElementById('topic-picker-status');
+
+    if (backBtn) {
+        backBtn.classList.add('hidden');
+        backBtn.classList.remove('flex');
+    }
+    if (titleEl) titleEl.textContent = window._topicPickerState.options.title || 'Chọn thư mục';
+    if (subtitleEl) subtitleEl.textContent = window._topicPickerState.options.subtitle || 'Chọn vị trí lưu từ vựng';
+    if (statusEl) statusEl.classList.add('hidden');
+
+    document.getElementById('topic-picker-step-folder')?.classList.remove('hidden');
+    document.getElementById('topic-picker-step-topic')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-test')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-passage')?.classList.add('hidden');
+
+    const folderNames = Object.keys(window._topicPickerState.foldersMap).sort((a, b) => {
+        if (a.toLowerCase() === 'cam') return -1;
+        if (b.toLowerCase() === 'cam') return 1;
+        if (a.toLowerCase() === 'ielts') return -1;
+        if (b.toLowerCase() === 'ielts') return 1;
+        return a.localeCompare(b, 'vi');
+    });
+
+    const folderList = document.getElementById('topic-picker-folder-list');
+    if (!folderList) return;
+
+    if (folderNames.length === 0) {
+        folderList.innerHTML = '<p class="text-center text-xs text-outline py-8">Chưa có thư mục nào</p>';
+        return;
+    }
+
+    folderList.innerHTML = folderNames.map(f => `
+        <button type="button" onclick="window.topicPickerSelectFolder('${_esc(f)}')"
+                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+                    📁
+                </div>
+                <span class="text-sm font-bold text-on-surface truncate">${_esc(f)}</span>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
+                ${window._topicPickerState.foldersMap[f].length} chủ đề ›
+            </span>
+        </button>
+    `).join('');
+};
+
+window.topicPickerSelectFolder = function(folderName) {
+    window._topicPickerState.step = 'topic';
+    window._topicPickerState.currentFolder = folderName;
+    window._topicPickerState.currentTopic = null;
+    window._topicPickerState.currentTest = null;
+
+    const backBtn = document.getElementById('topic-picker-back-btn');
+    const backLabel = document.getElementById('topic-picker-back-label');
+    const titleEl = document.getElementById('topic-picker-title');
+    const subtitleEl = document.getElementById('topic-picker-subtitle');
+    const statusEl = document.getElementById('topic-picker-status');
+
+    if (backBtn) {
+        backBtn.classList.remove('hidden');
+        backBtn.classList.add('flex');
+    }
+    if (backLabel) backLabel.textContent = 'Thư mục';
+    if (titleEl) titleEl.textContent = folderName;
+    if (subtitleEl) subtitleEl.textContent = 'Chọn chủ đề';
+    if (statusEl) statusEl.classList.add('hidden');
+
+    document.getElementById('topic-picker-step-folder')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-topic')?.classList.remove('hidden');
+    document.getElementById('topic-picker-step-test')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-passage')?.classList.add('hidden');
+
+    const topics = window._topicPickerState.foldersMap[folderName] || [];
+    const topicList = document.getElementById('topic-picker-topic-list');
+    if (!topicList) return;
+
+    if (topics.length === 0) {
+        topicList.innerHTML = '<p class="text-center text-xs text-outline py-8">Thư mục này chưa có chủ đề</p>';
+        return;
+    }
+
+    topicList.innerHTML = topics.map(t => `
+        <button type="button" onclick="window.topicPickerSelectTopic('${t.id}')"
+                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+                    ${t.icon && t.icon.length <= 2 ? t.icon : '📖'}
+                </div>
+                <span class="text-sm font-semibold text-on-surface truncate">${_esc(t.name)}</span>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
+                Chọn ›
+            </span>
+        </button>
+    `).join('');
+};
+
+window.topicPickerSelectTopic = async function(topicId) {
+    const topic = (window._topicPickerState.allTopics || []).find(t => t.id === topicId);
+    if (!topic) return;
+    window._topicPickerState.currentTopic = topic;
+
+    const statusEl = document.getElementById('topic-picker-status');
+    if (statusEl) {
+        statusEl.textContent = 'Đang kiểm tra cấu trúc bài thi...';
+        statusEl.classList.remove('hidden');
+    }
+
+    let tests = window._topicPickerState.topicTestsCache.get(topic.id);
+    if (tests === undefined) {
+        try {
+            if (typeof HiDB !== 'undefined' && typeof HiDB.getTopicTests === 'function') {
+                const res = await HiDB.getTopicTests(topic.id);
+                tests = (res?.hasTests && res.tests) ? res.tests : [];
+            } else {
+                tests = [];
+            }
+        } catch (e) {
+            console.warn('[topicPicker:getTopicTests]', e);
+            tests = [];
+        }
+        window._topicPickerState.topicTestsCache.set(topic.id, tests);
+    }
+
+    if (statusEl) statusEl.classList.add('hidden');
+
+    if (tests && tests.length > 0) {
+        window.renderTopicPickerTestStep(topic, tests);
+    } else {
+        // Chủ đề thông thường -> hoàn thành chọn ngay
+        window.finishTopicPickerSelection({
+            topicId: topic.id,
+            topicName: topic.name,
+            passageId: null,
+            passageTitle: null,
+            testName: null,
+            folderName: window._topicPickerState.currentFolder,
+            fullLabel: `${window._topicPickerState.currentFolder} / ${topic.name}`
+        });
+    }
+};
+
+window.renderTopicPickerTestStep = function(topic, tests) {
+    window._topicPickerState.step = 'test';
+    window._topicPickerState.currentTest = null;
+
+    const backBtn = document.getElementById('topic-picker-back-btn');
+    const backLabel = document.getElementById('topic-picker-back-label');
+    const titleEl = document.getElementById('topic-picker-title');
+    const subtitleEl = document.getElementById('topic-picker-subtitle');
+    const statusEl = document.getElementById('topic-picker-status');
+
+    if (backBtn) {
+        backBtn.classList.remove('hidden');
+        backBtn.classList.add('flex');
+    }
+    if (backLabel) backLabel.textContent = 'Chủ đề';
+    if (titleEl) titleEl.textContent = topic.name;
+    if (subtitleEl) subtitleEl.textContent = 'Chọn bài Test';
+    if (statusEl) statusEl.classList.add('hidden');
+
+    document.getElementById('topic-picker-step-folder')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-topic')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-test')?.classList.remove('hidden');
+    document.getElementById('topic-picker-step-passage')?.classList.add('hidden');
+
+    const testList = document.getElementById('topic-picker-test-list');
+    if (!testList) return;
+
+    if (!tests || tests.length === 0) {
+        testList.innerHTML = '<p class="text-center text-xs text-outline py-8">Chưa có bài test nào</p>';
+        return;
+    }
+
+    testList.innerHTML = tests.map(t => `
+        <button type="button" onclick="window.topicPickerSelectTest('${t.id}')"
+                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+                    📝
+                </div>
+                <span class="text-sm font-semibold text-on-surface truncate">${_esc(t.name)}</span>
+            </div>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
+                ${(t.passages || []).length} passage ›
+            </span>
+        </button>
+    `).join('');
+};
+
+window.topicPickerSelectTest = function(testId) {
+    const tests = window._topicPickerState.topicTestsCache.get(window._topicPickerState.currentTopic?.id) || [];
+    const test = tests.find(t => t.id === testId);
+    if (!test) return;
+    window._topicPickerState.currentTest = test;
+
+    window._topicPickerState.step = 'passage';
+
+    const backBtn = document.getElementById('topic-picker-back-btn');
+    const backLabel = document.getElementById('topic-picker-back-label');
+    const titleEl = document.getElementById('topic-picker-title');
+    const subtitleEl = document.getElementById('topic-picker-subtitle');
+    const statusEl = document.getElementById('topic-picker-status');
+
+    if (backBtn) {
+        backBtn.classList.remove('hidden');
+        backBtn.classList.add('flex');
+    }
+    if (backLabel) backLabel.textContent = 'Bài Test';
+    if (titleEl) titleEl.textContent = `${window._topicPickerState.currentTopic.name} · ${test.name}`;
+    if (subtitleEl) subtitleEl.textContent = 'Chọn passage để lưu từ';
+    if (statusEl) statusEl.classList.add('hidden');
+
+    document.getElementById('topic-picker-step-folder')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-topic')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-test')?.classList.add('hidden');
+    document.getElementById('topic-picker-step-passage')?.classList.remove('hidden');
+
+    const passageList = document.getElementById('topic-picker-passage-list');
+    if (!passageList) return;
+
+    const passages = test.passages || [];
+    if (passages.length === 0) {
+        passageList.innerHTML = '<p class="text-center text-xs text-outline py-8">Bài test này chưa có passage nào</p>';
+        return;
+    }
+
+    passageList.innerHTML = passages.map(p => `
+        <button type="button" onclick="window.topicPickerSelectPassage('${p.id}')"
+                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-base">
+                    📄
+                </div>
+                <span class="text-sm font-semibold text-on-surface truncate">${_esc(p.title || ('Passage ' + p.passageNumber))}</span>
+            </div>
+            <span class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-on-primary shadow-2xs group-hover:bg-surface-tint transition-colors shrink-0 ml-2">
+                ✓ Chọn
+            </span>
+        </button>
+    `).join('');
+};
+
+window.topicPickerSelectPassage = function(passageId) {
+    const test = window._topicPickerState.currentTest;
+    const passage = (test?.passages || []).find(p => p.id === passageId);
+    if (!passage) return;
+
+    const topic = window._topicPickerState.currentTopic;
+    const passageTitle = passage.title || `Passage ${passage.passageNumber}`;
+    window.finishTopicPickerSelection({
+        topicId: topic.id,
+        topicName: topic.name,
+        passageId: passage.id,
+        passageTitle: passageTitle,
+        testName: test.name,
+        folderName: window._topicPickerState.currentFolder,
+        fullLabel: `${window._topicPickerState.currentFolder} / ${topic.name} / ${test.name} / ${passageTitle}`
+    });
+};
+
+window.topicPickerGoBack = function() {
+    if (window._topicPickerState.step === 'passage') {
+        const tests = window._topicPickerState.topicTestsCache.get(window._topicPickerState.currentTopic?.id) || [];
+        window.renderTopicPickerTestStep(window._topicPickerState.currentTopic, tests);
+    } else if (window._topicPickerState.step === 'test') {
+        window.topicPickerSelectFolder(window._topicPickerState.currentFolder);
+    } else if (window._topicPickerState.step === 'topic') {
+        window.renderTopicPickerFolderStep();
+    }
+};
+
+window.finishTopicPickerSelection = function(destination) {
+    window.closeTopicPicker();
+    if (typeof window._topicPickerState.callback === 'function') {
+        window._topicPickerState.callback(destination);
+    }
+};
+
 // ── THÊM TỪ VỰNG TRỰC TIẾP & AI AUTO-FILL ───────────────────────
-// ── THÊM TỪ VỰNG TRỰC TIẾP & AI AUTO-FILL ───────────────────────
+window._singleAddState = window._singleAddState || {
+    selectedDestination: null
+};
+
+window.openTopicPickerForSingleAdd = function() {
+    window.openTopicPicker((destination) => {
+        window._singleAddState.selectedDestination = destination;
+        const topicInput = document.getElementById('add-word-topic-id');
+        const passageInput = document.getElementById('add-word-passage-id');
+        const pathEl = document.getElementById('add-word-destination-path');
+        const titleEl = document.getElementById('add-word-destination-title');
+        if (topicInput) topicInput.value = destination.topicId;
+        if (passageInput) passageInput.value = destination.passageId || '';
+        if (pathEl) pathEl.textContent = destination.folderName || 'Thư mục';
+        if (titleEl) titleEl.textContent = destination.fullLabel || destination.topicName;
+    }, {
+        title: 'Chọn nơi lưu từ vựng',
+        subtitle: 'Thư mục → Chủ đề → Test → Passage'
+    });
+};
+
 window.openAddWordModal = async function(topicId = null, passageId = null) {
     const isVocabContext = !topicId && !window._currentTopicId;
     let targetTopicId = topicId || (!isVocabContext ? window._currentTopicId : null);
@@ -6368,44 +6784,54 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
     const topicInput = document.getElementById('add-word-topic-id');
     const passageInput = document.getElementById('add-word-passage-id');
     const badgeContainer = document.getElementById('add-word-topic-badge');
-    const selectContainer = document.getElementById('add-word-topic-select-container');
-    const selectEl = document.getElementById('add-word-topic-select');
+    const destSection = document.getElementById('add-word-destination-section');
 
     if (topicInput) topicInput.value = targetTopicId || '';
     if (passageInput) passageInput.value = targetPassageId || '';
 
-    // Cấu hình Topic: Mở từ Sổ từ vs Mở từ Lesson
+    // Cấu hình Topic: Mở từ Sổ từ vs Mở từ Lesson/Passage cụ thể
     if (isVocabContext || !targetTopicId) {
         if (badgeContainer) badgeContainer.classList.add('hidden');
-        if (selectContainer) selectContainer.classList.remove('hidden');
+        if (destSection) destSection.classList.remove('hidden');
 
-        if (selectEl) {
-            selectEl.innerHTML = '<option value="">Đang tải danh sách chủ đề...</option>';
+        const pathEl = document.getElementById('add-word-destination-path');
+        const titleEl = document.getElementById('add-word-destination-title');
+
+        if (window._singleAddState.selectedDestination) {
+            const dest = window._singleAddState.selectedDestination;
+            if (topicInput) topicInput.value = dest.topicId;
+            if (passageInput) passageInput.value = dest.passageId || '';
+            if (pathEl) pathEl.textContent = dest.folderName || 'Thư mục';
+            if (titleEl) titleEl.textContent = dest.fullLabel || dest.topicName;
+        } else {
             try {
                 let personalTopic = null;
                 if (typeof HiDB !== 'undefined' && typeof HiDB.ensureUserPersonalTopic === 'function') {
                     personalTopic = await HiDB.ensureUserPersonalTopic().catch(() => null);
                 }
-                const allTopics = (typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function')
-                    ? await HiDB.getTopics().catch(() => [])
-                    : [];
-
-                let optionsHtml = '';
                 if (personalTopic) {
-                    optionsHtml += `<option value="${personalTopic.id}" selected>📝 ${personalTopic.name || 'Sổ tay từ vựng của tôi'}</option>`;
+                    window._singleAddState.selectedDestination = {
+                        topicId: personalTopic.id,
+                        topicName: personalTopic.name,
+                        passageId: null,
+                        folderName: 'General English',
+                        fullLabel: personalTopic.name
+                    };
+                    if (topicInput) topicInput.value = personalTopic.id;
+                    if (pathEl) pathEl.textContent = 'General English';
+                    if (titleEl) titleEl.textContent = personalTopic.name;
+                } else {
+                    if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
+                    if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
                 }
-                (allTopics || []).forEach(t => {
-                    if (personalTopic && t.id === personalTopic.id) return;
-                    optionsHtml += `<option value="${t.id}">📁 ${_esc(t.name)}</option>`;
-                });
-                selectEl.innerHTML = optionsHtml || '<option value="">Chưa có chủ đề</option>';
-                if (topicInput && personalTopic) topicInput.value = personalTopic.id;
             } catch (e) {
-                console.warn('[openAddWordModal:topics]', e);
+                if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
+                if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
             }
         }
     } else {
-        if (selectContainer) selectContainer.classList.add('hidden');
+        // Đang ở trong bài học/passage cụ thể -> Lưu trực tiếp
+        if (destSection) destSection.classList.add('hidden');
         if (badgeContainer) badgeContainer.classList.remove('hidden');
         const badgeNameEl = document.getElementById('add-word-topic-name');
         if (badgeNameEl) {
@@ -6565,7 +6991,6 @@ window.submitAddWord = async function(e) {
     const meaInput = document.getElementById('add-word-meaning');
     const exaInput = document.getElementById('add-word-example');
     const topicInput = document.getElementById('add-word-topic-id');
-    const selectEl   = document.getElementById('add-word-topic-select');
     const passageInput = document.getElementById('add-word-passage-id');
     const errEl    = document.getElementById('add-word-error');
     const errText  = document.getElementById('add-word-error-text');
@@ -6575,12 +7000,12 @@ window.submitAddWord = async function(e) {
     const phonetic = (phoInput?.value || '').trim();
     const meaning = (meaInput?.value || '').trim();
     const exampleSentence = (exaInput?.value || '').trim();
-    const topicId = topicInput?.value || (selectEl && selectEl.value) || window._currentTopicId;
+    const topicId = topicInput?.value || window._currentTopicId;
     const passageId = passageInput?.value || (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
 
     if (!topicId) {
         if (errEl && errText) {
-            errText.textContent = 'Không xác định được chủ đề để thêm từ.';
+            errText.textContent = 'Vui lòng chọn nơi lưu từ (bấm vào thẻ chọn nơi lưu phía trên).';
             errEl.classList.remove('hidden');
         }
         return;
@@ -6677,7 +7102,31 @@ document.getElementById('modal-add-word')?.addEventListener('click', function(e)
 window._bulkWordsState = {
     words: [],
     isGenerating: false,
-    isSubmitting: false
+    isSubmitting: false,
+    topicId: null,
+    passageId: null,
+    destination: null
+};
+
+window.openTopicPickerForBulkAdd = function() {
+    window.openTopicPicker((destination) => {
+        window._bulkWordsState.topicId = destination.topicId;
+        window._bulkWordsState.passageId = destination.passageId || null;
+        window._bulkWordsState.destination = destination;
+
+        const pathEl = document.getElementById('bulk-add-destination-path');
+        const titleEl = document.getElementById('bulk-add-destination-title');
+        const topicInput = document.getElementById('bulk-add-topic-id');
+        const passageInput = document.getElementById('bulk-add-passage-id');
+
+        if (topicInput) topicInput.value = destination.topicId;
+        if (passageInput) passageInput.value = destination.passageId || '';
+        if (pathEl) pathEl.textContent = destination.folderName || 'Thư mục';
+        if (titleEl) titleEl.textContent = destination.fullLabel || destination.topicName;
+    }, {
+        title: 'Chọn nơi lưu từ hàng loạt',
+        subtitle: 'Thư mục → Chủ đề → Test → Passage'
+    });
 };
 
 window.openVocabBulkAddModal = async function() {
@@ -6701,29 +7150,45 @@ window.openVocabBulkAddModal = async function() {
     const submitBtn = document.getElementById('btn-submit-bulk-add');
     if (submitBtn) submitBtn.disabled = true;
 
-    const selectEl = document.getElementById('bulk-add-topic-select');
-    if (selectEl) {
-        selectEl.innerHTML = '<option value="">Đang tải chủ đề...</option>';
+    // Cập nhật destination card
+    const pathEl = document.getElementById('bulk-add-destination-path');
+    const titleEl = document.getElementById('bulk-add-destination-title');
+    const topicInput = document.getElementById('bulk-add-topic-id');
+    const passageInput = document.getElementById('bulk-add-passage-id');
+
+    if (window._bulkWordsState.destination) {
+        const dest = window._bulkWordsState.destination;
+        if (topicInput) topicInput.value = dest.topicId;
+        if (passageInput) passageInput.value = dest.passageId || '';
+        if (pathEl) pathEl.textContent = dest.folderName || 'Thư mục';
+        if (titleEl) titleEl.textContent = dest.fullLabel || dest.topicName;
+    } else {
         try {
             let personalTopic = null;
             if (typeof HiDB !== 'undefined' && typeof HiDB.ensureUserPersonalTopic === 'function') {
                 personalTopic = await HiDB.ensureUserPersonalTopic().catch(() => null);
             }
-            const allTopics = (typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function')
-                ? await HiDB.getTopics().catch(() => [])
-                : [];
-
-            let optionsHtml = '';
             if (personalTopic) {
-                optionsHtml += `<option value="${personalTopic.id}" selected>📝 ${personalTopic.name || 'Sổ tay từ vựng của tôi'}</option>`;
+                window._bulkWordsState.topicId = personalTopic.id;
+                window._bulkWordsState.passageId = null;
+                window._bulkWordsState.destination = {
+                    topicId: personalTopic.id,
+                    topicName: personalTopic.name,
+                    passageId: null,
+                    folderName: 'General English',
+                    fullLabel: personalTopic.name
+                };
+                if (topicInput) topicInput.value = personalTopic.id;
+                if (passageInput) passageInput.value = '';
+                if (pathEl) pathEl.textContent = 'General English';
+                if (titleEl) titleEl.textContent = personalTopic.name;
+            } else {
+                if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
+                if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
             }
-            (allTopics || []).forEach(t => {
-                if (personalTopic && t.id === personalTopic.id) return;
-                optionsHtml += `<option value="${t.id}">📁 ${_esc(t.name)}</option>`;
-            });
-            selectEl.innerHTML = optionsHtml || '<option value="">Chưa có chủ đề</option>';
         } catch (e) {
-            console.warn('[openVocabBulkAddModal]', e);
+            if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
+            if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
         }
     }
 
@@ -6965,8 +7430,10 @@ window.removeBulkItem = function(idx) {
 };
 
 window.submitBulkAddWords = async function() {
-    const topicSelect = document.getElementById('bulk-add-topic-select');
-    const topicId = topicSelect?.value;
+    const topicInput = document.getElementById('bulk-add-topic-id');
+    const passageInput = document.getElementById('bulk-add-passage-id');
+    const topicId = window._bulkWordsState.topicId || topicInput?.value;
+    const passageId = window._bulkWordsState.passageId || passageInput?.value || null;
     const submitBtn = document.getElementById('btn-submit-bulk-add');
     const submitText = document.getElementById('bulk-submit-text');
     const errEl = document.getElementById('bulk-add-error');
@@ -6976,7 +7443,7 @@ window.submitBulkAddWords = async function() {
 
     if (!topicId) {
         if (errEl && errText) {
-            errText.textContent = 'Vui lòng chọn một Chủ đề / Sổ từ để lưu.';
+            errText.textContent = 'Vui lòng chọn nơi lưu từ (bấm vào thẻ chọn nơi lưu phía trên).';
             errEl.classList.remove('hidden');
         }
         return;
@@ -6999,7 +7466,7 @@ window.submitBulkAddWords = async function() {
             throw new Error('Hệ thống HiDB chưa hỗ trợ thêm hàng loạt.');
         }
 
-        const saved = await HiDB.addWordsBatch(topicId, wordsToSave);
+        const saved = await HiDB.addWordsBatch(topicId, wordsToSave, passageId);
 
         window.closeBulkAddModal();
         if (typeof showToast === 'function') {
@@ -7102,40 +7569,31 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
     window._vocabPageState.page = page;
     window._vocabPageState.isLoading = true;
 
-    // Cập nhật stats bộ nhớ SM-2 song song
-    if (typeof HiDB !== 'undefined' && typeof HiDB.getLearnedVocabStats === 'function') {
-        HiDB.getLearnedVocabStats().then(stats => {
-            if (!stats) return;
-            const tEl = document.getElementById('vocab-stat-total');
-            const dEl = document.getElementById('vocab-stat-due');
-            const lEl = document.getElementById('vocab-stat-learning');
-            const mEl = document.getElementById('vocab-stat-mastered');
-            const qBtn = document.getElementById('vocab-quick-review-btn');
-
-            if (tEl) tEl.textContent = stats.total.toLocaleString('vi-VN');
-            if (dEl) dEl.textContent = stats.due.toLocaleString('vi-VN');
-            if (lEl) lEl.textContent = stats.learning.toLocaleString('vi-VN');
-            if (mEl) mEl.textContent = stats.mastered.toLocaleString('vi-VN');
-
-            if (qBtn) {
-                if (stats.due > 0) {
-                    qBtn.classList.remove('hidden');
-                    qBtn.querySelector('span:last-child').textContent = `Ôn tập ngay (${stats.due})`;
-                } else {
-                    qBtn.classList.add('hidden');
-                }
-            }
-        }).catch(err => console.warn('[vocabStats]', err));
-    }
-
-    // Tải danh sách topic cho filter dropdown nếu chưa có
+    // Tải danh sách topic cho filter dropdown nếu chưa có (gom nhóm theo thư mục)
     if (!window._vocabPageState.topicsLoaded && typeof HiDB !== 'undefined' && typeof HiDB.getTopics === 'function') {
         HiDB.getTopics().then(topics => {
             const filterSel = document.getElementById('vocab-topic-filter');
             if (filterSel && topics && topics.length > 0) {
                 let opts = '<option value="">📁 Tất cả chủ đề</option>';
+                const groups = {};
                 topics.forEach(t => {
-                    opts += `<option value="${t.id}">${_esc(t.name)}</option>`;
+                    const cat = (t.category || 'Khác').trim();
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(t);
+                });
+                const sortedCategories = Object.keys(groups).sort((a, b) => {
+                    if (a.toLowerCase() === 'cam') return -1;
+                    if (b.toLowerCase() === 'cam') return 1;
+                    if (a.toLowerCase() === 'ielts') return -1;
+                    if (b.toLowerCase() === 'ielts') return 1;
+                    return a.localeCompare(b, 'vi');
+                });
+                sortedCategories.forEach(cat => {
+                    opts += `<optgroup label="📁 ${_esc(cat)}">`;
+                    groups[cat].forEach(t => {
+                        opts += `<option value="${t.id}">${_esc(t.name)}</option>`;
+                    });
+                    opts += `</optgroup>`;
                 });
                 filterSel.innerHTML = opts;
                 window._vocabPageState.topicsLoaded = true;
@@ -8023,6 +8481,16 @@ window.dictOpenSaveModal = async function() {
     const r = window._dictCurrentResult;
     if (!r) return;
 
+    if (typeof window.openTopicPicker === 'function') {
+        window.openTopicPicker(async (dest) => {
+            await window.dictSaveWord(dest.topicId, dest.topicName, dest.passageId, dest.passageTitle, dest.fullLabel);
+        }, {
+            title: 'Lưu từ vào bộ từ vựng',
+            subtitle: `Từ: "${r.word}"`
+        });
+        return;
+    }
+
     const modal = document.getElementById('modal-save-word');
     if (!modal) return;
 
@@ -8075,7 +8543,7 @@ window.dictOpenSaveModal = async function() {
 };
 
 /** Lưu từ vào chủ đề đã chọn */
-window.dictSaveWord = async function(topicId, topicName) {
+window.dictSaveWord = async function(topicId, topicName, passageId = null, passageTitle = null, fullLabel = null) {
     const r = window._dictCurrentResult;
     if (!r || !topicId) return;
 
@@ -8125,16 +8593,24 @@ window.dictSaveWord = async function(topicId, topicName) {
             phonetic,
             meaning,
             exampleSentence: example,
+            passageId:       passageId || null,
         });
 
         // Thành công
         window.dictCloseSaveModal();
-        _dictToast(`✓ Đã lưu "${r.word}" vào "${topicName}"`);
+        const displayDest = fullLabel || (passageTitle ? `${topicName} · ${passageTitle}` : topicName);
+        _dictToast(`✓ Đã lưu "${r.word}" vào "${displayDest}"`);
+        if (typeof showToast === 'function') {
+            showToast(`✓ Đã lưu "${r.word}" vào "${displayDest}"`, 'success');
+        }
 
     } catch(err) {
         if (errEl) {
             errEl.textContent = 'Lỗi: ' + err.message;
             errEl.classList.remove('hidden');
+        }
+        if (typeof showToast === 'function') {
+            showToast('Lỗi lưu từ: ' + err.message, 'error');
         }
     }
 };
@@ -8197,7 +8673,8 @@ window.addEventListener('message', async (event) => {
                 word: payload.word,
                 phonetic: payload.phonetic || '',
                 meaning: payload.meaning,
-                exampleSentence: payload.exampleSentence || ''
+                exampleSentence: payload.exampleSentence || '',
+                passageId: payload.passageId || payload.passage_id || null
             }));
         }
     } catch (error) {
