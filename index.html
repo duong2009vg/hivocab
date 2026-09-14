@@ -1864,6 +1864,10 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                     <span class="material-symbols-outlined text-[18px]">public</span>
                     <span>Chia sẻ Thư viện</span>
                 </button>
+                <button onclick="window.openVocabBulkAddModal(window._currentTopicId)" class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-sm px-3.5 py-2.5 rounded-xl border border-outline-variant/30 transition-all active:scale-95 flex items-center gap-1.5 shrink-0 cursor-pointer" title="Thêm từ vựng hàng loạt">
+                    <span class="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
+                    <span>Thêm hàng loạt</span>
+                </button>
                 <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     <span>Thêm từ vựng</span>
@@ -1882,6 +1886,9 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary font-bold text-xs p-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Chia sẻ Thư viện">
                             <span class="material-symbols-outlined text-[16px]">public</span>
+                        </button>
+                        <button onclick="window.openVocabBulkAddModal(window._currentTopicId)" class="bg-surface-container-high text-on-surface font-bold text-xs p-2.5 rounded-xl border border-outline-variant/30 transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Thêm từ hàng loạt">
+                            <span class="material-symbols-outlined text-[16px] text-primary">playlist_add</span>
                         </button>
                         <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer">
                             <span class="material-symbols-outlined text-[16px]">add</span>
@@ -3929,10 +3936,13 @@ window.addEventListener('hashchange', () => {
         </div>
         <div>
           <h2 class="text-lg font-bold text-on-surface leading-tight">Thêm từ vựng mới</h2>
-          <p id="add-word-topic-badge" class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1">
-            <span class="material-symbols-outlined text-[13px] text-primary">folder</span>
-            <span id="add-word-topic-name" class="font-medium truncate max-w-[240px]">Chủ đề hiện tại</span>
-          </p>
+          <div id="add-word-topic-badge" class="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1.5 flex-wrap">
+            <span class="material-symbols-outlined text-[14px] text-primary">folder</span>
+            <span id="add-word-topic-name" class="font-medium truncate max-w-[220px]">Chủ đề hiện tại</span>
+            <button type="button" onclick="window.openTopicPickerForSingleAdd()" class="text-[10px] text-primary font-bold hover:underline cursor-pointer bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded-full transition-colors">
+              Đổi chủ đề
+            </button>
+          </div>
         </div>
       </div>
       <button onclick="window.closeAddWordModal()" class="w-9 h-9 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-low transition-colors cursor-pointer">
@@ -3959,6 +3969,33 @@ window.addEventListener('hashchange', () => {
           </div>
           <span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors text-[20px] shrink-0 ml-2">navigate_next</span>
         </button>
+      </div>
+
+      <!-- Exam Test & Passage Selector (dành riêng cho bộ Cambridge và IELTS Actual Tests Vol) -->
+      <div id="add-word-exam-section" class="hidden p-3.5 bg-surface-container-low rounded-2xl border border-outline-variant/25 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <label class="text-[11px] font-bold text-outline uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary">quiz</span>
+            <span>Vị trí trong đề thi</span>
+          </label>
+          <span id="add-word-exam-badge-text" class="text-[11px] text-primary font-semibold truncate max-w-[200px]">Test &amp; Passage</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label for="add-word-test-select" class="block text-[11px] font-medium text-outline mb-1">Chọn bài Test <span class="text-rose-500">*</span></label>
+            <select id="add-word-test-select" onchange="window.onAddWordTestChange(this.value)"
+                    class="w-full bg-surface border border-outline-variant/30 focus:border-primary rounded-xl px-3 py-2 text-xs font-semibold text-on-surface focus:outline-none transition-colors">
+              <!-- Rendered dynamically -->
+            </select>
+          </div>
+          <div>
+            <label for="add-word-passage-select" class="block text-[11px] font-medium text-outline mb-1">Chọn Passage <span class="text-rose-500">*</span></label>
+            <select id="add-word-passage-select" onchange="window.onAddWordPassageChange(this.value)"
+                    class="w-full bg-surface border border-outline-variant/30 focus:border-primary rounded-xl px-3 py-2 text-xs font-semibold text-on-surface focus:outline-none transition-colors">
+              <!-- Rendered dynamically -->
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- English Word + AI Auto-Fill Button -->
@@ -4087,6 +4124,33 @@ window.addEventListener('hashchange', () => {
         </button>
         <input type="hidden" id="bulk-add-topic-id" value=""/>
         <input type="hidden" id="bulk-add-passage-id" value=""/>
+      </div>
+
+      <!-- Exam Test & Passage Selector (dành cho bộ CAM và IELTS Actual Tests Vol) -->
+      <div id="bulk-add-exam-section" class="hidden p-3.5 bg-surface-container-low rounded-2xl border border-outline-variant/25 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <label class="text-[11px] font-bold text-outline uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[16px] text-primary">quiz</span>
+            <span>Vị trí trong đề thi</span>
+          </label>
+          <span id="bulk-add-exam-badge-text" class="text-[11px] text-primary font-semibold truncate max-w-[200px]">Test &amp; Passage</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div>
+            <label for="bulk-add-test-select" class="block text-[11px] font-medium text-outline mb-1">Chọn bài Test <span class="text-rose-500">*</span></label>
+            <select id="bulk-add-test-select" onchange="window.onBulkAddTestChange(this.value)"
+                    class="w-full bg-surface border border-outline-variant/30 focus:border-primary rounded-xl px-3 py-2 text-xs font-semibold text-on-surface focus:outline-none transition-colors">
+              <!-- Rendered dynamically -->
+            </select>
+          </div>
+          <div>
+            <label for="bulk-add-passage-select" class="block text-[11px] font-medium text-outline mb-1">Chọn Passage <span class="text-rose-500">*</span></label>
+            <select id="bulk-add-passage-select" onchange="window.onBulkAddPassageChange(this.value)"
+                    class="w-full bg-surface border border-outline-variant/30 focus:border-primary rounded-xl px-3 py-2 text-xs font-semibold text-on-surface focus:outline-none transition-colors">
+              <!-- Rendered dynamically -->
+            </select>
+          </div>
+        </div>
       </div>
 
       <!-- Textarea Input -->
@@ -6752,22 +6816,267 @@ window.finishTopicPickerSelection = function(destination) {
     }
 };
 
+// ── QUẢN LÝ CẤU TRÚC TEST & PASSAGE CHO BỘ ĐỀ THI (CAM / VOL) ──────
+window._cachedTopicTests = window._cachedTopicTests || new Map();
+
+window._ensureTopicTests = async function(topicId) {
+    if (!topicId) return { hasTests: false, tests: [] };
+    if (window._cachedTopicTests.has(topicId)) {
+        return window._cachedTopicTests.get(topicId);
+    }
+    try {
+        if (typeof HiDB !== 'undefined' && typeof HiDB.getTopicTests === 'function') {
+            const res = await HiDB.getTopicTests(topicId);
+            const data = (res && res.hasTests && Array.isArray(res.tests)) ? res : { hasTests: false, tests: [] };
+            window._cachedTopicTests.set(topicId, data);
+            return data;
+        }
+    } catch (e) {
+        console.warn('[_ensureTopicTests]', e);
+    }
+    return { hasTests: false, tests: [] };
+};
+
+window._populateExamSelects = function(type, topicId, tests, targetPassageId = null) {
+    const isSingle = type === 'single';
+    const examSection = document.getElementById(isSingle ? 'add-word-exam-section' : 'bulk-add-exam-section');
+    const testSelect = document.getElementById(isSingle ? 'add-word-test-select' : 'bulk-add-test-select');
+    const passageSelect = document.getElementById(isSingle ? 'add-word-passage-select' : 'bulk-add-passage-select');
+    const badgeText = document.getElementById(isSingle ? 'add-word-exam-badge-text' : 'bulk-add-exam-badge-text');
+    const passageInput = document.getElementById(isSingle ? 'add-word-passage-id' : 'bulk-add-passage-id');
+
+    if (!tests || tests.length === 0) {
+        if (examSection) examSection.classList.add('hidden');
+        return;
+    }
+
+    if (examSection) examSection.classList.remove('hidden');
+
+    // Xác định test phù hợp
+    let matchedTest = null;
+    if (targetPassageId) {
+        matchedTest = tests.find(t => (t.passages || []).some(p => p.id === targetPassageId));
+    }
+    if (!matchedTest && window._currentTestId) {
+        matchedTest = tests.find(t => t.id === window._currentTestId);
+    }
+    if (!matchedTest && typeof window._currentTestIndex === 'number' && tests[window._currentTestIndex]) {
+        matchedTest = tests[window._currentTestIndex];
+    }
+    if (!matchedTest) {
+        matchedTest = tests[0];
+    }
+
+    // Đổ danh sách Tests
+    if (testSelect) {
+        testSelect.innerHTML = tests.map(t => `
+            <option value="${t.id}" ${t.id === matchedTest?.id ? 'selected' : ''}>
+                ${_esc(t.name)} (${(t.passages || []).length} bài đọc)
+            </option>
+        `).join('');
+    }
+
+    // Đổ danh sách Passages theo matchedTest
+    const passages = matchedTest?.passages || [];
+    let selectedPassage = null;
+    if (targetPassageId) {
+        selectedPassage = passages.find(p => p.id === targetPassageId);
+    }
+    if (!selectedPassage && passages.length > 0) {
+        selectedPassage = passages[0];
+    }
+
+    if (passageSelect) {
+        if (passages.length === 0) {
+            passageSelect.innerHTML = '<option value="">(Chưa có bài đọc)</option>';
+        } else {
+            passageSelect.innerHTML = passages.map(p => `
+                <option value="${p.id}" ${p.id === selectedPassage?.id ? 'selected' : ''}>
+                    Passage ${p.passageNumber}: ${_esc(p.title || '')}
+                </option>
+            `).join('');
+        }
+    }
+
+    const passageVal = selectedPassage ? selectedPassage.id : '';
+    if (passageInput) passageInput.value = passageVal;
+
+    if (isSingle) {
+        const badgeNameEl = document.getElementById('add-word-topic-name');
+        const topicName = window._currentTopicName || 'Chủ đề hiện tại';
+        if (matchedTest && selectedPassage) {
+            const passLabel = `Passage ${selectedPassage.passageNumber}: ${selectedPassage.title || ''}`.trim();
+            if (badgeText) badgeText.textContent = `${matchedTest.name} · ${passLabel}`;
+            if (badgeNameEl) badgeNameEl.textContent = `${topicName} · ${matchedTest.name} · ${passLabel}`;
+        }
+    } else {
+        window._bulkWordsState.passageId = passageVal;
+        if (matchedTest && selectedPassage) {
+            const passLabel = `Passage ${selectedPassage.passageNumber}: ${selectedPassage.title || ''}`.trim();
+            if (badgeText) badgeText.textContent = `${matchedTest.name} · ${passLabel}`;
+            const titleEl = document.getElementById('bulk-add-destination-title');
+            if (titleEl && window._bulkWordsState.destination) {
+                titleEl.textContent = `${window._bulkWordsState.destination.topicName || ''} · ${matchedTest.name} · ${passLabel}`;
+            }
+        }
+    }
+};
+
+window.onAddWordTestChange = function(testId) {
+    const topicInput = document.getElementById('add-word-topic-id');
+    const topicId = topicInput?.value || window._currentTopicId;
+    const testsInfo = window._cachedTopicTests.get(topicId);
+    if (!testsInfo || !testsInfo.tests) return;
+
+    const test = testsInfo.tests.find(t => t.id === testId);
+    if (!test) return;
+
+    const passageSelect = document.getElementById('add-word-passage-select');
+    const badgeText = document.getElementById('add-word-exam-badge-text');
+    const badgeNameEl = document.getElementById('add-word-topic-name');
+    const passageInput = document.getElementById('add-word-passage-id');
+
+    const passages = test.passages || [];
+    if (passageSelect) {
+        if (passages.length === 0) {
+            passageSelect.innerHTML = '<option value="">(Chưa có bài đọc)</option>';
+        } else {
+            passageSelect.innerHTML = passages.map((p, idx) => `
+                <option value="${p.id}" ${idx === 0 ? 'selected' : ''}>
+                    Passage ${p.passageNumber}: ${_esc(p.title || '')}
+                </option>
+            `).join('');
+        }
+    }
+
+    const firstPassage = passages[0] || null;
+    const passId = firstPassage ? firstPassage.id : '';
+    if (passageInput) passageInput.value = passId;
+
+    const topicName = window._currentTopicName || 'Chủ đề hiện tại';
+    if (firstPassage) {
+        const passLabel = `Passage ${firstPassage.passageNumber}: ${firstPassage.title || ''}`.trim();
+        if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
+        if (badgeNameEl) badgeNameEl.textContent = `${topicName} · ${test.name} · ${passLabel}`;
+    } else {
+        if (badgeText) badgeText.textContent = test.name;
+    }
+};
+
+window.onAddWordPassageChange = function(passageId) {
+    const topicInput = document.getElementById('add-word-topic-id');
+    const passageInput = document.getElementById('add-word-passage-id');
+    const testSelect = document.getElementById('add-word-test-select');
+    const badgeText = document.getElementById('add-word-exam-badge-text');
+    const badgeNameEl = document.getElementById('add-word-topic-name');
+
+    if (passageInput) passageInput.value = passageId || '';
+
+    const topicId = topicInput?.value || window._currentTopicId;
+    const testsInfo = window._cachedTopicTests.get(topicId);
+    const test = testsInfo?.tests?.find(t => t.id === testSelect?.value);
+    const passage = test?.passages?.find(p => p.id === passageId);
+
+    const topicName = window._currentTopicName || 'Chủ đề hiện tại';
+    if (test && passage) {
+        const passLabel = `Passage ${passage.passageNumber}: ${passage.title || ''}`.trim();
+        if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
+        if (badgeNameEl) badgeNameEl.textContent = `${topicName} · ${test.name} · ${passLabel}`;
+    }
+};
+
+window.onBulkAddTestChange = function(testId) {
+    const topicInput = document.getElementById('bulk-add-topic-id');
+    const topicId = window._bulkWordsState.topicId || topicInput?.value;
+    const testsInfo = window._cachedTopicTests.get(topicId);
+    if (!testsInfo || !testsInfo.tests) return;
+
+    const test = testsInfo.tests.find(t => t.id === testId);
+    if (!test) return;
+
+    const passageSelect = document.getElementById('bulk-add-passage-select');
+    const badgeText = document.getElementById('bulk-add-exam-badge-text');
+    const passageInput = document.getElementById('bulk-add-passage-id');
+    const titleEl = document.getElementById('bulk-add-destination-title');
+
+    const passages = test.passages || [];
+    if (passageSelect) {
+        if (passages.length === 0) {
+            passageSelect.innerHTML = '<option value="">(Chưa có bài đọc)</option>';
+        } else {
+            passageSelect.innerHTML = passages.map((p, idx) => `
+                <option value="${p.id}" ${idx === 0 ? 'selected' : ''}>
+                    Passage ${p.passageNumber}: ${_esc(p.title || '')}
+                </option>
+            `).join('');
+        }
+    }
+
+    const firstPassage = passages[0] || null;
+    const passId = firstPassage ? firstPassage.id : '';
+    window._bulkWordsState.passageId = passId;
+    if (passageInput) passageInput.value = passId;
+
+    const topicName = window._bulkWordsState.destination?.topicName || 'Chủ đề';
+    if (firstPassage) {
+        const passLabel = `Passage ${firstPassage.passageNumber}: ${firstPassage.title || ''}`.trim();
+        if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
+        if (titleEl) titleEl.textContent = `${topicName} · ${test.name} · ${passLabel}`;
+    } else {
+        if (badgeText) badgeText.textContent = test.name;
+    }
+};
+
+window.onBulkAddPassageChange = function(passageId) {
+    const topicInput = document.getElementById('bulk-add-topic-id');
+    const passageInput = document.getElementById('bulk-add-passage-id');
+    const testSelect = document.getElementById('bulk-add-test-select');
+    const badgeText = document.getElementById('bulk-add-exam-badge-text');
+    const titleEl = document.getElementById('bulk-add-destination-title');
+
+    window._bulkWordsState.passageId = passageId || null;
+    if (passageInput) passageInput.value = passageId || '';
+
+    const topicId = window._bulkWordsState.topicId || topicInput?.value;
+    const testsInfo = window._cachedTopicTests.get(topicId);
+    const test = testsInfo?.tests?.find(t => t.id === testSelect?.value);
+    const passage = test?.passages?.find(p => p.id === passageId);
+
+    const topicName = window._bulkWordsState.destination?.topicName || 'Chủ đề';
+    if (test && passage) {
+        const passLabel = `Passage ${passage.passageNumber}: ${passage.title || ''}`.trim();
+        if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
+        if (titleEl) titleEl.textContent = `${topicName} · ${test.name} · ${passLabel}`;
+    }
+};
+
 // ── THÊM TỪ VỰNG TRỰC TIẾP & AI AUTO-FILL ───────────────────────
 window._singleAddState = window._singleAddState || {
     selectedDestination: null
 };
 
 window.openTopicPickerForSingleAdd = function() {
-    window.openTopicPicker((destination) => {
+    window.openTopicPicker(async (destination) => {
         window._singleAddState.selectedDestination = destination;
         const topicInput = document.getElementById('add-word-topic-id');
         const passageInput = document.getElementById('add-word-passage-id');
         const pathEl = document.getElementById('add-word-destination-path');
         const titleEl = document.getElementById('add-word-destination-title');
+        const badgeNameEl = document.getElementById('add-word-topic-name');
+
         if (topicInput) topicInput.value = destination.topicId;
         if (passageInput) passageInput.value = destination.passageId || '';
         if (pathEl) pathEl.textContent = destination.folderName || 'Thư mục';
         if (titleEl) titleEl.textContent = destination.fullLabel || destination.topicName;
+        if (badgeNameEl) badgeNameEl.textContent = destination.fullLabel || destination.topicName;
+
+        // Cập nhật bộ chọn đề thi nếu topic có tests
+        const testsInfo = await window._ensureTopicTests(destination.topicId);
+        if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
+            window._populateExamSelects('single', destination.topicId, testsInfo.tests, destination.passageId);
+        } else {
+            document.getElementById('add-word-exam-section')?.classList.add('hidden');
+        }
     }, {
         title: 'Chọn nơi lưu từ vựng',
         subtitle: 'Thư mục → Chủ đề → Test → Passage'
@@ -6777,7 +7086,7 @@ window.openTopicPickerForSingleAdd = function() {
 window.openAddWordModal = async function(topicId = null, passageId = null) {
     const isVocabContext = !topicId && !window._currentTopicId;
     let targetTopicId = topicId || (!isVocabContext ? window._currentTopicId : null);
-    const targetPassageId = (passageId !== null && passageId !== undefined)
+    let targetPassageId = (passageId !== null && passageId !== undefined)
         ? passageId
         : (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
 
@@ -6785,6 +7094,7 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
     const passageInput = document.getElementById('add-word-passage-id');
     const badgeContainer = document.getElementById('add-word-topic-badge');
     const destSection = document.getElementById('add-word-destination-section');
+    const examSection = document.getElementById('add-word-exam-section');
 
     if (topicInput) topicInput.value = targetTopicId || '';
     if (passageInput) passageInput.value = targetPassageId || '';
@@ -6799,6 +7109,8 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
 
         if (window._singleAddState.selectedDestination) {
             const dest = window._singleAddState.selectedDestination;
+            targetTopicId = dest.topicId;
+            targetPassageId = dest.passageId || null;
             if (topicInput) topicInput.value = dest.topicId;
             if (passageInput) passageInput.value = dest.passageId || '';
             if (pathEl) pathEl.textContent = dest.folderName || 'Thư mục';
@@ -6817,6 +7129,7 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
                         folderName: 'General English',
                         fullLabel: personalTopic.name
                     };
+                    targetTopicId = personalTopic.id;
                     if (topicInput) topicInput.value = personalTopic.id;
                     if (pathEl) pathEl.textContent = 'General English';
                     if (titleEl) titleEl.textContent = personalTopic.name;
@@ -6830,7 +7143,7 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
             }
         }
     } else {
-        // Đang ở trong bài học/passage cụ thể -> Lưu trực tiếp
+        // Đang ở trong chủ đề hoặc bài học/passage cụ thể
         if (destSection) destSection.classList.add('hidden');
         if (badgeContainer) badgeContainer.classList.remove('hidden');
         const badgeNameEl = document.getElementById('add-word-topic-name');
@@ -6844,6 +7157,18 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
             badgeNameEl.textContent = label;
             badgeNameEl.title = label;
         }
+    }
+
+    // Kiểm tra cấu trúc đề thi (Tests -> Passages) như CAM và VOL
+    if (targetTopicId) {
+        const testsInfo = await window._ensureTopicTests(targetTopicId);
+        if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
+            window._populateExamSelects('single', targetTopicId, testsInfo.tests, targetPassageId);
+        } else {
+            if (examSection) examSection.classList.add('hidden');
+        }
+    } else {
+        if (examSection) examSection.classList.add('hidden');
     }
 
     // Reset Form
@@ -7011,6 +7336,16 @@ window.submitAddWord = async function(e) {
         return;
     }
 
+    // Kiểm tra nếu là đề thi có tests mà chưa chọn passage
+    const topicTests = window._cachedTopicTests.get(topicId);
+    if (topicTests && topicTests.hasTests && topicTests.tests && topicTests.tests.length > 0 && !passageId) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng chọn bài Test và Passage để lưu từ vựng vào đúng đề thi.';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
     if (!word) {
         if (errEl && errText) {
             errText.textContent = 'Vui lòng nhập từ tiếng Anh.';
@@ -7109,7 +7444,7 @@ window._bulkWordsState = {
 };
 
 window.openTopicPickerForBulkAdd = function() {
-    window.openTopicPicker((destination) => {
+    window.openTopicPicker(async (destination) => {
         window._bulkWordsState.topicId = destination.topicId;
         window._bulkWordsState.passageId = destination.passageId || null;
         window._bulkWordsState.destination = destination;
@@ -7123,13 +7458,20 @@ window.openTopicPickerForBulkAdd = function() {
         if (passageInput) passageInput.value = destination.passageId || '';
         if (pathEl) pathEl.textContent = destination.folderName || 'Thư mục';
         if (titleEl) titleEl.textContent = destination.fullLabel || destination.topicName;
+
+        const testsInfo = await window._ensureTopicTests(destination.topicId);
+        if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
+            window._populateExamSelects('bulk', destination.topicId, testsInfo.tests, destination.passageId);
+        } else {
+            document.getElementById('bulk-add-exam-section')?.classList.add('hidden');
+        }
     }, {
         title: 'Chọn nơi lưu từ hàng loạt',
         subtitle: 'Thư mục → Chủ đề → Test → Passage'
     });
 };
 
-window.openVocabBulkAddModal = async function() {
+window.openVocabBulkAddModal = async function(topicId = null, passageId = null) {
     const modal = document.getElementById('modal-bulk-add-word');
     if (!modal) return;
 
@@ -7155,13 +7497,49 @@ window.openVocabBulkAddModal = async function() {
     const titleEl = document.getElementById('bulk-add-destination-title');
     const topicInput = document.getElementById('bulk-add-topic-id');
     const passageInput = document.getElementById('bulk-add-passage-id');
+    const examSection = document.getElementById('bulk-add-exam-section');
 
-    if (window._bulkWordsState.destination) {
+    let targetTopicId = topicId || (window._currentTopicId || null);
+    let targetPassageId = (passageId !== null && passageId !== undefined) ? passageId : (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
+
+    if (targetTopicId) {
+        window._bulkWordsState.topicId = targetTopicId;
+        window._bulkWordsState.passageId = targetPassageId;
+        if (topicInput) topicInput.value = targetTopicId;
+        if (passageInput) passageInput.value = targetPassageId || '';
+
+        const topicName = window._currentTopicName || 'Chủ đề hiện tại';
+        const folderName = window._currentCategory || 'Thư mục';
+        window._bulkWordsState.destination = {
+            topicId: targetTopicId,
+            topicName: topicName,
+            passageId: targetPassageId,
+            folderName: folderName,
+            fullLabel: targetPassageId ? `${topicName} · Passage` : topicName
+        };
+
+        if (pathEl) pathEl.textContent = folderName;
+        if (titleEl) titleEl.textContent = topicName;
+
+        const testsInfo = await window._ensureTopicTests(targetTopicId);
+        if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
+            window._populateExamSelects('bulk', targetTopicId, testsInfo.tests, targetPassageId);
+        } else {
+            if (examSection) examSection.classList.add('hidden');
+        }
+    } else if (window._bulkWordsState.destination) {
         const dest = window._bulkWordsState.destination;
         if (topicInput) topicInput.value = dest.topicId;
         if (passageInput) passageInput.value = dest.passageId || '';
         if (pathEl) pathEl.textContent = dest.folderName || 'Thư mục';
         if (titleEl) titleEl.textContent = dest.fullLabel || dest.topicName;
+
+        const testsInfo = await window._ensureTopicTests(dest.topicId);
+        if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
+            window._populateExamSelects('bulk', dest.topicId, testsInfo.tests, dest.passageId);
+        } else {
+            if (examSection) examSection.classList.add('hidden');
+        }
     } else {
         try {
             let personalTopic = null;
@@ -7182,13 +7560,16 @@ window.openVocabBulkAddModal = async function() {
                 if (passageInput) passageInput.value = '';
                 if (pathEl) pathEl.textContent = 'General English';
                 if (titleEl) titleEl.textContent = personalTopic.name;
+                if (examSection) examSection.classList.add('hidden');
             } else {
                 if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
                 if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
+                if (examSection) examSection.classList.add('hidden');
             }
         } catch (e) {
             if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
             if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
+            if (examSection) examSection.classList.add('hidden');
         }
     }
 
@@ -7444,6 +7825,16 @@ window.submitBulkAddWords = async function() {
     if (!topicId) {
         if (errEl && errText) {
             errText.textContent = 'Vui lòng chọn nơi lưu từ (bấm vào thẻ chọn nơi lưu phía trên).';
+            errEl.classList.remove('hidden');
+        }
+        return;
+    }
+
+    // Kiểm tra nếu là đề thi có tests mà chưa chọn passage
+    const topicTests = window._cachedTopicTests.get(topicId);
+    if (topicTests && topicTests.hasTests && topicTests.tests && topicTests.tests.length > 0 && !passageId) {
+        if (errEl && errText) {
+            errText.textContent = 'Vui lòng chọn bài Test và Passage để lưu danh sách từ vào đúng đề thi.';
             errEl.classList.remove('hidden');
         }
         return;
