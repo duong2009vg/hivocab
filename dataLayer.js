@@ -969,7 +969,12 @@ window.HiDB = (() => {
      */
     async function getTopicTests(topicId) {
         if (!topicId) return { hasTests: false, tests: [] };
+        const cacheKey = `topic_tests:${topicId}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
         try {
+            await ensureReady();
             const client = _getClient();
             const { data: testsData, error: testsErr } = await client
                 .from('tests')
@@ -978,7 +983,7 @@ window.HiDB = (() => {
                 .order('test_order', { ascending: true });
 
             if (testsErr || !testsData || testsData.length === 0) {
-                return { hasTests: false, tests: [] };
+                return _cacheSet(cacheKey, { hasTests: false, tests: [] });
             }
 
             const { data: passagesData } = await client
@@ -1004,7 +1009,7 @@ window.HiDB = (() => {
                 passages: passagesByTest[t.id] || []
             }));
 
-            return { hasTests: true, tests };
+            return _cacheSet(cacheKey, { hasTests: true, tests });
         } catch (err) {
             console.warn('[getTopicTests]', err);
             return { hasTests: false, tests: [] };

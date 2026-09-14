@@ -1864,10 +1864,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                     <span class="material-symbols-outlined text-[18px]">public</span>
                     <span>Chia sẻ Thư viện</span>
                 </button>
-                <button onclick="window.openVocabBulkAddModal(window._currentTopicId)" class="bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-sm px-3.5 py-2.5 rounded-xl border border-outline-variant/30 transition-all active:scale-95 flex items-center gap-1.5 shrink-0 cursor-pointer" title="Thêm từ vựng hàng loạt">
-                    <span class="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
-                    <span>Thêm hàng loạt</span>
-                </button>
                 <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     <span>Thêm từ vựng</span>
@@ -1886,9 +1882,6 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
                     <div class="flex items-center gap-1.5 shrink-0">
                         <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary font-bold text-xs p-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Chia sẻ Thư viện">
                             <span class="material-symbols-outlined text-[16px]">public</span>
-                        </button>
-                        <button onclick="window.openVocabBulkAddModal(window._currentTopicId)" class="bg-surface-container-high text-on-surface font-bold text-xs p-2.5 rounded-xl border border-outline-variant/30 transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Thêm từ hàng loạt">
-                            <span class="material-symbols-outlined text-[16px] text-primary">playlist_add</span>
                         </button>
                         <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer">
                             <span class="material-symbols-outlined text-[16px]">add</span>
@@ -2589,37 +2582,7 @@ html[data-mobile-device="true"].mobile-game-awaiting-landscape .mobile-game-rota
 </main>
 </div>
 
-<!-- ==================== MODAL: LƯU TỪ VÀO CHỦ ĐỀ ==================== -->
-<div id="modal-save-word" class="fixed inset-0 z-[9999] hidden items-center justify-center p-4" style="background:rgba(0,0,0,0.5);backdrop-filter:blur(4px)">
-  <div class="w-full max-w-md bg-surface rounded-2xl p-6 md:p-8 soft-shadow fade-in">
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <h2 class="text-xl font-bold text-on-surface">Lưu từ vào chủ đề</h2>
-        <p id="save-word-label" class="text-sm text-on-surface-variant mt-0.5"></p>
-      </div>
-      <button onclick="window.dictCloseSaveModal()" class="p-2 rounded-full text-outline hover:bg-surface-container-low transition-colors">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
 
-    <!-- Topic list -->
-    <div id="save-topic-list" class="flex flex-col gap-2 max-h-64 overflow-y-auto pr-1">
-      <div class="flex items-center justify-center py-8">
-        <span class="material-symbols-outlined text-primary text-[32px] animate-spin">refresh</span>
-      </div>
-    </div>
-
-    <div id="save-word-error" class="text-error text-sm mt-3 hidden"></div>
-
-    <div class="mt-4 pt-4 border-t border-outline-variant/20">
-      <button onclick="window.openCreateTopicModal()"
-              class="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-outline-variant/40 text-on-surface-variant hover:border-primary hover:text-primary transition-colors font-medium text-sm">
-        <span class="material-symbols-outlined text-[18px]">add</span>
-        Tạo chủ đề mới
-      </button>
-    </div>
-  </div>
-</div>
 
 
 <div id="page-settings" class="page">
@@ -6497,7 +6460,8 @@ window.openTopicPicker = async function(callback, options = {}) {
 
         const foldersMap = {};
         (topics || []).forEach(t => {
-            const f = (t.category || 'General English').trim();
+            let f = (t.category || 'General English').trim();
+            if (f.toLowerCase() === 'general') f = 'General English';
             if (!foldersMap[f]) foldersMap[f] = [];
             foldersMap[f].push(t);
         });
@@ -6543,7 +6507,7 @@ window.renderTopicPickerFolderStep = function() {
         backBtn.classList.remove('flex');
     }
     if (titleEl) titleEl.textContent = window._topicPickerState.options.title || 'Chọn thư mục';
-    if (subtitleEl) subtitleEl.textContent = window._topicPickerState.options.subtitle || 'Chọn vị trí lưu từ vựng';
+    if (subtitleEl) subtitleEl.textContent = window._topicPickerState.options.subtitle || 'Bước 1/4: Chọn danh mục từ vựng';
     if (statusEl) statusEl.classList.add('hidden');
 
     document.getElementById('topic-picker-step-folder')?.classList.remove('hidden');
@@ -6554,8 +6518,8 @@ window.renderTopicPickerFolderStep = function() {
     const folderNames = Object.keys(window._topicPickerState.foldersMap).sort((a, b) => {
         if (a.toLowerCase() === 'cam') return -1;
         if (b.toLowerCase() === 'cam') return 1;
-        if (a.toLowerCase() === 'ielts') return -1;
-        if (b.toLowerCase() === 'ielts') return 1;
+        if (a.toLowerCase().includes('ielts actual')) return -1;
+        if (b.toLowerCase().includes('ielts actual')) return 1;
         return a.localeCompare(b, 'vi');
     });
 
@@ -6567,20 +6531,36 @@ window.renderTopicPickerFolderStep = function() {
         return;
     }
 
-    folderList.innerHTML = folderNames.map(f => `
-        <button type="button" onclick="window.topicPickerSelectFolder('${_esc(f)}')"
-                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
-            <div class="flex items-center gap-3 min-w-0">
-                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
-                    📁
+    const folderMeta = {
+        'CAM': { label: 'Cambridge IELTS', icon: '📘', desc: 'Trọn bộ đề CAM 10 – 21' },
+        'IELTS Actual Tests': { label: 'IELTS Actual Tests', icon: '📗', desc: 'Trọn bộ Actual Tests Vol 1 – 9' },
+        'oxford3000': { label: 'Oxford 3000', icon: '📕', desc: '3000 từ vựng cốt lõi' },
+        'Destination C1-C2': { label: 'Destination C1-C2', icon: '📙', desc: 'Từ vựng học thuật nâng cao' },
+        'THPT/ĐGNL': { label: 'Luyện thi THPT / ĐGNL', icon: '🎓', desc: 'Bộ từ vựng trọng tâm thi cử' },
+        'General English': { label: 'General English', icon: '📁', desc: 'Sổ tay từ vựng & chủ đề cá nhân' },
+    };
+
+    folderList.innerHTML = folderNames.map(f => {
+        const meta = folderMeta[f] || { label: f, icon: '📁', desc: `${window._topicPickerState.foldersMap[f].length} chủ đề` };
+        const count = window._topicPickerState.foldersMap[f].length;
+        return `
+            <button type="button" onclick="window.topicPickerSelectFolder('${_esc(f)}')"
+                    class="w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base font-bold">
+                        ${meta.icon}
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-sm font-bold text-on-surface truncate block">${_esc(meta.label)}</span>
+                        <span class="text-[11px] text-on-surface-variant truncate block">${_esc(meta.desc)}</span>
+                    </div>
                 </div>
-                <span class="text-sm font-bold text-on-surface truncate">${_esc(f)}</span>
-            </div>
-            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
-                ${window._topicPickerState.foldersMap[f].length} chủ đề ›
-            </span>
-        </button>
-    `).join('');
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
+                    ${count} chủ đề ›
+                </span>
+            </button>
+        `;
+    }).join('');
 };
 
 window.topicPickerSelectFolder = function(folderName) {
@@ -6601,7 +6581,7 @@ window.topicPickerSelectFolder = function(folderName) {
     }
     if (backLabel) backLabel.textContent = 'Thư mục';
     if (titleEl) titleEl.textContent = folderName;
-    if (subtitleEl) subtitleEl.textContent = 'Chọn chủ đề';
+    if (subtitleEl) subtitleEl.textContent = 'Bước 2/4: Chọn cuốn sách / chủ đề';
     if (statusEl) statusEl.classList.add('hidden');
 
     document.getElementById('topic-picker-step-folder')?.classList.add('hidden');
@@ -6620,12 +6600,15 @@ window.topicPickerSelectFolder = function(folderName) {
 
     topicList.innerHTML = topics.map(t => `
         <button type="button" onclick="window.topicPickerSelectTopic('${t.id}')"
-                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+                class="w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+                <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base font-bold">
                     ${t.icon && t.icon.length <= 2 ? t.icon : '📖'}
                 </div>
-                <span class="text-sm font-semibold text-on-surface truncate">${_esc(t.name)}</span>
+                <div class="min-w-0">
+                    <span class="text-sm font-semibold text-on-surface truncate block">${_esc(t.name)}</span>
+                    <span class="text-[11px] text-on-surface-variant">${t.totalWords || 0} từ vựng</span>
+                </div>
             </div>
             <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
                 Chọn ›
@@ -6645,6 +6628,8 @@ window.topicPickerSelectTopic = async function(topicId) {
         statusEl.classList.remove('hidden');
     }
 
+    const isExamTopic = (topic.category === 'CAM' || topic.category === 'IELTS Actual Tests' || /CAM|VOL/i.test(topic.name));
+
     let tests = window._topicPickerState.topicTestsCache.get(topic.id);
     if (tests === undefined) {
         try {
@@ -6658,15 +6643,39 @@ window.topicPickerSelectTopic = async function(topicId) {
             console.warn('[topicPicker:getTopicTests]', e);
             tests = [];
         }
-        window._topicPickerState.topicTestsCache.set(topic.id, tests);
+        if (tests && tests.length > 0) {
+            window._topicPickerState.topicTestsCache.set(topic.id, tests);
+        }
     }
 
     if (statusEl) statusEl.classList.add('hidden');
 
     if (tests && tests.length > 0) {
         window.renderTopicPickerTestStep(topic, tests);
+    } else if (isExamTopic) {
+        // Thử lại nếu là đề thi CAM / VOL nhưng chưa tải được ngay
+        if (statusEl) {
+            statusEl.textContent = 'Đang tải danh sách bài test...';
+            statusEl.classList.remove('hidden');
+        }
+        try {
+            const retryRes = await HiDB.getTopicTests(topic.id);
+            tests = (retryRes?.hasTests && retryRes.tests) ? retryRes.tests : [];
+            if (tests && tests.length > 0) {
+                window._topicPickerState.topicTestsCache.set(topic.id, tests);
+                if (statusEl) statusEl.classList.add('hidden');
+                window.renderTopicPickerTestStep(topic, tests);
+                return;
+            }
+        } catch (reErr) {
+            console.warn('[topicPicker:retry]', reErr);
+        }
+        if (statusEl) {
+            statusEl.textContent = 'Chủ đề này chưa có bài test nào.';
+            statusEl.classList.remove('hidden');
+        }
     } else {
-        // Chủ đề thông thường -> hoàn thành chọn ngay
+        // Chủ đề thông thường không có đề thi -> hoàn thành chọn ngay
         window.finishTopicPickerSelection({
             topicId: topic.id,
             topicName: topic.name,
@@ -6695,7 +6704,7 @@ window.renderTopicPickerTestStep = function(topic, tests) {
     }
     if (backLabel) backLabel.textContent = 'Chủ đề';
     if (titleEl) titleEl.textContent = topic.name;
-    if (subtitleEl) subtitleEl.textContent = 'Chọn bài Test';
+    if (subtitleEl) subtitleEl.textContent = 'Bước 3/4: Chọn bài Test';
     if (statusEl) statusEl.classList.add('hidden');
 
     document.getElementById('topic-picker-step-folder')?.classList.add('hidden');
@@ -6707,21 +6716,24 @@ window.renderTopicPickerTestStep = function(topic, tests) {
     if (!testList) return;
 
     if (!tests || tests.length === 0) {
-        testList.innerHTML = '<p class="text-center text-xs text-outline py-8">Chưa có bài test nào</p>';
+        testList.innerHTML = '<p class="text-center text-xs text-outline py-8">Chưa có bài test nào trong chủ đề này</p>';
         return;
     }
 
     testList.innerHTML = tests.map(t => `
         <button type="button" onclick="window.topicPickerSelectTest('${t.id}')"
-                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+                class="w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+                <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base font-bold">
                     📝
                 </div>
-                <span class="text-sm font-semibold text-on-surface truncate">${_esc(t.name)}</span>
+                <div>
+                    <span class="text-sm font-bold text-on-surface truncate block">${_esc(t.name)}</span>
+                    <span class="text-[11px] text-on-surface-variant">${(t.passages || []).length} bài đọc (passages)</span>
+                </div>
             </div>
             <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-outline group-hover:text-primary group-hover:bg-primary/10 transition-colors shrink-0 ml-2">
-                ${(t.passages || []).length} passage ›
+                Chọn Test ›
             </span>
         </button>
     `).join('');
@@ -6747,7 +6759,7 @@ window.topicPickerSelectTest = function(testId) {
     }
     if (backLabel) backLabel.textContent = 'Bài Test';
     if (titleEl) titleEl.textContent = `${window._topicPickerState.currentTopic.name} · ${test.name}`;
-    if (subtitleEl) subtitleEl.textContent = 'Chọn passage để lưu từ';
+    if (subtitleEl) subtitleEl.textContent = 'Bước 4/4: Chọn đoạn văn (Passage) để lưu từ';
     if (statusEl) statusEl.classList.add('hidden');
 
     document.getElementById('topic-picker-step-folder')?.classList.add('hidden');
@@ -6766,14 +6778,17 @@ window.topicPickerSelectTest = function(testId) {
 
     passageList.innerHTML = passages.map(p => `
         <button type="button" onclick="window.topicPickerSelectPassage('${p.id}')"
-                class="w-full p-3 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
+                class="w-full p-3.5 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 hover:border-primary/40 flex items-center justify-between text-left transition-all active:scale-[0.99] cursor-pointer group">
             <div class="flex items-center gap-3 min-w-0">
-                <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-base">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 text-base font-bold">
                     📄
                 </div>
-                <span class="text-sm font-semibold text-on-surface truncate">${_esc(p.title || ('Passage ' + p.passageNumber))}</span>
+                <div class="min-w-0">
+                    <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">Passage ${p.passageNumber}</span>
+                    <span class="text-sm font-semibold text-on-surface truncate block">${_esc(p.title || ('Passage ' + p.passageNumber))}</span>
+                </div>
             </div>
-            <span class="text-xs font-bold px-3 py-1 rounded-full bg-primary text-on-primary shadow-2xs group-hover:bg-surface-tint transition-colors shrink-0 ml-2">
+            <span class="text-xs font-bold px-3 py-1.5 rounded-full bg-primary text-on-primary shadow-2xs group-hover:bg-surface-tint transition-colors shrink-0 ml-2">
                 ✓ Chọn
             </span>
         </button>
@@ -6847,54 +6862,52 @@ window._populateExamSelects = function(type, topicId, tests, targetPassageId = n
 
     if (!tests || tests.length === 0) {
         if (examSection) examSection.classList.add('hidden');
+        if (passageInput) passageInput.value = '';
         return;
     }
 
     if (examSection) examSection.classList.remove('hidden');
 
-    // Xác định test phù hợp
+    // Xác định test và passage phù hợp nếu có targetPassageId
     let matchedTest = null;
+    let selectedPassage = null;
     if (targetPassageId) {
         matchedTest = tests.find(t => (t.passages || []).some(p => p.id === targetPassageId));
-    }
-    if (!matchedTest && window._currentTestId) {
-        matchedTest = tests.find(t => t.id === window._currentTestId);
-    }
-    if (!matchedTest && typeof window._currentTestIndex === 'number' && tests[window._currentTestIndex]) {
-        matchedTest = tests[window._currentTestIndex];
-    }
-    if (!matchedTest) {
-        matchedTest = tests[0];
+        if (matchedTest) {
+            selectedPassage = (matchedTest.passages || []).find(p => p.id === targetPassageId);
+        }
     }
 
-    // Đổ danh sách Tests
+    // Đổ danh sách Tests:
+    // Nếu có targetPassageId -> chọn matchedTest
+    // Nếu KHÔNG có targetPassageId (mở từ Topic level) -> hiển thị placeholder, KHÔNG tự chọn ngầm!
     if (testSelect) {
-        testSelect.innerHTML = tests.map(t => `
-            <option value="${t.id}" ${t.id === matchedTest?.id ? 'selected' : ''}>
+        const placeholder = `<option value="" disabled ${!matchedTest ? 'selected' : ''}>-- Chọn bài Test --</option>`;
+        const testOptions = tests.map(t => `
+            <option value="${t.id}" ${matchedTest && t.id === matchedTest.id ? 'selected' : ''}>
                 ${_esc(t.name)} (${(t.passages || []).length} bài đọc)
             </option>
         `).join('');
+        testSelect.innerHTML = placeholder + testOptions;
     }
 
-    // Đổ danh sách Passages theo matchedTest
-    const passages = matchedTest?.passages || [];
-    let selectedPassage = null;
-    if (targetPassageId) {
-        selectedPassage = passages.find(p => p.id === targetPassageId);
-    }
-    if (!selectedPassage && passages.length > 0) {
-        selectedPassage = passages[0];
-    }
-
+    // Đổ danh sách Passages:
     if (passageSelect) {
-        if (passages.length === 0) {
-            passageSelect.innerHTML = '<option value="">(Chưa có bài đọc)</option>';
+        if (matchedTest) {
+            const passages = matchedTest.passages || [];
+            if (passages.length === 0) {
+                passageSelect.innerHTML = '<option value="" disabled selected>(Chưa có bài đọc)</option>';
+            } else {
+                const pPlaceholder = `<option value="" disabled ${!selectedPassage ? 'selected' : ''}>-- Chọn Passage --</option>`;
+                const pOpts = passages.map(p => `
+                    <option value="${p.id}" ${selectedPassage && p.id === selectedPassage.id ? 'selected' : ''}>
+                        Passage ${p.passageNumber}: ${_esc(p.title || '')}
+                    </option>
+                `).join('');
+                passageSelect.innerHTML = pPlaceholder + pOpts;
+            }
         } else {
-            passageSelect.innerHTML = passages.map(p => `
-                <option value="${p.id}" ${p.id === selectedPassage?.id ? 'selected' : ''}>
-                    Passage ${p.passageNumber}: ${_esc(p.title || '')}
-                </option>
-            `).join('');
+            passageSelect.innerHTML = '<option value="" disabled selected>-- Vui lòng chọn bài Test trước --</option>';
         }
     }
 
@@ -6903,11 +6916,14 @@ window._populateExamSelects = function(type, topicId, tests, targetPassageId = n
 
     if (isSingle) {
         const badgeNameEl = document.getElementById('add-word-topic-name');
-        const topicName = window._currentTopicName || 'Chủ đề hiện tại';
+        const topicName = window._currentTopicName || 'Chủ đề';
         if (matchedTest && selectedPassage) {
             const passLabel = `Passage ${selectedPassage.passageNumber}: ${selectedPassage.title || ''}`.trim();
             if (badgeText) badgeText.textContent = `${matchedTest.name} · ${passLabel}`;
             if (badgeNameEl) badgeNameEl.textContent = `${topicName} · ${matchedTest.name} · ${passLabel}`;
+        } else {
+            if (badgeText) badgeText.textContent = 'Vui lòng chọn bài Test & Passage';
+            if (badgeNameEl) badgeNameEl.textContent = topicName;
         }
     } else {
         window._bulkWordsState.passageId = passageVal;
@@ -6918,6 +6934,8 @@ window._populateExamSelects = function(type, topicId, tests, targetPassageId = n
             if (titleEl && window._bulkWordsState.destination) {
                 titleEl.textContent = `${window._bulkWordsState.destination.topicName || ''} · ${matchedTest.name} · ${passLabel}`;
             }
+        } else {
+            if (badgeText) badgeText.textContent = 'Vui lòng chọn bài Test & Passage';
         }
     }
 };
@@ -6933,34 +6951,25 @@ window.onAddWordTestChange = function(testId) {
 
     const passageSelect = document.getElementById('add-word-passage-select');
     const badgeText = document.getElementById('add-word-exam-badge-text');
-    const badgeNameEl = document.getElementById('add-word-topic-name');
     const passageInput = document.getElementById('add-word-passage-id');
 
     const passages = test.passages || [];
     if (passageSelect) {
         if (passages.length === 0) {
-            passageSelect.innerHTML = '<option value="">(Chưa có bài đọc)</option>';
+            passageSelect.innerHTML = '<option value="" disabled selected>(Chưa có bài đọc)</option>';
         } else {
-            passageSelect.innerHTML = passages.map((p, idx) => `
-                <option value="${p.id}" ${idx === 0 ? 'selected' : ''}>
+            const placeholder = '<option value="" disabled selected>-- Chọn Passage --</option>';
+            const opts = passages.map(p => `
+                <option value="${p.id}">
                     Passage ${p.passageNumber}: ${_esc(p.title || '')}
                 </option>
             `).join('');
+            passageSelect.innerHTML = placeholder + opts;
         }
     }
 
-    const firstPassage = passages[0] || null;
-    const passId = firstPassage ? firstPassage.id : '';
-    if (passageInput) passageInput.value = passId;
-
-    const topicName = window._currentTopicName || 'Chủ đề hiện tại';
-    if (firstPassage) {
-        const passLabel = `Passage ${firstPassage.passageNumber}: ${firstPassage.title || ''}`.trim();
-        if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
-        if (badgeNameEl) badgeNameEl.textContent = `${topicName} · ${test.name} · ${passLabel}`;
-    } else {
-        if (badgeText) badgeText.textContent = test.name;
-    }
+    if (passageInput) passageInput.value = '';
+    if (badgeText) badgeText.textContent = `${test.name} · (Vui lòng chọn passage)`;
 };
 
 window.onAddWordPassageChange = function(passageId) {
@@ -6977,7 +6986,7 @@ window.onAddWordPassageChange = function(passageId) {
     const test = testsInfo?.tests?.find(t => t.id === testSelect?.value);
     const passage = test?.passages?.find(p => p.id === passageId);
 
-    const topicName = window._currentTopicName || 'Chủ đề hiện tại';
+    const topicName = window._currentTopicName || 'Chủ đề';
     if (test && passage) {
         const passLabel = `Passage ${passage.passageNumber}: ${passage.title || ''}`.trim();
         if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
@@ -7002,29 +7011,24 @@ window.onBulkAddTestChange = function(testId) {
     const passages = test.passages || [];
     if (passageSelect) {
         if (passages.length === 0) {
-            passageSelect.innerHTML = '<option value="">(Chưa có bài đọc)</option>';
+            passageSelect.innerHTML = '<option value="" disabled selected>(Chưa có bài đọc)</option>';
         } else {
-            passageSelect.innerHTML = passages.map((p, idx) => `
-                <option value="${p.id}" ${idx === 0 ? 'selected' : ''}>
+            const placeholder = '<option value="" disabled selected>-- Chọn Passage --</option>';
+            const opts = passages.map(p => `
+                <option value="${p.id}">
                     Passage ${p.passageNumber}: ${_esc(p.title || '')}
                 </option>
             `).join('');
+            passageSelect.innerHTML = placeholder + opts;
         }
     }
 
-    const firstPassage = passages[0] || null;
-    const passId = firstPassage ? firstPassage.id : '';
-    window._bulkWordsState.passageId = passId;
-    if (passageInput) passageInput.value = passId;
+    window._bulkWordsState.passageId = null;
+    if (passageInput) passageInput.value = '';
 
     const topicName = window._bulkWordsState.destination?.topicName || 'Chủ đề';
-    if (firstPassage) {
-        const passLabel = `Passage ${firstPassage.passageNumber}: ${firstPassage.title || ''}`.trim();
-        if (badgeText) badgeText.textContent = `${test.name} · ${passLabel}`;
-        if (titleEl) titleEl.textContent = `${topicName} · ${test.name} · ${passLabel}`;
-    } else {
-        if (badgeText) badgeText.textContent = test.name;
-    }
+    if (badgeText) badgeText.textContent = `${test.name} · (Vui lòng chọn passage)`;
+    if (titleEl) titleEl.textContent = `${topicName} · ${test.name}`;
 };
 
 window.onBulkAddPassageChange = function(passageId) {
@@ -7166,9 +7170,11 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
             window._populateExamSelects('single', targetTopicId, testsInfo.tests, targetPassageId);
         } else {
             if (examSection) examSection.classList.add('hidden');
+            if (passageInput) passageInput.value = '';
         }
     } else {
         if (examSection) examSection.classList.add('hidden');
+        if (passageInput) passageInput.value = '';
     }
 
     // Reset Form
@@ -8879,57 +8885,6 @@ window.dictOpenSaveModal = async function() {
             title: 'Lưu từ vào bộ từ vựng',
             subtitle: `Từ: "${r.word}"`
         });
-        return;
-    }
-
-    const modal = document.getElementById('modal-save-word');
-    if (!modal) return;
-
-    // Hiện label
-    const label = document.getElementById('save-word-label');
-    if (label) label.textContent = `"${r.word}" — ${r.phonetic || ''}`;
-
-    // Reset error
-    const errEl = document.getElementById('save-word-error');
-    if (errEl) errEl.classList.add('hidden');
-
-    // Hiện modal
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-
-    // Load topics
-    const listEl = document.getElementById('save-topic-list');
-    listEl.innerHTML = `<div class="flex items-center justify-center py-8">
-        <span class="material-symbols-outlined text-primary text-[32px] animate-spin">refresh</span>
-    </div>`;
-
-    try {
-        let topics = [];
-        if (typeof HiDB !== 'undefined') {
-            topics = await HiDB.getTopics();
-        }
-
-        if (!topics || topics.length === 0) {
-            listEl.innerHTML = `<p class="text-center text-on-surface-variant text-sm py-6">Chưa có chủ đề nào. Hãy tạo chủ đề mới!</p>`;
-            return;
-        }
-
-        window._dictTopicsCache = topics;
-        listEl.innerHTML = topics.map(t => `
-            <button onclick="window.dictSaveWord('${t.id}')"
-                    class="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-primary-container/10 text-left transition-colors group">
-                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
-                    <span class="material-symbols-outlined text-primary text-[18px]">${t.icon || 'folder'}</span>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold text-sm text-on-surface truncate">${_escHtml(t.name)}</p>
-                    <p class="text-xs text-on-surface-variant">${t.totalWords} từ</p>
-                </div>
-                <span class="material-symbols-outlined text-outline text-[18px] opacity-0 group-hover:opacity-100 transition-opacity">add</span>
-            </button>
-        `).join('');
-    } catch(err) {
-        listEl.innerHTML = `<p class="text-center text-error text-sm py-6">Lỗi tải chủ đề: ${_escHtml(err.message)}</p>`;
     }
 };
 
@@ -9009,8 +8964,9 @@ window.dictSaveWord = async function(topicId, topicName, passageId = null, passa
 
 /** Đóng modal lưu từ */
 window.dictCloseSaveModal = function() {
-    const modal = document.getElementById('modal-save-word');
-    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    if (typeof window.closeTopicPicker === 'function') {
+        window.closeTopicPicker();
+    }
 };
 
 /** Toast thông báo nhỏ */
@@ -9026,11 +8982,6 @@ function _dictToast(msg) {
     toast.style.opacity = '1';
     setTimeout(() => { toast.style.opacity = '0'; }, 2800);
 }
-
-// Đóng modal save-word khi click overlay
-document.getElementById('modal-save-word')?.addEventListener('click', function(e) {
-    if (e.target === this) window.dictCloseSaveModal();
-});
 
 
 </script>
