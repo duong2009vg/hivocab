@@ -5502,25 +5502,9 @@ window.copyAdminZalo = function() {
 };
 
 window.checkAndShowWelcomeModal = function() {
-    try {
-        // Không hiển thị modal che khuất màn hình trên Landing Page hoặc trang công khai (tuân thủ quy định Google Review)
-        const curPage = document.querySelector('.page.active')?.id;
-        if (!curPage || curPage === 'page-landing' || curPage === 'page-features' || curPage === 'page-reviews' || curPage === 'page-support' || curPage === 'page-faq' || curPage === 'page-login') {
-            return;
-        }
-
-        const hasSeen = localStorage.getItem('hivocab_welcome_gift_seen_v1');
-        if (!hasSeen) {
-            setTimeout(() => {
-                const activeNow = document.querySelector('.page.active')?.id;
-                if (activeNow && activeNow !== 'page-landing' && activeNow !== 'page-login') {
-                    window.openWelcomeModal();
-                }
-            }, 1000);
-        }
-    } catch (e) {
-        // Bỏ qua nếu có lỗi, không chặn người dùng
-    }
+    // Tắt tự động nổ popup toàn màn hình để tuân thủ 100% chính sách kiểm duyệt Google OAuth
+    // Người dùng vẫn có thể bấm nút '🎁 Quà tặng 2T & Zalo Admin' trên sidebar/menu để xem
+    return;
 };
 
 // ── Auth Mode State (login / signup) ───────────────────────────
