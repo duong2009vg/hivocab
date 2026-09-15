@@ -938,42 +938,104 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
     </div>
 </section>
 
-<!-- Section: Mục đích ứng dụng & Cam kết bảo mật (Google OAuth Transparency) -->
-<section class="border-t border-gray-100 dark:border-white/5 py-16 px-8 bg-gray-50/60 dark:bg-surface-container-low/30">
-    <div class="max-w-7xl mx-auto">
+<!-- Section: Application Purpose & Overview (Google OAuth Transparency & Verification) -->
+<section class="border-t border-gray-100 dark:border-white/5 py-16 px-8 bg-gray-50/70 dark:bg-surface-container-low/40">
+    <div class="max-w-7xl mx-auto space-y-8">
         <div class="max-w-3xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-xs font-semibold mb-3 border border-blue-200/50 dark:border-blue-800/50">
-                <span class="material-symbols-outlined text-sm">verified_user</span>
-                Mục đích ứng dụng & Cam kết bảo mật dữ liệu
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 text-xs font-semibold mb-3 border border-blue-200/60 dark:border-blue-800/60 shadow-xs">
+                <span class="material-symbols-outlined text-sm">verified</span>
+                Application Overview & Purpose · Mục đích ứng dụng
             </div>
-            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white tracking-tight mb-4">Về nền tảng học tập thông minh HiVocab</h2>
-            <p class="text-gray-600 dark:text-gray-300 text-sm sm:text-base leading-relaxed mb-6">
-                <strong>HiVocab (hivocab.site)</strong> là nền tảng giáo dục thông minh được xây dựng nhằm hỗ trợ học sinh, sinh viên và người học tiếng Anh nâng cao năng lực từ vựng học thuật, đọc hiểu chuyên sâu (Cambridge IELTS & IELTS Actual Tests) và ôn thi THPT Quốc Gia.
+            <h2 class="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight mb-3">
+                About HiVocab (hivocab.site)
+            </h2>
+            <p class="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                <strong>HiVocab</strong> is an interactive educational platform designed for English language learners, IELTS candidates, and high school students. The application's primary purpose is to help users acquire and retain academic vocabulary permanently, master reading comprehension with Cambridge IELTS 10–21 and IELTS Actual Tests, and practice standardized examination skills using the scientifically proven <strong>SuperMemo-2 (SM-2) Spaced Repetition System</strong> and <strong>Curtain Mode Active Reading</strong>.
+            </p>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 leading-relaxed mt-2 italic">
+                HiVocab là nền tảng giáo dục thông minh giúp học sinh, sinh viên và người học tiếng Anh làm chủ từ vựng học thuật, rèn luyện kỹ năng đọc hiểu chuyên sâu và ôn luyện thi THPT Quốc Gia theo phương pháp khoa học.
             </p>
         </div>
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-sm">
-                <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-xl">psychology</span>
+
+        <!-- 4 Key Transparency Columns -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Card 1: Target Audience & Learning Goal -->
+            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-xl">school</span>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base mb-1.5">Intended Audience</h3>
+                    <p class="text-xs text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mb-2">Đối tượng người học</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        High school students (THPT QG), university learners, and IELTS test takers aiming for Band 5.0 to 8.5+ seeking structured, context-rich academic vocabulary mastery.
+                    </p>
                 </div>
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Mục đích & Phương pháp học</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Ứng dụng thuật toán Spaced Repetition (SM-2) cá nhân hóa chu kỳ ôn tập, giúp người học chuyển hóa từ vựng ngắn hạn vào trí nhớ dài hạn một cách tự nhiên và bền vững.</p>
             </div>
-            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-sm">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-xl">lock</span>
+
+            <!-- Card 2: Core Learning Methodology -->
+            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-xl">psychology</span>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base mb-1.5">Core Features & SRS SM-2</h3>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold uppercase tracking-wider mb-2">Tính năng & Phương pháp</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Standardized 66,000+ Cambridge & Vol vocabulary database, active parallel reading with translation masks (Curtain Mode), and 5-tier Spaced Repetition memory intervals.
+                    </p>
                 </div>
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Đăng nhập Google an toàn</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">HiVocab sử dụng Google Sign-In chỉ để nhận diện email và tên hiển thị cơ bản nhằm đồng bộ sổ từ vựng cá nhân trên nền tảng Supabase bảo mật cao.</p>
             </div>
-            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-sm sm:col-span-2 lg:col-span-1">
-                <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center mb-4">
-                    <span class="material-symbols-outlined text-xl">policy</span>
+
+            <!-- Card 3: Why Google OAuth is Needed -->
+            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-xl">lock</span>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base mb-1.5">Why Google Sign-In?</h3>
+                    <p class="text-xs text-amber-600 dark:text-amber-400 font-semibold uppercase tracking-wider mb-2">Đăng nhập Google an toàn</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        Google OAuth is used solely to authenticate user identity via email and securely sync personal vocabulary notebooks and study streaks across devices on encrypted Supabase cloud storage.
+                    </p>
                 </div>
-                <h3 class="font-semibold text-gray-900 dark:text-white mb-2">Tuân thủ chính sách Google</h3>
-                <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">Tuyệt đối không chia sẻ hay thương mại hóa dữ liệu người dùng. Tuân thủ nghiêm ngặt chuẩn mực Google API Services User Data Policy.</p>
+            </div>
+
+            <!-- Card 4: Google Compliance & Limited Use -->
+            <div class="p-6 rounded-2xl bg-white dark:bg-surface-container-lowest border border-gray-200/70 dark:border-outline-variant/20 shadow-xs flex flex-col justify-between">
+                <div>
+                    <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 flex items-center justify-center mb-4">
+                        <span class="material-symbols-outlined text-xl">policy</span>
+                    </div>
+                    <h3 class="font-bold text-gray-900 dark:text-white text-base mb-1.5">Zero Third-Party Sharing</h3>
+                    <p class="text-xs text-purple-600 dark:text-purple-400 font-semibold uppercase tracking-wider mb-2">Bảo mật & Không chia sẻ</p>
+                    <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                        We never sell user data or use it for AI model training. Fully adhering to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google API Services User Data Policy</a>.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Quick Access Banner for Reviewers & Guests -->
+        <div class="p-5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200/60 dark:border-blue-800/40 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-blue-600 text-2xl">visibility</span>
+                <div class="text-xs sm:text-sm text-gray-700 dark:text-gray-300">
+                    <strong class="text-gray-900 dark:text-white">Public Access Notice:</strong> Anyone can freely browse vocabulary topics and features without logging in.
+                </div>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+                <a onclick="window.navigateTo('topics')" class="cursor-pointer px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-xs">
+                    Browse Vocabulary Catalog →
+                </a>
+                <a href="/privacy.html" class="px-4 py-2 rounded-xl bg-white dark:bg-surface-container border border-gray-300/80 dark:border-white/10 hover:bg-gray-50 text-xs font-semibold text-gray-800 dark:text-gray-200 transition-colors">
+                    Privacy Policy
+                </a>
             </div>
         </div>
+
     </div>
 </section>
 
@@ -5773,7 +5835,7 @@ window.handleGoogleLogin = async function() {
     }
 };
 
-// ── Bắt đầu ngay (Kiểm tra đăng nhập) ───────────────────────────
+// ── Bắt đầu ngay (Khám phá trải nghiệm học tập) ─────────────────
 window.handleStartNow = async function() {
     const isMock = localStorage.getItem('hi_use_mock') === 'true';
     let user = null;
@@ -5785,7 +5847,8 @@ window.handleStartNow = async function() {
     if (user || isMock) {
         window.navigateTo('dashboard');
     } else {
-        navigateTo('login');
+        // Cho phép người dùng và chuyên viên kiểm duyệt truy cập khám phá kho từ vựng trực tiếp mà không bị chặn bởi trang đăng nhập
+        window.navigateTo('topics');
     }
 };
 
