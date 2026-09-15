@@ -2,454 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Privacy Policy – HiVocab</title>
-    <meta name="description" content="HiVocab Privacy Policy detailing user data collection, Google OAuth user data usage, data retention, and deletion procedures compliant with Google API Services User Data Policy."/>
+    <meta name="description" content="HiVocab Privacy Policy detailing data collection, Google OAuth user data usage, storage, security, and deletion."/>
     <link rel="icon" type="image/svg+xml" href="/logo-mark.svg?v=3"/>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Inter', sans-serif; }
-        .tab-btn.active { background-color: #0071E3; color: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; }
     </style>
 </head>
-<body class="bg-[#F5F5F7] text-[#1D1D1F] min-h-screen flex flex-col antialiased selection:bg-[#0071E3] selection:text-white">
+<body class="bg-gray-50 text-gray-900 min-h-screen py-10 px-4 sm:px-6 lg:px-8 antialiased">
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-[#D2D2D7]/60">
-        <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2.5 group">
-                <img src="/logo-mark.svg" alt="HiVocab Logo" class="h-7 w-auto transition-transform group-hover:scale-105"/>
-                <span class="font-bold text-lg text-[#1D1D1F] tracking-tight">HiVocab</span>
-            </a>
-            <div class="flex items-center gap-4 text-sm font-medium">
-                <a href="/terms.html" class="text-[#6E6E73] hover:text-[#0071E3] transition-colors">Terms of Service</a>
-                <a href="/" class="px-4 py-1.5 rounded-full bg-[#1D1D1F] text-white hover:bg-[#333336] transition-all text-xs font-semibold">
-                    ← Back to Home
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-10 md:py-14">
+    <div class="max-w-3xl mx-auto bg-white p-8 sm:p-12 rounded-2xl border border-gray-200 shadow-sm space-y-8">
         
-        <!-- Language Switcher Bar -->
-        <div class="flex items-center justify-between mb-6 bg-white p-3 rounded-2xl border border-[#D2D2D7]/70 shadow-xs">
-            <div class="flex items-center gap-2 text-xs text-[#6E6E73] font-medium pl-2">
-                <span class="material-symbols-outlined text-base text-[#0071E3]">language</span>
-                <span>Select Language / Chọn ngôn ngữ:</span>
+        <!-- Header -->
+        <div class="border-b border-gray-200 pb-6">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <a href="/" class="flex items-center gap-2 font-bold text-xl text-gray-900">
+                    <img src="/logo-mark.svg" alt="HiVocab Logo" class="h-8 w-auto"/>
+                    <span>HiVocab</span>
+                </a>
+                <a href="/" class="text-sm font-medium text-blue-600 hover:underline">← Back to Home</a>
             </div>
-            <div class="flex gap-1.5 bg-[#F5F5F7] p-1 rounded-xl text-xs font-semibold">
-                <button id="btn-lang-en" onclick="switchLanguage('en')" class="tab-btn active px-3 py-1.5 rounded-lg transition-all">English (Official)</button>
-                <button id="btn-lang-vi" onclick="switchLanguage('vi')" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-[#6E6E73] hover:text-[#1D1D1F]">Tiếng Việt</button>
-            </div>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Privacy Policy</h1>
+            <p class="text-sm text-gray-500 mt-2">
+                Application: <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-blue-600 underline">https://hivocab.site</a>) · Effective Date: September 15, 2026
+            </p>
         </div>
 
-        <!-- ========================================================= -->
-        <!-- ENGLISH VERSION (Primary for Google Review & International) -->
-        <!-- ========================================================= -->
-        <div id="content-en" class="bg-white rounded-[28px] border border-[#D2D2D7]/70 p-8 md:p-12 shadow-sm space-y-10">
+        <!-- 1. Introduction -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">1. Introduction & Application Purpose</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                HiVocab (<a href="https://hivocab.site" class="text-blue-600 hover:underline">https://hivocab.site</a>) is an educational web application designed to help students, IELTS test-takers, and English language learners acquire and retain academic vocabulary through the Spaced Repetition System (SRS SM-2) and Active Reading (Curtain Mode).
+            </p>
+            <p class="text-gray-700 text-sm sm:text-base">
+                We respect your privacy and are committed to transparently disclosing how we access, collect, use, store, and protect your information, particularly data obtained through <strong>Google OAuth (Google User Data)</strong>.
+            </p>
+        </section>
 
-            <!-- Title & Metadata -->
-            <div class="border-b border-[#D2D2D7]/60 pb-8">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0071E3]/10 text-[#0071E3] text-xs font-semibold mb-3">
-                    <span class="material-symbols-outlined text-[15px]">verified_user</span>
-                    Google OAuth Compliant & User Data Policy
-                </div>
-                <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F] leading-tight">
-                    Privacy Policy
-                </h1>
-                <p class="text-sm text-[#6E6E73] mt-2">
-                    Applies to <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a>) · Effective Date: <strong>September 15, 2026</strong> · Last Updated: <strong>September 15, 2026</strong>
-                </p>
+        <!-- 2. Google User Data We Collect -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">2. Google User Data We Collect & Scopes Requested</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                When you sign in using <strong>"Continue with Google" (Google Sign-In)</strong>, HiVocab requests only the following non-sensitive standard scopes:
+            </p>
+            <ul class="list-disc pl-6 space-y-2 text-sm sm:text-base text-gray-700">
+                <li><strong>openid:</strong> Used to securely verify your identity based on OpenID Connect protocol.</li>
+                <li><strong>https://www.googleapis.com/auth/userinfo.email (Email):</strong> Used as your unique account identifier to create and manage your study account.</li>
+                <li><strong>https://www.googleapis.com/auth/userinfo.profile (Profile):</strong> Used to retrieve your name and profile picture to display personalized greetings in the app and show author credit on shared vocabulary decks.</li>
+            </ul>
+            <div class="bg-gray-100 p-4 rounded-xl text-xs sm:text-sm text-gray-800">
+                <strong>Scope Limitation:</strong> HiVocab does <strong>NOT</strong> request, access, or read any sensitive Google scopes, such as Google Drive files, Gmail messages, Contacts, Google Calendar, or Location data.
             </div>
+        </section>
 
-            <!-- Section 1: Introduction & App Identity -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">1.</span> Introduction & App Purpose
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Welcome to <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-[#0071E3] hover:underline">https://hivocab.site</a>). HiVocab is an educational web application designed to help students, IELTS test-takers, and English language learners master academic vocabulary, reading comprehension (Cambridge IELTS 10–21 and IELTS Actual Tests), and high school exam preparation using the scientifically proven Spaced Repetition System (SRS SM-2) and Active Reading (Curtain Mode).
-                </p>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    We respect your privacy and are committed to protecting your personal information. This Privacy Policy details the types of data we collect, how we handle and safeguard that data, our adherence to Google User Data requirements, and your rights to manage or delete your data at any time.
-                </p>
-            </section>
+        <!-- 3. How We Use Google User Data -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">3. How We Access and Use Your Data</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                Google user data is accessed only when you authenticate and is used strictly for core educational features:
+            </p>
+            <ul class="list-disc pl-6 space-y-1.5 text-sm sm:text-base text-gray-700">
+                <li>Authenticating user login sessions.</li>
+                <li>Creating and maintaining your personal vocabulary notebook.</li>
+                <li>Tracking and scheduling Spaced Repetition (SM-2) memory reviews.</li>
+                <li>Saving your IELTS reading practice progress and test history.</li>
+            </ul>
+        </section>
 
-            <!-- Section 2: Google User Data We Collect & Scopes -->
-            <section class="space-y-4">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">2.</span> Google User Data We Collect (OAuth Scopes)
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    When you choose to sign in to HiVocab using <strong>"Continue with Google" (Google Sign-In)</strong>, we request only the minimum necessary, non-sensitive scopes:
-                </p>
+        <!-- 4. Data Storage and Security -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">4. Data Storage and Security</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                User account information is stored securely on Supabase cloud database infrastructure:
+            </p>
+            <ul class="list-disc pl-6 space-y-1.5 text-sm sm:text-base text-gray-700">
+                <li><strong>Encryption:</strong> All data is encrypted in transit using SSL/TLS (HTTPS) and at rest using AES-256 standards.</li>
+                <li><strong>Access Control:</strong> Database Row-Level Security (RLS) is enforced, ensuring each user can only view and edit their own study data.</li>
+            </ul>
+        </section>
 
-                <!-- Scopes Table -->
-                <div class="overflow-x-auto rounded-2xl border border-[#D2D2D7]/80">
-                    <table class="w-full text-left text-xs md:text-sm">
-                        <thead class="bg-[#F5F5F7] border-b border-[#D2D2D7]/80 text-[#1D1D1F] font-semibold">
-                            <tr>
-                                <th class="p-3.5">Scope</th>
-                                <th class="p-3.5">Data Accessed</th>
-                                <th class="p-3.5">Specific Purpose & Usage</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#D2D2D7]/60 text-[#424245]">
-                            <tr>
-                                <td class="p-3.5 font-mono text-[11px] text-[#0071E3]">openid</td>
-                                <td class="p-3.5 font-medium">User Identifier Token</td>
-                                <td class="p-3.5">Authenticates user identity securely using OpenID Connect protocol.</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-mono text-[11px] text-[#0071E3]">.../auth/userinfo.email</td>
-                                <td class="p-3.5 font-medium">Email address</td>
-                                <td class="p-3.5">Used as your unique account ID, for login identification, and for critical account alerts.</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-mono text-[11px] text-[#0071E3]">.../auth/userinfo.profile</td>
-                                <td class="p-3.5 font-medium">Full name & profile picture</td>
-                                <td class="p-3.5">Personalizes UI greetings and displays author credit when you publish custom decks to the Community Library.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="bg-[#F5F5F7] border border-[#D2D2D7] rounded-2xl p-4 text-xs md:text-sm text-[#1D1D1F]">
-                    <strong>Strict Scope Boundary:</strong> HiVocab <strong>DOES NOT</strong> request, access, or read any sensitive or restricted scopes, such as Google Drive, Gmail messages, Contacts, Google Calendar, Device Location, or Financial data.
-                </div>
-            </section>
-
-            <!-- Section 3: How We Use Your Data -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">3.</span> How We Use Your Data
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    We use the collected information solely to provide, maintain, and enhance educational functionality:
-                </p>
-                <ul class="list-disc pl-6 space-y-1.5 text-sm md:text-base text-[#424245]">
-                    <li>Authenticating your user session and safeguarding your learning account.</li>
-                    <li>Synchronizing your personal vocabulary notebook (words saved, custom flashcard folders, definitions, and IPA).</li>
-                    <li>Calculating individual Spaced Repetition (SRS SM-2) review intervals and daily study streaks.</li>
-                    <li>Recording your progress in Cambridge IELTS reading passages and mock exam scores.</li>
-                </ul>
-            </section>
-
-            <!-- Section 4: Data Storage, Protection & Security -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">4.</span> Data Storage, Protection & Security
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    All user records are stored on Supabase managed database infrastructure. Data is secured using industry-standard protocols:
-                </p>
-                <ul class="list-disc pl-6 space-y-1.5 text-sm md:text-base text-[#424245]">
-                    <li><strong>Encryption in Transit:</strong> All communications between your browser and our servers are encrypted using modern TLS/SSL (HTTPS).</li>
-                    <li><strong>Encryption at Rest:</strong> Database volumes are encrypted at rest using AES-256 standards.</li>
-                    <li><strong>Row-Level Security (RLS):</strong> Strict database policies guarantee that each user can only read and modify their own personal study records.</li>
-                </ul>
-            </section>
-
-            <!-- Section 5: Third-Party Sharing & Commercialization -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">5.</span> Zero Third-Party Sharing & Commercialization
-                </h2>
-                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm leading-relaxed">
-                    <strong>Clear Guarantee:</strong> HiVocab <strong>NEVER</strong> sells, rents, monetizes, trades, or transfers your personal information or Google user data to any third parties, advertising networks, or data brokers.
-                </div>
-            </section>
-
-            <!-- Section 6: AI / ML Models Exclusion -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">6.</span> Artificial Intelligence (AI/ML) Policy
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    HiVocab does <strong>NOT</strong> use Google user data (including email, profile name, or personal learning records) to train, retrain, or fine-tune artificial intelligence (AI) or machine learning (ML) models.
-                </p>
-            </section>
-
-            <!-- Section 7: Google API Services User Data Policy Compliance -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">7.</span> Google API Services User Data Policy Compliance
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    HiVocab strictly adheres to Google's standards:
-                </p>
-                <blockquote class="p-4 rounded-2xl bg-[#F5F5F7] border-l-4 border-[#0071E3] text-xs md:text-sm text-[#1D1D1F] italic leading-relaxed">
-                    "HiVocab's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-[#0071E3] underline font-semibold">Google API Services User Data Policy</a>, including the Limited Use requirements."
-                </blockquote>
-            </section>
-
-            <!-- Section 8: Data Retention & Permanent Deletion -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">8.</span> Data Retention & Deletion Procedures
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    You have absolute control over your personal data at all times:
-                </p>
-                <div class="space-y-3 text-sm md:text-base text-[#424245]">
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1.5">
-                        <strong class="text-[#1D1D1F]">Retention Period:</strong>
-                        <p class="text-xs md:text-sm">We retain your user profile and learning data for as long as your account remains active. If an account is inactive for twenty-four (24) consecutive months, or upon explicit deletion request, all personal data is permanently purged from our active databases within seven (7) business days.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1.5">
-                        <strong class="text-[#1D1D1F]">Option 1 – In-App Self-Deletion:</strong>
-                        <p class="text-xs md:text-sm">Log in to HiVocab, navigate to <em>Settings (Cài đặt)</em>, and select <em>"Xóa tài khoản của tôi" (Delete My Account)</em>. All profile details, saved words, and study metrics will be permanently deleted immediately.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1.5">
-                        <strong class="text-[#1D1D1F]">Option 2 – Email Request:</strong>
-                        <p class="text-xs md:text-sm">You can send an account/data deletion request to <a href="mailto:support@hivocab.site" class="text-[#0071E3] underline">support@hivocab.site</a> or <a href="mailto:mitthoi60@gmail.com" class="text-[#0071E3] underline">mitthoi60@gmail.com</a>. We verify your identity and finalize the permanent data erasure within seven (7) business days.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1.5">
-                        <strong class="text-[#1D1D1F]">Option 3 – Revoke Google Access Directly:</strong>
-                        <p class="text-xs md:text-sm">You can revoke HiVocab's access to your Google Account at any time by visiting your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" class="text-[#0071E3] underline font-medium">Google Account Third-party Permissions Manager</a>.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section 9: Contact Information -->
-            <section class="space-y-3 border-t border-[#D2D2D7]/60 pt-8">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">9.</span> Contact Information
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    If you have questions, feedback, or inquiries regarding this Privacy Policy or our data handling practices, please contact us:
-                </p>
-                <div class="bg-[#F5F5F7] rounded-2xl p-5 border border-[#D2D2D7]/80 text-sm space-y-2 text-[#1D1D1F]">
-                    <div><strong>Application Name:</strong> HiVocab (Hi - Master Vocabulary)</div>
-                    <div><strong>Official Website:</strong> <a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a></div>
-                    <div><strong>Support Email:</strong> <a href="mailto:support@hivocab.site" class="text-[#0071E3] underline font-medium">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-[#0071E3] underline font-medium">mitthoi60@gmail.com</a></div>
-                    <div><strong>Hotline / Zalo Support:</strong> (+84) 0846 407 898</div>
-                </div>
-            </section>
-
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- VIETNAMESE VERSION (Bản Tiếng Việt) -->
-        <!-- ========================================================= -->
-        <div id="content-vi" class="hidden bg-white rounded-[28px] border border-[#D2D2D7]/70 p-8 md:p-12 shadow-sm space-y-10">
-
-            <!-- Title & Metadata -->
-            <div class="border-b border-[#D2D2D7]/60 pb-8">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0071E3]/10 text-[#0071E3] text-xs font-semibold mb-3">
-                    <span class="material-symbols-outlined text-[15px]">verified_user</span>
-                    Tuân thủ tiêu chuẩn Google OAuth
-                </div>
-                <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F] leading-tight">
-                    Chính Sách Quyền Riêng Tư (Privacy Policy)
-                </h1>
-                <p class="text-sm text-[#6E6E73] mt-2">
-                    Áp dụng cho ứng dụng <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a>) · Ngày cập nhật: <strong>15 tháng 09, 2026</strong>
-                </p>
+        <!-- 5. Third-Party Sharing & Commercialization -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">5. Data Sharing and Disclosure</h2>
+            <div class="p-4 rounded-xl bg-green-50 border border-green-200 text-green-900 text-sm sm:text-base">
+                <strong>Zero Selling Policy:</strong> HiVocab <strong>NEVER</strong> sells, rents, leases, or trades your personal information or Google user data to any third party, advertising company, or data broker.
             </div>
+            <p class="text-gray-700 text-sm sm:text-base">
+                Furthermore, HiVocab does <strong>NOT</strong> use Google user data to train, retrain, or fine-tune artificial intelligence (AI) or machine learning (ML) models.
+            </p>
+        </section>
 
-            <!-- Section 1: Giới thiệu -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">1.</span> Giới thiệu về HiVocab (Introduction)
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Chào mừng bạn đến với <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-[#0071E3] hover:underline">https://hivocab.site</a>). HiVocab là ứng dụng giáo dục hỗ trợ học từ vựng tiếng Anh theo phương pháp lặp lại ngắt quãng (Spaced Repetition SM-2), luyện đọc hiểu song ngữ Cambridge IELTS 10–21, IELTS Actual Tests, và luyện thi THPT Quốc Gia.
-                </p>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Chúng tôi cam kết bảo vệ quyền riêng tư của bạn. Chính sách này mô tả chi tiết cách thức thu thập, sử dụng, bảo vệ và xử lý thông tin cá nhân của người dùng, đặc biệt là dữ liệu nhận được từ <strong>Google OAuth (Google User Data)</strong>.
-                </p>
-            </section>
+        <!-- 6. Google API Services User Data Policy Compliance -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">6. Google API Services User Data Policy Compliance</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                HiVocab's use of Google user data adheres strictly to Google's requirements:
+            </p>
+            <blockquote class="p-4 rounded-xl bg-gray-100 border-l-4 border-blue-600 text-xs sm:text-sm text-gray-800 italic">
+                "HiVocab's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-semibold">Google API Services User Data Policy</a>, including the Limited Use requirements."
+            </blockquote>
+        </section>
 
-            <!-- Section 2: Dữ liệu Google thu thập -->
-            <section class="space-y-4">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">2.</span> Dữ liệu Google chúng tôi thu thập (Google User Data & Scopes)
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Khi bạn chọn tính năng <em>"Tiếp tục với Google"</em> (Google Sign-In), hệ thống chỉ yêu cầu các quyền cơ bản tối thiểu:
-                </p>
+        <!-- 7. Data Retention & Deletion -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">7. Data Retention & Deletion Procedures</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                Users retain full ownership and control of their data:
+            </p>
+            <ul class="list-disc pl-6 space-y-2 text-sm sm:text-base text-gray-700">
+                <li><strong>Retention:</strong> Personal data is kept for as long as your account remains active. If an account is inactive for 24 months, it is scheduled for automated permanent deletion.</li>
+                <li><strong>In-App Deletion:</strong> You can delete your account and all associated vocabulary data at any time under <em>Settings > Delete My Account</em>.</li>
+                <li><strong>Email Deletion Request:</strong> You can email us at <a href="mailto:support@hivocab.site" class="text-blue-600 underline">support@hivocab.site</a> or <a href="mailto:mitthoi60@gmail.com" class="text-blue-600 underline">mitthoi60@gmail.com</a> to request account deletion. We process all deletion requests within 7 business days.</li>
+                <li><strong>Revoke Google Permissions:</strong> You can revoke HiVocab's access to your Google account at any time via <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-medium">Google Account Security Settings</a>.</li>
+            </ul>
+        </section>
 
-                <!-- Bảng Scopes -->
-                <div class="overflow-x-auto rounded-2xl border border-[#D2D2D7]/80">
-                    <table class="w-full text-left text-xs md:text-sm">
-                        <thead class="bg-[#F5F5F7] border-b border-[#D2D2D7]/80 text-[#1D1D1F] font-semibold">
-                            <tr>
-                                <th class="p-3.5">Phạm vi (Scope)</th>
-                                <th class="p-3.5">Dữ liệu truy cập</th>
-                                <th class="p-3.5">Mục đích sử dụng cụ thể</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-[#D2D2D7]/60 text-[#424245]">
-                            <tr>
-                                <td class="p-3.5 font-mono text-[11px] text-[#0071E3]">openid</td>
-                                <td class="p-3.5 font-medium">Mã định danh phiên</td>
-                                <td class="p-3.5">Xác thực phiên đăng nhập an toàn theo chuẩn OpenID Connect.</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-mono text-[11px] text-[#0071E3]">.../auth/userinfo.email</td>
-                                <td class="p-3.5 font-medium">Địa chỉ Email</td>
-                                <td class="p-3.5">Định danh tài khoản duy nhất của người dùng, quản lý phiên và gửi thông báo hệ thống.</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3.5 font-mono text-[11px] text-[#0071E3]">.../auth/userinfo.profile</td>
-                                <td class="p-3.5 font-medium">Họ tên & Ảnh đại diện</td>
-                                <td class="p-3.5">Cá nhân hóa lời chào giao diện và hiển thị tên tác giả khi chia sẻ bộ từ trên Thư viện cộng đồng.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- 8. Contact Information -->
+        <section class="space-y-3 border-t border-gray-200 pt-6">
+            <h2 class="text-xl font-bold text-gray-900">8. Contact Us</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                If you have questions regarding this Privacy Policy or our data practices, please contact us:
+            </p>
+            <div class="bg-gray-100 rounded-xl p-4 text-sm space-y-1 text-gray-800">
+                <p><strong>App Name:</strong> HiVocab</p>
+                <p><strong>Official Website:</strong> <a href="https://hivocab.site" class="text-blue-600 underline">https://hivocab.site</a></p>
+                <p><strong>Support Email:</strong> <a href="mailto:support@hivocab.site" class="text-blue-600 underline">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-blue-600 underline">mitthoi60@gmail.com</a></p>
+                <p><strong>Phone / Zalo:</strong> (+84) 0846 407 898</p>
+            </div>
+        </section>
 
-                <div class="bg-[#F5F5F7] border border-[#D2D2D7] rounded-2xl p-4 text-xs md:text-sm text-[#1D1D1F]">
-                    <strong>Cam kết:</strong> HiVocab <strong>KHÔNG</strong> yêu cầu hoặc truy cập bất kỳ quyền nhạy cảm nào của Google như: Google Drive, Gmail, Danh bạ, Lịch, Dữ liệu vị trí hay Dữ liệu tài chính.
-                </div>
-            </section>
-
-            <!-- Section 3: Mục đích sử dụng -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">3.</span> Mục đích sử dụng dữ liệu
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Dữ liệu được thu thập chỉ phục vụ trực tiếp cho tính năng học tập của bạn:
-                </p>
-                <ul class="list-disc pl-6 space-y-1.5 text-sm md:text-base text-[#424245]">
-                    <li>Xác thực danh tính và duy trì phiên đăng nhập an toàn.</li>
-                    <li>Khởi tạo Sổ từ vựng cá nhân, lưu trữ các từ vựng bạn đã đánh dấu hoặc thêm qua Chrome Extension.</li>
-                    <li>Theo dõi và tính toán lịch ôn tập ngắt quãng (SRS SM-2) dựa trên cấp độ nhớ của từng từ.</li>
-                    <li>Lưu lịch sử và kết quả bài thi trắc nghiệm THPT Quốc gia hoặc tiến độ đọc hiểu Cambridge IELTS.</li>
-                </ul>
-            </section>
-
-            <!-- Section 4: Lưu trữ và bảo mật -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">4.</span> Lưu trữ và Bảo mật Dữ liệu
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Dữ liệu người dùng được lưu trữ trên nền tảng Supabase được bảo vệ bởi tiêu chuẩn mã hóa SSL/TLS khi truyền tải và mã hóa AES-256 ở trạng thái nghỉ. Chúng tôi kích hoạt chính sách <strong>Row-Level Security (RLS)</strong>, đảm bảo mỗi người dùng chỉ có quyền truy xuất dữ liệu cá nhân của chính mình.
-                </p>
-            </section>
-
-            <!-- Section 5: Không chia sẻ cho bên thứ ba -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">5.</span> Cam kết Không Chia Sẻ Dữ Liệu
-                </h2>
-                <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-sm leading-relaxed">
-                    <strong>Tuyên bố minh bạch:</strong> HiVocab tuyệt đối <strong>KHÔNG</strong> bán, cho thuê, thương mại hóa, hoặc chia sẻ thông tin cá nhân cũng như dữ liệu Google của bạn cho bất kỳ bên thứ ba, nhà môi giới dữ liệu hoặc đối tác quảng cáo nào.
-                </div>
-            </section>
-
-            <!-- Section 6: Cam kết về AI -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">6.</span> Chính sách về Trí tuệ Nhân tạo (AI/ML)
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    HiVocab <strong>KHÔNG</strong> sử dụng dữ liệu người dùng Google để huấn luyện, tái huấn luyện hoặc tinh chỉnh (fine-tune) các mô hình trí tuệ nhân tạo (AI) hay học máy (Machine Learning).
-                </p>
-            </section>
-
-            <!-- Section 7: Tuân thủ Google API Policy -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">7.</span> Tuân thủ Chính sách Dữ liệu của Google
-                </h2>
-                <blockquote class="p-4 rounded-2xl bg-[#F5F5F7] border-l-4 border-[#0071E3] text-xs md:text-sm text-[#1D1D1F] italic leading-relaxed">
-                    "HiVocab's use and transfer to any other app of information received from Google APIs will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" class="text-[#0071E3] underline font-semibold">Google API Services User Data Policy</a>, including the Limited Use requirements."
-                </blockquote>
-            </section>
-
-            <!-- Section 8: Quyền xóa dữ liệu -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">8.</span> Quyền xóa dữ liệu & Quản lý tài khoản
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Bạn có toàn quyền kiểm soát dữ liệu của mình bất kỳ lúc nào:
-                </p>
-                <div class="space-y-3 text-sm md:text-base text-[#424245]">
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1">
-                        <strong class="text-[#1D1D1F]">Thời hạn lưu trữ:</strong>
-                        <p class="text-xs md:text-sm">Dữ liệu được lưu trữ trong thời gian tài khoản hoạt động. Sau 24 tháng không hoạt động hoặc khi có yêu cầu xóa, toàn bộ dữ liệu sẽ được xóa vĩnh viễn trong vòng tối đa 7 ngày làm việc.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1">
-                        <strong class="text-[#1D1D1F]">Cách 1 – Tự xóa trên giao diện:</strong>
-                        <p class="text-xs md:text-sm">Vào mục <em>Cài đặt (Settings)</em> trên HiVocab và bấm <em>"Xóa tài khoản của tôi"</em>. Dữ liệu sẽ lập tức được xóa hoàn toàn.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1">
-                        <strong class="text-[#1D1D1F]">Cách 2 – Gửi yêu cầu qua Email:</strong>
-                        <p class="text-xs md:text-sm">Gửi thư đến <a href="mailto:support@hivocab.site" class="text-[#0071E3] underline">support@hivocab.site</a> hoặc <a href="mailto:mitthoi60@gmail.com" class="text-[#0071E3] underline">mitthoi60@gmail.com</a>. Chúng tôi xử lý trong vòng tối đa 7 ngày làm việc.</p>
-                    </div>
-                    <div class="p-4 rounded-2xl bg-[#F5F5F7] border border-[#D2D2D7]/70 space-y-1">
-                        <strong class="text-[#1D1D1F]">Cách 3 – Thu hồi quyền trên Google:</strong>
-                        <p class="text-xs md:text-sm">Bạn có thể ngắt kết nối quyền của HiVocab bất cứ lúc nào tại <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" class="text-[#0071E3] underline font-medium">Trang quản lý quyền tài khoản Google</a>.</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Section 9: Thông tin liên hệ -->
-            <section class="space-y-3 border-t border-[#D2D2D7]/60 pt-8">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">9.</span> Thông tin liên hệ (Contact Information)
-                </h2>
-                <div class="bg-[#F5F5F7] rounded-2xl p-5 border border-[#D2D2D7]/80 text-sm space-y-2 text-[#1D1D1F]">
-                    <div><strong>Tên ứng dụng:</strong> HiVocab (Hi - Master Vocabulary)</div>
-                    <div><strong>Website chính thức:</strong> <a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a></div>
-                    <div><strong>Email hỗ trợ:</strong> <a href="mailto:support@hivocab.site" class="text-[#0071E3] underline font-medium">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-[#0071E3] underline font-medium">mitthoi60@gmail.com</a></div>
-                    <div><strong>Hotline / Zalo:</strong> 0846 407 898</div>
-                </div>
-            </section>
-
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-[#D2D2D7]/60 bg-white py-6 text-center text-xs text-[#6E6E73]">
-        <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <!-- Footer -->
+        <div class="border-t border-gray-200 pt-6 flex items-center justify-between text-xs text-gray-500">
             <p>© 2026 HiVocab (hivocab.site). All rights reserved.</p>
-            <div class="flex items-center gap-4">
-                <a href="/privacy.html" class="hover:underline text-[#1D1D1F] font-medium">Privacy Policy</a>
-                <span class="text-[#D2D2D7]">·</span>
-                <a href="/terms.html" class="hover:underline text-[#1D1D1F] font-medium">Terms of Service</a>
-                <span class="text-[#D2D2D7]">·</span>
-                <a href="/" class="hover:underline text-[#0071E3] font-medium">Home</a>
+            <div class="flex items-center gap-3">
+                <a href="/terms.html" class="text-gray-700 hover:underline font-medium">Terms of Service</a>
+                <span>•</span>
+                <a href="/" class="text-blue-600 hover:underline font-medium">Home</a>
             </div>
         </div>
-    </footer>
 
-    <script>
-        function switchLanguage(lang) {
-            const enBox = document.getElementById('content-en');
-            const viBox = document.getElementById('content-vi');
-            const btnEn = document.getElementById('btn-lang-en');
-            const btnVi = document.getElementById('btn-lang-vi');
-
-            if (lang === 'vi') {
-                enBox.classList.add('hidden');
-                viBox.classList.remove('hidden');
-                btnVi.classList.add('active', 'bg-[#0071E3]', 'text-white');
-                btnVi.classList.remove('text-[#6E6E73]');
-                btnEn.classList.remove('active', 'bg-[#0071E3]', 'text-white');
-                btnEn.classList.add('text-[#6E6E73]');
-            } else {
-                viBox.classList.add('hidden');
-                enBox.classList.remove('hidden');
-                btnEn.classList.add('active', 'bg-[#0071E3]', 'text-white');
-                btnEn.classList.remove('text-[#6E6E73]');
-                btnVi.classList.remove('active', 'bg-[#0071E3]', 'text-white');
-                btnVi.classList.add('text-[#6E6E73]');
-            }
-        }
-    </script>
+    </div>
 
 </body>
 </html>

@@ -2,261 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Terms of Service – HiVocab</title>
     <meta name="description" content="HiVocab Terms of Service governing the use of the HiVocab learning platform (hivocab.site)."/>
     <link rel="icon" type="image/svg+xml" href="/logo-mark.svg?v=3"/>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", 'Inter', sans-serif; }
-        .tab-btn.active { background-color: #0071E3; color: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; }
     </style>
 </head>
-<body class="bg-[#F5F5F7] text-[#1D1D1F] min-h-screen flex flex-col antialiased selection:bg-[#0071E3] selection:text-white">
+<body class="bg-gray-50 text-gray-900 min-h-screen py-10 px-4 sm:px-6 lg:px-8 antialiased">
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-50 bg-white/85 backdrop-blur-xl border-b border-[#D2D2D7]/60">
-        <div class="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
-            <a href="/" class="flex items-center gap-2.5 group">
-                <img src="/logo-mark.svg" alt="HiVocab Logo" class="h-7 w-auto transition-transform group-hover:scale-105"/>
-                <span class="font-bold text-lg text-[#1D1D1F] tracking-tight">HiVocab</span>
-            </a>
-            <div class="flex items-center gap-4 text-sm font-medium">
-                <a href="/privacy.html" class="text-[#6E6E73] hover:text-[#0071E3] transition-colors">Privacy Policy</a>
-                <a href="/" class="px-4 py-1.5 rounded-full bg-[#1D1D1F] text-white hover:bg-[#333336] transition-all text-xs font-semibold">
-                    ← Back to Home
-                </a>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content Container -->
-    <main class="flex-1 max-w-4xl mx-auto w-full px-6 py-10 md:py-14">
+    <div class="max-w-3xl mx-auto bg-white p-8 sm:p-12 rounded-2xl border border-gray-200 shadow-sm space-y-8">
         
-        <!-- Language Switcher Bar -->
-        <div class="flex items-center justify-between mb-6 bg-white p-3 rounded-2xl border border-[#D2D2D7]/70 shadow-xs">
-            <div class="flex items-center gap-2 text-xs text-[#6E6E73] font-medium pl-2">
-                <span class="material-symbols-outlined text-base text-[#0071E3]">language</span>
-                <span>Select Language / Chọn ngôn ngữ:</span>
+        <!-- Header -->
+        <div class="border-b border-gray-200 pb-6">
+            <div class="flex items-center justify-between gap-4 mb-4">
+                <a href="/" class="flex items-center gap-2 font-bold text-xl text-gray-900">
+                    <img src="/logo-mark.svg" alt="HiVocab Logo" class="h-8 w-auto"/>
+                    <span>HiVocab</span>
+                </a>
+                <a href="/" class="text-sm font-medium text-blue-600 hover:underline">← Back to Home</a>
             </div>
-            <div class="flex gap-1.5 bg-[#F5F5F7] p-1 rounded-xl text-xs font-semibold">
-                <button id="btn-lang-en" onclick="switchLanguage('en')" class="tab-btn active px-3 py-1.5 rounded-lg transition-all">English (Official)</button>
-                <button id="btn-lang-vi" onclick="switchLanguage('vi')" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-[#6E6E73] hover:text-[#1D1D1F]">Tiếng Việt</button>
-            </div>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Terms of Service</h1>
+            <p class="text-sm text-gray-500 mt-2">
+                Application: <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-blue-600 underline">https://hivocab.site</a>) · Effective Date: September 15, 2026
+            </p>
         </div>
 
-        <!-- ========================================================= -->
-        <!-- ENGLISH VERSION (Primary for International Review) -->
-        <!-- ========================================================= -->
-        <div id="content-en" class="bg-white rounded-[28px] border border-[#D2D2D7]/70 p-8 md:p-12 shadow-sm space-y-10">
+        <!-- 1. Agreement to Terms -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">1. Agreement to Terms</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                By accessing or using the HiVocab web application (<a href="https://hivocab.site" class="text-blue-600 underline">https://hivocab.site</a>), you agree to be bound by these Terms of Service. If you do not agree to these terms, please discontinue using the service.
+            </p>
+        </section>
 
-            <!-- Title & Metadata -->
-            <div class="border-b border-[#D2D2D7]/60 pb-8">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0071E3]/10 text-[#0071E3] text-xs font-semibold mb-3">
-                    <span class="material-symbols-outlined text-[15px]">gavel</span>
-                    Terms of Service & Usage Agreement
-                </div>
-                <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F] leading-tight">
-                    Terms of Service
-                </h1>
-                <p class="text-sm text-[#6E6E73] mt-2">
-                    Applies to <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a>) · Effective Date: <strong>September 15, 2026</strong>
-                </p>
+        <!-- 2. Description of Services -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">2. Educational Services</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                HiVocab is an educational platform providing learners with tools to study academic English vocabulary and reading comprehension:
+            </p>
+            <ul class="list-disc pl-6 space-y-1.5 text-sm sm:text-base text-gray-700">
+                <li>Standardized 66,000+ Cambridge IELTS (10–21) and IELTS Actual Tests vocabulary database.</li>
+                <li>Spaced Repetition System (SRS SM-2) algorithm for memory retention.</li>
+                <li>Curtain Mode Active Reading (bilingual parallel reading with translation masks).</li>
+                <li>High school national examination (THPT Quốc Gia) practice simulations.</li>
+            </ul>
+        </section>
+
+        <!-- 3. User Accounts -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">3. User Accounts & Google Sign-In</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                Users may explore learning materials as guests or create an account via Google Sign-In or Email/Password. You are responsible for maintaining the confidentiality of your account credentials.
+            </p>
+        </section>
+
+        <!-- 4. Acceptable Use -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">4. Acceptable Use Policy</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                You agree not to misuse HiVocab services, including attempting to disrupt server operations, scraping data unlawfully, or engaging in abusive behavior.
+            </p>
+        </section>
+
+        <!-- 5. Intellectual Property -->
+        <section class="space-y-3">
+            <h2 class="text-xl font-bold text-gray-900">5. Intellectual Property</h2>
+            <p class="text-gray-700 text-sm sm:text-base">
+                All platform software, user interface designs, and algorithms are the property of HiVocab. Reference exam materials are compiled for non-commercial educational study under fair use doctrine.
+            </p>
+        </section>
+
+        <!-- 6. Contact -->
+        <section class="space-y-3 border-t border-gray-200 pt-6">
+            <h2 class="text-xl font-bold text-gray-900">6. Contact Information</h2>
+            <div class="bg-gray-100 rounded-xl p-4 text-sm space-y-1 text-gray-800">
+                <p><strong>App Name:</strong> HiVocab</p>
+                <p><strong>Support Email:</strong> <a href="mailto:support@hivocab.site" class="text-blue-600 underline">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-blue-600 underline">mitthoi60@gmail.com</a></p>
+                <p><strong>Phone / Zalo:</strong> (+84) 0846 407 898</p>
             </div>
+        </section>
 
-            <!-- Section 1 -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">1.</span> Acceptance of Terms
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    By accessing or using the <strong>HiVocab</strong> web application (<a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a>), its features, or browser extensions, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.
-                </p>
-            </section>
-
-            <!-- Section 2 -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">2.</span> Description of Educational Services
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    HiVocab is an educational platform providing English language learners with intelligent tools to acquire academic vocabulary and master reading comprehension:
-                </p>
-                <ul class="list-disc pl-6 space-y-1.5 text-sm md:text-base text-[#424245]">
-                    <li>Over 66,000 standardized vocabulary entries with IPA phonetics, parts of speech, and contextual example sentences extracted from Cambridge IELTS (10–21) and IELTS Actual Tests (Vol 1–9).</li>
-                    <li>Scientific memory optimization using the SuperMemo-2 (SM-2) Spaced Repetition algorithm.</li>
-                    <li>Active Reading with Curtain Mode (bilingual parallel reading with interactive translation masks).</li>
-                    <li>Computer-Based Test (CBT) simulation for national high school graduation exams (THPT Quốc Gia).</li>
-                </ul>
-            </section>
-
-            <!-- Section 3 -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">3.</span> User Accounts & Authentication
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    You may access study materials as a guest or create an account via Google Sign-In or Email/Password. You are responsible for safeguarding your login credentials. HiVocab is not liable for unauthorized account access resulting from compromised user credentials.
-                </p>
-            </section>
-
-            <!-- Section 4 -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">4.</span> Acceptable Use Policy
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Users agree not to:
-                </p>
-                <ul class="list-disc pl-6 space-y-1 text-sm md:text-base text-[#424245]">
-                    <li>Attempt to disrupt, compromise, or overload server and database infrastructure.</li>
-                    <li>Deploy automated scrapers, bots, or unauthorized data harvesting tools against the service.</li>
-                    <li>Post unlawful, abusive, defamatory, or harmful content on public community sections.</li>
-                </ul>
-            </section>
-
-            <!-- Section 5 -->
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">5.</span> Intellectual Property & Fair Use
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    The source code, user interface, brand assets, and algorithmic implementations of HiVocab are protected intellectual property. Cambridge IELTS and exam reference materials are curated for non-commercial educational analysis and personal study under fair use principles.
-                </p>
-            </section>
-
-            <!-- Section 6 -->
-            <section class="space-y-3 border-t border-[#D2D2D7]/60 pt-8">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">6.</span> Contact & Inquiries
-                </h2>
-                <div class="bg-[#F5F5F7] rounded-2xl p-5 border border-[#D2D2D7]/80 text-sm space-y-2 text-[#1D1D1F]">
-                    <div><strong>Application Name:</strong> HiVocab</div>
-                    <div><strong>Website:</strong> <a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a></div>
-                    <div><strong>Support Email:</strong> <a href="mailto:support@hivocab.site" class="text-[#0071E3] underline font-medium">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-[#0071E3] underline font-medium">mitthoi60@gmail.com</a></div>
-                    <div><strong>Hotline / Zalo:</strong> (+84) 0846 407 898</div>
-                </div>
-            </section>
-
-        </div>
-
-        <!-- ========================================================= -->
-        <!-- VIETNAMESE VERSION (Bản Tiếng Việt) -->
-        <!-- ========================================================= -->
-        <div id="content-vi" class="hidden bg-white rounded-[28px] border border-[#D2D2D7]/70 p-8 md:p-12 shadow-sm space-y-10">
-
-            <!-- Title & Metadata -->
-            <div class="border-b border-[#D2D2D7]/60 pb-8">
-                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0071E3]/10 text-[#0071E3] text-xs font-semibold mb-3">
-                    <span class="material-symbols-outlined text-[15px]">gavel</span>
-                    Quy định sử dụng dịch vụ
-                </div>
-                <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-[#1D1D1F] leading-tight">
-                    Điều Khoản Dịch Vụ (Terms of Service)
-                </h1>
-                <p class="text-sm text-[#6E6E73] mt-2">
-                    Áp dụng cho ứng dụng <strong>HiVocab</strong> (<a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a>) · Ngày có hiệu lực: <strong>15 tháng 09, 2026</strong>
-                </p>
-            </div>
-
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">1.</span> Chấp thuận Điều khoản
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Bằng việc truy cập hoặc sử dụng ứng dụng HiVocab qua website <a href="https://hivocab.site" class="text-[#0071E3] underline">https://hivocab.site</a>, bạn đồng ý tuân thủ toàn bộ các điều khoản và điều kiện được nêu tại đây.
-                </p>
-            </section>
-
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">2.</span> Mô tả Dịch vụ
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    HiVocab là nền tảng giáo dục hỗ trợ học sinh, sinh viên và người học tiếng Anh nâng cao vốn từ vựng thông qua:
-                </p>
-                <ul class="list-disc pl-6 space-y-1.5 text-sm md:text-base text-[#424245]">
-                    <li>Kho từ vựng chuẩn hóa trích từ các bộ đề thi Cambridge IELTS (10–21), IELTS Actual Tests (Vol 1–9) và THPT Quốc Gia.</li>
-                    <li>Thuật toán lặp lại ngắt quãng Spaced Repetition (SM-2) tự động tối ưu hóa chu kỳ ôn tập.</li>
-                    <li>Chế độ đọc song ngữ đối sánh trực quan (Curtain Mode) và các dạng bài tập thực hành phản xạ.</li>
-                </ul>
-            </section>
-
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">3.</span> Tài khoản Người dùng
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Bạn có thể đăng ký tài khoản qua Google OAuth hoặc Email/Mật khẩu. Bạn có trách nhiệm bảo mật thông tin đăng nhập của mình.
-                </p>
-            </section>
-
-            <section class="space-y-3">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">4.</span> Quy định Sử dụng Hợp pháp
-                </h2>
-                <p class="text-sm md:text-base text-[#424245] leading-relaxed">
-                    Người dùng cam kết không can thiệp, phá hoại máy chủ, cào dữ liệu trái phép hoặc đăng tải nội dung vi phạm pháp luật.
-                </p>
-            </section>
-
-            <section class="space-y-3 border-t border-[#D2D2D7]/60 pt-8">
-                <h2 class="text-xl font-bold text-[#1D1D1F] flex items-center gap-2">
-                    <span class="text-[#0071E3]">5.</span> Liên hệ & Hỗ trợ
-                </h2>
-                <div class="bg-[#F5F5F7] rounded-2xl p-5 border border-[#D2D2D7]/80 text-sm space-y-2 text-[#1D1D1F]">
-                    <div><strong>Tên ứng dụng:</strong> HiVocab</div>
-                    <div><strong>Email hỗ trợ:</strong> <a href="mailto:support@hivocab.site" class="text-[#0071E3] underline font-medium">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-[#0071E3] underline font-medium">mitthoi60@gmail.com</a></div>
-                    <div><strong>Hotline / Zalo:</strong> 0846 407 898</div>
-                </div>
-            </section>
-
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="border-t border-[#D2D2D7]/60 bg-white py-6 text-center text-xs text-[#6E6E73]">
-        <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <!-- Footer -->
+        <div class="border-t border-gray-200 pt-6 flex items-center justify-between text-xs text-gray-500">
             <p>© 2026 HiVocab (hivocab.site). All rights reserved.</p>
-            <div class="flex items-center gap-4">
-                <a href="/privacy.html" class="hover:underline text-[#1D1D1F] font-medium">Privacy Policy</a>
-                <span class="text-[#D2D2D7]">·</span>
-                <a href="/terms.html" class="hover:underline text-[#1D1D1F] font-medium">Terms of Service</a>
-                <span class="text-[#D2D2D7]">·</span>
-                <a href="/" class="hover:underline text-[#0071E3] font-medium">Home</a>
+            <div class="flex items-center gap-3">
+                <a href="/privacy.html" class="text-gray-700 hover:underline font-medium">Privacy Policy</a>
+                <span>•</span>
+                <a href="/" class="text-blue-600 hover:underline font-medium">Home</a>
             </div>
         </div>
-    </footer>
 
-    <script>
-        function switchLanguage(lang) {
-            const enBox = document.getElementById('content-en');
-            const viBox = document.getElementById('content-vi');
-            const btnEn = document.getElementById('btn-lang-en');
-            const btnVi = document.getElementById('btn-lang-vi');
-
-            if (lang === 'vi') {
-                enBox.classList.add('hidden');
-                viBox.classList.remove('hidden');
-                btnVi.classList.add('active', 'bg-[#0071E3]', 'text-white');
-                btnVi.classList.remove('text-[#6E6E73]');
-                btnEn.classList.remove('active', 'bg-[#0071E3]', 'text-white');
-                btnEn.classList.add('text-[#6E6E73]');
-            } else {
-                viBox.classList.add('hidden');
-                enBox.classList.remove('hidden');
-                btnEn.classList.add('active', 'bg-[#0071E3]', 'text-white');
-                btnEn.classList.remove('text-[#6E6E73]');
-                btnVi.classList.remove('active', 'bg-[#0071E3]', 'text-white');
-                btnVi.classList.add('text-[#6E6E73]');
-            }
-        }
-    </script>
+    </div>
 
 </body>
 </html>
