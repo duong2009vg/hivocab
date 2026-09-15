@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
 Allow: /about
+Allow: /oauth-home
+Allow: /privacy
 Allow: /privacy.html
+Allow: /terms
 Allow: /terms.html
 
 Sitemap: https://hivocab.site/sitemap.xml
