@@ -802,9 +802,9 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 <nav id="main-sidebar" class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-5 bg-surface/85 dark:bg-[#191D23]/85 backdrop-blur-2xl border-r border-outline-variant/30 dark:border-[#31353A] z-50 transition-colors" style="display: none;">
     <div class="mb-6 shrink-0">
         <a onclick="window.navigateTo('dashboard')" class="inline-flex cursor-pointer" aria-label="Hi - Trang chu"><img class="brand-logo" src="logo-mark.svg" alt="Hi"/></a>
-        <div class="mt-4 flex items-center gap-3 p-2 rounded-2xl hover:bg-surface-container dark:hover:bg-[#25292F] transition-all duration-200 cursor-pointer border border-transparent hover:border-outline-variant/20">
+        <div onclick="window.handleProfileClick()" title="Đăng nhập / Hồ sơ cá nhân" class="mt-4 flex items-center gap-3 p-2 rounded-2xl hover:bg-surface-container dark:hover:bg-[#25292F] transition-all duration-200 cursor-pointer border border-transparent hover:border-outline-variant/20">
             <div id="profile-avatar-container" class="w-10 h-10 rounded-full bg-surface-container-high dark:bg-[#25292F] flex items-center justify-center overflow-hidden bg-cover bg-center ring-1 ring-outline-variant/30"><span class="material-symbols-outlined text-outline text-[20px]">person</span></div>
-            <div class="min-w-0 flex-1"><div id="profile-name" class="font-semibold text-[13px] text-on-surface truncate">Hi Learner</div><div id="profile-email" class="text-on-surface-variant text-[11px] truncate">Vui lòng đăng nhập</div></div>
+            <div class="min-w-0 flex-1"><div id="profile-name" class="font-semibold text-[13px] text-on-surface truncate">Hi Learner</div><div id="profile-email" class="text-on-surface-variant text-[11px] truncate text-primary font-medium">Nhấn để đăng nhập</div></div>
         </div>
     </div>
     <button onclick="startSession()" class="mb-5 shrink-0 w-full py-2.5 px-4 bg-primary text-on-primary rounded-full font-semibold text-[13px] tracking-tight transition-all duration-200 active:scale-[0.98] shadow-sm hover:opacity-95 cursor-pointer">Bắt đầu ôn tập</button>
@@ -858,7 +858,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </nav>
 
 <!-- ==================== PAGE: LANDING ==================== -->
-<div id="page-landing" class="page active font-inter">
+<div id="page-landing" class="page font-inter">
 <section class="relative min-h-screen flex flex-col pt-6 pb-24 px-8 overflow-hidden bg-[#7d87a8]">
     <div class="absolute inset-0 z-0 bg-cover bg-center" style="background-image: url('/background-poster.jpg');">
         <video class="w-full h-full object-cover object-center" autoplay loop muted playsinline preload="auto" poster="/background-poster.jpg" id="landing-bg-video">
@@ -1573,7 +1573,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
 </div>
 
 <!-- ==================== PAGE: DASHBOARD ==================== -->
-<div id="page-dashboard" class="page">
+<div id="page-dashboard" class="page active">
 <main class="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div class="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -1586,7 +1586,7 @@ body, .bg-primary, .text-primary { transition: background-color 0.3s ease, color
                     <span class="material-symbols-outlined text-[#FF5722] icon-fill text-lg">local_fire_department</span>
                     <span id="dashboard-streak-badge" class="font-bold text-sm text-on-surface">— Ngày</span>
                 </div>
-                <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
+                <button onclick="window.handleProfileClick()" id="mobile-profile-avatar" class="lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
                     <span class="material-symbols-outlined text-outline text-sm">person</span>
                 </button>
             </div>
@@ -3234,11 +3234,24 @@ function _updateThemeBtns(active) {
     });
 }
 
+
+window.handleProfileClick = function() {
+    if (typeof HiDB !== 'undefined' && HiDB.currentUser) {
+        if (window.innerWidth < 1024 && typeof window.toggleMobileProfileDropdown === 'function') {
+            window.toggleMobileProfileDropdown();
+        } else {
+            window.navigateTo('settings');
+        }
+    } else {
+        window.navigateTo('login');
+    }
+};
+
 window.navigateTo = function(page, preserveHash = false){
     const pageName = (page || '').split('?')[0];
 
-    // Redirect game về dashboard vì tính năng game đã được gỡ bỏ hoàn toàn
-    if (pageName === 'game') {
+    // Luôn chuyển landing hoặc game vào trực tiếp dashboard học tập
+    if (pageName === 'landing' || pageName === 'game' || !pageName) {
         window.navigateTo('dashboard', preserveHash);
         return;
     }
@@ -3753,10 +3766,10 @@ window.addEventListener('DOMContentLoaded', () => {
         window.navigateTo('landing', true);
     } else if (h && (h.includes('access_token=') || authInfo.isPkceCode)) {
         window.navigateTo('landing', true); // Hiện landing tạm thời trong khi chờ auth
-    } else if (h) {
+    } else if (h && h !== 'landing') {
         window.navigateTo(h);
     } else {
-        window.navigateTo('landing');
+        window.navigateTo('dashboard');
     }
 
     // Hiển thị fallback cho Dashboard ngay lập tức
