@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-Allow: /about
-Allow: /oauth-home
 Allow: /privacy
 Allow: /privacy.html
 Allow: /policy
