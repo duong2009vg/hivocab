@@ -176,7 +176,7 @@ window.HiDB = (() => {
     async function signInWithGoogle() {
         const { error } = await _getClient().auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin + '/app' }
+            options: { redirectTo: window.location.origin }
         });
         if (error) throw error;
     }
@@ -198,7 +198,7 @@ window.HiDB = (() => {
         const { data, error } = await _getClient().auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: window.location.origin + '/app' }
+            options: { emailRedirectTo: window.location.origin }
         });
         if (error) throw error;
         return data;
@@ -209,7 +209,7 @@ window.HiDB = (() => {
      */
     async function resetPasswordForEmail(email) {
         // Chuyển hướng về /app để xử lý token khôi phục mật khẩu
-        const redirectUrl = window.location.origin + '/app';
+        const redirectUrl = window.location.origin;
         const { data, error } = await _getClient().auth.resetPasswordForEmail(email, {
             redirectTo: redirectUrl
         });
