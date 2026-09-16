@@ -1,25 +1,32 @@
 /* ==========================================================================
-   HiVocab Dynamic Time-Based Themes (Morning, Afternoon, Night)
-   Traditional Japanese Nature Aesthetics: Asagiri, Yuugiri, Sumiyama
+   HiVocab Dynamic Time-Based Themes (Ocean, Morning, Afternoon, Night)
+   Traditional Aesthetics: Blue Hour, Asagiri, Yuugiri, Sumiyama
    ========================================================================== */
 
 /* ── 1. GRADIENT BACKDROPS & NOISE OVERLAYS ── */
 
-/* Morning mist (Asagiri) */
+/* Ocean / Blue Hour (00:00 - 03:00) */
+.gradient-ocean {
+  position: relative;
+  background: linear-gradient(180deg, #EAF2F9 8.3%, #D3E3F0 25.0%, #A9C4DB 41.7%, #7FA0C2 58.3%, #54779F 75.0%, #324E78 91.7%);
+  background: linear-gradient(180deg in oklab, #EAF2F9 8.3%, #D3E3F0 25.0%, #A9C4DB 41.7%, #7FA0C2 58.3%, #54779F 75.0%, #324E78 91.7%);
+}
+
+/* Morning mist (Asagiri - 04:00 - 11:59) */
 .gradient-asagiri {
   position: relative;
   background: linear-gradient(180deg, #FBF2E2 8.3%, #F3DDC2 25.0%, #D9BCAE 41.7%, #B08F9B 58.3%, #7A6483 75.0%, #463A5E 91.7%);
   background: linear-gradient(180deg in oklab, #FBF2E2 8.3%, #F3DDC2 25.0%, #D9BCAE 41.7%, #B08F9B 58.3%, #7A6483 75.0%, #463A5E 91.7%);
 }
 
-/* Dusk ember (Yuugiri - Afternoon) */
+/* Dusk ember (Yuugiri - 12:00 - 17:59) */
 .gradient-yuugiri {
   position: relative;
   background: linear-gradient(180deg, #FBE7CD 8.3%, #F5C8A1 25.0%, #DD9B88 41.7%, #B06E80 58.3%, #7A4B6F 75.0%, #452F56 91.7%);
   background: linear-gradient(180deg in oklab, #FBE7CD 8.3%, #F5C8A1 25.0%, #DD9B88 41.7%, #B06E80 58.3%, #7A4B6F 75.0%, #452F56 91.7%);
 }
 
-/* Ink wash (Sumiyama - Evening & Night) */
+/* Ink wash (Sumiyama - 18:00 - 23:59) */
 .gradient-sumiyama {
   position: relative;
   background: linear-gradient(180deg, #F8F6F0 8.3%, #EAE5D9 25.0%, #C8C2B3 41.7%, #9A9483 58.3%, #6B6558 75.0%, #3B362E 91.7%);
@@ -27,6 +34,7 @@
 }
 
 /* Film noise texture overlay */
+.gradient-ocean::after,
 .gradient-asagiri::after,
 .gradient-yuugiri::after,
 .gradient-sumiyama::after {
@@ -40,6 +48,7 @@
   pointer-events: none;
 }
 
+.gradient-ocean::after,
 .gradient-asagiri::after,
 .gradient-yuugiri::after {
   opacity: 0.060;
@@ -52,7 +61,44 @@
 
 /* ── 2. COLOR THEME VARIABLES ── */
 
-/* Default / Morning Mist (Asagiri) */
+/* 1. Ocean / Blue Hour (00:00 - 03:00) */
+html[data-theme="ocean"]:not(.dark) {
+  --hi-bg: #EEF4FA;
+  --hi-surface: #FFFFFF;
+  --hi-surface-container: #DDEAF5;
+  --hi-surface-container-low: #F4F8FC;
+  --hi-surface-container-high: #D0E1F0;
+  --hi-border: rgba(84, 119, 159, 0.22);
+  --hi-p: #324E78;
+  --hi-p-hover: #263B5B;
+  --hi-p-tint: #54779F;
+  --hi-p-fix: #DDEAF5;
+  --hi-p-10: rgba(50, 78, 120, 0.08);
+  --hi-p-20: rgba(50, 78, 120, 0.16);
+  --hi-text: #18283E;
+  --hi-text-muted: #54779F;
+  --hi-text-on-p: #FFFFFF;
+}
+
+html.dark[data-theme="ocean"] {
+  --hi-bg: #0E1624;
+  --hi-surface: #162134;
+  --hi-surface-container: #1F2E47;
+  --hi-surface-container-low: #111A2B;
+  --hi-surface-container-high: #2A3C5B;
+  --hi-border: rgba(127, 160, 194, 0.25);
+  --hi-p: #7FA0C2;
+  --hi-p-hover: #95B2D1;
+  --hi-p-tint: #A9C4DB;
+  --hi-p-fix: #1F2E47;
+  --hi-p-10: rgba(127, 160, 194, 0.14);
+  --hi-p-20: rgba(127, 160, 194, 0.24);
+  --hi-text: #EAF2F9;
+  --hi-text-muted: #A9C4DB;
+  --hi-text-on-p: #0E1624;
+}
+
+/* 2. Morning Mist (Asagiri - 04:00 - 11:59) */
 :root,
 html[data-theme="morning"]:not(.dark) {
   --hi-bg: #FAF5ED;
@@ -91,7 +137,7 @@ html.dark:not([data-theme]) {
   --hi-text-on-p: #1B1525;
 }
 
-/* Afternoon / Dusk Ember (Yuugiri) */
+/* 3. Afternoon / Dusk Ember (Yuugiri - 12:00 - 17:59) */
 html[data-theme="afternoon"]:not(.dark) {
   --hi-bg: #FAF1E5;
   --hi-surface: #FFFFFF;
@@ -128,7 +174,7 @@ html.dark[data-theme="afternoon"] {
   --hi-text-on-p: #1B1122;
 }
 
-/* Night / Ink Wash (Sumiyama) */
+/* 4. Night / Ink Wash (Sumiyama - 18:00 - 23:59) */
 html[data-theme="night"]:not(.dark) {
   --hi-bg: #F5F3EB;
   --hi-surface: #FFFFFF;
