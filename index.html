@@ -451,7 +451,7 @@ html.dark .topic-card-surface .bg-surface-container-highest {
     background-color: #31353A !important;
 }
 /* ── MOBILE TOUCH & PERFORMANCE OPTIMIZATIONS ──────────── */
-html, body, button, a, input, select, textarea, [role="button"], .cursor-pointer {
+button, a, input, select, textarea, [role="button"], .cursor-pointer {
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
 }
@@ -486,7 +486,6 @@ html, body, button, a, input, select, textarea, [role="button"], .cursor-pointer
     }
     body, .page, main, #lessons-list, #topics-grid, #bilingual-reading-body, #lesson-words-list {
         -webkit-overflow-scrolling: touch;
-        overscroll-behavior-y: contain;
     }
 }
 
@@ -3086,8 +3085,19 @@ window.handleProfileClick = function() {
     }
 };
 
+window.lockBodyScroll = function(lock) {
+    try {
+        if (lock) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    } catch(e) {}
+};
+
 var navigateTo;
 window.navigateTo = navigateTo = function(page, preserveHash = false){
+    window.lockBodyScroll(false);
     const pageName = (page || '').split('?')[0];
 
     // Chuyển game vào trực tiếp dashboard học tập
@@ -3704,14 +3714,13 @@ window.addEventListener('hashchange', () => {
 <!-- ==================== BACKEND MODULES ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="dataLayer.js?v=20260914-remove-game-v6"></script>
-<script src="mockData.js"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260912-v1"></script>
 <script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>
 <script src="sessionUI.js?v=20260913-monitoring-v1"></script>
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
-<script src="bilingualReading.js?v=20260913-monitoring-v1"></script>
+<script src="bilingualReading.js?v=20260916-perf-v2"></script>
 <script src="library.js?v=20260914-remove-game-v6"></script>
 
 <!-- ==================== MODAL: XÁC NHẬN NỘP BÀI THPT ==================== -->
@@ -6288,7 +6297,7 @@ window._renderCamPassages = function(testIndex = 0) {
                     </span>
                     <div class="flex items-center gap-1.5">
                         ${p.contentEn || p.contentVi ? `
-                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}')"
+                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}', this)"
                                 class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
                                 title="Đọc bài song ngữ">
                             <span class="material-symbols-outlined text-[15px]">menu_book</span>
@@ -6322,7 +6331,7 @@ window._renderCamPassages = function(testIndex = 0) {
                     </span>
                     <div class="flex items-center gap-2">
                         ${p.contentEn || p.contentVi ? `
-                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}')"
+                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}', this)"
                                 class="px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 transition-all flex items-center gap-1 active:scale-95 cursor-pointer">
                             <span class="material-symbols-outlined text-[14px]">menu_book</span>
                             <span>Đọc</span>
@@ -7336,97 +7345,16 @@ window.openTopicPickerForSingleAdd = function() {
     });
 };
 
-window.openAddWordModal = async function(topicId = null, passageId = null) {
-    const isVocabContext = !topicId && !window._currentTopicId;
-    let targetTopicId = topicId || (!isVocabContext ? window._currentTopicId : null);
-    let targetPassageId = (passageId !== null && passageId !== undefined)
-        ? passageId
-        : (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
-
-    const topicInput = document.getElementById('add-word-topic-id');
-    const passageInput = document.getElementById('add-word-passage-id');
-    const badgeContainer = document.getElementById('add-word-topic-badge');
-    const destSection = document.getElementById('add-word-destination-section');
-    const examSection = document.getElementById('add-word-exam-section');
-
-    if (topicInput) topicInput.value = targetTopicId || '';
-    if (passageInput) passageInput.value = targetPassageId || '';
-
-    // Cấu hình Topic: Mở từ Sổ từ vs Mở từ Lesson/Passage cụ thể
-    if (isVocabContext || !targetTopicId) {
-        if (badgeContainer) badgeContainer.classList.add('hidden');
-        if (destSection) destSection.classList.remove('hidden');
-
-        const pathEl = document.getElementById('add-word-destination-path');
-        const titleEl = document.getElementById('add-word-destination-title');
-
-        if (window._singleAddState.selectedDestination) {
-            const dest = window._singleAddState.selectedDestination;
-            targetTopicId = dest.topicId;
-            targetPassageId = dest.passageId || null;
-            if (topicInput) topicInput.value = dest.topicId;
-            if (passageInput) passageInput.value = dest.passageId || '';
-            if (pathEl) pathEl.textContent = dest.folderName || 'Thư mục';
-            if (titleEl) titleEl.textContent = dest.fullLabel || dest.topicName;
-        } else {
-            try {
-                let personalTopic = null;
-                if (typeof HiDB !== 'undefined' && typeof HiDB.ensureUserPersonalTopic === 'function') {
-                    personalTopic = await HiDB.ensureUserPersonalTopic().catch(() => null);
-                }
-                if (personalTopic) {
-                    window._singleAddState.selectedDestination = {
-                        topicId: personalTopic.id,
-                        topicName: personalTopic.name,
-                        passageId: null,
-                        folderName: 'General English',
-                        fullLabel: personalTopic.name
-                    };
-                    targetTopicId = personalTopic.id;
-                    if (topicInput) topicInput.value = personalTopic.id;
-                    if (pathEl) pathEl.textContent = 'General English';
-                    if (titleEl) titleEl.textContent = personalTopic.name;
-                } else {
-                    if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
-                    if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
-                }
-            } catch (e) {
-                if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
-                if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
-            }
-        }
-    } else {
-        // Đang ở trong chủ đề hoặc bài học/passage cụ thể
-        if (destSection) destSection.classList.add('hidden');
-        if (badgeContainer) badgeContainer.classList.remove('hidden');
-        const badgeNameEl = document.getElementById('add-word-topic-name');
-        if (badgeNameEl) {
-            let label = window._currentTopicName || 'Chủ đề hiện tại';
-            if (targetPassageId && window._currentPassageTitle) {
-                label += ` · Passage ${window._currentPassageNumber || ''}: ${window._currentPassageTitle}`.trim();
-            } else if (window._currentLessonName) {
-                label += ` · ${window._currentLessonName}`;
-            }
-            badgeNameEl.textContent = label;
-            badgeNameEl.title = label;
-        }
+window.openAddWordModal = function(topicId = null, passageId = null) {
+    // 1. MỞ MODAL NGAY LẬP TỨC (0ms) để phản hồi tức thì
+    const modal = document.getElementById('modal-add-word');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        window.lockBodyScroll && window.lockBodyScroll(true);
     }
 
-    // Kiểm tra cấu trúc đề thi (Tests -> Passages) như CAM và VOL
-    if (targetTopicId) {
-        const testsInfo = await window._ensureTopicTests(targetTopicId);
-        if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
-            window._populateExamSelects('single', targetTopicId, testsInfo.tests, targetPassageId);
-        } else {
-            if (examSection) examSection.classList.add('hidden');
-            if (passageInput) passageInput.value = '';
-        }
-    } else {
-        if (examSection) examSection.classList.add('hidden');
-        if (passageInput) passageInput.value = '';
-    }
-
-    // Reset Form
+    // Reset Form nhanh
     const engInput = document.getElementById('add-word-english');
     const phoInput = document.getElementById('add-word-phonetic');
     const meaInput = document.getElementById('add-word-meaning');
@@ -7449,16 +7377,99 @@ window.openAddWordModal = async function(topicId = null, passageId = null) {
     }
     if (aiText) aiText.textContent = '✨ AI Điền tự động';
 
-    // Hiển thị modal
-    const modal = document.getElementById('modal-add-word');
-    if (modal) {
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-    }
-
     setTimeout(() => {
         if (engInput) engInput.focus();
-    }, 120);
+    }, 50);
+
+    // 2. Xử lý đồng bộ dữ liệu thư mục & đề thi ở chế độ nền (background async)
+    (async () => {
+        try {
+            const isVocabContext = !topicId && !window._currentTopicId;
+            let targetTopicId = topicId || (!isVocabContext ? window._currentTopicId : null);
+            let targetPassageId = (passageId !== null && passageId !== undefined)
+                ? passageId
+                : (window._currentPassageId && window._currentPassageId !== '__unlinked__' ? window._currentPassageId : null);
+
+            const topicInput = document.getElementById('add-word-topic-id');
+            const passageInput = document.getElementById('add-word-passage-id');
+            const badgeContainer = document.getElementById('add-word-topic-badge');
+            const destSection = document.getElementById('add-word-destination-section');
+            const examSection = document.getElementById('add-word-exam-section');
+
+            if (topicInput) topicInput.value = targetTopicId || '';
+            if (passageInput) passageInput.value = targetPassageId || '';
+
+            if (isVocabContext || !targetTopicId) {
+                if (badgeContainer) badgeContainer.classList.add('hidden');
+                if (destSection) destSection.classList.remove('hidden');
+
+                const pathEl = document.getElementById('add-word-destination-path');
+                const titleEl = document.getElementById('add-word-destination-title');
+
+                if (window._singleAddState && window._singleAddState.selectedDestination) {
+                    const dest = window._singleAddState.selectedDestination;
+                    targetTopicId = dest.topicId;
+                    targetPassageId = dest.passageId || null;
+                    if (topicInput) topicInput.value = dest.topicId;
+                    if (passageInput) passageInput.value = dest.passageId || '';
+                    if (pathEl) pathEl.textContent = dest.folderName || 'Thư mục';
+                    if (titleEl) titleEl.textContent = dest.fullLabel || dest.topicName;
+                } else {
+                    let personalTopic = null;
+                    if (typeof HiDB !== 'undefined' && typeof HiDB.ensureUserPersonalTopic === 'function') {
+                        personalTopic = await HiDB.ensureUserPersonalTopic().catch(() => null);
+                    }
+                    if (personalTopic) {
+                        if (window._singleAddState) {
+                            window._singleAddState.selectedDestination = {
+                                topicId: personalTopic.id,
+                                topicName: personalTopic.name,
+                                passageId: null,
+                                folderName: 'General English',
+                                fullLabel: personalTopic.name
+                            };
+                        }
+                        targetTopicId = personalTopic.id;
+                        if (topicInput) topicInput.value = personalTopic.id;
+                        if (pathEl) pathEl.textContent = 'General English';
+                        if (titleEl) titleEl.textContent = personalTopic.name;
+                    } else {
+                        if (pathEl) pathEl.textContent = 'Thư mục / Chủ đề';
+                        if (titleEl) titleEl.textContent = 'Bấm để chọn nơi lưu từ...';
+                    }
+                }
+            } else {
+                if (destSection) destSection.classList.add('hidden');
+                if (badgeContainer) badgeContainer.classList.remove('hidden');
+                const badgeNameEl = document.getElementById('add-word-topic-name');
+                if (badgeNameEl) {
+                    let label = window._currentTopicName || 'Chủ đề hiện tại';
+                    if (targetPassageId && window._currentPassageTitle) {
+                        label += ` · Passage ${window._currentPassageNumber || ''}: ${window._currentPassageTitle}`.trim();
+                    } else if (window._currentLessonName) {
+                        label += ` · ${window._currentLessonName}`;
+                    }
+                    badgeNameEl.textContent = label;
+                    badgeNameEl.title = label;
+                }
+            }
+
+            if (targetTopicId && typeof window._ensureTopicTests === 'function') {
+                const testsInfo = await window._ensureTopicTests(targetTopicId).catch(() => ({ hasTests: false, tests: [] }));
+                if (testsInfo.hasTests && testsInfo.tests && testsInfo.tests.length > 0) {
+                    window._populateExamSelects && window._populateExamSelects('single', targetTopicId, testsInfo.tests, targetPassageId);
+                } else {
+                    if (examSection) examSection.classList.add('hidden');
+                    if (passageInput) passageInput.value = '';
+                }
+            } else {
+                if (examSection) examSection.classList.add('hidden');
+                if (passageInput) passageInput.value = '';
+            }
+        } catch(err) {
+            console.warn('[openAddWordModal:asyncInit]', err);
+        }
+    })();
 };
 
 window.openVocabAddModal = function() {
@@ -7471,6 +7482,7 @@ window.closeAddWordModal = function() {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
     }
+    window.lockBodyScroll && window.lockBodyScroll(false);
 };
 
 window.previewAddWordAudio = function() {
@@ -8897,7 +8909,15 @@ window._readerViewMode = 'bilingual';
 window._currentReaderPassage = null;
 
 // ── Đọc bài đọc song ngữ (Chuyển tiếp sang chế độ Đọc Chủ Động độc lập) ──
-window._openPassageReader = function(passageId) {
+window._openPassageReader = function(passageId, btnEl) {
+    if (btnEl) {
+        btnEl.classList.add('opacity-75', 'scale-95');
+        const icon = btnEl.querySelector('.material-symbols-outlined');
+        if (icon) {
+            icon.textContent = 'refresh';
+            icon.classList.add('animate-spin');
+        }
+    }
     if (typeof window.startBilingualReading === 'function') {
         window.startBilingualReading(passageId);
     }
