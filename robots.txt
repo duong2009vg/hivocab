@@ -4,6 +4,8 @@ Allow: /about
 Allow: /oauth-home
 Allow: /privacy
 Allow: /privacy.html
+Allow: /policy
+Allow: /policy.html
 Allow: /terms
 Allow: /terms.html
 
