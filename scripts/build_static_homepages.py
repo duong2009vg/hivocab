@@ -1,11 +1,13 @@
-<!DOCTYPE html>
+import os
+
+TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>HiVocab – English Vocabulary & IELTS Learning Platform | Application Information</title>
     <meta name="description" content="HiVocab is a web-based English vocabulary, reading comprehension and IELTS learning platform with spaced repetition, exam practice and optional Google Sign-In."/>
-    <link rel="canonical" href="https://hivocab.site/"/>
+    <link rel="canonical" href="{canonical_url}"/>
     <link rel="icon" type="image/svg+xml" href="/logo-mark.svg?v=3"/>
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
@@ -13,12 +15,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
+        body {{
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", 'Inter', Roboto, Helvetica, Arial, sans-serif;
             color: #1f2937;
             background-color: #ffffff;
             line-height: 1.65;
-        }
+        }}
     </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
@@ -270,7 +272,7 @@
                 </div>
                 <div>
                     <span class="text-gray-500 text-xs uppercase tracking-wider block">Support Email</span>
-                    <a href=\"mailto:support@hivocab.com\" class=\"text-blue-600 underline font-semibold\"><!--email_off-->support@hivocab.com<!--/email_off--></a>
+                    <a href=\\"mailto:support@hivocab.com\\" class=\\"text-blue-600 underline font-semibold\\"><!--email_off-->support@hivocab.com<!--/email_off--></a>
                 </div>
                 <div>
                     <span class="text-gray-500 text-xs uppercase tracking-wider block">Support Hotline / Zalo</span>
@@ -299,3 +301,18 @@
 
 </body>
 </html>
+"""
+
+def generate_page(output_path, canonical_url):
+    html = TEMPLATE.format(canonical_url=canonical_url)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html)
+    print(f"Generated {output_path} with canonical {canonical_url} (size: {len(html)} bytes)")
+
+if __name__ == '__main__':
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    index_path = os.path.join(base_dir, 'index.html')
+    oauth_home_path = os.path.join(base_dir, 'oauth-home.html')
+
+    generate_page(index_path, 'https://hivocab.site/')
+    generate_page(oauth_home_path, 'https://hivocab.site/oauth-home')

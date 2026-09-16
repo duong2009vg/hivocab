@@ -176,7 +176,7 @@ window.HiDB = (() => {
     async function signInWithGoogle() {
         const { error } = await _getClient().auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: window.location.origin }
+            options: { redirectTo: window.location.origin + '/app' }
         });
         if (error) throw error;
     }
@@ -198,7 +198,7 @@ window.HiDB = (() => {
         const { data, error } = await _getClient().auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: window.location.origin }
+            options: { emailRedirectTo: window.location.origin + '/app' }
         });
         if (error) throw error;
         return data;
@@ -208,8 +208,8 @@ window.HiDB = (() => {
      * Gửi email khôi phục / đặt lại mật khẩu.
      */
     async function resetPasswordForEmail(email) {
-        // Luôn sử dụng origin sạch để Supabase gắn token/code mà không gây lỗi phân giải RFC 6749
-        const redirectUrl = window.location.origin;
+        // Chuyển hướng về /app để xử lý token khôi phục mật khẩu
+        const redirectUrl = window.location.origin + '/app';
         const { data, error } = await _getClient().auth.resetPasswordForEmail(email, {
             redirectTo: redirectUrl
         });
