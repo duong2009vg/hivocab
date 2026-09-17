@@ -298,9 +298,15 @@ html.dark body { background-color: #0A0F15; color: #F6FBFF; }
 html.dark .bg-surface { background-color: #0A0F15; }
 html.dark .bg-surface\/80, html.dark .bg-surface\/90 { background-color: rgba(25, 29, 35, 0.85); border-color: #31353A; }
 html.dark .glass-card { background-color: rgba(25, 29, 35, 0.75); border-color: rgba(255, 255, 255, 0.08); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); }
-html.dark .bg-surface-container-lowest, html.dark .bg-white { background-color: #191D23; }
-html.dark .bg-surface-container-lowest\/80 {
-    background-color: rgba(25, 29, 35, 0.88) !important;
+html.dark .bg-surface-container-lowest,
+html.dark .bg-surface-container-lowest\/40,
+html.dark .bg-surface-container-lowest\/50,
+html.dark .bg-surface-container-lowest\/60,
+html.dark .bg-surface-container-lowest\/80,
+html.dark .bg-surface-container-lowest\/85,
+html.dark .bg-surface-container-lowest\/90,
+html.dark .bg-white {
+    background-color: #191D23;
 }
 html.dark .bg-surface-container-low, html.dark .bg-\[\#F5F5F5\] { background-color: #20242B; }
 html.dark .bg-surface-container, html.dark .bg-surface-container-high { background-color: #25292F; }
@@ -327,21 +333,26 @@ html.dark input.fill-input, html.dark input { background-color: #191D23; color: 
 html.dark .bg-primary-container\/10 { background-color: rgba(41, 151, 255, 0.15); }
 html.dark .hover\:bg-surface-container-low:hover { background-color: #25292F; }
 html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(41, 151, 255, 0.12); }
-html.dark .topic-card-surface {
+html.dark .topic-card-surface,
+html.dark .folder-card-surface {
     background-color: #191D23 !important;
     border-color: #31353A !important;
 }
-html.dark .topic-card-surface:hover {
+html.dark .topic-card-surface:hover,
+html.dark .folder-card-surface:hover {
     background-color: #25292F !important;
-    border-color: #2997FF !important;
+    border-color: var(--hi-p, #2997FF) !important;
 }
-html.dark .topic-card-surface .bg-surface-container-high {
+html.dark .topic-card-surface .bg-surface-container-high,
+html.dark .folder-card-surface .bg-surface-container-high {
     background-color: #25292F !important;
 }
-html.dark .topic-card-surface .text-on-surface-variant {
+html.dark .topic-card-surface .text-on-surface-variant,
+html.dark .folder-card-surface .text-on-surface-variant {
     color: #9CA1A6 !important;
 }
-html.dark .topic-card-surface .bg-surface-container-highest {
+html.dark .topic-card-surface .bg-surface-container-highest,
+html.dark .folder-card-surface .bg-surface-container-highest {
     background-color: #31353A !important;
 }
 /* ── MOBILE TOUCH & PERFORMANCE OPTIMIZATIONS ──────────── */
@@ -5713,40 +5724,33 @@ window._renderTopicsGrid = async function() {
 
                 return `
                 <div onclick="window._switchCategory('${_esc(cat.id)}');"
-                    class="folder-card-surface cursor-pointer group relative bg-surface-container-lowest/90 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[170px] md:min-h-[220px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-primary/40 fade-in">
+                    class="folder-card-surface topic-card-surface cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/40 fade-in">
                     
-                    <!-- Top: Folder Icon & Topics Count Badge -->
-                    <div class="flex items-start justify-between gap-2">
-                        <div class="w-10 h-10 md:w-13 md:h-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs group-hover:scale-105 group-hover:bg-primary group-hover:text-on-primary transition-all duration-300 shrink-0">
-                            <span class="material-symbols-outlined text-[22px] md:text-[26px]">${cat.icon || 'folder'}</span>
+                    <div class="flex flex-col h-full">
+                        <!-- Top: Folder Icon & Topics Count Badge -->
+                        <div class="flex items-start justify-between gap-2 mb-2 md:mb-4">
+                            <div class="w-8 h-8 md:w-12 md:h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface shadow-sm shrink-0 group-hover:text-primary transition-colors">
+                                <span class="material-symbols-outlined text-[18px] md:text-2xl">${cat.icon || 'folder'}</span>
+                            </div>
+                            <span class="inline-flex items-center px-2 py-0.5 md:px-2.5 md:py-1 rounded-full text-[10px] md:text-xs font-bold bg-surface-container-high text-on-surface-variant border border-outline-variant/30 group-hover:border-primary/40 group-hover:text-primary transition-colors shrink-0">
+                                ${count} chủ đề
+                            </span>
                         </div>
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] md:text-xs font-bold bg-surface-container-high/80 text-on-surface-variant border border-outline-variant/30 group-hover:border-primary/40 group-hover:text-primary transition-colors shrink-0">
-                            ${count} chủ đề
-                        </span>
-                    </div>
 
-                    <!-- Middle: Folder Title & Subtitle -->
-                    <div class="my-3">
-                        <h3 class="text-sm md:text-lg font-bold text-on-surface group-hover:text-primary transition-colors leading-snug line-clamp-2">
+                        <!-- Middle: Folder Title -->
+                        <h3 class="text-sm md:text-lg font-bold text-on-surface group-hover:text-primary transition-colors leading-snug mb-1 line-clamp-2">
                             ${_esc(cat.label)}
                         </h3>
-                        <p class="text-[11px] md:text-xs text-on-surface-variant line-clamp-1 mt-1 opacity-70">
-                            Nhấn để xem ${count} chủ đề học tập
-                        </p>
-                    </div>
 
-                    <!-- Bottom: Progress Bar & Forward Arrow -->
-                    <div class="mt-auto pt-2 flex flex-col gap-1.5">
-                        <div class="flex justify-between items-center text-[10px] md:text-xs text-on-surface-variant font-medium">
-                            <span>Tiến độ</span>
-                            <span class="text-primary font-bold">${avgProgress}%</span>
-                        </div>
-                        <div class="w-full h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
-                            <div class="h-full bg-primary rounded-full transition-all duration-500" style="width: ${avgProgress}%"></div>
-                        </div>
-                        <div class="flex items-center justify-end gap-1 text-[11px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity pt-1 -mb-1">
-                            <span>Mở thư mục</span>
-                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                        <!-- Bottom: Progress Bar -->
+                        <div class="mt-auto pt-3 md:pt-4 flex flex-col gap-1 md:gap-2">
+                            <div class="flex justify-between items-center font-label-sm text-[9px] md:text-xs text-on-surface-variant">
+                                <span>Tiến độ</span>
+                                <span class="text-primary font-bold">${avgProgress}%</span>
+                            </div>
+                            <div class="w-full h-1 md:h-1.5 rounded-full bg-surface-container-highest overflow-hidden">
+                                <div class="h-full bg-primary rounded-full transition-all duration-500" style="width: ${avgProgress}%"></div>
+                            </div>
                         </div>
                     </div>
                 </div>`;

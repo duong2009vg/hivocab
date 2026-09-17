@@ -258,8 +258,41 @@ body,
   background-color: var(--hi-surface) !important;
 }
 
-.bg-surface-container-lowest {
+.bg-surface-container-lowest,
+.bg-surface-container-lowest\/40,
+.bg-surface-container-lowest\/50,
+.bg-surface-container-lowest\/60,
+.bg-surface-container-lowest\/80,
+.bg-surface-container-lowest\/85,
+.bg-surface-container-lowest\/90 {
   background-color: var(--hi-surface) !important;
+}
+
+.topic-card-surface,
+.folder-card-surface {
+  background-color: var(--hi-surface) !important;
+  border-color: var(--hi-border) !important;
+}
+
+.topic-card-surface:hover,
+.folder-card-surface:hover {
+  background-color: var(--hi-surface-container-high) !important;
+  border-color: var(--hi-p) !important;
+}
+
+.topic-card-surface .bg-surface-container-high,
+.folder-card-surface .bg-surface-container-high {
+  background-color: var(--hi-surface-container-high) !important;
+}
+
+.topic-card-surface .text-on-surface-variant,
+.folder-card-surface .text-on-surface-variant {
+  color: var(--hi-text-muted) !important;
+}
+
+.topic-card-surface .bg-surface-container-highest,
+.folder-card-surface .bg-surface-container-highest {
+  background-color: var(--hi-surface-container-high) !important;
 }
 
 .bg-surface-container-low {
