@@ -651,24 +651,24 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 
 <!-- Standalone Mobile Profile Dropdown -->
 <div id="mobile-profile-dropdown" class="hidden fixed right-4 w-56 bg-surface rounded-2xl shadow-2xl border border-outline-variant/20 z-[9999] overflow-hidden fade-in" style="top: max(calc(env(safe-area-inset-top, 0px) + 20px), 72px);">
-    <div class="px-4 py-3 border-b border-outline-variant/15 dark:border-[#31353A]">
+    <div onclick="if(!window.HiDB?.currentUser){window.navigateTo('login');document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')}" class="px-4 py-3 border-b border-outline-variant/15 cursor-pointer hover:bg-surface-container/50 transition-colors">
         <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
         <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
     </div>
-    <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors font-bold border-b border-outline-variant/15 dark:border-[#31353A] cursor-pointer">
+    <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
         <span class="text-base">🎁</span><span>Quà tặng & Zalo Admin</span>
     </button>
-    <button onclick="navigateTo('exercises'); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container dark:hover:bg-[#25292F] transition-colors cursor-pointer border-b border-outline-variant/15 dark:border-[#31353A]">
+    <button onclick="navigateTo('exercises'); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container dark:hover:bg-[#25292F] transition-colors cursor-pointer border-b border-outline-variant/15">
         <span class="material-symbols-outlined text-[18px] text-primary">school</span>Luyện Đề THPT
     </button>
-    <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container dark:hover:bg-[#25292F] transition-colors cursor-pointer">
+    <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container dark:hover:bg-[#25292F] transition-colors cursor-pointer">
         <span class="material-symbols-outlined text-[18px] text-on-surface-variant">settings</span>Cài đặt
     </button>
-    <a href="/privacy.html" target="_blank" onclick="document.getElementById('mobile-profile-dropdown').classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+    <a href="/privacy.html" target="_blank" onclick="document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
         <span class="material-symbols-outlined text-[16px]">verified_user</span>Quyền riêng tư (Privacy)
     </a>
-    <button onclick="window.handleLogout()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors border-t border-outline-variant/15 dark:border-[#31353A] cursor-pointer">
-        <span class="material-symbols-outlined text-[18px]">logout</span>Đăng xuất
+    <button id="mobile-dropdown-auth-btn" onclick="window.handleMobileDropdownAuth()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-primary hover:bg-primary/10 transition-colors border-t border-outline-variant/15 cursor-pointer font-semibold">
+        <span class="material-symbols-outlined text-[18px]">login</span><span>Đăng nhập</span>
     </button>
 </div>
 
@@ -1285,7 +1285,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
                     <span class="material-symbols-outlined text-[#FF5722] icon-fill text-lg">local_fire_department</span>
                     <span id="dashboard-streak-badge" class="font-bold text-sm text-on-surface">— Ngày</span>
                 </div>
-                <button onclick="window.handleProfileClick()" id="mobile-profile-avatar" class="lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
+                <button onclick="window.toggleMobileProfileDropdown()" id="mobile-profile-avatar" class="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
                     <span class="material-symbols-outlined text-outline text-sm">person</span>
                 </button>
             </div>
@@ -3007,12 +3007,12 @@ function _updateThemeBtns(active) {
 
 
 window.handleProfileClick = function() {
+    if (window.innerWidth < 1024 && typeof window.toggleMobileProfileDropdown === 'function') {
+        window.toggleMobileProfileDropdown();
+        return;
+    }
     if (typeof HiDB !== 'undefined' && HiDB.currentUser) {
-        if (window.innerWidth < 1024 && typeof window.toggleMobileProfileDropdown === 'function') {
-            window.toggleMobileProfileDropdown();
-        } else {
-            window.navigateTo('settings');
-        }
+        window.navigateTo('settings');
     } else {
         window.navigateTo('login');
     }
@@ -9311,6 +9311,11 @@ window._updateProfileUI = function(user) {
     const dropEmail = document.getElementById('mobile-dropdown-email');
     if (dropName)  dropName.textContent  = name;
     if (dropEmail) dropEmail.textContent = user.email;
+    const authBtn = document.getElementById('mobile-dropdown-auth-btn');
+    if (authBtn) {
+        authBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">logout</span><span>Đăng xuất</span>';
+        authBtn.className = 'w-full flex items-center gap-2 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors border-t border-outline-variant/15 cursor-pointer';
+    }
 };
 
 // XỬ LÝ ĐĂNG XUẤT
@@ -9327,6 +9332,16 @@ window.handleLogout = async function() {
     }
 };
 
+window.handleMobileDropdownAuth = function() {
+    const dropdown = document.getElementById('mobile-profile-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+    if (typeof HiDB !== 'undefined' && HiDB.currentUser) {
+        window.handleLogout();
+    } else {
+        window.navigateTo('login');
+    }
+};
+
 // MOBILE PROFILE DROPDOWN
 window.toggleMobileProfileDropdown = function() {
     const dropdown = document.getElementById('mobile-profile-dropdown');
@@ -9334,12 +9349,13 @@ window.toggleMobileProfileDropdown = function() {
     const isHidden = dropdown.classList.contains('hidden');
     if (isHidden) {
         dropdown.classList.remove('hidden');
-        // Đóng khi click ra ngoài
         setTimeout(() => {
-            document.addEventListener('click', _closeMobileDropdownOutside, { once: true });
-        }, 0);
+            document.removeEventListener('click', _closeMobileDropdownOutside);
+            document.addEventListener('click', _closeMobileDropdownOutside);
+        }, 10);
     } else {
         dropdown.classList.add('hidden');
+        document.removeEventListener('click', _closeMobileDropdownOutside);
     }
 };
 
@@ -9348,6 +9364,7 @@ function _closeMobileDropdownOutside(e) {
     const isAvatar = e.target.closest('#mobile-profile-avatar, .mobile-user-avatar');
     if (dropdown && !dropdown.contains(e.target) && !isAvatar) {
         dropdown.classList.add('hidden');
+        document.removeEventListener('click', _closeMobileDropdownOutside);
     }
 }
 </script>
