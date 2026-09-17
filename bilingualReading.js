@@ -170,10 +170,11 @@
                 state.currentWords = cached.words || [];
                 compileVocabRegex();
                 renderReadingHeader();
-                prepareGapExercises();
+                state.gapItems = []; // Lazy initialized when opening gap-fill tab
                 if (state.activeTab === 'reading') {
                     renderActiveReadingView();
                 } else {
+                    prepareGapExercises();
                     renderGapFillView();
                 }
                 return;
@@ -223,6 +224,7 @@
             const words = Array.isArray(fetchedWords) ? fetchedWords : [];
             state.currentPassage = passage;
             state.currentWords = words;
+            state.gapItems = []; // Lazy initialized
 
             // Lưu vào cache
             state.passageCache.set(passageId, { passage, words });
@@ -233,13 +235,11 @@
             // Cập nhật Header
             renderReadingHeader();
 
-            // Chuẩn bị bài tập đục lỗ
-            prepareGapExercises();
-
-            // Render tab hiện tại
+            // Render tab hiện tại (chỉ chuẩn bị bài tập đục lỗ nếu đang ở tab đục lỗ)
             if (state.activeTab === 'reading') {
                 renderActiveReadingView();
             } else {
+                prepareGapExercises();
                 renderGapFillView();
             }
 
@@ -357,6 +357,9 @@
         if (tabName === 'reading') {
             renderActiveReadingView();
         } else {
+            if (!state.gapItems || state.gapItems.length === 0) {
+                prepareGapExercises();
+            }
             renderGapFillView();
         }
     };
@@ -519,7 +522,7 @@
                         </div>
                     </div>
 
-                    <!-- Cột tiếng Việt: CURTAIN / BLUR MODE -->
+                    <!-- Cột tiếng Việt: CURTAIN / PRIVACY MODE -->
                     <div class="relative overflow-hidden rounded-xl border border-outline-variant/20 bg-surface-container-low/40 p-4 transition-all flex flex-col justify-between group/card">
                         <div>
                             <div class="flex items-center justify-between mb-2 pb-1 border-b border-outline-variant/15">
@@ -534,8 +537,8 @@
                                 </button>
                             </div>
 
-                            <!-- Khối chữ: áp dụng filter blur khi chưa mở -->
-                            <div class="transition-all duration-300 ${isRevealed ? 'filter-none select-text' : 'select-none blur-md opacity-40 pointer-events-none'}">
+                            <!-- Khối chữ: ẩn hoàn toàn khi chưa mở để tối ưu GPU và chống crash WebKit -->
+                            <div class="transition-opacity duration-200 ${isRevealed ? 'opacity-100 select-text' : 'opacity-0 select-none pointer-events-none min-h-[4rem]'}">
                                 <div class="text-on-surface font-normal text-justify ${fontClass}">${viHtml || '<span class="italic text-outline">Đang cập nhật bản dịch...</span>'}</div>
                             </div>
                         </div>
@@ -543,8 +546,8 @@
                         <!-- Overlay rèm che khi chưa mở: Click vào bất kỳ đâu trên rèm để mở -->
                         ${!isRevealed ? `
                         <div onclick="window.toggleParaCurtain(${i})"
-                            class="absolute inset-0 z-10 bg-surface/40 backdrop-blur-[2px] flex items-center justify-center cursor-pointer hover:bg-surface/20 transition-all">
-                            <div class="bg-surface-container-highest/90 text-on-surface px-4 py-2 rounded-full shadow-lg border border-outline-variant/30 flex items-center gap-2 text-xs font-bold group-hover/card:scale-105 transition-transform">
+                            class="absolute inset-0 z-10 bg-surface-container-low/95 flex items-center justify-center cursor-pointer hover:bg-surface-container transition-all">
+                            <div class="bg-surface-container-highest text-on-surface px-4 py-2 rounded-full shadow-md border border-outline-variant/30 flex items-center gap-2 text-xs font-bold active:scale-95 transition-transform">
                                 <span class="material-symbols-outlined text-[18px] text-primary">visibility</span>
                                 <span>Chạm để lật mở bản dịch</span>
                             </div>
@@ -598,22 +601,22 @@
         let lastIdx = 0;
         let result = '';
         let match;
+        let safetyCount = 0;
 
         while ((match = state.compiledRegex.exec(paraText)) !== null) {
-            // Phần text thường phía trước
+            if (++safetyCount > 1000) break; // Guard against runaways
+            if (match.index === state.compiledRegex.lastIndex) {
+                state.compiledRegex.lastIndex++;
+            }
+
             result += escapeHtml(paraText.substring(lastIdx, match.index));
 
             const matchedWord = match[0];
-            const baseKey = match[1].toLowerCase();
-            const wordObj = state.compiledWordMap.get(baseKey) || {};
-
-            const wordEsc = escapeHtml(wordObj.word || matchedWord);
-            const posEsc = escapeHtml(wordObj.pos || '');
-            const ipaEsc = escapeHtml(wordObj.phonetic || '');
-            const meaningEsc = escapeHtml(wordObj.meaning || '');
+            const baseKey = (match[1] || matchedWord).toLowerCase();
 
             result += `<span class="inline-flex items-baseline px-1.5 py-0.5 mx-0.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary font-bold border-b-2 border-primary/40 cursor-pointer transition-all active:scale-95"
-                onclick="event.stopPropagation(); window.showReadingVocabTooltip('${wordEsc}', '${posEsc}', '${ipaEsc}', '${meaningEsc}', event)"
+                data-word-key="${escapeHtml(baseKey)}"
+                onclick="event.stopPropagation(); window.showReadingVocabByKey('${escapeHtml(baseKey)}', event)"
                 title="Nhấp để xem nghĩa & phát âm">${escapeHtml(matchedWord)}</span>`;
 
             lastIdx = state.compiledRegex.lastIndex;
@@ -674,6 +677,12 @@
     };
 
     // ── TOOLTIP TRA TỪ NHANH KHI ĐỌC ─────────────────────────────────
+    window.showReadingVocabByKey = function(key, event) {
+        if (!key) return;
+        const wordObj = state.compiledWordMap?.get(key.toLowerCase()) || { word: key };
+        window.showReadingVocabTooltip(wordObj.word || key, wordObj.pos || '', wordObj.phonetic || '', wordObj.meaning || '', event);
+    };
+
     window.showReadingVocabTooltip = function(word, pos, phonetic, meaning, event) {
         let tooltip = document.getElementById('reading-vocab-tooltip');
         if (!tooltip) {
@@ -741,28 +750,39 @@
         const words = state.currentWords || [];
         const enContent = state.currentPassage?.contentEn || '';
 
+        // Tách câu 1 lần duy nhất từ bài đọc để tránh Regex Backtracking gây treo trình duyệt
+        const sentences = enContent
+            ? (enContent.match(/[^.!?\r\n]+[.!?]*/g) || [enContent]).map(s => s.trim()).filter(Boolean)
+            : [];
+
+        // Giới hạn tối đa 40 câu hỏi đục lỗ đầu tiên để đảm bảo hiệu năng mượt mà 60fps trên mobile
+        const targetWords = words.slice(0, 40);
         const items = [];
-        words.forEach((w, idx) => {
+
+        targetWords.forEach((w, idx) => {
             if (!w.word) return;
+            const cleanWord = w.word.trim();
+            if (!cleanWord) return;
 
             // Câu ngữ cảnh: ưu tiên exampleSentence đã trích sẵn, nếu không tìm từ bài đọc
             let sentence = w.exampleSentence;
-            if (!sentence && enContent) {
-                const regex = new RegExp(`([^.!?]*\\b${escapeRegex(w.word)}\\b[^.!?]*[.!?])`, 'i');
-                const m = enContent.match(regex);
-                if (m) sentence = m[1].trim();
+            if (!sentence && sentences.length > 0) {
+                const lowerWord = cleanWord.toLowerCase();
+                const found = sentences.find(s => s.toLowerCase().includes(lowerWord));
+                if (found) sentence = found;
             }
 
             if (!sentence) {
-                sentence = `In this passage, the term "${w.word}" plays a significant role in understanding the topic.`;
+                sentence = `In this passage, the term "${cleanWord}" plays a significant role in understanding the topic.`;
             }
 
             // Tìm vị trí của từ trong câu
-            const wordRegex = new RegExp(`\\b(${escapeRegex(w.word)})(s|es|ed|ing)?\\b`, 'i');
+            const escWord = escapeRegex(cleanWord);
+            const wordRegex = new RegExp(`\\b(${escWord})(s|es|ed|ing)?\\b`, 'i');
             const match = sentence.match(wordRegex);
 
             let before = sentence;
-            let targetBlank = w.word;
+            let targetBlank = cleanWord;
             let after = '';
 
             if (match && match.index !== undefined) {
@@ -774,7 +794,7 @@
             items.push({
                 index: idx,
                 wordId: w.id || idx,
-                targetWord: w.word,
+                targetWord: cleanWord,
                 blankWord: targetBlank,
                 pos: w.pos || '',
                 phonetic: w.phonetic || '',

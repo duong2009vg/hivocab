@@ -1868,7 +1868,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
                 <p id="ld-subtitle" class="text-on-surface-variant mt-sm">0 từ vựng</p>
             </div>
             <div class="flex items-center gap-3">
-                <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
+                <button type="button" onclick="event.stopPropagation(); window.openAddWordModal(window._currentTopicId, window._currentPassageId);" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     <span>Thêm từ vựng</span>
                 </button>
@@ -1914,7 +1914,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
                 <button type="button" onclick="startSinglePractice(0)" class="mt-5 w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-surface-tint transition-all active:opacity-85 text-sm cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                     Bắt đầu học
                 </button>
-                <button type="button" onclick="event.stopPropagation(); window.openAddWordModal();" class="w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 font-bold py-2.5 rounded-xl transition-all active:opacity-85 text-xs flex items-center justify-center gap-1.5 cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                <button type="button" onclick="event.stopPropagation(); window.openAddWordModal(window._currentTopicId, window._currentPassageId);" class="w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 font-bold py-2.5 rounded-xl transition-all active:opacity-85 text-xs flex items-center justify-center gap-1.5 cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                     <span class="material-symbols-outlined text-[16px] pointer-events-none">add</span>
                     <span class="pointer-events-none">Thêm từ vựng mới</span>
                 </button>
@@ -6324,6 +6324,13 @@ window._openPassage = function(topicId, passageId, testId, passageNumber, passag
     window._currentLessonWords    = [];
     window._currentLessonWordsKey = null;
 
+    try {
+        sessionStorage.setItem('hi_current_lesson_state', JSON.stringify({
+            topicId, passageId, testId, passageNumber, passageTitle, topicLabel, testName,
+            topicName: window._currentTopicName, lessonName: window._currentLessonName
+        }));
+    } catch(e) {}
+
     navigateTo('lesson-detail');
 };
 
@@ -6341,6 +6348,14 @@ window._openUnlinkedWords = function(topicId) {
     window._currentLessonName     = 'Từ vựng tự thêm / Bổ sung';
     window._currentLessonWords    = [];
     window._currentLessonWordsKey = null;
+
+    try {
+        sessionStorage.setItem('hi_current_lesson_state', JSON.stringify({
+            topicId, passageId: '__unlinked__', testId: null, passageNumber: null,
+            passageTitle: 'Từ vựng tự thêm / Bổ sung', topicLabel: 'Từ người dùng tự lưu',
+            testName: null, topicName: window._currentTopicName, lessonName: window._currentLessonName
+        }));
+    } catch(e) {}
 
     navigateTo('lesson-detail');
 };
@@ -6367,11 +6382,38 @@ window._openLesson = function(topicId, lessonIndex) {
     window._currentLessonWords    = [];
     window._currentLessonWordsKey = null;
 
+    try {
+        sessionStorage.setItem('hi_current_lesson_state', JSON.stringify({
+            topicId, passageId: null, testId: null, passageNumber: null,
+            passageTitle: null, topicLabel: null, testName: null, lessonIndex,
+            topicName: window._currentTopicName, lessonName, lessonProgress: window._currentLessonProgress
+        }));
+    } catch(e) {}
+
     navigateTo('lesson-detail');
 };
 
 // ── LOAD WORDS vào trang lesson-detail ──────────────────────────
 window._loadLessonWords = async function() {
+    if (!window._currentTopicId) {
+        try {
+            const saved = JSON.parse(sessionStorage.getItem('hi_current_lesson_state') || '{}');
+            if (saved.topicId) {
+                window._currentTopicId        = saved.topicId;
+                window._currentPassageId      = saved.passageId;
+                window._currentTestId         = saved.testId;
+                window._currentTestName       = saved.testName;
+                window._currentPassageNumber  = saved.passageNumber;
+                window._currentPassageTitle   = saved.passageTitle;
+                window._currentTopicLabel     = saved.topicLabel;
+                window._currentLessonIndex    = saved.lessonIndex;
+                window._currentLessonName     = saved.lessonName;
+                window._currentTopicName      = saved.topicName || window._currentTopicName;
+                window._currentLessonProgress = saved.lessonProgress || 0;
+            }
+        } catch(e) {}
+    }
+
     const topicId     = window._currentTopicId;
     const topicName   = window._currentTopicName   || '—';
     const passageId   = window._currentPassageId;
@@ -9349,7 +9391,11 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
 
                     const curPage = document.querySelector('.page.active')?.id;
-                    if (!curPage || curPage === 'page-landing' || curPage === 'page-login') {
+                    const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+                    const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
+                    const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login';
+
+                    if (isLandingOrLogin && !hasTargetRoute) {
                         window.navigateTo('dashboard');
                     }
                 }
@@ -9379,7 +9425,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             // Nếu đang trong chế độ đặt lại mật khẩu, không điều hướng về dashboard
             if (!window._isPasswordRecoveryMode) {
                 const curPage = document.querySelector('.page.active')?.id;
-                if (!curPage || curPage === 'page-landing' || curPage === 'page-login') {
+                const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+                const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
+                const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login';
+
+                if (isLandingOrLogin && !hasTargetRoute) {
                     window.navigateTo('dashboard');
                 }
             }

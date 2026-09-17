@@ -44,6 +44,19 @@ export function navigateTo(targetPageId, options = {}) {
   }
   _currentRoute = pageId;
 
+  // Delegate to window.navigateTo if available (so all subpage loaders & UI triggers run)
+  if (typeof window !== 'undefined' && typeof window.navigateTo === 'function' && window.navigateTo !== navigateTo) {
+    window.navigateTo(pageId, !!options.silent);
+    _routeHooks.forEach(cb => {
+      try {
+        cb(pageId, options);
+      } catch (e) {
+        console.error('[Router] Hook error:', e);
+      }
+    });
+    return;
+  }
+
   // Release any locked body scroll from lingering modals
   if (typeof window !== 'undefined' && typeof window.lockBodyScroll === 'function') {
     window.lockBodyScroll(false);
@@ -107,17 +120,15 @@ export function initRouter() {
   const handleHashChange = () => {
     const hash = normalizeRoute(window.location.hash);
     if (hash && VALID_ROUTES.includes(hash)) {
+      const activeEl = document.querySelector('.page.active');
+      if (activeEl && activeEl.id === `page-${hash}`) {
+        return; // Already on this page, do not reload
+      }
       navigateTo(hash, { silent: true });
     }
   };
 
   window.addEventListener('hashchange', handleHashChange);
-  
-  // Initial route
-  const initialHash = normalizeRoute(window.location.hash);
-  if (initialHash && VALID_ROUTES.includes(initialHash)) {
-    navigateTo(initialHash, { silent: true });
-  }
 }
 
 // Global bridge
