@@ -682,15 +682,27 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
     </button>
 </div>
 
-<nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-2xl bg-surface/85 backdrop-blur-2xl border-t border-outline-variant/20 shadow-[0_-2px_16px_rgba(0,0,0,0.03)] pb-safe transition-colors" style="display: none;">
-    <div class="flex justify-around items-center h-[54px] w-full px-1">
-        <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">home</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Trang chủ</span></a>
-        <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Chủ đề</span></a>
-        <a onclick="navigateTo('exercises')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">school</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Luyện đề</span></a>
-        <a onclick="navigateTo('library')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">explore</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Thư viện</span></a>
-        <a onclick="navigateTo('vocabulary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">collections_bookmark</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Sổ từ</span></a>
-        <a onclick="navigateTo('dictionary')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">search</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Tra từ</span></a>
-    </div>
+<nav id="mobile-bottom-nav" class="lg:hidden mobile-floating-dock" style="display: none;">
+    <a onclick="window.navigateTo('dashboard')" class="nav-item dock-nav-item" data-tab="dashboard">
+        <span class="material-symbols-outlined dock-icon">home</span>
+        <span class="dock-label">Trang chủ</span>
+    </a>
+    <a onclick="navigateTo('topics')" class="nav-item dock-nav-item" data-tab="topics">
+        <span class="material-symbols-outlined dock-icon">category</span>
+        <span class="dock-label">Chủ đề</span>
+    </a>
+    <a onclick="navigateTo('library')" class="nav-item dock-nav-item" data-tab="library">
+        <span class="material-symbols-outlined dock-icon">explore</span>
+        <span class="dock-label">Thư viện</span>
+    </a>
+    <a onclick="navigateTo('vocabulary')" class="nav-item dock-nav-item" data-tab="vocabulary">
+        <span class="material-symbols-outlined dock-icon">bookmark</span>
+        <span class="dock-label">Sổ từ</span>
+    </a>
+    <a onclick="navigateTo('dictionary')" class="nav-item dock-nav-item" data-tab="dictionary">
+        <span class="material-symbols-outlined dock-icon">search</span>
+        <span class="dock-label">Tra từ</span>
+    </a>
 </nav>
 
 <!-- ==================== PAGE: LANDING ==================== -->
@@ -3113,7 +3125,7 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
         const activeTarget = isTopicDetail ? 'topics' : isExerciseDetail ? 'exercises' : pageName; 
         
         document.querySelectorAll('.nav-item').forEach(a => {
-            a.classList.remove('text-primary');
+            a.classList.remove('text-primary', 'active');
             a.classList.add('text-on-surface-variant');
             const icon = a.querySelector('.material-symbols-outlined');
             if(icon) icon.classList.remove('icon-fill');
@@ -3121,7 +3133,7 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
         const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(a => (a.getAttribute('onclick') || '').includes(activeTarget));
         if (activeNav) {
             activeNav.classList.remove('text-on-surface-variant');
-            activeNav.classList.add('text-primary');
+            activeNav.classList.add('text-primary', 'active');
             const icon = activeNav.querySelector('.material-symbols-outlined');
             if(icon) icon.classList.add('icon-fill');
         }
