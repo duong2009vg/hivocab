@@ -6,7 +6,7 @@
 export function openAddWordModal(targetTopicId = null) {
   if (typeof document === 'undefined') return;
 
-  const modal = document.getElementById('add-word-modal');
+  const modal = document.getElementById('modal-add-word') || document.getElementById('add-word-modal');
   if (!modal) return;
 
   // 1. Instant 0ms open
@@ -19,14 +19,14 @@ export function openAddWordModal(targetTopicId = null) {
   }
 
   // Clear inputs & autofocus
-  const wordInput = document.getElementById('add-word-input');
+  const wordInput = document.getElementById('add-word-english') || document.getElementById('add-word-input');
   if (wordInput) {
     wordInput.value = '';
     setTimeout(() => wordInput.focus(), 50);
   }
-  const meaningInput = document.getElementById('add-meaning-input');
+  const meaningInput = document.getElementById('add-word-meaning') || document.getElementById('add-meaning-input');
   if (meaningInput) meaningInput.value = '';
-  const exampleInput = document.getElementById('add-example-input');
+  const exampleInput = document.getElementById('add-word-example') || document.getElementById('add-example-input');
   if (exampleInput) exampleInput.value = '';
 
   // 2. Background async preparation
@@ -38,7 +38,7 @@ export function openAddWordModal(targetTopicId = null) {
 export function closeAddWordModal() {
   if (typeof document === 'undefined') return;
 
-  const modal = document.getElementById('add-word-modal');
+  const modal = document.getElementById('modal-add-word') || document.getElementById('add-word-modal');
   if (!modal) return;
 
   modal.classList.add('hidden');

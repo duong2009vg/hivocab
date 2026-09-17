@@ -5,16 +5,23 @@
 
 const VALID_ROUTES = [
   'landing',
+  'features',
+  'reviews',
+  'faq',
+  'support',
+  'login',
   'dashboard',
   'topics',
   'topic-detail',
   'lesson-detail',
   'vocabulary',
   'learning',
+  'exercises',
   'thpt',
   'thpt-room',
   'bilingual-reading',
   'library',
+  'dictionary',
   'settings'
 ];
 
@@ -31,7 +38,10 @@ export function onNavigate(callback) {
 }
 
 export function navigateTo(targetPageId, options = {}) {
-  const pageId = (targetPageId || 'dashboard').replace(/^#/, '').replace(/^page-/, '');
+  let pageId = (targetPageId || 'dashboard').replace(/^#/, '').replace(/^page-/, '');
+  if (pageId === 'thpt') {
+    pageId = 'exercises';
+  }
   _currentRoute = pageId;
 
   // Release any locked body scroll from lingering modals
@@ -59,6 +69,19 @@ export function navigateTo(targetPageId, options = {}) {
       }
     });
 
+    // Control shared layout components
+    const mainTabs = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'dictionary', 'settings'];
+    const isMainTab = mainTabs.includes(pageId);
+    const isTopicDetail = (pageId === 'topic-detail' || pageId === 'lesson-detail');
+
+    const sidebar = document.getElementById('main-sidebar');
+    if (sidebar) sidebar.style.display = isMainTab ? '' : 'none';
+
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    if (bottomNav) {
+      bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
+    }
+
     // Scroll to top on navigation
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
@@ -76,8 +99,13 @@ export function navigateTo(targetPageId, options = {}) {
 export function initRouter() {
   if (typeof window === 'undefined') return;
 
+  const normalizeRoute = (raw) => {
+    const r = (raw || '').replace(/^#/, '').replace(/^page-/, '');
+    return r === 'thpt' ? 'exercises' : r;
+  };
+
   const handleHashChange = () => {
-    const hash = window.location.hash.replace(/^#/, '');
+    const hash = normalizeRoute(window.location.hash);
     if (hash && VALID_ROUTES.includes(hash)) {
       navigateTo(hash, { silent: true });
     }
@@ -86,7 +114,7 @@ export function initRouter() {
   window.addEventListener('hashchange', handleHashChange);
   
   // Initial route
-  const initialHash = window.location.hash.replace(/^#/, '');
+  const initialHash = normalizeRoute(window.location.hash);
   if (initialHash && VALID_ROUTES.includes(initialHash)) {
     navigateTo(initialHash, { silent: true });
   }
