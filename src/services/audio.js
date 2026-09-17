@@ -2,14 +2,14 @@
  * HiVocab Audio & Sound Effects Service
  */
 export const playSuccessSound = () => {
-  if (typeof window !== 'undefined' && window.soundEngine && typeof window.soundEngine.playCorrect === 'function') {
-    window.soundEngine.playCorrect();
+  if (typeof window !== 'undefined' && window.HiSound && typeof window.HiSound.playCorrect === 'function') {
+    window.HiSound.playCorrect();
   }
 };
 
 export const playWrongSound = () => {
-  if (typeof window !== 'undefined' && window.soundEngine && typeof window.soundEngine.playWrong === 'function') {
-    window.soundEngine.playWrong();
+  if (typeof window !== 'undefined' && window.HiSound && typeof window.HiSound.playIncorrect === 'function') {
+    window.HiSound.playIncorrect();
   }
 };
 

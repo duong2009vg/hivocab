@@ -118,6 +118,7 @@ const HiSessionUI = (() => {
     function _handleFlashcardKeydown(e) {
         const tag = e.target?.tagName;
         if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target?.isContentEditable) return;
+        if (document.querySelector('[id^="modal-"]:not(.hidden)')) return;
 
         const card = document.getElementById('flashcard-card');
         if (!card) {
@@ -1507,5 +1508,95 @@ window.startSession = async function() {
                 <p class="font-bold">Lỗi khi tải phiên học.</p>
                 <p class="text-sm mt-1">${err.message}</p>
             </div>`;
+    }
+};
+
+// ── startSinglePractice: luyện 1 dạng bài từ lesson hiện tại ────
+window.startSinglePractice = async function(exerciseTypeIndex) {
+    const typeMap = ['flashcard', 'mcq', 'fill', 'listen'];
+    const forcedType = typeMap[exerciseTypeIndex] || 'flashcard';
+
+    const topicId     = window._currentTopicId;
+    const passageId   = window._currentPassageId;
+    const lessonIndex = window._currentLessonIndex !== undefined ? window._currentLessonIndex : null;
+    const testId      = window._currentTestId;
+
+    // Return target when closing practice
+    const returnTarget = (passageId || lessonIndex !== null) ? 'lesson-detail' : (topicId ? 'topic-detail' : 'dashboard');
+    const closeBtn = document.getElementById('learning-close-btn');
+    if (closeBtn) closeBtn.setAttribute('onclick', `navigateTo('${returnTarget}')`);
+
+    const progContainer = document.getElementById('learning-progress-container');
+    if (progContainer) progContainer.style.display = 'flex';
+    const streakContainer = document.getElementById('learning-streak-container');
+    if (streakContainer) streakContainer.style.display = 'flex';
+
+    navigateTo('learning');
+
+    document.querySelectorAll('.exercise-step').forEach(el => el.classList.add('hidden'));
+
+    const container = document.getElementById('exercise-container');
+    if (!container) return;
+
+    try {
+        if (typeof HiDB === 'undefined' || typeof HiSessionUI === 'undefined') {
+            container.innerHTML = '<div class="text-center mt-20 text-on-surface-variant">Backend chưa sẵn sàng.</div>';
+            return;
+        }
+
+        HiSessionUI.init();
+        container.innerHTML = `<div class="flex items-center justify-center mt-24"><span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span></div>`;
+
+        let rawWords = null;
+        const lessonKey = passageId ? `passage:${passageId}` : (lessonIndex !== null ? `${topicId}::${lessonIndex}` : (testId ? `test:${testId}` : null));
+
+        if (lessonKey && window._currentLessonWordsKey === lessonKey && window._currentLessonWords && window._currentLessonWords.length > 0) {
+            rawWords = window._currentLessonWords;
+        }
+
+        if (!rawWords || rawWords.length === 0) {
+            if (passageId === '__unlinked__') {
+                const hier = window._camHierarchy || (typeof HiDB.getCamHierarchy === 'function' ? await HiDB.getCamHierarchy(topicId) : null);
+                rawWords = hier?.unlinkedWords || [];
+            } else if (passageId && typeof HiDB.getWordsInPassage === 'function') {
+                rawWords = await HiDB.getWordsInPassage(passageId);
+            } else if (lessonIndex !== null && typeof HiDB.getWordsInLesson === 'function') {
+                rawWords = await HiDB.getWordsInLesson(topicId, lessonIndex);
+            } else if (testId && typeof HiDB.getWordsInTest === 'function') {
+                rawWords = await HiDB.getWordsInTest(testId);
+            } else if (topicId && typeof HiDB.getWordsInTopic === 'function') {
+                rawWords = await HiDB.getWordsInTopic(topicId);
+            } else {
+                rawWords = await HiDB.getWordsDueForReview(20);
+            }
+            window._currentLessonWords = rawWords || [];
+            window._currentLessonWordsKey = lessonKey;
+        }
+
+        if (!rawWords || rawWords.length === 0) {
+            container.innerHTML = '<div class="text-center mt-20 text-on-surface-variant"><h2 class="font-bold text-xl mb-2">Không có từ để luyện tập</h2><p>Phần này chưa có từ vựng.</p></div>';
+            return;
+        }
+
+        // Chuẩn hoá sang định dạng HiSession (id → wordId)
+        const sessionWords = rawWords.map(w => ({
+            wordId:          w.id || w.wordId,
+            word:            w.word,
+            pos:             w.pos        || '',
+            phonetic:        w.phonetic   || '',
+            meaning:         w.meaning    || '',
+            exampleSentence: w.exampleSentence || w.example_sentence || '',
+            imageUrl:        w.imageUrl   || w.image_url || '',
+            image_url:       w.image_url  || w.imageUrl || '',
+            level:           w.level      ?? 0,
+        }));
+
+        HiSession.startSession(sessionWords, forcedType);
+
+        HiSessionUI.render();
+
+    } catch(err) {
+        console.error('[startSinglePractice] Lỗi:', err);
+        container.innerHTML = `<div class="text-center mt-20 text-error"><p>${err.message}</p></div>`;
     }
 };

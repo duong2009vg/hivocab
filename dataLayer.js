@@ -733,7 +733,7 @@ window.HiDB = (() => {
             .select(`
                 id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
                 topics!inner ( id, name, user_id ),
-                word_progress!inner ( level, next_review_at, last_reviewed_at, review_count, user_id )
+                word_progress ( level, next_review_at, last_reviewed_at, review_count, user_id )
             `, { count: 'exact' });
 
         if (user?.id) {

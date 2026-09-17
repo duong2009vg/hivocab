@@ -40,6 +40,7 @@ export function showToast(message, type = 'info', durationMs = 3000) {
 
 // Global window bridge
 if (typeof window !== 'undefined') {
+  window.showToast = showToast;
   window.showHiToast = showToast;
 }
 
