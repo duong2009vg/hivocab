@@ -1761,9 +1761,9 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
                         <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary font-bold text-xs p-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Chia sẻ Thư viện">
                             <span class="material-symbols-outlined text-[16px]">public</span>
                         </button>
-                        <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer">
-                            <span class="material-symbols-outlined text-[16px]">add</span>
-                            <span>Thêm từ</span>
+                        <button type="button" onclick="event.stopPropagation(); window.openAddWordModal();" class="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:opacity-85 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                            <span class="material-symbols-outlined text-[16px] pointer-events-none">add</span>
+                            <span class="pointer-events-none">Thêm từ</span>
                         </button>
                     </div>
                 </div>
@@ -1874,16 +1874,16 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
                     </div>
                 </div>
                 <!-- CTA button -->
-                <button onclick="startSinglePractice(0)" class="mt-5 w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-surface-tint transition-colors active:scale-95 text-sm">
+                <button type="button" onclick="startSinglePractice(0)" class="mt-5 w-full bg-primary text-on-primary font-bold py-3 rounded-xl hover:bg-surface-tint transition-all active:opacity-85 text-sm cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                     Bắt đầu học
                 </button>
-                <button onclick="window.openAddWordModal()" class="w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2.5 rounded-xl transition-colors active:scale-95 text-xs flex items-center justify-center gap-1.5 cursor-pointer">
-                    <span class="material-symbols-outlined text-[16px]">add</span>
-                    <span>Thêm từ vựng mới</span>
+                <button type="button" onclick="event.stopPropagation(); window.openAddWordModal();" class="w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 font-bold py-2.5 rounded-xl transition-all active:opacity-85 text-xs flex items-center justify-center gap-1.5 cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                    <span class="material-symbols-outlined text-[16px] pointer-events-none">add</span>
+                    <span class="pointer-events-none">Thêm từ vựng mới</span>
                 </button>
-                <button id="btn-read-passage-mobile" onclick="window.startBilingualReading()" class="hidden w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold py-2.5 rounded-xl transition-colors active:scale-95 text-xs flex items-center justify-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px]">menu_book</span>
-                    <span>Đọc bài đọc song ngữ</span>
+                <button type="button" id="btn-read-passage-mobile" onclick="event.stopPropagation(); window.startBilingualReading();" class="hidden w-full mt-2 bg-primary/10 text-primary hover:bg-primary/20 active:bg-primary/25 font-bold py-2.5 rounded-xl transition-all active:opacity-85 text-xs flex items-center justify-center gap-1.5 cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
+                    <span class="material-symbols-outlined text-[16px] pointer-events-none">menu_book</span>
+                    <span class="pointer-events-none">Đọc bài đọc song ngữ</span>
                 </button>
             </div>
 
@@ -1916,7 +1916,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
                         <span class="text-xs font-bold text-on-surface">Nghe &amp; Viết</span>
                     </button>
                     <!-- Nút Đọc & Dịch Song Ngữ (hiện có điều kiện khi có bài đọc) -->
-                    <button id="ld-study-mode-reading" onclick="window.startBilingualReading()" class="hidden col-span-2 bg-gradient-to-r from-primary/10 via-surface-container-lowest to-secondary/10 backdrop-blur-xl border border-primary/20 rounded-xl p-4 items-center justify-between gap-3 active:scale-95 transition-all soft-shadow group">
+                    <button type="button" id="ld-study-mode-reading" onclick="event.stopPropagation(); window.startBilingualReading();" class="hidden col-span-2 bg-gradient-to-r from-primary/10 via-surface-container-lowest to-secondary/10 backdrop-blur-xl border border-primary/20 rounded-xl p-4 items-center justify-between gap-3 active:opacity-85 transition-all soft-shadow group cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-on-primary transition-colors">
                                 <span class="material-symbols-outlined">menu_book</span>
@@ -3600,7 +3600,11 @@ window.addEventListener('hashchange', () => {
     const h = window.location.hash.slice(1);
     // Bỏ qua hash OAuth từ Supabase (access_token, error_description)
     if(h && !h.includes('access_token=') && !h.includes('error_description=')) {
-        window.navigateTo(h);
+        const activePageEl = document.querySelector('.page.active');
+        if (activePageEl && activePageEl.id === 'page-' + h.split('?')[0]) {
+            return;
+        }
+        window.navigateTo(h, true);
     }
 });
 </script>
@@ -6444,8 +6448,9 @@ window._loadLessonWords = async function() {
 
         listEl.innerHTML = words.map((w, i) => {
             const lv = Math.min(w.level || 0, 5);
+            const animDelay = i < 12 ? `style="animation-delay:${i*0.025}s"` : '';
             return `
-            <div class="group bg-surface-container-lowest/80 backdrop-blur-sm border border-outline-variant/20 rounded-xl p-4 flex items-start gap-4 soft-shadow hover:shadow-md transition-all fade-in" style="animation-delay:${i*0.025}s">
+            <div class="group bg-surface-container-lowest border border-outline-variant/20 rounded-xl p-4 flex items-start gap-4 soft-shadow hover:shadow-md transition-all fade-in" ${animDelay}>
                 <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                     <span class="text-sm font-bold text-primary">${i+1}</span>
                 </div>
@@ -6518,6 +6523,7 @@ window.openTopicPicker = async function(callback, options = {}) {
     modal.classList.remove('hidden');
     modal.classList.add('flex');
     window._topicPickerState.isOpen = true;
+    window._modalTopicPickerOpenedAt = Date.now();
 
     const folderList = document.getElementById('topic-picker-folder-list');
     if (folderList) {
@@ -6566,6 +6572,7 @@ window.closeTopicPicker = function() {
 };
 
 document.getElementById('modal-topic-picker')?.addEventListener('click', function(e) {
+    if (Date.now() - (window._modalTopicPickerOpenedAt || 0) < 350) return;
     if (e.target === this) window.closeTopicPicker();
 });
 
@@ -7246,6 +7253,7 @@ window.openAddWordModal = function(topicId = null, passageId = null) {
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         window.lockBodyScroll && window.lockBodyScroll(true);
+        window._modalAddWordOpenedAt = Date.now();
     }
 
     // Reset Form nhanh
@@ -7589,8 +7597,9 @@ window.submitAddWord = async function(e) {
     }
 };
 
-// Đóng modal add-word khi click ra ngoài nền tối
+// Đóng modal add-word khi click ra ngoài nền tối (kèm guard chống synthetic touch bleed-through)
 document.getElementById('modal-add-word')?.addEventListener('click', function(e) {
+    if (Date.now() - (window._modalAddWordOpenedAt || 0) < 350) return;
     if (e.target === this) window.closeAddWordModal();
 });
 
@@ -7736,6 +7745,7 @@ window.openVocabBulkAddModal = async function(topicId = null, passageId = null) 
 
     modal.classList.remove('hidden');
     modal.classList.add('flex');
+    window._modalBulkAddWordOpenedAt = Date.now();
     setTimeout(() => { if (textarea) textarea.focus(); }, 120);
 };
 
@@ -7748,6 +7758,7 @@ window.closeBulkAddModal = function() {
 };
 
 document.getElementById('modal-bulk-add-word')?.addEventListener('click', function(e) {
+    if (Date.now() - (window._modalBulkAddWordOpenedAt || 0) < 350) return;
     if (e.target === this) window.closeBulkAddModal();
 });
 

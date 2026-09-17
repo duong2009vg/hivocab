@@ -74,8 +74,30 @@
             }
         }
 
-        // Fallback: nếu vẫn chưa có targetId nhưng có _currentTopicId -> thử tải phân cấp chủ đề
-        if (!targetId && window._currentTopicId) {
+        // Nếu đã có targetId -> lập tức mở trang đọc 0ms
+        if (targetId) {
+            await openReadingPage(targetId);
+            return;
+        }
+
+        // Nếu chưa có targetId nhưng có _currentTopicId:
+        // Chuyển trang ngay lập tức với skeleton loader để người dùng không bị đơ giao diện
+        if (typeof window.navigateTo === 'function') {
+            window.navigateTo('bilingual-reading');
+        } else {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-bilingual-reading')?.classList.add('active');
+        }
+        const container = document.getElementById('bilingual-reading-body');
+        if (container) {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-24 gap-4">
+                    <span class="material-symbols-outlined text-primary text-[48px] animate-spin">refresh</span>
+                    <p class="text-on-surface-variant text-sm font-medium animate-pulse">Đang chuẩn bị nội dung bài đọc song ngữ...</p>
+                </div>`;
+        }
+
+        if (window._currentTopicId) {
             try {
                 if (typeof HiDB !== 'undefined' && typeof HiDB.getCamHierarchy === 'function') {
                     const hier = await HiDB.getCamHierarchy(window._currentTopicId);
@@ -97,15 +119,21 @@
 
         if (!targetId) {
             console.warn('[startBilingualReading] Không tìm thấy passageId hợp lệ.');
-            if (typeof window.showToast === 'function') {
+            if (container) {
+                container.innerHTML = `
+                    <div class="max-w-md mx-auto text-center py-20 px-4">
+                        <span class="material-symbols-outlined text-amber-500 text-[48px] mb-3">info</span>
+                        <h3 class="font-bold text-lg text-on-surface mb-2">Chưa có bài đọc song ngữ</h3>
+                        <p class="text-sm text-on-surface-variant mb-6">Chủ đề hoặc bài học này chưa có nội dung bài đọc song ngữ.</p>
+                        <button onclick="window.closeBilingualReading()" class="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm cursor-pointer">Quay lại</button>
+                    </div>`;
+            } else if (typeof window.showToast === 'function') {
                 window.showToast('Chủ đề này chưa có bài đọc song ngữ.', 'info');
-            } else {
-                alert('Chủ đề này chưa có bài đọc song ngữ.');
             }
             return;
         }
 
-        // Mở trang
+        // Đã tìm thấy passageId sau khi tải ngầm -> Mở tiếp nội dung
         await openReadingPage(targetId);
     };
 

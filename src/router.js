@@ -8,6 +8,7 @@ const VALID_ROUTES = [
   'dashboard',
   'topics',
   'topic-detail',
+  'lesson-detail',
   'vocabulary',
   'learning',
   'thpt',
@@ -51,10 +52,10 @@ export function navigateTo(targetPageId, options = {}) {
     pages.forEach(el => {
       if (el.id === `page-${pageId}`) {
         el.classList.add('active');
-        el.style.display = (el.id === 'page-thpt-room') ? 'flex' : 'block';
+        el.style.display = (el.id === 'page-thpt-room') ? 'flex' : '';
       } else {
         el.classList.remove('active');
-        el.style.display = 'none';
+        el.style.display = '';
       }
     });
 
