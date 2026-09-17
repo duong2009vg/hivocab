@@ -10,11 +10,13 @@ let currentAudioUrl = null;   // fallback URL
 let _loginPollTimer = null;
 
 
-const loginCard      = document.getElementById('loginCard');
-const mainContent    = document.getElementById('mainContent');
-const googleLoginBtn = document.getElementById('googleLoginBtn');
-const loginStatus    = document.getElementById('loginStatus');
-const logoutButton   = document.getElementById('logoutButton');
+const loginCard         = document.getElementById('loginCard');
+const mainContent       = document.getElementById('mainContent');
+const googleLoginBtn    = document.getElementById('googleLoginBtn');
+const openWebLoginBtn   = document.getElementById('openWebLoginBtn');
+const checkAuthAgainBtn = document.getElementById('checkAuthAgainBtn');
+const loginStatus       = document.getElementById('loginStatus');
+const logoutButton      = document.getElementById('logoutButton');
 
 const termInput    = document.getElementById('termInput');
 const searchForm   = document.getElementById('searchForm');
@@ -676,10 +678,13 @@ function startLoginPolling() {
     const authRes = await send('check-auth');
     if (authRes?.loggedIn) {
       stopLoginPolling();
-      checkAndShowUI();
-    } else if (attempts >= 80) { // tối đa 2 phút
+      loginStatus.textContent = '✓ Đăng nhập thành công! Đang tải dữ liệu...';
+      setTimeout(() => {
+        checkAndShowUI();
+      }, 400);
+    } else if (attempts >= 100) { // tối đa 2.5 phút
       stopLoginPolling();
-      loginStatus.textContent = 'Hết thời gian chờ. Vui lòng thử lại.';
+      loginStatus.textContent = 'Hết thời gian chờ. Bạn có thể bấm "Tôi đã đăng nhập" để kiểm tra lại.';
     }
   }, 1500);
 }
@@ -688,20 +693,41 @@ function stopLoginPolling() {
   if (_loginPollTimer) { clearInterval(_loginPollTimer); _loginPollTimer = null; }
 }
 
-googleLoginBtn.addEventListener('click', async () => {
+async function handleOpenLogin() {
   loginStatus.textContent = 'Đang mở cửa sổ đăng nhập...';
-  googleLoginBtn.disabled = true;
+  if (googleLoginBtn) googleLoginBtn.disabled = true;
+  if (openWebLoginBtn) openWebLoginBtn.disabled = true;
+
   const res = await send('open-app');
-  googleLoginBtn.disabled = false;
+  if (googleLoginBtn) googleLoginBtn.disabled = false;
+  if (openWebLoginBtn) openWebLoginBtn.disabled = false;
+
   if (!res?.ok) {
     loginStatus.textContent = res?.error || 'Không thể mở cửa sổ đăng nhập.';
     return;
   }
-  // Bắt đầu poll — kể cả khi login-success message bị mất
+  loginStatus.textContent = 'Vui lòng hoàn tất đăng nhập trên cửa sổ HiVocab vừa mở...';
   startLoginPolling();
+}
+
+googleLoginBtn?.addEventListener('click', handleOpenLogin);
+openWebLoginBtn?.addEventListener('click', handleOpenLogin);
+
+checkAuthAgainBtn?.addEventListener('click', async () => {
+  loginStatus.textContent = 'Đang kiểm tra phiên đăng nhập từ trình duyệt...';
+  const authRes = await send('check-auth');
+  if (authRes?.ok && authRes?.loggedIn) {
+    loginStatus.textContent = '✓ Đã đồng bộ thành công!';
+    setTimeout(() => {
+      checkAndShowUI();
+    }, 300);
+  } else {
+    loginStatus.textContent = 'Chưa tìm thấy phiên đăng nhập. Vui lòng mở HiVocab đăng nhập rồi bấm lại.';
+  }
 });
 
-logoutButton.addEventListener('click', async () => {
+logoutButton?.addEventListener('click', async () => {
+  await send('logout');
   await chrome.storage.local.remove('hivocab_session');
   currentResult   = null;
   currentAudioUrl = null;
@@ -709,7 +735,13 @@ logoutButton.addEventListener('click', async () => {
 });
 
 chrome.runtime.onMessage.addListener(message => {
-  if (message?.type === 'login-success') checkAndShowUI();
+  if (message?.type === 'login-success') {
+    stopLoginPolling();
+    checkAndShowUI();
+  }
+  if (message?.type === 'logout-success') {
+    checkAndShowUI();
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {

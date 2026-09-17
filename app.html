@@ -9185,6 +9185,20 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Thiết lập lắng nghe trạng thái đăng nhập để xử lý luồng OAuth hoặc khi đăng nhập thay đổi
         HiDB.onAuthStateChange((event, session) => {
+            // Phát tín hiệu xác thực cho Chrome Extension (nếu có)
+            try {
+                window.postMessage({
+                    source: 'hi-vocab-app',
+                    action: 'auth-state-change',
+                    event: event,
+                    session: session ? {
+                        access_token: session.access_token,
+                        refresh_token: session.refresh_token || null,
+                        expires_at: session.expires_at || null
+                    } : null
+                }, '*');
+            } catch (_) {}
+
             if (event === 'PASSWORD_RECOVERY' || window._isPasswordRecoveryMode) {
                 console.log('AuthStateChange: Yêu cầu đặt lại mật khẩu');
                 window._isPasswordRecoveryMode = true;
@@ -9233,6 +9247,25 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (user) {
             console.log("Đã đăng nhập:", user.email);
             
+            // Đồng bộ phiên đăng nhập ban đầu cho Chrome Extension
+            try {
+                const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+                const raw = sbKey ? localStorage.getItem(sbKey) : null;
+                const parsed = raw ? JSON.parse(raw) : null;
+                if (parsed?.access_token) {
+                    window.postMessage({
+                        source: 'hi-vocab-app',
+                        action: 'auth-state-change',
+                        event: 'INITIAL_SESSION',
+                        session: {
+                            access_token: parsed.access_token,
+                            refresh_token: parsed.refresh_token || null,
+                            expires_at: parsed.expires_at || null
+                        }
+                    }, '*');
+                }
+            } catch (_) {}
+
             // CẬP NHẬT GIAO DIỆN PROFILE
             _updateProfileUI(user);
             HiDB.getTopics().then(topics => {

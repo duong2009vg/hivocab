@@ -16,24 +16,57 @@
   (document.body || document.documentElement).appendChild(root);
 
   // ── Auth sync ─────────────────────────────────────────────────────────────
-  function syncAuthToken() {
+  function isHiVocabHost() {
+    const h = window.location.hostname.toLowerCase();
+    return h === 'hivocab.site' || 
+           h.endsWith('.hivocab.site') || 
+           h.includes('hivocab') || 
+           h === 'localhost' || 
+           h === '127.0.0.1';
+  }
+
+  let _lastSentToken = null;
+
+  function syncAuthToken(directSession = null) {
     try {
-      const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
-      const raw   = sbKey ? localStorage.getItem(sbKey) : null;
-      const parsed = raw ? JSON.parse(raw) : null;
-      const session = parsed?.access_token ? {
-        access_token:  parsed.access_token,
-        refresh_token: parsed.refresh_token || null,
-        expires_at:    parsed.expires_at    || null,
-      } : null;
-      chrome.runtime.sendMessage({ type: 'store-auth-token', session });
+      let session = directSession;
+      if (!session) {
+        const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+        const raw   = sbKey ? localStorage.getItem(sbKey) : null;
+        const parsed = raw ? JSON.parse(raw) : null;
+        session = parsed?.access_token ? {
+          access_token:  parsed.access_token,
+          refresh_token: parsed.refresh_token || null,
+          expires_at:    parsed.expires_at    || null,
+        } : null;
+      }
+
+      const currentToken = session?.access_token || null;
+      if (currentToken !== _lastSentToken) {
+        _lastSentToken = currentToken;
+        chrome.runtime.sendMessage({ type: 'store-auth-token', session });
+      }
     } catch (_) {}
   }
 
-  if (window.location.origin === new URL(APP_URL).origin) {
+  if (isHiVocabHost()) {
+    // 1. Kiểm tra và sync ngay khi tải trang
     syncAuthToken();
+
+    // 2. Định kỳ kiểm tra (800ms) để bắt kịp phiên đăng nhập sau redirect OAuth hoặc submit form
+    const _tokenInterval = setInterval(() => syncAuthToken(), 800);
+    window.addEventListener('beforeunload', () => clearInterval(_tokenInterval));
+
+    // 3. Bắt sự kiện storage thay đổi từ các tab khác
     window.addEventListener('storage', e => {
       if (e.key?.startsWith('sb-') && e.key?.endsWith('-auth-token')) syncAuthToken();
+    });
+
+    // 4. Lắng nghe thông báo trực tiếp từ app (HiDB.onAuthStateChange)
+    window.addEventListener('message', e => {
+      if (e.data?.source === 'hi-vocab-app' && e.data?.action === 'auth-state-change') {
+        syncAuthToken(e.data.session);
+      }
     });
   }
 
@@ -384,7 +417,7 @@
         getTopicsData().then(() => renderFolderStep()).catch(err => {
           folderListEl.innerHTML = `<div class="hi-vocab-error">${esc(err.message)}</div>`;
           if (err.message.includes('đăng nhập') || err.message.includes('Chưa đăng nhập')) {
-            folderListEl.innerHTML += `<div style="margin-top:8px;text-align:center"><a href="${APP_URL}" target="_blank" style="color:#0b6b91;font-weight:700;text-decoration:underline">Mở app để đăng nhập</a></div>`;
+            folderListEl.innerHTML += `<div style="margin-top:8px;text-align:center"><a href="${APP_URL}/#login" target="_blank" style="color:#0b6b91;font-weight:700;text-decoration:underline">Mở app để đăng nhập</a></div>`;
           }
         });
         return;

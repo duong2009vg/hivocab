@@ -1,5 +1,7 @@
-const APP_URL      = 'https://hivocab.site';
-const API_BASE_URL = 'https://hivocab.site/api';
+const APP_URL           = 'https://hivocab.site';
+const API_BASE_URL      = 'https://hivocab.site/api';
+const SUPABASE_URL      = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
 
 // ── Session storage helpers ───────────────────────────────────────────────
 
@@ -31,7 +33,15 @@ async function setLoginWindowId(id) {
     }
 }
 
-// ── Token management (auto-refresh) ──────────────────────────────────────────
+// Theo dõi khi cửa sổ đăng nhập bị đóng thủ công
+chrome.windows.onRemoved.addListener(async (removedWinId) => {
+    const currentId = await getLoginWindowId();
+    if (currentId === removedWinId) {
+        await setLoginWindowId(null);
+    }
+});
+
+// ── Token management (auto-refresh & Supabase fallback) ──────────────────────
 
 async function getValidToken() {
     const session = await getSession();
@@ -44,24 +54,102 @@ async function getValidToken() {
 
     if (!session.refresh_token) { await clearSession(); return null; }
 
+    // 1. Thử qua backend API
     try {
         const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refresh_token: session.refresh_token }),
         });
-        const data = await res.json();
-        if (data.ok) {
-            await saveSession({
-                access_token:  data.access_token,
-                refresh_token: data.refresh_token,
-                expires_at:    data.expires_at,
-            });
-            return data.access_token;
+        if (res.ok) {
+            const data = await res.json();
+            if (data.ok && data.access_token) {
+                await saveSession({
+                    access_token:  data.access_token,
+                    refresh_token: data.refresh_token || session.refresh_token,
+                    expires_at:    data.expires_at,
+                });
+                return data.access_token;
+            }
         }
     } catch (_) {}
 
+    // 2. Fallback trực tiếp qua Supabase Auth REST
+    try {
+        const sbRes = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+            },
+            body: JSON.stringify({ refresh_token: session.refresh_token }),
+        });
+        if (sbRes.ok) {
+            const data = await sbRes.json();
+            if (data.access_token) {
+                await saveSession({
+                    access_token:  data.access_token,
+                    refresh_token: data.refresh_token || session.refresh_token,
+                    expires_at:    data.expires_at,
+                });
+                return data.access_token;
+            }
+        } else if (sbRes.status === 400 || sbRes.status === 401) {
+            await clearSession();
+            return null;
+        }
+    } catch (_) {}
+
+    // Nếu mạng tạm thời gián đoạn, vẫn giữ token nếu chưa quá hạn
+    if (session.expires_at && (session.expires_at - nowSec) > 0) {
+        return session.access_token;
+    }
+
     await clearSession();
+    return null;
+}
+
+// ── Tự động đồng bộ token từ các tab HiVocab đang mở ────────────────────────
+
+async function trySyncFromOpenTabs() {
+    try {
+        const tabs = await chrome.tabs.query({});
+        for (const tab of tabs) {
+            if (!tab.id || !tab.url) continue;
+            const url = tab.url.toLowerCase();
+            const isHiVocab = url.includes('hivocab.site') || 
+                              url.includes('hivocab.vercel.app') || 
+                              url.includes('localhost') || 
+                              url.includes('127.0.0.1');
+            if (!isHiVocab) continue;
+
+            try {
+                const results = await chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    func: () => {
+                        try {
+                            const sbKey = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+                            const raw = sbKey ? localStorage.getItem(sbKey) : null;
+                            if (!raw) return null;
+                            const parsed = JSON.parse(raw);
+                            return parsed?.access_token ? {
+                                access_token:  parsed.access_token,
+                                refresh_token: parsed.refresh_token || null,
+                                expires_at:    parsed.expires_at    || null,
+                            } : null;
+                        } catch (_) {
+                            return null;
+                        }
+                    }
+                });
+                const session = results?.[0]?.result;
+                if (session?.access_token) {
+                    await saveSession(session);
+                    return session.access_token;
+                }
+            } catch (_) {}
+        }
+    } catch (_) {}
     return null;
 }
 
@@ -91,15 +179,22 @@ async function apiPost(path, token, body) {
 async function openLoginWindow() {
     const existingId = await getLoginWindowId();
     if (existingId !== null) {
-        try { await chrome.windows.remove(existingId); } catch (_) {}
+        try {
+            const existingWin = await chrome.windows.get(existingId).catch(() => null);
+            if (existingWin) {
+                await chrome.windows.update(existingId, { focused: true });
+                return;
+            }
+        } catch (_) {}
         await setLoginWindowId(null);
     }
 
+    const loginUrl = `${APP_URL}/#login`;
     const win = await chrome.windows.create({
-        url:     APP_URL,
+        url:     loginUrl,
         type:    'popup',
-        width:   490,
-        height:  700,
+        width:   520,
+        height:  720,
         focused: true,
     });
     await setLoginWindowId(win.id);
@@ -110,7 +205,7 @@ async function closeLoginWindowIfOpen() {
     if (id === null) return;
     try { await chrome.windows.remove(id); } catch (_) {}
     await setLoginWindowId(null);
-    // Thông báo popup (best-effort, popup cũng tự poll)
+    // Thông báo popup
     chrome.runtime.sendMessage({ type: 'login-success' }).catch(() => {});
 }
 
@@ -125,10 +220,23 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             saveSession(session).then(async () => {
                 sendResponse({ ok: true });
                 await closeLoginWindowIfOpen();
+                chrome.runtime.sendMessage({ type: 'login-success' }).catch(() => {});
             });
         } else {
-            clearSession().then(() => sendResponse({ ok: true }));
+            clearSession().then(() => {
+                sendResponse({ ok: true });
+                chrome.runtime.sendMessage({ type: 'logout-success' }).catch(() => {});
+            });
         }
+        return true;
+    }
+
+    // Đăng xuất từ popup
+    if (message?.type === 'logout') {
+        clearSession().then(() => {
+            sendResponse({ ok: true });
+            chrome.runtime.sendMessage({ type: 'logout-success' }).catch(() => {});
+        });
         return true;
     }
 
@@ -140,11 +248,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    // Kiểm tra trạng thái đăng nhập
+    // Kiểm tra trạng thái đăng nhập (kết hợp tự động sync từ tab nếu chưa có)
     if (message?.type === 'check-auth') {
-        getValidToken()
-            .then(token => sendResponse({ ok: true, loggedIn: !!token }))
-            .catch(() => sendResponse({ ok: true, loggedIn: false }));
+        (async () => {
+            let token = await getValidToken();
+            if (!token) {
+                token = await trySyncFromOpenTabs();
+            }
+            sendResponse({ ok: true, loggedIn: !!token });
+        })().catch(() => sendResponse({ ok: true, loggedIn: false }));
         return true;
     }
 

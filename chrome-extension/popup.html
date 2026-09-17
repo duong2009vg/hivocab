@@ -32,7 +32,7 @@
         <img src="logo-mark.svg" alt="Hi">
       </div>
       <h2 class="login-title">Đăng nhập để lưu từ</h2>
-      <p class="login-desc">Một cửa sổ nhỏ sẽ bật lên. Đăng nhập 1 lần, extension tự hoạt động mãi.</p>
+      <p class="login-desc">Đăng nhập tài khoản HiVocab (Google hoặc Email/Mật khẩu) để đồng bộ dữ liệu ôn tập.</p>
       <button id="googleLoginBtn" class="google-login-btn" type="button">
         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
           <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -41,6 +41,16 @@
           <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
         </svg>
         Đăng nhập với Google
+      </button>
+      <button id="openWebLoginBtn" class="web-login-btn" type="button">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Đăng nhập bằng Email / Mật khẩu
+      </button>
+      <button id="checkAuthAgainBtn" class="refresh-auth-btn" type="button">
+        🔄 Tôi đã đăng nhập trên web — Đồng bộ ngay
       </button>
       <p id="loginStatus" class="login-status"></p>
     </section>
