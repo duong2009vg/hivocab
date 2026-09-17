@@ -619,7 +619,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 <body class="bg-background text-on-background font-sans antialiased overflow-x-hidden transition-colors duration-300">
 
 <!-- ==================== UI DÙNG CHUNG (SIDEBAR / HEADER / BOTTOM NAV) ==================== -->
-<nav id="main-sidebar" class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-5 bg-surface/85 dark:bg-[#191D23]/85 backdrop-blur-2xl border-r border-outline-variant/30 dark:border-[#31353A] z-50 transition-colors" style="display: none;">
+<nav id="main-sidebar" class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-5 bg-surface/85 backdrop-blur-2xl border-r border-outline-variant/30 z-50 transition-colors" style="display: none;">
     <div class="mb-6 shrink-0">
         <a onclick="window.navigateTo('dashboard')" class="inline-flex cursor-pointer" aria-label="Hi - Trang chu"><img class="brand-logo" src="logo-mark.svg" alt="Hi"/></a>
         <div onclick="window.handleProfileClick()" title="Đăng nhập / Hồ sơ cá nhân" class="mt-4 flex items-center gap-3 p-2 rounded-2xl hover:bg-surface-container dark:hover:bg-[#25292F] transition-all duration-200 cursor-pointer border border-transparent hover:border-outline-variant/20">
@@ -648,7 +648,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 </nav>
 
 <!-- Standalone Mobile Profile Dropdown -->
-<div id="mobile-profile-dropdown" class="hidden fixed right-4 w-56 bg-surface dark:bg-[#191D23] rounded-2xl shadow-2xl border border-outline-variant/20 dark:border-[#31353A] z-[9999] overflow-hidden fade-in" style="top: max(calc(env(safe-area-inset-top, 0px) + 20px), 72px);">
+<div id="mobile-profile-dropdown" class="hidden fixed right-4 w-56 bg-surface rounded-2xl shadow-2xl border border-outline-variant/20 z-[9999] overflow-hidden fade-in" style="top: max(calc(env(safe-area-inset-top, 0px) + 20px), 72px);">
     <div class="px-4 py-3 border-b border-outline-variant/15 dark:border-[#31353A]">
         <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
         <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
@@ -670,7 +670,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
     </button>
 </div>
 
-<nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-2xl bg-surface/85 dark:bg-[#0A0F15]/85 backdrop-blur-2xl border-t border-outline-variant/20 dark:border-[#31353A] shadow-[0_-2px_16px_rgba(0,0,0,0.03)] pb-safe transition-colors" style="display: none;">
+<nav id="mobile-bottom-nav" class="lg:hidden fixed bottom-0 w-full z-50 rounded-t-2xl bg-surface/85 backdrop-blur-2xl border-t border-outline-variant/20 shadow-[0_-2px_16px_rgba(0,0,0,0.03)] pb-safe transition-colors" style="display: none;">
     <div class="flex justify-around items-center h-[54px] w-full px-1">
         <a onclick="window.navigateTo('dashboard')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">home</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Trang chủ</span></a>
         <a onclick="navigateTo('topics')" class="nav-item flex flex-col items-center justify-center text-on-surface-variant flex-1 cursor-pointer transition-colors"><span class="material-symbols-outlined text-[22px]">grid_view</span><span class="text-[10px] mt-0.5 font-medium tracking-tight">Chủ đề</span></a>
@@ -777,7 +777,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 
 
 <!-- Footer ONLY for Landing Page -->
-<footer class="border-t border-gray-200/80 dark:border-white/10 bg-white dark:bg-[#12141c] text-[#6E6E73] text-sm py-12 px-8">
+<footer class="border-t border-gray-200/80 dark:border-white/10 bg-white dark:bg-surface-container-low text-[#6E6E73] text-sm py-12 px-8">
     <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
         <!-- Col 1: Brand info -->
         <div class="md:col-span-2 space-y-4 pr-0 md:pr-8">
@@ -1653,7 +1653,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 </div>
 
 <!-- ==================== PAGE: THƯ VIỆN HỌC TẬP CỘNG ĐỒNG (THREADS-STYLE) ==================== -->
-<div id="page-library" class="page bg-surface dark:bg-black">
+<div id="page-library" class="page bg-surface">
 <main class="lg:ml-64 min-h-screen lg:pt-6 pb-28 lg:pb-12 px-0 sm:px-4 flex flex-col items-center">
     <div class="max-w-[620px] w-full flex flex-col gap-0 sm:gap-4 fade-in">
 
