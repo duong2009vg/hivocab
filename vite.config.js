@@ -38,6 +38,7 @@ function copyStaticAssetsPlugin() {
 
       // 2. Static root assets
       const rootAssets = [
+        'themes.css',
         'logo-mark.svg',
         'logo-mark-white.svg',
         'apple-touch-icon.png',

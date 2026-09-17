@@ -20,13 +20,125 @@
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="/css/hivocab.min.css?v=20260917-v2"/>
+<link rel="stylesheet" href="/css/hivocab.min.css?v=20260918-v3"/>
 <style>
 .material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
 .icon-fill{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
 .glass-card{background-color:rgba(255,255,255,0.82);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(210,210,215,0.6);box-shadow:0 4px 20px rgba(0,0,0,0.03)}
 .soft-shadow{box-shadow:0 2px 8px rgba(0,0,0,0.03),0 1px 2px rgba(0,0,0,0.02);border:1px solid #D2D2D7}
 .soft-shadow:hover{box-shadow:0 8px 24px rgba(0,0,0,0.06);border-color:#0071E3;transform:translateY(-1px);transition:all .25s ease}
+
+/* FLOATING LIQUID GLASS MOBILE DOCK */
+.mobile-floating-dock {
+    position: fixed !important;
+    left: 50% !important;
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+    transform: translateX(-50%) !important;
+    width: calc(100% - 24px) !important;
+    max-width: 440px !important;
+    height: 60px !important;
+    border-radius: 9999px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    padding: 6px 6px !important;
+    z-index: 999 !important;
+    backdrop-filter: blur(20px) saturate(180%) contrast(115%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) contrast(115%) !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    border: 1px solid rgba(255, 255, 255, 0.55) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+    isolation: isolate;
+}
+
+.mobile-floating-dock::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow:
+        inset 2px 2px 5px -2px rgba(255, 255, 255, 0.45),
+        inset -2px -2px 5px 2px rgba(255, 255, 255, 0.2),
+        inset 0 -2px 0 rgba(255, 255, 255, 0.15);
+    pointer-events: none;
+    z-index: 1;
+}
+
+html.dark .mobile-floating-dock {
+    background: rgba(22, 24, 30, 0.82) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55) !important;
+}
+
+html.dark .mobile-floating-dock::after {
+    box-shadow:
+        inset 1.5px 1.5px 3px -1px rgba(255, 255, 255, 0.25),
+        inset -1.5px -1.5px 3px 1px rgba(0, 0, 0, 0.5),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dock-nav-item {
+    position: relative;
+    z-index: 2;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    padding: 6px 2px !important;
+    border-radius: 9999px !important;
+    color: var(--hi-text-muted, #64748b) !important;
+    text-decoration: none !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    transition: background-color 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+                color 0.2s ease,
+                transform 0.15s ease,
+                box-shadow 0.2s ease !important;
+}
+
+.dock-nav-item:active {
+    transform: scale(0.92) !important;
+}
+
+.dock-nav-item .dock-icon {
+    font-size: 22px !important;
+    line-height: 1 !important;
+    display: block !important;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.dock-nav-item .dock-label {
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    margin-top: 3px !important;
+    letter-spacing: -0.01em !important;
+    white-space: nowrap !important;
+    display: block !important;
+}
+
+.dock-nav-item.active {
+    background: rgba(255, 255, 255, 0.88) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), inset 1px 1px 2px rgba(255, 255, 255, 0.8) !important;
+    color: var(--hi-p, #0071E3) !important;
+    font-weight: 700 !important;
+}
+
+html.dark .dock-nav-item.active {
+    background: rgba(255, 255, 255, 0.14) !important;
+    box-shadow: inset 1.5px 1.5px 3px -1px rgba(255, 255, 255, 0.3), inset -1.5px -1px 3px 0 rgba(255, 255, 255, 0.15) !important;
+    color: var(--hi-p, #38BDF8) !important;
+    font-weight: 700 !important;
+}
+
+.dock-nav-item.active .dock-icon {
+    transform: translateY(-1px) scale(1.08) !important;
+}
+
 .page{display:none;min-height:100vh}.page.active{display:block}
 #page-thpt-room{display:none!important}
 #page-thpt-room.active{
@@ -629,7 +741,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
     } catch (e) {}
 })();
 </script>
-<link rel="stylesheet" href="/themes.css?v=20260917-v2"/>
+<link rel="stylesheet" href="/themes.css?v=20260918-v3"/>
 </head>
 <body class="bg-background text-on-background font-sans antialiased overflow-x-hidden transition-colors duration-300">
 
@@ -682,26 +794,26 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
     </button>
 </div>
 
-<nav id="mobile-bottom-nav" class="lg:hidden mobile-floating-dock" style="display: none;">
-    <a onclick="window.navigateTo('dashboard')" class="nav-item dock-nav-item" data-tab="dashboard">
-        <span class="material-symbols-outlined dock-icon">home</span>
-        <span class="dock-label">Trang chủ</span>
+<nav id="mobile-bottom-nav" class="lg:hidden mobile-floating-dock fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-[440px] h-[60px] rounded-full flex items-center justify-around px-2" style="display: none;">
+    <a onclick="window.navigateTo('dashboard')" class="nav-item dock-nav-item flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-full cursor-pointer" data-tab="dashboard">
+        <span class="material-symbols-outlined dock-icon text-[22px] leading-none">home</span>
+        <span class="dock-label text-[10px] font-semibold leading-tight mt-1 whitespace-nowrap">Trang chủ</span>
     </a>
-    <a onclick="navigateTo('topics')" class="nav-item dock-nav-item" data-tab="topics">
-        <span class="material-symbols-outlined dock-icon">category</span>
-        <span class="dock-label">Chủ đề</span>
+    <a onclick="navigateTo('topics')" class="nav-item dock-nav-item flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-full cursor-pointer" data-tab="topics">
+        <span class="material-symbols-outlined dock-icon text-[22px] leading-none">category</span>
+        <span class="dock-label text-[10px] font-semibold leading-tight mt-1 whitespace-nowrap">Chủ đề</span>
     </a>
-    <a onclick="navigateTo('library')" class="nav-item dock-nav-item" data-tab="library">
-        <span class="material-symbols-outlined dock-icon">explore</span>
-        <span class="dock-label">Thư viện</span>
+    <a onclick="navigateTo('library')" class="nav-item dock-nav-item flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-full cursor-pointer" data-tab="library">
+        <span class="material-symbols-outlined dock-icon text-[22px] leading-none">explore</span>
+        <span class="dock-label text-[10px] font-semibold leading-tight mt-1 whitespace-nowrap">Thư viện</span>
     </a>
-    <a onclick="navigateTo('vocabulary')" class="nav-item dock-nav-item" data-tab="vocabulary">
-        <span class="material-symbols-outlined dock-icon">bookmark</span>
-        <span class="dock-label">Sổ từ</span>
+    <a onclick="navigateTo('vocabulary')" class="nav-item dock-nav-item flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-full cursor-pointer" data-tab="vocabulary">
+        <span class="material-symbols-outlined dock-icon text-[22px] leading-none">bookmark</span>
+        <span class="dock-label text-[10px] font-semibold leading-tight mt-1 whitespace-nowrap">Sổ từ</span>
     </a>
-    <a onclick="navigateTo('dictionary')" class="nav-item dock-nav-item" data-tab="dictionary">
-        <span class="material-symbols-outlined dock-icon">search</span>
-        <span class="dock-label">Tra từ</span>
+    <a onclick="navigateTo('dictionary')" class="nav-item dock-nav-item flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-full cursor-pointer" data-tab="dictionary">
+        <span class="material-symbols-outlined dock-icon text-[22px] leading-none">search</span>
+        <span class="dock-label text-[10px] font-semibold leading-tight mt-1 whitespace-nowrap">Tra từ</span>
     </a>
 </nav>
 
