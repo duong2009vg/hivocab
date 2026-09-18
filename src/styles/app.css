@@ -59,7 +59,7 @@
     max-width: 420px !important;
     height: 54px !important;
     border-radius: 9999px !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: space-around !important;
     padding: 4px 6px !important;
@@ -70,6 +70,20 @@
     border: 1px solid rgba(255, 255, 255, 0.55) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
     isolation: isolate;
+  }
+
+  @media (min-width: 1024px) {
+    .mobile-floating-dock,
+    #mobile-bottom-nav {
+      display: none !important;
+    }
+  }
+
+  .mobile-floating-dock.hidden,
+  #mobile-bottom-nav.hidden,
+  body:has(#page-landing.active) #mobile-bottom-nav,
+  body:has(#page-landing.active) .mobile-floating-dock {
+    display: none !important;
   }
 
   .mobile-floating-dock::after {

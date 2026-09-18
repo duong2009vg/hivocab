@@ -624,7 +624,10 @@
             const mobileHeader = document.getElementById('main-mobile-header');
             if (mobileHeader) mobileHeader.style.display = 'none';
             const mobileNav = document.getElementById('mobile-bottom-nav');
-            if (mobileNav) mobileNav.style.display = 'none';
+            if (mobileNav) {
+                mobileNav.classList.add('hidden');
+                mobileNav.style.display = 'none';
+            }
 
             window.scrollTo(0, 0);
 

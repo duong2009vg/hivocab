@@ -92,7 +92,14 @@ export function navigateTo(targetPageId, options = {}) {
 
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if (bottomNav) {
-      bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
+      const shouldShowBottomNav = (isMainTab || isTopicDetail) && pageId !== 'landing';
+      if (shouldShowBottomNav) {
+        bottomNav.classList.remove('hidden');
+        bottomNav.style.display = '';
+      } else {
+        bottomNav.classList.add('hidden');
+        bottomNav.style.display = 'none';
+      }
     }
 
     // Scroll to top on navigation

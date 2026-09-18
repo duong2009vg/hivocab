@@ -39,7 +39,7 @@
     max-width: 420px !important;
     height: 54px !important;
     border-radius: 9999px !important;
-    display: flex !important;
+    display: flex;
     align-items: center !important;
     justify-content: space-around !important;
     padding: 4px 6px !important;
@@ -50,6 +50,20 @@
     border: 1px solid rgba(255, 255, 255, 0.55) !important;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
     isolation: isolate;
+}
+
+@media (min-width: 1024px) {
+    .mobile-floating-dock,
+    #mobile-bottom-nav {
+        display: none !important;
+    }
+}
+
+.mobile-floating-dock.hidden,
+#mobile-bottom-nav.hidden,
+body:has(#page-landing.active) #mobile-bottom-nav,
+body:has(#page-landing.active) .mobile-floating-dock {
+    display: none !important;
 }
 
 .mobile-floating-dock::after {
@@ -795,7 +809,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
     </button>
 </div>
 
-<nav id="mobile-bottom-nav" class="lg:hidden mobile-floating-dock fixed bottom-[max(8px,calc(env(safe-area-inset-bottom,0px)-16px))] left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-[420px] h-[54px] rounded-full flex items-center justify-around px-1.5" style="display: none;">
+<nav id="mobile-bottom-nav" class="hidden lg:hidden mobile-floating-dock fixed bottom-[max(8px,calc(env(safe-area-inset-bottom,0px)-16px))] left-1/2 -translate-x-1/2 z-50 w-[calc(100%-24px)] max-w-[420px] h-[54px] rounded-full items-center justify-around px-1.5" style="display: none;">
     <a onclick="window.navigateTo('dashboard')" class="nav-item dock-nav-item flex-1 flex flex-col items-center justify-center h-full py-1 px-1 rounded-full cursor-pointer" data-tab="dashboard">
         <span class="material-symbols-outlined dock-icon text-[22px] leading-none">home</span>
         <span class="dock-label text-[10px] font-semibold leading-tight mt-1 whitespace-nowrap">Trang chủ</span>
@@ -3199,7 +3213,14 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
     // Mobile Bottom Navigation
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if (bottomNav) {
-        bottomNav.style.display = (isMainTab || isTopicDetail) ? '' : 'none';
+        const shouldShowBottomNav = (isMainTab || isTopicDetail) && pageName !== 'landing';
+        if (shouldShowBottomNav) {
+            bottomNav.classList.remove('hidden');
+            bottomNav.style.display = '';
+        } else {
+            bottomNav.classList.add('hidden');
+            bottomNav.style.display = 'none';
+        }
     }
     // Khi vào trang Topics: render tabs + grid
     if (pageName === 'topics') {
