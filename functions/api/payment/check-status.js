@@ -89,3 +89,13 @@ export async function onRequestGet(context) {
         });
     }
 }
+
+export async function onRequest(context) {
+    const method = context.request.method.toUpperCase();
+    if (method === 'OPTIONS') return onRequestOptions(context);
+    if (method === 'GET') return onRequestGet(context);
+    return new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
+}

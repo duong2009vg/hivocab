@@ -1,9 +1,7 @@
 // functions/api/payment/webhook.js
 // Cloudflare Pages Function: POST /api/payment/webhook
 // Nhận thông báo thanh toán thành công từ PayOS và kích hoạt PRO
-// Xác thực chữ ký số HMAC-SHA256 bằng PAYOS_CHECKSUM_KEY
-
-import crypto from 'node:crypto';
+// Xác thực chữ ký số HMAC-SHA256 bằng Web Crypto API tiêu chuẩn
 
 const PLAN_DAYS = {
     pro_1m: 30,
@@ -19,9 +17,40 @@ const corsHeaders = {
 };
 
 /**
+ * Tính HMAC-SHA256 bằng Web Crypto API tiêu chuẩn (hoạt động 100% trên Cloudflare Workers/Pages không cần node:crypto)
+ */
+async function hmacSha256(key, message) {
+    const enc = new TextEncoder();
+    const keyData = enc.encode(key);
+    const msgData = enc.encode(message);
+    const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+    return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * So sánh an toàn thời gian chống timing attack
+ */
+function timingSafeEqual(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string') return false;
+    if (a.length !== b.length) return false;
+    let result = 0;
+    for (let i = 0; i < a.length; i++) {
+        result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+    }
+    return result === 0;
+}
+
+/**
  * Xác thực chữ ký số HMAC-SHA256 của PayOS
  */
-function verifySignature(data, signature, checksumKey) {
+async function verifySignature(data, signature, checksumKey) {
     if (!data || !signature || !checksumKey) return false;
 
     // 1. Sắp xếp key theo bảng chữ cái A-Z
@@ -34,20 +63,10 @@ function verifySignature(data, signature, checksumKey) {
         .join('&');
 
     // 3. Tính HMAC-SHA256
-    const computedSignature = crypto
-        .createHmac('sha256', checksumKey)
-        .update(signData)
-        .digest('hex');
+    const computedSignature = await hmacSha256(checksumKey, signData);
 
     // 4. So sánh an toàn thời gian chống timing attack
-    try {
-        const computedBuffer = Buffer.from(computedSignature, 'utf8');
-        const signatureBuffer = Buffer.from(signature, 'utf8');
-        if (computedBuffer.length !== signatureBuffer.length) return false;
-        return crypto.timingSafeEqual(computedBuffer, signatureBuffer);
-    } catch (_) {
-        return false;
-    }
+    return timingSafeEqual(computedSignature.toLowerCase(), String(signature).toLowerCase());
 }
 
 export async function onRequestOptions() {
@@ -94,7 +113,7 @@ export async function onRequestPost(context) {
 
     // 2. Xác thực chữ ký điện tử
     if (PAYOS_CHECKSUM_KEY) {
-        const isValid = verifySignature(data, signature, PAYOS_CHECKSUM_KEY);
+        const isValid = await verifySignature(data, signature, PAYOS_CHECKSUM_KEY);
         if (!isValid) {
             console.error('[PayOS Webhook] Invalid signature!', { body });
             return new Response(JSON.stringify({ success: false, error: 'Invalid signature' }), {
@@ -250,4 +269,15 @@ export async function onRequestPost(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
+}
+
+export async function onRequest(context) {
+    const method = context.request.method.toUpperCase();
+    if (method === 'OPTIONS') return onRequestOptions(context);
+    if (method === 'GET') return onRequestGet(context);
+    if (method === 'POST') return onRequestPost(context);
+    return new Response(JSON.stringify({ success: false, error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 }

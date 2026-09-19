@@ -2,8 +2,6 @@
 // Cloudflare Pages Function: POST /api/payment/create-order
 // Tạo đơn hàng PayOS và trả về checkoutUrl cho Embedded Form
 
-import crypto from 'node:crypto';
-
 const PLANS = {
     pro_1m: {
         id: 'pro_1m',
@@ -33,16 +31,34 @@ const PLANS = {
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 /**
+ * Tính HMAC-SHA256 bằng Web Crypto API tiêu chuẩn (hoạt động 100% trên Cloudflare Workers/Pages không cần node:crypto)
+ */
+async function hmacSha256(key, message) {
+    const enc = new TextEncoder();
+    const keyData = enc.encode(key);
+    const msgData = enc.encode(message);
+    const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        keyData,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['sign']
+    );
+    const signature = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+    return Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
  * Tính chữ ký số HMAC-SHA256 cho yêu cầu tạo link thanh toán PayOS
  */
-function createPayOSSignature({ amount, cancelUrl, description, orderCode, returnUrl }, checksumKey) {
+async function createPayOSSignature({ amount, cancelUrl, description, orderCode, returnUrl }, checksumKey) {
     const rawData = `amount=${amount}&cancelUrl=${cancelUrl}&description=${description}&orderCode=${orderCode}&returnUrl=${returnUrl}`;
-    return crypto.createHmac('sha256', checksumKey).update(rawData).digest('hex');
+    return await hmacSha256(checksumKey, rawData);
 }
 
 export async function onRequestOptions() {
@@ -134,8 +150,8 @@ export async function onRequestPost(context) {
         const returnUrl = `${origin}/#pricing?status=success&orderCode=${orderCode}`;
         const cancelUrl = `${origin}/#pricing?status=cancelled&orderCode=${orderCode}`;
 
-        // 5. Tính signature cho PayOS
-        const signature = createPayOSSignature({
+        // 5. Tính signature cho PayOS bằng Web Crypto
+        const signature = await createPayOSSignature({
             amount: plan.amount,
             cancelUrl,
             description,
@@ -237,4 +253,14 @@ export async function onRequestPost(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
+}
+
+export async function onRequest(context) {
+    const method = context.request.method.toUpperCase();
+    if (method === 'OPTIONS') return onRequestOptions(context);
+    if (method === 'POST') return onRequestPost(context);
+    return new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
 }
