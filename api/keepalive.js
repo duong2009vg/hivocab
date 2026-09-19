@@ -27,11 +27,9 @@ export default async function handler(req, res) {
     }
 
     const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret) {
-        const auth = req.headers.authorization || '';
-        if (auth !== `Bearer ${cronSecret}`) {
-            return res.status(401).json({ ok: false, error: 'Unauthorized' });
-        }
+    const authHeader = req.headers.authorization || '';
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+        return res.status(401).json({ ok: false, error: 'Unauthorized: missing or invalid CRON_SECRET' });
     }
 
     const supabaseUrl = process.env.SUPABASE_URL;

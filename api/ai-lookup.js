@@ -4,11 +4,7 @@
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-function setCors(res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-}
+import { setCors } from './_cors.js';
 
 const rateLimitMap = new Map();
 const CLEANUP_INTERVAL = 60000;
@@ -51,10 +47,10 @@ function extractJson(text) {
 }
 
 export default async function handler(req, res) {
-    setCors(res);
+    setCors(req, res, ['POST', 'OPTIONS']);
 
     if (req.method === 'OPTIONS') {
-        return res.status(200).end();
+        return res.status(204).end();
     }
 
     if (req.method !== 'POST') {

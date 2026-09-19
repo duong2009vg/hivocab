@@ -154,6 +154,157 @@ html.dark .dock-nav-item.active {
     transform: translateY(-1px) scale(1.08) !important;
 }
 
+/* ==================== AI GENERATE BUTTON (UIVERSE COMPONENT) ==================== */
+.btn-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #a855f7 0%, #6366f1 50%, #ec4899 100%);
+  box-shadow: 0 2px 10px rgba(168, 85, 247, 0.2);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  vertical-align: middle;
+}
+.btn-wrapper:hover {
+  box-shadow: 0 4px 18px rgba(168, 85, 247, 0.4);
+  transform: translateY(-1px);
+}
+.btn-wrapper:active {
+  transform: scale(0.98);
+}
+.btn-wrapper .btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: none;
+  outline: none;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  background: #ffffff;
+  color: #1e1b4b;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  user-select: none;
+  overflow: hidden;
+  line-height: 1.4;
+}
+html.dark .btn-wrapper .btn {
+  background: #13161a;
+  color: #f1f5f9;
+}
+.btn-wrapper .btn-svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: #a855f7;
+  stroke-width: 2;
+  transition: transform 0.3s ease, filter 0.3s ease;
+}
+html.dark .btn-wrapper .btn-svg {
+  stroke: #c084fc;
+}
+.btn-wrapper .txt-wrapper {
+  position: relative;
+  height: 17px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 66px;
+}
+.btn-wrapper .txt-1 {
+  display: flex;
+  align-items: center;
+  gap: 0.5px;
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+.btn-wrapper .txt-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5px;
+  transform: translateY(115%);
+  opacity: 0;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  pointer-events: none;
+  color: #9333ea;
+}
+html.dark .btn-wrapper .txt-2 {
+  color: #c084fc;
+}
+.btn-wrapper .btn-letter {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+.btn-wrapper .btn:hover .txt-1,
+.btn-wrapper .btn.is-generating .txt-1,
+.btn-wrapper .btn:disabled .txt-1 {
+  transform: translateY(-115%);
+  opacity: 0;
+}
+.btn-wrapper .btn:hover .txt-2,
+.btn-wrapper .btn.is-generating .txt-2,
+.btn-wrapper .btn:disabled .txt-2 {
+  transform: translateY(0);
+  opacity: 1;
+}
+.btn-wrapper .btn:hover .btn-svg,
+.btn-wrapper .btn.is-generating .btn-svg {
+  animation: flicker 1.4s infinite ease-in-out;
+}
+.btn-wrapper .btn:hover .txt-2 .btn-letter,
+.btn-wrapper .btn.is-generating .txt-2 .btn-letter {
+  animation: letter-anim 1.2s infinite ease-in-out;
+}
+.btn-wrapper .txt-2 .btn-letter:nth-child(1) { animation-delay: 0.00s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(2) { animation-delay: 0.08s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(3) { animation-delay: 0.16s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(4) { animation-delay: 0.24s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(5) { animation-delay: 0.32s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(6) { animation-delay: 0.40s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(7) { animation-delay: 0.48s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(8) { animation-delay: 0.56s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(9) { animation-delay: 0.64s; }
+.btn-wrapper .txt-2 .btn-letter:nth-child(10) { animation-delay: 0.72s; }
+
+@keyframes letter-anim {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.85;
+  }
+  50% {
+    transform: translateY(-2.5px);
+    opacity: 1;
+    color: #ec4899;
+  }
+}
+@keyframes flicker {
+  0%, 100% {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: rotate(15deg) scale(1.15);
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.75));
+  }
+}
+
 .page{display:none;min-height:100vh}.page.active{display:block}
 #page-thpt-room{display:none!important}
 #page-thpt-room.active{
@@ -3964,11 +4115,42 @@ window.addEventListener('hashchange', () => {
           <label for="add-word-english" class="text-xs font-bold text-outline uppercase tracking-wider">
             Từ tiếng Anh / Cụm từ <span class="text-rose-500">*</span>
           </label>
-          <button type="button" id="btn-ai-autofill" onclick="window.triggerAiLookup()" 
-                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-500/15 via-primary/10 to-primary/20 text-primary hover:from-amber-500/25 hover:to-primary/30 border border-primary/25 transition-all active:scale-95 shadow-2xs cursor-pointer">
-            <span class="material-symbols-outlined text-[16px] text-amber-500" id="ai-fill-icon">auto_awesome</span>
-            <span id="ai-fill-text">✨ AI Điền tự động</span>
-          </button>
+          <div class="btn-wrapper">
+            <button type="button" id="btn-ai-autofill" onclick="window.triggerAiLookup()" class="btn" title="AI Điền tự động">
+              <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0 3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+                ></path>
+              </svg>
+
+              <div class="txt-wrapper">
+                <div class="txt-1">
+                  <span class="btn-letter">G</span>
+                  <span class="btn-letter">e</span>
+                  <span class="btn-letter">n</span>
+                  <span class="btn-letter">e</span>
+                  <span class="btn-letter">r</span>
+                  <span class="btn-letter">a</span>
+                  <span class="btn-letter">t</span>
+                  <span class="btn-letter">e</span>
+                </div>
+                <div class="txt-2">
+                  <span class="btn-letter">G</span>
+                  <span class="btn-letter">e</span>
+                  <span class="btn-letter">n</span>
+                  <span class="btn-letter">e</span>
+                  <span class="btn-letter">r</span>
+                  <span class="btn-letter">a</span>
+                  <span class="btn-letter">t</span>
+                  <span class="btn-letter">i</span>
+                  <span class="btn-letter">n</span>
+                  <span class="btn-letter">g</span>
+                </div>
+              </div>
+            </button>
+          </div>
         </div>
         <div class="relative">
           <input type="text" id="add-word-english" required placeholder="Ví dụ: resilient, breakthrough, persist..."
@@ -4128,11 +4310,42 @@ window.addEventListener('hashchange', () => {
 
       <!-- Action buttons for parsing / AI fill -->
       <div class="flex flex-wrap items-center gap-2 pt-1">
-        <button type="button" id="btn-bulk-ai-generate" onclick="window.generateBulkWordsAi()"
-          class="flex-1 min-w-[200px] px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500/15 via-primary/15 to-primary/25 text-primary hover:from-amber-500/25 hover:to-primary/35 border border-primary/30 transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-          <span class="material-symbols-outlined text-[18px] text-amber-500" id="bulk-ai-icon">auto_awesome</span>
-          <span id="bulk-ai-text">✨ AI Điền tự động hàng loạt</span>
-        </button>
+        <div class="btn-wrapper flex-1 min-w-[200px]">
+          <button type="button" id="btn-bulk-ai-generate" onclick="window.generateBulkWordsAi()" class="btn w-full" title="AI Điền tự động hàng loạt">
+            <svg class="btn-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"
+              ></path>
+            </svg>
+
+            <div class="txt-wrapper">
+              <div class="txt-1">
+                <span class="btn-letter">G</span>
+                <span class="btn-letter">e</span>
+                <span class="btn-letter">n</span>
+                <span class="btn-letter">e</span>
+                <span class="btn-letter">r</span>
+                <span class="btn-letter">a</span>
+                <span class="btn-letter">t</span>
+                <span class="btn-letter">e</span>
+              </div>
+              <div class="txt-2">
+                <span class="btn-letter">G</span>
+                <span class="btn-letter">e</span>
+                <span class="btn-letter">n</span>
+                <span class="btn-letter">e</span>
+                <span class="btn-letter">r</span>
+                <span class="btn-letter">a</span>
+                <span class="btn-letter">t</span>
+                <span class="btn-letter">i</span>
+                <span class="btn-letter">n</span>
+                <span class="btn-letter">g</span>
+              </div>
+            </div>
+          </button>
+        </div>
         <button type="button" onclick="window.parseBulkWordsRaw()"
           class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-colors cursor-pointer">
           Trích xuất từ danh sách
@@ -5686,6 +5899,7 @@ const DEFAULT_TOPIC_CATEGORIES = [
     'IELTS Actual Tests',
     'CAM',
     'Destination C1-C2',
+    'SAT',
     'General English',
     'IELTS/TOEIC',
     'Oxford 3000',
@@ -5705,6 +5919,7 @@ function _topicCategoryIcon(category) {
     if (compact.includes('actual') || compact.includes('vol')) return 'library_books';
     if (compact.includes('dest')) return 'school';
     if (compact === 'cam' || compact.includes('cambridge')) return 'menu_book';
+    if (compact.includes('sat')) return 'school';
     if (compact.includes('ielts') || compact.includes('toeic')) return 'military_tech';
     if (compact.includes('cefr')) return 'workspace_premium';
     if (compact.includes('thpt')) return 'school';
@@ -6672,6 +6887,7 @@ window.renderTopicPickerFolderStep = function() {
         'oxford3000': { label: 'Oxford 3000', icon: '📕', desc: '3000 từ vựng cốt lõi' },
         'Destination C1-C2': { label: 'Destination C1-C2', icon: '📙', desc: 'Từ vựng học thuật nâng cao' },
         'THPT/ĐGNL': { label: 'Luyện thi THPT / ĐGNL', icon: '🎓', desc: 'Bộ từ vựng trọng tâm thi cử' },
+        'SAT': { label: 'SAT Vocabulary', icon: '🎯', desc: 'Từ vựng luyện thi SAT chuẩn Barron' },
         'General English': { label: 'General English', icon: '📁', desc: 'Sổ tay từ vựng & chủ đề cá nhân' },
     };
 
@@ -7322,7 +7538,10 @@ window.openAddWordModal = function(topicId = null, passageId = null) {
     const aiBtn  = document.getElementById('btn-ai-autofill');
     const aiIcon = document.getElementById('ai-fill-icon');
     const aiText = document.getElementById('ai-fill-text');
-    if (aiBtn) aiBtn.disabled = false;
+    if (aiBtn) {
+        aiBtn.disabled = false;
+        aiBtn.classList.remove('is-generating');
+    }
     if (aiIcon) {
         aiIcon.textContent = 'auto_awesome';
         aiIcon.classList.remove('animate-spin');
@@ -7473,7 +7692,10 @@ window.triggerAiLookup = async function() {
     const aiIcon = document.getElementById('ai-fill-icon');
     const aiText = document.getElementById('ai-fill-text');
 
-    if (aiBtn) aiBtn.disabled = true;
+    if (aiBtn) {
+        aiBtn.disabled = true;
+        aiBtn.classList.add('is-generating');
+    }
     if (aiIcon) {
         aiIcon.textContent = 'sync';
         aiIcon.classList.add('animate-spin');
@@ -7509,8 +7731,11 @@ window.triggerAiLookup = async function() {
         setTimeout(() => {
             if (aiIcon) aiIcon.textContent = 'auto_awesome';
             if (aiText) aiText.textContent = '✨ AI Điền tự động';
-            if (aiBtn) aiBtn.disabled = false;
-        }, 1800);
+            if (aiBtn) {
+                aiBtn.disabled = false;
+                aiBtn.classList.remove('is-generating');
+            }
+        }, 1200);
 
     } catch (err) {
         console.error('[triggerAiLookup] Error:', err);
@@ -7523,7 +7748,10 @@ window.triggerAiLookup = async function() {
             aiIcon.classList.remove('animate-spin');
         }
         if (aiText) aiText.textContent = '✨ AI Điền tự động';
-        if (aiBtn) aiBtn.disabled = false;
+        if (aiBtn) {
+            aiBtn.disabled = false;
+            aiBtn.classList.remove('is-generating');
+        }
     }
 };
 
@@ -7913,7 +8141,10 @@ window.generateBulkWordsAi = async function() {
 
     if (wordList.length === 0) return;
 
-    if (aiBtn) aiBtn.disabled = true;
+    if (aiBtn) {
+        aiBtn.disabled = true;
+        aiBtn.classList.add('is-generating');
+    }
     if (aiIcon) {
         aiIcon.textContent = 'sync';
         aiIcon.classList.add('animate-spin');
@@ -7952,7 +8183,10 @@ window.generateBulkWordsAi = async function() {
             errEl.classList.remove('hidden');
         }
     } finally {
-        if (aiBtn) aiBtn.disabled = false;
+        if (aiBtn) {
+            aiBtn.disabled = false;
+            aiBtn.classList.remove('is-generating');
+        }
         if (aiIcon) {
             aiIcon.textContent = 'auto_awesome';
             aiIcon.classList.remove('animate-spin');
@@ -8549,7 +8783,7 @@ function _renderCategoryDropdown(preselectCat) {
     if (!catSel) return;
     const catMap = new Map();
     const defaultCats = [
-        'CAM','Destination C1-C2','IELTS','Oxford 3000','Idioms & Collocations',
+        'CAM','Destination C1-C2','SAT','IELTS','Oxford 3000','Idioms & Collocations',
         'THPT/ĐGNL','General English','CEFR','Grammar'
     ];
     defaultCats.forEach(c => catMap.set(c.toLowerCase(), c));

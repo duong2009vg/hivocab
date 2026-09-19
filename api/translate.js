@@ -2,11 +2,7 @@ const MAX_ITEMS = 24;
 const MAX_TEXT_LENGTH = 900;
 const DEEPL_URL = 'https://api-free.deepl.com/v2/translate';
 
-function setCors(res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
+import { setCors } from './_cors.js';
 
 function normalizeTexts(body) {
     const value = Array.isArray(body?.texts) ? body.texts : [body?.text];
@@ -43,7 +39,7 @@ function isRateLimited(ip, maxRequests = 35, windowMs = 60000) {
 }
 
 export default async function handler(req, res) {
-    setCors(res);
+    setCors(req, res);
 
     if (req.method === 'OPTIONS') {
         return res.status(204).end();

@@ -5,11 +5,7 @@
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
-function setCors(res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
+import { setCors } from './_cors.js';
 
 // Rate Limiting in-memory cache
 const rateLimitMap = new Map();
@@ -37,7 +33,7 @@ function isRateLimited(ip, maxRequests = 25, windowMs = 60000) {
 }
 
 export default async function handler(req, res) {
-    setCors(res);
+    setCors(req, res, ['POST', 'OPTIONS']);
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 

@@ -5,14 +5,10 @@
 const SUPABASE_URL      = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-function setCors(res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
+import { setCors } from '../_cors.js';
 
 export default async function handler(req, res) {
-    setCors(res);
+    setCors(req, res, ['POST', 'OPTIONS']);
     if (req.method === 'OPTIONS') return res.status(204).end();
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
