@@ -4913,12 +4913,14 @@ window.addEventListener('message', async (event) => {
 });
 
 // KẾT NỐI SUPABASE THẬT
-document.addEventListener("DOMContentLoaded", async () => {
+async function bootstrapHiDB() {
     try {
-        await HiDB.init(
-            'https://swehdtrqjyklmsefkjdf.supabase.co', 
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
-        );
+        if (!HiDB.isReady()) {
+            await HiDB.init(
+                'https://swehdtrqjyklmsefkjdf.supabase.co', 
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
+            );
+        }
         console.log("Đã kết nối Supabase thành công!");
         
         // Tắt chế độ mock data
@@ -5059,7 +5061,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (typeof window.checkAndShowWelcomeModal === 'function') {
         window.checkAndShowWelcomeModal();
     }
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener("DOMContentLoaded", bootstrapHiDB);
+} else {
+    bootstrapHiDB();
+}
 
 // CẬP NHẬT UI PROFILE (dùng chung cho desktop + mobile)
 window._updateProfileUI = function(user) {

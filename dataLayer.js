@@ -37,8 +37,17 @@ window.HiDB = (() => {
     const CACHE_TTL_MS = 5 * 60 * 1000;
     const _cache = new Map();
 
+    const DEFAULT_SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+
     function _getClient() {
-        if (!_supabase) throw new Error('[HiDB] Chưa khởi tạo. Gọi HiDB.init() trước.');
+        if (!_supabase) {
+            if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+                init(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY);
+            } else {
+                throw new Error('[HiDB] Chưa khởi tạo. Gọi HiDB.init() trước.');
+            }
+        }
         return _supabase;
     }
 
@@ -2741,8 +2750,8 @@ window.HiDB = (() => {
     // Export public API
     return {
         onAuthStateChange: (callback) => {
-            if (!_supabase) throw new Error('[HiDB] Chưa khởi tạo');
-            return _supabase.auth.onAuthStateChange((event, session) => {
+            const client = _getClient();
+            return client.auth.onAuthStateChange((event, session) => {
                 _currentUser = session?.user || null;
                 clearCache();
                 callback(event, session);
@@ -2832,6 +2841,18 @@ window.HiDB = (() => {
     };
 
 })();
+
+// Auto-initialize HiDB immediately if Supabase JS is already loaded
+if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
+    try {
+        window.HiDB.init(
+            'https://swehdtrqjyklmsefkjdf.supabase.co',
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
+        );
+    } catch (e) {
+        console.warn('[HiDB] Auto-init failed:', e);
+    }
+}
 
 // ============================================================
 // HƯỚNG DẪN TÍCH HỢP VÀO A7.html
