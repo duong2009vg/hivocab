@@ -12,6 +12,7 @@ function copyStaticAssetsPlugin() {
 
       // 1. Root scripts required by index.html and app.html
       const rootScripts = [
+        'app.js',
         'dataLayer.js',
         'aiHint.js',
         'dashboardStats.js',
