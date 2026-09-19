@@ -22,6 +22,7 @@ function copyStaticAssetsPlugin() {
         'thptExam.js',
         'bilingualReading.js',
         'library.js',
+        'pricing.js',
         'dictionary.js',
         'exercises.js',
         'mockData.js',
@@ -75,6 +76,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        admin: resolve(__dirname, 'admin.html'),
         privacy: resolve(__dirname, 'privacy.html'),
         terms: resolve(__dirname, 'terms.html'),
       },

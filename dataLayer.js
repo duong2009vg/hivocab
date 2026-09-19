@@ -174,6 +174,45 @@ window.HiDB = (() => {
         return _currentUser;
     }
 
+    let _userProfileCache = null;
+
+    async function getUserProfile(forceRefresh = false) {
+        const user = await getCurrentUser();
+        if (!user) {
+            _userProfileCache = null;
+            return null;
+        }
+        if (_userProfileCache && !forceRefresh) return _userProfileCache;
+        try {
+            const { data, error } = await _getClient()
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+            if (!error && data) {
+                _userProfileCache = data;
+                return data;
+            }
+        } catch (e) {
+            console.warn('[dataLayer] getUserProfile error:', e);
+        }
+        return null;
+    }
+
+    async function isUserPro() {
+        const user = await getCurrentUser();
+        if (!user) return false;
+        const profile = await getUserProfile();
+        if (!profile) return false;
+        if (profile.role === 'admin') return true;
+        if (profile.tier === 'lifetime' || profile.subscription_plan === 'pro_lifetime') return true;
+        if (profile.tier === 'pro') {
+            if (!profile.subscription_expires_at) return true;
+            return new Date(profile.subscription_expires_at) > new Date();
+        }
+        return false;
+    }
+
 
     /**
      * Đăng nhập qua Google OAuth.
@@ -284,6 +323,7 @@ window.HiDB = (() => {
                 name: topic.name,
                 icon: topic.icon,
                 category: normalizeTopicCategory(topic.category),
+                is_pro: Boolean(topic.is_pro),
                 totalWords: Number(topic.total_words || 0),
                 progress: Number(topic.progress || 0),
                 createdAt: topic.created_at,
@@ -1111,10 +1151,18 @@ window.HiDB = (() => {
 
         const client = _getClient();
 
+        // 0. Lấy thông tin topic (để kiểm tra topic có is_pro không)
+        const { data: topicData } = await client
+            .from('topics')
+            .select('id, name, is_pro')
+            .eq('id', topicId)
+            .maybeSingle();
+        const topicIsPro = Boolean(topicData?.is_pro);
+
         // 1. Lấy danh sách tests của topic
         const { data: testsData, error: testsError } = await client
             .from('tests')
-            .select('id, name, test_order')
+            .select('id, name, test_order, is_pro')
             .eq('topic_id', topicId)
             .order('test_order', { ascending: true });
 
@@ -1125,7 +1173,7 @@ window.HiDB = (() => {
         // 2. Lấy danh sách passages của topic
         const { data: passagesData, error: passagesError } = await client
             .from('passages')
-            .select('id, test_id, passage_number, title, topic_label, content_en, content_vi')
+            .select('id, test_id, passage_number, title, topic_label, content_en, content_vi, is_pro')
             .eq('topic_id', topicId)
             .order('passage_number', { ascending: true });
 
@@ -1273,6 +1321,11 @@ window.HiDB = (() => {
                 wordIds = wordsInP.map(w => w.id);
             }
 
+            // Tính isPro cho passage (kế thừa từ test hoặc topic nếu is_pro === null)
+            const parentTest = testsData.find(t => t.id === p.test_id);
+            const testIsPro = (parentTest?.is_pro === null || parentTest?.is_pro === undefined) ? topicIsPro : Boolean(parentTest.is_pro);
+            const effectivePassagePro = (p.is_pro === null || p.is_pro === undefined) ? testIsPro : Boolean(p.is_pro);
+
             const passageObj = {
                 id:            p.id,
                 testId:        p.test_id,
@@ -1281,6 +1334,7 @@ window.HiDB = (() => {
                 topicLabel:    p.topic_label || '',
                 contentEn:     p.content_en || '',
                 contentVi:     p.content_vi || '',
+                isPro:         effectivePassagePro,
                 totalWords,
                 progress,
                 wordIds,
@@ -1309,10 +1363,13 @@ window.HiDB = (() => {
             grandTotalWords += testWordsCount;
             grandTotalLevel += (testProgress * testWordsCount);
 
+            const effectiveTestPro = (t.is_pro === null || t.is_pro === undefined) ? topicIsPro : Boolean(t.is_pro);
+
             return {
                 id:         t.id,
                 name:       t.name,
                 testOrder:  t.test_order,
+                isPro:      effectiveTestPro,
                 totalWords: testWordsCount,
                 progress:   testProgress,
                 passages,
@@ -2696,8 +2753,10 @@ window.HiDB = (() => {
         ensureReady,
         isReady: () => !!_supabase,
 
-        // Auth
+        // Auth & Subscription
         getCurrentUser,
+        getUserProfile,
+        isUserPro,
         signInWithGoogle,
         signInWithPassword,
         signUpWithPassword,

@@ -930,6 +930,10 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
         <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">search</span><span>Tra từ</span></a>
     </div>
     <div class="mt-auto shrink-0 flex flex-col gap-1 pt-4 border-t border-outline-variant/20 dark:border-[#31353A]">
+        <button onclick="window.openPricingModal()" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl transition-all duration-200 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md shadow-amber-500/20 cursor-pointer text-xs font-extrabold text-left mb-2">
+            <span class="material-symbols-outlined text-[18px]">diamond</span>
+            <span class="truncate">Nâng cấp HiVocab PRO</span>
+        </button>
         <button onclick="window.openWelcomeModal()" class="w-full flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-400/30 hover:bg-amber-500/20 cursor-pointer text-xs font-bold text-left mb-1">
             <span class="text-base">🎁</span>
             <span class="truncate">Quà tặng 2T & Zalo Admin</span>
@@ -946,6 +950,9 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
         <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
         <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
     </div>
+    <button onclick="window.openPricingModal(); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/15 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
+        <span class="material-symbols-outlined text-[18px]">diamond</span><span>Nâng cấp PRO (VietQR)</span>
+    </button>
     <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
         <span class="text-base">🎁</span><span>Quà tặng & Zalo Admin</span>
     </button>
@@ -2651,6 +2658,8 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
 <script src="bilingualReading.js?v=20260916-perf-v2"></script>
 <script src="library.js?v=20260914-remove-game-v6"></script>
+<script src="https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js"></script>
+<script src="pricing.js"></script>
 
 <!-- @include 'templates/modals.html' -->
 

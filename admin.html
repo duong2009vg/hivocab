@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -26,7 +27,7 @@
                         card: '#ffffff',
                     },
                     fontFamily: {
-                        sans: ['"Hanken Grotesk"', 'Inter', 'sans-serif'],
+                        sans: ['"Inter"', '"Hanken Grotesk"', 'sans-serif'],
                     }
                 }
             }
@@ -34,15 +35,37 @@
     </script>
     <style>
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        html.dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
+        html.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
-        .glass-header { backdrop-filter: blur(12px); background-color: rgba(255, 255, 255, 0.92); }
+
+        /* Liquid Glassmorphism */
+        .glass-panel {
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        html.dark .glass-panel {
+            background: rgba(22, 27, 34, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-header {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+        html.dark .glass-header {
+            background-color: rgba(15, 20, 28, 0.85);
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased selection:bg-primary/20 selection:text-primary">
+<body class="bg-slate-50 dark:bg-[#0d1117] text-slate-800 dark:text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-200">
 
     <!-- TOAST NOTIFICATIONS CONTAINER -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
@@ -121,20 +144,20 @@
     <div id="view-admin" class="hidden flex-1 flex flex-col lg:flex-row min-h-screen">
         
         <!-- SIDEBAR -->
-        <aside id="sidebar" class="w-full lg:w-64 bg-white border-r border-slate-200 flex-shrink-0 flex flex-col justify-between z-20">
+        <aside id="sidebar" class="w-full lg:w-64 bg-white dark:bg-[#161b22] border-r border-slate-200 dark:border-white/10 flex-shrink-0 flex flex-col justify-between z-20 transition-colors">
             <div>
                 <!-- Brand Header -->
-                <div class="h-16 px-6 flex items-center justify-between border-b border-slate-200">
+                <div class="h-16 px-6 flex items-center justify-between border-b border-slate-200 dark:border-white/10">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center font-black text-lg shadow-sm">
                             Hi
                         </div>
                         <div>
                             <div class="flex items-center gap-1.5">
-                                <span class="font-extrabold text-base text-slate-900 tracking-tight">HiVocab</span>
-                                <span class="bg-amber-100 text-amber-800 text-[10px] font-extrabold px-1.5 py-0.2 rounded-md uppercase tracking-wider border border-amber-300">Admin</span>
+                                <span class="font-extrabold text-base text-slate-900 dark:text-white tracking-tight">HiVocab</span>
+                                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400 text-[10px] font-extrabold px-1.5 py-0.2 rounded-md uppercase tracking-wider border border-amber-300 dark:border-amber-700/50">Admin</span>
                             </div>
-                            <p class="text-[10px] text-slate-400 font-semibold tracking-wide">Enterprise Hub</p>
+                            <p class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Enterprise Hub</p>
                         </div>
                     </div>
                 </div>
@@ -146,45 +169,65 @@
                         <span>Tổng quan & Analytics</span>
                     </button>
 
-                    <button onclick="switchTab('users')" id="nav-tab-users" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
-                        <span class="material-symbols-outlined text-[20px]">group</span>
-                        <span>Quản lý Người dùng</span>
-                        <span id="nav-badge-users" class="ml-auto bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded-full font-extrabold">...</span>
+                    <!-- TAB MỚI: DOANH THU & PAYOS -->
+                    <button onclick="switchTab('revenue')" id="nav-tab-revenue" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+                        <span class="material-symbols-outlined text-[20px]">payments</span>
+                        <span>Doanh thu & Đơn hàng</span>
+                        <span id="nav-badge-revenue" class="ml-auto bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">PayOS</span>
                     </button>
 
-                    <button onclick="switchTab('tests')" id="nav-tab-tests" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <!-- TAB MỚI: QUẢN LÝ SUBSCRIPTION & TẶNG PRO -->
+                    <button onclick="switchTab('subscriptions')" id="nav-tab-subscriptions" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+                        <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+                        <span>Quản lý Gói & Tặng Pro</span>
+                        <span id="nav-badge-subscriptions" class="ml-auto bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">PRO</span>
+                    </button>
+
+                    <!-- TAB MỚI: PHÂN QUYỀN NỘI DUNG PRO / FREE -->
+                    <button onclick="switchTab('pro_content')" id="nav-tab-pro_content" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+                        <span class="material-symbols-outlined text-[20px]">lock_open</span>
+                        <span>Phân quyền Pro / Free</span>
+                    </button>
+
+                    <button onclick="switchTab('users')" id="nav-tab-users" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
+                        <span class="material-symbols-outlined text-[20px]">group</span>
+                        <span>Quản lý Người dùng</span>
+                        <span id="nav-badge-users" class="ml-auto bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 text-[10px] px-2 py-0.5 rounded-full font-extrabold">...</span>
+                    </button>
+
+                    <button onclick="switchTab('tests')" id="nav-tab-tests" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">auto_stories</span>
                         <span>Đề thi &amp; Bài đọc Song ngữ</span>
                     </button>
 
-                    <button onclick="switchTab('thpt')" id="nav-tab-thpt" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <button onclick="switchTab('thpt')" id="nav-tab-thpt" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">quiz</span>
                         <span>Quản lý Đề thi THPT</span>
-                        <span id="nav-badge-thpt" class="ml-auto bg-blue-100 text-blue-700 text-[10px] px-2 py-0.5 rounded-full font-extrabold">38</span>
+                        <span id="nav-badge-thpt" class="ml-auto bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">38</span>
                     </button>
 
-                    <button onclick="switchTab('reports')" id="nav-tab-reports" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <button onclick="switchTab('reports')" id="nav-tab-reports" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">flag</span>
                         <span>Báo cáo Người dùng 🚩</span>
-                        <span id="nav-badge-reports" class="ml-auto bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full font-extrabold">0</span>
+                        <span id="nav-badge-reports" class="ml-auto bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">0</span>
                     </button>
 
-                    <button onclick="switchTab('words')" id="nav-tab-words" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <button onclick="switchTab('words')" id="nav-tab-words" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">translate</span>
                         <span>Kho Từ vựng Hệ thống</span>
                     </button>
 
-                    <button onclick="switchTab('bulk')" id="nav-tab-bulk" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <button onclick="switchTab('bulk')" id="nav-tab-bulk" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">post_add</span>
                         <span>Nhập Từ vựng Hàng loạt</span>
                     </button>
 
-                    <button onclick="switchTab('performance')" id="nav-tab-performance" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <button onclick="switchTab('performance')" id="nav-tab-performance" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">speed</span>
                         <span>Kiểm tra Hiệu năng</span>
                     </button>
 
-                    <button onclick="switchTab('system')" id="nav-tab-system" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+                    <button onclick="switchTab('system')" id="nav-tab-system" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">tune</span>
                         <span>Trạng thái & Kiểm toán</span>
                     </button>
@@ -192,26 +235,26 @@
             </div>
 
             <!-- Sidebar Footer / Admin Info -->
-            <div class="p-4 border-t border-slate-200 space-y-3 bg-slate-50/50">
+            <div class="p-4 border-t border-slate-200 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-white/[0.02]">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-700 font-extrabold flex items-center justify-center text-sm border border-amber-500/20 flex-shrink-0" id="admin-avatar-char">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 font-extrabold flex items-center justify-center text-sm border border-amber-500/20 flex-shrink-0" id="admin-avatar-char">
                         A
                     </div>
                     <div class="min-w-0 flex-1">
-                        <p id="admin-email-sidebar" class="text-xs font-bold text-slate-800 truncate" title="">admin</p>
+                        <p id="admin-email-sidebar" class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" title="">admin</p>
                         <div class="flex items-center gap-1.5 mt-0.5">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Super Admin</span>
+                            <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Super Admin</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-1 pt-1">
-                    <a href="/" target="_blank" class="flex-1 py-1.5 px-2.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-primary hover:border-primary/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs">
+                    <a href="/" target="_blank" class="flex-1 py-1.5 px-2.5 rounded-lg bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-primary hover:border-primary/30 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs">
                         <span class="material-symbols-outlined text-[15px]">open_in_new</span>
                         <span>Trang Học</span>
                     </a>
-                    <button onclick="handleLogout()" class="p-1.5 rounded-lg bg-white border border-slate-200 hover:bg-rose-50 hover:border-rose-200 text-slate-500 hover:text-rose-600 transition-all shadow-2xs" title="Đăng xuất">
+                    <button onclick="handleLogout()" class="p-1.5 rounded-lg bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-200 text-slate-500 hover:text-rose-600 transition-all shadow-2xs cursor-pointer" title="Đăng xuất">
                         <span class="material-symbols-outlined text-[17px]">logout</span>
                     </button>
                 </div>
@@ -219,24 +262,29 @@
         </aside>
 
         <!-- MAIN VIEW AREA -->
-        <div class="flex-1 flex flex-col min-w-0 bg-slate-50/70">
+        <div class="flex-1 flex flex-col min-w-0 bg-slate-50/70 dark:bg-[#0d1117] transition-colors">
             
             <!-- TOP BAR -->
-            <header class="h-16 border-b border-slate-200 bg-white sticky top-0 z-10 px-4 sm:px-8 flex items-center justify-between shadow-2xs">
+            <header class="h-16 border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#161b22]/80 glass-header sticky top-0 z-10 px-4 sm:px-8 flex items-center justify-between shadow-2xs transition-colors">
                 <div class="flex items-center gap-3">
-                    <h2 id="topbar-title" class="text-lg font-black text-slate-900 tracking-tight">Tổng quan & Phân tích Hệ thống</h2>
-                    <span id="topbar-chip" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    <h2 id="topbar-title" class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Tổng quan & Phân tích Hệ thống</h2>
+                    <span id="topbar-chip" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                         <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         <span>Realtime Cloud Sync</span>
                     </span>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    <button onclick="refreshCurrentTab()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold text-xs transition-colors" title="Làm mới dữ liệu">
+                <div class="flex items-center gap-2 sm:gap-3">
+                    <!-- Nút chuyển Dark/Light Mode -->
+                    <button onclick="toggleAdminDarkMode()" id="admin-dark-mode-toggle" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer" title="Bật/Tắt chế độ tối">
+                        <span class="material-symbols-outlined text-[18px]" id="admin-dark-mode-icon">dark_mode</span>
+                    </button>
+
+                    <button onclick="refreshCurrentTab()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer" title="Làm mới dữ liệu">
                         <span class="material-symbols-outlined text-[16px]">refresh</span>
                         <span class="hidden sm:inline">Làm mới</span>
                     </button>
-                    <button onclick="openWordModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-all">
+                    <button onclick="openWordModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[16px]">add</span>
                         <span>Thêm Từ vựng</span>
                     </button>
@@ -433,6 +481,335 @@
                             <div id="recent-activity-container" class="space-y-2.5 max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
                                 <div class="text-center py-6 text-slate-400 text-xs font-medium">Đang tải nhật ký hoạt động...</div>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================== -->
+                <!-- TAB MỚI 1: DOANH THU & ĐƠN HÀNG PAYOS                -->
+                <!-- ==================================================== -->
+                <section id="section-revenue" class="hidden space-y-6">
+                    
+                    <!-- KPI Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Total Revenue -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tổng Doanh Thu</span>
+                                <div class="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">payments</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-total-revenue" class="text-3xl font-black text-slate-900 dark:text-white">0 đ</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center">
+                                    <span class="material-symbols-outlined text-sm">verified</span>
+                                    <span>Đã thanh toán</span>
+                                </span>
+                                <span>qua PayOS &amp; VietQR</span>
+                            </div>
+                        </div>
+
+                        <!-- Monthly Revenue -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Doanh Thu Tháng Này</span>
+                                <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">calendar_month</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-monthly-revenue" class="text-3xl font-black text-slate-900 dark:text-white">0 đ</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-blue-600 dark:text-blue-400 font-bold">Tháng hiện tại</span>
+                                <span>(tính từ ngày 1)</span>
+                            </div>
+                        </div>
+
+                        <!-- Total Paid Orders -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Đơn Hàng Thành Công</span>
+                                <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">receipt_long</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-paid-orders" class="text-3xl font-black text-slate-900 dark:text-white">0</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span id="stat-total-orders-count" class="font-bold text-slate-700 dark:text-slate-300">0</span>
+                                <span>tổng số đơn đã khởi tạo</span>
+                            </div>
+                        </div>
+
+                        <!-- Conversion Rate -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tỷ Lệ Hoàn Tất</span>
+                                <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">pie_chart</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-conversion-rate" class="text-3xl font-black text-slate-900 dark:text-white">0%</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-amber-600 dark:text-amber-400 font-bold">QR Checkout</span>
+                                <span>tỷ lệ quét và thanh toán</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Revenue Breakdown by Plan -->
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-4 transition-colors">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Cơ Cấu Doanh Thu Theo Gói Cước</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Phân bổ doanh số và số lượng học viên đăng ký giữa 4 gói cước.</p>
+                            </div>
+                            <span class="text-xs font-bold text-primary dark:text-primary-light px-2.5 py-1 bg-primary/10 rounded-xl">Pricing Plans</span>
+                        </div>
+                        <div id="revenue-plan-breakdown" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+                            <!-- Cards for 1M, 6M, 1Y, Lifetime will be injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Orders Table -->
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
+                        <!-- Toolbar -->
+                        <div class="p-5 border-b border-slate-200 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex flex-1 items-center gap-3">
+                                <div class="relative flex-1 max-w-md">
+                                    <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
+                                    <input type="text" id="revenue-search-input" onkeyup="filterRevenueOrders()" placeholder="Tìm theo mã đơn, email hoặc ID..." 
+                                           class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
+                                </div>
+                                <select id="revenue-status-filter" onchange="filterRevenueOrders()" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="all">Tất cả trạng thái</option>
+                                    <option value="PAID">Đã thanh toán (PAID)</option>
+                                    <option value="PENDING">Đang chờ (PENDING)</option>
+                                    <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="orders-count-badge" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 text-xs font-bold">0 đơn hàng</span>
+                                <button onclick="loadRevenueData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors" title="Tải lại đơn hàng">
+                                    <span class="material-symbols-outlined text-[18px]">refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-white/10 bg-slate-50/75 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                                        <th class="py-3.5 px-4">Mã Đơn Hàng</th>
+                                        <th class="py-3.5 px-4">Học Viên</th>
+                                        <th class="py-3.5 px-4">Gói Cước</th>
+                                        <th class="py-3.5 px-4 text-right">Số Tiền</th>
+                                        <th class="py-3.5 px-4 text-center">Cổng / Phương Thức</th>
+                                        <th class="py-3.5 px-4 text-center">Trạng Thái</th>
+                                        <th class="py-3.5 px-4 text-right">Thời Gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="revenue-table-body" class="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-slate-300">
+                                    <tr>
+                                        <td colspan="7" class="py-12 text-center text-slate-400">Đang tải lịch sử giao dịch...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================== -->
+                <!-- TAB MỚI 2: QUẢN LÝ SUBSCRIPTION & TẶNG PRO           -->
+                <!-- ==================================================== -->
+                <section id="section-subscriptions" class="hidden space-y-6">
+                    
+                    <!-- KPI Cards Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Active Pro -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Học Viên PRO Đang Dùng</span>
+                                <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">workspace_premium</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-active-pro" class="text-3xl font-black text-amber-600 dark:text-amber-400">0</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-amber-600 dark:text-amber-400 font-bold flex items-center">
+                                    <span class="material-symbols-outlined text-sm">stars</span>
+                                    <span>Active PRO</span>
+                                </span>
+                                <span>chưa hết hạn</span>
+                            </div>
+                        </div>
+
+                        <!-- Lifetime Pro -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gói Trọn Đời (Lifetime)</span>
+                                <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">all_inclusive</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-lifetime-pro" class="text-3xl font-black text-slate-900 dark:text-white">0</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-purple-600 dark:text-purple-400 font-bold">Vĩnh viễn</span>
+                                <span>không giới hạn thời gian</span>
+                            </div>
+                        </div>
+
+                        <!-- Expiring Soon -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sắp Hết Hạn (&le; 7 ngày)</span>
+                                <div class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">timer</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-expiring-soon" class="text-3xl font-black text-slate-900 dark:text-white">0</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-rose-600 dark:text-rose-400 font-bold">Cần gia hạn</span>
+                                <span>trong vòng 7 ngày tới</span>
+                            </div>
+                        </div>
+
+                        <!-- Gifted Pro -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 relative overflow-hidden transition-colors">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Gói Tặng Thủ Công</span>
+                                <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-xl">featured_seasonal_and_gifts</span>
+                                </div>
+                            </div>
+                            <div>
+                                <span id="stat-gifted-pro" class="text-3xl font-black text-slate-900 dark:text-white">0</span>
+                            </div>
+                            <div class="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 font-medium border-t border-slate-100 dark:border-white/5 pt-2">
+                                <span class="text-blue-600 dark:text-blue-400 font-bold">Admin Gift</span>
+                                <span>cấp đặc quyền miễn phí</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscriptions Management Table -->
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
+                        <!-- Toolbar -->
+                        <div class="p-5 border-b border-slate-200 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div class="flex flex-1 items-center gap-3">
+                                <div class="relative flex-1 max-w-md">
+                                    <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
+                                    <input type="text" id="subscriptions-search-input" onkeyup="filterSubscriptions()" placeholder="Tìm học viên theo email, tên hoặc ID..." 
+                                           class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
+                                </div>
+                                <select id="subscriptions-tier-filter" onchange="filterSubscriptions()" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                    <option value="all">Tất cả gói</option>
+                                    <option value="pro">Đang có PRO (Active)</option>
+                                    <option value="expiring">Sắp hết hạn (&le; 7 ngày)</option>
+                                    <option value="lifetime">Gói Trọn Đời (Lifetime)</option>
+                                    <option value="free">Tài khoản Miễn phí (Free)</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button onclick="openGrantProModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-[18px]">card_giftcard</span>
+                                    <span>Tặng Gói PRO Thủ Công</span>
+                                </button>
+                                <button onclick="loadSubscriptionsData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors" title="Tải lại danh sách">
+                                    <span class="material-symbols-outlined text-[18px]">refresh</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="overflow-x-auto custom-scrollbar">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 dark:border-white/10 bg-slate-50/75 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                                        <th class="py-3.5 px-4">Học Viên</th>
+                                        <th class="py-3.5 px-4 text-center">Hạng Thẻ</th>
+                                        <th class="py-3.5 px-4">Gói Đăng Ký</th>
+                                        <th class="py-3.5 px-4">Ngày Kích Hoạt</th>
+                                        <th class="py-3.5 px-4">Ngày Hết Hạn</th>
+                                        <th class="py-3.5 px-4 text-center">Trạng Thái</th>
+                                        <th class="py-3.5 px-4 text-right">Thao Tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="subscriptions-table-body" class="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-slate-300">
+                                    <tr>
+                                        <td colspan="7" class="py-12 text-center text-slate-400">Đang tải danh sách gói học viên...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================================================== -->
+                <!-- TAB MỚI 3: PHÂN QUYỀN NỘI DUNG PRO / FREE            -->
+                <!-- ==================================================== -->
+                <section id="section-pro_content" class="hidden space-y-6">
+                    <!-- Header Card -->
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Phân Quyền Nội Dung Học: PRO vs FREE</h3>
+                                <span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary dark:text-primary-light font-extrabold text-[10px]">Cây 3 Tầng</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                                Cấu hình phân cấp: <strong>Chủ đề (Topic)</strong> &rarr; <strong>Đề thi (Test)</strong> &rarr; <strong>Bài đọc (Passage)</strong>.
+                                <br><span class="text-amber-600 dark:text-amber-400 font-semibold">Quy tắc mặc định:</span> Luyện thi THPT (38 đề), Cam 16, 17, 18 và Vol 9 mở FREE. Các bộ sách và đề còn lại yêu cầu PRO.
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="applyDefaultProContentRules()" class="px-3.5 py-2 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">settings_backup_restore</span>
+                                <span>Khôi Phục Cấu Hình Mặc Định</span>
+                            </button>
+                            <button onclick="loadProContentData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors" title="Làm mới cây nội dung">
+                                <span class="material-symbols-outlined text-[18px]">refresh</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search and Stats Bar -->
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+                        <div class="relative flex-1 max-w-md">
+                            <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
+                            <input type="text" id="pro-content-search" onkeyup="filterProContentTree()" placeholder="Tìm chủ đề, đề thi hoặc bài đọc..." 
+                                   class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
+                        </div>
+                        <div class="flex items-center gap-2 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/40 font-bold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span id="pro-content-free-count">0 Free</span>
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40 font-bold">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                <span id="pro-content-pro-count">0 Pro</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Hierarchy Tree Container -->
+                    <div id="pro-content-tree-container" class="space-y-3">
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-12 text-center text-slate-400 border border-slate-200/90 dark:border-white/10">
+                            <span class="material-symbols-outlined text-3xl animate-spin text-primary">sync</span>
+                            <p class="mt-2 text-xs font-semibold">Đang tải cấu trúc cây nội dung...</p>
                         </div>
                     </div>
                 </section>
@@ -1701,6 +2078,95 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 </button>
             </div>
         </div>
+    <!-- ============================================================ -->
+    <!-- MODAL 9: CẤP / TẶNG GÓI PRO THỦ CÔNG                         -->
+    <!-- ============================================================ -->
+    <div id="modal-grant-pro" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#161b22] rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden font-sans transition-colors">
+            <div class="px-6 py-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
+                <div class="flex items-center gap-2.5 text-amber-600 dark:text-amber-400">
+                    <span class="material-symbols-outlined text-2xl">card_giftcard</span>
+                    <div>
+                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Tặng Gói HiVocab PRO Thủ Công</h3>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Cấp đặc quyền Pro cho học viên mà không cần thanh toán</p>
+                    </div>
+                </div>
+                <button onclick="closeGrantProModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+
+            <form id="form-grant-pro" onsubmit="handleGrantProSubmit(event)" class="p-6 space-y-4">
+                <!-- Chọn User -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Học Viên Nhận Gói <span class="text-rose-500">*</span></label>
+                    <input type="text" id="grant-pro-email" required placeholder="Nhập email học viên (ví dụ: student@gmail.com)" 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium">
+                    <p class="text-[11px] text-slate-400 mt-1">Hệ thống sẽ tra cứu User ID từ email và tự động nâng cấp quyền.</p>
+                </div>
+
+                <!-- Chọn Gói Cước -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Thời Hạn Gói PRO <span class="text-rose-500">*</span></label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+                        <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-amber-500 cursor-pointer bg-slate-50 dark:bg-white/5">
+                            <input type="radio" name="grant-pro-plan" value="1m" checked class="text-amber-500 focus:ring-amber-500" onchange="toggleCustomDaysInput(false)">
+                            <div>
+                                <div class="font-bold text-slate-900 dark:text-white">1 Tháng</div>
+                                <div class="text-[10px] text-slate-400">30 ngày</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-amber-500 cursor-pointer bg-slate-50 dark:bg-white/5">
+                            <input type="radio" name="grant-pro-plan" value="6m" class="text-amber-500 focus:ring-amber-500" onchange="toggleCustomDaysInput(false)">
+                            <div>
+                                <div class="font-bold text-slate-900 dark:text-white">6 Tháng</div>
+                                <div class="text-[10px] text-slate-400">180 ngày</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-amber-500 cursor-pointer bg-slate-50 dark:bg-white/5">
+                            <input type="radio" name="grant-pro-plan" value="1y" class="text-amber-500 focus:ring-amber-500" onchange="toggleCustomDaysInput(false)">
+                            <div>
+                                <div class="font-bold text-slate-900 dark:text-white">1 Năm</div>
+                                <div class="text-[10px] text-slate-400">365 ngày</div>
+                            </div>
+                        </label>
+                        <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-amber-500 cursor-pointer bg-slate-50 dark:bg-white/5">
+                            <input type="radio" name="grant-pro-plan" value="lifetime" class="text-amber-500 focus:ring-amber-500" onchange="toggleCustomDaysInput(false)">
+                            <div>
+                                <div class="font-bold text-purple-600 dark:text-purple-400">Trọn Đời</div>
+                                <div class="text-[10px] text-slate-400">Vĩnh viễn</div>
+                            </div>
+                        </label>
+                        <label class="col-span-2 flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-white/10 hover:border-amber-500 cursor-pointer bg-slate-50 dark:bg-white/5">
+                            <input type="radio" name="grant-pro-plan" value="custom" class="text-amber-500 focus:ring-amber-500" onchange="toggleCustomDaysInput(true)">
+                            <div class="flex-1 flex items-center justify-between">
+                                <div class="font-bold text-slate-900 dark:text-white">Tuỳ chọn số ngày:</div>
+                                <input type="number" id="grant-pro-custom-days" min="1" max="3650" placeholder="Số ngày" disabled 
+                                       class="w-24 px-2 py-1 rounded-lg border border-slate-300 dark:border-white/10 text-center font-bold text-xs bg-white dark:bg-white/10 text-slate-900 dark:text-white">
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Lý do tặng -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Lý Do / Ghi Chú</label>
+                    <input type="text" id="grant-pro-reason" placeholder="VD: Tặng học viên xuất sắc, Tri ân thành viên tích cực, Bù sự cố..." 
+                           class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium">
+                </div>
+
+                <!-- Actions -->
+                <div class="pt-3 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeGrantProModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer">
+                        Hủy
+                    </button>
+                    <button type="submit" id="btn-submit-grant-pro" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[18px]">verified</span>
+                        <span>Kích Hoạt Tặng Gói PRO</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- ============================================================ -->
@@ -1729,9 +2195,39 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         let currentReportSearchQuery = '';
         let activeDetailReport = null;
         let activeThptExam = null;
+        let allOrdersCache = [];
+        let allSubscriptionsCache = [];
+        let allProTopicsCache = [];
+        let allProTestsCache = [];
+        let allProPassagesCache = [];
+
+        // 0. THEME & DARK MODE
+        function toggleAdminDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('admin_theme', isDark ? 'dark' : 'light');
+            updateAdminThemeIcon(isDark);
+        }
+
+        function updateAdminThemeIcon(isDark) {
+            const icon = document.getElementById('admin-dark-mode-icon');
+            if (icon) icon.textContent = isDark ? 'light_mode' : 'dark_mode';
+        }
+
+        function initAdminTheme() {
+            const saved = localStorage.getItem('admin_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const isDark = saved === 'dark' || (!saved && prefersDark);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            updateAdminThemeIcon(isDark);
+        }
 
         // 1. INIT & AUTH GUARD
         document.addEventListener('DOMContentLoaded', async () => {
+            initAdminTheme();
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await checkAuth();
         });
@@ -1832,7 +2328,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             }
 
             // Ẩn tất cả section
-            ['overview', 'users', 'tests', 'thpt', 'reports', 'words', 'bulk', 'performance', 'system'].forEach(s => {
+            ['overview', 'revenue', 'subscriptions', 'pro_content', 'users', 'tests', 'thpt', 'reports', 'words', 'bulk', 'performance', 'system'].forEach(s => {
                 const el = document.getElementById(`section-${s}`);
                 if (el) el.classList.add('hidden');
             });
@@ -1844,6 +2340,9 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             // Cập nhật Topbar Title
             const titles = {
                 overview: 'Tổng quan & Phân tích Hệ thống',
+                revenue: 'Quản lý Doanh thu & Đơn hàng PayOS',
+                subscriptions: 'Quản lý Gói & Tặng Quyền Pro Thủ công',
+                pro_content: 'Phân quyền Nội dung Pro / Free (Cây 3 tầng)',
                 users: 'Quản lý Học viên & Phân quyền',
                 tests: 'Quản lý Đề thi & Bài đọc Song ngữ',
                 thpt: 'Quản lý Đề thi Tốt nghiệp THPT Quốc gia (38 Đề)',
@@ -1857,6 +2356,9 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
 
             // Gọi hàm tải dữ liệu theo từng tab
             if (tab === 'overview') await loadSystemAnalytics();
+            if (tab === 'revenue') await loadRevenueData();
+            if (tab === 'subscriptions') await loadSubscriptionsData();
+            if (tab === 'pro_content') await loadProContentData();
             if (tab === 'users') await loadAdminUsers();
             if (tab === 'thpt') await loadThptAdminExams();
             if (tab === 'reports') await loadBugReports();
@@ -2000,6 +2502,725 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 `;
             });
             container.innerHTML = html;
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // NEW TAB 1: DOANH THU & PAYOS
+        // ══════════════════════════════════════════════════════════════
+        async function loadRevenueData() {
+            const tbody = document.getElementById('revenue-table-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Đang tải dữ liệu doanh thu &amp; đơn hàng...</td></tr>';
+
+            try {
+                const { data: orders, error } = await sb
+                    .from('orders')
+                    .select('id, order_code, user_id, amount, status, plan, payment_method, description, created_at, paid_at, profiles(email, full_name)')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                allOrdersCache = orders || [];
+
+                // Calculate KPIs
+                let totalRevenue = 0;
+                let monthlyRevenue = 0;
+                let paidOrdersCount = 0;
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+
+                const planStats = {
+                    '1m': { count: 0, revenue: 0, label: '1 Tháng', price: '29.000 đ' },
+                    '6m': { count: 0, revenue: 0, label: '6 Tháng', price: '149.000 đ' },
+                    '1y': { count: 0, revenue: 0, label: '1 Năm', price: '249.000 đ' },
+                    'lifetime': { count: 0, revenue: 0, label: 'Trọn Đời', price: '499.000 đ' },
+                };
+
+                allOrdersCache.forEach(o => {
+                    const isPaid = o.status === 'PAID';
+                    const amt = Number(o.amount || 0);
+                    if (isPaid) {
+                        paidOrdersCount++;
+                        totalRevenue += amt;
+
+                        const createdAt = new Date(o.created_at);
+                        if (createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear) {
+                            monthlyRevenue += amt;
+                        }
+
+                        const p = (o.plan || '').toLowerCase();
+                        if (planStats[p]) {
+                            planStats[p].count++;
+                            planStats[p].revenue += amt;
+                        }
+                    }
+                });
+
+                const totalOrdersCount = allOrdersCache.length;
+                const convRate = totalOrdersCount > 0 ? ((paidOrdersCount / totalOrdersCount) * 100).toFixed(1) : 0;
+
+                // Update KPI Cards
+                document.getElementById('stat-total-revenue').textContent = totalRevenue.toLocaleString('vi-VN') + ' đ';
+                document.getElementById('stat-monthly-revenue').textContent = monthlyRevenue.toLocaleString('vi-VN') + ' đ';
+                document.getElementById('stat-paid-orders').textContent = paidOrdersCount.toLocaleString();
+                document.getElementById('stat-total-orders-count').textContent = totalOrdersCount.toLocaleString();
+                document.getElementById('stat-conversion-rate').textContent = convRate + '%';
+
+                // Render plan breakdown
+                const breakdownEl = document.getElementById('revenue-plan-breakdown');
+                if (breakdownEl) {
+                    breakdownEl.innerHTML = Object.entries(planStats).map(([key, item]) => `
+                        <div class="p-4 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-50/50 dark:bg-white/[0.02] space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-xs text-slate-700 dark:text-slate-300">${item.label} (${item.price})</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-primary/10 text-primary dark:text-primary-light">${item.count} đơn</span>
+                            </div>
+                            <div class="text-lg font-black text-slate-900 dark:text-white">
+                                ${item.revenue.toLocaleString('vi-VN')} đ
+                            </div>
+                        </div>
+                    `).join('');
+                }
+
+                filterRevenueOrders();
+            } catch (err) {
+                console.error('loadRevenueData error:', err);
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-rose-500">Lỗi tải dữ liệu đơn hàng: ${escHtml(err.message)}</td></tr>`;
+            }
+        }
+
+        function filterRevenueOrders() {
+            const search = (document.getElementById('revenue-search-input').value || '').toLowerCase().trim();
+            const statusFilter = document.getElementById('revenue-status-filter').value;
+            const tbody = document.getElementById('revenue-table-body');
+
+            const filtered = allOrdersCache.filter(o => {
+                const codeMatch = String(o.order_code || '').toLowerCase().includes(search);
+                const emailMatch = (o.profiles?.email || '').toLowerCase().includes(search) || (o.user_id || '').toLowerCase().includes(search);
+                const descMatch = (o.description || '').toLowerCase().includes(search);
+                const matchesSearch = codeMatch || emailMatch || descMatch;
+                const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            document.getElementById('orders-count-badge').textContent = `${filtered.length} đơn hàng`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Không tìm thấy đơn hàng nào.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(o => {
+                const email = o.profiles?.email || o.user_id || 'Ẩn danh';
+                const planNames = { '1m': '1 Tháng', '6m': '6 Tháng', '1y': '1 Năm', 'lifetime': 'Trọn Đời', 'pro_lifetime': 'Trọn Đời' };
+                const planLabel = planNames[o.plan] || o.plan || '—';
+                const isPaid = o.status === 'PAID';
+                const isCancelled = o.status === 'CANCELLED';
+
+                const statusBadge = isPaid
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>THÀNH CÔNG</span>'
+                    : isCancelled
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>ĐÃ HỦY</span>'
+                    : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>CHỜ THANH TOÁN</span>';
+
+                const methodBadge = o.payment_method === 'MANUAL_GIFT'
+                    ? '<span class="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-bold text-[10px]">🎁 Admin Tặng</span>'
+                    : '<span class="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold text-[10px]">VietQR PayOS</span>';
+
+                const createdDate = new Date(o.created_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+
+                return `
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors">
+                        <td class="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">#${o.order_code}</td>
+                        <td class="py-3.5 px-4">
+                            <div class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]" title="${escAttr(email)}">${escHtml(email)}</div>
+                            ${o.description ? `<div class="text-[10px] text-slate-400 truncate max-w-[200px]">${escHtml(o.description)}</div>` : ''}
+                        </td>
+                        <td class="py-3.5 px-4 font-semibold text-slate-700 dark:text-slate-300">${planLabel}</td>
+                        <td class="py-3.5 px-4 text-right font-bold ${isPaid ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}">${Number(o.amount || 0).toLocaleString('vi-VN')} đ</td>
+                        <td class="py-3.5 px-4 text-center">${methodBadge}</td>
+                        <td class="py-3.5 px-4 text-center">${statusBadge}</td>
+                        <td class="py-3.5 px-4 text-right text-slate-400 text-[11px] font-mono">${createdDate}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // NEW TAB 2: QUẢN LÝ SUBSCRIPTIONS & TẶNG PRO
+        // ══════════════════════════════════════════════════════════════
+        async function loadSubscriptionsData() {
+            const tbody = document.getElementById('subscriptions-table-body');
+            tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Đang tải danh sách gói học viên...</td></tr>';
+
+            try {
+                const { data: profiles, error } = await sb
+                    .from('profiles')
+                    .select('id, email, full_name, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, created_at')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                allSubscriptionsCache = profiles || [];
+
+                // Calculate KPIs
+                let activeProCount = 0;
+                let lifetimeCount = 0;
+                let expiringSoonCount = 0;
+                let giftedCount = 0;
+
+                const now = new Date();
+                const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+                allSubscriptionsCache.forEach(p => {
+                    const isPro = p.tier === 'pro' || p.tier === 'lifetime' || p.subscription_plan === 'lifetime' || p.subscription_plan === 'pro_lifetime';
+                    if (isPro) {
+                        const expiresAt = p.subscription_expires_at ? new Date(p.subscription_expires_at) : null;
+                        const isExpired = expiresAt && expiresAt < now;
+                        if (!isExpired) {
+                            activeProCount++;
+                            if (p.tier === 'lifetime' || p.subscription_plan === 'lifetime' || p.subscription_plan === 'pro_lifetime' || !expiresAt) {
+                                lifetimeCount++;
+                            } else if (expiresAt <= sevenDaysLater) {
+                                expiringSoonCount++;
+                            }
+                        }
+                    }
+                });
+
+                // Count gifted from allOrdersCache or query
+                const { count: giftCount } = await sb
+                    .from('orders')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('payment_method', 'MANUAL_GIFT');
+                giftedCount = giftCount || 0;
+
+                document.getElementById('stat-active-pro').textContent = activeProCount.toLocaleString();
+                document.getElementById('stat-lifetime-pro').textContent = lifetimeCount.toLocaleString();
+                document.getElementById('stat-expiring-soon').textContent = expiringSoonCount.toLocaleString();
+                document.getElementById('stat-gifted-pro').textContent = giftedCount.toLocaleString();
+                document.getElementById('nav-badge-subscriptions').textContent = `${activeProCount} PRO`;
+
+                filterSubscriptions();
+            } catch (err) {
+                console.error('loadSubscriptionsData error:', err);
+                tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-rose-500">Lỗi tải danh sách gói: ${escHtml(err.message)}</td></tr>`;
+            }
+        }
+
+        function filterSubscriptions() {
+            const search = (document.getElementById('subscriptions-search-input').value || '').toLowerCase().trim();
+            const tierFilter = document.getElementById('subscriptions-tier-filter').value;
+            const tbody = document.getElementById('subscriptions-table-body');
+            const now = new Date();
+            const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+            const filtered = allSubscriptionsCache.filter(p => {
+                const emailMatch = (p.email || '').toLowerCase().includes(search) || (p.full_name || '').toLowerCase().includes(search) || (p.id || '').toLowerCase().includes(search);
+                
+                const isProTier = p.tier === 'pro' || p.tier === 'lifetime' || p.subscription_plan === 'lifetime' || p.subscription_plan === 'pro_lifetime';
+                const expiresAt = p.subscription_expires_at ? new Date(p.subscription_expires_at) : null;
+                const isExpired = expiresAt && expiresAt < now;
+                const isActivePro = isProTier && !isExpired;
+                const isLifetime = p.tier === 'lifetime' || p.subscription_plan === 'lifetime' || p.subscription_plan === 'pro_lifetime' || (isActivePro && !expiresAt);
+                const isExpiring = isActivePro && expiresAt && expiresAt <= sevenDaysLater;
+
+                let matchesTier = true;
+                if (tierFilter === 'pro') matchesTier = isActivePro;
+                else if (tierFilter === 'expiring') matchesTier = isExpiring;
+                else if (tierFilter === 'lifetime') matchesTier = isLifetime;
+                else if (tierFilter === 'free') matchesTier = !isActivePro;
+
+                return emailMatch && matchesTier;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Không tìm thấy học viên nào phù hợp.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => {
+                const email = p.email || p.id || 'Ẩn danh';
+                const initial = email.charAt(0).toUpperCase();
+                const isProTier = p.tier === 'pro' || p.tier === 'lifetime' || p.subscription_plan === 'lifetime' || p.subscription_plan === 'pro_lifetime';
+                const expiresAt = p.subscription_expires_at ? new Date(p.subscription_expires_at) : null;
+                const isExpired = expiresAt && expiresAt < now;
+                const isActivePro = isProTier && !isExpired;
+
+                const tierBadge = isActivePro
+                    ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs"><span class="material-symbols-outlined text-[12px]">workspace_premium</span>PRO</span>'
+                    : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400">FREE</span>';
+
+                const planNames = { '1m': '1 Tháng', '6m': '6 Tháng', '1y': '1 Năm', 'lifetime': 'Trọn Đời', 'pro_lifetime': 'Trọn Đời' };
+                const planLabel = isActivePro ? (planNames[p.subscription_plan] || p.subscription_plan || 'PRO') : 'Gói Cơ Bản (Free)';
+
+                const startDate = p.subscription_started_at ? new Date(p.subscription_started_at).toLocaleDateString('vi-VN') : '—';
+                const endDate = expiresAt ? expiresAt.toLocaleDateString('vi-VN') : (isActivePro ? 'Vĩnh viễn' : '—');
+
+                const statusBadge = isActivePro
+                    ? (expiresAt && expiresAt <= sevenDaysLater
+                        ? '<span class="px-2 py-0.5 rounded-md bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 font-extrabold text-[10px]">Sắp hết hạn</span>'
+                        : '<span class="px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-extrabold text-[10px]">Đang hoạt động</span>')
+                    : (isExpired
+                        ? '<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-500 font-bold text-[10px]">Đã hết hạn</span>'
+                        : '<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-500 font-bold text-[10px]">Chưa đăng ký</span>');
+
+                return `
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors">
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl ${isActivePro ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300'} font-black text-xs flex items-center justify-center flex-shrink-0">
+                                    ${initial}
+                                </div>
+                                <div class="min-w-0">
+                                    <p class="font-bold text-slate-900 dark:text-white truncate max-w-[190px]" title="${escAttr(email)}">${escHtml(email)}</p>
+                                    ${p.full_name ? `<p class="text-[10px] text-slate-400 truncate max-w-[190px]">${escHtml(p.full_name)}</p>` : ''}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 text-center">${tierBadge}</td>
+                        <td class="py-3.5 px-4 font-semibold text-slate-800 dark:text-slate-200">${planLabel}</td>
+                        <td class="py-3.5 px-4 text-slate-500 dark:text-slate-400 text-[11px] font-mono">${startDate}</td>
+                        <td class="py-3.5 px-4 text-slate-700 dark:text-slate-300 font-bold text-[11px] font-mono">${endDate}</td>
+                        <td class="py-3.5 px-4 text-center">${statusBadge}</td>
+                        <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <button onclick="openGrantProModal('${p.id}', '${escAttr(email)}')" 
+                                        class="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-bold text-[11px] flex items-center gap-1 transition-colors cursor-pointer" 
+                                        title="Tặng hoặc gia hạn PRO">
+                                    <span class="material-symbols-outlined text-[15px]">card_giftcard</span>
+                                    <span>Tặng PRO</span>
+                                </button>
+                                ${isActivePro ? `
+                                <button onclick="handleRevokePro('${p.id}', '${escAttr(email)}')" 
+                                        class="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors cursor-pointer" 
+                                        title="Thu hồi gói PRO">
+                                    <span class="material-symbols-outlined text-[16px]">cancel</span>
+                                </button>` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openGrantProModal(userId, email) {
+            const input = document.getElementById('grant-pro-email');
+            if (input) input.value = email || '';
+            const modal = document.getElementById('modal-grant-pro');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeGrantProModal() {
+            const modal = document.getElementById('modal-grant-pro');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function toggleCustomDaysInput(enabled) {
+            const input = document.getElementById('grant-pro-custom-days');
+            if (input) {
+                input.disabled = !enabled;
+                if (enabled) input.focus();
+            }
+        }
+
+        async function handleGrantProSubmit(e) {
+            e.preventDefault();
+            const email = (document.getElementById('grant-pro-email').value || '').trim();
+            const planEl = document.querySelector('input[name="grant-pro-plan"]:checked');
+            const plan = planEl ? planEl.value : '1m';
+            const reason = (document.getElementById('grant-pro-reason').value || '').trim();
+            const btn = document.getElementById('btn-submit-grant-pro');
+
+            if (!email) {
+                showToast('Vui lòng nhập email học viên!', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span><span>Đang xử lý...</span>';
+
+            try {
+                // Find user by email in profiles
+                const { data: userProfile, error: userErr } = await sb
+                    .from('profiles')
+                    .select('id, email')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                if (userErr || !userProfile) {
+                    throw new Error(`Không tìm thấy tài khoản học viên với email "${email}". Học viên cần đăng nhập HiVocab ít nhất 1 lần.`);
+                }
+
+                // Compute expires_at
+                const now = new Date();
+                let expiresAt = null;
+                let daysAdded = 30;
+
+                if (plan === '1m') {
+                    daysAdded = 30;
+                    expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+                } else if (plan === '6m') {
+                    daysAdded = 180;
+                    expiresAt = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString();
+                } else if (plan === '1y') {
+                    daysAdded = 365;
+                    expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
+                } else if (plan === 'lifetime') {
+                    expiresAt = null; // Lifetime has null expiration or 100 years
+                } else if (plan === 'custom') {
+                    const customDays = parseInt(document.getElementById('grant-pro-custom-days').value, 10);
+                    if (!customDays || customDays <= 0) throw new Error('Vui lòng nhập số ngày hợp lệ!');
+                    daysAdded = customDays;
+                    expiresAt = new Date(now.getTime() + customDays * 24 * 60 * 60 * 1000).toISOString();
+                }
+
+                // Update profiles
+                const { error: updateErr } = await sb
+                    .from('profiles')
+                    .update({
+                        tier: plan === 'lifetime' ? 'lifetime' : 'pro',
+                        subscription_plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
+                        subscription_status: 'active',
+                        subscription_started_at: now.toISOString(),
+                        subscription_expires_at: expiresAt,
+                    })
+                    .eq('id', userProfile.id);
+
+                if (updateErr) throw updateErr;
+
+                // Insert into orders for record
+                const orderCode = Number(String(Date.now()).slice(-9));
+                await sb.from('orders').insert({
+                    order_code: orderCode,
+                    user_id: userProfile.id,
+                    amount: 0,
+                    status: 'PAID',
+                    plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
+                    payment_method: 'MANUAL_GIFT',
+                    description: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
+                    paid_at: now.toISOString(),
+                });
+
+                showToast(`Đã tặng thành công gói PRO cho học viên ${email}!`, 'success');
+                closeGrantProModal();
+                await loadSubscriptionsData();
+            } catch (err) {
+                console.error('handleGrantProSubmit error:', err);
+                showToast('Lỗi tặng gói PRO: ' + err.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<span class="material-symbols-outlined text-[18px]">verified</span><span>Kích Hoạt Tặng Gói PRO</span>';
+            }
+        }
+
+        function handleRevokePro(userId, email) {
+            showConfirmModal({
+                title: 'Thu hồi Quyền HiVocab PRO',
+                message: `Bạn có chắc chắn muốn hạ tài khoản <strong>${escHtml(email)}</strong> về gói FREE không? Học viên sẽ mất quyền truy cập các bài đọc và tài liệu Pro.`,
+                confirmText: 'Xác nhận Thu hồi',
+                isDanger: true,
+                onConfirm: async () => {
+                    try {
+                        const { error } = await sb
+                            .from('profiles')
+                            .update({
+                                tier: 'free',
+                                subscription_status: 'cancelled',
+                                subscription_expires_at: new Date().toISOString()
+                            })
+                            .eq('id', userId);
+
+                        if (error) throw error;
+                        showToast(`Đã hạ ${email} về gói FREE!`, 'info');
+                        await loadSubscriptionsData();
+                    } catch (err) {
+                        showToast('Lỗi thu hồi quyền PRO: ' + err.message, 'error');
+                    }
+                }
+            });
+        }
+
+        // ══════════════════════════════════════════════════════════════
+        // NEW TAB 3: PHÂN QUYỀN NỘI DUNG PRO / FREE (CÂY 3 TẦNG)
+        // ══════════════════════════════════════════════════════════════
+        async function loadProContentData() {
+            const container = document.getElementById('pro-content-tree-container');
+            container.innerHTML = `
+                <div class="bg-white dark:bg-[#161b22] rounded-2xl p-12 text-center text-slate-400 border border-slate-200/90 dark:border-white/10">
+                    <span class="material-symbols-outlined text-3xl animate-spin text-primary">sync</span>
+                    <p class="mt-2 text-xs font-semibold">Đang tải cây nội dung 3 tầng...</p>
+                </div>
+            `;
+
+            try {
+                // Fetch topics, tests, passages in parallel
+                const [topicsRes, testsRes, passagesRes] = await Promise.all([
+                    sb.from('topics').select('id, name, category, is_pro, created_at').order('name', { ascending: true }),
+                    sb.from('tests').select('id, name, topic_id, is_pro, test_order').order('test_order', { ascending: true }),
+                    sb.from('passages').select('id, title, test_id, topic_id, is_pro, passage_number').order('passage_number', { ascending: true })
+                ]);
+
+                if (topicsRes.error) throw topicsRes.error;
+                if (testsRes.error) throw testsRes.error;
+                if (passagesRes.error) throw passagesRes.error;
+
+                allProTopicsCache = topicsRes.data || [];
+                allProTestsCache = testsRes.data || [];
+                allProPassagesCache = passagesRes.data || [];
+
+                // Sort topics naturally
+                allProTopicsCache.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
+
+                // Count stats
+                let proCount = 0;
+                let freeCount = 0;
+
+                allProTopicsCache.forEach(t => {
+                    if (t.is_pro) proCount++;
+                    else freeCount++;
+                });
+
+                document.getElementById('pro-content-free-count').textContent = `${freeCount} Chủ đề Free`;
+                document.getElementById('pro-content-pro-count').textContent = `${proCount} Chủ đề Pro`;
+
+                filterProContentTree();
+            } catch (err) {
+                console.error('loadProContentData error:', err);
+                container.innerHTML = `<div class="p-8 text-center text-rose-500">Lỗi tải cấu trúc nội dung: ${escHtml(err.message)}</div>`;
+            }
+        }
+
+        function filterProContentTree() {
+            const query = (document.getElementById('pro-content-search').value || '').toLowerCase().trim();
+            const container = document.getElementById('pro-content-tree-container');
+
+            const filteredTopics = allProTopicsCache.filter(t => {
+                if (!query) return true;
+                const nameMatch = (t.name || '').toLowerCase().includes(query) || (t.category || '').toLowerCase().includes(query);
+                if (nameMatch) return true;
+                // Check if any test or passage inside matches
+                const topicTests = allProTestsCache.filter(te => te.topic_id === t.id);
+                const testMatch = topicTests.some(te => (te.name || '').toLowerCase().includes(query));
+                if (testMatch) return true;
+                const topicPassages = allProPassagesCache.filter(p => p.topic_id === t.id);
+                return topicPassages.some(p => (p.title || '').toLowerCase().includes(query));
+            });
+
+            if (filteredTopics.length === 0) {
+                container.innerHTML = '<div class="p-12 text-center text-slate-400">Không tìm thấy nội dung nào phù hợp.</div>';
+                return;
+            }
+
+            let html = '';
+            filteredTopics.forEach(topic => {
+                const topicTests = allProTestsCache.filter(te => te.topic_id === topic.id);
+                const topicPassages = allProPassagesCache.filter(p => p.topic_id === topic.id);
+                const isProTopic = Boolean(topic.is_pro);
+
+                html += `
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
+                        <!-- TẦNG 1: TOPIC / BỘ SÁCH -->
+                        <div class="p-4 sm:p-5 flex items-center justify-between gap-4 bg-slate-50/50 dark:bg-white/[0.01]">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <button onclick="toggleProTreeItem('topic-body-${topic.id}', this)" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer">
+                                    <span class="material-symbols-outlined text-[20px] transition-transform duration-200">expand_more</span>
+                                </button>
+                                <div class="w-9 h-9 rounded-xl ${isProTopic ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'} flex items-center justify-center font-bold text-sm shrink-0">
+                                    <span class="material-symbols-outlined text-[20px]">${isProTopic ? 'lock' : 'lock_open'}</span>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white truncate">${escHtml(topic.name)}</h4>
+                                        <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400">${escHtml(topic.category || 'General')}</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-400 mt-0.5">${topicTests.length} Đề thi &bull; ${topicPassages.length} Bài đọc</p>
+                                </div>
+                            </div>
+
+                            <!-- Switch Pro/Free cho Topic -->
+                            <div class="flex items-center gap-3 shrink-0">
+                                <span class="text-xs font-extrabold ${isProTopic ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'}">
+                                    ${isProTopic ? 'PRO' : 'FREE'}
+                                </span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" ${isProTopic ? 'checked' : ''} onchange="toggleTopicPro('${topic.id}', this.checked)" class="sr-only peer">
+                                    <div class="w-11 h-6 bg-emerald-500 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- TẦNG 2 & 3: TESTS & PASSAGES (COLLAPSIBLE) -->
+                        <div id="topic-body-${topic.id}" class="divide-y divide-slate-100 dark:divide-white/5 border-t border-slate-100 dark:border-white/5 pl-8 sm:pl-12 bg-slate-50/[0.2] dark:bg-white/[0.005]">
+                            ${topicTests.length === 0 ? `
+                                <div class="py-4 text-xs text-slate-400 italic">Chưa có đề thi nào trong bộ sách này.</div>
+                            ` : topicTests.map(test => {
+                                const testPassages = topicPassages.filter(p => p.test_id === test.id);
+                                const testState = test.is_pro === null ? 'inherit' : (test.is_pro ? 'pro' : 'free');
+                                const effectiveTestPro = test.is_pro === null ? isProTopic : test.is_pro;
+
+                                return `
+                                    <div class="py-3 pr-4 sm:pr-6 space-y-2">
+                                        <!-- TẦNG 2: TEST -->
+                                        <div class="flex items-center justify-between gap-3">
+                                            <div class="flex items-center gap-2 min-w-0">
+                                                <button onclick="toggleProTreeItem('test-body-${test.id}', this)" class="p-0.5 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+                                                    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                                                </button>
+                                                <span class="material-symbols-outlined text-[17px] text-slate-400">quiz</span>
+                                                <span class="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-200 truncate">${escHtml(test.name)}</span>
+                                                <span class="text-[10px] text-slate-400">(${testPassages.length} bài đọc)</span>
+                                            </div>
+
+                                            <!-- Dropdown/Select cho Test -->
+                                            <div class="flex items-center gap-2 shrink-0">
+                                                <span class="text-[11px] font-bold ${effectiveTestPro ? 'text-amber-600' : 'text-emerald-600'}">
+                                                    ${effectiveTestPro ? 'PRO' : 'FREE'}
+                                                </span>
+                                                <select onchange="toggleTestPro('${test.id}', this.value)" class="px-2 py-1 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-[11px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none">
+                                                    <option value="inherit" ${testState === 'inherit' ? 'selected' : ''}>Kế thừa (${isProTopic ? 'PRO' : 'FREE'})</option>
+                                                    <option value="pro" ${testState === 'pro' ? 'selected' : ''}>Ép PRO</option>
+                                                    <option value="free" ${testState === 'free' ? 'selected' : ''}>Ép FREE</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- TẦNG 3: PASSAGES -->
+                                        <div id="test-body-${test.id}" class="hidden pl-6 sm:pl-8 space-y-1.5 pt-1 pb-1">
+                                            ${testPassages.length === 0 ? `
+                                                <div class="py-1 text-[11px] text-slate-400 italic">Chưa có passage nào.</div>
+                                            ` : testPassages.map(p => {
+                                                const pState = p.is_pro === null ? 'inherit' : (p.is_pro ? 'pro' : 'free');
+                                                const effectivePassagePro = p.is_pro === null ? effectiveTestPro : p.is_pro;
+
+                                                return `
+                                                    <div class="p-2 rounded-xl bg-white dark:bg-white/5 border border-slate-200/60 dark:border-white/5 flex items-center justify-between gap-3 text-xs">
+                                                        <div class="flex items-center gap-2 min-w-0">
+                                                            <span class="material-symbols-outlined text-[15px] text-slate-400">article</span>
+                                                            <span class="font-semibold text-slate-700 dark:text-slate-300 truncate">Passage ${p.passage_number || '?'}: ${escHtml(p.title || 'Untitled')}</span>
+                                                        </div>
+                                                        <div class="flex items-center gap-2 shrink-0">
+                                                            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded ${effectivePassagePro ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400'}">
+                                                                ${effectivePassagePro ? 'PRO' : 'FREE'}
+                                                            </span>
+                                                            <select onchange="togglePassagePro('${p.id}', this.value)" class="px-2 py-0.5 rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-[10px] font-semibold text-slate-700 dark:text-slate-300 focus:outline-none">
+                                                                <option value="inherit" ${pState === 'inherit' ? 'selected' : ''}>Kế thừa (${effectiveTestPro ? 'PRO' : 'FREE'})</option>
+                                                                <option value="pro" ${pState === 'pro' ? 'selected' : ''}>Ép PRO</option>
+                                                                <option value="free" ${pState === 'free' ? 'selected' : ''}>Ép FREE</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleProTreeItem(elementId, btn) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const isHidden = el.classList.contains('hidden');
+            el.classList.toggle('hidden');
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (icon) {
+                if (icon.textContent === 'expand_more') {
+                    icon.style.transform = isHidden ? 'rotate(0deg)' : 'rotate(-90deg)';
+                } else if (icon.textContent === 'chevron_right') {
+                    icon.style.transform = isHidden ? 'rotate(90deg)' : 'rotate(0deg)';
+                }
+            }
+        }
+
+        async function toggleTopicPro(topicId, isPro) {
+            try {
+                const { error } = await sb
+                    .from('topics')
+                    .update({ is_pro: isPro })
+                    .eq('id', topicId);
+
+                if (error) throw error;
+                const found = allProTopicsCache.find(t => t.id === topicId);
+                if (found) found.is_pro = isPro;
+                showToast(`Đã đổi chủ đề sang ${isPro ? 'PRO' : 'FREE'}!`, 'success');
+                filterProContentTree();
+            } catch (err) {
+                showToast('Lỗi cập nhật: ' + err.message, 'error');
+            }
+        }
+
+        async function toggleTestPro(testId, val) {
+            try {
+                const isProVal = val === 'inherit' ? null : (val === 'pro');
+                const { error } = await sb
+                    .from('tests')
+                    .update({ is_pro: isProVal })
+                    .eq('id', testId);
+
+                if (error) throw error;
+                const found = allProTestsCache.find(t => t.id === testId);
+                if (found) found.is_pro = isProVal;
+                showToast('Đã lưu cấu hình đề thi!', 'success');
+                filterProContentTree();
+            } catch (err) {
+                showToast('Lỗi cập nhật: ' + err.message, 'error');
+            }
+        }
+
+        async function togglePassagePro(passageId, val) {
+            try {
+                const isProVal = val === 'inherit' ? null : (val === 'pro');
+                const { error } = await sb
+                    .from('passages')
+                    .update({ is_pro: isProVal })
+                    .eq('id', passageId);
+
+                if (error) throw error;
+                const found = allProPassagesCache.find(p => p.id === passageId);
+                if (found) found.is_pro = isProVal;
+                showToast('Đã lưu cấu hình bài đọc!', 'success');
+                filterProContentTree();
+            } catch (err) {
+                showToast('Lỗi cập nhật: ' + err.message, 'error');
+            }
+        }
+
+        async function applyDefaultProContentRules() {
+            showConfirmModal({
+                title: 'Khôi Phục Cấu Hình Pro / Free Mặc Định',
+                message: 'Bạn có chắc muốn áp dụng quy tắc mặc định?<br><br>&bull; <strong>FREE:</strong> Toàn bộ đề thi THPT, Cambridge IELTS 16, 17, 18 và Actual Tests Vol 9.<br>&bull; <strong>PRO:</strong> Tất cả các bộ Cam và sách khác.<br>&bull; Đặt lại tất cả test và passage về trạng thái kế thừa.',
+                confirmText: 'Áp dụng Mặc định',
+                onConfirm: async () => {
+                    try {
+                        showToast('Đang khôi phục cấu hình mặc định...', 'info');
+
+                        // Reset tests and passages to null (inherit)
+                        await sb.from('passages').update({ is_pro: null }).neq('id', '00000000-0000-0000-0000-000000000000');
+                        await sb.from('tests').update({ is_pro: null }).neq('id', '00000000-0000-0000-0000-000000000000');
+
+                        // Fetch all topics to update
+                        const { data: topics } = await sb.from('topics').select('id, name, category');
+                        for (const t of (topics || [])) {
+                            const name = (t.name || '').toLowerCase();
+                            const cat = (t.category || '').toLowerCase();
+                            const isFree = name.includes('16') || name.includes('17') || name.includes('18') || 
+                                           name.includes('vol 9') || name.includes('vol09') || name.includes('vol.9') ||
+                                           name.includes('thpt') || cat.includes('thpt');
+                            await sb.from('topics').update({ is_pro: !isFree }).eq('id', t.id);
+                        }
+
+                        showToast('Đã khôi phục thành công cấu hình mặc định!', 'success');
+                        await loadProContentData();
+                    } catch (err) {
+                        showToast('Lỗi khôi phục: ' + err.message, 'error');
+                    }
+                }
+            });
         }
 
         // 4. TAB 2: USER MANAGEMENT CMS

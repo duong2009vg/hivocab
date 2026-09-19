@@ -1237,7 +1237,6 @@ const DEFAULT_TOPIC_CATEGORIES = [
     'Oxford 3000',
     'CEFR',
     'THPT & ĐGNL',
-    'Idioms & Collocations',
     'Grammar',
     'Custom',
 ];
@@ -1476,6 +1475,7 @@ window._renderTopicsGrid = async function() {
 
         grid.innerHTML = filtered.map(topic => {
             const pct = topic.progress ?? 0;
+            const isPro = Boolean(topic.is_pro);
             return `
             <div id="topic-card-${topic.id}" onclick="window._openTopic('${topic.id}');"
                 class="topic-card-surface cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
@@ -1483,6 +1483,13 @@ window._renderTopicsGrid = async function() {
                     class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-outline hover:bg-error-container hover:text-error transition-colors z-10">
                     <span class="material-symbols-outlined text-[16px] md:text-[20px]">close</span>
                 </button>
+                ${isPro ? `
+                <div class="absolute top-2 right-2 md:top-3 md:right-3 z-10">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs">
+                        <span class="material-symbols-outlined text-[12px]">workspace_premium</span>
+                        PRO
+                    </span>
+                </div>` : ''}
                 <div class="flex flex-col h-full mt-4 md:mt-8">
                     <div class="w-8 h-8 md:w-12 md:h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-on-surface mb-2 md:mb-4 shadow-sm shrink-0">
                         <span class="material-symbols-outlined text-[18px] md:text-2xl">${topic.icon || 'folder'}</span>
@@ -1738,19 +1745,27 @@ window._renderCamPassages = function(testIndex = 0) {
     let html = passages.map(p => {
         const prog = p.progress || 0;
         const barColor = prog >= 80 ? 'bg-green-500' : prog >= 40 ? 'bg-primary' : 'bg-yellow-400';
+        const isPro = Boolean(p.isPro);
         return `
-        <div onclick="window._openPassage('${topicId}', '${p.id}', '${currentTest.id}', ${p.passageNumber}, '${_esc(p.title)}', '${_esc(p.topicLabel)}', '${_esc(currentTest.name)}')"
+        <div onclick="window._openPassage('${topicId}', '${p.id}', '${currentTest.id}', ${p.passageNumber}, '${_esc(p.title)}', '${_esc(p.topicLabel)}', '${_esc(currentTest.name)}', ${isPro})"
              class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
             <div>
                 <!-- Top row: Badge Passage X + Rename + Progress % -->
                 <div class="flex items-center justify-between gap-2 mb-3">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary">
-                        <span class="material-symbols-outlined text-[15px]">article</span>
-                        Passage ${p.passageNumber}
-                    </span>
+                    <div class="flex items-center gap-1.5">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary">
+                            <span class="material-symbols-outlined text-[15px]">article</span>
+                            Passage ${p.passageNumber}
+                        </span>
+                        ${isPro ? `
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs">
+                            <span class="material-symbols-outlined text-[12px]">workspace_premium</span>
+                            PRO
+                        </span>` : ''}
+                    </div>
                     <div class="flex items-center gap-1.5">
                         ${p.contentEn || p.contentVi ? `
-                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}', this)"
+                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}', this, ${isPro})"
                                 class="px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs flex items-center gap-1 transition-all active:scale-95 cursor-pointer"
                                 title="Đọc bài song ngữ">
                             <span class="material-symbols-outlined text-[15px]">menu_book</span>
@@ -1784,12 +1799,13 @@ window._renderCamPassages = function(testIndex = 0) {
                     </span>
                     <div class="flex items-center gap-2">
                         ${p.contentEn || p.contentVi ? `
-                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}', this)"
+                        <button onclick="event.stopPropagation(); window._openPassageReader('${p.id}', this, ${isPro})"
                                 class="px-2.5 py-1 rounded-lg bg-primary/10 text-primary font-bold text-xs hover:bg-primary/20 transition-all flex items-center gap-1 active:scale-95 cursor-pointer">
                             <span class="material-symbols-outlined text-[14px]">menu_book</span>
                             <span>Đọc</span>
                         </button>` : ''}
                         <span class="font-bold text-primary flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
+                            ${isPro ? '<span class="material-symbols-outlined text-[15px] text-amber-500 mr-0.5">lock</span>' : ''}
                             Học ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </span>
                     </div>
@@ -1827,7 +1843,19 @@ window._renderCamPassages = function(testIndex = 0) {
 };
 
 // ── MỞ PASSAGE (Cambridge) ───────────────────────────────────────
-window._openPassage = function(topicId, passageId, testId, passageNumber, passageTitle, topicLabel, testName) {
+window._openPassage = async function(topicId, passageId, testId, passageNumber, passageTitle, topicLabel, testName, isPro) {
+    if (isPro) {
+        const userIsPro = typeof HiDB !== 'undefined' ? await HiDB.isUserPro() : false;
+        if (!userIsPro) {
+            if (typeof window.openPricingModal === 'function') {
+                window.openPricingModal();
+            } else {
+                alert('Nội dung này thuộc gói HiVocab PRO. Vui lòng nâng cấp để mở khóa!');
+            }
+            return;
+        }
+    }
+
     const topicName = window._currentTopicName || '—';
     window._currentTopicId        = topicId;
     window._currentPassageId      = passageId;
@@ -4115,7 +4143,7 @@ function _renderCategoryDropdown(preselectCat) {
     if (!catSel) return;
     const catMap = new Map();
     const defaultCats = [
-        'CAM','Destination C1-C2','SAT','IELTS','Oxford 3000','Idioms & Collocations',
+        'CAM','Destination C1-C2','SAT','IELTS','Oxford 3000',
         'THPT/ĐGNL','General English','CEFR','Grammar'
     ];
     defaultCats.forEach(c => catMap.set(c.toLowerCase(), c));
@@ -4430,7 +4458,18 @@ window._readerViewMode = 'bilingual';
 window._currentReaderPassage = null;
 
 // ── Đọc bài đọc song ngữ (Chuyển tiếp sang chế độ Đọc Chủ Động độc lập) ──
-window._openPassageReader = function(passageId, btnEl) {
+window._openPassageReader = async function(passageId, btnEl, isPro) {
+    if (isPro) {
+        const userIsPro = typeof HiDB !== 'undefined' ? await HiDB.isUserPro() : false;
+        if (!userIsPro) {
+            if (typeof window.openPricingModal === 'function') {
+                window.openPricingModal();
+            } else {
+                alert('Bài đọc này thuộc gói HiVocab PRO. Vui lòng nâng cấp để mở khóa!');
+            }
+            return;
+        }
+    }
     if (btnEl) {
         btnEl.classList.add('opacity-75', 'scale-95');
         const icon = btnEl.querySelector('.material-symbols-outlined');
