@@ -1,0 +1,588 @@
+<!-- ==================== PAGE: LANDING ==================== -->
+<div id="page-landing" class="page active font-inter">
+<div id="landing-main-wrapper" class="relative overflow-hidden w-full">
+    <div id="landing-hero-backdrop" class="absolute inset-0 z-0 gradient-asagiri transition-all duration-700 pointer-events-none select-none">
+        <img id="landing-bg-svg" src="/bg-morning.svg" alt="" class="w-full h-full object-cover object-top pointer-events-none select-none" />
+        <div class="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/80 w-full h-full pointer-events-none select-none"></div>
+    </div>
+    <section class="relative z-10 min-h-screen flex flex-col pt-6 pb-20 px-6 sm:px-8">
+        <header class="relative z-20 flex items-center justify-between mx-auto w-full max-w-7xl">
+            <div class="flex-shrink-0 flex items-center"><a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-hero" src="logo-mark-white.svg" alt="Hi"/></a></div>
+            <nav class="hidden lg:flex items-center space-x-1 glass-nav rounded-full px-2 py-1.5">
+                <a class="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onclick="navigateTo('features')">Tính năng</a><div class="w-px h-4 bg-white/30 mx-1"></div>
+                <a class="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onclick="navigateTo('reviews')">Đánh giá</a><div class="w-px h-4 bg-white/30 mx-1"></div>
+                <a class="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onclick="navigateTo('support')">Hỗ trợ</a><div class="w-px h-4 bg-white/30 mx-1"></div>
+                <a class="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onclick="navigateTo('faq')">FAQ</a>
+            </nav>
+            <div class="flex items-center space-x-3">
+                <a class="inline-flex items-center justify-center px-4 py-2 rounded-lg text-white bg-white/20 hover:bg-white/30 border border-white/30 text-xs sm:text-sm font-semibold backdrop-blur-sm transition-colors cursor-pointer" onclick="window.navigateTo('dashboard')">Bắt đầu ngay</a>
+                <a class="inline-flex items-center justify-center px-5 py-2 rounded-lg text-gray-900 bg-white hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm transition-colors cursor-pointer" onclick="window.navigateTo('login')">Đăng nhập</a>
+            </div>
+        </header>
+        <main class="relative z-10 flex-grow flex items-center max-w-7xl mx-auto w-full mt-16 sm:mt-20 lg:mt-28">
+            <div class="grid lg:grid-cols-12 gap-8 items-center w-full">
+                <div class="lg:col-span-7 max-w-xl text-left pr-0 lg:pr-4 fade-in">
+                    <div id="hero-time-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold mb-3 border border-white/30">
+                        <span class="material-symbols-outlined text-sm">schedule</span>
+                        <span id="hero-time-label">Nền tảng học từ vựng & Luyện thi tiếng Anh</span>
+                    </div>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-snug mb-3">
+                        Làm chủ từ vựng tiếng Anh & Đọc hiểu IELTS
+                    </h1>
+                    <p class="text-xs sm:text-sm lg:text-base text-white/85 mb-6 max-w-md leading-relaxed">
+                        Ghi nhớ bền vững hơn 66.000 từ vựng học thuật chuẩn Cambridge với phương pháp Lặp lại ngắt quãng (Spaced Repetition) và Đọc hiểu chủ động.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-start">
+                        <a class="inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-white hover:bg-gray-100 shadow-md hover:shadow-lg transition-all cursor-pointer" onclick="window.navigateTo('dashboard')">
+                            <span>Bắt đầu ngay</span>
+                            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="lg:col-span-5 hidden lg:flex flex-col gap-3.5 relative ml-auto w-full max-w-[360px] fade-in" style="animation-delay: 0.2s;">
+                    <div onclick="window.navigateTo('dashboard')" class="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+                        <span class="text-white/70 text-xs font-medium uppercase tracking-wider">Trải nghiệm</span>
+                        <span class="text-white text-sm font-semibold truncate">CAM 19 • Test 2 • Passage 1 →</span>
+                    </div>
+                    <div onclick="window.navigateTo('features')" class="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg">
+                        <div class="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
+                        <span class="text-white/70 text-xs font-medium uppercase tracking-wider">Độc quyền</span>
+                        <span class="text-white text-sm font-semibold">Đọc Chủ Động & Che Dịch →</span>
+                    </div>
+                    <div onclick="window.navigateTo('dashboard')" class="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg">
+                        <div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
+                        <span class="text-white/70 text-xs font-medium uppercase tracking-wider">Kho từ</span>
+                        <span class="text-white text-sm font-semibold">66.000+ từ Cambridge & Vol →</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </section>
+    <section class="relative z-10 py-20 px-6 sm:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16 fade-in">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white drop-shadow-md">Tại sao nên chọn HiVocab?</h2>
+                <p class="mt-4 text-sm sm:text-base lg:text-lg text-white/85 max-w-2xl mx-auto drop-shadow-sm">Hệ sinh thái học từ vựng học thuật toàn diện, biến việc luyện đề IELTS thành trải nghiệm ghi nhớ sâu sắc và bền vững.</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6 md:gap-8 fade-in" style="animation-delay: 0.15s;">
+                <div class="text-left p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl hover:translate-y-[-4px] transition-all">
+                    <div class="w-14 h-14 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-500/20">
+                        <span class="material-symbols-outlined text-3xl">menu_book</span>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2.5">Kho 66.000+ từ vựng Cam & Vol</h3>
+                    <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Trọn bộ Cambridge 10–21 và IELTS Actual Tests Vol 1–9 được chuẩn hóa từ loại (POS), phiên âm (IPA) và câu ví dụ thật trích từ chính bài đọc.</p>
+                </div>
+                <div class="text-left p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl hover:translate-y-[-4px] transition-all">
+                    <div class="w-14 h-14 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-emerald-500/20">
+                        <span class="material-symbols-outlined text-3xl">vertical_split</span>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2.5">Chế độ Đọc Chủ Động (Curtain Mode)</h3>
+                    <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Đọc song ngữ Anh - Việt đối sánh với tính năng rèm che tương tác, kết hợp bài tập đục lỗ kích thích tư duy tự suy luận nghĩa trong ngữ cảnh.</p>
+                </div>
+                <div class="text-left p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl hover:translate-y-[-4px] transition-all">
+                    <div class="w-14 h-14 bg-purple-500/15 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-purple-500/20">
+                        <span class="material-symbols-outlined text-3xl">bolt</span>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2.5">Lặp lại ngắt quãng (SRS SM-2)</h3>
+                    <p class="text-gray-700 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">Thuật toán khoa học phân tầng 5 cấp độ trí nhớ, tự động nhắc nhở ôn tập vào đúng thời điểm bạn sắp quên để khắc sâu vĩnh viễn.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<!-- Footer ONLY for Landing Page -->
+<footer class="border-t border-gray-200/80 dark:border-white/10 bg-white dark:bg-surface-container-low text-[#6E6E73] text-sm py-12 px-8">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
+        <!-- Col 1: Brand info -->
+        <div class="md:col-span-2 space-y-4 pr-0 md:pr-8">
+            <div class="flex items-center gap-2.5">
+                <img src="/logo-mark.svg" alt="HiVocab Logo" class="h-8 w-auto"/>
+                <span class="font-bold text-xl text-gray-900 dark:text-white tracking-tight">HiVocab</span>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-md">
+                Hệ sinh thái học từ vựng học thuật thông minh, phương pháp Đọc Chủ Động (Curtain Mode) và Lặp lại ngắt quãng (Spaced Repetition SM-2) chuẩn hóa Cambridge IELTS & THPT Quốc Gia.
+            </p>
+            <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+                <p>📍 <strong>Đơn vị phát triển:</strong> HiVocab Education</p>
+                <p>✉️ <strong>Hỗ trợ:</strong> <a href="mailto:support@hivocab.site" class="text-blue-600 hover:underline">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" class="text-blue-600 hover:underline">mitthoi60@gmail.com</a></p>
+                <p>📞 <strong>Hotline/Zalo:</strong> 0846 407 898</p>
+            </div>
+        </div>
+
+        <!-- Col 2: Navigation -->
+        <div class="space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Điều hướng</h4>
+            <ul class="space-y-2 text-xs sm:text-sm">
+                <li><a onclick="navigateTo('features')" class="cursor-pointer hover:text-blue-600 transition-colors">Tính năng</a></li>
+                <li><a onclick="navigateTo('reviews')" class="cursor-pointer hover:text-blue-600 transition-colors">Đánh giá</a></li>
+                <li><a onclick="navigateTo('support')" class="cursor-pointer hover:text-blue-600 transition-colors">Hỗ trợ</a></li>
+                <li><a onclick="navigateTo('faq')" class="cursor-pointer hover:text-blue-600 transition-colors">Câu hỏi thường gặp (FAQ)</a></li>
+                <li><a onclick="navigateTo('login')" class="cursor-pointer hover:text-blue-600 transition-colors">Đăng nhập / Đăng ký</a></li>
+            </ul>
+        </div>
+
+        <!-- Col 3: Legal & Policy -->
+        <div class="space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Pháp lý & Chính sách</h4>
+            <ul class="space-y-2 text-xs sm:text-sm">
+                <li>
+                    <a href="/privacy" class="text-blue-600 font-semibold hover:underline flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px]">verified_user</span>
+                        Chính sách quyền riêng tư
+                    </a>
+                </li>
+                <li>
+                    <a href="/terms" class="hover:text-blue-600 transition-colors flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[15px]">gavel</span>
+                        Điều khoản dịch vụ
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bottom copyright -->
+    <div class="max-w-7xl mx-auto pt-6 border-t border-gray-200/60 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
+        <p>© 2026 HiVocab (hivocab.site). Bản quyền được bảo lưu.</p>
+        <div class="flex items-center gap-4">
+            <a href="/privacy" class="hover:underline text-gray-700 dark:text-gray-300">Privacy Policy</a>
+            <span>•</span>
+            <a href="/terms" class="hover:underline text-gray-700 dark:text-gray-300">Terms of Service</a>
+            <span>•</span>
+            <a href="/" class="hover:underline text-blue-600">hivocab.site</a>
+        </div>
+    </div>
+</footer>
+</div>
+
+<!-- ==================== PAGE: FEATURES ==================== -->
+<div id="page-features" class="page">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
+    <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
+        <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
+    </div>
+</header>
+<main class="pt-24 md:pt-32 pb-24 px-6 md:px-8 max-w-7xl mx-auto min-h-screen">
+    <div class="text-center mb-12 md:mb-16 fade-in">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
+            <span class="material-symbols-outlined text-sm">stars</span> Hệ thống học tập toàn diện
+        </div>
+        <h1 class="text-3xl md:text-5xl font-bold text-on-surface mb-4 md:mb-6">Tính năng đột phá của HiVocab</h1>
+        <p class="text-base md:text-xl text-on-surface-variant max-w-3xl mx-auto leading-relaxed">Khám phá các công cụ thông minh được thiết kế chuyên biệt để giúp bạn làm chủ từ vựng học thuật và bứt phá band điểm IELTS Reading nhanh nhất.</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 fade-in" style="animation-delay: 0.15s">
+        <!-- Feature 1 -->
+        <div class="glass-card soft-shadow p-6 md:p-8 rounded-2xl flex flex-col hover:-translate-y-1.5 transition-all duration-300 border border-outline-variant/30 hover:border-primary/50 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-14 h-14 bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-3xl">menu_book</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 uppercase tracking-wider">Độc quyền</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-3">Kho 66.000+ từ vựng Cam & Vol</h3>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed flex-1">Trọn bộ 12 cuốn Cambridge IELTS (CAM 10–21) và 9 tập IELTS Actual Tests (VOL 1–9). Chuẩn hóa 100% từ loại (POS), phiên âm quốc tế (IPA), bản dịch chuẩn xác và câu ví dụ thật từ bài đọc.</p>
+            <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs font-semibold text-primary">
+                <span class="material-symbols-outlined text-base">check_circle</span> 100 Tests • 300 Passages đầy đủ
+            </div>
+        </div>
+        <!-- Feature 2 -->
+        <div class="glass-card soft-shadow p-6 md:p-8 rounded-2xl flex flex-col hover:-translate-y-1.5 transition-all duration-300 border border-outline-variant/30 hover:border-emerald-500/50 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-14 h-14 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-3xl">vertical_split</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 uppercase tracking-wider">Đột phá</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-3">Đọc Chủ Động & Che Bản Dịch</h3>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed flex-1">Phương pháp Curtain Mode độc quyền: Đọc song ngữ Anh - Việt đối chiếu với rèm che thông minh giúp kích thích tư duy tự suy luận nghĩa từ ngữ cảnh. Tích hợp bài tập đục lỗ ngay trong bài đọc.</p>
+            <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                <span class="material-symbols-outlined text-base">check_circle</span> Tăng tốc độ đọc hiểu x2
+            </div>
+        </div>
+        <!-- Feature 3 -->
+        <div class="glass-card soft-shadow p-6 md:p-8 rounded-2xl flex flex-col hover:-translate-y-1.5 transition-all duration-300 border border-outline-variant/30 hover:border-amber-500/50 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-14 h-14 bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-3xl">bolt</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 uppercase tracking-wider">Khoa học</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-3">Lặp lại ngắt quãng (SRS SM-2)</h3>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed flex-1">Thuật toán SuperMemo-2 phân tầng 5 cấp độ trí nhớ từ Khởi động (1 ngày) đến Thành thạo (30 ngày). Nhắc nhở ôn tập chính xác thời điểm chuẩn bị quên, chuyển hóa từ vựng thành trí nhớ dài hạn vĩnh viễn.</p>
+            <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                <span class="material-symbols-outlined text-base">check_circle</span> Tiết kiệm 80% thời gian học
+            </div>
+        </div>
+        <!-- Feature 4 -->
+        <div class="glass-card soft-shadow p-6 md:p-8 rounded-2xl flex flex-col hover:-translate-y-1.5 transition-all duration-300 border border-outline-variant/30 hover:border-purple-500/50 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-14 h-14 bg-purple-500/10 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-3xl">sports_esports</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 uppercase tracking-wider">Đa giác quan</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-3">5 Chế độ Luyện tập Đa dạng</h3>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed flex-1">Tự do đổi gió với Flashcard lật mặt 3D, Trắc nghiệm 4 đáp án (Quiz) phản xạ, Điền từ ngữ cảnh (Type-in), Nghe chép chính tả (Dictation) chuẩn giọng bản ngữ và Trò chơi phiêu lưu vượt ải sinh động.</p>
+            <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs font-semibold text-purple-600 dark:text-purple-400">
+                <span class="material-symbols-outlined text-base">check_circle</span> Học không chán, nhớ bền lâu
+            </div>
+        </div>
+        <!-- Feature 5 -->
+        <div class="glass-card soft-shadow p-6 md:p-8 rounded-2xl flex flex-col hover:-translate-y-1.5 transition-all duration-300 border border-outline-variant/30 hover:border-rose-500/50 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-14 h-14 bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-3xl">smart_toy</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300 uppercase tracking-wider">AI Gemini</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-3">Trợ lý AI & Từ điển Ngữ cảnh</h3>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed flex-1">Trí tuệ nhân tạo Gemini phân tích ngữ cảnh học thuật chuyên sâu, giải nghĩa Collocations, Synonyms và cung cấp mẹo ghi nhớ (Mnemonics) độc đáo. Tra cứu tức thời không rời màn hình học.</p>
+            <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                <span class="material-symbols-outlined text-base">check_circle</span> Giải nghĩa sát đề thi thật
+            </div>
+        </div>
+        <!-- Feature 6 -->
+        <div class="glass-card soft-shadow p-6 md:p-8 rounded-2xl flex flex-col hover:-translate-y-1.5 transition-all duration-300 border border-outline-variant/30 hover:border-sky-500/50 relative overflow-hidden group">
+            <div class="flex items-center justify-between mb-5">
+                <div class="w-14 h-14 bg-sky-500/10 text-sky-600 dark:text-sky-400 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110">
+                    <span class="material-symbols-outlined text-3xl">monitoring</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-md bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300 uppercase tracking-wider">Động lực</span>
+            </div>
+            <h3 class="text-xl font-bold text-on-surface mb-3">Thống kê Tiến độ & Chuỗi Streak</h3>
+            <p class="text-on-surface-variant text-sm md:text-base leading-relaxed flex-1">Theo dõi chi tiết số từ đã thành thạo, thời gian học tập tích lũy qua biểu đồ trực quan. Ngọn lửa Streak hàng ngày nhắc nhở bạn duy trì thói quen học tập để gặt hái kết quả cao nhất.</p>
+            <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center gap-2 text-xs font-semibold text-sky-600 dark:text-sky-400">
+                <span class="material-symbols-outlined text-base">check_circle</span> Xây dựng kỷ luật học mỗi ngày
+            </div>
+        </div>
+    </div>
+    <!-- Features Bottom CTA -->
+    <div class="mt-14 p-8 md:p-12 rounded-3xl bg-gradient-to-r from-primary/10 via-surface-container to-secondary/10 border border-primary/20 text-center flex flex-col items-center">
+        <h2 class="text-2xl md:text-3xl font-bold text-on-surface mb-3">Sẵn sàng bứt phá band điểm IELTS cùng HiVocab?</h2>
+        <p class="text-on-surface-variant text-base md:text-lg max-w-xl mb-6">Đăng ký tài khoản ngay hôm nay để nhận trọn vẹn 2 tháng trải nghiệm Full tính năng hoàn toàn miễn phí!</p>
+        <button onclick="window.handleStartNow()" class="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-md hover:shadow-lg cursor-pointer">
+            <span class="material-symbols-outlined">rocket_launch</span> Bắt đầu học miễn phí
+        </button>
+    </div>
+</main>
+</div>
+
+<!-- ==================== PAGE: REVIEWS ==================== -->
+<div id="page-reviews" class="page">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
+    <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
+        <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
+    </div>
+</header>
+<main class="pt-24 md:pt-32 pb-24 px-6 md:px-8 max-w-5xl mx-auto min-h-screen">
+    <div class="text-center mb-10 md:mb-14 fade-in">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-amber-500/10 text-amber-600 text-xs font-bold uppercase tracking-wider mb-4 border border-amber-500/20">
+            <span class="material-symbols-outlined text-sm">chat_bubble</span> Phản hồi trải nghiệm sớm
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-on-surface mb-3">Cảm nhận từ những người dùng đầu tiên</h1>
+        <p class="text-base text-on-surface-variant max-w-xl mx-auto">HiVocab mới ra mắt và đang tiếp tục được hoàn thiện mỗi ngày. Dưới đây là những chia sẻ thực tế từ các bạn học viên trải nghiệm sớm.</p>
+        
+        <div class="flex items-center justify-center gap-3 mt-6 bg-surface-container-low w-max mx-auto px-5 py-2 rounded-xl border border-outline-variant/30">
+            <div class="flex text-[#FFB400] text-base">
+                <span class="material-symbols-outlined icon-fill">star</span>
+                <span class="material-symbols-outlined icon-fill">star</span>
+                <span class="material-symbols-outlined icon-fill">star</span>
+                <span class="material-symbols-outlined icon-fill">star</span>
+                <span class="material-symbols-outlined icon-fill">star_half</span>
+            </div>
+            <span class="text-xs md:text-sm text-on-surface-variant font-medium">Góp ý & đánh giá từ học viên trải nghiệm thử nghiệm</span>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in" style="animation-delay: 0.15s">
+        <!-- Review 1 -->
+        <div class="glass-card soft-shadow p-6 rounded-2xl flex flex-col gap-4 border border-outline-variant/20 bg-surface-container-lowest">
+            <div class="flex text-[#FFB400] text-sm">
+                <span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span>
+            </div>
+            <p class="text-on-surface text-sm leading-relaxed italic flex-1">"Website mới ra mắt nên đôi lúc còn vài chỗ cần tải dữ liệu, nhưng kho từ vựng Cam 10-21 làm rất chỉn chu. Có sẵn câu ví dụ trích từ bài đọc nên khi luyện đề đỡ mất công tự tra thủ công rất nhiều."</p>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-10 h-10 bg-primary/20 text-primary rounded-full flex items-center justify-center font-bold text-sm">Đ</div>
+                <div>
+                    <p class="font-bold text-on-surface text-sm">Minh Đức</p>
+                    <p class="text-xs text-on-surface-variant">Đang tự cày đề Cambridge</p>
+                </div>
+            </div>
+        </div>
+        <!-- Review 2 -->
+        <div class="glass-card soft-shadow p-6 rounded-2xl flex flex-col gap-4 border border-outline-variant/20 bg-surface-container-lowest">
+            <div class="flex text-[#FFB400] text-sm">
+                <span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span>
+            </div>
+            <p class="text-on-surface text-sm leading-relaxed italic flex-1">"Mình thích nhất tính năng kéo rèm che bản dịch tiếng Việt để tự đoán nghĩa theo ngữ cảnh trước khi xem lời dịch. Rất mong admin tiếp tục bổ sung thêm nhiều bài đọc mới trong thời gian tới!"</p>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-10 h-10 bg-emerald-500/20 text-emerald-600 rounded-full flex items-center justify-center font-bold text-sm">H</div>
+                <div>
+                    <p class="font-bold text-on-surface text-sm">Thu Hà</p>
+                    <p class="text-xs text-on-surface-variant">Đang ôn thi IELTS Reading</p>
+                </div>
+            </div>
+        </div>
+        <!-- Review 3 -->
+        <div class="glass-card soft-shadow p-6 rounded-2xl flex flex-col gap-4 border border-outline-variant/20 bg-surface-container-lowest">
+            <div class="flex text-[#FFB400] text-sm">
+                <span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span><span class="material-symbols-outlined icon-fill">star</span>
+            </div>
+            <p class="text-on-surface text-sm leading-relaxed italic flex-1">"Giao diện sạch sẽ, học Flashcard và làm trắc nghiệm khá mượt. Thích nhất là có số Zalo của admin, hôm trước gặp lỗi đăng nhập nhắn cái là admin hỗ trợ xử lý ngay lập tức."</p>
+            <div class="flex items-center gap-3 pt-3 border-t border-outline-variant/20">
+                <div class="w-10 h-10 bg-purple-500/20 text-purple-600 rounded-full flex items-center justify-center font-bold text-sm">A</div>
+                <div>
+                    <p class="font-bold text-on-surface text-sm">Tuấn Anh</p>
+                    <p class="text-xs text-on-surface-variant">Sinh viên đại học</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reviews Bottom CTA -->
+    <div class="mt-12 p-6 md:p-8 rounded-2xl bg-surface-container-low border border-outline-variant/30 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-left">
+            <h2 class="text-base md:text-lg font-bold text-on-surface">Bạn cũng đang trải nghiệm HiVocab?</h2>
+            <p class="text-xs md:text-sm text-on-surface-variant mt-1">Mọi góp ý của bạn đều giúp website hoàn thiện hơn mỗi ngày.</p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+            <a href="https://zalo.me/0846407898" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-[#0068FF] text-white text-sm font-bold rounded-xl hover:bg-[#0054cc] transition-colors shadow-xs">
+                <span class="material-symbols-outlined text-base">chat</span> Gửi góp ý qua Zalo
+            </a>
+            <button onclick="window.handleStartNow()" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-base">school</span> Học ngay
+            </button>
+        </div>
+    </div>
+</main>
+</div>
+
+<!-- ==================== PAGE: FAQ ==================== -->
+<div id="page-faq" class="page">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
+    <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
+        <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
+    </div>
+</header>
+<main class="pt-24 md:pt-32 pb-24 px-6 md:px-8 max-w-3xl mx-auto min-h-screen">
+    <div class="text-center mb-10 md:mb-14 fade-in">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
+            <span class="material-symbols-outlined text-sm">help</span> Giải đáp thắc mắc
+        </div>
+        <h1 class="text-3xl md:text-5xl font-bold text-on-surface mb-4">Câu hỏi thường gặp</h1>
+        <p class="text-base md:text-lg text-on-surface-variant max-w-xl mx-auto">Mọi điều bạn cần biết về HiVocab, kho 66.000+ từ vựng Cambridge / IELTS Vol và chương trình quà tặng ra mắt.</p>
+    </div>
+    <div class="space-y-3.5 md:space-y-4 fade-in" id="faq-list"></div>
+    <!-- FAQ Contact Box -->
+    <div class="mt-12 p-6 md:p-8 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-6 fade-in">
+        <div class="flex items-center gap-4 text-center md:text-left">
+            <div class="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-2xl">support_agent</span>
+            </div>
+            <div>
+                <h3 class="font-bold text-on-surface text-base md:text-lg">Vẫn còn thắc mắc chưa được giải đáp?</h3>
+                <p class="text-sm text-on-surface-variant mt-0.5">Admin luôn túc trực Zalo để hỗ trợ bạn bất cứ lúc nào.</p>
+            </div>
+        </div>
+        <a href="https://zalo.me/0846407898" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0068FF] hover:bg-[#0054cc] text-white font-bold rounded-xl transition-all shrink-0 shadow-sm">
+            <span class="material-symbols-outlined text-lg">chat</span> Nhắn Zalo: 0846 407 898
+        </a>
+    </div>
+</main>
+</div>
+
+<!-- ==================== PAGE: SUPPORT ==================== -->
+<div id="page-support" class="page">
+<header class="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
+    <div class="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
+        <a class="cursor-pointer" onclick="window.navigateTo('landing')" aria-label="Hi - Trang chu"><img class="brand-logo-sm" src="logo-mark.svg" alt="Hi"/></a>
+        <button onclick="window.navigateTo('landing')" class="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base"><span class="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại</button>
+    </div>
+</header>
+<main class="pt-24 md:pt-32 pb-24 px-6 md:px-8 max-w-2xl mx-auto min-h-screen">
+    <div class="text-center mb-10 fade-in">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider mb-4 border border-primary/20">
+            <span class="material-symbols-outlined text-sm">headset_mic</span> Trung tâm hỗ trợ & CSKH
+        </div>
+        <h1 class="text-3xl md:text-4xl font-bold text-on-surface mb-3">Chúng tôi có thể giúp gì cho bạn?</h1>
+        <p class="text-on-surface-variant text-base">Website HiVocab mới ra mắt, Admin sẵn sàng hỗ trợ kỹ thuật và lắng nghe góp ý 24/7.</p>
+    </div>
+
+    <!-- ZALO ADMIN VIP CARD -->
+    <div class="glass-card soft-shadow rounded-2xl p-6 md:p-8 mb-8 border-2 border-primary/30 relative overflow-hidden fade-in">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="flex items-start justify-between gap-4 mb-4">
+            <div class="flex items-center gap-3.5">
+                <div class="w-14 h-14 rounded-2xl bg-[#0068FF] text-white flex items-center justify-center font-bold text-2xl shadow-md shrink-0">
+                    Z
+                </div>
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[11px] font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Trực tuyến 24/7 • Phản hồi trong 5 phút
+                    </div>
+                    <h2 class="text-lg md:text-xl font-bold text-on-surface mt-1">Kênh Zalo Hỗ Trệu Chính Thức</h2>
+                </div>
+            </div>
+        </div>
+        <div class="bg-surface-container-low rounded-xl p-4 mb-5 border border-outline-variant/30 flex items-center justify-between">
+            <div>
+                <span class="text-xs text-on-surface-variant block font-medium">Số điện thoại / Zalo Admin:</span>
+                <span class="text-2xl md:text-3xl font-extrabold text-primary tracking-wider font-mono">0846 407 898</span>
+            </div>
+            <button type="button" id="btn-copy-zalo" onclick="window.copyZaloSupport()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold border border-outline-variant/40 transition-all shadow-xs cursor-pointer">
+                <span class="material-symbols-outlined text-base" id="icon-copy-zalo">content_copy</span>
+                <span id="text-copy-zalo">Sao chép</span>
+            </button>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+            <a href="https://zalo.me/0846407898" target="_blank" rel="noopener noreferrer" class="flex-1 flex items-center justify-center gap-2 py-3 px-5 bg-[#0068FF] hover:bg-[#0054cc] text-white font-bold rounded-xl transition-all shadow-sm">
+                <span class="material-symbols-outlined text-xl">chat</span> Nhắn tin Zalo ngay
+            </a>
+            <a href="tel:0846407898" class="flex items-center justify-center gap-2 py-3 px-5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-semibold rounded-xl border border-outline-variant/30 transition-all">
+                <span class="material-symbols-outlined text-xl">call</span> Gọi trực tiếp
+            </a>
+        </div>
+    </div>
+
+    <!-- WELCOME & 2-MONTH GIFT NOTICE -->
+    <div class="rounded-2xl p-5 md:p-6 mb-8 bg-gradient-to-r from-amber-500/10 via-surface-container-low to-primary/10 border border-amber-500/30 flex items-start gap-4 fade-in" style="animation-delay: 0.1s;">
+        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-600 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-2xl">card_giftcard</span>
+        </div>
+        <div class="text-sm md:text-base leading-relaxed">
+            <h3 class="font-bold text-on-surface text-base mb-1">Website mới ra mắt & Tặng 2 tháng Full tính năng</h3>
+            <p class="text-on-surface-variant">HiVocab vừa chính thức ra mắt với hơn 66.000 từ vựng và Chế độ Đọc Chủ Động. Trong quá trình học, nếu bạn gặp bất kỳ lỗi hiển thị hay đồng bộ nào, xin vui lòng chụp ảnh màn hình gửi qua Zalo <strong>0846 407 898</strong> để Admin khắc phục ngay lập tức nhé!</p>
+        </div>
+    </div>
+
+    <!-- QUICK CATEGORIES -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 fade-in" style="animation-delay: 0.15s;">
+        <a href="https://zalo.me/0846407898" target="_blank" rel="noopener noreferrer" class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-4 flex items-center gap-3.5 hover:border-primary/50 hover:shadow-md transition-all group">
+            <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <span class="material-symbols-outlined">bug_report</span>
+            </div>
+            <div>
+                <h4 class="font-bold text-on-surface text-sm">Báo lỗi kỹ thuật</h4>
+                <p class="text-xs text-on-surface-variant mt-0.5">Sự cố hiển thị, âm thanh, đồng bộ</p>
+            </div>
+            <span class="material-symbols-outlined ml-auto text-outline-variant text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </a>
+        <a href="https://zalo.me/0846407898" target="_blank" rel="noopener noreferrer" class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-xl p-4 flex items-center gap-3.5 hover:border-emerald-500/50 hover:shadow-md transition-all group">
+            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                <span class="material-symbols-outlined">school</span>
+            </div>
+            <div>
+                <h4 class="font-bold text-on-surface text-sm">Tư vấn lộ trình học</h4>
+                <p class="text-xs text-on-surface-variant mt-0.5">Hướng dẫn cày Cam 10–21 & Vol 1–9</p>
+            </div>
+            <span class="material-symbols-outlined ml-auto text-outline-variant text-base group-hover:translate-x-1 transition-transform">arrow_forward</span>
+        </a>
+    </div>
+
+    <!-- CONTACT FORM -->
+    <form onsubmit="window.handleSupportSubmit(event)" class="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-2xl p-6 md:p-8 flex flex-col gap-4 fade-in shadow-sm" style="animation-delay: 0.2s;">
+        <div>
+            <h2 class="font-bold text-lg text-on-surface">Gửi tin nhắn hoặc góp ý</h2>
+            <p class="text-xs text-on-surface-variant mt-1">Chúng tôi trân trọng từng ý kiến đóng góp của bạn để hoàn thiện HiVocab mỗi ngày.</p>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Họ và tên</label>
+            <input type="text" id="support-name" required placeholder="Ví dụ: Hoàng Nam" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface text-sm transition-colors"/>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Email hoặc Số Zalo liên hệ</label>
+            <input type="text" id="support-contact" required placeholder="Ví dụ: nam@gmail.com hoặc 0912..." class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface text-sm transition-colors"/>
+        </div>
+        <div>
+            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Nội dung câu hỏi / Báo lỗi</label>
+            <textarea id="support-message" required placeholder="Mô tả chi tiết câu hỏi hoặc lỗi bạn gặp phải..." rows="4" class="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none resize-none text-on-surface text-sm transition-colors"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-2 mt-2 cursor-pointer">
+            <span class="material-symbols-outlined text-lg">send</span> Gửi thông tin cho Admin
+        </button>
+    </form>
+</main>
+</div>
+
+<!-- ==================== PAGE: LOGIN ==================== -->
+<div id="page-login" class="page">
+<main class="relative z-10 w-full min-h-screen flex items-center justify-center px-4 md:px-6 py-10 bg-gradient-to-br from-[#1a1c2c] via-[#3a4a6b] to-[#7d87a8]">
+<div class="w-full max-w-md bg-surface/90 backdrop-blur-[24px] p-6 md:p-8 rounded-[24px] soft-shadow border border-white/50 fade-in">
+<div class="text-center mb-6">
+<img class="brand-logo mx-auto mb-2.5 h-10" src="logo-mark.svg" alt="Hi"/>
+<h2 id="auth-title" class="font-headline-md text-xl font-bold text-on-surface">Chào mừng trở lại!</h2>
+<p id="auth-subtitle" class="text-xs md:text-sm text-on-surface-variant mt-1">Đăng nhập để tiếp tục hành trình học từ vựng</p>
+</div>
+
+<!-- GOOGLE LOGIN BUTTON -->
+<button onclick="window.handleGoogleLogin()" class="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 border border-outline-variant/60 rounded-xl transition-all shadow-xs">
+<svg fill="none" height="20" viewBox="0 0 24 24" width="20"><path d="M22.56 12.25C22.56 11.47 22.49 10.72 22.36 10H12V14.26H17.92C17.66 15.63 16.88 16.78 15.68 17.55V20.31H19.25C21.34 18.39 22.56 15.58 22.56 12.25Z" fill="#4285F4"/><path d="M12 23C14.97 23 17.46 22.02 19.25 20.31L15.68 17.55C14.71 18.2 13.46 18.59 12 18.59C9.17 18.59 6.78 16.68 5.92 14.11H2.23V16.97C4.03 20.54 7.71 23 12 23Z" fill="#34A853"/><path d="M5.92 14.11C5.7 13.45 5.57 12.74 5.57 12C5.57 11.26 5.7 10.55 5.92 9.89V7.03H2.23C1.49 8.5 1.05 10.2 1.05 12C1.05 13.8 1.49 15.5 2.23 16.97L5.92 14.11Z" fill="#FBBC05"/><path d="M12 5.41C13.62 5.41 15.07 5.96 16.21 7.05L19.34 3.92C17.45 2.16 14.97 1.05 12 1.05C7.71 1.05 4.03 3.46 2.23 7.03L5.92 9.89C6.78 7.32 9.17 5.41 12 5.41Z" fill="#EA4335"/></svg>
+<span class="text-xs font-bold text-slate-800 uppercase tracking-wider">Tiếp tục với Google</span>
+</button>
+
+<div class="flex items-center my-4">
+<div class="flex-1 border-t border-outline-variant/30"></div>
+<span class="px-3 text-[11px] text-on-surface-variant uppercase tracking-wider font-semibold">hoặc email</span>
+<div class="flex-1 border-t border-outline-variant/30"></div>
+</div>
+
+<!-- AUTH MODE TOGGLE -->
+<div class="flex bg-surface-container-high/60 p-1 rounded-xl mb-4 border border-outline-variant/20">
+<button type="button" id="tab-auth-login" onclick="window.switchAuthMode('login')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all bg-white text-primary shadow-xs">Đăng nhập</button>
+<button type="button" id="tab-auth-signup" onclick="window.switchAuthMode('signup')" class="flex-1 py-1.5 text-xs font-bold rounded-lg transition-all text-on-surface-variant hover:text-on-surface">Đăng ký</button>
+</div>
+
+<!-- EMAIL / PASSWORD FORM -->
+<form id="email-auth-form" onsubmit="window.handleEmailAuth(event)" class="space-y-3">
+<div>
+<label class="block text-xs font-semibold text-on-surface mb-1">Email</label>
+<input type="email" id="auth-email" required placeholder="name@example.com" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+</div>
+
+<div>
+<div class="flex items-center justify-between mb-1">
+<label class="block text-xs font-semibold text-on-surface">Mật khẩu</label>
+<button type="button" id="link-forgot-pw" onclick="window.openForgotPasswordModal()" class="text-[11px] text-primary hover:underline font-medium">Quên mật khẩu?</button>
+</div>
+<input type="password" id="auth-password" required placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+</div>
+
+<!-- Confirm Password field (Only in Signup mode) -->
+<div id="field-confirm-password" class="hidden">
+<label class="block text-xs font-semibold text-on-surface mb-1">Xác nhận mật khẩu</label>
+<input type="password" id="auth-confirm-password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary">
+</div>
+
+<div id="auth-error" class="hidden text-xs text-error bg-error-container/40 border border-error/30 p-2.5 rounded-xl font-medium"></div>
+<div id="auth-success" class="hidden text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-medium"></div>
+
+<button type="submit" id="btn-auth-submit" class="w-full py-2.5 px-4 rounded-xl bg-primary text-white font-bold text-xs hover:bg-primary-dark transition-all shadow-xs">
+Đăng nhập
+</button>
+</form>
+
+<p class="text-[11px] text-center text-on-surface-variant mt-3 leading-relaxed">
+    Bằng việc tiếp tục, bạn đồng ý với <a href="/terms.html" target="_blank" class="text-primary hover:underline font-medium">Điều khoản</a> & <a href="/privacy.html" target="_blank" class="text-primary hover:underline font-medium">Chính sách quyền riêng tư</a> của HiVocab.
+</p>
+
+<div class="mt-4 text-center">
+<a class="text-on-surface-variant text-xs hover:text-primary cursor-pointer transition-colors" onclick="window.navigateTo('landing')">← Quay lại trang chủ</a>
+</div>
+
+<!-- Dev mode toggle -->
+<div class="mt-5 pt-3 border-t border-outline-variant/20 text-center">
+  <button onclick="window.toggleDevMode()" id="dev-mode-btn" class="text-[11px] text-outline hover:text-primary transition-colors px-3 py-1 rounded-lg hover:bg-surface-container-low">
+    <span class="material-symbols-outlined text-[13px] align-middle">developer_mode</span>
+    <span id="dev-mode-label">Chế độ Demo (offline)</span>
+  </button>
+</div>
+</div>
+</main>
+</div>
+

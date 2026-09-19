@@ -97,8 +97,20 @@ function copyStaticAssetsPlugin() {
   };
 }
 
+function htmlPartialsPlugin() {
+  return {
+    name: 'html-partials',
+    transformIndexHtml(html) {
+      return html.replace(/<!--\s*@include\s+['"]([^'"]+)['"]\s*-->/g, (match, filePath) => {
+        const fullPath = resolve(__dirname, filePath);
+        return fs.existsSync(fullPath) ? fs.readFileSync(fullPath, 'utf-8') : match;
+      });
+    }
+  };
+}
+
 export default defineConfig({
-  plugins: [copyStaticAssetsPlugin()],
+  plugins: [htmlPartialsPlugin(), copyStaticAssetsPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
