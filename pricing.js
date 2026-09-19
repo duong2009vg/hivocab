@@ -155,6 +155,7 @@
                                 <p>Đang tải mã VietQR bảo mật từ PayOS...</p>
                             </div>
                         </div>
+                        <div id="payos-external-link-wrap" class="text-center"></div>
 
                         <!-- Fallback / Backup bank info box -->
                         <div id="checkout-manual-info" class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -362,7 +363,7 @@
 
             if (window.PayOSCheckout && typeof window.PayOSCheckout.usePayOS === 'function') {
                 const payOSConfig = {
-                    RETURN_URL: `${window.location.origin}/#pricing?status=success&orderCode=${data.orderCode}`,
+                    RETURN_URL: `${window.location.origin}/?status=success&orderCode=${data.orderCode}`,
                     ELEMENT_ID: 'payos-embedded-container',
                     CHECKOUT_URL: data.checkoutUrl,
                     embedded: true,
@@ -381,9 +382,21 @@
                 const { open } = window.PayOSCheckout.usePayOS(payOSConfig);
                 open();
             } else {
-                // Fallback nếu SDK PayOS chưa tải kịp: nhúng iframe trực tiếp hoặc hiển thị QR
+                // Fallback nếu SDK PayOS chưa tải kịp: nhúng iframe trực tiếp
                 container.innerHTML = `
                     <iframe src="${data.checkoutUrl}" class="w-full h-[480px] border-0 rounded-2xl" allow="payment"></iframe>
+                `;
+            }
+
+            // Bổ sung nút mở trang thanh toán trực tiếp nếu cần
+            const externalLinkWrap = document.getElementById('payos-external-link-wrap');
+            if (externalLinkWrap) {
+                externalLinkWrap.innerHTML = `
+                    <a href="${data.checkoutUrl}" target="_blank" rel="noopener noreferrer" 
+                       class="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline py-2">
+                        <span class="material-symbols-outlined text-[16px]">open_in_new</span>
+                        <span>Mở trang thanh toán PayOS trong tab mới nếu cần</span>
+                    </a>
                 `;
             }
 

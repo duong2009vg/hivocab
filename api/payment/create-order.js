@@ -93,12 +93,12 @@ export default async function handler(req, res) {
         // Format: [timestamp 10 số][3 số ngẫu nhiên]
         const orderCode = Math.floor(Date.now() / 1000) * 1000 + Math.floor(Math.random() * 1000);
         
-        // Mô tả chuyển khoản (tối đa 25 ký tự, không dấu, không ký tự đặc biệt)
-        const description = `HV${orderCode.toString().slice(-8)}`;
+        // Mô tả chuyển khoản (giới hạn tối đa 9 ký tự: HV + 7 số)
+        const description = `HV${orderCode.toString().slice(-7)}`;
 
         const origin = req.headers.origin || 'https://hivocab.site';
-        const returnUrl = `${origin}/#pricing?status=success&orderCode=${orderCode}`;
-        const cancelUrl = `${origin}/#pricing?status=cancelled&orderCode=${orderCode}`;
+        const returnUrl = `${origin}/?status=success&orderCode=${orderCode}`;
+        const cancelUrl = `${origin}/?status=cancelled&orderCode=${orderCode}`;
 
         // 5. Tính signature cho PayOS
         const signature = createPayOSSignature({
