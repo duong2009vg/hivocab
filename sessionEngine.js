@@ -618,37 +618,40 @@ const HiSession = (() => {
     // ----------------------------------------------------------
 
     /**
-     * Ph�t �m m?t t? ti?ng Anh qua Web Speech API.
+     * Pht m m?t t? ti?ng Anh qua Web Speech API.
      * @param {string} word
-     * @param {number} rate - t?c d? (0.5�1.5, m?c d?nh 0.85)
+     * @param {number} rate - t?c d? (0.51.5, m?c d?nh 0.85)
      */
     function speakWord(word, rate = 0.85) {
-        if (!window.speechSynthesis) {
-            console.warn('[HiSession] Trình duyệt không hỗ trợ SpeechSynthesis.');
+        if (!word) return;
+        if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            window.HiAudio.playWord(word, rate);
             return;
         }
-        window.speechSynthesis.cancel(); // D?ng b?t k? �m thanh dang ph�t
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang  = 'en-US';
-        utterance.rate  = rate;
-        utterance.pitch = 1;
-
-        // Uu ti�n gi?ng native n?u c�
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v =>
-            v.lang.startsWith('en') && (v.name.includes('Google') || v.localService)
-        );
-        if (preferred) utterance.voice = preferred;
-
-        window.speechSynthesis.speak(utterance);
+        try {
+            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(word);
+                utterance.lang  = 'en-US';
+                utterance.rate  = rate;
+                utterance.pitch = 1;
+                const voices = window.speechSynthesis.getVoices();
+                const preferred = voices.find(v =>
+                    v.lang.startsWith('en') && (v.name.includes('Google') || v.localService)
+                );
+                if (preferred) utterance.voice = preferred;
+                window.speechSynthesis.speak(utterance);
+            }, 30);
+        } catch (_) {}
     }
 
     // ----------------------------------------------------------
-    // PUBLIC: K?T TH�C PHI�N
+    // PUBLIC: KẾT THÚC PHIÊN
     // ----------------------------------------------------------
 
     /**
-     * ��nh d?u phi�n k?t th�c v� tr? v? t?ng k?t.
+     * Đánh dấu phiên kết thúc và trả về tổng kết.
      * @returns {{ wordsReviewed: number, completedWords: Array }}
      */
     function endSession() {

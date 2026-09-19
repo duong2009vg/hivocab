@@ -164,11 +164,16 @@ window.HiDB = (() => {
     }
 
     async function getCurrentUser() {
-        if (_currentUser !== undefined) return _currentUser;
-        const { data: { session } } = await _getClient().auth.getSession();
-        _currentUser = session?.user || null;
+        if (_currentUser !== undefined && _currentUser !== null) return _currentUser;
+        try {
+            const { data: { session } } = await _getClient().auth.getSession();
+            _currentUser = session?.user || null;
+        } catch (_) {
+            _currentUser = null;
+        }
         return _currentUser;
     }
+
 
     /**
      * Đăng nhập qua Google OAuth.
@@ -748,11 +753,16 @@ window.HiDB = (() => {
             if (safeLevel === -1) {
                 query = query.lte('word_progress.next_review_at', new Date().toISOString());
             } else if (safeLevel === 0) {
+                const personalTopic = await ensureUserPersonalTopic().catch(() => null);
+                if (personalTopic?.id) {
+                    query = query.eq('topic_id', personalTopic.id);
+                }
                 query = query.or('level.eq.0,level.is.null', { foreignTable: 'word_progress' });
             } else {
                 query = query.eq('word_progress.level', safeLevel);
             }
         }
+
 
         if (safeSearch) {
             const escaped = safeSearch.replace(/[,%_()]/g, ' ').trim();
@@ -1816,19 +1826,23 @@ window.HiDB = (() => {
 
         // Đếm thêm các từ trong sổ tay cá nhân của user chưa có bản ghi word_progress (tính là Lv 0)
         try {
-            const { data: userTopicWords } = await _getClient()
-                .from('words')
-                .select('id, topics!inner(user_id)')
-                .eq('topics.user_id', user.id);
+            const personalTopic = await ensureUserPersonalTopic();
+            if (personalTopic?.id) {
+                const { data: notebookWords } = await _getClient()
+                    .from('words')
+                    .select('id')
+                    .eq('topic_id', personalTopic.id);
 
-            if (userTopicWords && userTopicWords.length > 0) {
-                userTopicWords.forEach(w => {
-                    if (!progressWordIds.has(w.id)) {
-                        memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
-                    }
-                });
+                if (notebookWords && notebookWords.length > 0) {
+                    notebookWords.forEach(w => {
+                        if (!progressWordIds.has(w.id)) {
+                            memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
+                        }
+                    });
+                }
             }
         } catch (_) {}
+
 
         // Tính streak: đếm ngày liên tiếp từ hôm nay trở về trước
         const { data: sessions } = await _getClient()
@@ -2015,6 +2029,14 @@ window.HiDB = (() => {
             throw new Error('[HiDB] Chưa load thư viện Supabase JS. Thêm <script> trước dataLayer.js');
         }
         _supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        try {
+            _supabase.auth.onAuthStateChange((event, session) => {
+                _currentUser = session?.user || null;
+                clearCache();
+            });
+        } catch (e) {
+            console.warn('[HiDB] onAuthStateChange setup warning:', e);
+        }
         console.log('[HiDB] ✅ Khởi tạo thành công');
         if (typeof _onReadyResolve === 'function') {
             _onReadyResolve(_supabase);

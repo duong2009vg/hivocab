@@ -69,17 +69,26 @@
      */
     function playWordAudio(word, event) {
         if (event) event.stopPropagation();
-        if (!word || !window.speechSynthesis) return;
+        if (!word) return;
+        if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            window.HiAudio.playWord(word, 0.9);
+            return;
+        }
+        if (!window.speechSynthesis) return;
         try {
-            window.speechSynthesis.cancel();
-            const utter = new SpeechSynthesisUtterance(word);
-            utter.lang = 'en-US';
-            utter.rate = 0.88;
-            window.speechSynthesis.speak(utter);
+            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            setTimeout(() => {
+                const utter = new SpeechSynthesisUtterance(word);
+                utter.lang = 'en-US';
+                utter.rate = 0.88;
+                window.speechSynthesis.speak(utter);
+            }, 30);
         } catch (err) {
             console.warn('[playWordAudio] Audio error:', err);
         }
     }
+
 
     /**
      * Render the tag pills bar

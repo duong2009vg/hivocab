@@ -995,7 +995,12 @@ const HiSessionUI = (() => {
         const item = HiSession.getCurrentItem();
         if (!item || item.exerciseType !== 'listen') return;
 
-        HiSession.speakWord(item.exerciseData.wordToSpeak, 0.9);
+        const word = item.exerciseData?.wordToSpeak || item.word?.word || item.exerciseData?.answer || '';
+        if (window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            window.HiAudio.playWord(word, 0.9);
+        } else {
+            HiSession.speakWord(word, 0.9);
+        }
         _listenPlayCount++;
         _animateSoundWave(1200);
 
@@ -1017,7 +1022,12 @@ const HiSessionUI = (() => {
     function _onListenSlow() {
         const item = HiSession.getCurrentItem();
         if (!item) return;
-        HiSession.speakWord(item.exerciseData.wordToSpeak, 0.55);
+        const word = item.exerciseData?.wordToSpeak || item.word?.word || item.exerciseData?.answer || '';
+        if (window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            window.HiAudio.playWord(word, 0.6);
+        } else {
+            HiSession.speakWord(word, 0.55);
+        }
         _animateSoundWave(1800);
         setTimeout(() => {
             const inputs = Array.from(document.querySelectorAll('[data-listen-index]'));
@@ -1026,6 +1036,7 @@ const HiSessionUI = (() => {
             firstEmpty?.select();
         }, 500);
     }
+
 
     function _toggleListenHint() {
         const box = document.getElementById('listen-meaning-box');
@@ -1342,19 +1353,28 @@ const HiSessionUI = (() => {
      * @param {number} rate  - Tốc độ (0.5–1.0), mặc định 0.9
      */
     function _speak(word, rate = 0.9) {
-        if (!word || !window.speechSynthesis) return;
-        window.speechSynthesis.cancel();
-        const utter = new SpeechSynthesisUtterance(word);
-        utter.lang = 'en-US';
-        utter.rate = rate;
-        utter.pitch = 1;
-        // Chọn giọng en-US nếu có
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
-                       || voices.find(v => v.lang === 'en-US')
-                       || voices.find(v => v.lang.startsWith('en'));
-        if (preferred) utter.voice = preferred;
-        window.speechSynthesis.speak(utter);
+        if (!word) return;
+        if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            window.HiAudio.playWord(word, rate);
+            return;
+        }
+        if (!window.speechSynthesis) return;
+        try {
+            if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+            setTimeout(() => {
+                const utter = new SpeechSynthesisUtterance(word);
+                utter.lang = 'en-US';
+                utter.rate = rate;
+                utter.pitch = 1;
+                const voices = window.speechSynthesis.getVoices();
+                const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
+                               || voices.find(v => v.lang === 'en-US')
+                               || voices.find(v => v.lang.startsWith('en'));
+                if (preferred) utter.voice = preferred;
+                window.speechSynthesis.speak(utter);
+            }, 30);
+        } catch (_) {}
     }
 
     // ----------------------------------------------------------
@@ -1390,19 +1410,30 @@ const HiSessionUI = (() => {
  * @param {number} rate  - Tốc độ (0.5-1.0), mặc định 0.9
  */
 window.HiSpeak = function(word, rate = 0.9) {
-    if (!word || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(word);
-    utter.lang = 'en-US';
-    utter.rate = rate;
-    utter.pitch = 1;
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
-                   || voices.find(v => v.lang === 'en-US')
-                   || voices.find(v => v.lang.startsWith('en'));
-    if (preferred) utter.voice = preferred;
-    window.speechSynthesis.speak(utter);
+    if (!word) return;
+    if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+        window.HiAudio.playWord(word, rate);
+        return;
+    }
+    if (!window.speechSynthesis) return;
+    try {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        setTimeout(() => {
+            const utter = new SpeechSynthesisUtterance(word);
+            utter.lang = 'en-US';
+            utter.rate = rate;
+            utter.pitch = 1;
+            const voices = window.speechSynthesis.getVoices();
+            const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
+                           || voices.find(v => v.lang === 'en-US')
+                           || voices.find(v => v.lang.startsWith('en'));
+            if (preferred) utter.voice = preferred;
+            window.speechSynthesis.speak(utter);
+        }, 30);
+    } catch (_) {}
 };
+
 
 if (window.speechSynthesis) {
     window.speechSynthesis.getVoices();

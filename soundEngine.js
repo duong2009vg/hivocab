@@ -169,9 +169,180 @@ const HiSound = (() => {
     };
 })();
 
+/**
+ * HiAudio - Multi-layer English Pronunciation Audio Engine
+ * Cung cấp phát âm thanh từ vựng tiếng Anh đa tầng, chống lỗi câm tiếng / silent bug trên mọi trình duyệt:
+ * - Tầng 1: Google TTS CDN audio stream (nhanh, tự nhiên, hỗ trợ tốc độ 1.0x và 0.6x mượt mà)
+ * - Tầng 2: Web Speech API (SpeechSynthesis) với đầy đủ bug-fixes cho Chrome/Safari (resume, cancel timing, GC retention)
+ * - Tầng 3: Free Dictionary API audio MP3 fallback
+ */
+const HiAudio = (() => {
+    let _activeAudio = null;
+    let _activeUtterance = null;
+    const _dictAudioCache = new Map();
+
+    // Khởi động voices cho SpeechSynthesis ngay khi có tương tác
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        try {
+            window.speechSynthesis.getVoices();
+            window.speechSynthesis.addEventListener('voiceschanged', () => {
+                window.speechSynthesis.getVoices();
+            });
+            window.addEventListener('pointerdown', () => {
+                if (window.speechSynthesis) window.speechSynthesis.getVoices();
+            }, { once: true });
+        } catch (_) {}
+    }
+
+    function stop() {
+        if (_activeAudio) {
+            try {
+                _activeAudio.pause();
+                _activeAudio.currentTime = 0;
+            } catch (_) {}
+            _activeAudio = null;
+        }
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            try {
+                window.speechSynthesis.cancel();
+            } catch (_) {}
+            _activeUtterance = null;
+        }
+    }
+
+    function _playAudioElement(url, rate = 1.0) {
+        return new Promise((resolve, reject) => {
+            try {
+                const audio = new Audio();
+                _activeAudio = audio;
+                audio.src = url;
+                audio.playbackRate = Math.max(0.4, Math.min(2.0, rate));
+                audio.onended = () => {
+                    _activeAudio = null;
+                    resolve(true);
+                };
+                audio.onerror = (err) => {
+                    _activeAudio = null;
+                    reject(err);
+                };
+                const playPromise = audio.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(reject);
+                }
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    function _playSpeechSynthesis(text, rate = 0.9) {
+        return new Promise((resolve) => {
+            if (typeof window === 'undefined' || !window.speechSynthesis) {
+                resolve(false);
+                return;
+            }
+            try {
+                // Chromium bug fix: resume nếu bị paused
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                }
+
+                setTimeout(() => {
+                    try {
+                        const utter = new SpeechSynthesisUtterance(text);
+                        _activeUtterance = utter; // Ngăn V8 garbage collection huỷ âm thanh
+                        utter.lang = 'en-US';
+                        utter.rate = Math.max(0.4, Math.min(1.5, rate));
+                        utter.pitch = 1;
+
+                        const voices = window.speechSynthesis.getVoices() || [];
+                        const preferred = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
+                                       || voices.find(v => v.lang === 'en-US')
+                                       || voices.find(v => v.lang.startsWith('en'));
+                        if (preferred) utter.voice = preferred;
+
+                        utter.onend = () => {
+                            _activeUtterance = null;
+                            resolve(true);
+                        };
+                        utter.onerror = () => {
+                            _activeUtterance = null;
+                            resolve(false);
+                        };
+
+                        window.speechSynthesis.speak(utter);
+                    } catch (_) {
+                        _activeUtterance = null;
+                        resolve(false);
+                    }
+                }, 30);
+            } catch (_) {
+                resolve(false);
+            }
+        });
+    }
+
+    async function playWord(word, rate = 0.9) {
+        if (!word || typeof word !== 'string') return false;
+        const cleanWord = word.trim();
+        if (!cleanWord) return false;
+
+        stop();
+
+        const key = cleanWord.toLowerCase();
+
+        // 1. Thử cached URL nếu đã có
+        const cachedUrl = _dictAudioCache.get(key);
+        if (cachedUrl) {
+            try {
+                await _playAudioElement(cachedUrl, rate);
+                return true;
+            } catch (_) {}
+        }
+
+        // 2. Thử Google Translate TTS CDN (chuẩn giọng bản ngữ, độ trễ cực thấp)
+        const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(cleanWord)}`;
+        try {
+            await _playAudioElement(googleUrl, rate);
+            return true;
+        } catch (_) {}
+
+        // 3. Fallback Web Speech API (đã fix pause bug và GC retention)
+        const ttsOk = await _playSpeechSynthesis(cleanWord, rate);
+        if (ttsOk) return true;
+
+        // 4. Fallback Free Dictionary API audio
+        try {
+            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
+            if (res.ok) {
+                const json = await res.json();
+                const phonetics = Array.isArray(json) ? json[0]?.phonetics : [];
+                const audioUrl = phonetics?.find(p => p.audio && p.audio.trim())?.audio;
+                if (audioUrl) {
+                    _dictAudioCache.set(key, audioUrl);
+                    await _playAudioElement(audioUrl, rate);
+                    return true;
+                }
+            }
+        } catch (_) {}
+
+        return false;
+    }
+
+    return {
+        playWord,
+        stop
+    };
+})();
+
 if (typeof window !== 'undefined') {
     window.HiSound = HiSound;
+    window.HiAudio = HiAudio;
 }
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HiSound;
+    module.exports = { HiSound, HiAudio };
 }
+

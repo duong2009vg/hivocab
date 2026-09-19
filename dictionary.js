@@ -232,8 +232,14 @@ const HiDict = (() => {
             } catch (_) { /* fallback */ }
         }
 
+        if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            await window.HiAudio.playWord(word, rate);
+            return;
+        }
+
         speakTTS();
     }
+
 
     function clearCache() { _cache.clear(); }
 
