@@ -2665,5 +2665,12 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 <script src="dictionary.js"></script>
 <script defer src="app.js?v=20260919-v1"></script>
 <script type="module" src="/src/main.js"></script>
+<script>
+if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>
