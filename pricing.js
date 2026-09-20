@@ -340,12 +340,16 @@
             document.getElementById('pricing-view-checkout')?.classList.remove('hidden');
 
             const plan = PLANS[currentSelectedPlan];
-            document.getElementById('checkout-plan-title').textContent = `Thanh toán ${plan.name}`;
-            document.getElementById('checkout-plan-amount').textContent = `Số tiền: ${plan.priceFormatted}`;
-            document.getElementById('fallback-content').textContent = data.description || `HV${data.orderCode}`;
+            const titleEl = document.getElementById('checkout-plan-title');
+            if (titleEl) titleEl.textContent = `Thanh toán ${plan.name}`;
+            const amountEl = document.getElementById('checkout-plan-amount');
+            if (amountEl) amountEl.textContent = `Số tiền: ${plan.priceFormatted}`;
+            const fallbackEl = document.getElementById('fallback-content');
+            if (fallbackEl) fallbackEl.textContent = data.description || `HV${data.orderCode}`;
 
             // Hiển thị trực tiếp mã VietQR và thông tin chuyển khoản chính xác 100%
             const container = document.getElementById('payos-embedded-container');
+            if (!container) return;
             const accNum = data.accountNumber || '0846407898';
             const accName = data.accountName || 'DANG TUNG DUONG';
             const desc = data.description || `HV${data.orderCode}`;
