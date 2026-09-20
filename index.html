@@ -937,7 +937,21 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 
 /* KHI ĐÃ ĐĂNG NHẬP: Ẩn landing page và hiện thẳng app học từ frame đầu tiên (chỉ trước khi Router sẵn sàng) */
 html.user-logged-in:not(.router-ready) #page-landing { display: none !important; }
-html.user-logged-in:not(.router-ready) #page-dashboard { display: block !important; }
+html.user-logged-in:not(.router-ready):not([data-initial-route]) #page-dashboard,
+html.user-logged-in:not(.router-ready)[data-initial-route="dashboard"] #page-dashboard { display: block !important; }
+html.user-logged-in:not(.router-ready)[data-initial-route="topics"] #page-topics { display: block !important; }
+html.user-logged-in:not(.router-ready)[data-initial-route="library"] #page-library { display: block !important; }
+html.user-logged-in:not(.router-ready)[data-initial-route="vocabulary"] #page-vocabulary { display: block !important; }
+html.user-logged-in:not(.router-ready)[data-initial-route="exercises"] #page-exercises { display: block !important; }
+html.user-logged-in:not(.router-ready)[data-initial-route="dictionary"] #page-dictionary { display: block !important; }
+
+/* KHI CHƯA ĐĂNG NHẬP: Mặc định hiển thị landing trước khi router sẵn sàng */
+html:not(.user-logged-in):not(.router-ready) #page-landing { display: block !important; }
+
+/* Bottom nav trên mobile khi đã đăng nhập (trước khi router sẵn sàng) */
+@media (max-width: 1023.98px) {
+    html.user-logged-in:not(.router-ready) #mobile-bottom-nav { display: flex !important; }
+}
 
 /* Sidebar chỉ hiển thị trên màn hình Desktop (>= 1024px) */
 @media (min-width: 1024px) {
@@ -983,22 +997,20 @@ html.user-logged-in:not(.router-ready) #page-dashboard { display: block !importa
             if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
                 try {
                     var tokenData = JSON.parse(localStorage.getItem(k) || '{}');
-                    if (tokenData && tokenData.access_token) {
-                        if (!tokenData.expires_at || tokenData.expires_at * 1000 > Date.now()) {
-                            hasAuth = true;
-                            break;
-                        }
+                    if (tokenData && (tokenData.access_token || tokenData.refresh_token || tokenData.user)) {
+                        hasAuth = true;
+                        break;
                     }
                 } catch(_) {}
             }
         }
         if (hasAuth) {
             window._isPreAuthenticated = true;
-            var curHash = (window.location.hash || '').replace(/^#/, '');
+            document.documentElement.classList.add('user-logged-in');
+            var curHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
             var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
-            if (!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) {
-                document.documentElement.classList.add('user-logged-in');
-            }
+            var initialRoute = (!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) ? 'dashboard' : curHash;
+            document.documentElement.setAttribute('data-initial-route', initialRoute);
         }
     } catch (e) {}
 })();

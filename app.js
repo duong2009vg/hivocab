@@ -463,10 +463,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 const k = localStorage.key(i);
                 if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
                     const item = JSON.parse(localStorage.getItem(k) || '{}');
-                    if (item && item.access_token) {
-                        if (!item.expires_at || item.expires_at * 1000 > Date.now()) {
-                            return true;
-                        }
+                    if (item && (item.access_token || item.refresh_token || item.user)) {
+                        return true;
                     }
                 }
             }
@@ -5094,6 +5092,7 @@ async function bootstrapHiDB() {
                     }
 
                     console.log('AuthStateChange: Đã đăng nhập:', user.email);
+                    try { document.documentElement.classList.add('user-logged-in'); } catch(_) {}
                     _updateProfileUI(user);
 
                     // Xóa cache topics/exercises để load lại với progress của user
@@ -5117,6 +5116,7 @@ async function bootstrapHiDB() {
                     }
                 }
             } else if (event === 'SIGNED_OUT') {
+                try { document.documentElement.classList.remove('user-logged-in'); } catch(_) {}
                 // Xóa cache khi đăng xuất
                 window._allTopics = [];
                 window._allExercises = null;
@@ -5301,6 +5301,7 @@ window._updateProfileUI = async function(user) {
 // XỬ LÝ ĐĂNG XUẤT
 window.handleLogout = async function() {
     try {
+        try { document.documentElement.classList.remove('user-logged-in'); } catch(_) {}
         if (typeof HiDB !== 'undefined') {
             await HiDB.signOut();
         }
