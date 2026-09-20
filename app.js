@@ -919,14 +919,22 @@ window.handleEmailAuth = async function(e) {
     const originalText = btn.textContent;
     btn.textContent = 'Đang xử lý...';
 
+    // Lấy token Turnstile Captcha nếu có
+    let captchaToken = '';
+    if (typeof turnstile !== 'undefined') {
+        try {
+            captchaToken = turnstile.getResponse();
+        } catch (_) {}
+    }
+
     try {
         if (typeof HiDB === 'undefined') throw new Error('Hệ thống cơ sở dữ liệu chưa sẵn sàng.');
 
         if (window._authMode === 'login') {
-            await HiDB.signInWithPassword(email, password);
+            await HiDB.signInWithPassword(email, password, captchaToken);
             window.navigateTo('dashboard');
         } else {
-            const res = await HiDB.signUpWithPassword(email, password);
+            const res = await HiDB.signUpWithPassword(email, password, captchaToken);
             // Kiểm tra nếu tài khoản này đã tồn tại trên hệ thống (Supabase trả về identities: [] để tránh dò quét email)
             if (res?.user && (!res.user.identities || res.user.identities.length === 0)) {
                 errBox.innerHTML = `
@@ -967,6 +975,9 @@ window.handleEmailAuth = async function(e) {
             }
         }
     } catch(err) {
+        if (typeof turnstile !== 'undefined') {
+            try { turnstile.reset(); } catch (_) {}
+        }
         errBox.textContent = err.message || 'Thao tác không thành công. Vui lòng thử lại.';
         errBox.classList.remove('hidden');
     } finally {

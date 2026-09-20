@@ -240,8 +240,12 @@ window.HiDB = (() => {
     /**
      * Đăng nhập bằng Email & Mật khẩu.
      */
-    async function signInWithPassword(email, password) {
-        const { data, error } = await _getClient().auth.signInWithPassword({ email, password });
+    async function signInWithPassword(email, password, captchaToken) {
+        const payload = { email, password };
+        if (captchaToken) {
+            payload.options = { captchaToken };
+        }
+        const { data, error } = await _getClient().auth.signInWithPassword(payload);
         if (error) throw error;
         _currentUser = data.user;
         return data;
@@ -250,11 +254,15 @@ window.HiDB = (() => {
     /**
      * Đăng ký tài khoản mới bằng Email & Mật khẩu.
      */
-    async function signUpWithPassword(email, password) {
+    async function signUpWithPassword(email, password, captchaToken) {
+        const options = { emailRedirectTo: window.location.origin };
+        if (captchaToken) {
+            options.captchaToken = captchaToken;
+        }
         const { data, error } = await _getClient().auth.signUp({
             email,
             password,
-            options: { emailRedirectTo: window.location.origin }
+            options
         });
         if (error) throw error;
         return data;
@@ -263,12 +271,13 @@ window.HiDB = (() => {
     /**
      * Gửi email khôi phục / đặt lại mật khẩu.
      */
-    async function resetPasswordForEmail(email) {
-        // Chuyển hướng về /app để xử lý token khôi phục mật khẩu
+    async function resetPasswordForEmail(email, captchaToken) {
         const redirectUrl = window.location.origin;
-        const { data, error } = await _getClient().auth.resetPasswordForEmail(email, {
-            redirectTo: redirectUrl
-        });
+        const options = { redirectTo: redirectUrl };
+        if (captchaToken) {
+            options.captchaToken = captchaToken;
+        }
+        const { data, error } = await _getClient().auth.resetPasswordForEmail(email, options);
         if (error) throw error;
         return data;
     }
