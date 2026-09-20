@@ -2531,12 +2531,25 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Đang tải dữ liệu doanh thu &amp; đơn hàng...</td></tr>';
 
             try {
-                const { data: orders, error } = await sb
+                let orders = null;
+                // Try select with profiles join
+                const res = await sb
                     .from('orders')
-                    .select('id, order_code, user_id, amount, status, plan, payment_method, description, created_at, paid_at, profiles(email, full_name)')
+                    .select('id, order_code, user_id, user_email, amount, status, plan_id, plan_name, plan, payment_method, description, admin_note, created_at, paid_at, payment_time, profiles(email, full_name)')
                     .order('created_at', { ascending: false });
 
-                if (error) throw error;
+                if (res.error) {
+                    console.warn('Orders query with profiles join failed, falling back to direct select:', res.error);
+                    const fallback = await sb
+                        .from('orders')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+                    if (fallback.error) throw fallback.error;
+                    orders = fallback.data;
+                } else {
+                    orders = res.data;
+                }
+
                 allOrdersCache = orders || [];
 
                 // Calculate KPIs
@@ -2561,12 +2574,12 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                         paidOrdersCount++;
                         totalRevenue += amt;
 
-                        const createdAt = new Date(o.created_at);
+                        const createdAt = new Date(o.paid_at || o.payment_time || o.created_at);
                         if (createdAt.getMonth() === currentMonth && createdAt.getFullYear() === currentYear) {
                             monthlyRevenue += amt;
                         }
 
-                        const p = (o.plan || '').toLowerCase();
+                        const p = (o.plan || o.plan_id || '').toLowerCase().replace('pro_', '');
                         if (planStats[p]) {
                             planStats[p].count++;
                             planStats[p].revenue += amt;
@@ -2614,8 +2627,8 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
 
             const filtered = allOrdersCache.filter(o => {
                 const codeMatch = String(o.order_code || '').toLowerCase().includes(search);
-                const emailMatch = (o.profiles?.email || '').toLowerCase().includes(search) || (o.user_id || '').toLowerCase().includes(search);
-                const descMatch = (o.description || '').toLowerCase().includes(search);
+                const emailMatch = (o.profiles?.email || '').toLowerCase().includes(search) || (o.user_email || '').toLowerCase().includes(search) || (o.user_id || '').toLowerCase().includes(search);
+                const descMatch = (o.description || o.admin_note || o.plan_name || '').toLowerCase().includes(search);
                 const matchesSearch = codeMatch || emailMatch || descMatch;
                 const matchesStatus = statusFilter === 'all' || o.status === statusFilter;
                 return matchesSearch && matchesStatus;
@@ -2629,9 +2642,10 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             }
 
             tbody.innerHTML = filtered.map(o => {
-                const email = o.profiles?.email || o.user_id || 'Ẩn danh';
+                const email = o.profiles?.email || o.user_email || o.user_id || 'Ẩn danh';
+                const planKey = (o.plan || o.plan_id || '').toLowerCase().replace('pro_', '');
                 const planNames = { '1m': '1 Tháng', '6m': '6 Tháng', '1y': '1 Năm', 'lifetime': 'Trọn Đời', 'pro_lifetime': 'Trọn Đời' };
-                const planLabel = planNames[o.plan] || o.plan || '—';
+                const planLabel = planNames[planKey] || o.plan_name || o.plan || o.plan_id || '—';
                 const isPaid = o.status === 'PAID';
                 const isCancelled = o.status === 'CANCELLED';
 
@@ -2645,14 +2659,15 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                     ? '<span class="px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-bold text-[10px]">🎁 Admin Tặng</span>'
                     : '<span class="px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold text-[10px]">VietQR PayOS</span>';
 
-                const createdDate = new Date(o.created_at).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
+                const orderDesc = o.description || o.admin_note || o.plan_name || '';
+                const createdDate = new Date(o.created_at || o.payment_time || Date.now()).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' });
 
                 return `
                     <tr class="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors">
                         <td class="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">#${o.order_code}</td>
                         <td class="py-3.5 px-4">
                             <div class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]" title="${escAttr(email)}">${escHtml(email)}</div>
-                            ${o.description ? `<div class="text-[10px] text-slate-400 truncate max-w-[200px]">${escHtml(o.description)}</div>` : ''}
+                            ${orderDesc ? `<div class="text-[10px] text-slate-400 truncate max-w-[200px]">${escHtml(orderDesc)}</div>` : ''}
                         </td>
                         <td class="py-3.5 px-4 font-semibold text-slate-700 dark:text-slate-300">${planLabel}</td>
                         <td class="py-3.5 px-4 text-right font-bold ${isPaid ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}">${Number(o.amount || 0).toLocaleString('vi-VN')} đ</td>
@@ -2706,11 +2721,16 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 });
 
                 // Count gifted from allOrdersCache or query
-                const { count: giftCount } = await sb
-                    .from('orders')
-                    .select('*', { count: 'exact', head: true })
-                    .eq('payment_method', 'MANUAL_GIFT');
-                giftedCount = giftCount || 0;
+                let giftedCount = 0;
+                try {
+                    const { count: giftCount } = await sb
+                        .from('orders')
+                        .select('*', { count: 'exact', head: true })
+                        .eq('payment_method', 'MANUAL_GIFT');
+                    giftedCount = giftCount || 0;
+                } catch (errGift) {
+                    console.warn('Count gifted orders error:', errGift);
+                }
 
                 document.getElementById('stat-active-pro').textContent = activeProCount.toLocaleString();
                 document.getElementById('stat-lifetime-pro').textContent = lifetimeCount.toLocaleString();
@@ -2911,12 +2931,17 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 await sb.from('orders').insert({
                     order_code: orderCode,
                     user_id: userProfile.id,
+                    user_email: userProfile.email,
+                    plan_id: plan === 'lifetime' ? 'pro_lifetime' : `pro_${plan}`,
+                    plan_name: `HiVocab Pro ${plan === 'lifetime' ? 'Trọn Đời' : plan}`,
                     amount: 0,
                     status: 'PAID',
                     plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
                     payment_method: 'MANUAL_GIFT',
                     description: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
+                    admin_note: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
                     paid_at: now.toISOString(),
+                    payment_time: now.toISOString(),
                 });
 
                 showToast(`Đã tặng thành công gói PRO cho học viên ${email}!`, 'success');
