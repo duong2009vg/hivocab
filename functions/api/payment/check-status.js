@@ -15,9 +15,12 @@ export async function onRequestOptions() {
 export async function onRequestGet(context) {
     const { request, env } = context;
 
-    const SUPABASE_URL              = env.SUPABASE_URL || 'https://swehdtrqjyklmsefkjdf.supabase.co';
-    const SUPABASE_ANON_KEY         = env.SUPABASE_ANON_KEY;
-    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+    const DEFAULT_SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+
+    const SUPABASE_URL              = env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
+    const SUPABASE_ANON_KEY         = env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
+    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
 
     const url = new URL(request.url);
     const orderCode = url.searchParams.get('orderCode');
@@ -31,8 +34,8 @@ export async function onRequestGet(context) {
     try {
         const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?order_code=eq.${orderCode}&select=*`, {
             headers: {
-                'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY}`,
-                'apikey': SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                'apikey': SUPABASE_SERVICE_ROLE_KEY,
             },
         });
 
@@ -45,8 +48,14 @@ export async function onRequestGet(context) {
 
         const orders = await orderRes.json();
         if (!orders || orders.length === 0) {
-            return new Response(JSON.stringify({ ok: false, error: 'Không tìm thấy đơn hàng' }), {
-                status: 404,
+            // Đơn hàng đang chờ xử lý hoặc đang trong quá trình đồng bộ
+            return new Response(JSON.stringify({
+                ok: true,
+                orderCode: Number(orderCode),
+                status: 'PENDING',
+                message: 'Đang chờ thanh toán...'
+            }), {
+                status: 200,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }

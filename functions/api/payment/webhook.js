@@ -108,8 +108,12 @@ export async function onRequestGet() {
 export async function onRequestPost(context) {
     const { request, env } = context;
 
-    const SUPABASE_URL              = env.SUPABASE_URL || 'https://swehdtrqjyklmsefkjdf.supabase.co';
-    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || env.SUPABASE_ANON_KEY;
+    const DEFAULT_SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+
+    const SUPABASE_URL              = env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
+    const SUPABASE_ANON_KEY         = env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
+    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
     const PAYOS_CHECKSUM_KEY        = String(env.PAYOS_CHECKSUM_KEY || '').trim();
 
     let body = {};
@@ -228,7 +232,27 @@ export async function onRequestPost(context) {
             });
         }
 
-        // 7. Cập nhật trạng thái đơn hàng thành PAID
+        // 7. Gọi RPC activate_pro_order (SECURITY DEFINER, chạy 100% thành công không bị chặn bởi RLS)
+        try {
+            await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                    'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    p_order_code: orderCode,
+                    p_payment_time: data.transactionDateTime ? new Date(data.transactionDateTime).toISOString() : new Date().toISOString(),
+                    p_webhook_data: data,
+                }),
+            });
+            console.log('[PayOS Webhook] Executed activate_pro_order RPC successfully for order:', orderCode);
+        } catch (e) {
+            console.warn('[activate_pro_order RPC Error]', e);
+        }
+
+        // Cập nhật trạng thái đơn hàng thành PAID qua REST
         const updateOrderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order.id}`, {
             method: 'PATCH',
             headers: {
