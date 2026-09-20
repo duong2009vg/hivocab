@@ -79,8 +79,7 @@ function copyStaticAssetsPlugin() {
           '<script src="thptExam.js?v=20260913-monitoring-v1"></script>',
           '<script src="bilingualReading.js?v=20260916-perf-v2"></script>',
           '<script src="library.js?v=20260914-remove-game-v6"></script>',
-          '<script src="https://cdn.payos.vn/payos-checkout/v1/stable/payos-initialize.js"></script>',
-          '<script src="pricing.js"></script>',
+          '<script src="pricing.js?v=20260920-v2"></script>',
           '<script src="dictionary.js"></script>',
           '<script defer src="app.js?v=20260920-v1"></script>',
         ].join('\n');
