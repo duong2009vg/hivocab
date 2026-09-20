@@ -935,10 +935,32 @@ html.dark .bg-primary-container        { background-color: var(--hi-p-fix) !impo
 html.dark .hover\:bg-primary-container\/10:hover { background-color: var(--hi-p-10) !important; }
 html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--hi-p) !important; }
 
-/* KHI ĐÃ ĐĂNG NHẬP: Ẩn landing page và hiện thẳng app học (dashboard + sidebar) từ frame đầu tiên */
+/* KHI ĐÃ ĐĂNG NHẬP: Ẩn landing page và hiện thẳng app học từ frame đầu tiên */
 html.user-logged-in #page-landing { display: none !important; }
 html.user-logged-in #page-dashboard { display: block !important; }
-html.user-logged-in #main-sidebar { display: flex !important; }
+
+/* Sidebar chỉ hiển thị trên màn hình Desktop (>= 1024px) */
+@media (min-width: 1024px) {
+    html.user-logged-in #main-sidebar { display: flex !important; }
+    body:has(#page-landing.active) #main-sidebar,
+    body:has(#page-topic-detail.active) #main-sidebar,
+    body:has(#page-lesson-detail.active) #main-sidebar,
+    body:has(#page-thpt-room.active) #main-sidebar {
+        display: none !important;
+    }
+}
+
+/* Trên màn hình Mobile / Tablet (< 1024px): Tuyệt đối KHÔNG hiển thị main-sidebar/sub-sidebar để tránh xung đột với bottom dock taskbar */
+@media (max-width: 1023.98px) {
+    #main-sidebar,
+    #sub-sidebar,
+    #ld-sidebar,
+    html.user-logged-in #main-sidebar,
+    html.user-logged-in #sub-sidebar,
+    html.user-logged-in #ld-sidebar {
+        display: none !important;
+    }
+}
 
 </style>
 <script>
