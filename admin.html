@@ -2298,8 +2298,20 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             let captchaToken = '';
             if (typeof turnstile !== 'undefined') {
                 try {
-                    captchaToken = turnstile.getResponse();
+                    captchaToken = turnstile.getResponse() || turnstile.getResponse('#turnstile-admin');
                 } catch (_) {}
+            }
+            if (!captchaToken) {
+                const hiddenInput = document.querySelector('[name="cf-turnstile-response"]');
+                if (hiddenInput && hiddenInput.value) {
+                    captchaToken = hiddenInput.value;
+                }
+            }
+
+            if (!captchaToken && typeof turnstile !== 'undefined') {
+                errText.textContent = 'Vui lòng hoàn thành xác thực bảo mật Cloudflare (tích chọn vào ô CAPTCHA) trước khi đăng nhập!';
+                errEl.classList.remove('hidden');
+                return;
             }
 
             errEl.classList.add('hidden');
@@ -2316,7 +2328,9 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 await checkAuth();
             } catch (err) {
                 if (typeof turnstile !== 'undefined') {
-                    try { turnstile.reset(); } catch (_) {}
+                    try { turnstile.reset('#turnstile-admin'); } catch (_) {
+                        try { turnstile.reset(); } catch (__) {}
+                    }
                 }
                 errText.textContent = err.message || 'Email hoặc mật khẩu không chính xác.';
                 errEl.classList.remove('hidden');
@@ -2721,7 +2735,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 });
 
                 // Count gifted from allOrdersCache or query
-                let giftedCount = 0;
+                giftedCount = 0;
                 try {
                     const { count: giftCount } = await sb
                         .from('orders')
@@ -2879,10 +2893,11 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
 
             try {
                 // Find user by email in profiles
+                const cleanEmail = email.toLowerCase().trim();
                 const { data: userProfile, error: userErr } = await sb
                     .from('profiles')
                     .select('id, email')
-                    .eq('email', email)
+                    .ilike('email', cleanEmail)
                     .maybeSingle();
 
                 if (userErr || !userProfile) {
