@@ -110,6 +110,7 @@ window.lockBodyScroll = function(lock) {
 
 var navigateTo;
 window.navigateTo = navigateTo = function(page, preserveHash = false){
+    try { document.documentElement.classList.add('router-ready'); } catch(_) {}
     window.lockBodyScroll(false);
     const rawPage = (page || '').split('?')[0].replace(/^#/, '').replace(/^page-/, '');
     const pageName = (rawPage === 'thpt') ? 'exercises' : rawPage;
