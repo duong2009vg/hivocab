@@ -77,6 +77,41 @@ export async function onRequestGet(context) {
             }
         } catch (_) {}
 
+        // Tự động kích hoạt (Auto-heal) nếu đơn hàng đã PAID nhưng profile chưa lên PRO
+        if (order.status === 'PAID' && profile?.tier !== 'pro') {
+            try {
+                await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                        'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        p_order_code: order.order_code,
+                        p_payment_time: order.payment_time || new Date().toISOString(),
+                        p_webhook_data: { source: 'auto_heal_check_status' },
+                    }),
+                });
+
+                // Tải lại profile mới nhất sau khi kích hoạt
+                const refreshedProfRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${order.user_id}&select=*`, {
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                        'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                    },
+                });
+                if (refreshedProfRes.ok) {
+                    const refreshedProfiles = await refreshedProfRes.json();
+                    if (refreshedProfiles && refreshedProfiles.length > 0) {
+                        profile = refreshedProfiles[0];
+                    }
+                }
+            } catch (rpcErr) {
+                console.warn('[check-status auto-heal error]', rpcErr);
+            }
+        }
+
         return new Response(JSON.stringify({
             ok: true,
             orderCode: order.order_code,

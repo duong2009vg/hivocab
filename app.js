@@ -120,6 +120,12 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
         return;
     }
 
+    // Nếu người dùng đã đăng nhập mà yêu cầu vào landing, chuyển thẳng vào dashboard học tập
+    if (pageName === 'landing' && window._hasLocalAuthToken && window._hasLocalAuthToken() && !window._isPasswordRecoveryMode && !window._pendingAuthError) {
+        window.navigateTo('dashboard', preserveHash);
+        return;
+    }
+
     // Gỡ bỏ sự kiện bàn phím phiên học khi rời trang learning
     if (pageName !== 'learning' && typeof HiSessionUI !== 'undefined' && typeof HiSessionUI.destroy === 'function') {
         HiSessionUI.destroy();
@@ -448,6 +454,27 @@ window.addEventListener('DOMContentLoaded', () => {
         };
     };
 
+    // Helper kiểm tra nhanh trạng thái đăng nhập từ localStorage
+    window._hasLocalAuthToken = function() {
+        if (window._isPreAuthenticated) return true;
+        try {
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+                    const item = JSON.parse(localStorage.getItem(k) || '{}');
+                    if (item && item.access_token) {
+                        if (!item.expires_at || item.expires_at * 1000 > Date.now()) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        } catch (_) {}
+        return false;
+    };
+
+    const isLoggedIn = window._hasLocalAuthToken();
+
     // Khởi tạo trang ban đầu
     const authInfo = window._parseAuthRedirectInfo();
     const h = window.location.hash.slice(1);
@@ -461,11 +488,15 @@ window.addEventListener('DOMContentLoaded', () => {
         window._isPasswordRecoveryMode = true;
         window.navigateTo('landing', true);
     } else if (h && (h.includes('access_token=') || authInfo.isPkceCode)) {
-        window.navigateTo('landing', true); // Hiện landing tạm thời trong khi chờ auth
-    } else if (h && h !== 'landing') {
+        window.navigateTo(isLoggedIn ? 'dashboard' : 'landing', true);
+    } else if (h && h !== 'landing' && h !== 'login') {
         window.navigateTo(h);
     } else {
-        window.navigateTo('landing', true);
+        if (isLoggedIn) {
+            window.navigateTo('dashboard');
+        } else {
+            window.navigateTo('landing', true);
+        }
     }
 
     // Hiển thị fallback cho Dashboard ngay lập tức
@@ -1473,9 +1504,14 @@ window._renderTopicsGrid = async function() {
             return;
         }
 
+        if (typeof window._isUserPro === 'undefined' && typeof HiDB !== 'undefined' && typeof HiDB.isUserPro === 'function') {
+            try { window._isUserPro = await HiDB.isUserPro(); } catch (_) {}
+        }
+
         grid.innerHTML = filtered.map(topic => {
             const pct = topic.progress ?? 0;
             const isPro = Boolean(topic.is_pro);
+            const showProBadge = isPro && !window._isUserPro;
             return `
             <div id="topic-card-${topic.id}" onclick="window._openTopic('${topic.id}');"
                 class="topic-card-surface cursor-pointer group relative bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-4 md:p-6 min-h-[160px] md:min-h-[240px] border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
@@ -1483,7 +1519,7 @@ window._renderTopicsGrid = async function() {
                     class="absolute top-2 left-2 md:top-3 md:left-3 w-6 h-6 md:w-8 md:h-8 flex items-center justify-center rounded-full text-outline hover:bg-error-container hover:text-error transition-colors z-10">
                     <span class="material-symbols-outlined text-[16px] md:text-[20px]">close</span>
                 </button>
-                ${isPro ? `
+                ${showProBadge ? `
                 <div class="absolute top-2 right-2 md:top-3 md:right-3 z-10">
                     <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs">
                         <span class="material-symbols-outlined text-[12px]">workspace_premium</span>
@@ -1672,8 +1708,13 @@ window._loadLessons = async function() {
         window._lessonsCache = window._lessonsCache || {};
         window._lessonsCache[topicId] = lessons;
 
+        if (typeof window._isUserPro === 'undefined' && typeof HiDB !== 'undefined' && typeof HiDB.isUserPro === 'function') {
+            try { window._isUserPro = await HiDB.isUserPro(); } catch (_) {}
+        }
+
         const currentTopicObj = (window._allTopics || []).find(t => t.id === topicId);
         const isTopicPro = Boolean(currentTopicObj?.is_pro);
+        const showTopicProBadge = isTopicPro && !window._isUserPro;
 
         listEl.innerHTML = lessons.map(lesson => {
             const prog = lesson.progress || 0;
@@ -1682,11 +1723,11 @@ window._loadLessons = async function() {
             <div onclick="window._openLesson('${topicId}', ${lesson.index})"
                  class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="w-10 h-10 rounded-xl ${isTopicPro ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'} flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-[22px]">${isTopicPro ? 'workspace_premium' : 'menu_book'}</span>
+                    <div class="w-10 h-10 rounded-xl ${showTopicProBadge ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'} flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">${showTopicProBadge ? 'workspace_premium' : 'menu_book'}</span>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        ${isTopicPro ? `
+                        ${showTopicProBadge ? `
                         <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs">
                             <span class="material-symbols-outlined text-[12px]">lock</span>
                             PRO
@@ -1756,6 +1797,7 @@ window._renderCamPassages = function(testIndex = 0) {
         const prog = p.progress || 0;
         const barColor = prog >= 80 ? 'bg-green-500' : prog >= 40 ? 'bg-primary' : 'bg-yellow-400';
         const isPro = Boolean(p.isPro);
+        const showPassageProBadge = isPro && !window._isUserPro;
         return `
         <div onclick="window._openPassage('${topicId}', '${p.id}', '${currentTest.id}', ${p.passageNumber}, '${_esc(p.title)}', '${_esc(p.topicLabel)}', '${_esc(currentTest.name)}', ${isPro})"
              class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col justify-between transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
@@ -1767,7 +1809,7 @@ window._renderCamPassages = function(testIndex = 0) {
                             <span class="material-symbols-outlined text-[15px]">article</span>
                             Passage ${p.passageNumber}
                         </span>
-                        ${isPro ? `
+                        ${showPassageProBadge ? `
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs">
                             <span class="material-symbols-outlined text-[12px]">workspace_premium</span>
                             PRO
@@ -1815,7 +1857,7 @@ window._renderCamPassages = function(testIndex = 0) {
                             <span>Đọc</span>
                         </button>` : ''}
                         <span class="font-bold text-primary flex items-center gap-0.5 group-hover:translate-x-0.5 transition-transform">
-                            ${isPro ? '<span class="material-symbols-outlined text-[15px] text-amber-500 mr-0.5">lock</span>' : ''}
+                            ${showPassageProBadge ? '<span class="material-symbols-outlined text-[15px] text-amber-500 mr-0.5">lock</span>' : ''}
                             Học ngay <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
                         </span>
                     </div>
@@ -5226,6 +5268,18 @@ window._updateProfileUI = async function(user) {
         } else {
             avatarDesk?.classList.remove('ring-2', 'ring-amber-500/70');
             avatarMob?.classList.remove('ring-2', 'ring-amber-500/70');
+        }
+
+        // Tự động làm mới danh sách bài học / chủ đề đang mở để loại bỏ icon ổ khóa và huy hiệu PRO
+        const curPage = document.querySelector('.page.active')?.id;
+        if (curPage === 'page-topics' && typeof window._renderTopicsGrid === 'function') {
+            window._renderTopicsGrid();
+        } else if (curPage === 'page-topic-detail' && window._currentTopicId) {
+            if (window._camHierarchy && typeof window._renderCamPassages === 'function') {
+                window._renderCamPassages(window._currentTestIndex || 0);
+            } else if (typeof window._loadLessons === 'function') {
+                window._loadLessons(window._currentTopicId);
+            }
         }
     } catch (e) {
         console.warn('[_updateProfileUI check PRO error]', e);

@@ -918,6 +918,11 @@ html.dark .bg-primary-container        { background-color: var(--hi-p-fix) !impo
 html.dark .hover\:bg-primary-container\/10:hover { background-color: var(--hi-p-10) !important; }
 html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--hi-p) !important; }
 
+/* KHI ĐÃ ĐĂNG NHẬP: Ẩn landing page và hiện thẳng app học (dashboard + sidebar) từ frame đầu tiên */
+html.user-logged-in #page-landing { display: none !important; }
+html.user-logged-in #page-dashboard { display: block !important; }
+html.user-logged-in #main-sidebar { display: flex !important; }
+
 </style>
 <script>
 (function() {
@@ -930,6 +935,31 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
         var dark = localStorage.getItem('theme');
         if (dark === 'dark' || (!dark && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             document.documentElement.classList.add('dark');
+        }
+
+        // KIỂM TRA PHIÊN ĐĂNG NHẬP NHANH TỪ LOCALSTORAGE ĐỂ CHUYỂN THẲNG VÀO APP
+        var hasAuth = false;
+        for (var i = 0; i < localStorage.length; i++) {
+            var k = localStorage.key(i);
+            if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+                try {
+                    var tokenData = JSON.parse(localStorage.getItem(k) || '{}');
+                    if (tokenData && tokenData.access_token) {
+                        if (!tokenData.expires_at || tokenData.expires_at * 1000 > Date.now()) {
+                            hasAuth = true;
+                            break;
+                        }
+                    }
+                } catch(_) {}
+            }
+        }
+        if (hasAuth) {
+            window._isPreAuthenticated = true;
+            var curHash = (window.location.hash || '').replace(/^#/, '');
+            var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
+            if (!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) {
+                document.documentElement.classList.add('user-logged-in');
+            }
         }
     } catch (e) {}
 })();

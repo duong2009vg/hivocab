@@ -1,5 +1,6 @@
-# Cloudflare Pages Redirects & Rewrites (SPA / Static routing)
-/admin    /admin.html    200
+# Cloudflare Pages Redirects & Rewrites
+# Note: Do not rewrite /admin, /terms, or /privacy to their .html files
+# because Cloudflare Pages Clean URLs already serves static .html files automatically.
+# Adding a rewrite to a .html file triggers an infinite 308 redirect loop.
+
 /app      /index.html    200
-/terms    /terms.html    200
-/privacy  /privacy.html  200
