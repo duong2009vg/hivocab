@@ -75,10 +75,13 @@ export function navigateTo(targetPageId, options = {}) {
     pages.forEach(el => {
       if (el.id === `page-${pageId}`) {
         el.classList.add('active');
-        el.style.display = (el.id === 'page-thpt-room') ? 'flex' : '';
+        el.style.removeProperty('display');
+        if (el.id === 'page-thpt-room') {
+          el.style.setProperty('display', 'flex', 'important');
+        }
       } else {
         el.classList.remove('active');
-        el.style.display = '';
+        el.style.setProperty('display', 'none', 'important');
       }
     });
 

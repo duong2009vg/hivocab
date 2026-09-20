@@ -132,10 +132,22 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
         HiSessionUI.destroy();
     }
 
-    // Đóng tất cả trang
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    const el = document.getElementById('page-'+pageName);
-    if(el) { el.classList.add('active'); window.scrollTo(0,0); }
+    // Đóng tất cả trang và ép ẩn bằng inline style !important để chống xung đột với bất kỳ CSS nào
+    document.querySelectorAll('.page').forEach(p => {
+        p.classList.remove('active');
+        if (p.id !== 'page-' + pageName) {
+            p.style.setProperty('display', 'none', 'important');
+        }
+    });
+    const el = document.getElementById('page-' + pageName);
+    if (el) {
+        el.classList.add('active');
+        el.style.removeProperty('display');
+        if (pageName === 'thpt-room') {
+            el.style.setProperty('display', 'flex', 'important');
+        }
+        window.scrollTo(0, 0);
+    }
     if (!preserveHash) window.location.hash = page;
  
     // Điều khiển Component dùng chung (Navbar / Sidebar)
