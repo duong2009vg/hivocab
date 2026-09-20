@@ -1,0 +1,839 @@
+[
+  {
+    "global_order": 901,
+    "word": "disinclination",
+    "en_meaning": "A reluctance or lack of enthusiasm; a slight aversion",
+    "vi_meaning": "Sự chán ghét, sự không sẵn lòng hoặc không có hứng thú",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 1
+  },
+  {
+    "global_order": 902,
+    "word": "disingenuous",
+    "en_meaning": "Not candid or sincere, typically by pretending that one knows less than one actually does",
+    "vi_meaning": "Không chân thật, gian xảo, thường giả vờ ngây ngô",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 2
+  },
+  {
+    "global_order": 903,
+    "word": "disinter",
+    "en_meaning": "To dig up or remove something from a grave or the ground",
+    "vi_meaning": "Quật mộ, đào lên hoặc khai quật thứ gì đó từ lòng đất",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 3
+  },
+  {
+    "global_order": 904,
+    "word": "disinterested",
+    "en_meaning": "Not influenced by considerations of personal advantage; unbiased or impartial",
+    "vi_meaning": "Công tâm, không vụ lợi, không bị tác động bởi lợi ích cá nhân",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 4
+  },
+  {
+    "global_order": 905,
+    "word": "disjointed",
+    "en_meaning": "Lacking a coherent sequence or connection; disconnected",
+    "vi_meaning": "Rời rạc, không mạch lạc hoặc thiếu sự kết nối",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 5
+  },
+  {
+    "global_order": 906,
+    "word": "dislodge",
+    "en_meaning": "To force a person or object out of a position or place",
+    "vi_meaning": "Trục xuất, đuổi ra, đánh bật khỏi vị trí",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 6
+  },
+  {
+    "global_order": 907,
+    "word": "dismantle",
+    "en_meaning": "To take a machine or structure to pieces in a gradual way",
+    "vi_meaning": "Tháo dỡ, phá hủy cấu trúc máy móc hoặc hệ thống",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 7
+  },
+  {
+    "global_order": 908,
+    "word": "dismay",
+    "en_meaning": "A feeling of unhappiness and disappointment or lack of confidence",
+    "vi_meaning": "Sự mất tinh thần, nỗi thất vọng hoặc lo âu",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 8
+  },
+  {
+    "global_order": 909,
+    "word": "dismember",
+    "en_meaning": "To cut or pull the limbs off a body; partition a country",
+    "vi_meaning": "Chia cắt, phân thây hoặc chia nhỏ một quốc gia",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 9
+  },
+  {
+    "global_order": 910,
+    "word": "dismiss",
+    "en_meaning": "To decide that something or someone is not important or worthy",
+    "vi_meaning": "Gạt bỏ, xua tan ý nghĩ hoặc sa thải ai đó",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 10
+  },
+  {
+    "global_order": 911,
+    "word": "disparage",
+    "en_meaning": "To regard or represent as being of little worth; to belittle",
+    "vi_meaning": "Xem thường, miệt thị hoặc gièm pha",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 11
+  },
+  {
+    "global_order": 912,
+    "word": "disparate",
+    "en_meaning": "Essentially different in kind; not allowing comparison",
+    "vi_meaning": "Khác hẳn nhau, khác loại và không thể so sánh",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 12
+  },
+  {
+    "global_order": 913,
+    "word": "disparity",
+    "en_meaning": "A great difference or inequality between things",
+    "vi_meaning": "Sự chênh lệch, sự khác biệt hoặc không bình đẳng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 13
+  },
+  {
+    "global_order": 914,
+    "word": "dispassionate",
+    "en_meaning": "Not influenced by strong emotion, and so able to be rational and impartial",
+    "vi_meaning": "Vô tư, khách quan, không bị chi phối bởi cảm xúc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 14
+  },
+  {
+    "global_order": 915,
+    "word": "dispatch",
+    "en_meaning": "To send off to a destination or for a purpose efficiently",
+    "vi_meaning": "Gửi đi, phái đi nhanh chóng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 15
+  },
+  {
+    "global_order": 916,
+    "word": "dispel",
+    "en_meaning": "To make a doubt, feeling, or belief disappear",
+    "vi_meaning": "Xua tan, làm tan biến",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 16
+  },
+  {
+    "global_order": 917,
+    "word": "disperse",
+    "en_meaning": "To go or distribute in different directions or over a wide area",
+    "vi_meaning": "Giải tán, phân tán",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 17
+  },
+  {
+    "global_order": 918,
+    "word": "dispirited",
+    "en_meaning": "Having lost enthusiasm and hope; disheartened",
+    "vi_meaning": "Nản lòng, chán nản",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 18
+  },
+  {
+    "global_order": 919,
+    "word": "disputatious",
+    "en_meaning": "Fond of or causing heated arguments or debates",
+    "vi_meaning": "Hay tranh luận, thích tranh cãi",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 19
+  },
+  {
+    "global_order": 920,
+    "word": "disquiet",
+    "en_meaning": "A feeling of anxiety or worry; lack of peace",
+    "vi_meaning": "Sự lo lắng, băn khoăn hoặc bất an",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 20
+  },
+  {
+    "global_order": 921,
+    "word": "dissection",
+    "en_meaning": "The action of cutting something open to study its internal structure",
+    "vi_meaning": "Sự mổ xẻ hoặc phân tích chi tiết",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 21
+  },
+  {
+    "global_order": 922,
+    "word": "dissemble",
+    "en_meaning": "To conceal one's true motives, feelings, or beliefs",
+    "vi_meaning": "Che giấu, ngụy tạo cảm xúc hoặc mục đích thật",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 22
+  },
+  {
+    "global_order": 923,
+    "word": "disseminate",
+    "en_meaning": "To spread or disperse information or ideas widely",
+    "vi_meaning": "Phổ biến, gieo rắc hoặc lan truyền thông tin",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 23
+  },
+  {
+    "global_order": 924,
+    "word": "dissent",
+    "en_meaning": "To hold or express opinions that are at variance with those previously or officially held",
+    "vi_meaning": "Sự bất đồng quan điểm hoặc phản đối ý kiến chính thống",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 24
+  },
+  {
+    "global_order": 925,
+    "word": "dissertation",
+    "en_meaning": "A long essay on a particular subject, especially one written for a university degree",
+    "vi_meaning": "Luận văn, luận án nghiên cứu chuyên sâu để lấy bằng đại học hoặc học vị",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 25
+  },
+  {
+    "global_order": 926,
+    "word": "dissident",
+    "en_meaning": "A person who opposes official policy, especially that of an authoritarian state",
+    "vi_meaning": "Người bất đồng chính kiến, phản đối chính sách của chính phủ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 26
+  },
+  {
+    "global_order": 927,
+    "word": "dissimulate",
+    "en_meaning": "To conceal or disguise one's thoughts, feelings, or character",
+    "vi_meaning": "Che đậy, ngụy trang suy nghĩ hoặc cảm xúc thật của bản thân",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 27
+  },
+  {
+    "global_order": 928,
+    "word": "dissipate",
+    "en_meaning": "To disappear or cause to disappear; to waste energy or resources",
+    "vi_meaning": "Xua tan, làm biến mất hoặc lãng phí tiền bạc, năng lượng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 28
+  },
+  {
+    "global_order": 929,
+    "word": "dissolute",
+    "en_meaning": "Lacking in morals; characterized by overindulgence in sensual pleasures",
+    "vi_meaning": "Ăn chơi phóng đãng, trụy lạc, thiếu đạo đức",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 29
+  },
+  {
+    "global_order": 930,
+    "word": "dissolution",
+    "en_meaning": "The formal closing down or dismissal of an assembly, partnership, or official body",
+    "vi_meaning": "Sự giải tán, sự giải thể hoặc kết thúc một tổ chức, liên minh",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 30
+  },
+  {
+    "global_order": 931,
+    "word": "dissonance",
+    "en_meaning": "A lack of harmony or agreement between elements; tension resulting from conflicting ideas",
+    "vi_meaning": "Sự bất hòa, sự thiếu hòa hợp hoặc mâu thuẫn giữa các ý tưởng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 31
+  },
+  {
+    "global_order": 932,
+    "word": "dissuade",
+    "en_meaning": "To persuade someone not to take a particular course of action",
+    "vi_meaning": "Khuyên ngăn, thuyết phục ai đó đừng làm việc gì",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 32
+  },
+  {
+    "global_order": 933,
+    "word": "distant",
+    "en_meaning": "Far away in space or time; not friendly or communicative",
+    "vi_meaning": "Xa xôi, cách biệt hoặc lạnh nhạt, ít nói",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 33
+  },
+  {
+    "global_order": 934,
+    "word": "distend",
+    "en_meaning": "To swell or cause to swell by pressure from inside",
+    "vi_meaning": "Làm sưng lên, phồng lên hoặc giãn ra",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 34
+  },
+  {
+    "global_order": 935,
+    "word": "distill",
+    "en_meaning": "To purify a liquid by heating and cooling; to extract the essence",
+    "vi_meaning": "Chưng cất, lọc sạch hoặc đúc kết tinh túy",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 35
+  },
+  {
+    "global_order": 936,
+    "word": "distinction",
+    "en_meaning": "A difference or contrast between similar things or people",
+    "vi_meaning": "Sự khác biệt, nét đặc trưng hoặc sự ưu tú",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 36
+  },
+  {
+    "global_order": 937,
+    "word": "distort",
+    "en_meaning": "To twist out of shape or misrepresent the truth",
+    "vi_meaning": "Xuyên tạc, bóp méo sự thật hoặc làm biến dạng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 37
+  },
+  {
+    "global_order": 938,
+    "word": "distraught",
+    "en_meaning": "Deeply upset, anxious, or agitated",
+    "vi_meaning": "Quẫn trí, mất bình tĩnh do quá lo lắng hoặc đau buồn",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 38
+  },
+  {
+    "global_order": 939,
+    "word": "diurnal",
+    "en_meaning": "Active during the day rather than at night",
+    "vi_meaning": "Hoạt động vào ban ngày",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 39
+  },
+  {
+    "global_order": 940,
+    "word": "diva",
+    "en_meaning": "A famous female opera singer or a self-important person",
+    "vi_meaning": "Nữ ca sĩ lừng danh hoặc người kiêu kỳ, tự phụ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 40
+  },
+  {
+    "global_order": 941,
+    "word": "diverge",
+    "en_meaning": "To separate and go in different directions from a point",
+    "vi_meaning": "Phân tách, rẽ ra các hướng khác nhau",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 41
+  },
+  {
+    "global_order": 942,
+    "word": "divergent",
+    "en_meaning": "Moving or extending in different directions from a common point",
+    "vi_meaning": "Khác biệt, chệch ra, phân kỳ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 42
+  },
+  {
+    "global_order": 943,
+    "word": "diverse",
+    "en_meaning": "Showing a great deal of variety; very different",
+    "vi_meaning": "Đa dạng, phong phú, gồm nhiều loại khác nhau",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 43
+  },
+  {
+    "global_order": 944,
+    "word": "diversion",
+    "en_meaning": "The action of turning something aside from its course or an entertaining activity",
+    "vi_meaning": "Sự làm chệch hướng hoặc sự giải trí, tiêu khiển",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 44
+  },
+  {
+    "global_order": 945,
+    "word": "diversity",
+    "en_meaning": "The state of being varied or having many different elements",
+    "vi_meaning": "Tính đa dạng, sự phong phú",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 45
+  },
+  {
+    "global_order": 946,
+    "word": "divest",
+    "en_meaning": "To deprive someone of power, rights, or possessions; to rid oneself of something",
+    "vi_meaning": "Tước bỏ, thoái vốn hoặc cởi bỏ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 46
+  },
+  {
+    "global_order": 947,
+    "word": "divine",
+    "en_meaning": "To discover or understand through intuition or supernatural means",
+    "vi_meaning": "Tiên đoán, đoán biết bằng trực giác",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 47
+  },
+  {
+    "global_order": 948,
+    "word": "divulge",
+    "en_meaning": "To make known private or sensitive information",
+    "vi_meaning": "Tiết lộ, để lộ bí mật",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 48
+  },
+  {
+    "global_order": 949,
+    "word": "docile",
+    "en_meaning": "Ready to accept control or instruction; submissive",
+    "vi_meaning": "Dễ bảo, ngoan ngoãn, phục tùng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 49
+  },
+  {
+    "global_order": 950,
+    "word": "doctrinaire",
+    "en_meaning": "Seeking to impose a theory without regard to practical considerations",
+    "vi_meaning": "Cứng nhắc, giáo điều, bám chặt vào lý thuyết",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 50
+  },
+  {
+    "global_order": 951,
+    "word": "doctrine",
+    "en_meaning": "A belief or set of beliefs held and taught by a group",
+    "vi_meaning": "Học thuyết, giáo lý",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 51
+  },
+  {
+    "global_order": 952,
+    "word": "document",
+    "en_meaning": "To record or provide evidence with written or digital information",
+    "vi_meaning": "Ghi chép lại hoặc cung cấp bằng chứng bằng dữ liệu",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 52
+  },
+  {
+    "global_order": 953,
+    "word": "doff",
+    "en_meaning": "To remove an item of clothing, especially a hat, as a greeting",
+    "vi_meaning": "Cởi bỏ quần áo hoặc ngả mũ chào",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 53
+  },
+  {
+    "global_order": 954,
+    "word": "dogged",
+    "en_meaning": "Showing great determination and not giving up easily",
+    "vi_meaning": "Kiên cường, bền bỉ và không bỏ cuộc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 54
+  },
+  {
+    "global_order": 955,
+    "word": "doggerel",
+    "en_meaning": "Verse or poetry that is badly written or sentimental",
+    "vi_meaning": "Thơ rẻ tiền, vần vè vụng về hoặc tầm thường",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 55
+  },
+  {
+    "global_order": 956,
+    "word": "dogmatic",
+    "en_meaning": "Stating opinions as if they are facts in an assertive way",
+    "vi_meaning": "Độc đoán, giáo điều, luôn cho là mình đúng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 56
+  },
+  {
+    "global_order": 957,
+    "word": "doldrums",
+    "en_meaning": "A state or period of inactivity, stagnation, or depression",
+    "vi_meaning": "Sự trì trệ, tình trạng ảm đạm hoặc trầm lắng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 57
+  },
+  {
+    "global_order": 958,
+    "word": "doleful",
+    "en_meaning": "Expressing sorrow; mournful or very sad",
+    "vi_meaning": "U sầu, buồn thảm, bi ai",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 58
+  },
+  {
+    "global_order": 959,
+    "word": "dolt",
+    "en_meaning": "A person who is stupid or slow to learn",
+    "vi_meaning": "Kẻ khờ dại, người ngu ngốc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 59
+  },
+  {
+    "global_order": 960,
+    "word": "domicile",
+    "en_meaning": "A person's regular or permanent place of residence",
+    "vi_meaning": "Nơi cư trú, nhà ở chính thức",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 60
+  },
+  {
+    "global_order": 961,
+    "word": "domineer",
+    "en_meaning": "To assert one's will over others in an arrogant way",
+    "vi_meaning": "Áp đặt, độc đoán, hống hách",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 61
+  },
+  {
+    "global_order": 962,
+    "word": "don",
+    "en_meaning": "To put on or dress in an item of clothing",
+    "vi_meaning": "Mặc vào, khoác lên mình (quần áo)",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 62
+  },
+  {
+    "global_order": 963,
+    "word": "doodle",
+    "en_meaning": "To draw or scribble aimlessly while one's mind is otherwise occupied",
+    "vi_meaning": "Vẽ nguệch ngoạc khi đang lơ đãng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 63
+  },
+  {
+    "global_order": 964,
+    "word": "dormant",
+    "en_meaning": "In a state of temporary inactivity or deep sleep",
+    "vi_meaning": "Tạm thời ngưng hoạt động hoặc đang ngủ đông",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 64
+  },
+  {
+    "global_order": 965,
+    "word": "dormer",
+    "en_meaning": "A vertical window that projects from a sloping roof",
+    "vi_meaning": "Cửa sổ mái nhô ra từ mái nhà dốc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 65
+  },
+  {
+    "global_order": 966,
+    "word": "dossier",
+    "en_meaning": "A collection of documents or files containing detailed information about someone or something",
+    "vi_meaning": "Hồ sơ chi tiết về một người hoặc một sự việc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 66
+  },
+  {
+    "global_order": 967,
+    "word": "dote",
+    "en_meaning": "To be extremely and uncritically fond of someone",
+    "vi_meaning": "Cực kỳ nuông chiều hoặc mê mẩn ai đó",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 67
+  },
+  {
+    "global_order": 968,
+    "word": "douse",
+    "en_meaning": "To drench with liquid or extinguish a fire",
+    "vi_meaning": "Dội nước, làm ướt sũng hoặc dập tắt lửa",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 68
+  },
+  {
+    "global_order": 969,
+    "word": "dowdy",
+    "en_meaning": "Lacking style or fashion; unfashionable and dull in appearance",
+    "vi_meaning": "Luộm thuộm, không hợp thời trang, cũ kỹ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 69
+  },
+  {
+    "global_order": 970,
+    "word": "downcast",
+    "en_meaning": "Feeling despondent, discouraged, or looking downward",
+    "vi_meaning": "Chán nản, thất vọng hoặc nhìn xuống dưới",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 70
+  },
+  {
+    "global_order": 971,
+    "word": "drab",
+    "en_meaning": "Lacking brightness or interest; dull and colorless",
+    "vi_meaning": "Buồn tẻ, xám xịt và thiếu sức sống",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 71
+  },
+  {
+    "global_order": 972,
+    "word": "draconian",
+    "en_meaning": "Extremely severe, harsh, or cruel laws or measures",
+    "vi_meaning": "Khắc nghiệt, hà khắc (thường nói về luật lệ)",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 72
+  },
+  {
+    "global_order": 973,
+    "word": "dregs",
+    "en_meaning": "The remnants of a liquid left in a container, together with any sediment",
+    "vi_meaning": "Cặn bã, phần dư thừa vô giá trị",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 73
+  },
+  {
+    "global_order": 974,
+    "word": "drivel",
+    "en_meaning": "Silly or meaningless talk; nonsense",
+    "vi_meaning": "Lời nói tầm phao, chuyện nhảm nhí",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 74
+  },
+  {
+    "global_order": 975,
+    "word": "droll",
+    "en_meaning": "Curious or unusual in a way that provokes dry amusement",
+    "vi_meaning": "Khôi hài, buồn cười theo lối kỳ quặc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 75
+  },
+  {
+    "global_order": 976,
+    "word": "drone",
+    "en_meaning": "To make a continuous low humming sound or speak tediously",
+    "vi_meaning": "Kêu vo ve hoặc nói bằng giọng đều đều gây buồn chán",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 76
+  },
+  {
+    "global_order": 977,
+    "word": "dross",
+    "en_meaning": "Something regarded as worthless; rubbish or impurities",
+    "vi_meaning": "Sỉ kim loại, vật vô giá trị hoặc rác rưởi",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 77
+  },
+  {
+    "global_order": 978,
+    "word": "drudgery",
+    "en_meaning": "Hard, menial, or dull work that is repetitive and boring",
+    "vi_meaning": "Công việc nặng nhọc, nhàm chán và vô vị",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 78
+  },
+  {
+    "global_order": 979,
+    "word": "dubious",
+    "en_meaning": "Hesitating or doubting; not to be relied upon; suspect",
+    "vi_meaning": "Mơ hồ, không chắc chắn hoặc đáng nghi ngờ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 79
+  },
+  {
+    "global_order": 980,
+    "word": "ductile",
+    "en_meaning": "Capable of being shaped or bent without breaking; easily influenced",
+    "vi_meaning": "Dễ uốn, dễ kéo sợi hoặc dễ bị thuyết phục",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 80
+  },
+  {
+    "global_order": 981,
+    "word": "dulcet",
+    "en_meaning": "Sweet and soothing, especially when describing sound or music",
+    "vi_meaning": "Êm dịu, ngọt ngào (thường dùng cho âm thanh)",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 81
+  },
+  {
+    "global_order": 982,
+    "word": "dumbfound",
+    "en_meaning": "To greatly astonish or amaze someone so they are speechless",
+    "vi_meaning": "Làm cho chết lặng, làm sửng sốt",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 82
+  },
+  {
+    "global_order": 983,
+    "word": "dupe",
+    "en_meaning": "To deceive or trick someone; a person who is easily deceived",
+    "vi_meaning": "Lừa bịp hoặc người dễ bị lừa",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 83
+  },
+  {
+    "global_order": 984,
+    "word": "duplicity",
+    "en_meaning": "Deceitfulness in speech or conduct; double-dealing",
+    "vi_meaning": "Sự ăn ở hai lòng, tính gian dối",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 84
+  },
+  {
+    "global_order": 985,
+    "word": "duration",
+    "en_meaning": "The length of time during which something continues or exists",
+    "vi_meaning": "Thời lượng; khoảng thời gian tồn tại của một sự việc",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 85
+  },
+  {
+    "global_order": 986,
+    "word": "duress",
+    "en_meaning": "Threats, violence, or constraints brought to bear on someone to do something",
+    "vi_meaning": "Sự cưỡng ép; ép buộc bằng vũ lực hoặc đe dọa",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 86
+  },
+  {
+    "global_order": 987,
+    "word": "dutiful",
+    "en_meaning": "Conscientiously or obediently fulfilling one's duty",
+    "vi_meaning": "Biết vâng lời; làm tròn bổn phận và trách nhiệm",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 87
+  },
+  {
+    "global_order": 988,
+    "word": "dwarf",
+    "en_meaning": "To cause to seem small or insignificant in comparison",
+    "vi_meaning": "Làm cho trở nên nhỏ bé hoặc không đáng kể so với thứ khác",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 88
+  },
+  {
+    "global_order": 989,
+    "word": "dwindle",
+    "en_meaning": "To diminish gradually in size, amount, or strength",
+    "vi_meaning": "Suy yếu dần; nhỏ lại hoặc ít đi một cách từ từ",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 89
+  },
+  {
+    "global_order": 990,
+    "word": "dynamic",
+    "en_meaning": "characterised by constant change, activity, or progress",
+    "vi_meaning": "năng động, sôi nổi hoặc luôn biến đổi",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 90
+  },
+  {
+    "global_order": 991,
+    "word": "earthy",
+    "en_meaning": "resembling or suggestive of earth or soil; direct and uninhibited",
+    "vi_meaning": "mộc mạc, chân chất hoặc liên quan đến đất",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 91
+  },
+  {
+    "global_order": 992,
+    "word": "ebb",
+    "en_meaning": "the movement of the tide out to sea; to gradually lessen",
+    "vi_meaning": "thủy triều rút hoặc sự suy yếu dần",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 92
+  },
+  {
+    "global_order": 993,
+    "word": "ebullient",
+    "en_meaning": "cheerful and full of energy; exuberant",
+    "vi_meaning": "phấn khích, hăng hái và tràn đầy năng lượng",
+    "lesson_name": "Lesson 10",
+    "lesson_order": 10,
+    "word_order": 93
+  }
+]

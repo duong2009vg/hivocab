@@ -1,0 +1,452 @@
+[
+  {
+    "global_order": 801,
+    "word": "deflect",
+    "en_meaning": "To cause something to change direction; to turn aside from a course",
+    "vi_meaning": "Làm lệch hướng, làm chệch đi",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 1
+  },
+  {
+    "global_order": 802,
+    "word": "defoliate",
+    "en_meaning": "To cause leaves to fall off a plant, often by using chemicals",
+    "vi_meaning": "Làm rụng lá, phát quang cây cối",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 2
+  },
+  {
+    "global_order": 803,
+    "word": "defray",
+    "en_meaning": "To provide money to pay for a cost or expense",
+    "vi_meaning": "Thanh toán hoặc chi trả chi phí",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 3
+  },
+  {
+    "global_order": 804,
+    "word": "deft",
+    "en_meaning": "Demonstrating skill, cleverness, or quickness in movement",
+    "vi_meaning": "Khéo léo, nhanh thoăn thoắt",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 4
+  },
+  {
+    "global_order": 805,
+    "word": "defunct",
+    "en_meaning": "No longer living, existing, or functioning",
+    "vi_meaning": "Không còn tồn tại hoặc đã quá thời",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 5
+  },
+  {
+    "global_order": 806,
+    "word": "defuse",
+    "en_meaning": "To remove the fuse from an explosive or reduce tension",
+    "vi_meaning": "Tháo ngòi nổ hoặc làm xoa dịu căng thẳng",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 6
+  },
+  {
+    "global_order": 807,
+    "word": "degenerate",
+    "en_meaning": "To decline or deteriorate physically, mentally, or morally",
+    "vi_meaning": "Thoái hóa, suy đồi hoặc trở nên tồi tệ hơn",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 7
+  },
+  {
+    "global_order": 808,
+    "word": "degradation",
+    "en_meaning": "The process of being reduced in quality, status, or condition",
+    "vi_meaning": "Sự suy thoái, sự giảm sút về chất lượng hoặc giá trị",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 8
+  },
+  {
+    "global_order": 809,
+    "word": "dehydrate",
+    "en_meaning": "To remove water or moisture from something",
+    "vi_meaning": "Làm mất nước hoặc loại bỏ độ ẩm",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 9
+  },
+  {
+    "global_order": 810,
+    "word": "deify",
+    "en_meaning": "To treat or worship someone or something as a god",
+    "vi_meaning": "Tôn sùng như thánh thần",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 10
+  },
+  {
+    "global_order": 811,
+    "word": "deign",
+    "en_meaning": "To do something that one considers to be below one's dignity",
+    "vi_meaning": "Hạ mình để làm việc gì đó",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 11
+  },
+  {
+    "global_order": 812,
+    "word": "delectable",
+    "en_meaning": "Delicious or highly pleasing to the senses",
+    "vi_meaning": "Ngon lành hoặc vô cùng thú vị",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 12
+  },
+  {
+    "global_order": 813,
+    "word": "delete",
+    "en_meaning": "To remove or erase written or stored information",
+    "vi_meaning": "Xóa bỏ thông tin đã lưu hoặc văn bản",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 13
+  },
+  {
+    "global_order": 814,
+    "word": "deleterious",
+    "en_meaning": "Causing harm or damage",
+    "vi_meaning": "Có hại, gây hại",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 14
+  },
+  {
+    "global_order": 815,
+    "word": "deliberate",
+    "en_meaning": "Done consciously and intentionally; carefully weighed or considered",
+    "vi_meaning": "Cố ý, có tính toán hoặc thận trọng",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 15
+  },
+  {
+    "global_order": 816,
+    "word": "delineate",
+    "en_meaning": "To describe or portray something precisely",
+    "vi_meaning": "Mô tả chi tiết, phác thảo hoặc định rõ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 16
+  },
+  {
+    "global_order": 817,
+    "word": "delirium",
+    "en_meaning": "An acutely disturbed state of mind characterized by restlessness and illusions",
+    "vi_meaning": "Sự mê sảng, trạng thái tinh thần bị kích động cực độ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 17
+  },
+  {
+    "global_order": 818,
+    "word": "delude",
+    "en_meaning": "To deceive or fool someone",
+    "vi_meaning": "Lừa dối, đánh lừa",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 18
+  },
+  {
+    "global_order": 819,
+    "word": "deluge",
+    "en_meaning": "A severe flood or a heavy fall of rain; an overwhelming amount of something",
+    "vi_meaning": "Trận đại hồng thủy hoặc sự dồn dập, quá tải của một thứ gì đó",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 19
+  },
+  {
+    "global_order": 820,
+    "word": "delusion",
+    "en_meaning": "A false belief or opinion maintained despite being contradicted by reality",
+    "vi_meaning": "Sự ảo tưởng hoặc niềm tin sai lệch bất chấp thực tế",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 20
+  },
+  {
+    "global_order": 821,
+    "word": "delve",
+    "en_meaning": "To research or investigate deeply and intensely into a particular subject",
+    "vi_meaning": "Nghiên cứu kỹ lưỡng hoặc đào sâu vào một vấn đề nào đó",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 21
+  },
+  {
+    "global_order": 822,
+    "word": "demagogue",
+    "en_meaning": "A political leader who seeks support by appealing to popular desires and prejudices",
+    "vi_meaning": "Kẻ mị dân, nhà chính trị lôi kéo quần chúng bằng cách lợi dụng lòng tin và thành kiến",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 22
+  },
+  {
+    "global_order": 823,
+    "word": "demean",
+    "en_meaning": "To cause a severe loss in the dignity of and respect for someone or something",
+    "vi_meaning": "Hạ thấp phẩm giá, làm nhục hoặc làm mất giá trị của ai đó/với cái gì đó",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 23
+  },
+  {
+    "global_order": 824,
+    "word": "demeanor",
+    "en_meaning": "Outward behavior or bearing",
+    "vi_meaning": "Cách ứng xử, thái độ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 24
+  },
+  {
+    "global_order": 825,
+    "word": "demented",
+    "en_meaning": "Driven to behave irrationally due to anger, distress, or excitement",
+    "vi_meaning": "Loạn trí, điên rồ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 25
+  },
+  {
+    "global_order": 826,
+    "word": "demise",
+    "en_meaning": "A person's death or the end or failure of an enterprise",
+    "vi_meaning": "Sự qua đời, sự lụi bại",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 26
+  },
+  {
+    "global_order": 827,
+    "word": "demolition",
+    "en_meaning": "The action or process of demolishing or being demolished",
+    "vi_meaning": "Sự phá dỡ, sự đánh đổ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 27
+  },
+  {
+    "global_order": 828,
+    "word": "demoniac",
+    "en_meaning": "Relating to, characteristic of, or possessed by an evil spirit",
+    "vi_meaning": "Ma quái, hung ác",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 28
+  },
+  {
+    "global_order": 829,
+    "word": "demur",
+    "en_meaning": "to raise objections or show reluctance",
+    "vi_meaning": "phản đối hoặc do dự",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 29
+  },
+  {
+    "global_order": 830,
+    "word": "demure",
+    "en_meaning": "quiet, modest, and shy in behavior",
+    "vi_meaning": "kín đáo, khiêm tốn và e lệ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 30
+  },
+  {
+    "global_order": 831,
+    "word": "demystify",
+    "en_meaning": "to make something easier to understand by explaining it",
+    "vi_meaning": "làm sáng tỏ, giải mã điều gì đó phức tạp",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 31
+  },
+  {
+    "global_order": 832,
+    "word": "denigrate",
+    "en_meaning": "to criticize unfairly or disparage someone's reputation",
+    "vi_meaning": "gièm pha, bôi nhọ hoặc hạ thấp uy tín",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 32
+  },
+  {
+    "global_order": 833,
+    "word": "denizen",
+    "en_meaning": "an inhabitant or occupant of a particular place",
+    "vi_meaning": "cư dân, người trú ngụ hoặc sinh vật sống tại một vùng",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 33
+  },
+  {
+    "global_order": 834,
+    "word": "denotation",
+    "en_meaning": "The literal, primary meaning of a word, in contrast to its feelings or ideas",
+    "vi_meaning": "Nghĩa đen, nghĩa trực tiếp của một từ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 34
+  },
+  {
+    "global_order": 835,
+    "word": "denouement",
+    "en_meaning": "The final part of a play, movie, or narrative in which the plot is resolved",
+    "vi_meaning": "Phần kết thúc, cách giải quyết các tình tiết cuối cùng của một câu chuyện",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 35
+  },
+  {
+    "global_order": 836,
+    "word": "depict",
+    "en_meaning": "To show or represent by a drawing, painting, or other art form",
+    "vi_meaning": "Mô tả, miêu tả thông qua hình ảnh hoặc ngôn từ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 36
+  },
+  {
+    "global_order": 837,
+    "word": "deplete",
+    "en_meaning": "To use up the supply or resources of something",
+    "vi_meaning": "Làm cạn kiệt, suy giảm nguồn lực hoặc số lượng",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 37
+  },
+  {
+    "global_order": 838,
+    "word": "deplore",
+    "en_meaning": "to feel or express strong disapproval or grief",
+    "vi_meaning": "lấy làm tiếc, phản đối mạnh mẽ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 38
+  },
+  {
+    "global_order": 839,
+    "word": "deploy",
+    "en_meaning": "to move into position for military action or effective use",
+    "vi_meaning": "triển khai (quân đội hoặc nguồn lực)",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 39
+  },
+  {
+    "global_order": 840,
+    "word": "depose",
+    "en_meaning": "to remove from office suddenly and forcefully",
+    "vi_meaning": "cách chức, phế truất",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 40
+  },
+  {
+    "global_order": 841,
+    "word": "deposition",
+    "en_meaning": "the act of removing someone from office; or a formal statement",
+    "vi_meaning": "sự phế truất; hoặc lời khai tuyên thệ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 41
+  },
+  {
+    "global_order": 842,
+    "word": "depravity",
+    "en_meaning": "moral corruption or wickedness",
+    "vi_meaning": "sự đồi bại, sự trụy lạc",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 42
+  },
+  {
+    "global_order": 843,
+    "word": "deprecate",
+    "en_meaning": "to express strong disapproval of or to belittle",
+    "vi_meaning": "phản đối, không tán thành hoặc xem nhẹ",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 43
+  },
+  {
+    "global_order": 844,
+    "word": "depreciate",
+    "en_meaning": "to decrease in value or price over time",
+    "vi_meaning": "giảm giá trị, sụt giá",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 44
+  },
+  {
+    "global_order": 845,
+    "word": "depredation",
+    "en_meaning": "an act of attacking, plundering, or laying waste",
+    "vi_meaning": "sự cướp phá, sự phá phách",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 45
+  },
+  {
+    "global_order": 846,
+    "word": "deranged",
+    "en_meaning": "unable to think or act in a normal or logical way",
+    "vi_meaning": "bị loạn trí, điên loạn",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 46
+  },
+  {
+    "global_order": 847,
+    "word": "derelict",
+    "en_meaning": "in a very poor condition as a result of disuse and neglect",
+    "vi_meaning": "bị bỏ rơi, vô chủ, tình trạng tồi tàn",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 47
+  },
+  {
+    "global_order": 848,
+    "word": "deride",
+    "en_meaning": "To express contempt for; to ridicule or mock",
+    "vi_meaning": "Chế nhạo, nhạo báng, giễu cợt",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 48
+  },
+  {
+    "global_order": 849,
+    "word": "derivative",
+    "en_meaning": "Imitative of the work of another person, or originating from something else",
+    "vi_meaning": "Bắt chước, không nguyên bản, bắt nguồn từ cái gì đó khác",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 49
+  },
+  {
+    "global_order": 850,
+    "word": "dermatologist",
+    "en_meaning": "A medical practitioner qualified to diagnose and treat skin disorders",
+    "vi_meaning": "Bác sĩ da liễu",
+    "lesson_name": "Lesson 9",
+    "lesson_order": 9,
+    "word_order": 50
+  }
+]

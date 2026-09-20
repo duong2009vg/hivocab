@@ -1,0 +1,902 @@
+[
+  {
+    "global_order": 201,
+    "word": "antediluvian",
+    "en_meaning": "Extremely old-fashioned or belonging to the time before the biblical flood",
+    "vi_meaning": "Cổ xưa, lạc hậu hoặc thuộc về thời kỳ trước trận đại hồng thủy",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 1
+  },
+  {
+    "global_order": 202,
+    "word": "anthem",
+    "en_meaning": "A song of praise, loyalty, or celebration, often for a country",
+    "vi_meaning": "Bài hát ca ngợi, lòng trung thành hoặc bài quốc ca",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 2
+  },
+  {
+    "global_order": 203,
+    "word": "anthology",
+    "en_meaning": "A published collection of poems, stories, or other musical pieces",
+    "vi_meaning": "Một tuyển tập văn học, thơ ca hoặc các tác phẩm âm nhạc",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 3
+  },
+  {
+    "global_order": 204,
+    "word": "anthropocentric",
+    "en_meaning": "Regarding humankind as the central or most important element of existence",
+    "vi_meaning": "Lấy con người làm trung tâm",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 4
+  },
+  {
+    "global_order": 205,
+    "word": "anthropoid",
+    "en_meaning": "Resembling a human in form; relating to apes that are similar to humans",
+    "vi_meaning": "Dạng người; thuộc về các loài khỉ giống người",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 5
+  },
+  {
+    "global_order": 206,
+    "word": "anthropologist",
+    "en_meaning": "An expert in or student of the study of human societies and cultures",
+    "vi_meaning": "Nhà nhân chủng học",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 6
+  },
+  {
+    "global_order": 207,
+    "word": "anthropomorphic",
+    "en_meaning": "Having human characteristics or behavior applied to a god, animal, or object",
+    "vi_meaning": "Nhân hóa; có hình người hoặc đặc điểm của con người",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 7
+  },
+  {
+    "global_order": 208,
+    "word": "anticlimax",
+    "en_meaning": "A disappointing end to an exciting or impressive series of events",
+    "vi_meaning": "Sự hụt hẫng; đoạn kết gây thất vọng sau một chuỗi sự kiện kịch tính",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 8
+  },
+  {
+    "global_order": 209,
+    "word": "antidote",
+    "en_meaning": "A medicine or remedy that counteracts a poison or something harmful",
+    "vi_meaning": "Thuốc giải độc, phương thuốc cứu chữa điều có hại",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 9
+  },
+  {
+    "global_order": 210,
+    "word": "antipathy",
+    "en_meaning": "A deep-seated feeling of dislike or aversion",
+    "vi_meaning": "Sự ác cảm, lòng ghét bỏ sâu sắc",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 10
+  },
+  {
+    "global_order": 211,
+    "word": "antiquated",
+    "en_meaning": "Old-fashioned or outdated and no longer suitable for modern use",
+    "vi_meaning": "cũ kỹ, lỗi thời",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 11
+  },
+  {
+    "global_order": 212,
+    "word": "antiseptic",
+    "en_meaning": "Scrupulously clean or preventing the growth of disease-causing microorganisms",
+    "vi_meaning": "khử trùng, sạch khuẩn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 12
+  },
+  {
+    "global_order": 213,
+    "word": "antithesis",
+    "en_meaning": "A person or thing that is the direct opposite of someone or something else",
+    "vi_meaning": "sự tương phản, phép đối lập",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 13
+  },
+  {
+    "global_order": 214,
+    "word": "apathy",
+    "en_meaning": "Lack of interest, enthusiasm, or concern about something",
+    "vi_meaning": "sự thờ ơ, vô cảm",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 14
+  },
+  {
+    "global_order": 215,
+    "word": "ape",
+    "en_meaning": "To imitate or mimic someone's behavior or style, often clumsily",
+    "vi_meaning": "bắt chước, nhại lại",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 15
+  },
+  {
+    "global_order": 216,
+    "word": "aperture",
+    "en_meaning": "An opening, hole, or gap through which light or liquid travels",
+    "vi_meaning": "Lỗ hổng, khe hở, hoặc khẩu độ (trong nhiếp ảnh)",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 16
+  },
+  {
+    "global_order": 217,
+    "word": "apex",
+    "en_meaning": "The top or highest part of something, especially one forming a point",
+    "vi_meaning": "Đỉnh, ngọn, hoặc điểm cao nhất",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 17
+  },
+  {
+    "global_order": 218,
+    "word": "aphasia",
+    "en_meaning": "A medical condition causing the loss of ability to understand or express speech",
+    "vi_meaning": "Chứng mất ngôn ngữ do tổn thương não",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 18
+  },
+  {
+    "global_order": 219,
+    "word": "aphorism",
+    "en_meaning": "A concise statement of a scientific principle or observation; a pithy observation",
+    "vi_meaning": "Cách ngôn, châm ngôn ngắn gọn đúc kết một chân lý",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 19
+  },
+  {
+    "global_order": 220,
+    "word": "apiary",
+    "en_meaning": "A place where bees are kept; a collection of beehives",
+    "vi_meaning": "Nhà nuôi ong hoặc khu vực đặt các tổ ong",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 20
+  },
+  {
+    "global_order": 221,
+    "word": "aplomb",
+    "en_meaning": "Self-confidence or assurance, especially when in a demanding situation",
+    "vi_meaning": "Sự tự tin, điềm tĩnh trong những tình huống khó khăn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 21
+  },
+  {
+    "global_order": 222,
+    "word": "apocalyptic",
+    "en_meaning": "Describing or prophesying the complete destruction of the world",
+    "vi_meaning": "Thuộc về ngày tận thế, mang tính chất thảm họa diệt vong",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 22
+  },
+  {
+    "global_order": 223,
+    "word": "apocryphal",
+    "en_meaning": "Of doubtful authenticity, although widely circulated as being true",
+    "vi_meaning": "Nghi vấn về tính xác thực, không chính thống, ngụy tạo",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 23
+  },
+  {
+    "global_order": 224,
+    "word": "apogee",
+    "en_meaning": "The highest point in the development of something; a climax or culmination",
+    "vi_meaning": "Tuyệt đỉnh, điểm cao nhất, thời kỳ hoàng kim",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 24
+  },
+  {
+    "global_order": 225,
+    "word": "apolitical",
+    "en_meaning": "Not interested or involved in politics",
+    "vi_meaning": "Phi chính trị, không quan tâm hoặc không tham gia vào chính trị",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 25
+  },
+  {
+    "global_order": 226,
+    "word": "apologist",
+    "en_meaning": "A person who defends or justifies a particular policy, doctrine, or belief system",
+    "vi_meaning": "Người biện hộ, người lên tiếng bảo vệ một quan điểm hoặc học thuyết",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 26
+  },
+  {
+    "global_order": 227,
+    "word": "apostate",
+    "en_meaning": "A person who renounces a religious or political belief or principle",
+    "vi_meaning": "Người bỏ đạo, người từ bỏ đức tin hoặc lý tưởng chính trị",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 27
+  },
+  {
+    "global_order": 228,
+    "word": "apotheosis",
+    "en_meaning": "The highest point in the development of something; culmination or deification",
+    "vi_meaning": "Sự tôn thờ, giai đoạn đỉnh cao hoặc sự thần thánh hóa",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 28
+  },
+  {
+    "global_order": 229,
+    "word": "appall",
+    "en_meaning": "To greatly dismay or horrify someone",
+    "vi_meaning": "Làm kinh sợ, làm kinh ngạc hoặc gây kinh hoàng",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 29
+  },
+  {
+    "global_order": 230,
+    "word": "apparatus",
+    "en_meaning": "The technical equipment or machinery needed for a particular activity or purpose",
+    "vi_meaning": "Thiết bị bộ máy, dụng cụ chuyên dụng để thực hiện một công việc",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 30
+  },
+  {
+    "global_order": 231,
+    "word": "apparition",
+    "en_meaning": "A ghost or ghostlike image of a person",
+    "vi_meaning": "Sự xuất hiện đột ngột của một con ma hoặc ảo ảnh",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 31
+  },
+  {
+    "global_order": 232,
+    "word": "appease",
+    "en_meaning": "To pacify or placate someone by acceding to their demands",
+    "vi_meaning": "Nhân nhượng, làm cho nguôi giận hoặc xoa dịu",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 32
+  },
+  {
+    "global_order": 233,
+    "word": "appellation",
+    "en_meaning": "A name or title given to a person or thing",
+    "vi_meaning": "Tên gọi, danh xưng hoặc hiệu",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 33
+  },
+  {
+    "global_order": 234,
+    "word": "append",
+    "en_meaning": "To add something as an attachment or supplement",
+    "vi_meaning": "Cộng thêm vào, đính kèm hoặc viết thêm vào cuối",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 34
+  },
+  {
+    "global_order": 235,
+    "word": "apprehension",
+    "en_meaning": "Anxiety or fear that something bad will happen; understanding of a concept",
+    "vi_meaning": "Sự e sợ, lo âu; sự lĩnh hội hoặc hiểu biết",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 35
+  },
+  {
+    "global_order": 236,
+    "word": "apprenticeship",
+    "en_meaning": "A period of time spent learning a trade or skill from a skilled employer",
+    "vi_meaning": "Thời gian học việc, thực tập nghề",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 36
+  },
+  {
+    "global_order": 237,
+    "word": "apprise",
+    "en_meaning": "To inform or tell someone about something",
+    "vi_meaning": "Thông báo, cho biết",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 37
+  },
+  {
+    "global_order": 238,
+    "word": "approbation",
+    "en_meaning": "Approval or praise, often formal or official",
+    "vi_meaning": "Sự tán thành, sự chấp thuận hoặc khen ngợi",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 38
+  },
+  {
+    "global_order": 239,
+    "word": "appropriate",
+    "en_meaning": "Suitable or proper in the circumstances; to take something for one's own use without permission",
+    "vi_meaning": "Thích hợp, phù hợp; chiếm đoạt, chiếm dụng làm của riêng",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 39
+  },
+  {
+    "global_order": 240,
+    "word": "apropos",
+    "en_meaning": "Relevant or appropriate to a particular situation; concerning a subject",
+    "vi_meaning": "Thích hợp, hợp thời, về vấn đề gì đó",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 40
+  },
+  {
+    "global_order": 241,
+    "word": "aptitude",
+    "en_meaning": "A natural ability or skill to do something well",
+    "vi_meaning": "Năng khiếu, khả năng tự nhiên",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 41
+  },
+  {
+    "global_order": 242,
+    "word": "aquatic",
+    "en_meaning": "Relating to water; living or growing in or near water",
+    "vi_meaning": "Sống dưới nước, liên quan đến nước",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 42
+  },
+  {
+    "global_order": 243,
+    "word": "aquiline",
+    "en_meaning": "Like an eagle; curved or hooked like an eagle's beak",
+    "vi_meaning": "Giống chim ưng, khoằm (như mỏ chim ưng)",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 43
+  },
+  {
+    "global_order": 244,
+    "word": "arable",
+    "en_meaning": "Land suitable for growing crops or being cultivated",
+    "vi_meaning": "Đất trồng trọt được, đất canh tác",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 44
+  },
+  {
+    "global_order": 245,
+    "word": "arbiter",
+    "en_meaning": "A person who settles a dispute or has ultimate authority in a matter",
+    "vi_meaning": "Người phân xử hoặc người có quyền quyết định tối cao",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 45
+  },
+  {
+    "global_order": 246,
+    "word": "arbitrary",
+    "en_meaning": "Based on random choice or personal whim, rather than any reason or system",
+    "vi_meaning": "Tùy hứng, độc đoán hoặc dựa trên sự lựa chọn ngẫu nhiên",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 46
+  },
+  {
+    "global_order": 247,
+    "word": "application",
+    "en_meaning": "The practical use or relevance of something; a formal request for something",
+    "vi_meaning": "Sự ứng dụng hoặc đơn xin việc/đơn yêu cầu",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 47
+  },
+  {
+    "global_order": 248,
+    "word": "apposite",
+    "en_meaning": "Highly appropriate, relevant, or suitable to a particular situation",
+    "vi_meaning": "Thích hợp, đúng lúc, phù hợp",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 48
+  },
+  {
+    "global_order": 249,
+    "word": "appraise",
+    "en_meaning": "To assess the value, quality, or nature of something or someone",
+    "vi_meaning": "Đánh giá, định giá",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 49
+  },
+  {
+    "global_order": 250,
+    "word": "appreciate",
+    "en_meaning": "To recognize the full worth of; to increase in value over time",
+    "vi_meaning": "Trân trọng, đánh giá cao hoặc tăng giá trị",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 50
+  },
+  {
+    "global_order": 251,
+    "word": "apprehend",
+    "en_meaning": "To arrest someone; to understand or perceive the meaning of something",
+    "vi_meaning": "Bắt giữ hoặc hiểu rõ, lĩnh hội",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 51
+  },
+  {
+    "global_order": 252,
+    "word": "asinine",
+    "en_meaning": "extremely stupid or foolish",
+    "vi_meaning": "ngu ngốc, đần độn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 52
+  },
+  {
+    "global_order": 253,
+    "word": "arbitrator",
+    "en_meaning": "An independent person or body officially appointed to settle a dispute",
+    "vi_meaning": "Trọng tài, người phân xử",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 53
+  },
+  {
+    "global_order": 254,
+    "word": "arboretum",
+    "en_meaning": "A botanical garden devoted to trees",
+    "vi_meaning": "Vườn bách thảo chuyên về các loại cây thân gỗ",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 54
+  },
+  {
+    "global_order": 255,
+    "word": "arcade",
+    "en_meaning": "A covered passage with arches or a place with coin-operated games",
+    "vi_meaning": "Dãy cuốn, mái vòm hoặc khu vui chơi giải trí",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 55
+  },
+  {
+    "global_order": 256,
+    "word": "arcane",
+    "en_meaning": "Understood by few; mysterious or secret",
+    "vi_meaning": "Bí ẩn, huyền bí, ít người biết đến",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 56
+  },
+  {
+    "global_order": 257,
+    "word": "archaeology",
+    "en_meaning": "The study of human history through the excavation of sites and artifacts",
+    "vi_meaning": "Khảo cổ học",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 57
+  },
+  {
+    "global_order": 258,
+    "word": "archaic",
+    "en_meaning": "Extremely old or belonging to a very early period in history",
+    "vi_meaning": "Cổ xưa, lỗi thời hoặc thuộc về thời sơ khai",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 58
+  },
+  {
+    "global_order": 259,
+    "word": "archetype",
+    "en_meaning": "A perfect or typical example that serves as a model or basis",
+    "vi_meaning": "Hình mẫu, nguyên mẫu tiêu biểu",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 59
+  },
+  {
+    "global_order": 260,
+    "word": "archipelago",
+    "en_meaning": "A large group or chain of islands situated in a sea or ocean",
+    "vi_meaning": "Quần đảo, một nhóm các hòn đảo",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 60
+  },
+  {
+    "global_order": 261,
+    "word": "archives",
+    "en_meaning": "A collection of historical records or the place where they are kept",
+    "vi_meaning": "Kho lưu trữ, hồ sơ lưu trữ lịch sử",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 61
+  },
+  {
+    "global_order": 262,
+    "word": "ardent",
+    "en_meaning": "Characterized by intense emotion, passion, or enthusiastic support",
+    "vi_meaning": "Hăng hái, nồng nhiệt, cuồng nhiệt",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 62
+  },
+  {
+    "global_order": 263,
+    "word": "arduous",
+    "en_meaning": "Involving or requiring strenuous effort; difficult and tiring",
+    "vi_meaning": "Khó khăn, gian khổ, đòi hỏi nhiều nỗ lực",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 63
+  },
+  {
+    "global_order": 264,
+    "word": "aria",
+    "en_meaning": "A long accompanied song for a solo voice, typically in an opera",
+    "vi_meaning": "Giai điệu đơn ca trong vở nhạc kịch (opera)",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 64
+  },
+  {
+    "global_order": 265,
+    "word": "arid",
+    "en_meaning": "Having little or no rain; too dry or barren to support vegetation",
+    "vi_meaning": "Khô cằn, vô vị, thiếu sức sống",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 65
+  },
+  {
+    "global_order": 266,
+    "word": "aristocracy",
+    "en_meaning": "The highest class in certain societies, especially those holding hereditary titles",
+    "vi_meaning": "Tầng lớp quý tộc",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 66
+  },
+  {
+    "global_order": 267,
+    "word": "armada",
+    "en_meaning": "A fleet of warships",
+    "vi_meaning": "Hạm đội tàu chiến",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 67
+  },
+  {
+    "global_order": 268,
+    "word": "aromatic",
+    "en_meaning": "Having a pleasant and distinctive smell",
+    "vi_meaning": "Thơm, có mùi hương đặc trưng",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 68
+  },
+  {
+    "global_order": 269,
+    "word": "arousal",
+    "en_meaning": "The state of being physiologically or psychologically awake or reactive to stimuli",
+    "vi_meaning": "Sự đánh thức, trạng thái hưng phấn hoặc kích thích",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 69
+  },
+  {
+    "global_order": 270,
+    "word": "arraign",
+    "en_meaning": "To call or bring someone before a court to answer a criminal charge",
+    "vi_meaning": "Buộc tội, đưa ra tòa để luận tội",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 70
+  },
+  {
+    "global_order": 271,
+    "word": "array",
+    "en_meaning": "An impressive display or range of a particular type of thing",
+    "vi_meaning": "Một dãy, một loạt sự sắp xếp ấn tượng",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 71
+  },
+  {
+    "global_order": 272,
+    "word": "arrears",
+    "en_meaning": "Money that is owed and should have been paid earlier",
+    "vi_meaning": "Tiền nợ đọng, các khoản thanh toán quá hạn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 72
+  },
+  {
+    "global_order": 273,
+    "word": "arrest",
+    "en_meaning": "To stop or check the progress of something; to seize by legal authority",
+    "vi_meaning": "Ngăn chặn, làm dừng lại; bắt giữ bằng pháp luật",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 73
+  },
+  {
+    "global_order": 274,
+    "word": "arrogance",
+    "en_meaning": "An offensive display of superiority or self-importance; overbearing pride",
+    "vi_meaning": "Sự kiêu ngạo, tính ngạo mạn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 74
+  },
+  {
+    "global_order": 275,
+    "word": "arroyo",
+    "en_meaning": "A steep-sided gully or dry creek bed that fills with water after rain",
+    "vi_meaning": "Con suối khô, rãnh nước cạn (thường ở vùng khô hạn)",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 75
+  },
+  {
+    "global_order": 276,
+    "word": "arsenal",
+    "en_meaning": "A collection of weapons or a place where weapons and military equipment are stored",
+    "vi_meaning": "Kho vũ khí, kho tàng quân dụng",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 76
+  },
+  {
+    "global_order": 277,
+    "word": "articulate",
+    "en_meaning": "Expressing oneself clearly and effectively; to pronounce words distinctly",
+    "vi_meaning": "Ăn nói lưu loát, rõ ràng; phát âm rõ rệt",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 77
+  },
+  {
+    "global_order": 278,
+    "word": "artifact",
+    "en_meaning": "An object made by a human being, typically one of cultural or historical interest",
+    "vi_meaning": "Hiện vật, cổ vật do con người tạo ra có giá trị lịch sử",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 78
+  },
+  {
+    "global_order": 279,
+    "word": "artifice",
+    "en_meaning": "The use of clever stratagems or trickery, especially to deceive others",
+    "vi_meaning": "Mưu mẹo, kỹ xảo hoặc sự đánh lừa khéo léo",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 79
+  },
+  {
+    "global_order": 280,
+    "word": "artisan",
+    "en_meaning": "A worker in a skilled trade, especially one that involves making things by hand",
+    "vi_meaning": "Nghệ nhân, thợ thủ công lành nghề",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 80
+  },
+  {
+    "global_order": 281,
+    "word": "artless",
+    "en_meaning": "Without guile or deception; natural, simple, and sincere",
+    "vi_meaning": "Chân thật, chất phác, không khéo léo nhưng tự nhiên",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 81
+  },
+  {
+    "global_order": 282,
+    "word": "ascendancy",
+    "en_meaning": "A position of dominant power or influence",
+    "vi_meaning": "Uy thế, vị thế thống trị hoặc ảnh hưởng vượt trội",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 82
+  },
+  {
+    "global_order": 283,
+    "word": "ascertain",
+    "en_meaning": "To find out definitely or learn with certainty",
+    "vi_meaning": "Xác minh, tìm hiểu chắc chắn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 83
+  },
+  {
+    "global_order": 284,
+    "word": "ascetic",
+    "en_meaning": "Practicing strict self-denial as a measure of personal and spiritual discipline",
+    "vi_meaning": "Khổ hạnh, tu khổ hạnh",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 84
+  },
+  {
+    "global_order": 285,
+    "word": "ascribe",
+    "en_meaning": "To attribute something to a particular cause, source, or author",
+    "vi_meaning": "Gán cho, đổ tại cho",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 85
+  },
+  {
+    "global_order": 286,
+    "word": "aseptic",
+    "en_meaning": "Free from contamination caused by harmful bacteria, viruses, or other microorganisms",
+    "vi_meaning": "Vô khuẩn, tiệt trùng",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 86
+  },
+  {
+    "global_order": 287,
+    "word": "ashen",
+    "en_meaning": "Of the pale gray color of ash; very pale from illness or fear",
+    "vi_meaning": "Xám xịt, tái mét",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 87
+  },
+  {
+    "global_order": 288,
+    "word": "aspire",
+    "en_meaning": "To direct one's hopes or ambitions toward achieving something",
+    "vi_meaning": "Khao khát, hướng tới một mục tiêu lớn lao",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 88
+  },
+  {
+    "global_order": 289,
+    "word": "assail",
+    "en_meaning": "To attack someone physically or emotionally in a violent way",
+    "vi_meaning": "Tấn công, chỉ trích dữ dội",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 89
+  },
+  {
+    "global_order": 290,
+    "word": "assay",
+    "en_meaning": "To examine or analyze a substance to determine its components",
+    "vi_meaning": "Sự thí nghiệm, phân tích chất lượng (đặc biệt là kim loại).洞",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 90
+  },
+  {
+    "global_order": 291,
+    "word": "assent",
+    "en_meaning": "The expression of approval or agreement",
+    "vi_meaning": "Sự đồng ý, tán thành",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 91
+  },
+  {
+    "global_order": 292,
+    "word": "assert",
+    "en_meaning": "To state a fact or belief confidently and forcefully",
+    "vi_meaning": "Khẳng định, xác nhận một cách quyết đoán",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 92
+  },
+  {
+    "global_order": 293,
+    "word": "assessment",
+    "en_meaning": "The evaluation or estimation of the nature, quality, or ability of someone or something",
+    "vi_meaning": "Sự đánh giá, sự ước định",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 93
+  },
+  {
+    "global_order": 294,
+    "word": "assiduous",
+    "en_meaning": "Showing great care, attention, and effort; diligent",
+    "vi_meaning": "Siêng năng, cần mẫn",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 94
+  },
+  {
+    "global_order": 295,
+    "word": "assimilate",
+    "en_meaning": "To take in and fully understand information or ideas; to absorb and integrate",
+    "vi_meaning": "Đồng hóa, hấp thụ kiến thức",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 95
+  },
+  {
+    "global_order": 296,
+    "word": "assuage",
+    "en_meaning": "To make an unpleasant feeling less intense; to satisfy an appetite or desire",
+    "vi_meaning": "Làm dịu bớt, làm nguôi đi",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 96
+  },
+  {
+    "global_order": 297,
+    "word": "assumption",
+    "en_meaning": "A thing that is accepted as true or as certain to happen, without proof",
+    "vi_meaning": "Giả định, sự thừa nhận",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 97
+  },
+  {
+    "global_order": 298,
+    "word": "assurance",
+    "en_meaning": "A statement intended to give confidence; a promise or guarantee",
+    "vi_meaning": "Sự cam đoan, sự đảm bảo hoặc sự tự tin",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 98
+  },
+  {
+    "global_order": 299,
+    "word": "asteroid",
+    "en_meaning": "A small rocky body orbiting the sun, especially between Mars and Jupiter",
+    "vi_meaning": "Tiểu hành tinh",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 99
+  },
+  {
+    "global_order": 300,
+    "word": "astigmatism",
+    "en_meaning": "A defect in the eye or lens preventing proper focus",
+    "vi_meaning": "Chứng loạn thị",
+    "lesson_name": "Lesson 3",
+    "lesson_order": 3,
+    "word_order": 100
+  }
+]

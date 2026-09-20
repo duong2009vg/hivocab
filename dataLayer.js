@@ -45,7 +45,10 @@ window.HiDB = (() => {
             if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function') {
                 init(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_ANON_KEY);
             } else {
-                throw new Error('[HiDB] Chưa khởi tạo. Gọi HiDB.init() trước.');
+                const err = new Error('[HiDB] Chưa khởi tạo. Gọi HiDB.init() trước.');
+                console.error('[HiDB] _getClient() called before init. window.supabase available:', typeof window !== 'undefined' ? !!window.supabase : 'N/A');
+                console.error('[HiDB] Call stack:', err.stack);
+                throw err;
             }
         }
         return _supabase;

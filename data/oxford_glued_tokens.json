@@ -1,0 +1,996 @@
+{
+  "cahát": [
+    [
+      "Sing",
+      "Hát, cahát"
+    ]
+  ],
+  "Tuyểntậpcakhúc": [
+    [
+      "Album",
+      "Tuyểntậpcakhúc"
+    ]
+  ],
+  "Đànvi": [
+    [
+      "Violin",
+      "Đànvi-ô-lông"
+    ]
+  ],
+  "đơnca": [
+    [
+      "Solo",
+      "Bài đơnca"
+    ]
+  ],
+  "Casĩ": [
+    [
+      "Leadsinger",
+      "Casĩ hát chính"
+    ]
+  ],
+  "Bàđỡ": [
+    [
+      "Midwife",
+      "Bàđỡ"
+    ]
+  ],
+  "Canxi": [
+    [
+      "Calcium",
+      "Canxi"
+    ]
+  ],
+  "Ytá": [
+    [
+      "Nurse",
+      "Ytá"
+    ],
+    [
+      "Nurse",
+      "Ytá"
+    ]
+  ],
+  "ytá": [
+    [
+      "Call button",
+      "Chu ông gọi(ytá)"
+    ]
+  ],
+  "Xeđẩytay": [
+    [
+      "Gurney",
+      "Xeđẩytay"
+    ]
+  ],
+  "Xelăn": [
+    [
+      "Wheelchair",
+      "Xelăn"
+    ]
+  ],
+  "Nhânviênytế": [
+    [
+      "Paramedic",
+      "Nhânviênytế"
+    ]
+  ],
+  "Sanhô": [
+    [
+      "Coral",
+      "Sanhô"
+    ]
+  ],
+  "Cávoi": [
+    [
+      "Whale",
+      "Cávoi"
+    ]
+  ],
+  "Cáheo": [
+    [
+      "Dolphin",
+      "Cáheo"
+    ]
+  ],
+  "Rạnsanhô": [
+    [
+      "Coral reef",
+      "Rạnsanhô"
+    ]
+  ],
+  "Cáđộ": [
+    [
+      "Bet",
+      "Cáđộ"
+    ]
+  ],
+  "phaphạmlỗi": [
+    [
+      "Foul",
+      "Lỗi, phaphạmlỗi"
+    ]
+  ],
+  "dựbị": [
+    [
+      "Reserveteam",
+      "Đội dựbị"
+    ]
+  ],
+  "antoàn": [
+    [
+      "Secure",
+      "(cảm giác) yên tâm, antoàn"
+    ]
+  ],
+  "Hoasen": [
+    [
+      "Lotus",
+      "Hoasen"
+    ]
+  ],
+  "Hoaloakèn": [
+    [
+      "Lily",
+      "Hoaloakèn"
+    ]
+  ],
+  "lolắng": [
+    [
+      "Nervous",
+      "Bồn chồn, lolắng"
+    ]
+  ],
+  "Ởgiữa": [
+    [
+      "Between",
+      "Ởgiữa"
+    ]
+  ],
+  "ởphíatrước": [
+    [
+      "Infrontof",
+      "(vị trí) ởphíatrước, ởđằngtrước"
+    ]
+  ],
+  "ởđằngtrước": [
+    [
+      "Infrontof",
+      "(vị trí) ởphíatrước, ởđằngtrước"
+    ]
+  ],
+  "Ởphíasau": [
+    [
+      "Behind",
+      "Ởphíasau"
+    ]
+  ],
+  "Ongbắpcày": [
+    [
+      "Wasp",
+      "Ongbắpcày"
+    ]
+  ],
+  "bỏđi": [
+    [
+      "Throwout",
+      "Vứt, bỏđi"
+    ]
+  ],
+  "Laudọnbếp": [
+    [
+      "Cleanthekitchen",
+      "Laudọnbếp"
+    ]
+  ],
+  "lausạch": [
+    [
+      "Wipe",
+      "Chùi, lausạch"
+    ]
+  ],
+  "Sạpbáo": [
+    [
+      "Newspaperkiosk",
+      "Sạpbáo"
+    ]
+  ],
+  "Cửahàngbánrauquả": [
+    [
+      "Greengrocer",
+      "Cửahàngbánrauquả"
+    ],
+    [
+      "Greengrocer",
+      "Cửahàngbánrauquả"
+    ]
+  ],
+  "emrể": [
+    [
+      "Brother-in-law",
+      "Anh/ emrể, anh/ emchồng, anh/ emvợ"
+    ],
+    [
+      "Brother-in-law",
+      "Anh/ emrể, anh/ emchồng, anh/ emvợ"
+    ]
+  ],
+  "emchồng": [
+    [
+      "Brother-in-law",
+      "Anh/ emrể, anh/ emchồng, anh/ emvợ"
+    ],
+    [
+      "Sister-in-law",
+      "Chị/ emdâu, chị/ emchồng, chị/ emvợ"
+    ],
+    [
+      "Brother-in-law",
+      "Anh/ emrể, anh/ emchồng, anh/ emvợ"
+    ],
+    [
+      "Sister-in-law",
+      "Chị/ emdâu, chị/ emchồng, chị/ emvợ"
+    ]
+  ],
+  "emvợ": [
+    [
+      "Brother-in-law",
+      "Anh/ emrể, anh/ emchồng, anh/ emvợ"
+    ],
+    [
+      "Sister-in-law",
+      "Chị/ emdâu, chị/ emchồng, chị/ emvợ"
+    ],
+    [
+      "Brother-in-law",
+      "Anh/ emrể, anh/ emchồng, anh/ emvợ"
+    ],
+    [
+      "Sister-in-law",
+      "Chị/ emdâu, chị/ emchồng, chị/ emvợ"
+    ]
+  ],
+  "emdâu": [
+    [
+      "Sister-in-law",
+      "Chị/ emdâu, chị/ emchồng, chị/ emvợ"
+    ],
+    [
+      "Sister-in-law",
+      "Chị/ emdâu, chị/ emchồng, chị/ emvợ"
+    ]
+  ],
+  "Áoximôckinh": [
+    [
+      "Tuxedo",
+      "Áoximôckinh"
+    ]
+  ],
+  "Rượusâmpanh": [
+    [
+      "Champagne",
+      "Rượusâmpanh"
+    ],
+    [
+      "Champagne",
+      "Rượusâmpanh"
+    ]
+  ],
+  "Thịtbarọi": [
+    [
+      "Bacon",
+      "Thịtbarọi xông khói"
+    ]
+  ],
+  "ôliu": [
+    [
+      "Olive",
+      "Quả ôliu"
+    ]
+  ],
+  "Vani": [
+    [
+      "Vanilla",
+      "Vani"
+    ]
+  ],
+  "Hồsơ": [
+    [
+      "Dossier",
+      "Hồsơ"
+    ]
+  ],
+  "Bútbi": [
+    [
+      "Ballpointpen",
+      "Bútbi"
+    ],
+    [
+      "Ballpointpen",
+      "Bútbi"
+    ]
+  ],
+  "Balô": [
+    [
+      "Backpack",
+      "Balô"
+    ]
+  ],
+  "Khănlaubảng": [
+    [
+      "Duster",
+      "Khănlaubảng"
+    ]
+  ],
+  "Cốcbêse": [
+    [
+      "Beaker",
+      "Cốcbêse"
+    ]
+  ],
+  "xahoa": [
+    [
+      "Luxurious",
+      "Sang trọng, xahoa"
+    ]
+  ],
+  "Rượurum": [
+    [
+      "Rum",
+      "Rượurum"
+    ]
+  ],
+  "Nguyênkem": [
+    [
+      "Full-cream",
+      "Nguyênkem"
+    ]
+  ],
+  "Chồnvizon": [
+    [
+      "Mink",
+      "Chồnvizon"
+    ]
+  ],
+  "Sưtử": [
+    [
+      "Lion",
+      "Sưtử"
+    ]
+  ],
+  "Dulịch": [
+    [
+      "Travel",
+      "Dulịch"
+    ]
+  ],
+  "lýdulịch": [
+    [
+      "Travel agent",
+      "Đại lýdulịch"
+    ]
+  ],
+  "Việcsaytàuxe": [
+    [
+      "Travel sickness",
+      "Việcsaytàuxe"
+    ]
+  ],
+  "Dukhách": [
+    [
+      "Tourist",
+      "Dukhách"
+    ]
+  ],
+  "emhọ": [
+    [
+      "Cousin",
+      "Anh họ, emhọ"
+    ]
+  ],
+  "emgái": [
+    [
+      "Half-sister",
+      "Chị gái, emgái(cùng cha/ mẹ khác mẹ/ cha)"
+    ],
+    [
+      "Sister",
+      "Chị gái, emgái"
+    ]
+  ],
+  "emtrai": [
+    [
+      "Half-brother",
+      "Anh trai, emtrai(cùng cha/ mẹ khác mẹ/ cha)"
+    ],
+    [
+      "Brother",
+      "Anh trai, emtrai"
+    ]
+  ],
+  "mẹvợ": [
+    [
+      "Mother-in-law",
+      "Mẹ chồng, mẹvợ"
+    ]
+  ],
+  "bốvợ": [
+    [
+      "Father-in-law",
+      "Bố chồng, bốvợ"
+    ]
+  ],
+  "Mẹkế": [
+    [
+      "Stepmother",
+      "Mẹkế"
+    ]
+  ],
+  "Xetrượttuyết": [
+    [
+      "Sled",
+      "Xetrượttuyết"
+    ]
+  ],
+  "Việcthuêxeôtô": [
+    [
+      "Carhire",
+      "Việcthuêxeôtô"
+    ]
+  ],
+  "Vạtđấtcạnhxalộđểdừngxe": [
+    [
+      "Hardshoulder",
+      "Vạtđấtcạnhxalộđểdừngxe"
+    ]
+  ],
+  "Nhânviênkiểmsoátđỗxe": [
+    [
+      "Traff cwarden",
+      "Nhânviênkiểmsoátđỗxe"
+    ]
+  ],
+  "Đồnghồđỗxe": [
+    [
+      "Parking-meter",
+      "Đồnghồđỗxe"
+    ]
+  ],
+  "đỗxenhiềutầng": [
+    [
+      "Multi-storeycarpark",
+      "Bãi đỗxenhiềutầng"
+    ]
+  ],
+  "Xalộhai": [
+    [
+      "Dual carriageway",
+      "Xalộhai chiều"
+    ]
+  ],
+  "Ápsuấtlốpxe": [
+    [
+      "Tyrepressure",
+      "Ápsuấtlốpxe"
+    ]
+  ],
+  "diesel": [
+    [
+      "Diesel",
+      "Dầu diesel"
+    ]
+  ],
+  "Ngãba": [
+    [
+      "Fork",
+      "Ngãba"
+    ],
+    [
+      "T-junction",
+      "Ngãba"
+    ]
+  ],
+  "Xalộ": [
+    [
+      "Motorway",
+      "Xalộ"
+    ]
+  ],
+  "đỗxe": [
+    [
+      "Carpark",
+      "Bãi đỗxe"
+    ]
+  ],
+  "Chỗđỗxe": [
+    [
+      "Parkingspace",
+      "Chỗđỗxe"
+    ]
+  ],
+  "Véđỗxe": [
+    [
+      "Parkingticket",
+      "Véđỗxe"
+    ]
+  ],
+  "palăng": [
+    [
+      "Jack",
+      "Đòn bẩy, palăng"
+    ]
+  ],
+  "lanra": [
+    [
+      "Sweep",
+      "Quét qua; lanra"
+    ]
+  ],
+  "Lahét": [
+    [
+      "Shout",
+      "Lahét, reohò"
+    ]
+  ],
+  "reohò": [
+    [
+      "Shout",
+      "Lahét, reohò"
+    ]
+  ],
+  "ănởngoài": [
+    [
+      "Eatout",
+      "Đi ănởngoài"
+    ]
+  ],
+  "hoasen": [
+    [
+      "Haveashower",
+      "Tắm vòi hoasen"
+    ]
+  ],
+  "rangoài": [
+    [
+      "Playoutside",
+      "Đi rangoài chơi"
+    ]
+  ],
+  "tivi": [
+    [
+      "Watchtelevision",
+      "Xem tivi"
+    ]
+  ],
+  "Màukem": [
+    [
+      "Cream",
+      "Màukem"
+    ]
+  ],
+  "Màuxanhdatrời": [
+    [
+      "Blue",
+      "Màuxanhdatrời"
+    ]
+  ],
+  "Màungọclam": [
+    [
+      "Turquoise",
+      "Màungọclam"
+    ]
+  ],
+  "Máyvi": [
+    [
+      "Computer",
+      "Máyvi tính"
+    ]
+  ],
+  "Ổđĩa": [
+    [
+      "Diskdrive",
+      "Ổđĩa"
+    ]
+  ],
+  "Ổcứng": [
+    [
+      "Harddisk",
+      "Ổcứng"
+    ]
+  ],
+  "ĐĩaCDdữliệu": [
+    [
+      "CD-ROM",
+      "ĐĩaCDdữliệu"
+    ]
+  ],
+  "Tầngozon": [
+    [
+      "Ozonelayer",
+      "Tầngozon"
+    ]
+  ],
+  "Xeđẩy": [
+    [
+      "Trolley",
+      "Xeđẩy"
+    ]
+  ],
+  "Sathải": [
+    [
+      "Dismiss",
+      "Sathải"
+    ]
+  ],
+  "Ởnướcngoài": [
+    [
+      "Abroad",
+      "Ởnướcngoài"
+    ]
+  ],
+  "Khohàng": [
+    [
+      "Warehouse",
+      "Khohàng"
+    ]
+  ],
+  "Khobạc": [
+    [
+      "Treasury",
+      "Khobạc"
+    ]
+  ],
+  "Chovay": [
+    [
+      "Lend",
+      "Chovay"
+    ]
+  ],
+  "Tínhkoantoàn": [
+    [
+      "Insecurity",
+      "Tínhkoantoàn"
+    ]
+  ],
+  "Camkết": [
+    [
+      "Commit",
+      "Camkết"
+    ]
+  ],
+  "Hướngdẫnviêndulịch": [
+    [
+      "Tourguide",
+      "Hướngdẫnviêndulịch"
+    ]
+  ],
+  "Kỹsư": [
+    [
+      "Engineer",
+      "Kỹsư"
+    ]
+  ],
+  "làmviệctựdo": [
+    [
+      "Freelancer",
+      "Người làmviệctựdo"
+    ]
+  ],
+  "Máyphacàphê": [
+    [
+      "Coffeemaker",
+      "Máyphacàphê"
+    ]
+  ],
+  "Lòvi": [
+    [
+      "Microwave",
+      "Lòvi sóng"
+    ]
+  ],
+  "Ấmphatrà": [
+    [
+      "Teapot",
+      "Ấmphatrà"
+    ]
+  ],
+  "Máyxaysinhtố": [
+    [
+      "Blender",
+      "Máyxaysinhtố"
+    ]
+  ],
+  "Khănlauchén": [
+    [
+      "Dishtowel",
+      "Khănlauchén"
+    ]
+  ],
+  "Rautrộn": [
+    [
+      "Salad",
+      "Rautrộn"
+    ]
+  ],
+  "Máyxtê": [
+    [
+      "Stereo",
+      "Máyxtê-rê-ô"
+    ]
+  ],
+  "Điềukhiểntừxa": [
+    [
+      "Remotecontrol",
+      "Điềukhiểntừxa"
+    ]
+  ],
+  "cóloa": [
+    [
+      "Stereosystem",
+      "Dàn máy hát(cóloa)"
+    ]
+  ],
+  "Tiềnboa": [
+    [
+      "Tip",
+      "Tiềnboa"
+    ]
+  ],
+  "Khunglòxonângnệm": [
+    [
+      "Boxspring",
+      "Khunglòxonângnệm"
+    ]
+  ],
+  "Áosơmi": [
+    [
+      "Blouse",
+      "Áosơmi nữ"
+    ],
+    [
+      "Shirt",
+      "Áosơmi"
+    ]
+  ],
+  "Áogi": [
+    [
+      "Vest",
+      "Áogi-lê"
+    ]
+  ],
+  "Áolen": [
+    [
+      "Sweater",
+      "Áolen"
+    ]
+  ],
+  "Bộcomlê": [
+    [
+      "Suit",
+      "Bộcomlê"
+    ]
+  ],
+  "Quanhco": [
+    [
+      "Winding",
+      "Quanhco, uốn khúc"
+    ]
+  ],
+  "Khothóc": [
+    [
+      "Barn",
+      "Khothóc"
+    ]
+  ],
+  "Canada": [
+    [
+      "Canada",
+      "Canada"
+    ]
+  ],
+  "Mêxicô": [
+    [
+      "Mexico",
+      "Mêxicô"
+    ]
+  ],
+  "HyLạp": [
+    [
+      "Greece",
+      "HyLạp"
+    ]
+  ],
+  "Braxin": [
+    [
+      "Brazil",
+      "Braxin"
+    ]
+  ],
+  "Rauchânvịt": [
+    [
+      "Spinach",
+      "Rauchânvịt"
+    ]
+  ],
+  "RauMuống": [
+    [
+      "Water Spinach",
+      "RauMuống"
+    ]
+  ],
+  "Raumùi": [
+    [
+      "Cilantro",
+      "Raumùi"
+    ]
+  ],
+  "RaucàngCua": [
+    [
+      "Pepper-elder",
+      "RaucàngCua"
+    ]
+  ],
+  "Raucải": [
+    [
+      "Cress",
+      "Raucải xoong"
+    ]
+  ],
+  "Câyatiso": [
+    [
+      "Artichoke",
+      "Câyatiso"
+    ]
+  ],
+  "Saymáybay": [
+    [
+      "Airsick",
+      "Saymáybay"
+    ]
+  ],
+  "Mặtnạthởoxy": [
+    [
+      "Oxygenmask",
+      "Mặtnạthởoxy"
+    ]
+  ],
+  "Sốtsiêuvi": [
+    [
+      "Fevervirus",
+      "Sốtsiêuvi"
+    ]
+  ],
+  "Viêmgan": [
+    [
+      "Hepatitis",
+      "Viêmgan"
+    ]
+  ],
+  "Ubướu": [
+    [
+      "Lump",
+      "Ubướu"
+    ]
+  ],
+  "Đuaxeđạp": [
+    [
+      "Cycling",
+      "Đuaxeđạp, đạpxe"
+    ]
+  ],
+  "đạpxe": [
+    [
+      "Cycling",
+      "Đuaxeđạp, đạpxe"
+    ]
+  ],
+  "Cửtạ": [
+    [
+      "Weightlifting",
+      "Cửtạ"
+    ]
+  ],
+  "ThểthaoĐôngNamÁ": [
+    [
+      "SEAGames",
+      "Đại hội ThểthaoĐôngNamÁ"
+    ]
+  ],
+  "Đăngcai": [
+    [
+      "Host",
+      "Đăngcai, tổ chức"
+    ]
+  ],
+  "võwushu": [
+    [
+      "Wushu",
+      "(môn) võwushu"
+    ]
+  ],
+  "Ấmáp": [
+    [
+      "Warm",
+      "Ấmáp, ấm"
+    ]
+  ],
+  "Tiachớp": [
+    [
+      "Lightning",
+      "Tiachớp"
+    ]
+  ],
+  "Tửtế": [
+    [
+      "Kind",
+      "Tửtế, tốt bụng"
+    ]
+  ],
+  "nhátgan": [
+    [
+      "Coward",
+      "Người nhátgan"
+    ]
+  ],
+  "hợmhĩnh": [
+    [
+      "Snob",
+      "Người hợmhĩnh"
+    ]
+  ],
+  "Keokiệt": [
+    [
+      "Stingy",
+      "Keokiệt"
+    ]
+  ],
+  "Ngungốc": [
+    [
+      "Crazy",
+      "Ngungốc"
+    ]
+  ],
+  "Emyêu": [
+    [
+      "Darling",
+      "Emyêu, anh yêu"
+    ]
+  ],
+  "Quảcam": [
+    [
+      "Orange",
+      "Quảcam"
+    ]
+  ],
+  "kiwi": [
+    [
+      "Kiwi",
+      "Quả kiwi"
+    ]
+  ],
+  "Quảme": [
+    [
+      "Tamarind",
+      "Quảme"
+    ]
+  ],
+  "Quảnho": [
+    [
+      "Grape",
+      "Quảnho"
+    ]
+  ],
+  "Nhokhô": [
+    [
+      "Raisin",
+      "Nhokhô"
+    ]
+  ],
+  "Quảna": [
+    [
+      "Custardapple",
+      "Quảna"
+    ]
+  ]
+}

@@ -1,0 +1,452 @@
+[
+  {
+    "global_order": 301,
+    "word": "astral",
+    "en_meaning": "Relating to, similar to, or coming from the stars",
+    "vi_meaning": "Thuộc về các vì sao, thuộc tinh tú",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 1
+  },
+  {
+    "global_order": 302,
+    "word": "astringent",
+    "en_meaning": "Causing the contraction of skin cells; sharp or severe in manner",
+    "vi_meaning": "Làm se (da); nghiêm khắc, sắc sảo",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 2
+  },
+  {
+    "global_order": 303,
+    "word": "askance",
+    "en_meaning": "with an attitude or look of suspicion or disapproval",
+    "vi_meaning": "nghi ngờ, dè bỉu",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 3
+  },
+  {
+    "global_order": 304,
+    "word": "askew",
+    "en_meaning": "not in a straight or level position; crooked",
+    "vi_meaning": "nghiêng, xiên, lệch",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 4
+  },
+  {
+    "global_order": 305,
+    "word": "asperity",
+    "en_meaning": "harshness of tone or manner",
+    "vi_meaning": "sự gay gắt, khắc nghiệt",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 5
+  },
+  {
+    "global_order": 306,
+    "word": "aspirant",
+    "en_meaning": "a person who has ambitions to achieve something",
+    "vi_meaning": "người có khát vọng, người cầu tiến",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 6
+  },
+  {
+    "global_order": 307,
+    "word": "astronomical",
+    "en_meaning": "Extremely large in size or amount; relating to astronomy",
+    "vi_meaning": "Vô cùng lớn, khổng lồ; thuộc về thiên văn học",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 7
+  },
+  {
+    "global_order": 308,
+    "word": "astute",
+    "en_meaning": "Having the ability to accurately assess situations or people to one's advantage",
+    "vi_meaning": "Sắc sảo, tinh khôn, nhạy bén",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 8
+  },
+  {
+    "global_order": 309,
+    "word": "asunder",
+    "en_meaning": "Apart or divided into separate pieces",
+    "vi_meaning": "Rời ra từng mảnh, thành từng phần riêng biệt",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 9
+  },
+  {
+    "global_order": 310,
+    "word": "asylum",
+    "en_meaning": "Protection or shelter from danger, especially for political refugees",
+    "vi_meaning": "Sự tị nạn, nơi trú ẩn an toàn",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 10
+  },
+  {
+    "global_order": 311,
+    "word": "asymmetric",
+    "en_meaning": "Having parts that fail to correspond to one another in shape or size",
+    "vi_meaning": "Không đối xứng, bất đối xứng",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 11
+  },
+  {
+    "global_order": 312,
+    "word": "atavism",
+    "en_meaning": "The reappearance of a characteristic in an organism after several generations of absence",
+    "vi_meaning": "Sự lại giống; sự xuất hiện trở lại của các đặc điểm tổ tiên xa xưa",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 12
+  },
+  {
+    "global_order": 313,
+    "word": "atheistic",
+    "en_meaning": "Disbelieving or lacking belief in the existence of God or gods",
+    "vi_meaning": "Vô thần; không tin vào sự tồn tại của thần linh",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 13
+  },
+  {
+    "global_order": 314,
+    "word": "atlas",
+    "en_meaning": "A book or bound collection of maps",
+    "vi_meaning": "Tập bản đồ",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 14
+  },
+  {
+    "global_order": 315,
+    "word": "atone",
+    "en_meaning": "To make amends or reparation for an offense or a crime",
+    "vi_meaning": "Chuộc lỗi",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 15
+  },
+  {
+    "global_order": 316,
+    "word": "atrocity",
+    "en_meaning": "An extremely wicked or cruel act, typically involving physical violence",
+    "vi_meaning": "Sự tàn bạo",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 16
+  },
+  {
+    "global_order": 317,
+    "word": "atrophy",
+    "en_meaning": "To waste away or decline in effectiveness due to underuse or neglect",
+    "vi_meaning": "Sự hao mòn hoặc teo đi",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 17
+  },
+  {
+    "global_order": 318,
+    "word": "attain",
+    "en_meaning": "To succeed in achieving something that one has worked for",
+    "vi_meaning": "Đạt được",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 18
+  },
+  {
+    "global_order": 319,
+    "word": "attentive",
+    "en_meaning": "Paying close attention to something; listening or watching carefully",
+    "vi_meaning": "Chăm chú, lưu tâm, ân cần",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 19
+  },
+  {
+    "global_order": 320,
+    "word": "attenuate",
+    "en_meaning": "To reduce the force, effect, or value of something; to weaken",
+    "vi_meaning": "Làm yếu đi, làm giảm bớt giá trị hoặc cường độ",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 20
+  },
+  {
+    "global_order": 321,
+    "word": "attest",
+    "en_meaning": "To provide or serve as clear evidence of something",
+    "vi_meaning": "Chứng nhận, chứng thực, bằng chứng cho điều gì",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 21
+  },
+  {
+    "global_order": 322,
+    "word": "attribute",
+    "en_meaning": "To regard something as being caused by someone or something",
+    "vi_meaning": "Quy cho, gán cho là do cái gì hoặc ai",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 22
+  },
+  {
+    "global_order": 323,
+    "word": "attrition",
+    "en_meaning": "The process of gradually reducing the strength or effectiveness of someone or something through sustained attack or pressure",
+    "vi_meaning": "Sự hao mòn, sự giảm dần quân số hoặc sức mạnh",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 23
+  },
+  {
+    "global_order": 324,
+    "word": "atypical",
+    "en_meaning": "Not representative of a type, group, or class; unusual or irregular",
+    "vi_meaning": "Không điển hình, khác thường, dị biệt",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 24
+  },
+  {
+    "global_order": 325,
+    "word": "audacious",
+    "en_meaning": "Showing a willingness to take surprisingly bold risks; daring",
+    "vi_meaning": "Táo bạo, liều lĩnh, gan dạ",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 25
+  },
+  {
+    "global_order": 326,
+    "word": "audit",
+    "en_meaning": "An official inspection of an individual's or organization's accounts",
+    "vi_meaning": "Kiểm toán, sự kiểm tra sổ sách kế toán",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 26
+  },
+  {
+    "global_order": 327,
+    "word": "auditory",
+    "en_meaning": "Relating to the sense of hearing",
+    "vi_meaning": "Thuộc thính giác, liên quan đến khả năng nghe",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 27
+  },
+  {
+    "global_order": 328,
+    "word": "augment",
+    "en_meaning": "To make something greater by adding to it; increase",
+    "vi_meaning": "Làm tăng lên, tăng cường, bổ sung",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 28
+  },
+  {
+    "global_order": 329,
+    "word": "augury",
+    "en_meaning": "A sign of what will happen in the future; an omen",
+    "vi_meaning": "Điềm báo, sự tiên đoán",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 29
+  },
+  {
+    "global_order": 330,
+    "word": "august",
+    "en_meaning": "Respected and impressive; inspiring reverence or admiration",
+    "vi_meaning": "Uy nghi, oai vệ, đáng kính trọng",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 30
+  },
+  {
+    "global_order": 331,
+    "word": "aureole",
+    "en_meaning": "A circle of light or brightness surrounding something, especially a deity",
+    "vi_meaning": "Hào quang, quầng sáng rực rỡ",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 31
+  },
+  {
+    "global_order": 332,
+    "word": "auroral",
+    "en_meaning": "Relating to or resembling the dawn or the aurora borealis",
+    "vi_meaning": "Thuộc về bình minh hoặc hiện tượng cực quang",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 32
+  },
+  {
+    "global_order": 333,
+    "word": "auspicious",
+    "en_meaning": "Conducive to success; favorable or promising",
+    "vi_meaning": "Có điềm tốt, thuận lợi, hứa hẹn sự thành công",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 33
+  },
+  {
+    "global_order": 334,
+    "word": "austere",
+    "en_meaning": "Severe or strict in manner, attitude, or appearance; simple and unadorned",
+    "vi_meaning": "Khắc khổ, mộc mạc, hoặc nghiêm khắc trong lối sống và vẻ bề ngoài",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 34
+  },
+  {
+    "global_order": 335,
+    "word": "authenticate",
+    "en_meaning": "To prove or show that something is true, genuine, or valid",
+    "vi_meaning": "Xác thực, chứng minh điều gì đó là thật hoặc có giá trị pháp lý",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 35
+  },
+  {
+    "global_order": 336,
+    "word": "authoritarian",
+    "en_meaning": "Favoring or enforcing strict obedience to authority, especially that of the government",
+    "vi_meaning": "Độc đoán, cưỡng chế tuân thủ tuyệt đối vào quyền lực hoặc chính quyền",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 36
+  },
+  {
+    "global_order": 337,
+    "word": "authoritative",
+    "en_meaning": "Commanding, reliable, and showing expertise or power",
+    "vi_meaning": "Có thẩm quyền, quyết đoán và đáng tin cậy",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 37
+  },
+  {
+    "global_order": 338,
+    "word": "autocratic",
+    "en_meaning": "Ruling with absolute power and or authority; dictatorial",
+    "vi_meaning": "Độc đoán, chuyên chế, có quyền lực tuyệt đối",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 38
+  },
+  {
+    "global_order": 339,
+    "word": "automaton",
+    "en_meaning": "A moving mechanical device made in imitation of a human being",
+    "vi_meaning": "Người máy, thiết bị tự động hoặc người làm việc máy móc",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 39
+  },
+  {
+    "global_order": 340,
+    "word": "autonomous",
+    "en_meaning": "Acting independently or having the freedom to do so",
+    "vi_meaning": "Tự chủ, độc lập, có quyền tự trị",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 40
+  },
+  {
+    "global_order": 341,
+    "word": "autopsy",
+    "en_meaning": "A postmortem examination to discover the cause of death",
+    "vi_meaning": "Khám nghiệm tử thi để xác định nguyên nhân cái chết",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 41
+  },
+  {
+    "global_order": 342,
+    "word": "auxiliary",
+    "en_meaning": "providing supplementary or additional help and support",
+    "vi_meaning": "phụ trợ, bổ trợ",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 42
+  },
+  {
+    "global_order": 343,
+    "word": "avalanche",
+    "en_meaning": "a large mass of snow, ice, or rocks falling rapidly down a mountainside",
+    "vi_meaning": "tuyết lở",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 43
+  },
+  {
+    "global_order": 344,
+    "word": "avarice",
+    "en_meaning": "extreme greed for wealth or material gain",
+    "vi_meaning": "sự tham lam, tính hám lợi",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 44
+  },
+  {
+    "global_order": 345,
+    "word": "avenge",
+    "en_meaning": "to inflict harm in return for an injury or wrong done to oneself or others",
+    "vi_meaning": "trả thù, báo thù",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 45
+  },
+  {
+    "global_order": 346,
+    "word": "averse",
+    "en_meaning": "having a strong dislike of or opposition to something",
+    "vi_meaning": "ngần ngại, ác cảm, không thích",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 46
+  },
+  {
+    "global_order": 347,
+    "word": "aversion",
+    "en_meaning": "A strong feeling of dislike or opposition toward something",
+    "vi_meaning": "Sự ghét, sự ác cảm hoặc không thích điều gì đó",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 47
+  },
+  {
+    "global_order": 348,
+    "word": "avert",
+    "en_meaning": "To turn away one's eyes or thoughts, or to prevent something bad",
+    "vi_meaning": "Ngoảnh đi, quay đi hoặc ngăn chặn một điều xấu xảy ra",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 48
+  },
+  {
+    "global_order": 349,
+    "word": "aviary",
+    "en_meaning": "A large cage or enclosure for keeping birds",
+    "vi_meaning": "Chuồng chim lớn hoặc nhà nuôi chim",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 49
+  },
+  {
+    "global_order": 350,
+    "word": "avid",
+    "en_meaning": "Having or showing a keen interest in or enthusiasm for something",
+    "vi_meaning": "Khao khát, nồng nhiệt hoặc say mê cái gì đó",
+    "lesson_name": "Lesson 4",
+    "lesson_order": 4,
+    "word_order": 50
+  }
+]

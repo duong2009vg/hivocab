@@ -1,0 +1,628 @@
+import json
+import os
+
+enriched_data = [
+  {
+    "global_order": 101,
+    "word": "adulation",
+    "phonetic": "/ˌædʒəˈleɪʃən/",
+    "pos": "n.",
+    "en_meaning": "Excessive admiration or praise, often bordering on flattery",
+    "vi_meaning": "Sự tán dương quá mức, sự nịnh bợ",
+    "example_sentence": "Unaccustomed to such uncritical public adulation, the reserved scientist insisted that the medical breakthrough belonged to the entire research consortium rather than to him alone.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 1
+  },
+  {
+    "global_order": 102,
+    "word": "adulterate",
+    "phonetic": "/əˈdʌltəreɪt/",
+    "pos": "v.",
+    "en_meaning": "To make something poorer in quality by adding another substance",
+    "vi_meaning": "Làm giả, làm cho kém chất lượng bằng cách pha tạp",
+    "example_sentence": "Unscrupulous merchants during the famine attempted to adulterate bags of flour with fine chalk dust to artificially inflate their dwindling inventory.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 2
+  },
+  {
+    "global_order": 103,
+    "word": "aggressor",
+    "phonetic": "/əˈɡrɛsər/",
+    "pos": "n.",
+    "en_meaning": "A person or country that attacks first without being provoked",
+    "vi_meaning": "Kẻ xâm lược, bên phát động tấn công trước",
+    "example_sentence": "By launching a sudden preemptive naval strike without formal provocation, the bellicose empire indisputably established itself as the aggressor in the escalating war.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 3
+  },
+  {
+    "global_order": 104,
+    "word": "aghast",
+    "phonetic": "/əˈɡæst/",
+    "pos": "adj.",
+    "en_meaning": "Filled with horror, shock, or amazement",
+    "vi_meaning": "Kinh ngạc, sửng sốt, kinh hãi",
+    "example_sentence": "The assembly of ambassadors stood aghast as the foreign minister abruptly declared his government's intention to repudiate the fifty-year-old nonaggression treaty.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 4
+  },
+  {
+    "global_order": 105,
+    "word": "agility",
+    "phonetic": "/əˈdʒɪləti/",
+    "pos": "n.",
+    "en_meaning": "The ability to move quickly and easily or to think rapidly",
+    "vi_meaning": "Sự nhanh nhẹn, tính linh hoạt về thể chất hoặc tư duy",
+    "example_sentence": "Navigating sudden macroeconomic turbulence demanded not merely deep capital reserves, but also exceptional strategic agility from the corporation's executive leadership.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 5
+  },
+  {
+    "global_order": 106,
+    "word": "abridge",
+    "phonetic": "/əˈbrɪdʒ/",
+    "pos": "v.",
+    "en_meaning": "To shorten a book, movie, or speech without losing the sense",
+    "vi_meaning": "Rút gọn, lược bớt nội dung, hạn chế quyền lợi",
+    "example_sentence": "Civil libertarians argued before the Supreme Court that the proposed emergency statute would dangerously abridge fundamental First Amendment rights of peaceful assembly.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 6
+  },
+  {
+    "global_order": 107,
+    "word": "abrogate",
+    "phonetic": "/ˈæbrəɡeɪt/",
+    "pos": "v.",
+    "en_meaning": "To repeal or do away with a law, right, or formal agreement",
+    "vi_meaning": "Bãi bỏ hoặc hủy bỏ hiệu lực của một đạo luật hay hiệp ước",
+    "example_sentence": "Following the coup d'état, the newly established regime acted swiftly to abrogate the maritime boundaries agreed upon in the previous decade's diplomatic pact.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 7
+  },
+  {
+    "global_order": 108,
+    "word": "abscond",
+    "phonetic": "/æbˈskɑnd/",
+    "pos": "v.",
+    "en_meaning": "To leave hurriedly and secretly, typically to avoid detection or arrest",
+    "vi_meaning": "Bỏ trốn, lẩn trốn để tránh bị phát giác hay bắt giữ",
+    "example_sentence": "Realizing that federal forensic auditors had traced the fictitious offshore accounts, the rogue financier attempted to abscond aboard a private vessel before dawn.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 8
+  },
+  {
+    "global_order": 109,
+    "word": "absolute",
+    "phonetic": "/ˈæbsəlut/",
+    "pos": "adj.",
+    "en_meaning": "Not qualified or diminished in any way; total and complete",
+    "vi_meaning": "Tuyệt đối, hoàn toàn, không bị giới hạn",
+    "example_sentence": "Seventeenth-century apologists for divine right claimed that the monarch's authority was absolute, brooking no interference from parliamentary assemblies or judiciary rulings.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 9
+  },
+  {
+    "global_order": 110,
+    "word": "absolve",
+    "phonetic": "/əbˈzɑlv/",
+    "pos": "v.",
+    "en_meaning": "To declare someone free from guilt, obligation, or punishment",
+    "vi_meaning": "Xá tội, tuyên bố vô tội, miễn trừ trách nhiệm",
+    "example_sentence": "The discovery of unredacted diplomatic cables did not absolve the colonial administrator of complicity in the severe repressions that followed the provincial uprising.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 10
+  },
+  {
+    "global_order": 111,
+    "word": "advent",
+    "phonetic": "/ˈædvɛnt/",
+    "pos": "n.",
+    "en_meaning": "The arrival or beginning of a notable person, thing, or event",
+    "vi_meaning": "Sự xuất hiện, sự ra đời của một thời kỳ hoặc phát minh quan trọng",
+    "example_sentence": "The advent of mechanised printing in fifteenth-century Europe profoundly democratized religious debate and undermined the monopolistic authority of scholastic scribes.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 11
+  },
+  {
+    "global_order": 112,
+    "word": "adventitious",
+    "phonetic": "/ˌædvɛnˈtɪʃəs/",
+    "pos": "adj.",
+    "en_meaning": "Happening or carried on according to chance rather than design",
+    "vi_meaning": "Tình cờ, ngẫu nhiên, từ bên ngoài đưa vào",
+    "example_sentence": "Evolutionary biologists determined that the sudden surge in the island's beetle population was not an innate adaptation, but an adventitious consequence of ballast soil dumped by cargo ships.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 12
+  },
+  {
+    "global_order": 113,
+    "word": "adversary",
+    "phonetic": "/ˈædvərˌsɛri/",
+    "pos": "n.",
+    "en_meaning": "One's opponent in a contest, conflict, or dispute",
+    "vi_meaning": "Đối thủ, kẻ địch",
+    "example_sentence": "Though profoundly respectful of one another in private correspondence, the two constitutional attorneys proved ferocious adversaries whenever arguing landmark appeals before the bench.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 13
+  },
+  {
+    "global_order": 114,
+    "word": "adverse",
+    "phonetic": "/ædˈvərs/",
+    "pos": "adj.",
+    "en_meaning": "Preventing success or development; harmful; unfavorable",
+    "vi_meaning": "Bất lợi, có hại, ngược chiều",
+    "example_sentence": "Despite persistently adverse climatic conditions characterized by prolonged droughts and saline soil, the agricultural cooperative harvested a resilient yield of hybrid millet.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 14
+  },
+  {
+    "global_order": 115,
+    "word": "adversity",
+    "phonetic": "/ædˈvərsəti/",
+    "pos": "n.",
+    "en_meaning": "Difficulties; misfortune; a state of serious and continued difficulty",
+    "vi_meaning": "Nghịch cảnh, hoàn cảnh khó khăn gian truân",
+    "example_sentence": "Frederick Douglass famously attested that enduring profound personal adversity, far from breaking his spirit, fortified his lifelong resolve to struggle against institutional bondage.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 15
+  },
+  {
+    "global_order": 116,
+    "word": "advocacy",
+    "phonetic": "/ˈædvəkəsi/",
+    "pos": "n.",
+    "en_meaning": "Public support for or recommendation of a particular cause or policy",
+    "vi_meaning": "Sự vận động, sự bênh vực hoặc ủng hộ công khai cho một chính sách",
+    "example_sentence": "Rachel Carson's fearless public advocacy catalyzed widespread environmental consciousness and ultimately compelled the federal government to prohibit the agricultural spraying of DDT.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 16
+  },
+  {
+    "global_order": 117,
+    "word": "agitate",
+    "phonetic": "/ˈædʒɪteɪt/",
+    "pos": "v.",
+    "en_meaning": "To disturb, excite, or stir up interest and discussion",
+    "vi_meaning": "Kích động, làm xáo động, cổ động quần chúng",
+    "example_sentence": "Discontented industrial workers began to openly agitate for collective bargaining rights and an eight-hour workday through clandestine underground leaflets.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 17
+  },
+  {
+    "global_order": 118,
+    "word": "agnostic",
+    "phonetic": "/æɡˈnɑstɪk/",
+    "pos": "n.",
+    "en_meaning": "A person who believes that nothing is known about God's existence",
+    "vi_meaning": "Người theo thuyết bất khả tri",
+    "example_sentence": "Describing himself as a resolute agnostic, the Victorian naturalist argued that cosmic origins lay forever outside the reach of sensory observation and empirical confirmation.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 18
+  },
+  {
+    "global_order": 119,
+    "word": "agrarian",
+    "phonetic": "/əˈɡrɛriən/",
+    "pos": "adj.",
+    "en_meaning": "Relating to cultivated land, farming, or landed property",
+    "vi_meaning": "Thuộc về nông nghiệp, ruộng đất",
+    "example_sentence": "Thomas Jefferson championed an agrarian republic where self-reliant yeoman farmers would serve as virtuous guardians against the corruptions of urban industrialism.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 19
+  },
+  {
+    "global_order": 120,
+    "word": "alacrity",
+    "phonetic": "/əˈlækrəti/",
+    "pos": "n.",
+    "en_meaning": "Brisk and cheerful readiness to do something",
+    "vi_meaning": "Sự sốt sắng, sự hăng hái và nhanh nhẹn",
+    "example_sentence": "Anticipating an imminent counterattack from the flank, the seasoned cavalry scouts carried out the general's retreat orders with disciplined alacrity.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 20
+  },
+  {
+    "global_order": 121,
+    "word": "alchemy",
+    "phonetic": "/ˈælkəmi/",
+    "pos": "n.",
+    "en_meaning": "A medieval chemical philosophy aiming to transmute metals into gold and find a universal elixir",
+    "vi_meaning": "Giả kim thuật, phép biến đổi kỳ diệu",
+    "example_sentence": "Isaac Newton spent decades secretly immersed in the symbolic literature of alchemy, seeking universal cosmological truths alongside his mathematical formulations of optics and gravitation.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 21
+  },
+  {
+    "global_order": 122,
+    "word": "alcove",
+    "phonetic": "/ˈælkoʊv/",
+    "pos": "n.",
+    "en_meaning": "A small recessed section of a room or an area in a garden",
+    "vi_meaning": "Hốc tường, góc thụt vào trong phòng",
+    "example_sentence": "Tucked away in a shadowy alcove of the monastery library, the illuminator labored under candle-light to gild the borders of the vellum Psalter.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 22
+  },
+  {
+    "global_order": 123,
+    "word": "alias",
+    "phonetic": "/ˈeɪliəs/",
+    "pos": "n.",
+    "en_meaning": "A false or assumed name used to conceal one's identity",
+    "vi_meaning": "Bí danh, tên giả",
+    "example_sentence": "Operating under the innocuous alias of a traveling linen merchant, the intelligence officer moved undetected across fortified enemy territory.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 23
+  },
+  {
+    "global_order": 124,
+    "word": "alienate",
+    "phonetic": "/ˈeɪliəneɪt/",
+    "pos": "v.",
+    "en_meaning": "To cause someone to feel isolated or estranged from a group or individual",
+    "vi_meaning": "Làm cho xa lánh, cô lập, làm mất thiện cảm",
+    "example_sentence": "The autocratic director's dismissive attitude toward junior researchers threatened to alienate the laboratory's brightest talent and derail the pharmaceutical project.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 24
+  },
+  {
+    "global_order": 125,
+    "word": "alimentary",
+    "phonetic": "/ˌæləˈmɛntəri/",
+    "pos": "adj.",
+    "en_meaning": "Relating to nourishment, food, or the process of nutrition",
+    "vi_meaning": "Thuộc về dinh dưỡng, thức ăn hoặc bộ máy tiêu hóa",
+    "example_sentence": "Comparative physiologists noted that ruminants possess an intricately specialized alimentary tract capable of extracting vital carbohydrates from fibrous forage.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 25
+  },
+  {
+    "global_order": 126,
+    "word": "alimony",
+    "phonetic": "/ˈæləmoʊni/",
+    "pos": "n.",
+    "en_meaning": "Financial support paid to a former spouse after a divorce or separation",
+    "vi_meaning": "Khoản tiền cấp dưỡng sau khi ly hôn",
+    "example_sentence": "Under the formal divorce settlement ratified by the magistrate, the shipping magnate was mandated to remit substantial monthly alimony to maintain his ex-spouse's estate.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 26
+  },
+  {
+    "global_order": 127,
+    "word": "allay",
+    "phonetic": "/əˈleɪ/",
+    "pos": "v.",
+    "en_meaning": "To diminish or put at rest a fear, suspicion, or worry",
+    "vi_meaning": "Làm dịu đi, xua tan, trấn an nỗi lo sợ",
+    "example_sentence": "Seeking to allay widespread fears of a banking collapse, the treasury secretary held a nationally televised address outlining comprehensive liquidity guarantees.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 27
+  },
+  {
+    "global_order": 128,
+    "word": "allege",
+    "phonetic": "/əˈlɛdʒ/",
+    "pos": "v.",
+    "en_meaning": "To claim that someone has done something wrong, typically without proof",
+    "vi_meaning": "Cáo buộc, khẳng định khi chưa có bằng chứng xác thực",
+    "example_sentence": "State prosecutors allege that executives at the chemical conglomerate intentionally concealed toxic effluent discharge reports from regional environmental regulators.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 28
+  },
+  {
+    "global_order": 129,
+    "word": "allegiance",
+    "phonetic": "/əˈlidʒəns/",
+    "pos": "n.",
+    "en_meaning": "Loyalty or commitment of a subordinate to a superior or individual",
+    "vi_meaning": "Lòng trung thành, sự tận tụy gắn bó",
+    "example_sentence": "Torn between familial allegiance to his confederate birthplace and constitutional fidelity to the Union, the naval officer faced an excruciating moral crossroads.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 29
+  },
+  {
+    "global_order": 130,
+    "word": "allegory",
+    "phonetic": "/ˈæləɡɔri/",
+    "pos": "n.",
+    "en_meaning": "A story, poem, or picture that can be interpreted to reveal a hidden meaning",
+    "vi_meaning": "Truyện ngụ ngôn, biểu tượng chứa đựng ý nghĩa ẩn dụ",
+    "example_sentence": "Plato's famed Allegory of the Cave uses the dramatic journey from subterranean shadow into daylight to symbolize the philosophical awakening of the human soul.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 30
+  },
+  {
+    "global_order": 131,
+    "word": "alleviate",
+    "phonetic": "/əˈlivieɪt/",
+    "pos": "v.",
+    "en_meaning": "To make physical suffering or a problem less severe",
+    "vi_meaning": "Làm nhẹ bớt, làm giảm bớt nỗi đau hoặc khó khăn",
+    "example_sentence": "International relief organizations dispatched mobile water purification units to alleviate acute sanitary crises throughout the earthquake-stricken province.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 31
+  },
+  {
+    "global_order": 132,
+    "word": "alliteration",
+    "phonetic": "/əˌlɪtəˈreɪʃən/",
+    "pos": "n.",
+    "en_meaning": "The repetition of the same consonant sounds at the beginning of words",
+    "vi_meaning": "Phép điệp phụ âm đầu",
+    "example_sentence": "The Anglo-Saxon bard skillfully employed alliteration rather than modern rhyming schemes to imbue Beowulf with rhythmic solemnity during oral recitations.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 32
+  },
+  {
+    "global_order": 133,
+    "word": "allocate",
+    "phonetic": "/ˈæləkeɪt/",
+    "pos": "v.",
+    "en_meaning": "To distribute resources or duties for a particular purpose",
+    "vi_meaning": "Phân bổ, chỉ định nguồn lực cho một mục đích nhất định",
+    "example_sentence": "The parliamentary budget committee agreed to allocate substantial capital endowments directly to municipal transit authorities rather than suburban highway expansions.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 33
+  },
+  {
+    "global_order": 134,
+    "word": "alloy",
+    "phonetic": "/ˈælɔɪ/",
+    "pos": "n.",
+    "en_meaning": "A mixture of two or more metals",
+    "vi_meaning": "Hợp kim",
+    "example_sentence": "Aerospace engineers selected a specialized titanium-aluminum alloy whose remarkable strength-to-weight ratio could withstand the intense thermal friction of supersonic atmospheric re-entry.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 34
+  },
+  {
+    "global_order": 135,
+    "word": "allude",
+    "phonetic": "/əˈlud/",
+    "pos": "v.",
+    "en_meaning": "To suggest or hint at something indirectly",
+    "vi_meaning": "Nói bóng gió, ám chỉ gián tiếp",
+    "example_sentence": "In her seminal critique of modern capitalism, the sociologist chose only to allude to earlier Marxist doctrine rather than explicitly invoke its contentious nomenclature.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 35
+  },
+  {
+    "global_order": 136,
+    "word": "allure",
+    "phonetic": "/əˈlʊr/",
+    "pos": "n.",
+    "en_meaning": "The quality of being powerfully and mysteriously attractive or fascinating",
+    "vi_meaning": "Sức lôi cuốn, sự quyến rũ mê hoặc",
+    "example_sentence": "The seductive allure of instant maritime wealth drew hundreds of impoverished European sailors onto perilous voyages into uncharted waters across the South Pacific.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 36
+  },
+  {
+    "global_order": 137,
+    "word": "allusion",
+    "phonetic": "/əˈluʒən/",
+    "pos": "n.",
+    "en_meaning": "An indirect or passing reference to something or someone",
+    "vi_meaning": "Lời ám chỉ, điển tích hoặc dẫn chiếu gián tiếp",
+    "example_sentence": "Herman Melville's Moby-Dick opens with a deliberate Biblical allusion when the narrator implores the reader to 'Call me Ishmael,' establishing his outsider status.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 37
+  },
+  {
+    "global_order": 138,
+    "word": "aloft",
+    "phonetic": "/əˈlɔft/",
+    "pos": "adv.",
+    "en_meaning": "Up in or into the air; overhead",
+    "vi_meaning": "Ở trên cao, trên không trung",
+    "example_sentence": "Powerful thermal updrafts rising from the sun-drenched canyon floor enabled the Andean condor to remain aloft for hours without expending energy to flap its wings.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 38
+  },
+  {
+    "global_order": 139,
+    "word": "aloof",
+    "phonetic": "/əˈluf/",
+    "pos": "adj.",
+    "en_meaning": "Cool and distant; not friendly or forthcoming",
+    "vi_meaning": "Xa cách, hững hờ, lãnh đạm",
+    "example_sentence": "Though revered for his intellectual brilliance, the diplomatic envoy remained aloof from local social circles, preferring the detached tranquility of his embassy study.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 39
+  },
+  {
+    "global_order": 140,
+    "word": "altercation",
+    "phonetic": "/ˌɔltərˈkeɪʃən/",
+    "pos": "n.",
+    "en_meaning": "A noisy argument or disagreement, especially in public",
+    "vi_meaning": "Cuộc cãi cọ ầm ĩ, sự xung đột gay gắt nơi công cộng",
+    "example_sentence": "What commenced as a routine trade negotiation abruptly deteriorated into a loud altercation between the envoys, prompting security personnel to intervene immediately.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 40
+  },
+  {
+    "global_order": 141,
+    "word": "altruistic",
+    "phonetic": "/ˌæltruˈɪstɪk/",
+    "pos": "adj.",
+    "en_meaning": "Showing a disinterested and selfless concern for the well-being of others",
+    "vi_meaning": "Vị tha, nhân hậu, vì lợi ích của người khác",
+    "example_sentence": "Skeptical political scientists questioned whether the foreign superpower's massive developmental aid represented a genuinely altruistic initiative or merely an instrument of geopolitical leverage.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 41
+  },
+  {
+    "global_order": 142,
+    "word": "amalgamate",
+    "phonetic": "/əˈmælɡəmeɪt/",
+    "pos": "v.",
+    "en_meaning": "To combine or unite to form one organization or structure",
+    "vi_meaning": "Hợp nhất, kết hợp thành một tổ chức thống nhất",
+    "example_sentence": "Under the national industrial reorganization act, independent regional railway lines were compelled to amalgamate into a single centralized transit syndicate.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 42
+  },
+  {
+    "global_order": 143,
+    "word": "amass",
+    "phonetic": "/əˈmæs/",
+    "pos": "v.",
+    "en_meaning": "To collect or gather together a large amount over time",
+    "vi_meaning": "Tích lũy, cóp nhặt số lượng lớn theo thời gian",
+    "example_sentence": "Through decades of meticulous archival excavation across continental libraries, the paleographer managed to amass the world's most exhaustive collection of Carolingian deeds.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 43
+  },
+  {
+    "global_order": 144,
+    "word": "ambidextrous",
+    "phonetic": "/ˌæmbɪˈdɛkstrəs/",
+    "pos": "adj.",
+    "en_meaning": "Able to use both the right and left hands equally well",
+    "vi_meaning": "Thuận cả hai tay, khéo léo cả hai tay như nhau",
+    "example_sentence": "Because microscopic vascular surgery demands millimeter precision at awkward anatomical angles, surgeons who are naturally ambidextrous hold a formidable technical advantage.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 44
+  },
+  {
+    "global_order": 145,
+    "word": "ambience",
+    "phonetic": "/ˈæmbiəns/",
+    "pos": "n.",
+    "en_meaning": "The character and atmosphere of a place",
+    "vi_meaning": "Không khí, bầu không gian đặc trưng của một nơi",
+    "example_sentence": "The crackling hearth, towering mahogany bookshelves, and subdued amber lighting imparted to the college common room a cozy, contemplative ambience.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 45
+  },
+  {
+    "global_order": 146,
+    "word": "ambiguous",
+    "phonetic": "/æmˈbɪɡjuəs/",
+    "pos": "adj.",
+    "en_meaning": "Open to more than one interpretation; not clear",
+    "vi_meaning": "Mơ hồ, nhập nhằng, không rõ ràng",
+    "example_sentence": "The treaty's deliberately ambiguous phrasing regarding maritime sovereign boundaries laid the groundwork for severe territorial disputes decades after its signing.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 46
+  },
+  {
+    "global_order": 147,
+    "word": "ambivalence",
+    "phonetic": "/æmˈbɪvələns/",
+    "pos": "n.",
+    "en_meaning": "The state of having mixed feelings or contradictory ideas about something or someone",
+    "vi_meaning": "Sự mâu thuẫn trong tư tưởng hoặc cảm xúc",
+    "example_sentence": "Ecological historians have documented society's deep-seated ambivalence toward nuclear power, acknowledging its carbon neutrality while remaining terrified of radioactive catastrophe.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 47
+  },
+  {
+    "global_order": 148,
+    "word": "amble",
+    "phonetic": "/ˈæmbəl/",
+    "pos": "v.",
+    "en_meaning": "To walk or move at a slow, relaxed pace",
+    "vi_meaning": "Đi dạo thong thả, tản bộ thảnh thơi",
+    "example_sentence": "Unbothered by the bustling commerce of the harbor, the elderly philosopher would amble along the coastal seawall each afternoon, lost in speculative meditation.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 48
+  },
+  {
+    "global_order": 149,
+    "word": "ambulatory",
+    "phonetic": "/ˈæmbjələˌtɔri/",
+    "pos": "adj.",
+    "en_meaning": "Related to or capable of walking",
+    "vi_meaning": "Có thể đi lại được, không phải nằm một chỗ",
+    "example_sentence": "Modern post-operative protocols urge joint replacement patients to become ambulatory within twenty-four hours to stimulate systemic circulation and expedite recovery.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 49
+  },
+  {
+    "global_order": 150,
+    "word": "ameliorate",
+    "phonetic": "/əˈmiljəreɪt/",
+    "pos": "v.",
+    "en_meaning": "To make something bad or unsatisfactory better",
+    "vi_meaning": "Cải thiện, làm cho tốt hơn, xoa dịu tình trạng xấu",
+    "example_sentence": "Public health reformers in nineteenth-century London constructed deep subterranean sewer networks to ameliorate the catastrophic urban spread of cholera and typhus.",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 50
+  }
+]
+
+# Validation
+chunk_3_in_path = r"c:\Users\MY PC\Documents\GitHub\hivocab\data\sat_chunks\chunk_3.json"
+with open(chunk_3_in_path, "r", encoding="utf-8") as f:
+    orig_data = json.load(f)
+
+assert len(enriched_data) == 50, f"Expected 50 items, got {len(enriched_data)}"
+assert len(orig_data) == 50, f"Expected 50 original items, got {len(orig_data)}"
+
+valid_pos = {"v.", "n.", "adj.", "adv."}
+for orig, item in zip(orig_data, enriched_data):
+    assert orig["global_order"] == item["global_order"], f"Mismatch global_order: {orig['global_order']} vs {item['global_order']}"
+    assert orig["word"].strip().lower() == item["word"].strip().lower(), f"Mismatch word: {orig['word']} vs {item['word']}"
+    assert item["pos"] in valid_pos, f"Invalid pos: {item['pos']} for {item['word']}"
+    assert item["phonetic"].startswith("/") and item["phonetic"].endswith("/"), f"Invalid phonetic: {item['phonetic']} for {item['word']}"
+    assert not item["vi_meaning"].endswith("."), f"vi_meaning has trailing period: {item['vi_meaning']} for {item['word']}"
+    assert len(item["example_sentence"]) > 50, f"Sentence too short for {item['word']}"
+
+output_path = r"c:\Users\MY PC\Documents\GitHub\hivocab\data\sat_chunks\chunk_3_enriched.json"
+with open(output_path, "w", encoding="utf-8") as f:
+    json.dump(enriched_data, f, ensure_ascii=False, indent=2)
+
+print(f"Successfully generated {output_path} with {len(enriched_data)} items.")

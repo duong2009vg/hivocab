@@ -1,0 +1,1 @@
+UPDATE public.words SET image_url = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/oxford3000/oxford_3000_m_nh_c/drum.webp' WHERE id = 'eb4f92eb-0ace-4224-af19-6eadb690132f';

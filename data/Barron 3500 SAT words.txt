@@ -1,0 +1,995 @@
+#	Word	English Meaning	Vietnamese Meaning
+1	abase	To lower in rank, prestige, or esteem; to humiliate.	Làm hạ thấp phẩm giá, làm nhục.
+2	abash	To make someone feel embarrassed, disconcerted, or ashamed.	Làm bối rối, làm lúng túng.
+3	abate	To become less intense, active, or widespread.	Làm giảm bớt, dịu đi.
+4	abbreviate	To shorten a word, phrase, or text by omitting letters.	Tóm tắt, viết tắt.
+5	abdicate	To formally give up a position of power or responsibility.	Từ bỏ quyền lực, thoái vị.
+6	abduction	The action of forcibly taking someone away against their will	Sự bắt cóc hoặc chiếm đoạt người khác trái phép
+7	aberrant	Departing from an accepted standard or normal course	Khác thường, lệch lạc so với quy chuẩn
+8	abet	To encourage or assist someone to do something wrong	Tiếp tay, xúi giục hoặc giúp sức làm điều xấu
+9	abeyance	A state of temporary disuse or suspension	Tình trạng tạm hoãn, đình chỉ hoặc chưa quyết định
+10	abhor	To regard with disgust and hatred	Ghê tởm, căm ghét hoặc cực kỳ bài bác
+11	abject	Experienced to a maximum degree or completely without pride or dignity.	Hèn hạ, thấp hèn hoặc cực kỳ tồi tệ.
+12	abjure	To solemnly renounce a belief, cause, or claim.	Tuyên bố từ bỏ hoặc rút lui một cách trang trọng.
+13	ablution	The act of washing oneself, often used in a religious context.	Lễ tẩy trần hoặc việc tắm rửa vệ sinh cá nhân.
+14	abnegation	The act of renouncing or rejecting something; self-denial.	Sự từ bỏ quyền lợi hoặc sự hy sinh quên mình.
+15	abolish	To formally put an end to a system, practice, or institution.	Bãi bỏ, hủy bỏ một hệ thống hoặc tập tục.
+16	abominable	Vile, detestable, or very unpleasant	Đáng ghét, ghê tởm, tồi tệ
+17	absorb	To soak up or take in information, liquids, or energy.	hấp thụ, tiếp thu
+18	abstain	To restrain oneself from doing or enjoying something.	kiêng, nhịn, bỏ phiếu trắng
+19	abstemious	Not self-indulgent, especially when eating and drinking.	tiết độ, điều độ
+20	abstinence	The practice of restraining oneself from indulging in something.	sự kiêng khem
+21	abstract	Existing in thought or as an idea but not having a physical existence.	trừu tượng
+22	abstruse	Difficult to understand; obscure or profound.	Khó hiểu, uyên thâm, thâm thúy.
+23	abundant	Existing or available in large quantities; plentiful.	Phong phú, dồi dào, có nhiều.
+24	abusive	Extremely offensive and insulting; using physical or verbal violence.	Lăng mạ, sỉ nhục hoặc ngược đãi.
+25	abut	To be next to or have a common boundary with something.	Tiếp giáp với, nằm sát cạnh.
+26	abysmal	Extremely bad; appalling or wretched.	Rất tồi tệ, cực kỳ kém hoặc không đáy.
+27	abyss	A very deep or seemingly bottomless chasm or void.	Vực thẳm, khoảng trống vô tận.
+28	academic	Relating to schools, education, and study; or purely theoretical.	Thuộc về học thuật, lý thuyết hoặc trường lớp.
+29	accede	To agree to a demand, request, or treaty.	Đồng ý, tán thành hoặc nhượng bộ một yêu cầu.
+30	accelerate	To increase in speed or cause to happen more quickly.	Thúc đẩy, làm tăng tốc độ hoặc diễn ra nhanh hơn.
+31	accentuate	To make more noticeable or prominent.	Nhấn mạnh, làm nổi bật hoặc làm rõ nét hơn.
+32	accessible	Easy to approach, reach, enter, or understand.	Có thể tiếp cận, dễ hiểu hoặc dễ sử dụng.
+33	accessory	A supplemental component that improves or adds to something else.	Phụ kiện, vật phụ thuộc hoặc người đồng lõa.
+34	acclaim	To praise enthusiastically and publicly.	Sự hoan nghênh, ca ngợi nồng nhiệt.
+35	acclimate	To adapt to a new climate, environment, or situation.	Thích nghi với môi trường hoặc khí hậu mới.
+36	acclivity	An upward slope, such as on a hill.	Dốc ngược, con dốc hướng lên trên.
+37	accolade	An expression of praise, approval, or a special distinction or award.	Sự tán dương, giải thưởng danh giá hoặc sự công nhận thành tích.
+38	accommodate	To provide lodging or space; to adjust or adapt to someone's needs.	Cung cấp chỗ ở; điều chỉnh để đáp ứng nhu cầu.
+39	accomplice	A person who helps another commit a crime or do something wrong.	Đồng phạm, kẻ tiếp tay cho hành vi sai trái.
+40	accord	An official agreement or treaty; to give or grant someone power or status.	Sự đồng lòng, hiệp định; ban cho hoặc chấp thuận.
+41	accost	To approach and address someone boldly or aggressively.	Tiếp cận và bắt chuyện một cách đường đột hoặc hung hăng.
+42	accoutre	To clothe or equip in something noticeable or impressive.	Trang bị hoặc mặc đồ theo một cách ấn tượng.
+43	accretion	The process of growth or increase by the gradual accumulation of additional layers or matter.	Sự bồi đắp, sự phát triển dần dần bằng cách tích tụ thêm các lớp.
+44	accrue	To accumulate or receive payments or benefits over time.	Tích lũy lại, dồn lại (ví dụ như tiền lãi hoặc lợi ích).
+45	acerbity	Sharpness and directness in speech; sourness or bitterness in taste.	Sự chua chát, gay gắt (trong lời nói) hoặc vị chua, chát.
+46	acetic	Relating to or containing acetic acid; vinegary.	Có tính chất của axit axetic hoặc liên quan đến giấm.
+47	acidulous	Sharp-tasted or sour; somewhat acidic; caustic in style.	Hơi chua; có tính châm biếm, gay gắt (trong phong cách, lời nói).
+48	acknowledge	To accept or admit the existence or truth of something.	Thừa nhận hoặc công nhận sự tồn tại của cái gì đó.
+49	acme	The highest point or stage; the peak of perfection.	Điểm cao nhất, cực điểm hoặc thời kỳ hoàng kim.
+50	acoustics	The properties or qualities of a room that determine how sound is transmitted.	Độ vang âm hoặc đặc tính âm thanh của một không gian.
+51	acquiesce	To accept something reluctantly but without protest.	Bằng lòng, ưng thuận hoặc mặc nhiên chấp nhận mà không phản đối.
+52	acquire	To buy or obtain an asset or object for oneself.	Giành được, đạt được hoặc thu mua được một cái gì đó.
+53	acquittal	A judgment that a person is not guilty of the crime with which they have been charged.	Sự trắng án, tuyên bố không có tội.
+54	acrid	Having an irritatingly strong and unpleasant taste or smell.	Hăng, nồng, cay xè (mùi hoặc vị gây khó chịu).
+55	advocate	To publicly support or recommend a particular cause or policy	Ủng hộ, bênh vực hoặc biện hộ cho một vấn đề nào đó
+56	aerie	A large nest of a bird of prey built in a high place	Tổ chim ưng hoặc tổ của các loài chim săn mồi trên cao
+57	aesthetic	Concerned with beauty or the appreciation of beauty	Có thẩm mỹ, liên quan đến vẻ đẹp hoặc nghệ thuật
+58	affable	Friendly, good-natured, or easy to talk to	Niềm nở, lịch sự, dễ gần và thân thiện
+59	affected	Artificial, pretentious, or designed to impress	Giả tạo, điệu bộ, không tự nhiên nhằm gây ấn tượng
+60	affidavit	A written statement confirmed by oath or affirmation for use as evidence in court.	Bản tuyên thệ trước tòa án
+61	affiliation	The state of being officially attached or connected to an organization.	Sự liên kết hoặc gia nhập vào một tổ chức
+62	affinity	A spontaneous or natural liking or sympathy for someone or something.	Sự đồng cảm hoặc lôi cuốn tự nhiên
+63	affirmation	A formal declaration that something is true; a positive assertion.	Sự khẳng định hoặc xác nhận
+64	affix	To stick, attach, or fasten something to something else.	Đóng dấu, dán vào hoặc đính kèm
+65	affliction	Something that causes pain or suffering	Nỗi đau đớn, nỗi thống khổ hoặc nguyên nhân gây tai họa
+66	affluence	The state of having a great deal of money or wealth	Sự giàu có, sung túc hoặc sự dồi dào về tài lộc
+67	affront	An action or remark that causes outrage or offense	Sự lăng nhục, xúc phạm công khai
+68	aftermath	The consequences or aftereffects of a significant unpleasant event	Hậu quả hoặc giai đoạn hệ lụy sau một sự kiện tồi tệ
+69	agenda	A list of items to be discussed at a formal meeting	Chương trình nghị sự hoặc danh sách vấn đề cần thảo luận
+70	agent	A person or entity that acts on behalf of another or produces a particular effect.	Đại lý, tác nhân hoặc người đại diện.
+71	agglomeration	A mass or collection of things; a cluster.	Sự kết tụ, sự tích tụ thành một khối.
+72	aggrandize	To increase the power, status, or wealth of something or someone.	Phóng đại, mở rộng hoặc làm tăng thêm quyền lực.
+73	aggregate	A whole formed by combining several separate elements.	Tổng hợp, gộp chung lại thành một khối.
+74	acrimonious	Angry and bitter in language or tone	Gay gắt, chua chát (trong lời nói, thái độ)
+75	acrophobia	An intense fear of heights	Hội chứng sợ độ cao
+76	actuarial	Relating to statistical calculation of insurance risks and premiums	Thuộc về tính toán bảo hiểm
+77	actuate	To put into motion or motivate someone to act	Kích hoạt, vận hành hoặc thúc đẩy hành động
+78	acuity	Sharpness or keenness of thought, vision, or hearing	Sự nhạy bén, sắc sảo
+79	acumen	The ability to make good judgments and quick decisions.	Sự nhạy bén, sự tinh tường trong suy xét.
+80	acute	Present or experienced to a severe or intense degree.	Nghiêm trọng, nhức nhối hoặc thính nhạy (giác quan).
+81	adage	A proverb or short statement expressing a general truth.	Ngạn ngữ, châm ngôn.
+82	adamant	Refusing to be persuaded or to change one's mind.	Cứng rắn, kiên định, không lay chuyển.
+83	adapt	To become adjusted to new conditions.	Thích nghi, điều chỉnh cho phù hợp.
+84	aboriginal	Inhabiting or existing in a land from the earliest times	Thổ dân, thuộc về bản địa từ sơ khai
+85	abortive	Failing to produce the intended result; unsuccessful	Thất bại, không thành công, dở dang
+86	abrade	To scrape or wear away by friction or erosion	Làm trầy xước, mài mòn
+87	abrasive	Showing little concern for others' feelings; rough or harsh	Thô bạo, gây khó chịu hoặc có tính mài mòn
+88	addendum	An item of additional material added at the end of a book or document.	Phần phụ lục hoặc nội dung bổ sung vào cuối văn bản.
+89	addiction	The fact or condition of being addicted to a particular substance or activity.	Sự nghiện ngập hoặc lệ thuộc vào một chất hay hoạt động nào đó.
+90	addle	To make someone unable to think clearly; to confuse.	Làm cho rối trí, quẫn bách hoặc không thể suy nghĩ rõ ràng.
+91	address	To speak to a person or an assembly; to direct attention to an issue.	Phát biểu trước công chúng hoặc tập trung giải quyết một vấn đề.
+92	adept	Very skilled or proficient at something.	Thông thạo, tinh thông hoặc rất giỏi trong một lĩnh vực cụ thể.
+93	adhere	to stick firmly to a surface or to follow a set of rules and beliefs	tuân thủ, dính chặt
+94	adherent	someone who supports a particular party, person, or set of ideas	người ủng hộ
+95	adjacent	next to or adjoining something else	kế bên, liền kề
+96	adjunct	something added to something else as a supplementary rather than an essential part	phần bổ trợ
+97	admonish	to warn or reprimand someone firmly or to advise earnestly	cảnh báo, nhắc nhở
+98	admonition	A firm warning or gentle criticism about someone's behavior	Lời cảnh báo hoặc nhắc nhở nhẹ nhàng
+99	adorn	To make something more beautiful or attractive by adding ornaments	Trang trí, tô điểm
+100	adroit	Clever or skillful in using the hands or mind	Khéo léo, tinh xảo
+101	adulation	Excessive admiration or praise, often bordering on flattery	Sự nịnh hót, ca tụng quá mức
+102	adulterate	To make something poorer in quality by adding another substance	Làm giả, làm cho kém chất lượng bằng cách pha tạp
+103	aggressor	A person or country that attacks first without being provoked.	Kẻ xâm lược, bên tấn công trước.
+104	aghast	Filled with horror, shock, or amazement	Kinh ngạc, sửng sốt hoặc kinh hãi
+105	agility	The ability to move quickly and easily or to think rapidly.	Sự nhanh nhẹn, linh hoạt về thể chất hoặc tư duy.
+106	abridge	To shorten a book, movie, or speech without losing the sense.	Rút gọn hoặc lược bớt nội dung.
+107	abrogate	To repeal or do away with a law, right, or formal agreement.	Bãi bỏ hoặc hủy bỏ (một đạo luật, thỏa thuận).
+108	abscond	To leave hurriedly and secretly, typically to avoid detection or arrest.	Bỏ trốn hoặc lẩn lút ra đi.
+109	absolute	Not qualified or diminished in any way; total and complete.	Tuyệt đối, hoàn toàn hoặc không hạn chế.
+110	absolve	To declare someone free from guilt, obligation, or punishment.	Xá tội, miễn tội hoặc giải phóng khỏi trách nhiệm.
+111	advent	the arrival or beginning of a notable person, thing, or event	sự xuất hiện, sự bắt đầu của một sự kiện quan trọng
+112	adventitious	happening or carried on according to chance rather than design	tình cờ, ngẫu nhiên, không do dự tính
+113	adversary	one's opponent in a contest, conflict, or dispute	đối thủ, kẻ thù, kẻ nghịch
+114	adverse	preventing success or development; harmful; unfavorable	bất lợi, có hại, ngược lại
+115	adversity	difficulties; misfortune; a state of serious and continued difficulty	nghịch cảnh, sự bất hạnh, hoàn cảnh khó khăn
+116	advocacy	Public support for or recommendation of a particular cause or policy.	Sự ủng hộ, tán thành hoặc vận động cho một mục tiêu hoặc chính sách nào đó.
+117	agitate	To disturb, excite, or stir up interest and discussion.	Làm náo động, gây kích động hoặc tranh luận.
+118	agnostic	A person who believes that nothing is known about God's existence.	Người theo thuyết bất khả tri.
+119	agrarian	Relating to cultivated land, farming, or landed property.	Thuộc về nông nghiệp, ruộng đất.
+120	alacrity	Brisk and cheerful readiness to do something.	Sự sốt sắng, hăng hái và sẵn lòng.
+121	alchemy	A medieval chemical philosophy aiming to transmute metals into gold and find a universal elixir.	Giả kim thuật
+122	alcove	A small recessed section of a room or an area in a garden.	Hốc tường, hốc phòng
+123	alias	A false or assumed name used to conceal one's identity.	Bí danh, tên giả
+124	alienate	To cause someone to feel isolated or estranged from a group or individual.	Làm cho xa lánh, cô lập
+125	alimentary	Relating to nourishment, food, or the process of nutrition.	Thuộc về dinh dưỡng, liên quan đến thực phẩm
+126	alimony	Financial support paid to a former spouse after a divorce or separation.	Khoản tiền cấp dưỡng cho vợ hoặc chồng sau khi ly hôn.
+1	allay	To diminish or put at rest a fear, suspicion, or worry	làm dịu đi, trấn an
+2	allege	To claim that someone has done something wrong, typically without proof	cáo buộc mà không có bằng chứng
+3	allegiance	Loyalty or commitment of a subordinate to a superior or individual	lòng trung thành
+4	allegory	A story, poem, or picture that can be interpreted to reveal a hidden meaning	chuyện ngụ ngôn hoặc biểu tượng
+5	alleviate	To make physical suffering or a problem less severe	làm nhẹ bớt, làm giảm bớt
+6	alliteration	The repetition of the same consonant sounds at the beginning of words.	Sự lặp lại phụ âm đầu (điệp âm).
+7	allocate	To distribute resources or duties for a particular purpose.	Phân bổ, chỉ định (nguồn lực, tiền bạc).
+8	alloy	A mixture of two or more metals.	Hợp kim.
+9	allude	To suggest or hint at something indirectly.	Nói bóng gió, ám chỉ.
+10	allure	The quality of being powerfully and mysteriously attractive or fascinating.	Sức lôi cuốn, sự quyến rũ.
+11	allusion	An indirect or passing reference to something or someone	Lời ám chỉ, sự nói bóng gió
+12	aloft	Up in or into the air; overhead	Ở trên cao, trên không trung
+13	aloof	Cool and distant; not friendly or forthcoming	Xa cách, hững hờ, lạnh lùng
+14	altercation	A noisy argument or disagreement, especially in public	Cuộc cãi lộn, sự đấu khẩu
+15	altruistic	Showing a disinterested and selfless concern for the well-being of others	Vị tha, nhân hậu, lòng lành
+16	amalgamate	to combine or unite to form one organization or structure	hợp nhất, kết hợp
+17	amass	to collect or gather together a large amount over time	tích lũy, cóp nhặt
+18	ambidextrous	able to use both the right and left hands equally well	thuận cả hai tay
+19	ambience	the character and atmosphere of a place	không khí, môi trường xung quanh
+20	ambiguous	open to more than one interpretation; not clear	mơ hồ, nhập nhằng
+21	ambivalence	The state of having mixed feelings or contradictory ideas about something or someone	Sự mâu thuẫn trong tư tưởng hoặc cảm xúc
+22	amble	To walk or move at a slow, relaxed pace	Đi dạo thong thả
+23	ambulatory	Related to or capable of walking	Có thể đi lại được, không phải nằm một chỗ
+24	ameliorate	To make something bad or unsatisfactory better	Cải thiện, làm cho tốt hơn
+25	amenable	Open and responsive to suggestion; easily persuaded or controlled	Dễ bảo, tuân thủ hoặc sẵn sàng đáp ứng
+26	amend	To make minor changes in a text in order to make it fairer or more accurate	Sửa đổi, bổ sung (văn bản, luật lệ)
+27	amenities	Desirable or useful features of a building or place.	Các tiện nghi, cơ sở hạ tầng bổ trợ.
+28	amiable	Having or displaying a friendly and pleasant manner.	Tử tế, tốt bụng, hòa nhã.
+29	amicable	Characterized by friendliness and absence of discord.	Thân thiện, hòa bình, không có xung đột.
+30	amiss	Not quite right, inappropriate, or out of place.	Sai sót, hỏng hóc, không ổn.
+31	amity	A state of friendship and peaceful relations.	Tình hữu nghị, quan hệ thân thiện giữa các bên.
+32	amnesia	A partial or total loss of memory.	Chứng mất trí nhớ.
+33	amnesty	An official pardon for people who have been convicted of political offenses.	Sự ân xá hoặc lệnh đặc xá.
+34	amoral	Lacking a moral sense; unconcerned with the rightness or wrongness of something.	Phi luân lý, không quan tâm đến đạo đức.
+35	amorous	Showing, feeling, or relating to sexual desire or romantic love.	Đa tình, thuộc về tình yêu nam nữ.
+36	amorphous	Without a clearly defined shape or form.	Vô hình dạng, không có cấu trúc xác định.
+37	amphibian	An animal that can live both on land and in water	động vật lưỡng cư
+38	amphitheater	An open-air venue used for entertainment, performances, and sports	đấu trường, giảng đường vòng tròn
+39	ample	More than enough in size, scope, or capacity	dư dả, phong phú, rộng rãi
+40	amplify	To make something larger, louder, or more powerful	phóng đại, khuếch đại
+41	amputate	To cut off a limb or digit by surgical operation	cắt cụt (chi, bộ phận cơ thể)
+42	amulet	An ornament or small piece of jewelry thought to give protection against evil or danger.	Bùa hộ mệnh, vật may mắn.
+43	anachronistic	Belonging to a period other than that in which it exists; out of date.	Sai lệch thời đại, lỗi thời.
+44	analgesic	A drug or substance acting to relieve pain.	Thuốc giảm đau, có tác dụng giảm đau.
+45	analogous	Comparable in certain respects, typically in a way which makes clearer the nature of the things compared.	tương tự, giống nhau về một khía cạnh nào đó
+46	analogy	A comparison between two things, typically for the purpose of explanation or clarification.	sự tương tự, phép loại suy
+47	anarchist	A person who believes in or tries to bring about a state of lawlessness.	người theo chủ nghĩa vô chính phủ
+48	anarchy	A state of disorder due to absence or nonrecognition of authority.	tình trạng hỗn loạn, tình trạng vô chính phủ
+49	anathema	Something or someone that one vehemently dislikes or a formal curse by a council of the Church.	điều bị nguyền rủa, điều cực kỳ ghét
+50	ancestry	The lineage or family descent of a person	Tổ tiên, dòng dõi
+51	anchor	A heavy object used to hold something in place	Mỏ neo, vật giữ cố định
+52	ancillary	Providing necessary support to the primary activities	Phụ trợ, bổ trợ
+53	anecdote	A short, interesting story about a real person or event	Giai thoại, câu chuyện ngắn
+54	anemia	A condition marked by a deficiency of red blood cells	Bệnh thiếu máu
+55	anesthetic	A substance that causes insensitivity to pain or loss of consciousness	Thuốc gây tê, thuốc gây mê
+56	anguish	Severe mental or physical pain or suffering	Nỗi đau đớn, thống khổ về thể xác hoặc tinh thần
+57	angular	Having angles or sharp corners; lean and bony	Góc cạnh, gầy gò
+58	animated	Full of life or excitement; lively	Sôi nổi, náo nhiệt, đầy sức sống
+59	animosity	Strong hostility or ill will toward someone or something	Sự thù oán, ác cảm
+60	animus	A feeling of ill will, animosity, or strong dislike; motivation or guiding spirit.	Sự thù hằn, ác cảm hoặc ý chí thúc đẩy một hành động.
+61	annals	A chronological record of historical events, often kept year by year.	Biên niên sử hoặc hồ sơ ghi chép sự kiện theo từng năm.
+62	annex	To add or attach as a subordinate part; to take territory by force or legal act.	Thôn tính, sáp nhập lãnh thổ hoặc thêm vào một phần phụ.
+63	annihilate	To destroy utterly; to reduce to nonexistence.	Tiêu diệt hoàn toàn; phá hủy hoàn toàn.
+64	annotate	To add explanatory notes or comments to a text.	Chú thích; ghi chú giải thích cho văn bản.
+65	annuity	A fixed sum of money paid to someone each year.	Tiền cấp dưỡng hàng năm; tiền niên kim.
+66	annul	To declare invalid; to cancel or abolish.	Bãi bỏ; hủy bỏ hiệu lực pháp lý.
+67	anoint	To smear or rub with oil, typically as part of a religious ceremony.	Xức dầu; phong chức bằng cách xức dầu.
+68	anomalous	Deviating from what is standard, normal, or expected.	Bất thường, không nhất quán với quy luật chung.
+69	anomaly	Something that deviates from what is standard, normal, or expected.	Sự bất thường, dị thường hoặc vật khác thường.
+70	anonymity	The condition of being unknown or unacknowledged.	Tình trạng vô danh hoặc ẩn danh.
+71	anonymous	Not identified by name; of unknown authorship.	Vô danh, ẩn danh, giấu tên.
+72	antagonism	Active hostility or opposition between unfriendly beliefs or people.	Sự đối kháng, sự thù địch hoặc sự phản kháng.
+73	antecede	To go before in time, order, or rank.	Xảy ra trước hoặc đứng trước về thời gian, thứ tự.
+74	antecedents	Preceding events or ancestors that influence later developments.	Sự việc tiền đề hoặc tổ tiên, những người đi trước.
+75	antediluvian	Extremely old-fashioned or belonging to the time before the biblical flood.	Cổ xưa, lạc hậu hoặc thuộc về thời kỳ trước trận đại hồng thủy.
+76	anthem	A song of praise, loyalty, or celebration, often for a country.	Bài hát ca ngợi, lòng trung thành hoặc bài quốc ca.
+77	anthology	A published collection of poems, stories, or other musical pieces.	Một tuyển tập văn học, thơ ca hoặc các tác phẩm âm nhạc.
+78	anthropocentric	Regarding humankind as the central or most important element of existence.	Lấy con người làm trung tâm.
+79	anthropoid	Resembling a human in form; relating to apes that are similar to humans.	Dạng người; thuộc về các loài khỉ giống người.
+80	anthropologist	An expert in or student of the study of human societies and cultures.	Nhà nhân chủng học.
+81	anthropomorphic	Having human characteristics or behavior applied to a god, animal, or object.	Nhân hóa; có hình người hoặc đặc điểm của con người.
+82	anticlimax	A disappointing end to an exciting or impressive series of events.	Sự hụt hẫng; đoạn kết gây thất vọng sau một chuỗi sự kiện kịch tính.
+83	antidote	A medicine or remedy that counteracts a poison or something harmful.	Thuốc giải độc, phương thuốc cứu chữa điều có hại.
+84	antipathy	A deep-seated feeling of dislike or aversion.	Sự ác cảm, lòng ghét bỏ sâu sắc.
+85	antiquated	Old-fashioned or outdated and no longer suitable for modern use	cũ kỹ, lỗi thời
+86	antiseptic	Scrupulously clean or preventing the growth of disease-causing microorganisms	khử trùng, sạch khuẩn
+87	antithesis	A person or thing that is the direct opposite of someone or something else	sự tương phản, phép đối lập
+88	apathy	Lack of interest, enthusiasm, or concern about something	sự thờ ơ, vô cảm
+89	ape	To imitate or mimic someone's behavior or style, often clumsily	bắt chước, nhại lại
+90	aperture	An opening, hole, or gap through which light or liquid travels.	Lỗ hổng, khe hở, hoặc khẩu độ (trong nhiếp ảnh).
+91	apex	The top or highest part of something, especially one forming a point.	Đỉnh, ngọn, hoặc điểm cao nhất.
+92	aphasia	A medical condition causing the loss of ability to understand or express speech.	Chứng mất ngôn ngữ do tổn thương não.
+93	aphorism	A concise statement of a scientific principle or observation; a pithy observation.	Cách ngôn, châm ngôn ngắn gọn đúc kết một chân lý.
+94	apiary	A place where bees are kept; a collection of beehives.	Nhà nuôi ong hoặc khu vực đặt các tổ ong.
+95	aplomb	Self-confidence or assurance, especially when in a demanding situation	Sự tự tin, điềm tĩnh trong những tình huống khó khăn
+96	apocalyptic	Describing or prophesying the complete destruction of the world	Thuộc về ngày tận thế, mang tính chất thảm họa diệt vong
+97	apocryphal	Of doubtful authenticity, although widely circulated as being true	Nghi vấn về tính xác thực, không chính thống, ngụy tạo
+98	apogee	The highest point in the development of something; a climax or culmination	Tuyệt đỉnh, điểm cao nhất, thời kỳ hoàng kim
+99	apolitical	Not interested or involved in politics	Phi chính trị, không quan tâm hoặc không tham gia vào chính trị
+100	apologist	A person who defends or justifies a particular policy, doctrine, or belief system.	Người biện hộ, người lên tiếng bảo vệ một quan điểm hoặc học thuyết.
+101	apostate	A person who renounces a religious or political belief or principle.	Người bỏ đạo, người từ bỏ đức tin hoặc lý tưởng chính trị.
+102	apotheosis	The highest point in the development of something; culmination or deification.	Sự tôn thờ, giai đoạn đỉnh cao hoặc sự thần thánh hóa.
+103	appall	To greatly dismay or horrify someone.	Làm kinh sợ, làm kinh ngạc hoặc gây kinh hoàng.
+104	apparatus	The technical equipment or machinery needed for a particular activity or purpose.	Thiết bị bộ máy, dụng cụ chuyên dụng để thực hiện một công việc.
+105	apparition	A ghost or ghostlike image of a person.	Sự xuất hiện đột ngột của một con ma hoặc ảo ảnh.
+106	appease	To pacify or placate someone by acceding to their demands.	Nhân nhượng, làm cho nguôi giận hoặc xoa dịu.
+107	appellation	A name or title given to a person or thing.	Tên gọi, danh xưng hoặc hiệu.
+108	append	To add something as an attachment or supplement.	Cộng thêm vào, đính kèm hoặc viết thêm vào cuối.
+109	apprehension	Anxiety or fear that something bad will happen; understanding of a concept.	Sự e sợ, lo âu; sự lĩnh hội hoặc hiểu biết.
+110	apprenticeship	A period of time spent learning a trade or skill from a skilled employer.	Thời gian học việc, thực tập nghề.
+111	apprise	To inform or tell someone about something.	Thông báo, cho biết.
+112	approbation	Approval or praise, often formal or official.	Sự tán thành, sự chấp thuận hoặc khen ngợi.
+113	appropriate	Suitable or proper in the circumstances; to take something for one's own use without permission.	Thích hợp, phù hợp; chiếm đoạt, chiếm dụng làm của riêng.
+114	apropos	Relevant or appropriate to a particular situation; concerning a subject.	Thích hợp, hợp thời, về vấn đề gì đó.
+115	aptitude	A natural ability or skill to do something well.	Năng khiếu, khả năng tự nhiên.
+116	aquatic	Relating to water; living or growing in or near water.	Sống dưới nước, liên quan đến nước.
+117	aquiline	Like an eagle; curved or hooked like an eagle's beak.	Giống chim ưng, khoằm (như mỏ chim ưng).
+118	arable	Land suitable for growing crops or being cultivated.	Đất trồng trọt được, đất canh tác.
+119	arbiter	A person who settles a dispute or has ultimate authority in a matter.	Người phân xử hoặc người có quyền quyết định tối cao.
+120	arbitrary	Based on random choice or personal whim, rather than any reason or system.	Tùy hứng, độc đoán hoặc dựa trên sự lựa chọn ngẫu nhiên.
+121	application	The practical use or relevance of something; a formal request for something.	Sự ứng dụng hoặc đơn xin việc/đơn yêu cầu.
+122	apposite	Highly appropriate, relevant, or suitable to a particular situation.	Thích hợp, đúng lúc, phù hợp.
+123	appraise	To assess the value, quality, or nature of something or someone.	Đánh giá, định giá.
+124	appreciate	To recognize the full worth of; to increase in value over time.	Trân trọng, đánh giá cao hoặc tăng giá trị.
+125	apprehend	To arrest someone; to understand or perceive the meaning of something.	Bắt giữ hoặc hiểu rõ, lĩnh hội.
+1	asinine	extremely stupid or foolish	ngu ngốc, đần độn
+2	arbitrator	An independent person or body officially appointed to settle a dispute.	Trọng tài, người phân xử
+3	arboretum	A botanical garden devoted to trees.	Vườn bách thảo chuyên về các loại cây thân gỗ
+4	arcade	A covered passage with arches or a place with coin-operated games.	Dãy cuốn, mái vòm hoặc khu vui chơi giải trí
+5	arcane	Understood by few; mysterious or secret.	Bí ẩn, huyền bí, ít người biết đến
+6	archaeology	The study of human history through the excavation of sites and artifacts.	Khảo cổ học
+7	archaic	Extremely old or belonging to a very early period in history.	Cổ xưa, lỗi thời hoặc thuộc về thời sơ khai.
+8	archetype	A perfect or typical example that serves as a model or basis.	Hình mẫu, nguyên mẫu tiêu biểu.
+9	archipelago	A large group or chain of islands situated in a sea or ocean.	Quần đảo, một nhóm các hòn đảo.
+10	archives	A collection of historical records or the place where they are kept.	Kho lưu trữ, hồ sơ lưu trữ lịch sử.
+11	ardent	Characterized by intense emotion, passion, or enthusiastic support.	Hăng hái, nồng nhiệt, cuồng nhiệt.
+12	arduous	Involving or requiring strenuous effort; difficult and tiring.	Khó khăn, gian khổ, đòi hỏi nhiều nỗ lực.
+13	aria	A long accompanied song for a solo voice, typically in an opera.	Giai điệu đơn ca trong vở nhạc kịch (opera).
+14	arid	Having little or no rain; too dry or barren to support vegetation.	Khô cằn, vô vị, thiếu sức sống.
+15	aristocracy	The highest class in certain societies, especially those holding hereditary titles.	Tầng lớp quý tộc.
+16	armada	A fleet of warships.	Hạm đội tàu chiến.
+17	aromatic	Having a pleasant and distinctive smell.	Thơm, có mùi hương đặc trưng.
+18	arousal	The state of being physiologically or psychologically awake or reactive to stimuli.	Sự đánh thức, trạng thái hưng phấn hoặc kích thích.
+19	arraign	To call or bring someone before a court to answer a criminal charge.	Buộc tội, đưa ra tòa để luận tội.
+20	array	An impressive display or range of a particular type of thing.	Một dãy, một loạt sự sắp xếp ấn tượng.
+21	arrears	Money that is owed and should have been paid earlier.	Tiền nợ đọng, các khoản thanh toán quá hạn.
+22	arrest	To stop or check the progress of something; to seize by legal authority.	Ngăn chặn, làm dừng lại; bắt giữ bằng pháp luật.
+23	arrogance	An offensive display of superiority or self-importance; overbearing pride.	Sự kiêu ngạo, tính ngạo mạn.
+24	arroyo	A steep-sided gully or dry creek bed that fills with water after rain.	Con suối khô, rãnh nước cạn (thường ở vùng khô hạn).
+25	arsenal	A collection of weapons or a place where weapons and military equipment are stored.	Kho vũ khí, kho tàng quân dụng.
+26	articulate	Expressing oneself clearly and effectively; to pronounce words distinctly.	Ăn nói lưu loát, rõ ràng; phát âm rõ rệt.
+27	artifact	An object made by a human being, typically one of cultural or historical interest.	Hiện vật, cổ vật do con người tạo ra có giá trị lịch sử.
+28	artifice	The use of clever stratagems or trickery, especially to deceive others.	Mưu mẹo, kỹ xảo hoặc sự đánh lừa khéo léo.
+29	artisan	A worker in a skilled trade, especially one that involves making things by hand.	Nghệ nhân, thợ thủ công lành nghề.
+30	artless	Without guile or deception; natural, simple, and sincere.	Chân thật, chất phác, không khéo léo nhưng tự nhiên.
+31	ascendancy	A position of dominant power or influence.	Uy thế, vị thế thống trị hoặc ảnh hưởng vượt trội.
+32	ascertain	To find out definitely or learn with certainty	Xác minh, tìm hiểu chắc chắn
+33	ascetic	Practicing strict self-denial as a measure of personal and spiritual discipline	Khổ hạnh, tu khổ hạnh
+34	ascribe	To attribute something to a particular cause, source, or author	Gán cho, đổ tại cho
+35	aseptic	Free from contamination caused by harmful bacteria, viruses, or other microorganisms	Vô khuẩn, tiệt trùng
+36	ashen	Of the pale gray color of ash; very pale from illness or fear	Xám xịt, tái mét
+37	aspire	To direct one's hopes or ambitions toward achieving something.	Khao khát, hướng tới một mục tiêu lớn lao.
+38	assail	To attack someone physically or emotionally in a violent way.	Tấn công, chỉ trích dữ dội.
+39	assay	To examine or analyze a substance to determine its components.	Sự thí nghiệm, phân tích chất lượng (đặc biệt là kim loại).洞
+40	assent	The expression of approval or agreement.	Sự đồng ý, tán thành.
+41	assert	To state a fact or belief confidently and forcefully.	Khẳng định, xác nhận một cách quyết đoán.
+42	assessment	The evaluation or estimation of the nature, quality, or ability of someone or something.	Sự đánh giá, sự ước định
+43	assiduous	Showing great care, attention, and effort; diligent.	Siêng năng, cần mẫn
+44	assimilate	To take in and fully understand information or ideas; to absorb and integrate.	Đồng hóa, hấp thụ kiến thức
+45	assuage	To make an unpleasant feeling less intense; to satisfy an appetite or desire.	Làm dịu bớt, làm nguôi đi
+46	assumption	A thing that is accepted as true or as certain to happen, without proof.	Giả định, sự thừa nhận
+47	assurance	A statement intended to give confidence; a promise or guarantee.	Sự cam đoan, sự đảm bảo hoặc sự tự tin.
+48	asteroid	A small rocky body orbiting the sun, especially between Mars and Jupiter.	Tiểu hành tinh.
+49	astigmatism	A defect in the eye or lens preventing proper focus.	Chứng loạn thị.
+50	astral	Relating to, similar to, or coming from the stars.	Thuộc về các vì sao, thuộc tinh tú.
+51	astringent	Causing the contraction of skin cells; sharp or severe in manner.	Làm se (da); nghiêm khắc, sắc sảo.
+52	askance	with an attitude or look of suspicion or disapproval	nghi ngờ, dè bỉu
+53	askew	not in a straight or level position; crooked	nghiêng, xiên, lệch
+54	asperity	harshness of tone or manner	sự gay gắt, khắc nghiệt
+55	aspirant	a person who has ambitions to achieve something	người có khát vọng, người cầu tiến
+56	astronomical	Extremely large in size or amount; relating to astronomy.	Vô cùng lớn, khổng lồ; thuộc về thiên văn học.
+57	astute	Having the ability to accurately assess situations or people to one's advantage.	Sắc sảo, tinh khôn, nhạy bén.
+58	asunder	Apart or divided into separate pieces.	Rời ra từng mảnh, thành từng phần riêng biệt.
+59	asylum	Protection or shelter from danger, especially for political refugees.	Sự tị nạn, nơi trú ẩn an toàn.
+60	asymmetric	Having parts that fail to correspond to one another in shape or size.	Không đối xứng, bất đối xứng.
+61	atavism	The reappearance of a characteristic in an organism after several generations of absence.	Sự lại giống; sự xuất hiện trở lại của các đặc điểm tổ tiên xa xưa.
+62	atheistic	Disbelieving or lacking belief in the existence of God or gods.	Vô thần; không tin vào sự tồn tại của thần linh.
+63	atlas	A book or bound collection of maps	Tập bản đồ
+64	atone	To make amends or reparation for an offense or a crime	Chuộc lỗi
+65	atrocity	An extremely wicked or cruel act, typically involving physical violence	Sự tàn bạo
+66	atrophy	To waste away or decline in effectiveness due to underuse or neglect	Sự hao mòn hoặc teo đi
+67	attain	To succeed in achieving something that one has worked for	Đạt được
+68	attentive	Paying close attention to something; listening or watching carefully.	Chăm chú, lưu tâm, ân cần.
+69	attenuate	To reduce the force, effect, or value of something; to weaken.	Làm yếu đi, làm giảm bớt giá trị hoặc cường độ.
+70	attest	To provide or serve as clear evidence of something.	Chứng nhận, chứng thực, bằng chứng cho điều gì.
+71	attribute	To regard something as being caused by someone or something.	Quy cho, gán cho là do cái gì hoặc ai.
+72	attrition	The process of gradually reducing the strength or effectiveness of someone or something through sustained attack or pressure.	Sự hao mòn, sự giảm dần quân số hoặc sức mạnh.
+73	atypical	Not representative of a type, group, or class; unusual or irregular.	Không điển hình, khác thường, dị biệt.
+74	audacious	Showing a willingness to take surprisingly bold risks; daring.	Táo bạo, liều lĩnh, gan dạ.
+75	audit	An official inspection of an individual's or organization's accounts.	Kiểm toán, sự kiểm tra sổ sách kế toán.
+76	auditory	Relating to the sense of hearing.	Thuộc thính giác, liên quan đến khả năng nghe.
+77	augment	To make something greater by adding to it; increase.	Làm tăng lên, tăng cường, bổ sung.
+78	augury	A sign of what will happen in the future; an omen.	Điềm báo, sự tiên đoán.
+79	august	Respected and impressive; inspiring reverence or admiration.	Uy nghi, oai vệ, đáng kính trọng.
+80	aureole	A circle of light or brightness surrounding something, especially a deity.	Hào quang, quầng sáng rực rỡ.
+81	auroral	Relating to or resembling the dawn or the aurora borealis.	Thuộc về bình minh hoặc hiện tượng cực quang.
+82	auspicious	Conducive to success; favorable or promising.	Có điềm tốt, thuận lợi, hứa hẹn sự thành công.
+83	austere	Severe or strict in manner, attitude, or appearance; simple and unadorned.	Khắc khổ, mộc mạc, hoặc nghiêm khắc trong lối sống và vẻ bề ngoài.
+84	authenticate	To prove or show that something is true, genuine, or valid.	Xác thực, chứng minh điều gì đó là thật hoặc có giá trị pháp lý.
+85	authoritarian	Favoring or enforcing strict obedience to authority, especially that of the government.	Độc đoán, cưỡng chế tuân thủ tuyệt đối vào quyền lực hoặc chính quyền.
+86	authoritative	Commanding, reliable, and showing expertise or power.	Có thẩm quyền, quyết đoán và đáng tin cậy.
+87	autocratic	Ruling with absolute power and or authority; dictatorial.	Độc đoán, chuyên chế, có quyền lực tuyệt đối.
+88	automaton	A moving mechanical device made in imitation of a human being.	Người máy, thiết bị tự động hoặc người làm việc máy móc.
+89	autonomous	Acting independently or having the freedom to do so.	Tự chủ, độc lập, có quyền tự trị.
+90	autopsy	A postmortem examination to discover the cause of death.	Khám nghiệm tử thi để xác định nguyên nhân cái chết.
+91	auxiliary	providing supplementary or additional help and support	phụ trợ, bổ trợ
+92	avalanche	a large mass of snow, ice, or rocks falling rapidly down a mountainside	tuyết lở
+93	avarice	extreme greed for wealth or material gain	sự tham lam, tính hám lợi
+94	avenge	to inflict harm in return for an injury or wrong done to oneself or others	trả thù, báo thù
+95	averse	having a strong dislike of or opposition to something	ngần ngại, ác cảm, không thích
+96	aversion	A strong feeling of dislike or opposition toward something.	Sự ghét, sự ác cảm hoặc không thích điều gì đó.
+97	avert	To turn away one's eyes or thoughts, or to prevent something bad.	Ngoảnh đi, quay đi hoặc ngăn chặn một điều xấu xảy ra.
+98	aviary	A large cage or enclosure for keeping birds.	Chuồng chim lớn hoặc nhà nuôi chim.
+99	avid	Having or showing a keen interest in or enthusiasm for something.	Khao khát, nồng nhiệt hoặc say mê cái gì đó.
+100	avocation	A hobby or minor occupation pursued in addition to one's main work.	Sở thích, công việc phụ hoặc nghề tay trái.
+101	avow	To assert or confess openly and directly.	Thừa nhận hoặc tuyên bố công khai.
+102	avuncular	Kind and friendly toward a younger person, like an uncle.	Có lòng tốt và thân thiện như một người chú, người bác.
+103	awe	A feeling of reverential respect mixed with fear or wonder.	Sự kính sợ, kinh ngạc xen lẫn tôn kính.
+104	awry	Away from the appropriate, planned, or expected course.	Hỏng, không như ý muốn, bị xiên xẹo.
+105	axiom	A statement or proposition which is regarded as being self-evidently true.	Chân lý hiển nhiên, tiên đề.
+106	azure	Bright blue in color, like a cloudless sky	Màu xanh da trời, xanh ngắt
+107	babble	To talk rapidly and continuously in a foolish or incomprehensible way	Nói bập bẹ, nói lảm nhảm hoặc ríu rít
+108	bacchanalian	Characterized by drunken revelry or riotous festivity	Say sưa chè chén, tiệc tùng thác loạn
+109	badger	To repeatedly ask or annoy someone to do something.	Làm phiền, mè nheo hoặc đeo bám để nài nỉ.
+110	badinage	Humorous or witty conversation; playful banter.	Sự đùa cợt, giễu cợt nhẹ nhàng và dí dỏm.
+111	baffle	To totally bewilder or perplex someone.	Làm ai đó hoàn toàn bối rối hoặc khó hiểu.
+112	bait	To deliberately annoy or taunt someone; food used to entice prey.	Chọc ghẹo, khiêu khích hoặc dùng mồi nhử.
+113	baleful	Threatening harm; menacing or destructive.	Đe dọa, hiểm ác hoặc có hại.
+114	balk	To hesitate or be unwilling to accept an idea or undertaking.	Chùn bước, do dự hoặc từ chối thực hiện.
+115	ballast	Heavy material used to provide stability to a ship or structure.	Vật nặng làm đối trọng để giữ thăng bằng.
+116	balm	A fragrant ointment used to heal or soothe the skin.	Dầu cù là, thuốc mỡ giảm đau hoặc vật an ủi.
+117	balmy	Characterized by pleasantly warm and mild weather.	Êm dịu, dễ chịu (thường nói về thời tiết).
+118	banal	So lacking in originality as to be obvious and boring.	Tầm thường, vô vị, thiếu tính độc đáo.
+119	bandy	To pass back and forth; to exchange words competitively or carelessly.	Bàn tán, truyền đi truyền lại, đấu khẩu.
+120	bane	A cause of continuous great distress, annoyance, or ruin.	Nỗi ám ảnh, nguyên nhân gây ra sự khổ sở hoặc tai ương.
+121	bantering	Characterized by good-humored, playful, and teasing remarks.	Nói đùa, giễu cợt một cách hóm hỉnh.
+122	barb	A sharp projection or a biting, critical remark.	Ngạnh, lời mỉa mai châm chọc.
+123	bard	A poet, traditionally one who recites epics and associated with a particular culture.	Thi sĩ, người ngâm thơ sử thi.
+124	baroque	Extremely ornate, complex, or detailed in style, especially referring to 17th-century art and architecture.	Phong cách cầu kỳ, hoa mỹ và chi tiết; thuộc về thời kỳ kiến trúc Baroque.
+1	bestow	To confer or present an honor, right, or gift	ban tặng, trao cho
+2	betroth	To formally promise to marry someone.	Hứa hôn, đính hôn
+3	barrage	An overwhelming quantity or continuous delivery of something, such as questions or criticisms.	Sự dồn dập, loạt (câu hỏi, lời chỉ trích) liên tiếp.
+4	barren	Too poor to produce much or any vegetation; unproductive or infertile.	Cằn cỗi, không sinh sản được hoặc không màu mỡ.
+5	barricade	An improvised barrier erected across a street to prevent or delay the movement of opposing forces.	Chướng ngại vật, rào chắn để ngăn chặn hoặc bảo vệ.
+6	barterer	A person who exchanges goods or services for other goods or services without using money.	Người trao đổi hàng lấy hàng, người thực hiện giao dịch không dùng tiền mặt.
+7	bask	To lie exposed to warmth and light, typically from the sun, for relaxation and pleasure.	Phơi mình, tắm nắng hoặc tận hưởng sự ấm áp, dễ chịu.
+8	bastion	A strong defense or a person or institution that upholds particular principles.	Pháo đài, thành trì hoặc người bảo vệ một nguyên tắc nào đó.
+9	bate	To lessen the force or intensity of; to moderate.	Kiềm chế, làm giảm bớt cường độ hoặc lực lượng.
+10	bauble	A small, showy trinket or decoration of little value.	Đồ trang sức rẻ tiền, vật trang trí hào nhoáng nhưng ít giá trị.
+11	bawdy	Dealing with sexual matters in a comical or humorously indecent way.	Tục tĩu, dâm ô theo cách hài hước.
+12	beam	To transmit a signal or to smile radiantly; a long piece of timber.	Phát tín hiệu, cười rạng rỡ hoặc một thanh dầm/xà nhà.
+13	beatific	Feeling or expressing blissful happiness.	Ban phước, hạnh phúc rạng ngời.
+14	beatitude	Supreme blessedness or a state of utmost bliss.	Hạnh phúc tối thượng, phúc lành.
+15	bedizen	To dress up or decorate in a gaudy, tasteless manner.	Trang điểm lòe loẹt, diện đồ diêm dúa.
+16	bedraggle	To make something dirty, wet, or limp.	Làm bẩn thỉu, làm ướt sũng.
+17	beeline	A straight direct course between two places.	Đường thẳng nhất, con đường nhanh nhất.
+18	befuddle	To confuse or perplex someone greatly.	Làm bối rối, làm lúng túng hoặc làm cho ai đó ngây dại.
+19	beget	To give rise to; to bring about or produce.	Gây ra, tạo ra hoặc là cha đẻ của điều gì đó.
+20	begrudge	To envy someone's possession or enjoyment of something.	Ghen tị, đố kỵ hoặc cho rằng ai đó không xứng đáng hưởng điều gì.
+21	beguile	To charm or enchant someone, sometimes in a deceptive way.	Quyến rũ, mê hoặc hoặc đánh lừa một cách ngọt ngào.
+22	behemoth	A huge or monstrous creature, or something of enormous size and power.	Thứ gì đó khổng lồ, to lớn hoặc một tổ chức cực kỳ quyền lực.
+23	belabor	To explain or go over something excessively or to an absurd degree.	Giải thích dông dài hoặc lặp đi lặp lại quá mức cần thiết.
+24	bogus	Not genuine or true; fake.	Giả mạo, không có thật.
+25	belated	Coming or happening later than should have been the case.	Đến muộn hoặc chậm trễ hơn so với thời điểm mong đợi.
+26	beleaguer	To surround with military forces or to cause many problems for someone.	Bao vây bằng quân đội hoặc gây ra nhiều khó khăn, áp lực cho ai đó.
+27	belie	To give a false impression of something or contradict it.	Gây ấn tượng sai lầm hoặc mâu thuẫn với sự thật.
+28	belittle	To make someone or something seem unimportant or insignificant.	Coi nhẹ, hạ thấp giá trị hoặc xem thường.
+29	bellicose	Demonstrating aggression and a willingness to fight.	Hiếu chiến, thích gây hấn hoặc tranh đấu.
+30	belligerent	Hostile and aggressive; engaged in a war or conflict.	Hung hăng, thù địch hoặc đang tham gia chiến tranh.
+31	bemoan	To express deep grief or regret about something.	Than vãn, thương tiếc hoặc phàn nàn về điều gì đó.
+32	bemused	Confused or puzzled; filled with bewilderment.	Làm cho sửng sốt, kinh ngạc hoặc làm cho lúng túng.
+33	benediction	The utterance or bestowing of a blessing, especially at the end of a religious service.	Lời chúc phước, lời cầu phúc trong các nghi lễ tôn giáo.
+34	benefactor	A person who gives money or other help to a person or cause.	Nhà hảo tâm, người làm ơn hoặc người bảo trợ.
+35	beneficial	Favorable or advantageous; resulting in good.	Có lợi, hữu ích hoặc mang lại điều tốt lành.
+36	beneficiary	A person who derives advantage from something, especially a trust, will, or life insurance policy.	Người thụ hưởng hoặc người được hưởng quyền lợi từ di chúc, bảo hiểm.
+37	benevolent	Kind, generous, and desiring to do good for others.	Nhân từ, rộng lượng, hay làm việc thiện.
+38	benign	Gentle and kindly; not harmful in effect.	Lành tính, nhân hậu, không gây hại.
+39	bent	A natural talent or inclination for something.	Năng khiếu, khuynh hướng tự nhiên.
+40	bequeath	To leave property or money to someone in a will.	Để lại, chúc thư, truyền lại cho đời sau.
+41	berate	To scold or criticize someone angrily and at length.	Mắng nhiếc, chỉ trích gay gắt.
+42	bereavement	The state of being deprived of a loved one through a profound loss, especially death.	Nỗi đau buồn do mất người thân; sự mất mát.
+43	bereft	Deprived of or lacking something, especially a non-material asset; lonely and abandoned.	Bị tước đoạt; thiếu thốn (cái gì đó); cô độc.
+44	berserk	Out of control with anger or excitement; wild or frenzied.	Phát điên; cuồng loạn; mất kiểm soát.
+45	beseech	To ask someone urgently and fervently to do something; to implore.	Van xin; cầu khẩn; nài nỉ.
+46	beset	To be troubled or threatened persistently; to surround or attack on all sides.	Bủa vây; gây rắc rối liên tục; bao vây.
+47	besiege	To surround a place with armed forces in order to capture it	bao vây, vây hãm
+48	besmirch	To damage the reputation of someone or something in the opinion of others	bôi nhọ, làm bẩn danh tiếng
+49	bestial	Savagely cruel and depraved, like an animal	có tính thú vật, dã man
+50	betoken	To be a sign of something; to indicate	là điềm báo, biểu thị
+51	betray	To be disloyal to someone or reveal confidential information to an enemy.	Phản bội, làm lộ bí mật
+52	bevy	A large group of people or things of a particular kind.	Một nhóm lớn, một bầy
+53	biased	Unfairly showing prejudice for or against someone or something.	Chệch hướng, thành kiến, thiên vị
+54	bicameral	Having two separate legislative chambers or houses.	(Hệ thống nghị viện) có hai viện
+55	bicker	To argue about petty and trivial matters.	Cãi vã vụn vặt về những chuyện không quan trọng.
+56	biennial	Taking place every other year or lasting for two years.	Xảy ra hai năm một lần hoặc kéo dài hai năm.
+57	bigotry	Intolerance toward those who hold different opinions or beliefs.	Sự cố chấp, cực đoan đối với ý kiến hoặc niềm tin khác biệt.
+58	bilious	Affected by nausea or vomiting; extremely unpleasant or bad-tempered.	Cáu gắt, khó tính hoặc có liên quan đến bệnh gan mật.
+59	bilk	To obtain or withhold money from someone by deceit or without justification.	Lừa đảo, quỵt nợ hoặc chiếm đoạt tiền một cách bất chính.
+60	billowing	Swelling outward or puffing up, typically due to wind or air.	Cuồn cuộn, dâng lên như sóng
+61	bivouac	A temporary camp without tents or cover, used especially by soldiers.	Trạm nghỉ tạm thời, lán trại dã chiến
+62	bizarre	Very strange or unusual, especially so as to cause interest or amusement.	Kỳ quái, lạ lùng
+63	blanch	To turn white or pale, typically from shock, fear, or cooking.	Tái đi, làm cho trắng hoặc chần qua nước sôi
+64	bland	Lacking strong features or characteristics and therefore uninteresting.	Nhạt nhẽo, vô vị, không có gì đặc sắc
+65	blandishment	A flattering or pleasing statement or action used to persuade someone gently.	Lời nịnh hót, sự ngọt ngào dỗ dành
+66	blare	To make a loud, harsh, and typically unpleasant sound.	Tiếng om sòm, kêu inh ỏi
+67	blasphemy	The act or offense of speaking sacrilegiously about God or sacred things.	Lời báng bổ, sự xúc phạm thần linh
+68	blatant	Done openly and unashamedly; completely obvious and conspicuous.	Rành rành, trắng trợn, hiển nhiên
+69	bleak	Lacking vegetation or exposed to elements; cold, miserable, or hopeless.	Trống trải, lạnh lẽo, ảm đạm
+70	blighted	damaged, spoiled, or suffering from a severe negative condition	bị tàn lụi, bị ảnh hưởng xấu hoặc hư hỏng
+71	blithe	showing a casual and cheerful indifference considered to be callous or improper	vô tư, thanh thản một cách hờ hững
+72	bloated	swollen with fluid or gas; excessively large or wealthy	sưng phồng, phù nề hoặc quá tải
+73	bludgeon	to hit with a heavy object; to force or bully someone	đánh bằng dùi cui, ép buộc hoặc bắt nạt
+74	bluff	an attempt to deceive someone into believing one can or will do something	sự lừa bịp, lời hù dọa hoặc thái độ giả vờ
+75	blunder	A stupid or careless mistake.	Sai lầm ngớ ngẩn hoặc bất cẩn.
+76	blurt	To say something suddenly and without thinking.	Thốt ra một cách bất ngờ, thiếu suy nghĩ.
+77	bluster	To talk in a loud, aggressive, or indignant way with little effect.	Nói huênh hoang, dọa dẫm hoặc quát tháo.
+78	bode	To be an omen of a particular outcome.	Báo hiệu, là điềm báo cho điều gì đó.
+79	bohemian	Living an unconventional life, often involved in the arts	Nghệ sĩ, phóng túng, không theo khuôn phép xã hội
+80	boisterous	Noisy, energetic, and cheerful; rowdy	Náo nhiệt, huyên náo, ồn ào và đầy năng lượng
+81	bolster	To support or strengthen; to prop up	Ủng hộ, bồi đắp, củng cố
+82	bolt	To move suddenly and rapidly; to fasten with a metal pin	Lao đi bất thình lình; chốt cửa, cài then
+83	bombardment	A continuous attack with bombs, shells, or missiles.	Sự oanh tạc hoặc tấn công dồn dập.
+84	bombastic	High-sounding but with little meaning; inflated.	Khoa trương, đao to búa lớn.
+85	booming	Having a period of great prosperity or rapid economic growth.	Phát triển nhanh chóng, bùng nổ.
+86	boon	A thing that is helpful or beneficial.	Lợi ích, ơn huệ, vật may mắn.
+87	boorish	Rough and bad-mannered; coarse.	Thô lỗ, cục cằn, kém văn hóa.
+88	boundless	having no limits; infinite or vast	vô hạn, không biên giới
+89	bountiful	large in quantity; abundant or generous	dồi dào, phong phú, hào phóng
+90	bourgeois	belonging to the middle class; conventional or materialistic	thuộc tầng lớp trung lưu, thực dụng
+91	bovine	relating to cattle; slow-moving or dull	thuộc họ bò, chậm chạp, đần độn
+92	bowdlerize	to remove offensive or improper parts from a text	lược bỏ những đoạn không phù hợp (trong sách)
+93	boycott	To refuse to buy or participate in something as a form of protest.	Tẩy chay, phản đối bằng cách không sử dụng sản phẩm hoặc dịch vụ.
+94	braggart	A person who boasts about their achievements or possessions.	Người khoe khoang, kẻ hay đi khoác lác về bản thân.
+95	brandish	To wave something, especially a weapon, as a threat or in excitement.	Khua, vung vẩy vũ khí hoặc vật gì đó một cách đe dọa.
+96	bravado	A bold manner or a show of boldness intended to impress or intimidate.	Sự phô trương lòng dũng cảm, sự làm bộ bạo dạn để gây ấn tượng.
+97	brawn	Physical strength in contrast to intelligence.	Sức mạnh cơ bắp, thể lực khỏe mạnh đối lập với trí tuệ.
+98	brazen	Bold and without shame; shameless.	Trơ trẽn, vô liêm sỉ hoặc táo bạo.
+99	breach	An act of breaking a law, agreement, or code of conduct.	Sự vi phạm hợp đồng, luật lệ hoặc sự phá vỡ mối quan hệ.
+100	breadth	The width of something; a wide range or extent.	Bề ngang, chiều rộng hoặc sự hiểu biết sâu rộng.
+101	brevity	Concise and exact use of words in writing or speech.	Sự ngắn gọn, súc tích trong lời nói hoặc văn bản.
+102	brindled	Brownish or tawny color of animal fur, with streaks of other color.	Có vằn, có đốm màu nâu hoặc xám (thường nói về lông thú).
+103	bristling	Showing irritation or aggressiveness; standing up stiffly like bristles.	Dựng đứng, đầy rẫy hoặc thể hiện sự giận dữ.
+104	brittle	Hard but liable to break or shatter easily.	Giòn, dễ gãy, dễ vỡ.
+105	broach	To bring up a sensitive or difficult subject for discussion	Đề cập, bắt đầu thảo luận một chủ đề nhạy cảm
+106	brochure	A small book or magazine containing pictures and information about a product	Cuốn sách nhỏ quảng cáo hoặc giới thiệu thông tin
+107	brooch	An ornament fastened to clothing with a hinged pin and catch	Trâm cài áo
+108	browbeat	To intimidate someone, typically into doing something, with stern or abusive words	Hăm dọa, nạt nộ để ép buộc người khác
+109	browse	To survey goods for sale or read through data in a relaxed way	Xem lướt qua, duyệt nội dung hoặc hàng hóa
+110	brunt	The main force or physical impact of an attack or blow.	Gánh nặng chính, sức ép nặng nề nhất
+111	brusque	Abrupt or offhand in speech or manner.	Cộc lốc, thô lỗ, khiếm nhã
+112	buccaneer	A pirate, originally one operating in the Caribbean.	Hải tặc, kẻ cướp biển
+113	bucolic	Relating to the pleasant aspects of the countryside and country life.	Thanh bình, thuộc về đồng quê
+114	buffet	To strike repeatedly and violently, especially of wind or waves.	Vùi dập, đánh mạnh liên tiếp
+115	buffoonery	Amusing or ridiculous behavior; acting like a clown.	Trò hề, hành vi lố bịch hoặc gây cười.
+116	bullion	Gold or silver in the form of bars or ingots.	Vàng hoặc bạc thỏi.
+117	bulwark	A defensive wall or person/thing serving as a protection.	Thành lũy, bức tường bảo vệ hoặc vật che chắn.
+118	bumptious	Offensively self-assertive or excessively proud; pushy.	Tự mãn, hợm hĩnh hoặc kiêu ngạo quá mức.
+119	bungalow	A small house with a single story or low attic.	Nhà gỗ một tầng, nhà có gác lửng thấp.
+120	bungle	To carry out a task clumsily or incompetently	Làm hỏng việc do vụng về hoặc thiếu hụt năng lực
+121	buoyant	Able to float or showing a cheerful and optimistic attitude	Có khả năng nổi hoặc có tâm trạng vui vẻ, lạc quan
+122	bureaucracy	A complex system of administration characterized by many rules and procedures	Hệ thống quan liêu với nhiều thủ tục hành chính phức tạp
+123	burgeon	To grow, expand, or flourish rapidly	Phát triển nhanh chóng, đâm chồi nảy lộc
+1	burlesque	An absurd or exaggerated imitation of something, often for comedic effect	Sự giễu nhại, kịch hài hước bắt chước quá lố
+2	burly	Strong and heavily built; muscular	Vạm vỡ, lực lưỡng, cường tráng
+3	burnish	To polish something, especially metal, by rubbing to make it shiny	Đánh bóng, làm cho láng bóng Surface
+4	centrifugal	Moving or tending to move away from a center	Ly tâm (hướng ra xa tâm)
+5	bustle	To move in an energetic or noisy manner; busy activity	Hối hả, náo nhiệt, sự bận rộn ồn ào
+6	buttress	A source of defense or support; to strengthen or reinforce	Điểm tựa, sự hỗ trợ, củng cố (lập luận hoặc cấu trúc)
+7	buxom	(Of a woman) healthily plump, full-bosomed, and attractive.	Đầy đặn, nảy nở, có sức sống (thường nói về phụ nữ).
+8	cabal	A small group of people who plan secret plots or schemes.	Băng đảng, phe nhóm bí mật đang âm mưu điều gì đó.
+9	cache	A hiding place, or the objects stored in such a place.	Nơi cất giấu bí mật hoặc kho tàng trữ.
+10	cacophonous	Involving or producing a harsh, discordant mixture of sounds.	Âm thanh chói tai, hỗn tạp và khó nghe.
+11	cadaver	A dead body, especially one intended for dissection.	Tử thi, xác chết (thường dùng trong y học hoặc nghiên cứu).
+12	cadaverous	resembling a corpse in being very pale, thin, or bony	xanh xao như xác chết, gầy gò hốc hác
+13	cadence	a rhythmic sequence or flow of sounds in language	nhịp điệu, ngữ điệu, sự lên bổng xuống trầm
+14	cajole	to persuade someone to do something by sustained coaxing or flattery	nịnh nọt, dụ dỗ, thuyết phục khéo léo
+15	calamity	an event causing great and often sudden damage or distress; a disaster	tai họa, tai ương, thiên tai thảm khốc
+16	calculated	done with full awareness of the likely consequences; intentional	có tính toán trước, có dự tính, cố ý
+17	caldron	A large metal pot used for cooking over an open fire	Nồi lớn, vạc
+18	caliber	The quality of someone's character or the level of their ability	Năng lực, phẩm chất, tầm vóc
+19	calligraphy	The art of producing decorative handwriting or lettering with a pen or brush	Thư pháp
+20	callous	Showing or having a cruel and coldhearted disregard for others	Vô tâm, nhẫn tâm, nhám (da)
+21	callow	Inexperienced and immature, especially of a young person	Non nớt, thiếu kinh nghiệm
+22	calorific	relating to the amount of energy or heat produced by food or fuel	tạo nhiệt, sinh nhiệt
+23	calumny	the making of false and defamatory statements about someone in order to damage their reputation	sự vu khống, lời phỉ báng
+24	camaraderie	Mutual trust and friendship among people who spend a lot of time together.	Tình bạn thân thiết, sự gắn bó giữa những người đồng chí.
+25	cameo	A small character part in a play or movie played by a distinguished actor.	Vai diễn khách mời của người nổi tiếng hoặc hình chạm khắc trên đá quý.
+26	camouflage	Disguising personnel, equipment, or machinery by making them blend with the surroundings.	Sự ngụy trang để hòa lẫn vào môi trường xung quanh.
+27	candor	The quality of being open, honest, and sincere in expression.	Sự ngay thẳng, thật thà và bộc trực.
+28	canine	Relating to or resembling dogs or the family of animals that includes dogs.	Thuộc về giống chó hoặc có liên quan đến chó.
+29	canny	Having or showing shrewdness and good judgment, especially in money or business matters.	Khôn ngoan, thận trọng, đặc biệt là trong các vấn đề tiền bạc hoặc kinh doanh.
+30	catalyst	Something that causes or hastens a change or event	Chất xúc tác, nhân tố thúc đẩy sự thay đổi
+31	cant	Hypocritical and sanctimonious talk, typically of a moral, religious, or political nature.	Lời nói đạo đức giả, thường mang tính chất tôn giáo hoặc chính trị.
+32	cantankerous	Bad-tempered, argumentative, and uncooperative.	Khó tính, hay gắt gỏng và khó bảo.
+33	cantata	A medium-length narrative piece of music for voices with instrumental accompaniment.	Một bản nhạc kịch ngắn dành cho hợp xướng kèm theo nhạc cụ.
+34	canter	A three-beat gait of a horse or other quadruped between a trot and a gallop.	Bước chạy thong thả của ngựa, nằm giữa bước chạy lúp xúp và phi nước đại.
+35	canto	A major section or division of a long poem	Khổ thơ hoặc chương trong một bài thơ dài
+36	canvass	To examine in detail or seek votes or opinions from a group	Thăm dò ý kiến, kêu gọi bầu cử hoặc xem xét chi tiết
+37	capacious	Having a lot of space inside; roomy	Rộng rãi, có sức chứa lớn
+38	capitulate	To cease to resist an opponent or an unwelcome demand; surrender	Đầu hàng, ngừng kháng cự theo các điều kiện thỏa hiệp
+39	caprice	A sudden and unaccountable change of mood or behavior	Sự thất thường, tính khí nắng mưa thất thường
+40	capricious	Given to sudden and unaccountable changes of mood or behavior.	Thất thường, dễ thay đổi đột ngột.
+41	caption	A title or brief explanation accompanying an illustration or photograph.	Chú thích, lời thuyết minh ngắn gọn dưới hình ảnh.
+42	captivate	To attract and hold the interest and attention of someone.	Mê hoặc, quyến rũ, làm say đắm.
+43	carat	A unit of weight for precious stones or degree of purity for gold.	Đơn vị trọng lượng đá quý hoặc độ tinh khiết của vàng.
+44	cardinal	Of greatest importance; fundamental or primary.	Cốt yếu, cơ bản, quan trọng nhất.
+45	cardiologist	A doctor who specializes in the study and treatment of heart diseases.	Bác sĩ chuyên khoa tim mạch.
+46	careen	To move swiftly and in an uncontrolled way in a specific direction.	Chao đảo, lao nhanh một cách mất kiểm soát.
+47	caricature	A picture or description exaggerating someone's features for comic or grotesque effect.	Tranh biếm họa hoặc sự mô tả phóng đại.
+48	carnage	The killing of a large number of people, often in war or a violent event.	Sự tàn sát, cảnh chém giết đẫm máu.
+49	carnal	Relating to physical, especially sexual, needs and activities	Thuộc về xác thịt, nhục dục
+50	carnivorous	Feeding on other animals; meat-eating	Ăn thịt, động vật ăn thịt
+51	carping	Difficult to please; critical in a petty and nagging way	Hay chỉ trích, xoi mói những việc nhỏ nhặt
+52	cartographer	A person who draws or produces maps	Người vẽ bản đồ
+53	cascade	A small waterfall or a large amount of something falling together	Thác nước nhỏ hoặc sự đổ xuống hàng loạt
+54	castigate	To reprimand or punish someone severely	Trừng phạt, khiển trách gay gắt
+55	casualty	A person killed or injured in a war or accident	Thương vong, nạn nhân bị thương hoặc tử vong
+56	cataclysm	A large-scale and violent event in the natural world	Biến cố lớn, thảm họa thiên nhiên dữ dội
+57	catapult	To hurl or launch something in a specified direction	Bắn vọt lên, quăng mạnh hoặc máy phóng
+58	cataract	A large waterfall or a medical condition where the eye lens becomes cloudy.	Thác nước lớn hoặc bệnh đục thủy tinh thể.
+59	ceremonious	Excessively polite or formal; following strict rituals	Trịnh trọng, kiểu cách, đúng nghi thức
+60	catastrophe	An event causing great and usually sudden damage or suffering; a disaster.	Thảm họa, tai ương bất ngờ và nghiêm trọng.
+61	catcall	A loud, sexually suggestive whistle or comment directed at someone.	Tiếng huýt sáo hoặc lời trêu ghẹo khiếm nhã đối với người đi đường.
+62	catechism	A summary of religious doctrine often in the form of questions and answers.	Sách giáo lý, các câu hỏi và trả lời tóm tắt về tôn giáo.
+63	categorical	Unambiguously explicit and direct; absolute and without exceptions.	Tuyệt đối, rõ ràng và không mập mờ.
+64	cater	To provide food, services, or entertainment for a specific group or need.	Cung cấp thực phẩm, dịch vụ hoặc phục vụ nhu cầu của một nhóm cụ thể.
+65	catharsis	The process of releasing strong or repressed emotions through a particular experience.	Sự giải tỏa những cảm xúc mạnh mẽ hoặc bị dồn nén thông qua một trải nghiệm cụ thể.
+66	catholic	Broad or wide-ranging in tastes, interests, or specialized areas.	Rộng rãi, bao quát, đa dạng
+67	caucus	A meeting of members of a political party to choose candidates or decide policy.	Nhóm họp kín của một đảng chính trị
+68	caulk	To seal gaps or seams to make them watertight or airtight.	Xảm, trét kín các khe hở
+69	causal	Relating to or acting as a cause.	Thuộc về nguyên nhân, hệ quả
+70	caustic	Able to burn or corrode by chemical action; sarcastic in a scathing way.	Ăn mòn, châm chọc, cay nghiệt
+71	cavalcade	A formal procession of people walking, on horseback, or in vehicles.	Đoàn người, xe hoặc ngựa diễu hành trang trọng.
+72	cavalier	Showing a lack of proper concern; dismissive or arrogant.	Thái độ khinh khỉnh, thiếu quan tâm hoặc kiêu ngạo.
+73	cavil	To make petty or unnecessary objections.	Cãi bướng, bắt bẻ những chuyện vụn vặt.
+74	cede	To give up power or territory, often by treaty.	Nhượng lại quyền lực hoặc lãnh thổ.
+75	celebrated	Well known and widely admired or respected.	Nổi tiếng, lừng danh và được ngưỡng mộ rộng rãi.
+76	celerity	Swiftness of movement; speed.	Sự nhanh chóng, tốc độ.
+77	celestial	Positioned in or relating to the sky, or outer space.	Thuộc về bầu trời, thiên thượng.
+78	celibate	Abstaining from marriage and sexual relations, typically for religious reasons.	Độc thân, tiết dục.
+79	censor	An official who examines material to suppress unacceptable parts.	Người kiểm duyệt.
+80	censorious	Severely critical of others.	Hay chỉ trích, khắt khe.
+81	censure	Strong expression of disapproval or official rebuke	Sự phê bình nghiêm khắc hoặc chỉ trích chính thức
+82	centigrade	A scale of temperature measurement where water freezes at 0 and boils at 100	Thang nhiệt độ Celsius (độ C)
+83	centripetal	Moving or tending to move toward a center	Hướng tâm (hướng về phía tâm)
+84	centurion	An officer in the ancient Roman army commanding a group of one hundred soldiers	Bách nhân đội trưởng (sĩ quan chỉ huy 100 quân trong quân đội La Mã)
+85	cerebral	Relating to the brain or intellect rather than emotions	Thuộc về trí tuệ hoặc não bộ
+86	cerebration	The act of thinking or using one's mind	Sự suy nghĩ, hoạt động trí óc
+87	certitude	Absolute certainty or conviction that something is true	Sự chắc chắn tuyệt đối
+88	cessation	The process of ending or being brought to a stop	Sự chấm dứt, sự dừng lại
+89	cession	The formal giving up of rights, property, or territory	Sự nhượng lại, sự bàn giao (quyền lợi, lãnh thổ)
+90	chafe	To make sore by rubbing against something; to feel irritation	Làm trầy xước do cọ xát; cảm thấy khó chịu, bực bội
+91	chaff	The husks of corn or other seed separated by winnowing	Vỏ trấu; vật không có giá trị, đồ bỏ đi
+92	chaffing	The act of teasing someone in a lighthearted, mocking way	Sự trêu chọc, sự giễu cợt một cách thân thiện
+93	chagrin	Distress or embarrassment at having failed or been humiliated.	Sự chán nản, thất vọng hoặc hổ thẹn vì thất bại.
+94	chalice	A large cup or goblet, typically used for drinking wine in Christian rituals.	Cái chén thánh, ly lớn thường dùng trong nghi lễ.
+95	chameleon	A lizard that changes color; a person who changes their behavior to please others.	Tắc kè hoa; người hay thay đổi để thích nghi với hoàn cảnh.
+96	champion	A person who has defeated all rivals; to vigorously support a cause.	Nhà vô địch; người đấu tranh bảo vệ cho một lý tưởng.
+97	charisma	Compelling attractiveness or charm that can inspire devotion in others.	Sức lôi cuốn, uy tín cá nhân tạo ra sự thu hút mãnh liệt.
+98	charlatan	A person falsely claiming to have a special knowledge or skill; a fraud.	Kẻ lừa đảo, người giả danh có kiến thức chuyên môn.
+99	chary	Cautiously or suspiciously reluctant to do something.	Thận trọng, dè dặt, cảnh giác.
+100	chasm	A deep fissure in the earth, rock, or another surface; a profound difference.	Vực sâu, kẽ nứt sâu; sự khác biệt lớn về tư tưởng.
+101	chassis	The base frame of a motor vehicle or other wheeled object.	Khung gầm xe, bộ khung cơ bản của máy móc.
+102	chaste	Abstaining from extramarital, or from all, sexual intercourse; simple and unadorned.	Trong trắng, đức hạnh; giản dị, không phô trương.
+103	chasten	To correct through punishment or suffering; to subdue or moderate.	Trừng phạt để uốn nắn, làm cho khiêm tốn hoặc tự kiềm chế hơn.
+104	chastise	To criticize severely or punish for misbehavior.	Chỉ trích gay gắt hoặc trừng phạt nghiêm khắc.
+105	chauvinist	A person displaying excessive and irrational patriotism or superiority.	Người theo chủ nghĩa vị kỷ, sô vanh hoặc tin vào sự ưu việt của phe mình.
+106	check	To stop or slow down the progress of something.	Ngăn chặn, kìm hãm hoặc kiểm soát sự phát triển của cái gì.
+107	checkered	Marked by periods of varied fortune or disreputable incidents.	Thăng trầm, sóng gió hoặc có nhiều vết nhơ (thường nói về sự nghiệp).
+108	cherubic	Having the innocent and chubby beauty of a child or an angel.	Ngây thơ, mũm mĩm, đáng yêu như thiên thần.
+109	chicanery	The use of trickery or deception to achieve a political, financial, or legal purpose.	Mưu đồ, sự lừa dối gian xảo để đạt được mục đích.
+110	chide	To scold or rebuke someone mildly.	Quở trách, mắng mỏ một cách nhẹ nhàng.
+111	chimerical	Existing only in the imagination; unrealistic or wildly fanciful.	Hão huyền, viển vông, không thực tế.
+112	chisel	To cut or shape wood or stone; also used to mean cheating someone.	Cái đục; hành động đục đẽo hoặc lừa bịp ai đó.
+113	choleric	Easily angered or irritable; bad-tempered.	Dễ nổi nóng, hay cáu kỉnh.
+114	choreography	The sequence of steps and movements in dance or figure skating.	Nghệ thuật biên đạo múa hoặc dàn dựng các động tác nhảy.
+115	chortle	To chuckle gleefully or give a breathy, satisfied laugh.	Cười nắc nẻ, cười khoái chí một cách thỏa mãn.
+116	chronic	Persisting for a long time or constantly recurring.	Kéo dài kinh niên, mãn tính hoặc lặp đi lặp lại liên tục.
+117	chronicle	A factual written account of important or historical events in order of occurrence.	Biên niên sử hoặc ghi chép các sự kiện theo trình tự thời gian.
+118	churlish	Rude in a mean-spirited and surly way.	Thô lỗ, mất lịch sự và khó gần.
+119	cipher	A secret or disguised way of writing; a code.	Mật mã hoặc cách viết để che giấu thông tin.
+120	circuitous	Longer than the most direct way; roundabout.	Quanh co, vòng vèo, không trực tiếp.
+121	circumlocution	The use of many words where fewer would do, especially in a deliberate attempt to be vague.	Cách nói vòng vo, lằng nhằng để né tránh vấn đề.
+122	circumscribe	To restrict something within limits; to draw a line around.	Giới hạn, hạn chế trong một phạm vi nhất định.
+123	circumspect	Wary and unwilling to take risks; cautious.	Thận trọng, cẩn trọng, luôn xem xét kỹ lưỡng.
+124	circumvent	To find a way around an obstacle or a rule, typically in a clever way.	Né tránh, lách luật hoặc tìm cách vượt qua khó khăn một cách khéo léo.
+1	cistern	A tank for storing water, especially one supplying taps or as part of a flushing toilet.	Bể chứa nước, hố chứa nước
+2	citadel	A fortress, typically on high ground, protecting or dominating a city.	Thành trì, pháo đài
+3	cite	To quote a passage, book, or author as evidence for or justification of an argument.	Trích dẫn, dẫn chứng
+4	clairvoyant	A person who claims to have a supernatural ability to perceive events in the future.	Người có khả năng thấu thị, người tiên tri
+5	clamber	To climb, move, or get in or out of something in an awkward and laborious way.	Leo trèo một cách khó khăn bằng cả chân và tay
+6	clamor	A loud and confused noise, especially that of people shouting vehemently.	Tiếng la hét ầm ĩ hoặc sự phản đối gay gắt từ đám đông.
+7	clandestine	Kept secret or done secretively, especially because illicit.	Bí mật, lén lút, thường dùng cho các hoạt động bất hợp pháp.
+8	clangor	A continuous loud banging or ringing sound.	Tiếng loảng xoảng hoặc tiếng vang rền liên tục của kim loại.
+9	clapper	The object inside a bell that strikes its side to make it sound.	Quả lắc của cái chuông.
+10	clasp	To grasp something tightly with one's hand; a device for fastening.	Cái móc cài hoặc hành động nắm chặt, ôm chặt.
+11	claustrophobia	Extreme or irrational fear of confined or small spaces.	Hội chứng sợ không gian hẹp.
+12	cleave	To split or sever something, or to stick closely to something.	Chẻ ra, tách rời hoặc bám chặt lấy.
+13	clemency	Mercy, lenience, or mildness in judgment or punishment.	Lòng khoan dung hoặc sự nhân từ.
+14	clench	To close or hold tight, especially one's teeth or fist.	Nghiến (răng) hoặc siết chặt (tay).
+15	clientele	The group of people who are regular customers or clients.	Nhóm khách hàng hoặc thân chủ.
+16	climactic	Forming an exciting climax; the peak of a series of events.	mang tính cao trào, tạo nên đỉnh điểm
+17	clime	A region or area considered with reference to its climate.	vùng, miền, xứ sở (đặc trưng bởi khí hậu)
+18	clique	A small, exclusive group of people with shared interests.	bè lũ, phe cánh, nhóm người riêng biệt
+19	cloister	To seclude or confine in a monastery or quiet place.	sống ẩn dật, giam mình hoặc tu viện
+20	cloying	Excessively sweet, rich, or sentimental to a disgusting extent.	ngọt xớt, quá ủy mị, gây cảm giác ngấy
+21	coagulate	to change from a liquid to a thickened or solid state	làm đông lại, đóng vón
+22	coalesce	to come together to form one mass or whole	hợp nhất, kết hợp lại thành một
+23	coalition	a temporary alliance of distinct parties or persons for joint action	sự liên minh, khối liên minh
+24	coddle	To treat with extreme or excessive care and attention.	Chiều chuộng, nuông chiều quá mức.
+25	codicil	An addition or supplement that explains, modifies, or revokes a will.	Phụ lục hoặc điều khoản bổ sung cho di chúc.
+26	codify	To arrange laws or rules into a systematic code.	Hệ thống hóa, lập điều lệ.
+27	coercion	The practice of persuading someone to do something by using force or threats.	Sự ép buộc, cưỡng chế.
+28	cogent	Clear, logical, and convincing; powerful enough to influence.	Có sức thuyết phục, vững chắc, chặt chẽ.
+29	cogitate	To think deeply or reflect profoundly about something.	Suy ngẫm, suy nghĩ thấu đáo.
+30	cognate	Related by descent from the same ancestral language or source.	Cùng nguồn gốc, có liên quan.
+31	cognitive	Relating to the process of acquiring knowledge and understanding.	Liên quan đến nhận thức.
+32	cognizance	Knowledge, awareness, or notice of something.	Sự nhận thức, thẩm quyền xét xử.
+33	cohere	To be united or logically connected.	Dính liền, chặt chẽ, mạch lạc.
+34	cohesion	The action or fact of forming a united whole	Sự gắn kết, tính liên kết chặt chẽ
+35	coiffure	An elaborate hairstyle or the manner of arranging hair	Kiểu làm tóc, cách sắp xếp tóc cầu kỳ
+36	coin	To invent or devise a new word or phrase	Tạo ra (từ mới), đặt ra (thuật ngữ mới)
+37	coincidence	A remarkable concurrence of events or circumstances without apparent causal connection	Sự trùng hợp ngẫu nhiên
+38	colander	A perforated bowl used to drain off liquids from food	Cái rổ có lỗ để ráo nước
+39	collaborate	To work jointly on an activity or project to produce something.	Hợp tác, cộng tác
+40	collage	A piece of art made by sticking various materials such as photographs and pieces of paper.	Nghệ thuật cắt dán, tranh cắt dán
+41	collate	To collect and combine texts or information in a proper order.	Đối chiếu, kiểm tra kỹ thứ tự
+42	collateral	Something pledged as security for repayment of a loan, to be forfeited in the event of a default.	Tài sản thế chấp
+43	colloquial	Used in ordinary or familiar conversation; not formal or literary.	Thông tục, ngôn ngữ giao tiếp hằng ngày
+44	compound	A thing that is composed of two or more separate elements; a mixture.	Hợp chất, từ ghép hoặc khu hợp hợp.
+45	collusion	Secret or illegal cooperation or conspiracy, especially in order to deceive others.	Sự câu kết, thông đồng bí mật để làm việc phi pháp hoặc lừa dối.
+46	colossal	Extremely large or great in size, extent, or degree.	Khổng lồ, to lớn một cách phi thường.
+47	comatose	In a state of deep unconsciousness for a prolonged period; extremely lethargic.	Trong trạng thái hôn mê sâu hoặc cực kỳ uể oải, thiếu sức sống.
+48	combustible	Able to catch fire and burn easily; excitable.	Dễ cháy hoặc dễ bị kích động.
+49	comely	Pleasant to look at; attractive or agreeable.	Xinh đẹp, duyên dáng, dễ nhìn.
+50	comeuppance	A punishment or fate that someone deserves for their bad actions	sự báo ứng, hình phạt đích đáng
+51	commandeer	To officially take control or possession of something, especially for military use.	Trưng dụng, chiếm dụng (thường là cho mục đích quân sự hoặc công vụ).
+52	commemorate	To honor or keep alive the memory of a person or event.	Kỷ niệm, tưởng niệm.
+53	commensurate	Corresponding in size, degree, or proportion.	Tương xứng, cùng diện tích hoặc mức độ.
+54	commiserate	To express or feel sympathy or pity for someone.	Thương hại, bày tỏ sự cảm thông.
+55	commodious	Roomy and comfortable; spacious.	Rộng rãi, thênh thang (thường nói về không gian sống).
+56	communal	Shared by all members of a community for common use.	Thuộc về công cộng hoặc tài sản chung của cộng đồng.
+57	compact	Closely and neatly packed together; dense or concise.	Nhỏ gọn, kết cấu chặt chẽ hoặc súc tích.
+58	comparable	Able to be likened to another; similar in quality or size.	Có thể so sánh được hoặc tương đương về tính chất.
+59	compatible	Able to exist or occur together without conflict.	Tương thích, hợp nhau hoặc có thể tồn tại song song.
+60	compelling	Evoking interest, attention, or admiration in a powerfully irresistible way.	Hấp dẫn, thuyết phục hoặc cưỡng lại được.
+61	compensatory	Intended to offset or make up for a loss or deficiency.	Có tính đền bù, bồi thường hoặc bù đắp.
+62	compile	To collect and assemble information from various sources.	Biên soạn, thu thập và tập hợp tài liệu.
+63	complacency	A feeling of smug or uncritical satisfaction with oneself.	Sự tự mãn, bằng lòng quá mức với bản thân.
+64	complaisant	willing to please others or to accept what they want or do	chiều chuộng, sẵn lòng làm hài lòng người khác
+65	complement	something that completes or makes something else perfect	phần bổ sung, phần bù
+66	complementary	combining in such a way as to enhance or emphasize each other's qualities	bổ trợ lẫn nhau, tương trợ
+67	compliance	the action or fact of complying with a wish or command	sự tuân thủ, sự làm đúng theo quy định
+68	compliant	inclined to agree with others or obey rules, especially to an excessive degree	hay phục tùng, sẵn sàng tuân thủ
+69	complicity	The state of being involved with others in an illegal activity or wrongdoing.	Sự đồng lõa, sự tiếp tay cho hành vi sai trái.
+70	component	A part or element of a larger whole.	Thành phần, bộ phận cấu thành.
+71	composure	The state of being calm and in control of oneself.	Sự điềm tĩnh, sự bình tĩnh.
+72	comprehensive	Complete and including all or nearly all elements or aspects of something.	Toàn diện, bao quát mọi khía cạnh.
+73	compress	To squeeze or press together to force into less space	Nén lại, ép lại
+74	comprise	To include, contain, or consist of specific parts	Bao gồm, gồm có
+75	compromise	An agreement reached by each side making concessions	Thỏa hiệp, sự dàn xếp
+76	compunction	A feeling of guilt or moral scruple that prevents wrongdoing	Sự hối hận, sự cắn rứt lương tâm
+77	compute	To calculate an amount or figure mathematically	Tính toán
+78	concave	Curved inward like the interior of a circle or sphere.	Lõm
+79	concede	To admit that something is true or valid after first denying it.	Thừa nhận, nhượng bộ
+80	conceit	Excessive pride in oneself; self-admiration.	Sự kiêu ngạo, tính tự phụ
+81	concentric	Circles or shapes that share the same center point.	Đồng tâm
+82	conception	The forming or devising of a plan or idea.	Quan niệm, sự hình thành ý tưởng
+83	concerted	Planned or performed in cooperation with others; coordinated.	Phối hợp, có tính hiệp lực.
+84	concession	Something yielded or granted, often to settle a dispute or reach agreement.	Sự nhượng bộ, sự thỏa hiệp.
+85	conciliatory	intended or likely to placate or pacify	có tính hòa giải, làm dịu sự bất hòa
+86	concise	giving a lot of information clearly and in a few words	ngắn gọn, súc tích
+87	contrived	deliberately created rather than arising naturally or spontaneously	gượng ép, không tự nhiên, được sắp đặt sẵn
+88	controvert	deny the truth or validity of something	bác bỏ, phủ nhận lập luận hoặc bằng chứng
+89	contusion	a region of injured tissue or skin in which blood capillaries have been ruptured; a bruise	vết đòn dập, vết bầm tím
+90	conundrum	A confusing and difficult problem or question.	Vấn đề nan giải hoặc câu đố hóc búa.
+91	convene	To come or bring together for a meeting or assembly.	Triệu tập hoặc nhóm họp.
+92	convention	A way in which something is usually done; a large meeting.	Tục lệ, quy ước hoặc một hội nghị lớn.
+93	conventional	Based on or in accordance with what is generally done or believed.	Thông thường, theo tập quán hoặc truyền thống.
+94	converge	To tend to meet at a point; to gradually become similar.	Hội tụ hoặc cùng hướng về một điểm.
+95	conversant	Familiar with or knowledgeable about something through experience or study.	Thông thạo, quen thuộc hoặc hiểu biết về một lĩnh vực nào đó.
+96	converse	The opposite or reverse of a statement or situation.	Điều ngược lại, sự trái ngược.
+97	convert	To change something into a different form, purpose, or system.	Chuyển đổi, biến đổi từ dạng này sang dạng khác.
+98	convex	Curved outward like the exterior of a circle or sphere.	Lồi, có bề mặt cong ra phía ngoài.
+99	conveyance	The action of transporting something or the process of communicating a message.	Sự vận chuyển, sự truyền tải hoặc phương tiện vận chuyển.
+100	conviction	A firmly held belief or opinion; also a formal declaration of guilt in court.	Sự tin tưởng mãnh liệt hoặc sự kết án trọng tội.
+101	convivial	Cheerful and friendly; especially in relation to social atmosphere and feasting.	Vui vẻ, thân thiện, mang không khí hội hè.
+102	convoke	To call together or assemble for a formal meeting or council.	Triệu tập một cuộc họp hoặc hội đồng.
+103	convoluted	Extremely complex and difficult to follow; twisted or coiled.	Xoắn xuýt, phức tạp và cực kỳ khó hiểu.
+104	coquette	A woman who flirts lightheartedly with men to win their admiration and affection.	Người phụ nữ lẳng lơ, thích tán tỉnh để thu hút sự chú ý.
+105	cordial	Warm and friendly in manner or appearance.	Thân ái, chân thành, nồng hậu.
+106	cordon	A line of people or objects serving as a barrier.	Hàng rào cảnh sát, vòng đai bao vây.
+107	cornucopia	An abundant supply of good things.	Sự phong phú, dồi dào, sừng bừa bãi.
+108	corollary	A direct or natural consequence or result.	Hệ quả tất yếu, kết luận rút ra từ một mệnh đề.
+109	coronation	The ceremony of crowning a sovereign.	Lễ đăng quang, lễ lên ngôi.
+110	corporeal	Relating to a person's body, especially as opposed to their spirit	Thuộc về thân thể, xác thịt
+111	corpulent	Large or bulky of body; fat or obese	Mập mạp, béo tốt
+112	correlation	A mutual relationship or connection between two or more things	Sự tương quan, mối liên hệ lẫn nhau
+113	corroborate	To confirm or give support to a statement, theory, or finding	Xác nhận, chứng thực
+114	corrode	To destroy or wear away gradually by chemical action	Ăn mòn, gặm nhấm
+115	corrosive	Tending to cause gradual destruction or eating away of a substance by chemical action.	Gặm mòn, ăn mòn
+116	corrugated	Folded into ridges and troughs; shaped into a series of parallel ridges.	Có nếp nhăn, lượn sóng, có dạng gấp khúc
+117	cosmopolitan	Familiar with and at ease in many different countries and cultures.	Thuộc về toàn thế giới, có tính quốc tế
+118	coterie	A small group of people with shared interests, who often exclude others.	Nhóm kín, nhóm người có cùng sở thích
+119	countenance	A person's face or facial expression; or to admit as acceptable.	Sắc mặt, vẻ mặt; hoặc sự tán thành
+120	countermand	To revoke or cancel a previous order or command officially.	Hủy bỏ hoặc phản lệnh một chỉ thị trước đó.
+121	culvert	A tunnel or structure that allows water to flow under a road.	Cống thoát nước hoặc đường ống dẫn nước dưới lòng đường.
+122	cumbersome	Large, heavy, or difficult to carry or manage; inefficient and slow.	Cồng kềnh, nặng nề hoặc rắc rối khi xử lý.
+123	cumulative	Increasing or growing by accumulation or successive additions.	Tích lũy, dồn lại hoặc tăng dần theo thời gian.
+1	denounce	To publicly declare to be wrong or evil.	Lên án, tố cáo công khai.
+2	cupidity	Excessive greed for money or possessions	Sự tham lam quá mức, lòng tham tiền bạc
+3	curator	A person in charge of a museum, library, or collection	Người quản lý bảo tàng, người phụ trách triển lãm
+4	curmudgeon	A bad-tempered, difficult, or cranky person	Người hay gắt gỏng, người khó tính và khó chiều
+5	cursive	Written with characters joined together in a flowing style	Chữ viết tay kiểu nối nét, chữ thảo
+6	cursory	Hasty and therefore not thorough or detailed	Nhanh, lướt qua, không kỹ lưỡng
+7	curtail	To reduce in extent or quantity; to impose a restriction on.	Cắt bớt, rút ngắn, hạn chế
+8	cynical	Believing that people are motivated purely by self-interest; distrustful of sincerity.	Hoài nghi, yếm thế, thiếu tin tưởng vào lòng tốt
+9	cynosure	A person or thing that is the center of attention or admiration.	Trung tâm của sự chú ý, tiêu điểm của sự ngưỡng mộ
+10	dabble	To take part in an activity in a casual or superficial way.	Làm việc gì đó một cách tài tử, không chuyên sâu
+11	dais	A low platform for a lectern, seats of honor, or a throne.	Bục danh dự, bục phát biểu
+12	dank	unpleasantly damp, cold, and often musty	ẩm thấp, lạnh lẽo và khó chịu
+13	dapper	neat and trim in appearance and dress	gọn gàng, bảnh bao, tươm tất
+14	dappled	marked with spots or rounded patches of color	lốm đốm, có các vệt màu khác nhau
+15	daub	to spread a substance thickly or carelessly on a surface	phết, trét, bôi bẩn một cách cẩu thả
+16	daunt	to make someone feel intimidated or apprehensive	làm nản lòng, khuất phục hoặc làm sợ hãi
+17	dauntless	Showing fearlessness and determination; bold and brave.	Dũng cảm, kiên cường, không sợ hãi.
+18	dawdle	To waste time or move slowly and aimlessly.	Lãng phí thời gian, nhởn nhơ, chậm chạp.
+19	deadlock	A situation where no progress is possible; a stalemate.	Sự đình trệ, bế tắc hoàn toàn.
+20	deadpan	Deliberately impassive or expressionless, especially for humorous effect.	Thản nhiên, sắc mặt không biểu cảm (để gây cười).
+21	dearth	A scarcity or lack of something.	Sự khan hiếm, tình trạng thiếu thốn.
+22	debacle	A sudden and complete failure or fiasco.	Sự thất bại thảm hại hoặc sụp đổ hoàn toàn.
+23	debase	To lower the quality, value, or character of something.	Làm giảm giá trị, chất lượng hoặc nhân cách.
+24	debauch	To corrupt morally or indulge in excessive pleasure.	Làm đồi bại, sa đọa hoặc chè chén quá mức.
+25	debilitate	To make someone or something very weak or infirm.	Làm cho yếu sức, làm suy nhược.
+26	debonair	Confident, stylish, and charming, typically used for a man.	Lịch lãm, hào hoa và tự tin (thường dùng cho nam giới).
+27	debris	Scattered pieces of waste or remains of something destroyed	Mảnh vụn, những mảnh đổ nát hoặc phế liệu
+28	debunk	To expose the falseness or hollowness of a myth, idea, or belief.	Vạch trần, giải mã sự thật
+29	debutante	A young woman making her formal entrance into society.	Thiếu nữ sắp ra mắt giới thượng lưu
+30	decadence	Moral or cultural decline as characterized by excessive indulgence in pleasure or luxury.	Sự suy đồi, tình trạng sa đọa
+31	decapitate	To cut off the head of a person or animal.	Chặt đầu, xử trảm
+32	decelerate	To reduce the speed of something; to slow down.	Giảm tốc độ, đi chậm lại
+33	deciduous	Shedding leaves annually at the end of the growing season.	Rụng lá hằng năm
+34	decimate	To destroy or kill a large part of a group or population.	Tàn phá nặng nề hoặc tiêu diệt số lượng lớn
+35	detergent	A water-soluble cleansing agent used for washing clothes or dishes.	Chất tẩy rửa, xà phòng tổng hợp.
+36	decipher	To succeed in understanding or interpreting something complicated or secret.	Giải mã hoặc hiểu được những thứ phức tạp
+37	declivity	A downward slope or surface.	Dốc xuống
+38	decollete	Having a low neckline on a garment.	Xẻ sâu ở cổ áo
+39	decomposition	The process of decaying or breaking down into smaller parts.	Sự phân hủy, sự thối rữa.
+40	decorum	Behavior in keeping with good taste and propriety.	Sự đúng mực, sự đoan trang, phong thái lịch thiệp.
+41	decoy	A person or thing used to mislead or lure into a trap.	Mồi nhử, vật dùng để đánh lạc hướng.
+42	decrepit	Elderly and infirm; worn out or ruined because of age or neglect.	Già yếu, hỏng hóc, đổ nát do tuổi tác hoặc thiếu chăm sóc.
+43	decrepitude	The state of being decrepit; physical weakness due to old age.	Tình trạng già yếu, sự suy yếu, sự rệu rã.
+44	decry	To publicly denounce or express strong disapproval of something.	Công khai chỉ trích hoặc phản đối mạnh mẽ.
+45	deducible	Able to be logicaly derived or figured out from available information.	Có thể suy luận được từ các thông tin sẵn có.
+46	deface	To spoil the surface or appearance of something, often by writing or drawing on it.	Làm hư hỏng hoặc làm xấu đi bề mặt của vật gì đó.
+47	defame	To damage the good reputation of someone by spreading false information.	Làm nhục, phỉ báng hoặc làm tổn hại danh dự của ai đó.
+48	default	Failure to fulfill an obligation, especially to repay a loan or appear in court.	Sự vỡ nợ, sự không thực hiện được nghĩa vụ hoặc trạng thái mặc định.
+49	defeatist	Demonstrating expectation or acceptance of failure.	Người bi quan, người luôn nghĩ đến thất bại.
+50	defection	The desertion of one's country or cause in favor of an opposing one.	Sự đào ngũ, sự rời bỏ đảng phái hoặc đất nước để sang phía đối diện.
+51	defer	To put off an action or event to a later time; postpone.	Trì hoãn, hoãn lại cho đến một thời điểm sau này.
+52	deference	Humble submission and respect toward the judgment or wishes of another.	Sự tôn trọng, lòng tôn kính và sự chiều lòng ý muốn của người khác.
+53	defiance	Open resistance or bold disobedience to authority or an opposing force.	Sự thách thức, sự không tuân thủ.
+54	defile	To damage the purity or appearance of something; to desecrate.	Làm ô uế, làm bẩn, làm mất đi sự trong sạch.
+55	definitive	Done or reached decisively and with authority; providing a final solution.	Cuối cùng, dứt khoát, mang tính quyết định.
+56	deflect	To cause something to change direction; to turn aside from a course.	Làm lệch hướng, làm chệch đi.
+57	defoliate	To cause leaves to fall off a plant, often by using chemicals.	Làm rụng lá, phát quang cây cối.
+58	defray	To provide money to pay for a cost or expense	Thanh toán hoặc chi trả chi phí
+59	deft	Demonstrating skill, cleverness, or quickness in movement	Khéo léo, nhanh thoăn thoắt
+60	defunct	No longer living, existing, or functioning	Không còn tồn tại hoặc đã quá thời
+61	defuse	To remove the fuse from an explosive or reduce tension	Tháo ngòi nổ hoặc làm xoa dịu căng thẳng
+62	degenerate	To decline or deteriorate physically, mentally, or morally	Thoái hóa, suy đồi hoặc trở nên tồi tệ hơn
+63	degradation	The process of being reduced in quality, status, or condition.	Sự suy thoái, sự giảm sút về chất lượng hoặc giá trị.
+64	dehydrate	To remove water or moisture from something	Làm mất nước hoặc loại bỏ độ ẩm
+65	deify	To treat or worship someone or something as a god	Tôn sùng như thánh thần
+66	deign	To do something that one considers to be below one's dignity	Hạ mình để làm việc gì đó
+67	delectable	Delicious or highly pleasing to the senses	Ngon lành hoặc vô cùng thú vị
+68	delete	To remove or erase written or stored information	Xóa bỏ thông tin đã lưu hoặc văn bản
+69	deleterious	Causing harm or damage	Có hại, gây hại
+70	deliberate	Done consciously and intentionally; carefully weighed or considered	Cố ý, có tính toán hoặc thận trọng
+71	delineate	To describe or portray something precisely	Mô tả chi tiết, phác thảo hoặc định rõ
+72	delirium	An acutely disturbed state of mind characterized by restlessness and illusions	Sự mê sảng, trạng thái tinh thần bị kích động cực độ
+73	delude	To deceive or fool someone	Lừa dối, đánh lừa
+74	deluge	A severe flood or a heavy fall of rain; an overwhelming amount of something.	Trận đại hồng thủy hoặc sự dồn dập, quá tải của một thứ gì đó.
+75	delusion	A false belief or opinion maintained despite being contradicted by reality.	Sự ảo tưởng hoặc niềm tin sai lệch bất chấp thực tế.
+76	delve	To research or investigate deeply and intensely into a particular subject.	Nghiên cứu kỹ lưỡng hoặc đào sâu vào một vấn đề nào đó.
+77	demagogue	A political leader who seeks support by appealing to popular desires and prejudices.	Kẻ mị dân, nhà chính trị lôi kéo quần chúng bằng cách lợi dụng lòng tin và thành kiến.
+78	demean	To cause a severe loss in the dignity of and respect for someone or something.	Hạ thấp phẩm giá, làm nhục hoặc làm mất giá trị của ai đó/với cái gì đó.
+79	demeanor	Outward behavior or bearing	Cách ứng xử, thái độ
+80	demented	Driven to behave irrationally due to anger, distress, or excitement	Loạn trí, điên rồ
+81	demise	A person's death or the end or failure of an enterprise	Sự qua đời, sự lụi bại
+82	demolition	The action or process of demolishing or being demolished	Sự phá dỡ, sự đánh đổ
+83	demoniac	Relating to, characteristic of, or possessed by an evil spirit	Ma quái, hung ác
+84	demur	to raise objections or show reluctance	phản đối hoặc do dự
+85	demure	quiet, modest, and shy in behavior	kín đáo, khiêm tốn và e lệ
+86	demystify	to make something easier to understand by explaining it	làm sáng tỏ, giải mã điều gì đó phức tạp
+87	denigrate	to criticize unfairly or disparage someone's reputation	gièm pha, bôi nhọ hoặc hạ thấp uy tín
+88	denizen	an inhabitant or occupant of a particular place	cư dân, người trú ngụ hoặc sinh vật sống tại một vùng
+89	denotation	The literal, primary meaning of a word, in contrast to its feelings or ideas.	Nghĩa đen, nghĩa trực tiếp của một từ.
+90	denouement	The final part of a play, movie, or narrative in which the plot is resolved.	Phần kết thúc, cách giải quyết các tình tiết cuối cùng của một câu chuyện.
+91	depict	To show or represent by a drawing, painting, or other art form.	Mô tả, miêu tả thông qua hình ảnh hoặc ngôn từ.
+92	deplete	To use up the supply or resources of something.	Làm cạn kiệt, suy giảm nguồn lực hoặc số lượng.
+93	deplore	to feel or express strong disapproval or grief	lấy làm tiếc, phản đối mạnh mẽ
+94	deploy	to move into position for military action or effective use	triển khai (quân đội hoặc nguồn lực)
+95	depose	to remove from office suddenly and forcefully	cách chức, phế truất
+96	deposition	the act of removing someone from office; or a formal statement	sự phế truất; hoặc lời khai tuyên thệ
+97	depravity	moral corruption or wickedness	sự đồi bại, sự trụy lạc
+98	deprecate	to express strong disapproval of or to belittle	phản đối, không tán thành hoặc xem nhẹ
+99	depreciate	to decrease in value or price over time	giảm giá trị, sụt giá
+100	depredation	an act of attacking, plundering, or laying waste	sự cướp phá, sự phá phách
+101	deranged	unable to think or act in a normal or logical way	bị loạn trí, điên loạn
+102	derelict	in a very poor condition as a result of disuse and neglect	bị bỏ rơi, vô chủ, tình trạng tồi tàn
+103	deride	To express contempt for; to ridicule or mock.	Chế nhạo, nhạo báng, giễu cợt.
+104	derivative	Imitative of the work of another person, or originating from something else.	Bắt chước, không nguyên bản, bắt nguồn từ cái gì đó khác.
+105	dermatologist	A medical practitioner qualified to diagnose and treat skin disorders.	Bác sĩ da liễu.
+106	derogatory	Showing a critical or disrespectful attitude towards someone or something.	Mang tính xúc phạm, làm giảm uy tín hoặc coi thường.
+107	descant	To talk or write at length about a particular subject.	Bàn luận hoặc thuyết giảng chi tiết về một chủ đề.
+108	descry	To catch sight of or discover something distant or obscure.	Nhìn thấy hoặc phát hiện ra cái gì đó từ xa hoặc lờ mờ.
+109	desecrate	To treat a sacred place or thing with violent disrespect.	Mạo phạm, bôi nhọ hoặc làm ô uế nơi thiêng liêng.
+110	desiccate	To remove the moisture from something; to dry out completely.	Làm khô cạn, rút hết độ ẩm hoặc sấy khô.
+111	desolate	Feeling or showing misery, unhappiness, or loneliness; deserted of people.	Hoang vắng, tiêu điều, hoặc cảm thấy cô độc tuyệt vọng.
+112	despise	To feel contempt or a deep repugnance for someone or something.	Khinh rẻ, coi thường hoặc ghét cay ghét đắng.
+113	despoil	To steal or remove valuable possessions from a place; to plunder.	Cướp đoạt, tước đoạt hoặc chiếm đoạt tài sản.
+114	despondent	In low spirits from loss of hope or courage.	Nản lòng, thoái chí hoặc tuyệt vọng.
+115	despot	A ruler or other person who holds absolute power, typically exercising it cruelly.	Kẻ bạo chúa, người cầm quyền độc tài và tàn ác.
+116	destitute	Extremely poor and lacking the means to provide for oneself.	Cực kì nghèo khổ, thiếu thốn các nhu yếu phẩm cơ bản.
+117	desultory	Lacking a plan, purpose, or enthusiasm; occurring in an unfocused manner.	Rời rạc, không có hệ thống hoặc mục đích rõ ràng.
+118	detached	Separate or disconnected; objective and free from emotional involvement.	Tách biệt hoặc khách quan, không bị cảm xúc chi phối.
+119	determination	Firmness of purpose; the process of establishing something exactly.	Sự quyết tâm hoặc sự xác định rõ ràng một điều gì đó.
+120	deterrent	Something that discourages or prevents a certain action through fear of consequences.	Vật ngăn chặn, rào cản hoặc sự răn đe.
+121	detonation	The action of causing a bomb or explosive device to explode.	Sự nổ, sự kích nổ hoặc sự bùng nổ.
+122	detraction	The act of disparaging or belittling the reputation or value of someone.	Sự gièm pha, sự nói xấu hoặc làm giảm uy tín.
+123	detrimental	Tending to cause harm, damage, or negative effects.	Có hại, gây bất lợi hoặc gây thiệt hại.
+1	deviate	To depart from an established course or standard.	Chệch hướng, làm khác đi so với lộ trình hoặc tiêu chuẩn.
+2	devious	Showing a skillful use of underhanded tactics to achieve goals.	Láu cá, quanh co, không trung thực.
+3	devise	To plan or invent a complex procedure or system by careful thought.	Phát minh, nghĩ ra, đặt kế hoạch.
+4	devoid	Entirely lacking or free from something.	Trống rỗng, hoàn toàn không có.
+5	devotee	A person who is very interested in and enthusiastic about someone or something.	Người hâm mộ nhiệt thành, tín đồ.
+6	devout	Having or showing deep religious feeling or commitment.	Sùng đạo, thành tâm
+7	dexterous	Showing or having skill, especially with the hands.	Khéo léo, nhuần nhuyễn
+8	diabolical	Characteristic of the Devil, or so evil as to be suggestive of the Devil.	Độc ác như quỷ dữ
+9	diagnosis	The identification of the nature of an illness or other problem by examination.	Sự chẩn đoán
+10	discomfit	To make someone feel uneasy or embarrassed.	Làm bối rối, làm lúng túng
+11	discomposure	A state of feeling unsettled, agitated, or lacking self-control.	Sự mất bình tĩnh, sự bối rối hoặc mất tự chủ.
+12	disconcert	To disturb the composure of; to unsettle or confuse someone.	Làm bối rối, làm lúng túng hoặc làm mất tự nhiên.
+13	disconsolate	Deeply unhappy or dejected; unable to be comforted.	U sầu, tuyệt vọng hoặc không thể an ủi được.
+14	discord	Disagreement between people or a lack of harmony between notes.	Sự bất hòa, sự xung đột hoặc âm thanh nghịch tai.
+15	discordant	Disagreeing or incongruous; harsh and jarring in sound.	Bất hòa, trái ngược hoặc chói tai, không hòa hợp.
+16	discount	To disregard as unimportant or to reduce the price of something.	Xem nhẹ, không coi trọng hoặc chiết khấu, giảm giá.
+17	discourse	Written or spoken communication or debate on a particular subject.	Bài diễn thuyết, luận văn hoặc sự đàm thoại.
+18	discredit	To harm the good reputation of someone or to cause disbelief.	Làm mất uy tín, làm mất danh tiếng hoặc nghi ngờ.
+19	discrepancy	A lack of compatibility or similarity between two or more facts.	Sự khác biệt, sự không nhất quán giữa các con số hoặc dữ kiện.
+20	discrete	Individually separate and distinct from others.	Riêng biệt, rời rạc, độc lập với nhau.
+21	discretion	The freedom to decide what should be done in a particular situation.	Quyền tự do quyết định hoặc sự thận trọng trong hành động.
+22	discriminating	Having or showing refined taste or good judgment.	Có óc phán đoán tốt, biết phân biệt tinh tế.
+23	discursive	Moving from topic to topic without order; rambling.	Lan man, không tập trung vào chủ đề chính.
+24	disdain	The feeling that someone or something is unworthy of respect.	Sự khinh miệt, coi thường.
+25	disembark	To leave a ship, aircraft, or other vehicle.	Xuống tàu, máy bay hoặc các phương tiện vận tải.
+26	disenfranchise	To deprive someone of a right or privilege, especially the right to vote.	Tước quyền công dân, đặc biệt là quyền bầu cử.
+27	disengage	To separate or release from something that it is attached to.	Tháo rời, tách ra hoặc rút lui.
+28	disfigure	To spoil the appearance or shape of something.	Làm biến dạng, làm mất đi vẻ đẹp bên ngoài.
+29	disgorge	To discharge or pour out contents from the mouth or an opening.	Nôn ra, tuôn ra hoặc xả ra lượng lớn.
+30	disgruntle	To make someone dissatisfied, moody, or resentful.	Làm cho bực bội, bất mãn hoặc cau có.
+31	dishearten	To cause someone to lose determination or confidence.	Làm nản lòng, làm mất đi niềm tin và nhuệ khí.
+32	disheveled	Untidy or disordered in appearance, especially hair or clothing.	Luộm thuộm, xộc xệch, rối bời (đầu tóc, quần áo).
+33	disinclination	A reluctance or lack of enthusiasm; a slight aversion.	Sự chán ghét, sự không sẵn lòng hoặc không có hứng thú.
+34	disingenuous	Not candid or sincere, typically by pretending that one knows less than one actually does.	Không chân thật, gian xảo, thường giả vờ ngây ngô.
+35	disinter	To dig up or remove something from a grave or the ground.	Quật mộ, đào lên hoặc khai quật thứ gì đó từ lòng đất.
+36	disinterested	Not influenced by considerations of personal advantage; unbiased or impartial.	Công tâm, không vụ lợi, không bị tác động bởi lợi ích cá nhân.
+37	disjointed	Lacking a coherent sequence or connection; disconnected.	Rời rạc, không mạch lạc hoặc thiếu sự kết nối.
+38	dislodge	To force a person or object out of a position or place.	Trục xuất, đuổi ra, đánh bật khỏi vị trí.
+39	dismantle	To take a machine or structure to pieces in a gradual way.	Tháo dỡ, phá hủy cấu trúc máy móc hoặc hệ thống.
+40	dismay	A feeling of unhappiness and disappointment or lack of confidence.	Sự mất tinh thần, nỗi thất vọng hoặc lo âu.
+41	dismember	To cut or pull the limbs off a body; partition a country.	Chia cắt, phân thây hoặc chia nhỏ một quốc gia.
+42	dismiss	To decide that something or someone is not important or worthy.	Gạt bỏ, xua tan ý nghĩ hoặc sa thải ai đó.
+43	disparage	To regard or represent as being of little worth; to belittle.	Xem thường, miệt thị hoặc gièm pha.
+44	disparate	Essentially different in kind; not allowing comparison.	Khác hẳn nhau, khác loại và không thể so sánh.
+45	disparity	A great difference or inequality between things.	Sự chênh lệch, sự khác biệt hoặc không bình đẳng.
+46	dispassionate	Not influenced by strong emotion, and so able to be rational and impartial.	Vô tư, khách quan, không bị chi phối bởi cảm xúc.
+47	dispatch	To send off to a destination or for a purpose efficiently.	Gửi đi, phái đi nhanh chóng
+48	dispel	To make a doubt, feeling, or belief disappear.	Xua tan, làm tan biến
+49	disperse	To go or distribute in different directions or over a wide area.	Giải tán, phân tán
+50	dispirited	Having lost enthusiasm and hope; disheartened.	Nản lòng, chán nản
+51	disputatious	Fond of or causing heated arguments or debates.	Hay tranh luận, thích tranh cãi
+52	disquiet	A feeling of anxiety or worry; lack of peace.	Sự lo lắng, băn khoăn hoặc bất an.
+53	dissection	The action of cutting something open to study its internal structure.	Sự mổ xẻ hoặc phân tích chi tiết.
+54	dissemble	To conceal one's true motives, feelings, or beliefs.	Che giấu, ngụy tạo cảm xúc hoặc mục đích thật.
+55	disseminate	To spread or disperse information or ideas widely.	Phổ biến, gieo rắc hoặc lan truyền thông tin.
+56	dissent	To hold or express opinions that are at variance with those previously or officially held.	Sự bất đồng quan điểm hoặc phản đối ý kiến chính thống.
+57	dissertation	A long essay on a particular subject, especially one written for a university degree.	Luận văn, luận án nghiên cứu chuyên sâu để lấy bằng đại học hoặc học vị.
+58	dissident	A person who opposes official policy, especially that of an authoritarian state.	Người bất đồng chính kiến, phản đối chính sách của chính phủ.
+59	dissimulate	To conceal or disguise one's thoughts, feelings, or character.	Che đậy, ngụy trang suy nghĩ hoặc cảm xúc thật của bản thân.
+60	dissipate	To disappear or cause to disappear; to waste energy or resources.	Xua tan, làm biến mất hoặc lãng phí tiền bạc, năng lượng.
+61	dissolute	Lacking in morals; characterized by overindulgence in sensual pleasures.	Ăn chơi phóng đãng, trụy lạc, thiếu đạo đức.
+62	dissolution	The formal closing down or dismissal of an assembly, partnership, or official body.	Sự giải tán, sự giải thể hoặc kết thúc một tổ chức, liên minh.
+63	dissonance	A lack of harmony or agreement between elements; tension resulting from conflicting ideas.	Sự bất hòa, sự thiếu hòa hợp hoặc mâu thuẫn giữa các ý tưởng.
+64	dissuade	To persuade someone not to take a particular course of action.	Khuyên ngăn, thuyết phục ai đó đừng làm việc gì.
+65	distant	Far away in space or time; not friendly or communicative.	Xa xôi, cách biệt hoặc lạnh nhạt, ít nói.
+66	distend	To swell or cause to swell by pressure from inside.	Làm sưng lên, phồng lên hoặc giãn ra.
+67	distill	To purify a liquid by heating and cooling; to extract the essence.	Chưng cất, lọc sạch hoặc đúc kết tinh túy.
+68	distinction	A difference or contrast between similar things or people.	Sự khác biệt, nét đặc trưng hoặc sự ưu tú.
+69	distort	To twist out of shape or misrepresent the truth.	Xuyên tạc, bóp méo sự thật hoặc làm biến dạng.
+70	distraught	Deeply upset, anxious, or agitated.	Quẫn trí, mất bình tĩnh do quá lo lắng hoặc đau buồn.
+71	diurnal	Active during the day rather than at night.	Hoạt động vào ban ngày.
+72	diva	A famous female opera singer or a self-important person.	Nữ ca sĩ lừng danh hoặc người kiêu kỳ, tự phụ.
+73	diverge	To separate and go in different directions from a point.	Phân tách, rẽ ra các hướng khác nhau.
+74	divergent	Moving or extending in different directions from a common point.	Khác biệt, chệch ra, phân kỳ.
+75	diverse	Showing a great deal of variety; very different.	Đa dạng, phong phú, gồm nhiều loại khác nhau.
+76	diversion	The action of turning something aside from its course or an entertaining activity.	Sự làm chệch hướng hoặc sự giải trí, tiêu khiển.
+77	diversity	The state of being varied or having many different elements.	Tính đa dạng, sự phong phú.
+78	divest	To deprive someone of power, rights, or possessions; to rid oneself of something.	Tước bỏ, thoái vốn hoặc cởi bỏ.
+79	divine	To discover or understand through intuition or supernatural means.	Tiên đoán, đoán biết bằng trực giác.
+80	divulge	To make known private or sensitive information.	Tiết lộ, để lộ bí mật.
+81	docile	Ready to accept control or instruction; submissive.	Dễ bảo, ngoan ngoãn, phục tùng.
+82	doctrinaire	Seeking to impose a theory without regard to practical considerations.	Cứng nhắc, giáo điều, bám chặt vào lý thuyết.
+83	doctrine	A belief or set of beliefs held and taught by a group.	Học thuyết, giáo lý.
+84	document	To record or provide evidence with written or digital information.	Ghi chép lại hoặc cung cấp bằng chứng bằng dữ liệu.
+85	doff	To remove an item of clothing, especially a hat, as a greeting.	Cởi bỏ quần áo hoặc ngả mũ chào.
+86	dogged	Showing great determination and not giving up easily.	Kiên cường, bền bỉ và không bỏ cuộc.
+87	doggerel	Verse or poetry that is badly written or sentimental.	Thơ rẻ tiền, vần vè vụng về hoặc tầm thường.
+88	dogmatic	Stating opinions as if they are facts in an assertive way.	Độc đoán, giáo điều, luôn cho là mình đúng.
+89	doldrums	A state or period of inactivity, stagnation, or depression.	Sự trì trệ, tình trạng ảm đạm hoặc trầm lắng.
+90	doleful	Expressing sorrow; mournful or very sad.	U sầu, buồn thảm, bi ai.
+91	dolt	A person who is stupid or slow to learn.	Kẻ khờ dại, người ngu ngốc.
+92	domicile	A person's regular or permanent place of residence.	Nơi cư trú, nhà ở chính thức.
+93	domineer	To assert one's will over others in an arrogant way.	Áp đặt, độc đoán, hống hách.
+94	don	To put on or dress in an item of clothing.	Mặc vào, khoác lên mình (quần áo).
+95	doodle	To draw or scribble aimlessly while one's mind is otherwise occupied.	Vẽ nguệch ngoạc khi đang lơ đãng.
+96	dormant	In a state of temporary inactivity or deep sleep.	Tạm thời ngưng hoạt động hoặc đang ngủ đông.
+97	dormer	A vertical window that projects from a sloping roof.	Cửa sổ mái nhô ra từ mái nhà dốc.
+98	dossier	A collection of documents or files containing detailed information about someone or something.	Hồ sơ chi tiết về một người hoặc một sự việc.
+99	dote	To be extremely and uncritically fond of someone.	Cực kỳ nuông chiều hoặc mê mẩn ai đó.
+100	douse	To drench with liquid or extinguish a fire.	Dội nước, làm ướt sũng hoặc dập tắt lửa.
+101	dowdy	Lacking style or fashion; unfashionable and dull in appearance.	Luộm thuộm, không hợp thời trang, cũ kỹ.
+102	downcast	Feeling despondent, discouraged, or looking downward.	Chán nản, thất vọng hoặc nhìn xuống dưới.
+103	drab	Lacking brightness or interest; dull and colorless.	Buồn tẻ, xám xịt và thiếu sức sống.
+104	draconian	Extremely severe, harsh, or cruel laws or measures.	Khắc nghiệt, hà khắc (thường nói về luật lệ).
+105	dregs	The remnants of a liquid left in a container, together with any sediment.	Cặn bã, phần dư thừa vô giá trị.
+106	drivel	Silly or meaningless talk; nonsense.	Lời nói tầm phao, chuyện nhảm nhí.
+107	droll	Curious or unusual in a way that provokes dry amusement.	Khôi hài, buồn cười theo lối kỳ quặc.
+108	drone	To make a continuous low humming sound or speak tediously.	Kêu vo ve hoặc nói bằng giọng đều đều gây buồn chán.
+109	dross	Something regarded as worthless; rubbish or impurities.	Sỉ kim loại, vật vô giá trị hoặc rác rưởi.
+110	drudgery	Hard, menial, or dull work that is repetitive and boring	Công việc nặng nhọc, nhàm chán và vô vị
+111	dubious	Hesitating or doubting; not to be relied upon; suspect	Mơ hồ, không chắc chắn hoặc đáng nghi ngờ
+112	ductile	Capable of being shaped or bent without breaking; easily influenced.	Dễ uốn, dễ kéo sợi hoặc dễ bị thuyết phục.
+113	dulcet	Sweet and soothing, especially when describing sound or music.	Êm dịu, ngọt ngào (thường dùng cho âm thanh).
+114	dumbfound	To greatly astonish or amaze someone so they are speechless.	Làm cho chết lặng, làm sửng sốt.
+115	dupe	To deceive or trick someone; a person who is easily deceived.	Lừa bịp hoặc người dễ bị lừa.
+116	duplicity	Deceitfulness in speech or conduct; double-dealing.	Sự ăn ở hai lòng, tính gian dối.
+117	duration	The length of time during which something continues or exists.	Thời lượng; khoảng thời gian tồn tại của một sự việc.
+118	duress	Threats, violence, or constraints brought to bear on someone to do something.	Sự cưỡng ép; ép buộc bằng vũ lực hoặc đe dọa.
+119	dutiful	Conscientiously or obediently fulfilling one's duty.	Biết vâng lời; làm tròn bổn phận và trách nhiệm.
+120	dwarf	To cause to seem small or insignificant in comparison.	Làm cho trở nên nhỏ bé hoặc không đáng kể so với thứ khác.
+121	dwindle	To diminish gradually in size, amount, or strength.	Suy yếu dần; nhỏ lại hoặc ít đi một cách từ từ.
+122	dynamic	characterised by constant change, activity, or progress	năng động, sôi nổi hoặc luôn biến đổi
+123	earthy	resembling or suggestive of earth or soil; direct and uninhibited	mộc mạc, chân chất hoặc liên quan đến đất
+124	ebb	the movement of the tide out to sea; to gradually lessen	thủy triều rút hoặc sự suy yếu dần
+125	ebullient	cheerful and full of energy; exuberant	phấn khích, hăng hái và tràn đầy năng lượng
+

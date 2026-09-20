@@ -1,0 +1,902 @@
+[
+  {
+    "global_order": 1,
+    "word": "abase",
+    "en_meaning": "To lower in rank, prestige, or esteem; to humiliate",
+    "vi_meaning": "Làm hạ thấp phẩm giá, làm nhục",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 1
+  },
+  {
+    "global_order": 2,
+    "word": "abash",
+    "en_meaning": "To make someone feel embarrassed, disconcerted, or ashamed",
+    "vi_meaning": "Làm bối rối, làm lúng túng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 2
+  },
+  {
+    "global_order": 3,
+    "word": "abate",
+    "en_meaning": "To become less intense, active, or widespread",
+    "vi_meaning": "Làm giảm bớt, dịu đi",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 3
+  },
+  {
+    "global_order": 4,
+    "word": "abbreviate",
+    "en_meaning": "To shorten a word, phrase, or text by omitting letters",
+    "vi_meaning": "Tóm tắt, viết tắt",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 4
+  },
+  {
+    "global_order": 5,
+    "word": "abdicate",
+    "en_meaning": "To formally give up a position of power or responsibility",
+    "vi_meaning": "Từ bỏ quyền lực, thoái vị",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 5
+  },
+  {
+    "global_order": 6,
+    "word": "abduction",
+    "en_meaning": "The action of forcibly taking someone away against their will",
+    "vi_meaning": "Sự bắt cóc hoặc chiếm đoạt người khác trái phép",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 6
+  },
+  {
+    "global_order": 7,
+    "word": "aberrant",
+    "en_meaning": "Departing from an accepted standard or normal course",
+    "vi_meaning": "Khác thường, lệch lạc so với quy chuẩn",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 7
+  },
+  {
+    "global_order": 8,
+    "word": "abet",
+    "en_meaning": "To encourage or assist someone to do something wrong",
+    "vi_meaning": "Tiếp tay, xúi giục hoặc giúp sức làm điều xấu",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 8
+  },
+  {
+    "global_order": 9,
+    "word": "abeyance",
+    "en_meaning": "A state of temporary disuse or suspension",
+    "vi_meaning": "Tình trạng tạm hoãn, đình chỉ hoặc chưa quyết định",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 9
+  },
+  {
+    "global_order": 10,
+    "word": "abhor",
+    "en_meaning": "To regard with disgust and hatred",
+    "vi_meaning": "Ghê tởm, căm ghét hoặc cực kỳ bài bác",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 10
+  },
+  {
+    "global_order": 11,
+    "word": "abject",
+    "en_meaning": "Experienced to a maximum degree or completely without pride or dignity",
+    "vi_meaning": "Hèn hạ, thấp hèn hoặc cực kỳ tồi tệ",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 11
+  },
+  {
+    "global_order": 12,
+    "word": "abjure",
+    "en_meaning": "To solemnly renounce a belief, cause, or claim",
+    "vi_meaning": "Tuyên bố từ bỏ hoặc rút lui một cách trang trọng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 12
+  },
+  {
+    "global_order": 13,
+    "word": "ablution",
+    "en_meaning": "The act of washing oneself, often used in a religious context",
+    "vi_meaning": "Lễ tẩy trần hoặc việc tắm rửa vệ sinh cá nhân",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 13
+  },
+  {
+    "global_order": 14,
+    "word": "abnegation",
+    "en_meaning": "The act of renouncing or rejecting something; self-denial",
+    "vi_meaning": "Sự từ bỏ quyền lợi hoặc sự hy sinh quên mình",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 14
+  },
+  {
+    "global_order": 15,
+    "word": "abolish",
+    "en_meaning": "To formally put an end to a system, practice, or institution",
+    "vi_meaning": "Bãi bỏ, hủy bỏ một hệ thống hoặc tập tục",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 15
+  },
+  {
+    "global_order": 16,
+    "word": "abominable",
+    "en_meaning": "Vile, detestable, or very unpleasant",
+    "vi_meaning": "Đáng ghét, ghê tởm, tồi tệ",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 16
+  },
+  {
+    "global_order": 17,
+    "word": "absorb",
+    "en_meaning": "To soak up or take in information, liquids, or energy",
+    "vi_meaning": "hấp thụ, tiếp thu",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 17
+  },
+  {
+    "global_order": 18,
+    "word": "abstain",
+    "en_meaning": "To restrain oneself from doing or enjoying something",
+    "vi_meaning": "kiêng, nhịn, bỏ phiếu trắng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 18
+  },
+  {
+    "global_order": 19,
+    "word": "abstemious",
+    "en_meaning": "Not self-indulgent, especially when eating and drinking",
+    "vi_meaning": "tiết độ, điều độ",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 19
+  },
+  {
+    "global_order": 20,
+    "word": "abstinence",
+    "en_meaning": "The practice of restraining oneself from indulging in something",
+    "vi_meaning": "sự kiêng khem",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 20
+  },
+  {
+    "global_order": 21,
+    "word": "abstract",
+    "en_meaning": "Existing in thought or as an idea but not having a physical existence",
+    "vi_meaning": "trừu tượng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 21
+  },
+  {
+    "global_order": 22,
+    "word": "abstruse",
+    "en_meaning": "Difficult to understand; obscure or profound",
+    "vi_meaning": "Khó hiểu, uyên thâm, thâm thúy",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 22
+  },
+  {
+    "global_order": 23,
+    "word": "abundant",
+    "en_meaning": "Existing or available in large quantities; plentiful",
+    "vi_meaning": "Phong phú, dồi dào, có nhiều",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 23
+  },
+  {
+    "global_order": 24,
+    "word": "abusive",
+    "en_meaning": "Extremely offensive and insulting; using physical or verbal violence",
+    "vi_meaning": "Lăng mạ, sỉ nhục hoặc ngược đãi",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 24
+  },
+  {
+    "global_order": 25,
+    "word": "abut",
+    "en_meaning": "To be next to or have a common boundary with something",
+    "vi_meaning": "Tiếp giáp với, nằm sát cạnh",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 25
+  },
+  {
+    "global_order": 26,
+    "word": "abysmal",
+    "en_meaning": "Extremely bad; appalling or wretched",
+    "vi_meaning": "Rất tồi tệ, cực kỳ kém hoặc không đáy",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 26
+  },
+  {
+    "global_order": 27,
+    "word": "abyss",
+    "en_meaning": "A very deep or seemingly bottomless chasm or void",
+    "vi_meaning": "Vực thẳm, khoảng trống vô tận",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 27
+  },
+  {
+    "global_order": 28,
+    "word": "academic",
+    "en_meaning": "Relating to schools, education, and study; or purely theoretical",
+    "vi_meaning": "Thuộc về học thuật, lý thuyết hoặc trường lớp",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 28
+  },
+  {
+    "global_order": 29,
+    "word": "accede",
+    "en_meaning": "To agree to a demand, request, or treaty",
+    "vi_meaning": "Đồng ý, tán thành hoặc nhượng bộ một yêu cầu",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 29
+  },
+  {
+    "global_order": 30,
+    "word": "accelerate",
+    "en_meaning": "To increase in speed or cause to happen more quickly",
+    "vi_meaning": "Thúc đẩy, làm tăng tốc độ hoặc diễn ra nhanh hơn",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 30
+  },
+  {
+    "global_order": 31,
+    "word": "accentuate",
+    "en_meaning": "To make more noticeable or prominent",
+    "vi_meaning": "Nhấn mạnh, làm nổi bật hoặc làm rõ nét hơn",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 31
+  },
+  {
+    "global_order": 32,
+    "word": "accessible",
+    "en_meaning": "Easy to approach, reach, enter, or understand",
+    "vi_meaning": "Có thể tiếp cận, dễ hiểu hoặc dễ sử dụng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 32
+  },
+  {
+    "global_order": 33,
+    "word": "accessory",
+    "en_meaning": "A supplemental component that improves or adds to something else",
+    "vi_meaning": "Phụ kiện, vật phụ thuộc hoặc người đồng lõa",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 33
+  },
+  {
+    "global_order": 34,
+    "word": "acclaim",
+    "en_meaning": "To praise enthusiastically and publicly",
+    "vi_meaning": "Sự hoan nghênh, ca ngợi nồng nhiệt",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 34
+  },
+  {
+    "global_order": 35,
+    "word": "acclimate",
+    "en_meaning": "To adapt to a new climate, environment, or situation",
+    "vi_meaning": "Thích nghi với môi trường hoặc khí hậu mới",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 35
+  },
+  {
+    "global_order": 36,
+    "word": "acclivity",
+    "en_meaning": "An upward slope, such as on a hill",
+    "vi_meaning": "Dốc ngược, con dốc hướng lên trên",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 36
+  },
+  {
+    "global_order": 37,
+    "word": "accolade",
+    "en_meaning": "An expression of praise, approval, or a special distinction or award",
+    "vi_meaning": "Sự tán dương, giải thưởng danh giá hoặc sự công nhận thành tích",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 37
+  },
+  {
+    "global_order": 38,
+    "word": "accommodate",
+    "en_meaning": "To provide lodging or space; to adjust or adapt to someone's needs",
+    "vi_meaning": "Cung cấp chỗ ở; điều chỉnh để đáp ứng nhu cầu",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 38
+  },
+  {
+    "global_order": 39,
+    "word": "accomplice",
+    "en_meaning": "A person who helps another commit a crime or do something wrong",
+    "vi_meaning": "Đồng phạm, kẻ tiếp tay cho hành vi sai trái",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 39
+  },
+  {
+    "global_order": 40,
+    "word": "accord",
+    "en_meaning": "An official agreement or treaty; to give or grant someone power or status",
+    "vi_meaning": "Sự đồng lòng, hiệp định; ban cho hoặc chấp thuận",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 40
+  },
+  {
+    "global_order": 41,
+    "word": "accost",
+    "en_meaning": "To approach and address someone boldly or aggressively",
+    "vi_meaning": "Tiếp cận và bắt chuyện một cách đường đột hoặc hung hăng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 41
+  },
+  {
+    "global_order": 42,
+    "word": "accoutre",
+    "en_meaning": "To clothe or equip in something noticeable or impressive",
+    "vi_meaning": "Trang bị hoặc mặc đồ theo một cách ấn tượng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 42
+  },
+  {
+    "global_order": 43,
+    "word": "accretion",
+    "en_meaning": "The process of growth or increase by the gradual accumulation of additional layers or matter",
+    "vi_meaning": "Sự bồi đắp, sự phát triển dần dần bằng cách tích tụ thêm các lớp",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 43
+  },
+  {
+    "global_order": 44,
+    "word": "accrue",
+    "en_meaning": "To accumulate or receive payments or benefits over time",
+    "vi_meaning": "Tích lũy lại, dồn lại (ví dụ như tiền lãi hoặc lợi ích)",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 44
+  },
+  {
+    "global_order": 45,
+    "word": "acerbity",
+    "en_meaning": "Sharpness and directness in speech; sourness or bitterness in taste",
+    "vi_meaning": "Sự chua chát, gay gắt (trong lời nói) hoặc vị chua, chát",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 45
+  },
+  {
+    "global_order": 46,
+    "word": "acetic",
+    "en_meaning": "Relating to or containing acetic acid; vinegary",
+    "vi_meaning": "Có tính chất của axit axetic hoặc liên quan đến giấm",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 46
+  },
+  {
+    "global_order": 47,
+    "word": "acidulous",
+    "en_meaning": "Sharp-tasted or sour; somewhat acidic; caustic in style",
+    "vi_meaning": "Hơi chua; có tính châm biếm, gay gắt (trong phong cách, lời nói)",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 47
+  },
+  {
+    "global_order": 48,
+    "word": "acknowledge",
+    "en_meaning": "To accept or admit the existence or truth of something",
+    "vi_meaning": "Thừa nhận hoặc công nhận sự tồn tại của cái gì đó",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 48
+  },
+  {
+    "global_order": 49,
+    "word": "acme",
+    "en_meaning": "The highest point or stage; the peak of perfection",
+    "vi_meaning": "Điểm cao nhất, cực điểm hoặc thời kỳ hoàng kim",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 49
+  },
+  {
+    "global_order": 50,
+    "word": "acoustics",
+    "en_meaning": "The properties or qualities of a room that determine how sound is transmitted",
+    "vi_meaning": "Độ vang âm hoặc đặc tính âm thanh của một không gian",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 50
+  },
+  {
+    "global_order": 51,
+    "word": "acquiesce",
+    "en_meaning": "To accept something reluctantly but without protest",
+    "vi_meaning": "Bằng lòng, ưng thuận hoặc mặc nhiên chấp nhận mà không phản đối",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 51
+  },
+  {
+    "global_order": 52,
+    "word": "acquire",
+    "en_meaning": "To buy or obtain an asset or object for oneself",
+    "vi_meaning": "Giành được, đạt được hoặc thu mua được một cái gì đó",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 52
+  },
+  {
+    "global_order": 53,
+    "word": "acquittal",
+    "en_meaning": "A judgment that a person is not guilty of the crime with which they have been charged",
+    "vi_meaning": "Sự trắng án, tuyên bố không có tội",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 53
+  },
+  {
+    "global_order": 54,
+    "word": "acrid",
+    "en_meaning": "Having an irritatingly strong and unpleasant taste or smell",
+    "vi_meaning": "Hăng, nồng, cay xè (mùi hoặc vị gây khó chịu)",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 54
+  },
+  {
+    "global_order": 55,
+    "word": "advocate",
+    "en_meaning": "To publicly support or recommend a particular cause or policy",
+    "vi_meaning": "Ủng hộ, bênh vực hoặc biện hộ cho một vấn đề nào đó",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 55
+  },
+  {
+    "global_order": 56,
+    "word": "aerie",
+    "en_meaning": "A large nest of a bird of prey built in a high place",
+    "vi_meaning": "Tổ chim ưng hoặc tổ của các loài chim săn mồi trên cao",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 56
+  },
+  {
+    "global_order": 57,
+    "word": "aesthetic",
+    "en_meaning": "Concerned with beauty or the appreciation of beauty",
+    "vi_meaning": "Có thẩm mỹ, liên quan đến vẻ đẹp hoặc nghệ thuật",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 57
+  },
+  {
+    "global_order": 58,
+    "word": "affable",
+    "en_meaning": "Friendly, good-natured, or easy to talk to",
+    "vi_meaning": "Niềm nở, lịch sự, dễ gần và thân thiện",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 58
+  },
+  {
+    "global_order": 59,
+    "word": "affected",
+    "en_meaning": "Artificial, pretentious, or designed to impress",
+    "vi_meaning": "Giả tạo, điệu bộ, không tự nhiên nhằm gây ấn tượng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 59
+  },
+  {
+    "global_order": 60,
+    "word": "affidavit",
+    "en_meaning": "A written statement confirmed by oath or affirmation for use as evidence in court",
+    "vi_meaning": "Bản tuyên thệ trước tòa án",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 60
+  },
+  {
+    "global_order": 61,
+    "word": "affiliation",
+    "en_meaning": "The state of being officially attached or connected to an organization",
+    "vi_meaning": "Sự liên kết hoặc gia nhập vào một tổ chức",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 61
+  },
+  {
+    "global_order": 62,
+    "word": "affinity",
+    "en_meaning": "A spontaneous or natural liking or sympathy for someone or something",
+    "vi_meaning": "Sự đồng cảm hoặc lôi cuốn tự nhiên",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 62
+  },
+  {
+    "global_order": 63,
+    "word": "affirmation",
+    "en_meaning": "A formal declaration that something is true; a positive assertion",
+    "vi_meaning": "Sự khẳng định hoặc xác nhận",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 63
+  },
+  {
+    "global_order": 64,
+    "word": "affix",
+    "en_meaning": "To stick, attach, or fasten something to something else",
+    "vi_meaning": "Đóng dấu, dán vào hoặc đính kèm",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 64
+  },
+  {
+    "global_order": 65,
+    "word": "affliction",
+    "en_meaning": "Something that causes pain or suffering",
+    "vi_meaning": "Nỗi đau đớn, nỗi thống khổ hoặc nguyên nhân gây tai họa",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 65
+  },
+  {
+    "global_order": 66,
+    "word": "affluence",
+    "en_meaning": "The state of having a great deal of money or wealth",
+    "vi_meaning": "Sự giàu có, sung túc hoặc sự dồi dào về tài lộc",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 66
+  },
+  {
+    "global_order": 67,
+    "word": "affront",
+    "en_meaning": "An action or remark that causes outrage or offense",
+    "vi_meaning": "Sự lăng nhục, xúc phạm công khai",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 67
+  },
+  {
+    "global_order": 68,
+    "word": "aftermath",
+    "en_meaning": "The consequences or aftereffects of a significant unpleasant event",
+    "vi_meaning": "Hậu quả hoặc giai đoạn hệ lụy sau một sự kiện tồi tệ",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 68
+  },
+  {
+    "global_order": 69,
+    "word": "agenda",
+    "en_meaning": "A list of items to be discussed at a formal meeting",
+    "vi_meaning": "Chương trình nghị sự hoặc danh sách vấn đề cần thảo luận",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 69
+  },
+  {
+    "global_order": 70,
+    "word": "agent",
+    "en_meaning": "A person or entity that acts on behalf of another or produces a particular effect",
+    "vi_meaning": "Đại lý, tác nhân hoặc người đại diện",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 70
+  },
+  {
+    "global_order": 71,
+    "word": "agglomeration",
+    "en_meaning": "A mass or collection of things; a cluster",
+    "vi_meaning": "Sự kết tụ, sự tích tụ thành một khối",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 71
+  },
+  {
+    "global_order": 72,
+    "word": "aggrandize",
+    "en_meaning": "To increase the power, status, or wealth of something or someone",
+    "vi_meaning": "Phóng đại, mở rộng hoặc làm tăng thêm quyền lực",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 72
+  },
+  {
+    "global_order": 73,
+    "word": "aggregate",
+    "en_meaning": "A whole formed by combining several separate elements",
+    "vi_meaning": "Tổng hợp, gộp chung lại thành một khối",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 73
+  },
+  {
+    "global_order": 74,
+    "word": "acrimonious",
+    "en_meaning": "Angry and bitter in language or tone",
+    "vi_meaning": "Gay gắt, chua chát (trong lời nói, thái độ)",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 74
+  },
+  {
+    "global_order": 75,
+    "word": "acrophobia",
+    "en_meaning": "An intense fear of heights",
+    "vi_meaning": "Hội chứng sợ độ cao",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 75
+  },
+  {
+    "global_order": 76,
+    "word": "actuarial",
+    "en_meaning": "Relating to statistical calculation of insurance risks and premiums",
+    "vi_meaning": "Thuộc về tính toán bảo hiểm",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 76
+  },
+  {
+    "global_order": 77,
+    "word": "actuate",
+    "en_meaning": "To put into motion or motivate someone to act",
+    "vi_meaning": "Kích hoạt, vận hành hoặc thúc đẩy hành động",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 77
+  },
+  {
+    "global_order": 78,
+    "word": "acuity",
+    "en_meaning": "Sharpness or keenness of thought, vision, or hearing",
+    "vi_meaning": "Sự nhạy bén, sắc sảo",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 78
+  },
+  {
+    "global_order": 79,
+    "word": "acumen",
+    "en_meaning": "The ability to make good judgments and quick decisions",
+    "vi_meaning": "Sự nhạy bén, sự tinh tường trong suy xét",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 79
+  },
+  {
+    "global_order": 80,
+    "word": "acute",
+    "en_meaning": "Present or experienced to a severe or intense degree",
+    "vi_meaning": "Nghiêm trọng, nhức nhối hoặc thính nhạy (giác quan)",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 80
+  },
+  {
+    "global_order": 81,
+    "word": "adage",
+    "en_meaning": "A proverb or short statement expressing a general truth",
+    "vi_meaning": "Ngạn ngữ, châm ngôn",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 81
+  },
+  {
+    "global_order": 82,
+    "word": "adamant",
+    "en_meaning": "Refusing to be persuaded or to change one's mind",
+    "vi_meaning": "Cứng rắn, kiên định, không lay chuyển",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 82
+  },
+  {
+    "global_order": 83,
+    "word": "adapt",
+    "en_meaning": "To become adjusted to new conditions",
+    "vi_meaning": "Thích nghi, điều chỉnh cho phù hợp",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 83
+  },
+  {
+    "global_order": 84,
+    "word": "aboriginal",
+    "en_meaning": "Inhabiting or existing in a land from the earliest times",
+    "vi_meaning": "Thổ dân, thuộc về bản địa từ sơ khai",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 84
+  },
+  {
+    "global_order": 85,
+    "word": "abortive",
+    "en_meaning": "Failing to produce the intended result; unsuccessful",
+    "vi_meaning": "Thất bại, không thành công, dở dang",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 85
+  },
+  {
+    "global_order": 86,
+    "word": "abrade",
+    "en_meaning": "To scrape or wear away by friction or erosion",
+    "vi_meaning": "Làm trầy xước, mài mòn",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 86
+  },
+  {
+    "global_order": 87,
+    "word": "abrasive",
+    "en_meaning": "Showing little concern for others' feelings; rough or harsh",
+    "vi_meaning": "Thô bạo, gây khó chịu hoặc có tính mài mòn",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 87
+  },
+  {
+    "global_order": 88,
+    "word": "addendum",
+    "en_meaning": "An item of additional material added at the end of a book or document",
+    "vi_meaning": "Phần phụ lục hoặc nội dung bổ sung vào cuối văn bản",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 88
+  },
+  {
+    "global_order": 89,
+    "word": "addiction",
+    "en_meaning": "The fact or condition of being addicted to a particular substance or activity",
+    "vi_meaning": "Sự nghiện ngập hoặc lệ thuộc vào một chất hay hoạt động nào đó",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 89
+  },
+  {
+    "global_order": 90,
+    "word": "addle",
+    "en_meaning": "To make someone unable to think clearly; to confuse",
+    "vi_meaning": "Làm cho rối trí, quẫn bách hoặc không thể suy nghĩ rõ ràng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 90
+  },
+  {
+    "global_order": 91,
+    "word": "address",
+    "en_meaning": "To speak to a person or an assembly; to direct attention to an issue",
+    "vi_meaning": "Phát biểu trước công chúng hoặc tập trung giải quyết một vấn đề",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 91
+  },
+  {
+    "global_order": 92,
+    "word": "adept",
+    "en_meaning": "Very skilled or proficient at something",
+    "vi_meaning": "Thông thạo, tinh thông hoặc rất giỏi trong một lĩnh vực cụ thể",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 92
+  },
+  {
+    "global_order": 93,
+    "word": "adhere",
+    "en_meaning": "to stick firmly to a surface or to follow a set of rules and beliefs",
+    "vi_meaning": "tuân thủ, dính chặt",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 93
+  },
+  {
+    "global_order": 94,
+    "word": "adherent",
+    "en_meaning": "someone who supports a particular party, person, or set of ideas",
+    "vi_meaning": "người ủng hộ",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 94
+  },
+  {
+    "global_order": 95,
+    "word": "adjacent",
+    "en_meaning": "next to or adjoining something else",
+    "vi_meaning": "kế bên, liền kề",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 95
+  },
+  {
+    "global_order": 96,
+    "word": "adjunct",
+    "en_meaning": "something added to something else as a supplementary rather than an essential part",
+    "vi_meaning": "phần bổ trợ",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 96
+  },
+  {
+    "global_order": 97,
+    "word": "admonish",
+    "en_meaning": "to warn or reprimand someone firmly or to advise earnestly",
+    "vi_meaning": "cảnh báo, nhắc nhở",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 97
+  },
+  {
+    "global_order": 98,
+    "word": "admonition",
+    "en_meaning": "A firm warning or gentle criticism about someone's behavior",
+    "vi_meaning": "Lời cảnh báo hoặc nhắc nhở nhẹ nhàng",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 98
+  },
+  {
+    "global_order": 99,
+    "word": "adorn",
+    "en_meaning": "To make something more beautiful or attractive by adding ornaments",
+    "vi_meaning": "Trang trí, tô điểm",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 99
+  },
+  {
+    "global_order": 100,
+    "word": "adroit",
+    "en_meaning": "Clever or skillful in using the hands or mind",
+    "vi_meaning": "Khéo léo, tinh xảo",
+    "lesson_name": "Lesson 1",
+    "lesson_order": 1,
+    "word_order": 100
+  }
+]

@@ -1,0 +1,902 @@
+[
+  {
+    "global_order": 401,
+    "word": "beleaguer",
+    "en_meaning": "To surround with military forces or to cause many problems for someone",
+    "vi_meaning": "Bao vây bằng quân đội hoặc gây ra nhiều khó khăn, áp lực cho ai đó",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 1
+  },
+  {
+    "global_order": 402,
+    "word": "belie",
+    "en_meaning": "To give a false impression of something or contradict it",
+    "vi_meaning": "Gây ấn tượng sai lầm hoặc mâu thuẫn với sự thật",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 2
+  },
+  {
+    "global_order": 403,
+    "word": "belittle",
+    "en_meaning": "To make someone or something seem unimportant or insignificant",
+    "vi_meaning": "Coi nhẹ, hạ thấp giá trị hoặc xem thường",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 3
+  },
+  {
+    "global_order": 404,
+    "word": "bellicose",
+    "en_meaning": "Demonstrating aggression and a willingness to fight",
+    "vi_meaning": "Hiếu chiến, thích gây hấn hoặc tranh đấu",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 4
+  },
+  {
+    "global_order": 405,
+    "word": "belligerent",
+    "en_meaning": "Hostile and aggressive; engaged in a war or conflict",
+    "vi_meaning": "Hung hăng, thù địch hoặc đang tham gia chiến tranh",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 5
+  },
+  {
+    "global_order": 406,
+    "word": "bemoan",
+    "en_meaning": "To express deep grief or regret about something",
+    "vi_meaning": "Than vãn, thương tiếc hoặc phàn nàn về điều gì đó",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 6
+  },
+  {
+    "global_order": 407,
+    "word": "bemused",
+    "en_meaning": "Confused or puzzled; filled with bewilderment",
+    "vi_meaning": "Làm cho sửng sốt, kinh ngạc hoặc làm cho lúng túng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 7
+  },
+  {
+    "global_order": 408,
+    "word": "benediction",
+    "en_meaning": "The utterance or bestowing of a blessing, especially at the end of a religious service",
+    "vi_meaning": "Lời chúc phước, lời cầu phúc trong các nghi lễ tôn giáo",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 8
+  },
+  {
+    "global_order": 409,
+    "word": "benefactor",
+    "en_meaning": "A person who gives money or other help to a person or cause",
+    "vi_meaning": "Nhà hảo tâm, người làm ơn hoặc người bảo trợ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 9
+  },
+  {
+    "global_order": 410,
+    "word": "beneficial",
+    "en_meaning": "Favorable or advantageous; resulting in good",
+    "vi_meaning": "Có lợi, hữu ích hoặc mang lại điều tốt lành",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 10
+  },
+  {
+    "global_order": 411,
+    "word": "beneficiary",
+    "en_meaning": "A person who derives advantage from something, especially a trust, will, or life insurance policy",
+    "vi_meaning": "Người thụ hưởng hoặc người được hưởng quyền lợi từ di chúc, bảo hiểm",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 11
+  },
+  {
+    "global_order": 412,
+    "word": "benevolent",
+    "en_meaning": "Kind, generous, and desiring to do good for others",
+    "vi_meaning": "Nhân từ, rộng lượng, hay làm việc thiện",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 12
+  },
+  {
+    "global_order": 413,
+    "word": "benign",
+    "en_meaning": "Gentle and kindly; not harmful in effect",
+    "vi_meaning": "Lành tính, nhân hậu, không gây hại",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 13
+  },
+  {
+    "global_order": 414,
+    "word": "bent",
+    "en_meaning": "A natural talent or inclination for something",
+    "vi_meaning": "Năng khiếu, khuynh hướng tự nhiên",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 14
+  },
+  {
+    "global_order": 415,
+    "word": "bequeath",
+    "en_meaning": "To leave property or money to someone in a will",
+    "vi_meaning": "Để lại, chúc thư, truyền lại cho đời sau",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 15
+  },
+  {
+    "global_order": 416,
+    "word": "berate",
+    "en_meaning": "To scold or criticize someone angrily and at length",
+    "vi_meaning": "Mắng nhiếc, chỉ trích gay gắt",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 16
+  },
+  {
+    "global_order": 417,
+    "word": "bereavement",
+    "en_meaning": "The state of being deprived of a loved one through a profound loss, especially death",
+    "vi_meaning": "Nỗi đau buồn do mất người thân; sự mất mát",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 17
+  },
+  {
+    "global_order": 418,
+    "word": "bereft",
+    "en_meaning": "Deprived of or lacking something, especially a non-material asset; lonely and abandoned",
+    "vi_meaning": "Bị tước đoạt; thiếu thốn (cái gì đó); cô độc",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 18
+  },
+  {
+    "global_order": 419,
+    "word": "berserk",
+    "en_meaning": "Out of control with anger or excitement; wild or frenzied",
+    "vi_meaning": "Phát điên; cuồng loạn; mất kiểm soát",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 19
+  },
+  {
+    "global_order": 420,
+    "word": "beseech",
+    "en_meaning": "To ask someone urgently and fervently to do something; to implore",
+    "vi_meaning": "Van xin; cầu khẩn; nài nỉ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 20
+  },
+  {
+    "global_order": 421,
+    "word": "beset",
+    "en_meaning": "To be troubled or threatened persistently; to surround or attack on all sides",
+    "vi_meaning": "Bủa vây; gây rắc rối liên tục; bao vây",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 21
+  },
+  {
+    "global_order": 422,
+    "word": "besiege",
+    "en_meaning": "To surround a place with armed forces in order to capture it",
+    "vi_meaning": "bao vây, vây hãm",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 22
+  },
+  {
+    "global_order": 423,
+    "word": "besmirch",
+    "en_meaning": "To damage the reputation of someone or something in the opinion of others",
+    "vi_meaning": "bôi nhọ, làm bẩn danh tiếng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 23
+  },
+  {
+    "global_order": 424,
+    "word": "bestial",
+    "en_meaning": "Savagely cruel and depraved, like an animal",
+    "vi_meaning": "có tính thú vật, dã man",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 24
+  },
+  {
+    "global_order": 425,
+    "word": "betoken",
+    "en_meaning": "To be a sign of something; to indicate",
+    "vi_meaning": "là điềm báo, biểu thị",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 25
+  },
+  {
+    "global_order": 426,
+    "word": "betray",
+    "en_meaning": "To be disloyal to someone or reveal confidential information to an enemy",
+    "vi_meaning": "Phản bội, làm lộ bí mật",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 26
+  },
+  {
+    "global_order": 427,
+    "word": "bevy",
+    "en_meaning": "A large group of people or things of a particular kind",
+    "vi_meaning": "Một nhóm lớn, một bầy",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 27
+  },
+  {
+    "global_order": 428,
+    "word": "biased",
+    "en_meaning": "Unfairly showing prejudice for or against someone or something",
+    "vi_meaning": "Chệch hướng, thành kiến, thiên vị",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 28
+  },
+  {
+    "global_order": 429,
+    "word": "bicameral",
+    "en_meaning": "Having two separate legislative chambers or houses",
+    "vi_meaning": "(Hệ thống nghị viện) có hai viện",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 29
+  },
+  {
+    "global_order": 430,
+    "word": "bicker",
+    "en_meaning": "To argue about petty and trivial matters",
+    "vi_meaning": "Cãi vã vụn vặt về những chuyện không quan trọng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 30
+  },
+  {
+    "global_order": 431,
+    "word": "biennial",
+    "en_meaning": "Taking place every other year or lasting for two years",
+    "vi_meaning": "Xảy ra hai năm một lần hoặc kéo dài hai năm",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 31
+  },
+  {
+    "global_order": 432,
+    "word": "bigotry",
+    "en_meaning": "Intolerance toward those who hold different opinions or beliefs",
+    "vi_meaning": "Sự cố chấp, cực đoan đối với ý kiến hoặc niềm tin khác biệt",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 32
+  },
+  {
+    "global_order": 433,
+    "word": "bilious",
+    "en_meaning": "Affected by nausea or vomiting; extremely unpleasant or bad-tempered",
+    "vi_meaning": "Cáu gắt, khó tính hoặc có liên quan đến bệnh gan mật",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 33
+  },
+  {
+    "global_order": 434,
+    "word": "bilk",
+    "en_meaning": "To obtain or withhold money from someone by deceit or without justification",
+    "vi_meaning": "Lừa đảo, quỵt nợ hoặc chiếm đoạt tiền một cách bất chính",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 34
+  },
+  {
+    "global_order": 435,
+    "word": "billowing",
+    "en_meaning": "Swelling outward or puffing up, typically due to wind or air",
+    "vi_meaning": "Cuồn cuộn, dâng lên như sóng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 35
+  },
+  {
+    "global_order": 436,
+    "word": "bivouac",
+    "en_meaning": "A temporary camp without tents or cover, used especially by soldiers",
+    "vi_meaning": "Trạm nghỉ tạm thời, lán trại dã chiến",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 36
+  },
+  {
+    "global_order": 437,
+    "word": "bizarre",
+    "en_meaning": "Very strange or unusual, especially so as to cause interest or amusement",
+    "vi_meaning": "Kỳ quái, lạ lùng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 37
+  },
+  {
+    "global_order": 438,
+    "word": "blanch",
+    "en_meaning": "To turn white or pale, typically from shock, fear, or cooking",
+    "vi_meaning": "Tái đi, làm cho trắng hoặc chần qua nước sôi",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 38
+  },
+  {
+    "global_order": 439,
+    "word": "bland",
+    "en_meaning": "Lacking strong features or characteristics and therefore uninteresting",
+    "vi_meaning": "Nhạt nhẽo, vô vị, không có gì đặc sắc",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 39
+  },
+  {
+    "global_order": 440,
+    "word": "blandishment",
+    "en_meaning": "A flattering or pleasing statement or action used to persuade someone gently",
+    "vi_meaning": "Lời nịnh hót, sự ngọt ngào dỗ dành",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 40
+  },
+  {
+    "global_order": 441,
+    "word": "blare",
+    "en_meaning": "To make a loud, harsh, and typically unpleasant sound",
+    "vi_meaning": "Tiếng om sòm, kêu inh ỏi",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 41
+  },
+  {
+    "global_order": 442,
+    "word": "blasphemy",
+    "en_meaning": "The act or offense of speaking sacrilegiously about God or sacred things",
+    "vi_meaning": "Lời báng bổ, sự xúc phạm thần linh",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 42
+  },
+  {
+    "global_order": 443,
+    "word": "blatant",
+    "en_meaning": "Done openly and unashamedly; completely obvious and conspicuous",
+    "vi_meaning": "Rành rành, trắng trợn, hiển nhiên",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 43
+  },
+  {
+    "global_order": 444,
+    "word": "bleak",
+    "en_meaning": "Lacking vegetation or exposed to elements; cold, miserable, or hopeless",
+    "vi_meaning": "Trống trải, lạnh lẽo, ảm đạm",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 44
+  },
+  {
+    "global_order": 445,
+    "word": "blighted",
+    "en_meaning": "damaged, spoiled, or suffering from a severe negative condition",
+    "vi_meaning": "bị tàn lụi, bị ảnh hưởng xấu hoặc hư hỏng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 45
+  },
+  {
+    "global_order": 446,
+    "word": "blithe",
+    "en_meaning": "showing a casual and cheerful indifference considered to be callous or improper",
+    "vi_meaning": "vô tư, thanh thản một cách hờ hững",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 46
+  },
+  {
+    "global_order": 447,
+    "word": "bloated",
+    "en_meaning": "swollen with fluid or gas; excessively large or wealthy",
+    "vi_meaning": "sưng phồng, phù nề hoặc quá tải",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 47
+  },
+  {
+    "global_order": 448,
+    "word": "bludgeon",
+    "en_meaning": "to hit with a heavy object; to force or bully someone",
+    "vi_meaning": "đánh bằng dùi cui, ép buộc hoặc bắt nạt",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 48
+  },
+  {
+    "global_order": 449,
+    "word": "bluff",
+    "en_meaning": "an attempt to deceive someone into believing one can or will do something",
+    "vi_meaning": "sự lừa bịp, lời hù dọa hoặc thái độ giả vờ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 49
+  },
+  {
+    "global_order": 450,
+    "word": "blunder",
+    "en_meaning": "A stupid or careless mistake",
+    "vi_meaning": "Sai lầm ngớ ngẩn hoặc bất cẩn",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 50
+  },
+  {
+    "global_order": 451,
+    "word": "blurt",
+    "en_meaning": "To say something suddenly and without thinking",
+    "vi_meaning": "Thốt ra một cách bất ngờ, thiếu suy nghĩ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 51
+  },
+  {
+    "global_order": 452,
+    "word": "bluster",
+    "en_meaning": "To talk in a loud, aggressive, or indignant way with little effect",
+    "vi_meaning": "Nói huênh hoang, dọa dẫm hoặc quát tháo",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 52
+  },
+  {
+    "global_order": 453,
+    "word": "bode",
+    "en_meaning": "To be an omen of a particular outcome",
+    "vi_meaning": "Báo hiệu, là điềm báo cho điều gì đó",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 53
+  },
+  {
+    "global_order": 454,
+    "word": "bohemian",
+    "en_meaning": "Living an unconventional life, often involved in the arts",
+    "vi_meaning": "Nghệ sĩ, phóng túng, không theo khuôn phép xã hội",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 54
+  },
+  {
+    "global_order": 455,
+    "word": "boisterous",
+    "en_meaning": "Noisy, energetic, and cheerful; rowdy",
+    "vi_meaning": "Náo nhiệt, huyên náo, ồn ào và đầy năng lượng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 55
+  },
+  {
+    "global_order": 456,
+    "word": "bolster",
+    "en_meaning": "To support or strengthen; to prop up",
+    "vi_meaning": "Ủng hộ, bồi đắp, củng cố",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 56
+  },
+  {
+    "global_order": 457,
+    "word": "bolt",
+    "en_meaning": "To move suddenly and rapidly; to fasten with a metal pin",
+    "vi_meaning": "Lao đi bất thình lình; chốt cửa, cài then",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 57
+  },
+  {
+    "global_order": 458,
+    "word": "bombardment",
+    "en_meaning": "A continuous attack with bombs, shells, or missiles",
+    "vi_meaning": "Sự oanh tạc hoặc tấn công dồn dập",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 58
+  },
+  {
+    "global_order": 459,
+    "word": "bombastic",
+    "en_meaning": "High-sounding but with little meaning; inflated",
+    "vi_meaning": "Khoa trương, đao to búa lớn",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 59
+  },
+  {
+    "global_order": 460,
+    "word": "booming",
+    "en_meaning": "Having a period of great prosperity or rapid economic growth",
+    "vi_meaning": "Phát triển nhanh chóng, bùng nổ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 60
+  },
+  {
+    "global_order": 461,
+    "word": "boon",
+    "en_meaning": "A thing that is helpful or beneficial",
+    "vi_meaning": "Lợi ích, ơn huệ, vật may mắn",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 61
+  },
+  {
+    "global_order": 462,
+    "word": "boorish",
+    "en_meaning": "Rough and bad-mannered; coarse",
+    "vi_meaning": "Thô lỗ, cục cằn, kém văn hóa",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 62
+  },
+  {
+    "global_order": 463,
+    "word": "boundless",
+    "en_meaning": "having no limits; infinite or vast",
+    "vi_meaning": "vô hạn, không biên giới",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 63
+  },
+  {
+    "global_order": 464,
+    "word": "bountiful",
+    "en_meaning": "large in quantity; abundant or generous",
+    "vi_meaning": "dồi dào, phong phú, hào phóng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 64
+  },
+  {
+    "global_order": 465,
+    "word": "bourgeois",
+    "en_meaning": "belonging to the middle class; conventional or materialistic",
+    "vi_meaning": "thuộc tầng lớp trung lưu, thực dụng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 65
+  },
+  {
+    "global_order": 466,
+    "word": "bovine",
+    "en_meaning": "relating to cattle; slow-moving or dull",
+    "vi_meaning": "thuộc họ bò, chậm chạp, đần độn",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 66
+  },
+  {
+    "global_order": 467,
+    "word": "bowdlerize",
+    "en_meaning": "to remove offensive or improper parts from a text",
+    "vi_meaning": "lược bỏ những đoạn không phù hợp (trong sách)",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 67
+  },
+  {
+    "global_order": 468,
+    "word": "boycott",
+    "en_meaning": "To refuse to buy or participate in something as a form of protest",
+    "vi_meaning": "Tẩy chay, phản đối bằng cách không sử dụng sản phẩm hoặc dịch vụ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 68
+  },
+  {
+    "global_order": 469,
+    "word": "braggart",
+    "en_meaning": "A person who boasts about their achievements or possessions",
+    "vi_meaning": "Người khoe khoang, kẻ hay đi khoác lác về bản thân",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 69
+  },
+  {
+    "global_order": 470,
+    "word": "brandish",
+    "en_meaning": "To wave something, especially a weapon, as a threat or in excitement",
+    "vi_meaning": "Khua, vung vẩy vũ khí hoặc vật gì đó một cách đe dọa",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 70
+  },
+  {
+    "global_order": 471,
+    "word": "bravado",
+    "en_meaning": "A bold manner or a show of boldness intended to impress or intimidate",
+    "vi_meaning": "Sự phô trương lòng dũng cảm, sự làm bộ bạo dạn để gây ấn tượng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 71
+  },
+  {
+    "global_order": 472,
+    "word": "brawn",
+    "en_meaning": "Physical strength in contrast to intelligence",
+    "vi_meaning": "Sức mạnh cơ bắp, thể lực khỏe mạnh đối lập với trí tuệ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 72
+  },
+  {
+    "global_order": 473,
+    "word": "brazen",
+    "en_meaning": "Bold and without shame; shameless",
+    "vi_meaning": "Trơ trẽn, vô liêm sỉ hoặc táo bạo",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 73
+  },
+  {
+    "global_order": 474,
+    "word": "breach",
+    "en_meaning": "An act of breaking a law, agreement, or code of conduct",
+    "vi_meaning": "Sự vi phạm hợp đồng, luật lệ hoặc sự phá vỡ mối quan hệ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 74
+  },
+  {
+    "global_order": 475,
+    "word": "breadth",
+    "en_meaning": "The width of something; a wide range or extent",
+    "vi_meaning": "Bề ngang, chiều rộng hoặc sự hiểu biết sâu rộng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 75
+  },
+  {
+    "global_order": 476,
+    "word": "brevity",
+    "en_meaning": "Concise and exact use of words in writing or speech",
+    "vi_meaning": "Sự ngắn gọn, súc tích trong lời nói hoặc văn bản",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 76
+  },
+  {
+    "global_order": 477,
+    "word": "brindled",
+    "en_meaning": "Brownish or tawny color of animal fur, with streaks of other color",
+    "vi_meaning": "Có vằn, có đốm màu nâu hoặc xám (thường nói về lông thú)",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 77
+  },
+  {
+    "global_order": 478,
+    "word": "bristling",
+    "en_meaning": "Showing irritation or aggressiveness; standing up stiffly like bristles",
+    "vi_meaning": "Dựng đứng, đầy rẫy hoặc thể hiện sự giận dữ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 78
+  },
+  {
+    "global_order": 479,
+    "word": "brittle",
+    "en_meaning": "Hard but liable to break or shatter easily",
+    "vi_meaning": "Giòn, dễ gãy, dễ vỡ",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 79
+  },
+  {
+    "global_order": 480,
+    "word": "broach",
+    "en_meaning": "To bring up a sensitive or difficult subject for discussion",
+    "vi_meaning": "Đề cập, bắt đầu thảo luận một chủ đề nhạy cảm",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 80
+  },
+  {
+    "global_order": 481,
+    "word": "brochure",
+    "en_meaning": "A small book or magazine containing pictures and information about a product",
+    "vi_meaning": "Cuốn sách nhỏ quảng cáo hoặc giới thiệu thông tin",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 81
+  },
+  {
+    "global_order": 482,
+    "word": "brooch",
+    "en_meaning": "An ornament fastened to clothing with a hinged pin and catch",
+    "vi_meaning": "Trâm cài áo",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 82
+  },
+  {
+    "global_order": 483,
+    "word": "browbeat",
+    "en_meaning": "To intimidate someone, typically into doing something, with stern or abusive words",
+    "vi_meaning": "Hăm dọa, nạt nộ để ép buộc người khác",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 83
+  },
+  {
+    "global_order": 484,
+    "word": "browse",
+    "en_meaning": "To survey goods for sale or read through data in a relaxed way",
+    "vi_meaning": "Xem lướt qua, duyệt nội dung hoặc hàng hóa",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 84
+  },
+  {
+    "global_order": 485,
+    "word": "brunt",
+    "en_meaning": "The main force or physical impact of an attack or blow",
+    "vi_meaning": "Gánh nặng chính, sức ép nặng nề nhất",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 85
+  },
+  {
+    "global_order": 486,
+    "word": "brusque",
+    "en_meaning": "Abrupt or offhand in speech or manner",
+    "vi_meaning": "Cộc lốc, thô lỗ, khiếm nhã",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 86
+  },
+  {
+    "global_order": 487,
+    "word": "buccaneer",
+    "en_meaning": "A pirate, originally one operating in the Caribbean",
+    "vi_meaning": "Hải tặc, kẻ cướp biển",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 87
+  },
+  {
+    "global_order": 488,
+    "word": "bucolic",
+    "en_meaning": "Relating to the pleasant aspects of the countryside and country life",
+    "vi_meaning": "Thanh bình, thuộc về đồng quê",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 88
+  },
+  {
+    "global_order": 489,
+    "word": "buffet",
+    "en_meaning": "To strike repeatedly and violently, especially of wind or waves",
+    "vi_meaning": "Vùi dập, đánh mạnh liên tiếp",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 89
+  },
+  {
+    "global_order": 490,
+    "word": "buffoonery",
+    "en_meaning": "Amusing or ridiculous behavior; acting like a clown",
+    "vi_meaning": "Trò hề, hành vi lố bịch hoặc gây cười",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 90
+  },
+  {
+    "global_order": 491,
+    "word": "bullion",
+    "en_meaning": "Gold or silver in the form of bars or ingots",
+    "vi_meaning": "Vàng hoặc bạc thỏi",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 91
+  },
+  {
+    "global_order": 492,
+    "word": "bulwark",
+    "en_meaning": "A defensive wall or person/thing serving as a protection",
+    "vi_meaning": "Thành lũy, bức tường bảo vệ hoặc vật che chắn",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 92
+  },
+  {
+    "global_order": 493,
+    "word": "bumptious",
+    "en_meaning": "Offensively self-assertive or excessively proud; pushy",
+    "vi_meaning": "Tự mãn, hợm hĩnh hoặc kiêu ngạo quá mức",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 93
+  },
+  {
+    "global_order": 494,
+    "word": "bungalow",
+    "en_meaning": "A small house with a single story or low attic",
+    "vi_meaning": "Nhà gỗ một tầng, nhà có gác lửng thấp",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 94
+  },
+  {
+    "global_order": 495,
+    "word": "bungle",
+    "en_meaning": "To carry out a task clumsily or incompetently",
+    "vi_meaning": "Làm hỏng việc do vụng về hoặc thiếu hụt năng lực",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 95
+  },
+  {
+    "global_order": 496,
+    "word": "buoyant",
+    "en_meaning": "Able to float or showing a cheerful and optimistic attitude",
+    "vi_meaning": "Có khả năng nổi hoặc có tâm trạng vui vẻ, lạc quan",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 96
+  },
+  {
+    "global_order": 497,
+    "word": "bureaucracy",
+    "en_meaning": "A complex system of administration characterized by many rules and procedures",
+    "vi_meaning": "Hệ thống quan liêu với nhiều thủ tục hành chính phức tạp",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 97
+  },
+  {
+    "global_order": 498,
+    "word": "burgeon",
+    "en_meaning": "To grow, expand, or flourish rapidly",
+    "vi_meaning": "Phát triển nhanh chóng, đâm chồi nảy lộc",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 98
+  },
+  {
+    "global_order": 499,
+    "word": "burlesque",
+    "en_meaning": "An absurd or exaggerated imitation of something, often for comedic effect",
+    "vi_meaning": "Sự giễu nhại, kịch hài hước bắt chước quá lố",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 99
+  },
+  {
+    "global_order": 500,
+    "word": "burly",
+    "en_meaning": "Strong and heavily built; muscular",
+    "vi_meaning": "Vạm vỡ, lực lưỡng, cường tráng",
+    "lesson_name": "Lesson 5",
+    "lesson_order": 5,
+    "word_order": 100
+  }
+]

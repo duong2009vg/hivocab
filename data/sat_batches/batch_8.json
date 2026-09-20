@@ -1,0 +1,902 @@
+[
+  {
+    "global_order": 701,
+    "word": "concede",
+    "en_meaning": "To admit that something is true or valid after first denying it",
+    "vi_meaning": "Thừa nhận, nhượng bộ",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 1
+  },
+  {
+    "global_order": 702,
+    "word": "conceit",
+    "en_meaning": "Excessive pride in oneself; self-admiration",
+    "vi_meaning": "Sự kiêu ngạo, tính tự phụ",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 2
+  },
+  {
+    "global_order": 703,
+    "word": "concentric",
+    "en_meaning": "Circles or shapes that share the same center point",
+    "vi_meaning": "Đồng tâm",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 3
+  },
+  {
+    "global_order": 704,
+    "word": "conception",
+    "en_meaning": "The forming or devising of a plan or idea",
+    "vi_meaning": "Quan niệm, sự hình thành ý tưởng",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 4
+  },
+  {
+    "global_order": 705,
+    "word": "concerted",
+    "en_meaning": "Planned or performed in cooperation with others; coordinated",
+    "vi_meaning": "Phối hợp, có tính hiệp lực",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 5
+  },
+  {
+    "global_order": 706,
+    "word": "concession",
+    "en_meaning": "Something yielded or granted, often to settle a dispute or reach agreement",
+    "vi_meaning": "Sự nhượng bộ, sự thỏa hiệp",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 6
+  },
+  {
+    "global_order": 707,
+    "word": "conciliatory",
+    "en_meaning": "intended or likely to placate or pacify",
+    "vi_meaning": "có tính hòa giải, làm dịu sự bất hòa",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 7
+  },
+  {
+    "global_order": 708,
+    "word": "concise",
+    "en_meaning": "giving a lot of information clearly and in a few words",
+    "vi_meaning": "ngắn gọn, súc tích",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 8
+  },
+  {
+    "global_order": 709,
+    "word": "contrived",
+    "en_meaning": "deliberately created rather than arising naturally or spontaneously",
+    "vi_meaning": "gượng ép, không tự nhiên, được sắp đặt sẵn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 9
+  },
+  {
+    "global_order": 710,
+    "word": "controvert",
+    "en_meaning": "deny the truth or validity of something",
+    "vi_meaning": "bác bỏ, phủ nhận lập luận hoặc bằng chứng",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 10
+  },
+  {
+    "global_order": 711,
+    "word": "contusion",
+    "en_meaning": "a region of injured tissue or skin in which blood capillaries have been ruptured; a bruise",
+    "vi_meaning": "vết đòn dập, vết bầm tím",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 11
+  },
+  {
+    "global_order": 712,
+    "word": "conundrum",
+    "en_meaning": "A confusing and difficult problem or question",
+    "vi_meaning": "Vấn đề nan giải hoặc câu đố hóc búa",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 12
+  },
+  {
+    "global_order": 713,
+    "word": "convene",
+    "en_meaning": "To come or bring together for a meeting or assembly",
+    "vi_meaning": "Triệu tập hoặc nhóm họp",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 13
+  },
+  {
+    "global_order": 714,
+    "word": "convention",
+    "en_meaning": "A way in which something is usually done; a large meeting",
+    "vi_meaning": "Tục lệ, quy ước hoặc một hội nghị lớn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 14
+  },
+  {
+    "global_order": 715,
+    "word": "conventional",
+    "en_meaning": "Based on or in accordance with what is generally done or believed",
+    "vi_meaning": "Thông thường, theo tập quán hoặc truyền thống",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 15
+  },
+  {
+    "global_order": 716,
+    "word": "converge",
+    "en_meaning": "To tend to meet at a point; to gradually become similar",
+    "vi_meaning": "Hội tụ hoặc cùng hướng về một điểm",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 16
+  },
+  {
+    "global_order": 717,
+    "word": "conversant",
+    "en_meaning": "Familiar with or knowledgeable about something through experience or study",
+    "vi_meaning": "Thông thạo, quen thuộc hoặc hiểu biết về một lĩnh vực nào đó",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 17
+  },
+  {
+    "global_order": 718,
+    "word": "converse",
+    "en_meaning": "The opposite or reverse of a statement or situation",
+    "vi_meaning": "Điều ngược lại, sự trái ngược",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 18
+  },
+  {
+    "global_order": 719,
+    "word": "convert",
+    "en_meaning": "To change something into a different form, purpose, or system",
+    "vi_meaning": "Chuyển đổi, biến đổi từ dạng này sang dạng khác",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 19
+  },
+  {
+    "global_order": 720,
+    "word": "convex",
+    "en_meaning": "Curved outward like the exterior of a circle or sphere",
+    "vi_meaning": "Lồi, có bề mặt cong ra phía ngoài",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 20
+  },
+  {
+    "global_order": 721,
+    "word": "conveyance",
+    "en_meaning": "The action of transporting something or the process of communicating a message",
+    "vi_meaning": "Sự vận chuyển, sự truyền tải hoặc phương tiện vận chuyển",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 21
+  },
+  {
+    "global_order": 722,
+    "word": "conviction",
+    "en_meaning": "A firmly held belief or opinion; also a formal declaration of guilt in court",
+    "vi_meaning": "Sự tin tưởng mãnh liệt hoặc sự kết án trọng tội",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 22
+  },
+  {
+    "global_order": 723,
+    "word": "convivial",
+    "en_meaning": "Cheerful and friendly; especially in relation to social atmosphere and feasting",
+    "vi_meaning": "Vui vẻ, thân thiện, mang không khí hội hè",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 23
+  },
+  {
+    "global_order": 724,
+    "word": "convoke",
+    "en_meaning": "To call together or assemble for a formal meeting or council",
+    "vi_meaning": "Triệu tập một cuộc họp hoặc hội đồng",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 24
+  },
+  {
+    "global_order": 725,
+    "word": "convoluted",
+    "en_meaning": "Extremely complex and difficult to follow; twisted or coiled",
+    "vi_meaning": "Xoắn xuýt, phức tạp và cực kỳ khó hiểu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 25
+  },
+  {
+    "global_order": 726,
+    "word": "coquette",
+    "en_meaning": "A woman who flirts lightheartedly with men to win their admiration and affection",
+    "vi_meaning": "Người phụ nữ lẳng lơ, thích tán tỉnh để thu hút sự chú ý",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 26
+  },
+  {
+    "global_order": 727,
+    "word": "cordial",
+    "en_meaning": "Warm and friendly in manner or appearance",
+    "vi_meaning": "Thân ái, chân thành, nồng hậu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 27
+  },
+  {
+    "global_order": 728,
+    "word": "cordon",
+    "en_meaning": "A line of people or objects serving as a barrier",
+    "vi_meaning": "Hàng rào cảnh sát, vòng đai bao vây",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 28
+  },
+  {
+    "global_order": 729,
+    "word": "cornucopia",
+    "en_meaning": "An abundant supply of good things",
+    "vi_meaning": "Sự phong phú, dồi dào, sừng bừa bãi",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 29
+  },
+  {
+    "global_order": 730,
+    "word": "corollary",
+    "en_meaning": "A direct or natural consequence or result",
+    "vi_meaning": "Hệ quả tất yếu, kết luận rút ra từ một mệnh đề",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 30
+  },
+  {
+    "global_order": 731,
+    "word": "coronation",
+    "en_meaning": "The ceremony of crowning a sovereign",
+    "vi_meaning": "Lễ đăng quang, lễ lên ngôi",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 31
+  },
+  {
+    "global_order": 732,
+    "word": "corporeal",
+    "en_meaning": "Relating to a person's body, especially as opposed to their spirit",
+    "vi_meaning": "Thuộc về thân thể, xác thịt",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 32
+  },
+  {
+    "global_order": 733,
+    "word": "corpulent",
+    "en_meaning": "Large or bulky of body; fat or obese",
+    "vi_meaning": "Mập mạp, béo tốt",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 33
+  },
+  {
+    "global_order": 734,
+    "word": "correlation",
+    "en_meaning": "A mutual relationship or connection between two or more things",
+    "vi_meaning": "Sự tương quan, mối liên hệ lẫn nhau",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 34
+  },
+  {
+    "global_order": 735,
+    "word": "corroborate",
+    "en_meaning": "To confirm or give support to a statement, theory, or finding",
+    "vi_meaning": "Xác nhận, chứng thực",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 35
+  },
+  {
+    "global_order": 736,
+    "word": "corrode",
+    "en_meaning": "To destroy or wear away gradually by chemical action",
+    "vi_meaning": "Ăn mòn, gặm nhấm",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 36
+  },
+  {
+    "global_order": 737,
+    "word": "corrosive",
+    "en_meaning": "Tending to cause gradual destruction or eating away of a substance by chemical action",
+    "vi_meaning": "Gặm mòn, ăn mòn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 37
+  },
+  {
+    "global_order": 738,
+    "word": "corrugated",
+    "en_meaning": "Folded into ridges and troughs; shaped into a series of parallel ridges",
+    "vi_meaning": "Có nếp nhăn, lượn sóng, có dạng gấp khúc",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 38
+  },
+  {
+    "global_order": 739,
+    "word": "cosmopolitan",
+    "en_meaning": "Familiar with and at ease in many different countries and cultures",
+    "vi_meaning": "Thuộc về toàn thế giới, có tính quốc tế",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 39
+  },
+  {
+    "global_order": 740,
+    "word": "coterie",
+    "en_meaning": "A small group of people with shared interests, who often exclude others",
+    "vi_meaning": "Nhóm kín, nhóm người có cùng sở thích",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 40
+  },
+  {
+    "global_order": 741,
+    "word": "countenance",
+    "en_meaning": "A person's face or facial expression; or to admit as acceptable",
+    "vi_meaning": "Sắc mặt, vẻ mặt; hoặc sự tán thành",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 41
+  },
+  {
+    "global_order": 742,
+    "word": "countermand",
+    "en_meaning": "To revoke or cancel a previous order or command officially",
+    "vi_meaning": "Hủy bỏ hoặc phản lệnh một chỉ thị trước đó",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 42
+  },
+  {
+    "global_order": 743,
+    "word": "culvert",
+    "en_meaning": "A tunnel or structure that allows water to flow under a road",
+    "vi_meaning": "Cống thoát nước hoặc đường ống dẫn nước dưới lòng đường",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 43
+  },
+  {
+    "global_order": 744,
+    "word": "cumbersome",
+    "en_meaning": "Large, heavy, or difficult to carry or manage; inefficient and slow",
+    "vi_meaning": "Cồng kềnh, nặng nề hoặc rắc rối khi xử lý",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 44
+  },
+  {
+    "global_order": 745,
+    "word": "cumulative",
+    "en_meaning": "Increasing or growing by accumulation or successive additions",
+    "vi_meaning": "Tích lũy, dồn lại hoặc tăng dần theo thời gian",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 45
+  },
+  {
+    "global_order": 746,
+    "word": "denounce",
+    "en_meaning": "To publicly declare to be wrong or evil",
+    "vi_meaning": "Lên án, tố cáo công khai",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 46
+  },
+  {
+    "global_order": 747,
+    "word": "cupidity",
+    "en_meaning": "Excessive greed for money or possessions",
+    "vi_meaning": "Sự tham lam quá mức, lòng tham tiền bạc",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 47
+  },
+  {
+    "global_order": 748,
+    "word": "curator",
+    "en_meaning": "A person in charge of a museum, library, or collection",
+    "vi_meaning": "Người quản lý bảo tàng, người phụ trách triển lãm",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 48
+  },
+  {
+    "global_order": 749,
+    "word": "curmudgeon",
+    "en_meaning": "A bad-tempered, difficult, or cranky person",
+    "vi_meaning": "Người hay gắt gỏng, người khó tính và khó chiều",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 49
+  },
+  {
+    "global_order": 750,
+    "word": "cursive",
+    "en_meaning": "Written with characters joined together in a flowing style",
+    "vi_meaning": "Chữ viết tay kiểu nối nét, chữ thảo",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 50
+  },
+  {
+    "global_order": 751,
+    "word": "cursory",
+    "en_meaning": "Hasty and therefore not thorough or detailed",
+    "vi_meaning": "Nhanh, lướt qua, không kỹ lưỡng",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 51
+  },
+  {
+    "global_order": 752,
+    "word": "curtail",
+    "en_meaning": "To reduce in extent or quantity; to impose a restriction on",
+    "vi_meaning": "Cắt bớt, rút ngắn, hạn chế",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 52
+  },
+  {
+    "global_order": 753,
+    "word": "cynical",
+    "en_meaning": "Believing that people are motivated purely by self-interest; distrustful of sincerity",
+    "vi_meaning": "Hoài nghi, yếm thế, thiếu tin tưởng vào lòng tốt",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 53
+  },
+  {
+    "global_order": 754,
+    "word": "cynosure",
+    "en_meaning": "A person or thing that is the center of attention or admiration",
+    "vi_meaning": "Trung tâm của sự chú ý, tiêu điểm của sự ngưỡng mộ",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 54
+  },
+  {
+    "global_order": 755,
+    "word": "dabble",
+    "en_meaning": "To take part in an activity in a casual or superficial way",
+    "vi_meaning": "Làm việc gì đó một cách tài tử, không chuyên sâu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 55
+  },
+  {
+    "global_order": 756,
+    "word": "dais",
+    "en_meaning": "A low platform for a lectern, seats of honor, or a throne",
+    "vi_meaning": "Bục danh dự, bục phát biểu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 56
+  },
+  {
+    "global_order": 757,
+    "word": "dank",
+    "en_meaning": "unpleasantly damp, cold, and often musty",
+    "vi_meaning": "ẩm thấp, lạnh lẽo và khó chịu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 57
+  },
+  {
+    "global_order": 758,
+    "word": "dapper",
+    "en_meaning": "neat and trim in appearance and dress",
+    "vi_meaning": "gọn gàng, bảnh bao, tươm tất",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 58
+  },
+  {
+    "global_order": 759,
+    "word": "dappled",
+    "en_meaning": "marked with spots or rounded patches of color",
+    "vi_meaning": "lốm đốm, có các vệt màu khác nhau",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 59
+  },
+  {
+    "global_order": 760,
+    "word": "daub",
+    "en_meaning": "to spread a substance thickly or carelessly on a surface",
+    "vi_meaning": "phết, trét, bôi bẩn một cách cẩu thả",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 60
+  },
+  {
+    "global_order": 761,
+    "word": "daunt",
+    "en_meaning": "to make someone feel intimidated or apprehensive",
+    "vi_meaning": "làm nản lòng, khuất phục hoặc làm sợ hãi",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 61
+  },
+  {
+    "global_order": 762,
+    "word": "dauntless",
+    "en_meaning": "Showing fearlessness and determination; bold and brave",
+    "vi_meaning": "Dũng cảm, kiên cường, không sợ hãi",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 62
+  },
+  {
+    "global_order": 763,
+    "word": "dawdle",
+    "en_meaning": "To waste time or move slowly and aimlessly",
+    "vi_meaning": "Lãng phí thời gian, nhởn nhơ, chậm chạp",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 63
+  },
+  {
+    "global_order": 764,
+    "word": "deadlock",
+    "en_meaning": "A situation where no progress is possible; a stalemate",
+    "vi_meaning": "Sự đình trệ, bế tắc hoàn toàn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 64
+  },
+  {
+    "global_order": 765,
+    "word": "deadpan",
+    "en_meaning": "Deliberately impassive or expressionless, especially for humorous effect",
+    "vi_meaning": "Thản nhiên, sắc mặt không biểu cảm (để gây cười)",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 65
+  },
+  {
+    "global_order": 766,
+    "word": "dearth",
+    "en_meaning": "A scarcity or lack of something",
+    "vi_meaning": "Sự khan hiếm, tình trạng thiếu thốn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 66
+  },
+  {
+    "global_order": 767,
+    "word": "debacle",
+    "en_meaning": "A sudden and complete failure or fiasco",
+    "vi_meaning": "Sự thất bại thảm hại hoặc sụp đổ hoàn toàn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 67
+  },
+  {
+    "global_order": 768,
+    "word": "debase",
+    "en_meaning": "To lower the quality, value, or character of something",
+    "vi_meaning": "Làm giảm giá trị, chất lượng hoặc nhân cách",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 68
+  },
+  {
+    "global_order": 769,
+    "word": "debauch",
+    "en_meaning": "To corrupt morally or indulge in excessive pleasure",
+    "vi_meaning": "Làm đồi bại, sa đọa hoặc chè chén quá mức",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 69
+  },
+  {
+    "global_order": 770,
+    "word": "debilitate",
+    "en_meaning": "To make someone or something very weak or infirm",
+    "vi_meaning": "Làm cho yếu sức, làm suy nhược",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 70
+  },
+  {
+    "global_order": 771,
+    "word": "debonair",
+    "en_meaning": "Confident, stylish, and charming, typically used for a man",
+    "vi_meaning": "Lịch lãm, hào hoa và tự tin (thường dùng cho nam giới)",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 71
+  },
+  {
+    "global_order": 772,
+    "word": "debris",
+    "en_meaning": "Scattered pieces of waste or remains of something destroyed",
+    "vi_meaning": "Mảnh vụn, những mảnh đổ nát hoặc phế liệu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 72
+  },
+  {
+    "global_order": 773,
+    "word": "debunk",
+    "en_meaning": "To expose the falseness or hollowness of a myth, idea, or belief",
+    "vi_meaning": "Vạch trần, giải mã sự thật",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 73
+  },
+  {
+    "global_order": 774,
+    "word": "debutante",
+    "en_meaning": "A young woman making her formal entrance into society",
+    "vi_meaning": "Thiếu nữ sắp ra mắt giới thượng lưu",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 74
+  },
+  {
+    "global_order": 775,
+    "word": "decadence",
+    "en_meaning": "Moral or cultural decline as characterized by excessive indulgence in pleasure or luxury",
+    "vi_meaning": "Sự suy đồi, tình trạng sa đọa",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 75
+  },
+  {
+    "global_order": 776,
+    "word": "decapitate",
+    "en_meaning": "To cut off the head of a person or animal",
+    "vi_meaning": "Chặt đầu, xử trảm",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 76
+  },
+  {
+    "global_order": 777,
+    "word": "decelerate",
+    "en_meaning": "To reduce the speed of something; to slow down",
+    "vi_meaning": "Giảm tốc độ, đi chậm lại",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 77
+  },
+  {
+    "global_order": 778,
+    "word": "deciduous",
+    "en_meaning": "Shedding leaves annually at the end of the growing season",
+    "vi_meaning": "Rụng lá hằng năm",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 78
+  },
+  {
+    "global_order": 779,
+    "word": "decimate",
+    "en_meaning": "To destroy or kill a large part of a group or population",
+    "vi_meaning": "Tàn phá nặng nề hoặc tiêu diệt số lượng lớn",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 79
+  },
+  {
+    "global_order": 780,
+    "word": "detergent",
+    "en_meaning": "A water-soluble cleansing agent used for washing clothes or dishes",
+    "vi_meaning": "Chất tẩy rửa, xà phòng tổng hợp",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 80
+  },
+  {
+    "global_order": 781,
+    "word": "decipher",
+    "en_meaning": "To succeed in understanding or interpreting something complicated or secret",
+    "vi_meaning": "Giải mã hoặc hiểu được những thứ phức tạp",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 81
+  },
+  {
+    "global_order": 782,
+    "word": "declivity",
+    "en_meaning": "A downward slope or surface",
+    "vi_meaning": "Dốc xuống",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 82
+  },
+  {
+    "global_order": 783,
+    "word": "decollete",
+    "en_meaning": "Having a low neckline on a garment",
+    "vi_meaning": "Xẻ sâu ở cổ áo",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 83
+  },
+  {
+    "global_order": 784,
+    "word": "decomposition",
+    "en_meaning": "The process of decaying or breaking down into smaller parts",
+    "vi_meaning": "Sự phân hủy, sự thối rữa",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 84
+  },
+  {
+    "global_order": 785,
+    "word": "decorum",
+    "en_meaning": "Behavior in keeping with good taste and propriety",
+    "vi_meaning": "Sự đúng mực, sự đoan trang, phong thái lịch thiệp",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 85
+  },
+  {
+    "global_order": 786,
+    "word": "decoy",
+    "en_meaning": "A person or thing used to mislead or lure into a trap",
+    "vi_meaning": "Mồi nhử, vật dùng để đánh lạc hướng",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 86
+  },
+  {
+    "global_order": 787,
+    "word": "decrepit",
+    "en_meaning": "Elderly and infirm; worn out or ruined because of age or neglect",
+    "vi_meaning": "Già yếu, hỏng hóc, đổ nát do tuổi tác hoặc thiếu chăm sóc",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 87
+  },
+  {
+    "global_order": 788,
+    "word": "decrepitude",
+    "en_meaning": "The state of being decrepit; physical weakness due to old age",
+    "vi_meaning": "Tình trạng già yếu, sự suy yếu, sự rệu rã",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 88
+  },
+  {
+    "global_order": 789,
+    "word": "decry",
+    "en_meaning": "To publicly denounce or express strong disapproval of something",
+    "vi_meaning": "Công khai chỉ trích hoặc phản đối mạnh mẽ",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 89
+  },
+  {
+    "global_order": 790,
+    "word": "deducible",
+    "en_meaning": "Able to be logicaly derived or figured out from available information",
+    "vi_meaning": "Có thể suy luận được từ các thông tin sẵn có",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 90
+  },
+  {
+    "global_order": 791,
+    "word": "deface",
+    "en_meaning": "To spoil the surface or appearance of something, often by writing or drawing on it",
+    "vi_meaning": "Làm hư hỏng hoặc làm xấu đi bề mặt của vật gì đó",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 91
+  },
+  {
+    "global_order": 792,
+    "word": "defame",
+    "en_meaning": "To damage the good reputation of someone by spreading false information",
+    "vi_meaning": "Làm nhục, phỉ báng hoặc làm tổn hại danh dự của ai đó",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 92
+  },
+  {
+    "global_order": 793,
+    "word": "default",
+    "en_meaning": "Failure to fulfill an obligation, especially to repay a loan or appear in court",
+    "vi_meaning": "Sự vỡ nợ, sự không thực hiện được nghĩa vụ hoặc trạng thái mặc định",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 93
+  },
+  {
+    "global_order": 794,
+    "word": "defeatist",
+    "en_meaning": "Demonstrating expectation or acceptance of failure",
+    "vi_meaning": "Người bi quan, người luôn nghĩ đến thất bại",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 94
+  },
+  {
+    "global_order": 795,
+    "word": "defection",
+    "en_meaning": "The desertion of one's country or cause in favor of an opposing one",
+    "vi_meaning": "Sự đào ngũ, sự rời bỏ đảng phái hoặc đất nước để sang phía đối diện",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 95
+  },
+  {
+    "global_order": 796,
+    "word": "defer",
+    "en_meaning": "To put off an action or event to a later time; postpone",
+    "vi_meaning": "Trì hoãn, hoãn lại cho đến một thời điểm sau này",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 96
+  },
+  {
+    "global_order": 797,
+    "word": "deference",
+    "en_meaning": "Humble submission and respect toward the judgment or wishes of another",
+    "vi_meaning": "Sự tôn trọng, lòng tôn kính và sự chiều lòng ý muốn của người khác",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 97
+  },
+  {
+    "global_order": 798,
+    "word": "defiance",
+    "en_meaning": "Open resistance or bold disobedience to authority or an opposing force",
+    "vi_meaning": "Sự thách thức, sự không tuân thủ",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 98
+  },
+  {
+    "global_order": 799,
+    "word": "defile",
+    "en_meaning": "To damage the purity or appearance of something; to desecrate",
+    "vi_meaning": "Làm ô uế, làm bẩn, làm mất đi sự trong sạch",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 99
+  },
+  {
+    "global_order": 800,
+    "word": "definitive",
+    "en_meaning": "Done or reached decisively and with authority; providing a final solution",
+    "vi_meaning": "Cuối cùng, dứt khoát, mang tính quyết định",
+    "lesson_name": "Lesson 8",
+    "lesson_order": 8,
+    "word_order": 100
+  }
+]

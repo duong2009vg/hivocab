@@ -1,0 +1,5 @@
+UPDATE public.words SET image_url = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/oxford3000/oxford_3000_m_nh_c/band.webp' WHERE id = '84af55c6-9885-406e-84e9-991eb24b4e45';
+UPDATE public.words SET image_url = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/oxford3000/oxford_3000_m_nh_c/music.webp' WHERE id = 'ac6c7245-3d1b-4273-816c-5a397ab1547d';
+UPDATE public.words SET image_url = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/oxford3000/oxford_3000_m_nh_c/play.webp' WHERE id = '81f4cff1-8a68-4b88-a9ed-48d35ef4cf57';
+UPDATE public.words SET image_url = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/oxford3000/oxford_3000_m_nh_c/note.webp' WHERE id = '7639eb97-a78d-40d0-8f4f-09528d637c78';
+UPDATE public.words SET image_url = 'https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev/oxford3000/oxford_3000_m_nh_c/playlist.webp' WHERE id = '0525b29b-694c-44fb-86a5-71d0f0f31e99';

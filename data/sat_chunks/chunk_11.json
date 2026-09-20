@@ -1,0 +1,452 @@
+[
+  {
+    "global_order": 501,
+    "word": "burnish",
+    "en_meaning": "To polish something, especially metal, by rubbing to make it shiny",
+    "vi_meaning": "Đánh bóng, làm cho láng bóng Surface",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 1
+  },
+  {
+    "global_order": 502,
+    "word": "centrifugal",
+    "en_meaning": "Moving or tending to move away from a center",
+    "vi_meaning": "Ly tâm (hướng ra xa tâm)",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 2
+  },
+  {
+    "global_order": 503,
+    "word": "bustle",
+    "en_meaning": "To move in an energetic or noisy manner; busy activity",
+    "vi_meaning": "Hối hả, náo nhiệt, sự bận rộn ồn ào",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 3
+  },
+  {
+    "global_order": 504,
+    "word": "buttress",
+    "en_meaning": "A source of defense or support; to strengthen or reinforce",
+    "vi_meaning": "Điểm tựa, sự hỗ trợ, củng cố (lập luận hoặc cấu trúc)",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 4
+  },
+  {
+    "global_order": 505,
+    "word": "buxom",
+    "en_meaning": "(Of a woman) healthily plump, full-bosomed, and attractive",
+    "vi_meaning": "Đầy đặn, nảy nở, có sức sống (thường nói về phụ nữ)",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 5
+  },
+  {
+    "global_order": 506,
+    "word": "cabal",
+    "en_meaning": "A small group of people who plan secret plots or schemes",
+    "vi_meaning": "Băng đảng, phe nhóm bí mật đang âm mưu điều gì đó",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 6
+  },
+  {
+    "global_order": 507,
+    "word": "cache",
+    "en_meaning": "A hiding place, or the objects stored in such a place",
+    "vi_meaning": "Nơi cất giấu bí mật hoặc kho tàng trữ",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 7
+  },
+  {
+    "global_order": 508,
+    "word": "cacophonous",
+    "en_meaning": "Involving or producing a harsh, discordant mixture of sounds",
+    "vi_meaning": "Âm thanh chói tai, hỗn tạp và khó nghe",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 8
+  },
+  {
+    "global_order": 509,
+    "word": "cadaver",
+    "en_meaning": "A dead body, especially one intended for dissection",
+    "vi_meaning": "Tử thi, xác chết (thường dùng trong y học hoặc nghiên cứu)",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 9
+  },
+  {
+    "global_order": 510,
+    "word": "cadaverous",
+    "en_meaning": "resembling a corpse in being very pale, thin, or bony",
+    "vi_meaning": "xanh xao như xác chết, gầy gò hốc hác",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 10
+  },
+  {
+    "global_order": 511,
+    "word": "cadence",
+    "en_meaning": "a rhythmic sequence or flow of sounds in language",
+    "vi_meaning": "nhịp điệu, ngữ điệu, sự lên bổng xuống trầm",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 11
+  },
+  {
+    "global_order": 512,
+    "word": "cajole",
+    "en_meaning": "to persuade someone to do something by sustained coaxing or flattery",
+    "vi_meaning": "nịnh nọt, dụ dỗ, thuyết phục khéo léo",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 12
+  },
+  {
+    "global_order": 513,
+    "word": "calamity",
+    "en_meaning": "an event causing great and often sudden damage or distress; a disaster",
+    "vi_meaning": "tai họa, tai ương, thiên tai thảm khốc",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 13
+  },
+  {
+    "global_order": 514,
+    "word": "calculated",
+    "en_meaning": "done with full awareness of the likely consequences; intentional",
+    "vi_meaning": "có tính toán trước, có dự tính, cố ý",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 14
+  },
+  {
+    "global_order": 515,
+    "word": "caldron",
+    "en_meaning": "A large metal pot used for cooking over an open fire",
+    "vi_meaning": "Nồi lớn, vạc",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 15
+  },
+  {
+    "global_order": 516,
+    "word": "caliber",
+    "en_meaning": "The quality of someone's character or the level of their ability",
+    "vi_meaning": "Năng lực, phẩm chất, tầm vóc",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 16
+  },
+  {
+    "global_order": 517,
+    "word": "calligraphy",
+    "en_meaning": "The art of producing decorative handwriting or lettering with a pen or brush",
+    "vi_meaning": "Thư pháp",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 17
+  },
+  {
+    "global_order": 518,
+    "word": "callous",
+    "en_meaning": "Showing or having a cruel and coldhearted disregard for others",
+    "vi_meaning": "Vô tâm, nhẫn tâm, nhám (da)",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 18
+  },
+  {
+    "global_order": 519,
+    "word": "callow",
+    "en_meaning": "Inexperienced and immature, especially of a young person",
+    "vi_meaning": "Non nớt, thiếu kinh nghiệm",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 19
+  },
+  {
+    "global_order": 520,
+    "word": "calorific",
+    "en_meaning": "relating to the amount of energy or heat produced by food or fuel",
+    "vi_meaning": "tạo nhiệt, sinh nhiệt",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 20
+  },
+  {
+    "global_order": 521,
+    "word": "calumny",
+    "en_meaning": "the making of false and defamatory statements about someone in order to damage their reputation",
+    "vi_meaning": "sự vu khống, lời phỉ báng",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 21
+  },
+  {
+    "global_order": 522,
+    "word": "camaraderie",
+    "en_meaning": "Mutual trust and friendship among people who spend a lot of time together",
+    "vi_meaning": "Tình bạn thân thiết, sự gắn bó giữa những người đồng chí",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 22
+  },
+  {
+    "global_order": 523,
+    "word": "cameo",
+    "en_meaning": "A small character part in a play or movie played by a distinguished actor",
+    "vi_meaning": "Vai diễn khách mời của người nổi tiếng hoặc hình chạm khắc trên đá quý",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 23
+  },
+  {
+    "global_order": 524,
+    "word": "camouflage",
+    "en_meaning": "Disguising personnel, equipment, or machinery by making them blend with the surroundings",
+    "vi_meaning": "Sự ngụy trang để hòa lẫn vào môi trường xung quanh",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 24
+  },
+  {
+    "global_order": 525,
+    "word": "candor",
+    "en_meaning": "The quality of being open, honest, and sincere in expression",
+    "vi_meaning": "Sự ngay thẳng, thật thà và bộc trực",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 25
+  },
+  {
+    "global_order": 526,
+    "word": "canine",
+    "en_meaning": "Relating to or resembling dogs or the family of animals that includes dogs",
+    "vi_meaning": "Thuộc về giống chó hoặc có liên quan đến chó",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 26
+  },
+  {
+    "global_order": 527,
+    "word": "canny",
+    "en_meaning": "Having or showing shrewdness and good judgment, especially in money or business matters",
+    "vi_meaning": "Khôn ngoan, thận trọng, đặc biệt là trong các vấn đề tiền bạc hoặc kinh doanh",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 27
+  },
+  {
+    "global_order": 528,
+    "word": "catalyst",
+    "en_meaning": "Something that causes or hastens a change or event",
+    "vi_meaning": "Chất xúc tác, nhân tố thúc đẩy sự thay đổi",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 28
+  },
+  {
+    "global_order": 529,
+    "word": "cant",
+    "en_meaning": "Hypocritical and sanctimonious talk, typically of a moral, religious, or political nature",
+    "vi_meaning": "Lời nói đạo đức giả, thường mang tính chất tôn giáo hoặc chính trị",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 29
+  },
+  {
+    "global_order": 530,
+    "word": "cantankerous",
+    "en_meaning": "Bad-tempered, argumentative, and uncooperative",
+    "vi_meaning": "Khó tính, hay gắt gỏng và khó bảo",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 30
+  },
+  {
+    "global_order": 531,
+    "word": "cantata",
+    "en_meaning": "A medium-length narrative piece of music for voices with instrumental accompaniment",
+    "vi_meaning": "Một bản nhạc kịch ngắn dành cho hợp xướng kèm theo nhạc cụ",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 31
+  },
+  {
+    "global_order": 532,
+    "word": "canter",
+    "en_meaning": "A three-beat gait of a horse or other quadruped between a trot and a gallop",
+    "vi_meaning": "Bước chạy thong thả của ngựa, nằm giữa bước chạy lúp xúp và phi nước đại",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 32
+  },
+  {
+    "global_order": 533,
+    "word": "canto",
+    "en_meaning": "A major section or division of a long poem",
+    "vi_meaning": "Khổ thơ hoặc chương trong một bài thơ dài",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 33
+  },
+  {
+    "global_order": 534,
+    "word": "canvass",
+    "en_meaning": "To examine in detail or seek votes or opinions from a group",
+    "vi_meaning": "Thăm dò ý kiến, kêu gọi bầu cử hoặc xem xét chi tiết",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 34
+  },
+  {
+    "global_order": 535,
+    "word": "capacious",
+    "en_meaning": "Having a lot of space inside; roomy",
+    "vi_meaning": "Rộng rãi, có sức chứa lớn",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 35
+  },
+  {
+    "global_order": 536,
+    "word": "capitulate",
+    "en_meaning": "To cease to resist an opponent or an unwelcome demand; surrender",
+    "vi_meaning": "Đầu hàng, ngừng kháng cự theo các điều kiện thỏa hiệp",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 36
+  },
+  {
+    "global_order": 537,
+    "word": "caprice",
+    "en_meaning": "A sudden and unaccountable change of mood or behavior",
+    "vi_meaning": "Sự thất thường, tính khí nắng mưa thất thường",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 37
+  },
+  {
+    "global_order": 538,
+    "word": "capricious",
+    "en_meaning": "Given to sudden and unaccountable changes of mood or behavior",
+    "vi_meaning": "Thất thường, dễ thay đổi đột ngột",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 38
+  },
+  {
+    "global_order": 539,
+    "word": "caption",
+    "en_meaning": "A title or brief explanation accompanying an illustration or photograph",
+    "vi_meaning": "Chú thích, lời thuyết minh ngắn gọn dưới hình ảnh",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 39
+  },
+  {
+    "global_order": 540,
+    "word": "captivate",
+    "en_meaning": "To attract and hold the interest and attention of someone",
+    "vi_meaning": "Mê hoặc, quyến rũ, làm say đắm",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 40
+  },
+  {
+    "global_order": 541,
+    "word": "carat",
+    "en_meaning": "A unit of weight for precious stones or degree of purity for gold",
+    "vi_meaning": "Đơn vị trọng lượng đá quý hoặc độ tinh khiết của vàng",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 41
+  },
+  {
+    "global_order": 542,
+    "word": "cardinal",
+    "en_meaning": "Of greatest importance; fundamental or primary",
+    "vi_meaning": "Cốt yếu, cơ bản, quan trọng nhất",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 42
+  },
+  {
+    "global_order": 543,
+    "word": "cardiologist",
+    "en_meaning": "A doctor who specializes in the study and treatment of heart diseases",
+    "vi_meaning": "Bác sĩ chuyên khoa tim mạch",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 43
+  },
+  {
+    "global_order": 544,
+    "word": "careen",
+    "en_meaning": "To move swiftly and in an uncontrolled way in a specific direction",
+    "vi_meaning": "Chao đảo, lao nhanh một cách mất kiểm soát",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 44
+  },
+  {
+    "global_order": 545,
+    "word": "caricature",
+    "en_meaning": "A picture or description exaggerating someone's features for comic or grotesque effect",
+    "vi_meaning": "Tranh biếm họa hoặc sự mô tả phóng đại",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 45
+  },
+  {
+    "global_order": 546,
+    "word": "carnage",
+    "en_meaning": "The killing of a large number of people, often in war or a violent event",
+    "vi_meaning": "Sự tàn sát, cảnh chém giết đẫm máu",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 46
+  },
+  {
+    "global_order": 547,
+    "word": "carnal",
+    "en_meaning": "Relating to physical, especially sexual, needs and activities",
+    "vi_meaning": "Thuộc về xác thịt, nhục dục",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 47
+  },
+  {
+    "global_order": 548,
+    "word": "carnivorous",
+    "en_meaning": "Feeding on other animals; meat-eating",
+    "vi_meaning": "Ăn thịt, động vật ăn thịt",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 48
+  },
+  {
+    "global_order": 549,
+    "word": "carping",
+    "en_meaning": "Difficult to please; critical in a petty and nagging way",
+    "vi_meaning": "Hay chỉ trích, xoi mói những việc nhỏ nhặt",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 49
+  },
+  {
+    "global_order": 550,
+    "word": "cartographer",
+    "en_meaning": "A person who draws or produces maps",
+    "vi_meaning": "Người vẽ bản đồ",
+    "lesson_name": "Lesson 6",
+    "lesson_order": 6,
+    "word_order": 50
+  }
+]

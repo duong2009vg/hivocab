@@ -1,0 +1,452 @@
+[
+  {
+    "global_order": 101,
+    "word": "adulation",
+    "en_meaning": "Excessive admiration or praise, often bordering on flattery",
+    "vi_meaning": "Sự nịnh hót, ca tụng quá mức",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 1
+  },
+  {
+    "global_order": 102,
+    "word": "adulterate",
+    "en_meaning": "To make something poorer in quality by adding another substance",
+    "vi_meaning": "Làm giả, làm cho kém chất lượng bằng cách pha tạp",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 2
+  },
+  {
+    "global_order": 103,
+    "word": "aggressor",
+    "en_meaning": "A person or country that attacks first without being provoked",
+    "vi_meaning": "Kẻ xâm lược, bên tấn công trước",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 3
+  },
+  {
+    "global_order": 104,
+    "word": "aghast",
+    "en_meaning": "Filled with horror, shock, or amazement",
+    "vi_meaning": "Kinh ngạc, sửng sốt hoặc kinh hãi",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 4
+  },
+  {
+    "global_order": 105,
+    "word": "agility",
+    "en_meaning": "The ability to move quickly and easily or to think rapidly",
+    "vi_meaning": "Sự nhanh nhẹn, linh hoạt về thể chất hoặc tư duy",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 5
+  },
+  {
+    "global_order": 106,
+    "word": "abridge",
+    "en_meaning": "To shorten a book, movie, or speech without losing the sense",
+    "vi_meaning": "Rút gọn hoặc lược bớt nội dung",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 6
+  },
+  {
+    "global_order": 107,
+    "word": "abrogate",
+    "en_meaning": "To repeal or do away with a law, right, or formal agreement",
+    "vi_meaning": "Bãi bỏ hoặc hủy bỏ (một đạo luật, thỏa thuận)",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 7
+  },
+  {
+    "global_order": 108,
+    "word": "abscond",
+    "en_meaning": "To leave hurriedly and secretly, typically to avoid detection or arrest",
+    "vi_meaning": "Bỏ trốn hoặc lẩn lút ra đi",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 8
+  },
+  {
+    "global_order": 109,
+    "word": "absolute",
+    "en_meaning": "Not qualified or diminished in any way; total and complete",
+    "vi_meaning": "Tuyệt đối, hoàn toàn hoặc không hạn chế",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 9
+  },
+  {
+    "global_order": 110,
+    "word": "absolve",
+    "en_meaning": "To declare someone free from guilt, obligation, or punishment",
+    "vi_meaning": "Xá tội, miễn tội hoặc giải phóng khỏi trách nhiệm",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 10
+  },
+  {
+    "global_order": 111,
+    "word": "advent",
+    "en_meaning": "the arrival or beginning of a notable person, thing, or event",
+    "vi_meaning": "sự xuất hiện, sự bắt đầu của một sự kiện quan trọng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 11
+  },
+  {
+    "global_order": 112,
+    "word": "adventitious",
+    "en_meaning": "happening or carried on according to chance rather than design",
+    "vi_meaning": "tình cờ, ngẫu nhiên, không do dự tính",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 12
+  },
+  {
+    "global_order": 113,
+    "word": "adversary",
+    "en_meaning": "one's opponent in a contest, conflict, or dispute",
+    "vi_meaning": "đối thủ, kẻ thù, kẻ nghịch",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 13
+  },
+  {
+    "global_order": 114,
+    "word": "adverse",
+    "en_meaning": "preventing success or development; harmful; unfavorable",
+    "vi_meaning": "bất lợi, có hại, ngược lại",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 14
+  },
+  {
+    "global_order": 115,
+    "word": "adversity",
+    "en_meaning": "difficulties; misfortune; a state of serious and continued difficulty",
+    "vi_meaning": "nghịch cảnh, sự bất hạnh, hoàn cảnh khó khăn",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 15
+  },
+  {
+    "global_order": 116,
+    "word": "advocacy",
+    "en_meaning": "Public support for or recommendation of a particular cause or policy",
+    "vi_meaning": "Sự ủng hộ, tán thành hoặc vận động cho một mục tiêu hoặc chính sách nào đó",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 16
+  },
+  {
+    "global_order": 117,
+    "word": "agitate",
+    "en_meaning": "To disturb, excite, or stir up interest and discussion",
+    "vi_meaning": "Làm náo động, gây kích động hoặc tranh luận",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 17
+  },
+  {
+    "global_order": 118,
+    "word": "agnostic",
+    "en_meaning": "A person who believes that nothing is known about God's existence",
+    "vi_meaning": "Người theo thuyết bất khả tri",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 18
+  },
+  {
+    "global_order": 119,
+    "word": "agrarian",
+    "en_meaning": "Relating to cultivated land, farming, or landed property",
+    "vi_meaning": "Thuộc về nông nghiệp, ruộng đất",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 19
+  },
+  {
+    "global_order": 120,
+    "word": "alacrity",
+    "en_meaning": "Brisk and cheerful readiness to do something",
+    "vi_meaning": "Sự sốt sắng, hăng hái và sẵn lòng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 20
+  },
+  {
+    "global_order": 121,
+    "word": "alchemy",
+    "en_meaning": "A medieval chemical philosophy aiming to transmute metals into gold and find a universal elixir",
+    "vi_meaning": "Giả kim thuật",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 21
+  },
+  {
+    "global_order": 122,
+    "word": "alcove",
+    "en_meaning": "A small recessed section of a room or an area in a garden",
+    "vi_meaning": "Hốc tường, hốc phòng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 22
+  },
+  {
+    "global_order": 123,
+    "word": "alias",
+    "en_meaning": "A false or assumed name used to conceal one's identity",
+    "vi_meaning": "Bí danh, tên giả",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 23
+  },
+  {
+    "global_order": 124,
+    "word": "alienate",
+    "en_meaning": "To cause someone to feel isolated or estranged from a group or individual",
+    "vi_meaning": "Làm cho xa lánh, cô lập",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 24
+  },
+  {
+    "global_order": 125,
+    "word": "alimentary",
+    "en_meaning": "Relating to nourishment, food, or the process of nutrition",
+    "vi_meaning": "Thuộc về dinh dưỡng, liên quan đến thực phẩm",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 25
+  },
+  {
+    "global_order": 126,
+    "word": "alimony",
+    "en_meaning": "Financial support paid to a former spouse after a divorce or separation",
+    "vi_meaning": "Khoản tiền cấp dưỡng cho vợ hoặc chồng sau khi ly hôn",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 26
+  },
+  {
+    "global_order": 127,
+    "word": "allay",
+    "en_meaning": "To diminish or put at rest a fear, suspicion, or worry",
+    "vi_meaning": "làm dịu đi, trấn an",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 27
+  },
+  {
+    "global_order": 128,
+    "word": "allege",
+    "en_meaning": "To claim that someone has done something wrong, typically without proof",
+    "vi_meaning": "cáo buộc mà không có bằng chứng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 28
+  },
+  {
+    "global_order": 129,
+    "word": "allegiance",
+    "en_meaning": "Loyalty or commitment of a subordinate to a superior or individual",
+    "vi_meaning": "lòng trung thành",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 29
+  },
+  {
+    "global_order": 130,
+    "word": "allegory",
+    "en_meaning": "A story, poem, or picture that can be interpreted to reveal a hidden meaning",
+    "vi_meaning": "chuyện ngụ ngôn hoặc biểu tượng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 30
+  },
+  {
+    "global_order": 131,
+    "word": "alleviate",
+    "en_meaning": "To make physical suffering or a problem less severe",
+    "vi_meaning": "làm nhẹ bớt, làm giảm bớt",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 31
+  },
+  {
+    "global_order": 132,
+    "word": "alliteration",
+    "en_meaning": "The repetition of the same consonant sounds at the beginning of words",
+    "vi_meaning": "Sự lặp lại phụ âm đầu (điệp âm)",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 32
+  },
+  {
+    "global_order": 133,
+    "word": "allocate",
+    "en_meaning": "To distribute resources or duties for a particular purpose",
+    "vi_meaning": "Phân bổ, chỉ định (nguồn lực, tiền bạc)",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 33
+  },
+  {
+    "global_order": 134,
+    "word": "alloy",
+    "en_meaning": "A mixture of two or more metals",
+    "vi_meaning": "Hợp kim",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 34
+  },
+  {
+    "global_order": 135,
+    "word": "allude",
+    "en_meaning": "To suggest or hint at something indirectly",
+    "vi_meaning": "Nói bóng gió, ám chỉ",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 35
+  },
+  {
+    "global_order": 136,
+    "word": "allure",
+    "en_meaning": "The quality of being powerfully and mysteriously attractive or fascinating",
+    "vi_meaning": "Sức lôi cuốn, sự quyến rũ",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 36
+  },
+  {
+    "global_order": 137,
+    "word": "allusion",
+    "en_meaning": "An indirect or passing reference to something or someone",
+    "vi_meaning": "Lời ám chỉ, sự nói bóng gió",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 37
+  },
+  {
+    "global_order": 138,
+    "word": "aloft",
+    "en_meaning": "Up in or into the air; overhead",
+    "vi_meaning": "Ở trên cao, trên không trung",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 38
+  },
+  {
+    "global_order": 139,
+    "word": "aloof",
+    "en_meaning": "Cool and distant; not friendly or forthcoming",
+    "vi_meaning": "Xa cách, hững hờ, lạnh lùng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 39
+  },
+  {
+    "global_order": 140,
+    "word": "altercation",
+    "en_meaning": "A noisy argument or disagreement, especially in public",
+    "vi_meaning": "Cuộc cãi lộn, sự đấu khẩu",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 40
+  },
+  {
+    "global_order": 141,
+    "word": "altruistic",
+    "en_meaning": "Showing a disinterested and selfless concern for the well-being of others",
+    "vi_meaning": "Vị tha, nhân hậu, lòng lành",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 41
+  },
+  {
+    "global_order": 142,
+    "word": "amalgamate",
+    "en_meaning": "to combine or unite to form one organization or structure",
+    "vi_meaning": "hợp nhất, kết hợp",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 42
+  },
+  {
+    "global_order": 143,
+    "word": "amass",
+    "en_meaning": "to collect or gather together a large amount over time",
+    "vi_meaning": "tích lũy, cóp nhặt",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 43
+  },
+  {
+    "global_order": 144,
+    "word": "ambidextrous",
+    "en_meaning": "able to use both the right and left hands equally well",
+    "vi_meaning": "thuận cả hai tay",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 44
+  },
+  {
+    "global_order": 145,
+    "word": "ambience",
+    "en_meaning": "the character and atmosphere of a place",
+    "vi_meaning": "không khí, môi trường xung quanh",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 45
+  },
+  {
+    "global_order": 146,
+    "word": "ambiguous",
+    "en_meaning": "open to more than one interpretation; not clear",
+    "vi_meaning": "mơ hồ, nhập nhằng",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 46
+  },
+  {
+    "global_order": 147,
+    "word": "ambivalence",
+    "en_meaning": "The state of having mixed feelings or contradictory ideas about something or someone",
+    "vi_meaning": "Sự mâu thuẫn trong tư tưởng hoặc cảm xúc",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 47
+  },
+  {
+    "global_order": 148,
+    "word": "amble",
+    "en_meaning": "To walk or move at a slow, relaxed pace",
+    "vi_meaning": "Đi dạo thong thả",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 48
+  },
+  {
+    "global_order": 149,
+    "word": "ambulatory",
+    "en_meaning": "Related to or capable of walking",
+    "vi_meaning": "Có thể đi lại được, không phải nằm một chỗ",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 49
+  },
+  {
+    "global_order": 150,
+    "word": "ameliorate",
+    "en_meaning": "To make something bad or unsatisfactory better",
+    "vi_meaning": "Cải thiện, làm cho tốt hơn",
+    "lesson_name": "Lesson 2",
+    "lesson_order": 2,
+    "word_order": 50
+  }
+]

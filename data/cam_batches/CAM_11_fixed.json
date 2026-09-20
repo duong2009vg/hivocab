@@ -1,0 +1,1557 @@
+[
+  {
+    "row_idx": 435,
+    "word": "demographic",
+    "new_example": "The marketing team analyzed demographic data to design an advertising campaign tailored specifically to young urban professionals."
+  },
+  {
+    "row_idx": 436,
+    "word": "hothouse",
+    "new_example": "Our biology teacher took the class to a local hothouse to observe how exotic tropical orchids grow during winter."
+  },
+  {
+    "row_idx": 438,
+    "word": "accommodate",
+    "new_example": "The university built two new residential dormitories on campus to accommodate the growing number of international students this semester."
+  },
+  {
+    "row_idx": 439,
+    "word": "multi-storey",
+    "new_example": "The city council approved plans to build a multi-storey parking garage near the busy downtown shopping district."
+  },
+  {
+    "row_idx": 441,
+    "word": "proponent",
+    "new_example": "The mayor is a strong proponent of public transit investments to reduce traffic congestion and carbon emissions."
+  },
+  {
+    "row_idx": 443,
+    "word": "sacrificed adj/v",
+    "new_example": "Many personal leisure activities were sacrificed so that she could finish her medical degree on schedule."
+  },
+  {
+    "row_idx": 444,
+    "word": "despoil",
+    "new_example": "Illegal logging and unregulated mining continue to despoil the lush natural forests along the river valley."
+  },
+  {
+    "row_idx": 446,
+    "word": "semi-arid",
+    "new_example": "Farmers in this semi-arid region rely on modern drip irrigation to cultivate drought-resistant olives and almonds efficiently."
+  },
+  {
+    "row_idx": 447,
+    "word": "rigour",
+    "new_example": "The academic rigour of the doctoral program prepared graduate students well for demanding careers in scientific research."
+  },
+  {
+    "row_idx": 449,
+    "word": "herbicide",
+    "new_example": "The organic gardener refused to spray chemical herbicide, preferring to pull stubborn weeds from the flowerbeds by hand."
+  },
+  {
+    "row_idx": 450,
+    "word": "pesticide",
+    "new_example": "Consumers increasingly buy organic apples to avoid harmful pesticide residues that may remain on the fruit skins."
+  },
+  {
+    "row_idx": 451,
+    "word": "fertiliser",
+    "new_example": "Spreading natural compost instead of synthetic fertiliser improved the garden soil structure and helped our tomato plants flourish."
+  },
+  {
+    "row_idx": 452,
+    "word": "incidence",
+    "new_example": "Health officials noted a sharp drop in the incidence of seasonal flu after the widespread vaccination campaign began."
+  },
+  {
+    "row_idx": 454,
+    "word": "nonedible",
+    "new_example": "Supervisors warned the factory workers that the brightly colored liquid was strictly nonedible and posed serious chemical risks."
+  },
+  {
+    "row_idx": 459,
+    "word": "detrimental",
+    "new_example": "Staying up late every night playing video games has a detrimental effect on a student's academic performance."
+  },
+  {
+    "row_idx": 460,
+    "word": "demographic trend",
+    "new_example": "Government planners are studying the current demographic trend of an aging population to allocate adequate healthcare funds."
+  },
+  {
+    "row_idx": 462,
+    "word": "traditional farming method",
+    "new_example": "Rather than adopting heavy machinery, the village elders still rely on a traditional farming method that protects the soil."
+  },
+  {
+    "row_idx": 466,
+    "word": "horizontal farming",
+    "new_example": "Because horizontal farming consumes vast amounts of rural land, engineers are actively developing vertical crop towers instead."
+  },
+  {
+    "row_idx": 467,
+    "word": "weather-related crop failure",
+    "new_example": "Severe summer droughts triggered widespread weather-related crop failure, driving up vegetable prices across the entire country."
+  },
+  {
+    "row_idx": 470,
+    "word": "multi-storey facility",
+    "new_example": "The logistics company built a modern multi-storey facility near the seaport to store and distribute electronic goods."
+  },
+  {
+    "row_idx": 471,
+    "word": "renewable energy",
+    "new_example": "The university campus generates over half of its electricity from renewable energy sources like rooftop solar panels."
+  },
+  {
+    "row_idx": 473,
+    "word": "detrimental impact",
+    "new_example": "Discarding single-use plastics into the ocean creates a detrimental impact on delicate marine ecosystems and coastal fisheries."
+  },
+  {
+    "row_idx": 474,
+    "word": "urban rooftop",
+    "new_example": "Volunteers transformed a vacant urban rooftop into a lush community garden where local residents grow fresh vegetables."
+  },
+  {
+    "row_idx": 475,
+    "word": "navigability",
+    "new_example": "Dredging the shallow river restored its navigability, allowing cargo ships to transport commercial goods safely to the port."
+  },
+  {
+    "row_idx": 478,
+    "word": "landmark",
+    "new_example": "The historic clock tower stands as a beloved landmark that guides tourists walking through the bustling old quarter."
+  },
+  {
+    "row_idx": 479,
+    "word": "commemoration",
+    "new_example": "The town council organized a solemn ceremony in commemoration of firefighters who lost their lives serving the community."
+  },
+  {
+    "row_idx": 480,
+    "word": "regeneration",
+    "new_example": "An ambitious urban regeneration scheme turned the rundown industrial waterfront into a thriving district with shops and cafes."
+  },
+  {
+    "row_idx": 481,
+    "word": "seesaw",
+    "new_example": "Two laughing children spent the sunny afternoon taking turns playing on the colorful seesaw at the neighborhood playground."
+  },
+  {
+    "row_idx": 482,
+    "word": "monorail",
+    "new_example": "Commuters conveniently take the elevated monorail to travel between the airport terminals and the downtown hotel district."
+  },
+  {
+    "row_idx": 483,
+    "word": "propeller",
+    "new_example": "The mechanic inspected the boat's bronze propeller carefully to ensure no seaweed or fishing net was entangled inside."
+  },
+  {
+    "row_idx": 489,
+    "word": "displacement",
+    "new_example": "Naval engineers calculated the ship's water displacement to confirm that the hull would float securely when fully loaded."
+  },
+  {
+    "row_idx": 490,
+    "word": "domestic",
+    "new_example": "Airline companies reported a significant surge in domestic passenger flights during the recent national holiday weekend."
+  },
+  {
+    "row_idx": 492,
+    "word": "array",
+    "new_example": "The new computer laboratory features an impressive array of high-performance workstations for engineering students to use."
+  },
+  {
+    "row_idx": 493,
+    "word": "axle",
+    "new_example": "The truck driver immediately stopped by the roadside when he heard a loud clunking noise from the broken rear axle."
+  },
+  {
+    "row_idx": 494,
+    "word": "cog",
+    "new_example": "The master clockmaker adjusted a tiny brass cog inside the vintage timepiece to make it tick accurately again."
+  },
+  {
+    "row_idx": 497,
+    "word": "historic",
+    "new_example": "Delegates from sixty nations gathered in the grand convention hall to sign a historic treaty protecting global oceans."
+  },
+  {
+    "row_idx": 498,
+    "word": "distinct",
+    "new_example": "The coffee shop sells beans from three distinct growing regions, each possessing a unique aroma and flavor profile."
+  },
+  {
+    "row_idx": 501,
+    "word": "economic regeneration",
+    "new_example": "Converting the disused shipyard into a technology park stimulated economic regeneration throughout the entire coastal town."
+  },
+  {
+    "row_idx": 502,
+    "word": "Celtic double-headed axe",
+    "new_example": "The museum curator displayed an ancient bronze Celtic double-headed axe discovered near an iron age burial mound."
+  },
+  {
+    "row_idx": 503,
+    "word": "toy building set",
+    "new_example": "For his seventh birthday, Liam was thrilled to receive a colorful plastic toy building set with robotic parts."
+  },
+  {
+    "row_idx": 504,
+    "word": "withstand immense stress",
+    "new_example": "Modern suspension bridges are engineered with reinforced steel cables that can withstand immense stress during severe typhoons."
+  },
+  {
+    "row_idx": 506,
+    "word": "central spine",
+    "new_example": "The futuristic airport terminal is designed around a wide central spine connecting departure gates and baggage halls."
+  },
+  {
+    "row_idx": 507,
+    "word": "principle of displacement",
+    "new_example": "During our physics lab session, students tested the principle of displacement by submerging metal cylinders in water cylinders."
+  },
+  {
+    "row_idx": 508,
+    "word": "hydraulic steel gate",
+    "new_example": "Operators swiftly lowered the heavy hydraulic steel gate to prevent rising river floodwaters from reaching the residential district."
+  },
+  {
+    "row_idx": 509,
+    "word": "central machine room",
+    "new_example": "Only certified technicians with security badges are permitted to enter the central machine room controlling the factory automation."
+  },
+  {
+    "row_idx": 510,
+    "word": "hydraulic motor",
+    "new_example": "The heavy excavator arm is driven by a compact hydraulic motor capable of lifting tonnes of wet soil."
+  },
+  {
+    "row_idx": 511,
+    "word": "central axle",
+    "new_example": "The giant observation wheel rotates smoothly because its massive central axle is lubricated and monitored continuously by technicians."
+  },
+  {
+    "row_idx": 513,
+    "word": "fixed inner cog",
+    "new_example": "The transmission mechanism relies on a fixed inner cog to guide outer gears without slipping under high speeds."
+  },
+  {
+    "row_idx": 515,
+    "word": "stem",
+    "new_example": "The central bank raised interest rates aggressively in an effort to stem accelerating inflation across the country."
+  },
+  {
+    "row_idx": 516,
+    "word": "manipulation",
+    "new_example": "Consumers should learn to spot clever advertising manipulation designed to convince shoppers to purchase items they hardly need."
+  },
+  {
+    "row_idx": 518,
+    "word": "disperse",
+    "new_example": "Police officers asked the gathering crowd to disperse calmly after the outdoor music concert ended late at night."
+  },
+  {
+    "row_idx": 519,
+    "word": "refract",
+    "new_example": "Water droplets hanging in the humid air refract sunlight at specific angles to create a brilliant rainbow."
+  },
+  {
+    "row_idx": 520,
+    "word": "stimulate",
+    "new_example": "The provincial government cut corporate taxes to stimulate private investment and encourage entrepreneurs to start new technology companies."
+  },
+  {
+    "row_idx": 522,
+    "word": "aerosol",
+    "new_example": "Environmental agencies urge cosmetics manufacturers to replace harmful aerosol sprays with eco-friendly pump dispensers to protect the atmosphere."
+  },
+  {
+    "row_idx": 523,
+    "word": "stratosphere",
+    "new_example": "Commercial passenger jets cruise smoothly in the lower stratosphere where weather turbulence is far less frequent than near the ground."
+  },
+  {
+    "row_idx": 524,
+    "word": "dimming",
+    "new_example": "Atmospheric scientists observed that airborne pollution contributed to solar dimming by blocking sunlight from reaching the Earth's surface."
+  },
+  {
+    "row_idx": 529,
+    "word": "guarded",
+    "new_example": "The company spokesperson gave a guarded response when journalists asked whether layoffs were being planned for next quarter."
+  },
+  {
+    "row_idx": 533,
+    "word": "induce",
+    "new_example": "Doctors warned that working long hours without adequate sleep can induce chronic headaches and elevated blood pressure levels."
+  },
+  {
+    "row_idx": 535,
+    "word": "intentional",
+    "new_example": "The referee concluded that the foul was intentional and promptly showed the aggressive defender a red card."
+  },
+  {
+    "row_idx": 536,
+    "word": "latitude",
+    "new_example": "Cities situated at a northern latitude experience very short winter daylight hours and frigid temperatures."
+  },
+  {
+    "row_idx": 537,
+    "word": "stride",
+    "new_example": "The pharmaceutical startup made a major stride toward developing an affordable oral vaccine for tropical fever diseases."
+  },
+  {
+    "row_idx": 539,
+    "word": "fossil fuel",
+    "new_example": "Many European nations are shutting down coal power plants to end their dependence on fossil fuel imports."
+  },
+  {
+    "row_idx": 540,
+    "word": "global warming",
+    "new_example": "Rising ocean temperatures caused by global warming are bleaching fragile coral reefs in the South Pacific."
+  },
+  {
+    "row_idx": 543,
+    "word": "large-scale manipulation",
+    "new_example": "Some scientists propose large-scale manipulation of planetary clouds to reflect sunlight and cool terrestrial climates."
+  },
+  {
+    "row_idx": 544,
+    "word": "backup generator",
+    "new_example": "When severe storms knocked out the electrical grid, the community hospital immediately switched to its diesel backup generator."
+  },
+  {
+    "row_idx": 546,
+    "word": "sunlight-refracting sunshade",
+    "new_example": "Architects installed a giant sunlight-refracting sunshade on the building facade to keep glass offices cool in hot weather."
+  },
+  {
+    "row_idx": 547,
+    "word": "high latitude",
+    "new_example": "Communities located at a high latitude often encounter twenty-four hours of continuous darkness during midwinter months."
+  },
+  {
+    "row_idx": 549,
+    "word": "short-term cooling",
+    "new_example": "The volcanic ash plume produced short-term cooling by shading the regional atmosphere for several weeks."
+  },
+  {
+    "row_idx": 550,
+    "word": "high-tension cable",
+    "new_example": "Civil engineers inspected every high-tension cable supporting the suspension bridge to check for rust or metal wear."
+  },
+  {
+    "row_idx": 551,
+    "word": "permanent solution",
+    "new_example": "Patching road potholes offers quick relief, but repaving the entire highway is the only permanent solution."
+  },
+  {
+    "row_idx": 553,
+    "word": "pre-industrial level",
+    "new_example": "Climate treaties urge nations to prevent global temperatures from warming beyond two degrees above the pre-industrial level."
+  },
+  {
+    "row_idx": 554,
+    "word": "vessel",
+    "new_example": "The coast guard deployed an offshore patrol vessel to rescue stranded fishermen trapped in rough sea conditions."
+  },
+  {
+    "row_idx": 555,
+    "word": "undisputable",
+    "new_example": "Security camera footage presented undisputable proof that the suspect was nowhere near the convenience store during the break-in."
+  },
+  {
+    "row_idx": 556,
+    "word": "starboard",
+    "new_example": "The ferry captain turned the steering wheel sharply to starboard to avoid an unlit wooden fishing boat ahead."
+  },
+  {
+    "row_idx": 558,
+    "word": "degradation",
+    "new_example": "Continuous pesticide runoff caused severe soil degradation, prompting local farmers to switch to organic cultivation methods."
+  },
+  {
+    "row_idx": 559,
+    "word": "intact",
+    "new_example": "Amazingly, all delicate glassware packed in bubble wrap remained completely intact after the bumpy cross-country moving trip."
+  },
+  {
+    "row_idx": 560,
+    "word": "obstruction",
+    "new_example": "Road maintenance crews quickly cleared a fallen tree obstruction to reopen both highway lanes to morning commuter traffic."
+  },
+  {
+    "row_idx": 564,
+    "word": "excavation",
+    "new_example": "During the subway excavation, construction workers uncovered prehistoric pottery shards and ancient stone tools buried beneath the street."
+  },
+  {
+    "row_idx": 565,
+    "word": "climax",
+    "new_example": "The detective novel reached an exciting climax when the detective confronted the secretive suspect aboard a speeding train."
+  },
+  {
+    "row_idx": 566,
+    "word": "treasure trove",
+    "new_example": "The university basement archive proved to be a real treasure trove of handwritten letters from nineteenth-century authors."
+  },
+  {
+    "row_idx": 567,
+    "word": "salvage",
+    "new_example": "Marine divers attempted to salvage the sunken cargo container before incoming stormy waters scattered its contents across the seabed."
+  },
+  {
+    "row_idx": 569,
+    "word": "go-ahead",
+    "new_example": "After thorough environmental safety reviews, the municipal board granted the final go-ahead for building the new solar facility."
+  },
+  {
+    "row_idx": 570,
+    "word": "hydraulic",
+    "new_example": "Auto repair technicians use a heavy hydraulic press to bend thick steel plates into exact shapes for vehicles."
+  },
+  {
+    "row_idx": 571,
+    "word": "cradle",
+    "new_example": "Engineers lowered the restored antique sports car onto a cushioned cradle to transport it safely across the exhibition hall."
+  },
+  {
+    "row_idx": 574,
+    "word": "undisciplined",
+    "new_example": "The soccer coach substituted the undisciplined striker after he repeatedly ignored defensive instructions during the second half."
+  },
+  {
+    "row_idx": 578,
+    "word": "precise",
+    "new_example": "The chemistry experiment requires precise measurements of each powdered reagent to guarantee reproducible laboratory findings."
+  },
+  {
+    "row_idx": 579,
+    "word": "sea battle",
+    "new_example": "Military historians recounted a decisive sixteenth-century sea battle in which galleons clashed along the foggy coastline."
+  },
+  {
+    "row_idx": 581,
+    "word": "mechanical degradation",
+    "new_example": "Continuous friction inside the unlubricated conveyor belt caused severe mechanical degradation and shut down factory operations."
+  },
+  {
+    "row_idx": 582,
+    "word": "remain intact",
+    "new_example": "The ancient stone arch managed to remain intact despite centuries of severe seasonal earthquakes and weathering."
+  },
+  {
+    "row_idx": 583,
+    "word": "fade into obscurity",
+    "new_example": "Without active marketing, many groundbreaking indie video games quickly fade into obscurity among thousands of rival app releases."
+  },
+  {
+    "row_idx": 584,
+    "word": "search technique",
+    "new_example": "Mountain rescue teams deployed an advanced aerial search technique using thermal drones to locate missing hikers rapidly."
+  },
+  {
+    "row_idx": 585,
+    "word": "side-scan sonar",
+    "new_example": "Marine archaeologists mounted a side-scan sonar device onto their research vessel to map sunken shipwrecks in muddy waters."
+  },
+  {
+    "row_idx": 586,
+    "word": "treasure trove",
+    "new_example": "The local flea market is a wonderful treasure trove where vintage book lovers discover rare first editions."
+  },
+  {
+    "row_idx": 587,
+    "word": "salvage operation",
+    "new_example": "Heavy ocean swells forced harbor authorities to postpone the underwater salvage operation until storm conditions subsided."
+  },
+  {
+    "row_idx": 589,
+    "word": "hydraulic jack",
+    "new_example": "The auto mechanic slipped a hydraulic jack underneath the chassis to lift the car and replace the flat tire."
+  },
+  {
+    "row_idx": 590,
+    "word": "lifting cradle",
+    "new_example": "Workers secured the fragile wooden hull in a custom lifting cradle before hoisting it onto the recovery barge."
+  },
+  {
+    "row_idx": 592,
+    "word": "timber framework",
+    "new_example": "Carpenters erected a sturdy timber framework to support the pitched roof of the traditional countryside cottage."
+  },
+  {
+    "row_idx": 593,
+    "word": "give the go-ahead",
+    "new_example": "The city council finally decided to give the go-ahead for building a new pedestrian walkway across the river."
+  },
+  {
+    "row_idx": 595,
+    "word": "ethnographer",
+    "new_example": "The ethnographer spent two years living with rural mountain villagers to document their oral storytelling traditions."
+  },
+  {
+    "row_idx": 596,
+    "word": "extraterrestrial",
+    "new_example": "Astronomers analyze radio signals from deep space to search for any plausible sign of extraterrestrial life."
+  },
+  {
+    "row_idx": 597,
+    "word": "sediment",
+    "new_example": "Heavy seasonal rains washed thick sediment down from the hills, clogging irrigation ditches across the farmland."
+  },
+  {
+    "row_idx": 598,
+    "word": "descendant",
+    "new_example": "As a direct descendant of the village founder, he felt proud to preserve the historic family farmhouse."
+  },
+  {
+    "row_idx": 599,
+    "word": "scenario",
+    "new_example": "Our financial advisor modeled an economic scenario where inflation rises sharply, helping us plan our household savings."
+  },
+  {
+    "row_idx": 600,
+    "word": "accelerate",
+    "new_example": "The marketing director launched online promotions to accelerate product sales before the festive holiday shopping season began."
+  },
+  {
+    "row_idx": 601,
+    "word": "dominance",
+    "new_example": "The tech giant maintained market dominance by continuously acquiring promising artificial intelligence startups and retaining skilled engineers."
+  },
+  {
+    "row_idx": 603,
+    "word": "catastrophe",
+    "new_example": "Prompt evacuation orders by local emergency services prevented a terrible human catastrophe during the coastal hurricane."
+  },
+  {
+    "row_idx": 605,
+    "word": "pioneer",
+    "new_example": "Dr. Evans is recognized as an early pioneer in robotic surgery, having trained dozens of young surgeons worldwide."
+  },
+  {
+    "row_idx": 608,
+    "word": "manoeuvre",
+    "new_example": "The delivery driver managed to manoeuvre the large refrigerated truck through narrow, crowded alleys in the old quarter."
+  },
+  {
+    "row_idx": 609,
+    "word": "replica",
+    "new_example": "The museum gift shop sells an exact plastic replica of the famous dinosaur skull displayed in the exhibition."
+  },
+  {
+    "row_idx": 612,
+    "word": "shrivel",
+    "new_example": "Without adequate watering during hot summer heatwaves, potted balcony plants will quickly shrivel and lose their green leaves."
+  },
+  {
+    "row_idx": 613,
+    "word": "ingenious",
+    "new_example": "The creative software engineer devised an ingenious solution that compressed large image files without sacrificing photo clarity."
+  },
+  {
+    "row_idx": 614,
+    "word": "steward",
+    "new_example": "As a responsible forest steward, Marcus spends his weekends clearing invasive weeds and marking safe hiking trails."
+  },
+  {
+    "row_idx": 615,
+    "word": "abject",
+    "new_example": "Charity organizations strive to provide nutritious meals and temporary shelters to families living in abject poverty."
+  },
+  {
+    "row_idx": 616,
+    "word": "reckless",
+    "new_example": "Traffic police issued a heavy fine to the reckless driver who sped through red lights during rush hour."
+  },
+  {
+    "row_idx": 617,
+    "word": "deforestation",
+    "new_example": "Rampant deforestation along tropical river basins causes severe soil erosion and threatens indigenous wildlife populations."
+  },
+  {
+    "row_idx": 619,
+    "word": "Stone Age culture",
+    "new_example": "Archaeology students visited the prehistoric cave site to study cave paintings left behind by a vanished Stone Age culture."
+  },
+  {
+    "row_idx": 620,
+    "word": "local folklore",
+    "new_example": "According to colorful local folklore, a gentle guardian spirit protects lost travelers in these mist-covered mountain valleys."
+  },
+  {
+    "row_idx": 621,
+    "word": "lush palm forest",
+    "new_example": "The luxury island resort is completely surrounded by a lush palm forest bordering golden sandy beaches."
+  },
+  {
+    "row_idx": 623,
+    "word": "worst-case scenario",
+    "new_example": "In a worst-case scenario where the server crashes permanently, our IT department has cloud backups ready for recovery."
+  },
+  {
+    "row_idx": 624,
+    "word": "ecological catastrophe",
+    "new_example": "The massive industrial oil spill triggered an unprecedented ecological catastrophe that devastated hundreds of miles of coastline."
+  },
+  {
+    "row_idx": 625,
+    "word": "sustainable farming",
+    "new_example": "By rotating crops and harvesting rainwater, local growers successfully practice sustainable farming without exhausting soil nutrients."
+  },
+  {
+    "row_idx": 626,
+    "word": "stone windbreak",
+    "new_example": "Farmers on the windy coastal hillside constructed a stone windbreak to protect their young vegetable crops from ocean gales."
+  },
+  {
+    "row_idx": 627,
+    "word": "biological invasion",
+    "new_example": "Customs inspectors carefully screen imported timber to prevent a devastating biological invasion by non-native beetle species."
+  },
+  {
+    "row_idx": 629,
+    "word": "slave trader",
+    "new_example": "The historical exhibition documents the horrific transatlantic voyage organized by an eighteenth-century slave trader."
+  },
+  {
+    "row_idx": 630,
+    "word": "power display",
+    "new_example": "The military parade through the capital avenue served as an overt power display to intimidate neighboring rivals."
+  },
+  {
+    "row_idx": 631,
+    "word": "deliberate campaign",
+    "new_example": "The consumer protection agency launched a deliberate campaign to warn seniors against fraudulent telemarketing schemes."
+  },
+  {
+    "row_idx": 632,
+    "word": "neuroaesthetics",
+    "new_example": "Graduate students in neuroaesthetics use brain imaging to explore how visual artworks trigger emotional pleasure in human observers."
+  },
+  {
+    "row_idx": 633,
+    "word": "objectivity",
+    "new_example": "A professional investigative journalist must maintain complete objectivity when reporting on controversial political elections."
+  },
+  {
+    "row_idx": 634,
+    "word": "amygdala",
+    "new_example": "When you suddenly encounter a venomous snake, your amygdala triggers an instinctive fight-or-flight response within milliseconds."
+  },
+  {
+    "row_idx": 637,
+    "word": "doodle",
+    "new_example": "Whenever Sophie felt bored during long conference calls, she would doodle intricate floral patterns in her notebook."
+  },
+  {
+    "row_idx": 638,
+    "word": "acclaimed",
+    "new_example": "The acclaimed author visited our local bookstore to sign copies of her bestselling historical mystery novel."
+  },
+  {
+    "row_idx": 639,
+    "word": "ambiguous",
+    "new_example": "The manager's ambiguous email left team members confused about who was responsible for completing the project presentation."
+  },
+  {
+    "row_idx": 640,
+    "word": "scrutiny",
+    "new_example": "The proposed corporate merger faced intense regulatory scrutiny from antitrust authorities concerned about fair consumer competition."
+  },
+  {
+    "row_idx": 641,
+    "word": "decipher",
+    "new_example": "Pharmacists often struggle to decipher messy handwritten prescriptions brought in by patients visiting neighborhood clinics."
+  },
+  {
+    "row_idx": 642,
+    "word": "deceptively",
+    "new_example": "The entrance exam problem appeared deceptively simple, but it actually required sophisticated mathematical logic to solve correctly."
+  },
+  {
+    "row_idx": 645,
+    "word": "intricacy",
+    "new_example": "Tourists marveled at the sheer intricacy of the hand-woven Persian rug displayed inside the palace gallery."
+  },
+  {
+    "row_idx": 650,
+    "word": "linger",
+    "new_example": "Customers often linger in the cozy coffee shop for hours, enjoying warm cinnamon pastries while reading classic novels."
+  },
+  {
+    "row_idx": 652,
+    "word": "perceptual",
+    "new_example": "Optical illusions test human perceptual limitations by creating visual impressions that contradict physical reality."
+  },
+  {
+    "row_idx": 653,
+    "word": "impressionist",
+    "new_example": "The art gallery opened an exhibition showcasing famous impressionist paintings depicting lively Parisian street scenes and gardens."
+  },
+  {
+    "row_idx": 654,
+    "word": "representational",
+    "new_example": "While modern artists often favor pure abstraction, traditional portrait painters prefer representational styles that mirror reality."
+  },
+  {
+    "row_idx": 655,
+    "word": "mirror neuron",
+    "new_example": "Scientists believe the mirror neuron system helps humans empathize by firing when we watch another person experience emotion."
+  },
+  {
+    "row_idx": 656,
+    "word": "subtle",
+    "new_example": "A subtle hint of fresh vanilla added an irresistible sweetness to the baker's homemade almond croissants."
+  },
+  {
+    "row_idx": 657,
+    "word": "scientific objectivity",
+    "new_example": "Laboratory researchers must uphold strict scientific objectivity when evaluating clinical trial results to prevent personal confirmation bias."
+  },
+  {
+    "row_idx": 658,
+    "word": "perceptual decision",
+    "new_example": "Pilots must make a rapid perceptual decision when judging runway visibility through dense fog during night landings."
+  },
+  {
+    "row_idx": 659,
+    "word": "follow the crowd",
+    "new_example": "Instead of choosing an independent career path, many college graduates simply follow the crowd into corporate banking."
+  },
+  {
+    "row_idx": 660,
+    "word": "acclaimed masterpiece",
+    "new_example": "Thousands of international tourists visit the Louvre every morning to admire Leonardo da Vinci's acclaimed masterpiece, the Mona Lisa."
+  },
+  {
+    "row_idx": 661,
+    "word": "under scrutiny",
+    "new_example": "The pharmaceutical firm came under scrutiny after whistleblowers revealed irregularities in its confidential vaccine safety data."
+  },
+  {
+    "row_idx": 662,
+    "word": "neural activity",
+    "new_example": "Brain scans revealed heightened neural activity in sensory areas when participants listened to their favorite classical piano concertos."
+  },
+  {
+    "row_idx": 663,
+    "word": "deceptively simple",
+    "new_example": "The rules of chess are deceptively simple, yet mastering grandmaster strategies requires decades of disciplined study and practice."
+  },
+  {
+    "row_idx": 665,
+    "word": "perceptual overload",
+    "new_example": "Walking through Times Square for the first time caused perceptual overload with its blaring electronic billboards and screaming sirens."
+  },
+  {
+    "row_idx": 666,
+    "word": "repeated motif",
+    "new_example": "The fashion designer featured a repeated motif of golden lotus petals throughout her latest autumn silk collection."
+  },
+  {
+    "row_idx": 667,
+    "word": "mirror neuron",
+    "new_example": "Neurologists suggest that the mirror neuron mechanism enables babies to imitate adult facial expressions like smiling and frowning."
+  },
+  {
+    "row_idx": 668,
+    "word": "test a hypothesis",
+    "new_example": "Psychology researchers designed a series of controlled experiments to test a hypothesis regarding human memory retention under stress."
+  },
+  {
+    "row_idx": 670,
+    "word": "moment of recognition",
+    "new_example": "Her face lit up in a sudden moment of recognition when she spotted her childhood friend across the terminal."
+  },
+  {
+    "row_idx": 671,
+    "word": "visual system",
+    "new_example": "Staring at digital computer screens without taking breaks can strain the human visual system and cause eye fatigue."
+  },
+  {
+    "row_idx": 673,
+    "word": "unravel",
+    "new_example": "Detectives worked tirelessly for months to unravel the tangled financial web behind the multi-million-dollar banking fraud."
+  },
+  {
+    "row_idx": 674,
+    "word": "subsequently",
+    "new_example": "The chef graduated from a culinary institute and subsequently opened his own award-winning French restaurant downtown."
+  },
+  {
+    "row_idx": 675,
+    "word": "rear",
+    "new_example": "Passionate hobbyists rear honeybees in wooden backyard hives to produce pure wildflower honey for their families."
+  },
+  {
+    "row_idx": 677,
+    "word": "millennium",
+    "new_example": "Historians noted that the ancient coastal citadel survived for over a millennium before falling into ruined neglect."
+  },
+  {
+    "row_idx": 678,
+    "word": "caste",
+    "new_example": "Social reformers campaigned tirelessly to abolish rigid caste distinctions and ensure equal employment opportunities for all citizens."
+  },
+  {
+    "row_idx": 679,
+    "word": "lucrative",
+    "new_example": "Developing mobile applications turned out to be a highly lucrative career choice for the ambitious young programmer."
+  },
+  {
+    "row_idx": 680,
+    "word": "commodity",
+    "new_example": "Crude oil remains the most actively traded energy commodity across international financial markets worldwide."
+  },
+  {
+    "row_idx": 681,
+    "word": "middleman",
+    "new_example": "By selling organic coffee directly online, the farmer eliminated the middleman and doubled his seasonal profits."
+  },
+  {
+    "row_idx": 682,
+    "word": "conceal",
+    "new_example": "The celebrity wore oversized dark sunglasses and a wide-brimmed hat to conceal her identity from intrusive paparazzi."
+  },
+  {
+    "row_idx": 683,
+    "word": "monopoly",
+    "new_example": "The antitrust commission investigated the tech giant to prevent it from establishing an unfair monopoly over internet search."
+  },
+  {
+    "row_idx": 685,
+    "word": "esteemed",
+    "new_example": "The university invited an esteemed Nobel laureate to deliver the keynote speech at the annual commencement ceremony."
+  },
+  {
+    "row_idx": 691,
+    "word": "silkworm",
+    "new_example": "Farmers in the northern province feed fresh mulberry leaves to silkworm caterpillars to produce top-quality raw silk."
+  },
+  {
+    "row_idx": 692,
+    "word": "cocoon",
+    "new_example": "Workers carefully harvest each delicate white cocoon before the developing moth can damage the continuous silk thread."
+  },
+  {
+    "row_idx": 693,
+    "word": "exotic",
+    "new_example": "The botanical conservatory houses thousands of exotic tropical flowers imported from remote rainforests in South America."
+  },
+  {
+    "row_idx": 695,
+    "word": "merchant",
+    "new_example": "The wealthy spice merchant traveled across foreign harbors to buy rare cinnamon, cloves, and nutmeg for European markets."
+  },
+  {
+    "row_idx": 696,
+    "word": "industrialisation",
+    "new_example": "Rapid industrialisation during the nineteenth century drew millions of agricultural workers into crowded urban manufacturing centers."
+  },
+  {
+    "row_idx": 697,
+    "word": "lucrative trade route",
+    "new_example": "Control over the lucrative trade route connecting Asia and Europe brought immense wealth to coastal merchant cities."
+  },
+  {
+    "row_idx": 698,
+    "word": "unit of currency",
+    "new_example": "The euro functions as the standard unit of currency for commercial transactions across twenty European member nations."
+  },
+  {
+    "row_idx": 699,
+    "word": "imperial monopoly",
+    "new_example": "The emperor enforced an imperial monopoly on porcelain manufacturing, prohibiting private citizens from exporting ceramic wares."
+  },
+  {
+    "row_idx": 700,
+    "word": "prized commodity",
+    "new_example": "During the Middle Ages, black pepper was such a prized commodity that it was sometimes used like gold."
+  },
+  {
+    "row_idx": 701,
+    "word": "precious commodity",
+    "new_example": "In drought-stricken desert villages, clean drinking water is regarded as an extraordinarily precious commodity by every resident."
+  },
+  {
+    "row_idx": 702,
+    "word": "diplomatic gift",
+    "new_example": "The visiting ambassador presented a hand-carved silver vase as a diplomatic gift to the prime minister."
+  },
+  {
+    "row_idx": 703,
+    "word": "man-made fibre",
+    "new_example": "Garment factories blend natural cotton with man-made fibre like polyester to manufacture durable and wrinkle-resistant work shirts."
+  },
+  {
+    "row_idx": 704,
+    "word": "raw material",
+    "new_example": "The furniture workshop purchases timber as the main raw material for crafting bespoke dining tables and chairs."
+  },
+  {
+    "row_idx": 706,
+    "word": "esteemed reputation",
+    "new_example": "Through decades of producing luxury sports cars, the German automaker established an esteemed reputation for superior engineering."
+  },
+  {
+    "row_idx": 707,
+    "word": "sole producer",
+    "new_example": "For several years, the biotechnology firm remained the sole producer of the lifesaving childhood vaccine worldwide."
+  },
+  {
+    "row_idx": 708,
+    "word": "major exporter",
+    "new_example": "Vietnam has become a major exporter of robusta coffee beans, supplying roasters across Europe and North America."
+  },
+  {
+    "row_idx": 709,
+    "word": "silk cultivation",
+    "new_example": "Traditional villages along the Red River delta have preserved the practice of silk cultivation for over eight centuries."
+  },
+  {
+    "row_idx": 711,
+    "word": "trade route",
+    "new_example": "The maritime trade route through the Strait of Malacca carries huge volumes of international cargo every single day."
+  },
+  {
+    "row_idx": 712,
+    "word": "interval",
+    "new_example": "During the two-hour university lecture, the professor paused at a twenty-minute interval to answer questions from students."
+  },
+  {
+    "row_idx": 713,
+    "word": "instinct",
+    "new_example": "A mother bird relies on pure instinct to build a protective nest and gather food for her chicks."
+  },
+  {
+    "row_idx": 714,
+    "word": "prolonged",
+    "new_example": "Doctors warned that prolonged exposure to direct sunlight without sunscreen significantly raises the risk of skin cancer."
+  },
+  {
+    "row_idx": 715,
+    "word": "allocation",
+    "new_example": "The project manager reviewed the budget allocation to ensure sufficient funding for software development and product testing."
+  },
+  {
+    "row_idx": 716,
+    "word": "attentiveness",
+    "new_example": "The flight attendant served passengers with warm attentiveness, ensuring that elderly travelers felt completely comfortable throughout the flight."
+  },
+  {
+    "row_idx": 717,
+    "word": "temptation",
+    "new_example": "While studying for final exams, David resisted the temptation to check his smartphone notifications every five minutes."
+  },
+  {
+    "row_idx": 721,
+    "word": "terrestrial",
+    "new_example": "Elephants are recognized as the largest living terrestrial mammals roaming the savannas and forests of Africa and Asia."
+  },
+  {
+    "row_idx": 722,
+    "word": "deplete",
+    "new_example": "Overfishing by commercial trawlers can rapidly deplete marine fish stocks, disrupting coastal marine food chains."
+  },
+  {
+    "row_idx": 724,
+    "word": "detrimental",
+    "new_example": "Consuming excessive amounts of refined sugar has a detrimental effect on dental health and metabolic functions."
+  },
+  {
+    "row_idx": 725,
+    "word": "invariance",
+    "new_example": "Mathematical laws demonstrate invariance under rotation, meaning their equations remain true regardless of coordinate orientation."
+  },
+  {
+    "row_idx": 728,
+    "word": "corridor",
+    "new_example": "Environmental groups helped establish a forested wildlife corridor allowing brown bears to cross safely between national parks."
+  },
+  {
+    "row_idx": 731,
+    "word": "jurisdiction",
+    "new_example": "The federal court ruled that the international maritime dispute fell entirely outside state judicial jurisdiction."
+  },
+  {
+    "row_idx": 734,
+    "word": "sagebrush",
+    "new_example": "Herds of wild pronghorns graze peacefully among low sagebrush bushes scattered across the vast Wyoming prairie."
+  },
+  {
+    "row_idx": 735,
+    "word": "herring",
+    "new_example": "Flocks of hungry seabirds circled above the bay to dive on a massive migrating school of herring."
+  },
+  {
+    "row_idx": 736,
+    "word": "zooplankton",
+    "new_example": "Baleen whales filter tons of seawater each day to feed on microscopic zooplankton drifting in cold polar currents."
+  },
+  {
+    "row_idx": 737,
+    "word": "inherited instinct",
+    "new_example": "Sea turtle hatchlings crawl toward the moonlit ocean guided entirely by an inherited instinct for survival."
+  },
+  {
+    "row_idx": 739,
+    "word": "larger purpose",
+    "new_example": "Volunteering at the youth center gave David a profound sense of fulfilling a larger purpose in his community."
+  },
+  {
+    "row_idx": 740,
+    "word": "detrimental impact",
+    "new_example": "Constructing highways across native wetlands had an immediate and detrimental impact on regional amphibian breeding grounds."
+  },
+  {
+    "row_idx": 741,
+    "word": "migration corridor",
+    "new_example": "Biologists worked with local ranchers to establish a safe migration corridor for elk moving toward winter valleys."
+  },
+  {
+    "row_idx": 742,
+    "word": "regular interval",
+    "new_example": "The automated bell sounds at a regular interval of forty-five minutes to signal the change of high school classes."
+  },
+  {
+    "row_idx": 743,
+    "word": "prolonged movement",
+    "new_example": "Long-distance flights involve prolonged movement inside narrow cabins, so passengers are encouraged to stretch their legs frequently."
+  },
+  {
+    "row_idx": 744,
+    "word": "linear path  con",
+    "new_example": "Instead of following a linear path, the hiking trail meandered gracefully along the curves of the mountain stream."
+  },
+  {
+    "row_idx": 745,
+    "word": "intense attentiveness",
+    "new_example": "The surgeon operated with intense attentiveness throughout the delicate six-hour procedure to repair the damaged artery."
+  },
+  {
+    "row_idx": 746,
+    "word": "terrestrial mammal",
+    "new_example": "The African cheetah is widely celebrated as the fastest terrestrial mammal, reaching sprint speeds over sixty miles per hour."
+  },
+  {
+    "row_idx": 747,
+    "word": "seasonal range",
+    "new_example": "Caribou herds travel hundreds of miles each spring to reach their traditional seasonal range on the arctic tundra."
+  },
+  {
+    "row_idx": 748,
+    "word": "perceptual cue",
+    "new_example": "Migrating geese rely on the angle of sunlight as a crucial perceptual cue to maintain their southward flight heading."
+  },
+  {
+    "row_idx": 749,
+    "word": "narrow route",
+    "new_example": "Tour buses carefully navigated the narrow route winding between ancient cliffside villages along the Mediterranean coast."
+  },
+  {
+    "row_idx": 750,
+    "word": "private land",
+    "new_example": "Hikers must respect posted signs and avoid trespassing onto private land while walking along the countryside nature trail."
+  },
+  {
+    "row_idx": 751,
+    "word": "conservation scientist",
+    "new_example": "A dedicated conservation scientist collected soil and water samples to assess the health of the protected wetland sanctuary."
+  },
+  {
+    "row_idx": 752,
+    "word": "phenomenon",
+    "new_example": "The Northern Lights represent a spectacular natural phenomenon caused by charged solar particles colliding with Earth's atmosphere."
+  },
+  {
+    "row_idx": 753,
+    "word": "elementary",
+    "new_example": "Before tackling complex calculus equations, college freshmen must master elementary principles of algebra and geometry."
+  },
+  {
+    "row_idx": 755,
+    "word": "reveal",
+    "new_example": "The university audit will reveal whether research grant money was allocated properly across various academic departments."
+  },
+  {
+    "row_idx": 756,
+    "word": "adept",
+    "new_example": "Emma became remarkably adept at resolving customer complaints calmly, earning praise from her office manager."
+  },
+  {
+    "row_idx": 757,
+    "word": "notorious",
+    "new_example": "The downtown intersection is notorious for frequent traffic accidents during rainy morning commutes and rush hours."
+  },
+  {
+    "row_idx": 759,
+    "word": "capacity",
+    "new_example": "The newly renovated football stadium has a seating capacity of over sixty thousand enthusiastic spectators."
+  },
+  {
+    "row_idx": 761,
+    "word": "foundation",
+    "new_example": "Mastering fundamental grammar rules provides a solid foundation for mastering any foreign language fluently and confidently."
+  },
+  {
+    "row_idx": 762,
+    "word": "tantalized",
+    "new_example": "The hungry shoppers felt tantalized by the delicious aroma of freshly baked cinnamon bread drifting from the bakery."
+  },
+  {
+    "row_idx": 765,
+    "word": "aficionado",
+    "new_example": "As an authentic espresso aficionado, Marco visits artisan coffee roasters whenever he travels to new cities."
+  },
+  {
+    "row_idx": 766,
+    "word": "testimonial",
+    "new_example": "The skincare website featured a glowing testimonial from a customer who praised the natural anti-aging moisturizer."
+  },
+  {
+    "row_idx": 767,
+    "word": "discipline",
+    "new_example": "Learning to play the violin requires immense personal discipline and hours of patient daily practice."
+  },
+  {
+    "row_idx": 771,
+    "word": "arithmetic",
+    "new_example": "Primary school pupils practice basic mental arithmetic daily by solving quick addition and multiplication puzzles."
+  },
+  {
+    "row_idx": 772,
+    "word": "trigonometry",
+    "new_example": "Architecture students use principles of trigonometry to calculate roof angles and structural beam heights accurately."
+  },
+  {
+    "row_idx": 773,
+    "word": "humanities",
+    "new_example": "Courses in the humanities encourage university undergraduates to reflect critically on ethics, literature, and human history."
+  },
+  {
+    "row_idx": 775,
+    "word": "subatomic",
+    "new_example": "Physicists smash high-energy particles inside underground colliders to discover elusive subatomic particles like bosons."
+  },
+  {
+    "row_idx": 776,
+    "word": "theorem",
+    "new_example": "The math professor wrote Pythagoras's famous geometric theorem on the whiteboard and asked students to prove it."
+  },
+  {
+    "row_idx": 777,
+    "word": "elementary arithmetic",
+    "new_example": "Before moving on to advanced algebra, young students must feel confident solving problems in elementary arithmetic."
+  },
+  {
+    "row_idx": 779,
+    "word": "intuitive style",
+    "new_example": "The graphic designer is celebrated for an intuitive style that anticipates user needs before they even ask."
+  },
+  {
+    "row_idx": 780,
+    "word": "general public",
+    "new_example": "The city art museum opened its outdoor sculpture garden to the general public free of charge every weekend."
+  },
+  {
+    "row_idx": 781,
+    "word": "structural engineer",
+    "new_example": "A certified structural engineer inspected the earthquake damage on the concrete overpass before allowing vehicles back on."
+  },
+  {
+    "row_idx": 782,
+    "word": "human potential",
+    "new_example": "Innovative education models strive to unlock boundless human potential by nurturing creativity and critical problem-solving skills."
+  },
+  {
+    "row_idx": 783,
+    "word": "scientific theory",
+    "new_example": "Albert Einstein revolutionized modern physics when he formulated a groundbreaking scientific theory of general relativity."
+  },
+  {
+    "row_idx": 786,
+    "word": "analytical skill",
+    "new_example": "Working as a financial consultant requires sharp analytical skill to interpret market patterns and advise corporate clients wisely."
+  },
+  {
+    "row_idx": 788,
+    "word": "political science",
+    "new_example": "After graduating with honors in political science, Sarah secured a rewarding internship with the municipal government."
+  },
+  {
+    "row_idx": 789,
+    "word": "theoretical discovery",
+    "new_example": "The physicist received an international award for a theoretical discovery explaining quantum particle entanglements in laboratory settings."
+  },
+  {
+    "row_idx": 790,
+    "word": "unanticipated application",
+    "new_example": "Engineers discovered an unanticipated application for the lightweight material in manufacturing shockproof phone cases."
+  },
+  {
+    "row_idx": 791,
+    "word": "line of thought",
+    "new_example": "The professor paused when a ringing smartphone interrupted his line of thought during the philosophy seminar."
+  },
+  {
+    "row_idx": 793,
+    "word": "identical",
+    "new_example": "Although the two sisters are identical twins, their personalities and artistic talents could not be more different."
+  },
+  {
+    "row_idx": 794,
+    "word": "fraternal",
+    "new_example": "Unlike identical siblings, fraternal twins develop from separate eggs and may not share matching physical appearances."
+  },
+  {
+    "row_idx": 796,
+    "word": "ailment",
+    "new_example": "Grandmother brewed a soothing pot of ginger tea to treat any minor stomach ailment or seasonal chill."
+  },
+  {
+    "row_idx": 798,
+    "word": "heredity",
+    "new_example": "Eye color and natural hair texture are determined by heredity through genes inherited from biological parents."
+  },
+  {
+    "row_idx": 801,
+    "word": "rear",
+    "new_example": "Working parents often find it demanding yet deeply rewarding to rear polite and independent children."
+  },
+  {
+    "row_idx": 802,
+    "word": "trait",
+    "new_example": "Patience is a valuable personality trait that helps customer service representatives handle difficult complaints constructively."
+  },
+  {
+    "row_idx": 803,
+    "word": "epigenetics",
+    "new_example": "Modern medical researchers study epigenetics to understand how lifestyle choices and diet influence gene expression without altering DNA."
+  },
+  {
+    "row_idx": 804,
+    "word": "hardwired",
+    "new_example": "Evolutionary biologists argue that human brains are hardwired to recognize friendly facial expressions quickly in social groups."
+  },
+  {
+    "row_idx": 805,
+    "word": "unalterable",
+    "new_example": "Once the signed legal contract is submitted to the registrar, its terms become virtually unalterable."
+  },
+  {
+    "row_idx": 808,
+    "word": "schizophrenia",
+    "new_example": "Psychiatrists emphasize that early clinical intervention and medication can help patients with schizophrenia manage their daily symptoms."
+  },
+  {
+    "row_idx": 809,
+    "word": "embryonic",
+    "new_example": "Scientists observed how embryonic cells differentiate into specialized nerve and muscle tissues during early pregnancy."
+  },
+  {
+    "row_idx": 810,
+    "word": "mechanism",
+    "new_example": "The clockmaker carefully examined the intricate gear mechanism inside the grandfather clock to locate the jam."
+  },
+  {
+    "row_idx": 811,
+    "word": "pinpoint",
+    "new_example": "Network engineers ran diagnostic software to pinpoint the exact server causing intermittent connection outages across the office."
+  },
+  {
+    "row_idx": 812,
+    "word": "identical twin",
+    "new_example": "Growing up as an identical twin, Lucas often found that strangers confused him with his brother Liam."
+  },
+  {
+    "row_idx": 813,
+    "word": "fraternal twin",
+    "new_example": "Unlike her fraternal twin who loved painting, Maya was passionate about competitive swimming and outdoor athletics."
+  },
+  {
+    "row_idx": 815,
+    "word": "environmental factor",
+    "new_example": "Air pollution is a major environmental factor that can worsen respiratory illnesses in vulnerable urban communities."
+  },
+  {
+    "row_idx": 816,
+    "word": "genetic makeup",
+    "new_example": "Every human individual possesses a unique genetic makeup that influences physical traits and susceptibility to certain illnesses."
+  },
+  {
+    "row_idx": 818,
+    "word": "behavioral problem",
+    "new_example": "The elementary school counselor helped parents address their child's behavioral problem through positive reinforcement techniques."
+  },
+  {
+    "row_idx": 819,
+    "word": "embryonic cell",
+    "new_example": "Medical researchers investigated how an embryonic cell multiplies and develops into healthy heart tissue."
+  },
+  {
+    "row_idx": 820,
+    "word": "precious opportunity",
+    "new_example": "Winning the study abroad scholarship gave Minh a precious opportunity to pursue advanced robotics in Tokyo."
+  },
+  {
+    "row_idx": 821,
+    "word": "radical conclusion",
+    "new_example": "After reviewing five years of experimental data, the astrophysicist reached a radical conclusion regarding black hole radiation."
+  },
+  {
+    "row_idx": 823,
+    "word": "genetic mechanism",
+    "new_example": "Botanists identified the genetic mechanism that enables certain desert plants to conserve water during extreme drought."
+  },
+  {
+    "row_idx": 825,
+    "word": "ingredient",
+    "new_example": "Fresh basil is the essential ingredient that gives traditional Italian pesto sauce its vibrant green color and aroma."
+  },
+  {
+    "row_idx": 828,
+    "word": "merge",
+    "new_example": "Drivers must slow down and merge safely into the left lane when entering the busy highway interchange."
+  },
+  {
+    "row_idx": 829,
+    "word": "persona",
+    "new_example": "Behind his outgoing online persona, the popular video streamer was actually quite shy and reserved in real life."
+  },
+  {
+    "row_idx": 831,
+    "word": "intrinsic",
+    "new_example": "Flexibility and problem-solving are intrinsic qualities of successful project managers working in fast-paced software startups."
+  },
+  {
+    "row_idx": 832,
+    "word": "breakneck",
+    "new_example": "The motorcycle stunt rider raced down the winding mountain pass at breakneck speeds, thrilling spectators lining the road."
+  },
+  {
+    "row_idx": 833,
+    "word": "escapism",
+    "new_example": "Reading fantasy novels after a stressful workday provides a welcome sense of escapism for many exhausted urban professionals."
+  },
+  {
+    "row_idx": 834,
+    "word": "frenetic",
+    "new_example": "Stock traders shouted orders and rushed between trading desks at a frenetic pace during the morning market opening."
+  },
+  {
+    "row_idx": 836,
+    "word": "nuance",
+    "new_example": "A skilled translator captures every subtle nuance of humor and tone between different languages without losing meaning."
+  },
+  {
+    "row_idx": 837,
+    "word": "ubiquitous",
+    "new_example": "Smartphones have become ubiquitous across modern society, with people using them constantly for banking, navigation, and shopping."
+  },
+  {
+    "row_idx": 840,
+    "word": "menace",
+    "new_example": "Reckless drivers who text while speeding pose a dangerous menace to pedestrian safety on residential streets."
+  },
+  {
+    "row_idx": 841,
+    "word": "salient",
+    "new_example": "The executive summary clearly outlines the salient points of the business proposal before presenting budget details."
+  },
+  {
+    "row_idx": 842,
+    "word": "convention",
+    "new_example": "The avant-garde theater director chose to break with traditional dramatic convention by having actors perform among the audience."
+  },
+  {
+    "row_idx": 843,
+    "word": "subtle",
+    "new_example": "There was a subtle change in the patient's breathing that alerted the observant nurse to check his monitor."
+  },
+  {
+    "row_idx": 844,
+    "word": "human voice",
+    "new_example": "Voice recognition software is now remarkably adept at distinguishing the unique nuances of an individual human voice."
+  },
+  {
+    "row_idx": 846,
+    "word": "essential ingredient",
+    "new_example": "Mutual trust among team members is an essential ingredient for delivering successful collaborative workplace projects on time."
+  },
+  {
+    "row_idx": 847,
+    "word": "visual experience",
+    "new_example": "Watching the fantasy movie in IMAX 3D created an immersive visual experience that captivated audiences of all ages."
+  },
+  {
+    "row_idx": 848,
+    "word": "soundtrack",
+    "new_example": "The movie's orchestral soundtrack heightened suspense during the climactic chase scene through the rainy city streets."
+  },
+  {
+    "row_idx": 849,
+    "word": "breakneck speed",
+    "new_example": "The emergency ambulance rushed through evening traffic at breakneck speed to transport the injured patient to hospital."
+  },
+  {
+    "row_idx": 850,
+    "word": "pure escapism",
+    "new_example": "Visiting the sunny beach resort offered a delightful weekend of pure escapism away from demanding corporate deadlines."
+  },
+  {
+    "row_idx": 851,
+    "word": "emotional nuance",
+    "new_example": "The actor delivered his dramatic monologue with exquisite emotional nuance, earning a standing ovation from theater patrons."
+  },
+  {
+    "row_idx": 852,
+    "word": "background music",
+    "new_example": "Soft acoustic background music played in the coffee lounge, creating a peaceful atmosphere for studying and relaxed conversation."
+  },
+  {
+    "row_idx": 853,
+    "word": "musical theme  giai",
+    "new_example": "The composer repeated an eerie musical theme on solo cello whenever the mysterious villain appeared on screen."
+  },
+  {
+    "row_idx": 855,
+    "word": "art form",
+    "new_example": "Calligraphy is cherished across East Asia as a sophisticated art form that demands decades of disciplined brushwork."
+  },
+  {
+    "row_idx": 858,
+    "word": "pale",
+    "new_example": "Minor everyday worries seem to pale when a family member faces a serious medical emergency."
+  },
+  {
+    "row_idx": 861,
+    "word": "unparalleled",
+    "new_example": "The luxury boutique hotel offers unparalleled views of the snow-capped mountain peaks from every guest room balcony."
+  },
+  {
+    "row_idx": 862,
+    "word": "sophistication",
+    "new_example": "Modern smartphone cameras operate with astonishing technological sophistication, automatically balancing light, focus, and color depth in real-time."
+  },
+  {
+    "row_idx": 863,
+    "word": "ingenious",
+    "new_example": "The young mechanical inventor designed an ingenious foldable bicycle that fits easily inside a standard office backpack."
+  },
+  {
+    "row_idx": 866,
+    "word": "stirrings",
+    "new_example": "Listening to the triumphant national anthem aroused deep emotional stirrings among the crowd gathered in the stadium."
+  },
+  {
+    "row_idx": 867,
+    "word": "eloquent",
+    "new_example": "The defense attorney delivered an eloquent closing argument that persuaded jury members to acquit the wrongly accused defendant."
+  },
+  {
+    "row_idx": 868,
+    "word": "magnitude",
+    "new_example": "City leaders quickly recognized the immense magnitude of the housing crisis and funded new affordable apartment projects."
+  },
+  {
+    "row_idx": 870,
+    "word": "incongruity",
+    "new_example": "Wearing a formal black-tie tuxedo to a casual beach barbecue created a humorous sense of obvious incongruity."
+  },
+  {
+    "row_idx": 871,
+    "word": "paradox",
+    "new_example": "It is an intriguing paradox that constantly being connected through social media often makes young people feel lonelier."
+  },
+  {
+    "row_idx": 872,
+    "word": "measly",
+    "new_example": "After working overtime for two whole weeks, Kevin felt insulted when he received a measly ten-dollar bonus."
+  },
+  {
+    "row_idx": 873,
+    "word": "morsel",
+    "new_example": "The starving stray kitten eagerly devoured every single delicious morsel of roasted tuna placed in her bowl."
+  },
+  {
+    "row_idx": 875,
+    "word": "interminable",
+    "new_example": "Employees quietly groaned as the department director launched into another interminable speech during the Friday afternoon meeting."
+  },
+  {
+    "row_idx": 876,
+    "word": "exertion",
+    "new_example": "After hours of strenuous physical exertion chopping firewood, the tired lumberjacks rested gratefully beside the warm cabin fireplace."
+  },
+  {
+    "row_idx": 877,
+    "word": "estrangement",
+    "new_example": "Years of poor communication and unresolved arguments led to a painful estrangement between the two once-close brothers."
+  },
+  {
+    "row_idx": 878,
+    "word": "outlandish",
+    "new_example": "Party guests arrived wearing colorful wigs and outlandish superhero costumes for the quirky Halloween celebration."
+  },
+  {
+    "row_idx": 880,
+    "word": "compactness",
+    "new_example": "Commuters appreciate the lightweight compactness of modern folding electric scooters that can be carried onto subway trains."
+  },
+  {
+    "row_idx": 882,
+    "word": "pale in significance",
+    "new_example": "Minor everyday financial disagreements pale in significance when compared to the sudden loss of personal health."
+  },
+  {
+    "row_idx": 883,
+    "word": "embark on an ascent",
+    "new_example": "Early at dawn, the mountaineering expedition prepared to embark on an ascent toward the snowy summit of Mont Blanc."
+  },
+  {
+    "row_idx": 884,
+    "word": "unparalleled power",
+    "new_example": "The multinational tech conglomerate wields unparalleled power over global online search and digital commerce markets."
+  },
+  {
+    "row_idx": 885,
+    "word": "ingenious simplicity",
+    "new_example": "The everyday paperclip is admired worldwide for the ingenious simplicity of its bent steel wire design."
+  },
+  {
+    "row_idx": 886,
+    "word": "hymns of praise",
+    "new_example": "The cathedral choir sang joyous hymns of praise to celebrate the historic completion of the city cathedral restoration."
+  },
+  {
+    "row_idx": 887,
+    "word": "critical incongruity",
+    "new_example": "Auditors spotted a critical incongruity between reported company earnings and actual cash reserves held in bank accounts."
+  },
+  {
+    "row_idx": 888,
+    "word": "apparent paradox",
+    "new_example": "That people feel increasingly isolated despite constant digital connectivity represents an apparent paradox of modern life."
+  },
+  {
+    "row_idx": 889,
+    "word": "master craftsman",
+    "new_example": "The antique acoustic guitar was hand-built by a master craftsman using aged spruce and rosewood tonewoods."
+  },
+  {
+    "row_idx": 893,
+    "word": "thrifty compactness",
+    "new_example": "Travelers admired the thrifty compactness of the Japanese capsule hotel room, which provided essential comforts in minimal space."
+  },
+  {
+    "row_idx": 894,
+    "word": "fine-tuned technology",
+    "new_example": "Modern electric race cars rely on fine-tuned technology to maximize battery efficiency and cornering acceleration on racing tracks."
+  }
+]
