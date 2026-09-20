@@ -148,25 +148,12 @@
                             </div>
                         </div>
 
-                        <!-- PayOS Embedded Form Iframe Target -->
-                        <div id="payos-embedded-container" class="w-full min-h-[460px] rounded-2xl overflow-hidden bg-slate-50 dark:bg-black/20 flex items-center justify-center">
+                        <!-- PayOS Embedded / VietQR Target Container -->
+                        <div id="payos-embedded-container" class="w-full min-h-[420px] rounded-2xl overflow-hidden bg-slate-50 dark:bg-black/20 flex items-center justify-center">
                             <div class="text-center py-12 space-y-3 text-slate-500 dark:text-slate-400 text-xs">
                                 <span class="material-symbols-outlined text-3xl animate-spin text-amber-500">sync</span>
-                                <p>Đang tải mã VietQR bảo mật từ PayOS...</p>
+                                <p>Đang khởi tạo mã VietQR từ PayOS...</p>
                             </div>
-                        </div>
-                        <div id="payos-external-link-wrap" class="text-center"></div>
-
-                        <!-- Fallback / Backup bank info box -->
-                        <div id="checkout-manual-info" class="p-3.5 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-200/80 dark:border-amber-500/20 text-xs text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div class="space-y-0.5">
-                                <div class="font-bold">Chuyển khoản thủ công dự phòng:</div>
-                                <div>Ngân hàng: <strong>KienlongBank</strong> &bull; Số TK: <strong id="fallback-acc-num">0846407898</strong></div>
-                                <div>Chủ TK: <strong>DANG TUNG DUONG</strong> &bull; Nội dung: <strong id="fallback-content">...</strong></div>
-                            </div>
-                            <button onclick="window.copyPaymentContent()" class="self-start sm:self-center px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-[11px] hover:bg-amber-700 transition-colors shadow-xs shrink-0 cursor-pointer">
-                                Sao chép nội dung
-                            </button>
                         </div>
                     </div>
 
@@ -357,50 +344,77 @@
             document.getElementById('checkout-plan-amount').textContent = `Số tiền: ${plan.priceFormatted}`;
             document.getElementById('fallback-content').textContent = data.description || `HV${data.orderCode}`;
 
-            // Nhúng PayOS Checkout
+            // Hiển thị trực tiếp mã VietQR và thông tin chuyển khoản chính xác 100%
             const container = document.getElementById('payos-embedded-container');
-            container.innerHTML = ''; // Clear loading spinner
+            const accNum = data.accountNumber || '0846407898';
+            const accName = data.accountName || 'DANG TUNG DUONG';
+            const desc = data.description || `HV${data.orderCode}`;
+            const qrImgUrl = `https://img.vietqr.io/image/KLB-${accNum}-compact2.png?amount=${plan.amount}&addInfo=${encodeURIComponent(desc)}&accountName=${encodeURIComponent(accName)}`;
 
-            if (window.PayOSCheckout && typeof window.PayOSCheckout.usePayOS === 'function') {
-                const payOSConfig = {
-                    RETURN_URL: `${window.location.origin}/?status=success&orderCode=${data.orderCode}`,
-                    ELEMENT_ID: 'payos-embedded-container',
-                    CHECKOUT_URL: data.checkoutUrl,
-                    embedded: true,
-                    onSuccess: (event) => {
-                        console.log('[PayOS] Thanh toán thành công qua Embedded Form:', event);
-                        handlePaymentSuccess();
-                    },
-                    onCancel: (event) => {
-                        console.log('[PayOS] Người dùng hủy thanh toán:', event);
-                    },
-                    onExit: (event) => {
-                        console.log('[PayOS] Người dùng đóng giao diện PayOS:', event);
-                    },
-                };
+            container.innerHTML = `
+                <div class="w-full flex flex-col md:flex-row items-center justify-center gap-6 p-4 sm:p-6 bg-white dark:bg-[#1f222e] rounded-2xl shadow-sm border border-slate-200/80 dark:border-white/10">
+                    <!-- Left: VietQR Code -->
+                    <div class="flex flex-col items-center gap-2.5 shrink-0">
+                        <div class="p-2.5 bg-white rounded-2xl shadow-md border border-slate-200/80 flex items-center justify-center">
+                            <img src="${qrImgUrl}" alt="Mã VietQR thanh toán" class="w-56 h-56 sm:w-64 sm:h-64 object-contain rounded-xl" loading="eager" />
+                        </div>
+                        <div class="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                            <span class="material-symbols-outlined text-[15px] text-emerald-500">verified</span>
+                            <span>Mã VietQR tự động khớp tiền &amp; nội dung</span>
+                        </div>
+                    </div>
 
-                const { open } = window.PayOSCheckout.usePayOS(payOSConfig);
-                open();
-            } else {
-                // Fallback nếu SDK PayOS chưa tải kịp: nhúng iframe trực tiếp
-                container.innerHTML = `
-                    <iframe src="${data.checkoutUrl}" class="w-full h-[480px] border-0 rounded-2xl" allow="payment"></iframe>
-                `;
-            }
+                    <!-- Right: Bank transfer info & copy buttons -->
+                    <div class="flex-1 w-full max-w-sm space-y-3 text-left">
+                        <div class="p-3.5 bg-slate-50 dark:bg-white/[0.03] rounded-xl border border-slate-200/70 dark:border-white/10 space-y-2.5 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 dark:text-slate-400">Ngân hàng:</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">KienlongBank (KLB)</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 dark:text-slate-400">Số tài khoản:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono font-bold text-slate-900 dark:text-white text-sm">${accNum}</span>
+                                    <button type="button" onclick="window.copyText('${accNum}', 'btn-c-acc')" id="btn-c-acc" class="px-2 py-0.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold transition-colors cursor-pointer">Chép</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 dark:text-slate-400">Chủ tài khoản:</span>
+                                <span class="font-bold text-slate-800 dark:text-slate-100">${accName}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-500 dark:text-slate-400">Số tiền:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">${plan.priceFormatted}</span>
+                                    <button type="button" onclick="window.copyText('${plan.amount}', 'btn-c-amt')" id="btn-c-amt" class="px-2 py-0.5 rounded-md bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-bold transition-colors cursor-pointer">Chép</button>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+                                <span class="text-amber-800 dark:text-amber-300 font-bold">Nội dung CK:</span>
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono font-black text-amber-900 dark:text-amber-200 text-sm">${desc}</span>
+                                    <button type="button" onclick="window.copyText('${desc}', 'btn-c-desc')" id="btn-c-desc" class="px-2 py-0.5 rounded-md bg-amber-600 text-white text-[10px] font-bold hover:bg-amber-700 transition-colors shadow-xs cursor-pointer">Chép</button>
+                                </div>
+                            </div>
+                        </div>
 
-            // Bổ sung nút mở trang thanh toán trực tiếp nếu cần
-            const externalLinkWrap = document.getElementById('payos-external-link-wrap');
-            if (externalLinkWrap) {
-                externalLinkWrap.innerHTML = `
-                    <a href="${data.checkoutUrl}" target="_blank" rel="noopener noreferrer" 
-                       class="inline-flex items-center gap-1.5 text-xs text-primary font-bold hover:underline py-2">
-                        <span class="material-symbols-outlined text-[16px]">open_in_new</span>
-                        <span>Mở trang thanh toán PayOS trong tab mới nếu cần</span>
-                    </a>
-                `;
-            }
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 text-xs">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                            <span>Tự động kích hoạt PRO sau 3 giây khi nhận tiền!</span>
+                        </div>
 
-            // Bật Polling kiểm tra trạng thái mỗi 3 giây
+                        <div class="pt-1 text-center">
+                            <a href="${data.checkoutUrl}" target="_blank" rel="noopener noreferrer" 
+                               class="inline-flex items-center gap-1 text-[11px] text-slate-500 dark:text-slate-400 hover:text-primary hover:underline transition-colors">
+                                <span>Mở trang thanh toán PayOS trong tab mới</span>
+                                <span class="material-symbols-outlined text-xs">open_in_new</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Bật Polling kiểm tra trạng thái mỗi 2.5 giây
             startPollingOrderStatus(data.orderCode);
 
         } catch (err) {
@@ -468,15 +482,25 @@
     };
 
     /**
-     * Copy nội dung chuyển khoản
+     * Copy text helper với visual feedback
      */
-    window.copyPaymentContent = function() {
-        const text = document.getElementById('fallback-content')?.textContent || '';
-        if (text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert(`Đã sao chép nội dung: "${text}"`);
-            });
-        }
+    window.copyText = function(text, btnId) {
+        if (!text) return;
+        navigator.clipboard.writeText(String(text)).then(() => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                const orig = btn.innerHTML;
+                btn.textContent = 'Đã chép ✓';
+                btn.classList.add('bg-emerald-500', 'text-white');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.remove('bg-emerald-500', 'text-white');
+                }, 1800);
+            }
+        }).catch(() => {
+            // Fallback
+            prompt('Sao chép thông tin:', text);
+        });
     };
 
 })();

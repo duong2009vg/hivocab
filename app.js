@@ -4978,17 +4978,20 @@ async function bootstrapHiDB() {
                     window._allTopics = [];
                     window._allExercises = null;
 
-                    if (window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=')) {
-                        history.replaceState(null, '', window.location.pathname + window.location.search);
+                    const isAuthHash = window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=');
+                    if (isAuthHash) {
+                        try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(_) {}
                     }
 
                     const curPage = document.querySelector('.page.active')?.id;
                     const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
                     const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
-                    const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login';
+                    const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login' && !rawHash.includes('access_token=');
 
-                    if (isLandingOrLogin && !hasTargetRoute) {
-                        window.navigateTo('dashboard');
+                    if (isLandingOrLogin || isAuthHash) {
+                        if (!hasTargetRoute) {
+                            window.navigateTo('dashboard');
+                        }
                     }
                 }
             } else if (event === 'SIGNED_OUT') {
@@ -5029,8 +5032,9 @@ async function bootstrapHiDB() {
                 window._allTopics = topics || [];
             }).catch(err => console.warn('[prefetch topics]', err));
 
-            if (window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=')) { 
-                history.replaceState(null, '', window.location.pathname + window.location.search); 
+            const isAuthHash = window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=');
+            if (isAuthHash) { 
+                try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(_) {}
             }
 
             // Nếu đang trong chế độ đặt lại mật khẩu, không điều hướng về dashboard
@@ -5038,10 +5042,12 @@ async function bootstrapHiDB() {
                 const curPage = document.querySelector('.page.active')?.id;
                 const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
                 const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
-                const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login';
+                const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login' && !rawHash.includes('access_token=');
 
-                if (isLandingOrLogin && !hasTargetRoute) {
-                    window.navigateTo('dashboard');
+                if (isLandingOrLogin || isAuthHash) {
+                    if (!hasTargetRoute) {
+                        window.navigateTo('dashboard');
+                    }
                 }
             }
         }

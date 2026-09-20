@@ -146,9 +146,9 @@ export async function onRequestPost(context) {
         // Mô tả chuyển khoản (giới hạn tối đa 9 ký tự: HV + 7 số)
         const description = `HV${orderCode.toString().slice(-7)}`;
 
-        const origin = request.headers.get('origin') || 'https://hivocab.site';
-        const returnUrl = `${origin}/?status=success&orderCode=${orderCode}`;
-        const cancelUrl = `${origin}/?status=cancelled&orderCode=${orderCode}`;
+        const origin = (request.headers.get('origin') || 'https://hivocab.site').replace(/\/+$/, '');
+        const returnUrl = `${origin}/`;
+        const cancelUrl = `${origin}/`;
 
         // 5. Tính signature cho PayOS bằng Web Crypto
         const signature = await createPayOSSignature({

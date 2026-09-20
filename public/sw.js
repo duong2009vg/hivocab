@@ -1,11 +1,12 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v3';
+const CACHE_NAME = 'hivocab-shell-v5';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',
   '/logo-mark.svg',
   '/themes.css',
-  '/css/hivocab.min.css'
+  '/css/hivocab.min.css',
+  '/fonts/material-symbols-outlined.woff2'
 ];
 
 // Các domain CDN/external — để browser tự xử lý, không intercept
