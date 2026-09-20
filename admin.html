@@ -210,12 +210,6 @@
                         <span id="nav-badge-thpt" class="ml-auto bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">38</span>
                     </button>
 
-                    <button onclick="switchTab('reports')" id="nav-tab-reports" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
-                        <span class="material-symbols-outlined text-[20px]">flag</span>
-                        <span>Báo cáo Người dùng 🚩</span>
-                        <span id="nav-badge-reports" class="ml-auto bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">0</span>
-                    </button>
-
                     <button onclick="switchTab('words')" id="nav-tab-words" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">translate</span>
                         <span>Kho Từ vựng Hệ thống</span>
@@ -228,12 +222,13 @@
 
                     <button onclick="switchTab('performance')" id="nav-tab-performance" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
                         <span class="material-symbols-outlined text-[20px]">speed</span>
-                        <span>Kiểm tra Hiệu năng</span>
+                        <span>Đo Hiệu Năng Web</span>
                     </button>
 
                     <button onclick="switchTab('system')" id="nav-tab-system" class="admin-nav-item w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white">
-                        <span class="material-symbols-outlined text-[20px]">tune</span>
-                        <span>Trạng thái & Kiểm toán</span>
+                        <span class="material-symbols-outlined text-[20px]">health_and_safety</span>
+                        <span>Giám sát Lỗi &amp; Kiểm toán</span>
+                        <span id="nav-badge-system" class="ml-auto bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold">0 lỗi</span>
                     </button>
                 </nav>
             </div>
@@ -739,11 +734,36 @@
                             </div>
                         </div>
 
+                        <!-- Bulk Action Bar -->
+                        <div id="sub-bulk-bar" class="hidden flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-200 dark:border-amber-700/50 shadow-sm">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                                    <span class="material-symbols-outlined text-[18px]">checklist</span>
+                                </div>
+                                <div>
+                                    <span class="font-black text-xs text-amber-900 dark:text-amber-200" id="sub-bulk-count">Đã chọn 0 học viên</span>
+                                    <p class="text-[10px] text-amber-700 dark:text-amber-400">Bạn có thể cấp / gia hạn gói PRO cho toàn bộ học viên được chọn cùng lúc.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="openBulkGrantProModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+                                    <span class="material-symbols-outlined text-[16px]">card_giftcard</span>
+                                    <span>Tặng PRO Hàng Loạt</span>
+                                </button>
+                                <button onclick="clearSelectedSubs()" class="px-3 py-2 rounded-xl border border-amber-300 dark:border-amber-700 hover:bg-amber-100/50 dark:hover:bg-amber-900/40 text-amber-800 dark:text-amber-300 font-bold text-xs transition-colors cursor-pointer">
+                                    Bỏ chọn
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Table -->
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-slate-200 dark:border-white/10 bg-slate-50/75 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[11px]">
+                                        <th class="py-3.5 px-4 w-10 text-center">
+                                            <input type="checkbox" id="sub-select-all" onchange="toggleSelectAllSubs(this.checked)" class="w-4 h-4 rounded text-amber-500 focus:ring-amber-500 cursor-pointer" title="Chọn tất cả">
+                                        </th>
                                         <th class="py-3.5 px-4">Học Viên</th>
                                         <th class="py-3.5 px-4 text-center">Hạng Thẻ</th>
                                         <th class="py-3.5 px-4">Gói Đăng Ký</th>
@@ -755,7 +775,7 @@
                                 </thead>
                                 <tbody id="subscriptions-table-body" class="divide-y divide-slate-100 dark:divide-white/5 text-slate-700 dark:text-slate-300">
                                     <tr>
-                                        <td colspan="7" class="py-12 text-center text-slate-400">Đang tải danh sách gói học viên...</td>
+                                        <td colspan="8" class="py-12 text-center text-slate-400">Đang tải danh sách gói học viên...</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -958,92 +978,9 @@
                 </section>
 
                 <!-- ==================================================== -->
-                <!-- VIEW 3.2: HÒM THƯ BÁO CÁO NGƯỜI DÙNG 🚩              -->
+                <!-- VIEW 3.2: HÒM THƯ BÁO CÁO NGƯỜI DÙNG 🚩 (ALIASED)    -->
                 <!-- ==================================================== -->
-                <section id="section-reports" class="hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-5">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div>
-                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-200 mb-1.5">
-                                    <span class="material-symbols-outlined text-[15px]">flag</span>
-                                    <span>Hệ Thống Kiểm Soát Chất Lượng Nội Dung</span>
-                                </div>
-                                <h3 class="font-extrabold text-xl text-slate-900 tracking-tight">Hòm thư Báo cáo Người dùng 🚩</h3>
-                                <p class="text-xs text-slate-500 mt-1">Tiếp nhận, xử lý và theo dõi phản hồi báo sai đáp án, lỗi từ vựng, lỗi âm thanh và góp ý giao diện từ học viên.</p>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <button onclick="setReportStatusFilter('all')" id="btn-filter-rep-all" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-900 text-white shadow-2xs cursor-pointer">
-                                    Tất cả (<span id="count-rep-all">0</span>)
-                                </button>
-                                <button onclick="setReportStatusFilter('pending')" id="btn-filter-rep-pending" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 cursor-pointer">
-                                    Chờ xử lý (<span id="count-rep-pending">0</span>)
-                                </button>
-                                <button onclick="setReportStatusFilter('resolved')" id="btn-filter-rep-resolved" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 cursor-pointer">
-                                    Đã khắc phục (<span id="count-rep-resolved">0</span>)
-                                </button>
-                                <button onclick="setReportStatusFilter('dismissed')" id="btn-filter-rep-dismissed" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 cursor-pointer">
-                                    Bỏ qua (<span id="count-rep-dismissed">0</span>)
-                                </button>
-                                <button onclick="loadBugReports(true)" class="p-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 ml-1 transition-colors cursor-pointer" title="Làm mới">
-                                    <span class="material-symbols-outlined text-[18px]">refresh</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Filter Bar -->
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                            <div class="relative">
-                                <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
-                                <input type="text" id="report-search-input" oninput="handleReportSearch(this.value)" placeholder="Tìm theo nội dung, từ vựng, URL..." 
-                                       class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium">
-                            </div>
-                            <div>
-                                <select id="report-feature-filter" onchange="handleReportFeatureFilter(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20">
-                                    <option value="">Tất cả tính năng</option>
-                                    <option value="thpt_exam">Đề thi THPT (thpt_exam)</option>
-                                    <option value="learning_session">Phiên học từ vựng (learning_session)</option>
-                                    <option value="bilingual_reading">Bài đọc song ngữ (bilingual_reading)</option>
-                                    <option value="dictionary">Tra từ điển (dictionary)</option>
-                                    <option value="general">Hệ thống chung (general)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <select id="report-type-filter" onchange="handleReportTypeFilter(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20">
-                                    <option value="">Tất cả loại vấn đề</option>
-                                    <option value="exam_question">Lỗi câu hỏi đề thi</option>
-                                    <option value="wrong_answer">Sai đáp án bài tập</option>
-                                    <option value="typo">Lỗi chính tả / dịch thuật</option>
-                                    <option value="audio">Lỗi phát âm / âm thanh</option>
-                                    <option value="ui_bug">Lỗi giao diện / nút bấm</option>
-                                    <option value="other">Góp ý / Khác</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- Reports Table -->
-                        <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50/80 text-slate-500 font-extrabold border-b border-slate-200">
-                                        <th class="py-3 px-4 w-36">Thời gian</th>
-                                        <th class="py-3 px-4 w-44">Tính năng &amp; Loại</th>
-                                        <th class="py-3 px-4">Ngữ cảnh &amp; Nội dung báo lỗi</th>
-                                        <th class="py-3 px-4 w-40">Học viên</th>
-                                        <th class="py-3 px-4 w-32 text-center">Trạng thái</th>
-                                        <th class="py-3 px-4 w-28 text-right">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reports-table-body" class="divide-y divide-slate-100 font-medium">
-                                    <tr>
-                                        <td colspan="6" class="py-12 text-center text-slate-400">
-                                            Đang tải dữ liệu hòm thư báo cáo...
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
+                <section id="section-reports" class="hidden"></section>
 
                 <!-- ==================================================== -->
                 <!-- VIEW 4: VOCABULARY CMS                               -->
@@ -1479,153 +1416,290 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                                         <p class="text-[11px] text-emerald-700 mt-0.5">Phân phối tĩnh siêu tốc qua các máy chủ Edge gần người học nhất tại VN.</p>
                                     </div>
                                 </div>
-                    <!-- Panel 4: System Error Logs (Crash Monitoring) -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div>
-                                <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-bold border border-rose-200 mb-1.5">
-                                    <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                                    <span>Client Crash &amp; Error Monitoring</span>
-                                </div>
-                                <h4 class="font-extrabold text-base text-slate-900">Nhật ký Lỗi Hệ thống (System Error Logs)</h4>
-                                <p class="text-xs text-slate-500 mt-0.5">Tự động ghi lại các ngoại lệ JavaScript runtime (`window.onerror`), lỗi Promise (`unhandledrejection`) từ thiết bị người học.</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span id="error-logs-count-badge" class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-mono font-bold text-xs">0 logs</span>
-                                <button onclick="loadSystemErrorLogs(true)" class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                                    <span class="material-symbols-outlined text-[16px]">refresh</span>
-                                    <span>Làm mới</span>
-                                </button>
-                                <button onclick="clearOldSystemLogs()" class="px-3 py-1.5 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-600 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
-                                    <span>Dọn dẹp (&gt;7 ngày)</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Error Logs Table -->
-                        <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50/80 text-slate-500 font-extrabold border-b border-slate-200">
-                                        <th class="py-3 px-4 w-36">Thời gian</th>
-                                        <th class="py-3 px-4 w-28">Mức độ</th>
-                                        <th class="py-3 px-4 w-40">Thành phần</th>
-                                        <th class="py-3 px-4">Thông điệp Lỗi</th>
-                                        <th class="py-3 px-4 w-52">URL / Thiết bị</th>
-                                        <th class="py-3 px-4 w-28 text-right">Chi tiết</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="system-error-logs-body" class="divide-y divide-slate-100 font-medium">
-                                    <tr>
-                                        <td colspan="6" class="py-10 text-center text-slate-400">
-                                            Đang tải nhật ký lỗi hệ thống...
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </section>
 
                 <!-- ==================================================== -->
-                <!-- VIEW 7: SYSTEM HEALTH & DATA AUDIT                   -->
+                <!-- VIEW 7: GIÁM SÁT LỖI, BÁO CÁO & KIỂM TOÁN HỆ THỐNG   -->
                 <!-- ==================================================== -->
                 <section id="section-system" class="hidden space-y-6">
-                    
-                    <!-- Table Records Audit -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-5">
-                        <div class="flex items-center justify-between">
+                    <!-- Top Navigation Bar / Sub-tabs -->
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 border border-slate-200/90 dark:border-white/10 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button onclick="switchSystemSubTab('reports')" id="btn-sys-subtab-reports" class="sys-subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-primary text-white shadow-xs flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">flag</span>
+                                <span>Báo Cáo Người Dùng</span>
+                                <span id="sys-subtab-badge-reports" class="ml-1 px-1.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-extrabold">0</span>
+                            </button>
+                            <button onclick="switchSystemSubTab('logs')" id="btn-sys-subtab-logs" class="sys-subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">bug_report</span>
+                                <span>Nhật Ký Lỗi Runtime</span>
+                                <span id="sys-subtab-badge-logs" class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] font-extrabold">0</span>
+                            </button>
+                            <button onclick="switchSystemSubTab('audit')" id="btn-sys-subtab-audit" class="sys-subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">auto_fix_high</span>
+                                <span>Kiểm Toán Từ Vựng & AI</span>
+                            </button>
+                            <button onclick="switchSystemSubTab('database')" id="btn-sys-subtab-database" class="sys-subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 flex items-center gap-1.5 cursor-pointer">
+                                <span class="material-symbols-outlined text-[16px]">database</span>
+                                <span>Bản Ghi DB & Cache</span>
+                            </button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="refreshSystemData()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5 transition-colors cursor-pointer" title="Làm mới tất cả dữ liệu kiểm toán & lỗi">
+                                <span class="material-symbols-outlined text-[16px]">sync</span>
+                                <span>Làm mới tất cả</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 1: HÒM THƯ BÁO CÁO NGƯỜI DÙNG 🚩 -->
+                    <div id="sys-panel-reports" class="sys-subpanel space-y-6">
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-5 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-[11px] font-bold border border-rose-200 dark:border-rose-800/40 mb-1.5">
+                                        <span class="material-symbols-outlined text-[15px]">flag</span>
+                                        <span>Hệ Thống Tiếp Nhận Phản Hồi</span>
+                                    </div>
+                                    <h3 class="font-extrabold text-xl text-slate-900 dark:text-white tracking-tight">Hòm thư Báo cáo Người dùng 🚩</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Tiếp nhận, xử lý và theo dõi phản hồi báo sai đáp án, lỗi từ vựng, lỗi âm thanh và góp ý giao diện từ học viên.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button onclick="setReportStatusFilter('all')" id="btn-filter-rep-all" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-900 text-white shadow-2xs cursor-pointer">
+                                        Tất cả (<span id="count-rep-all">0</span>)
+                                    </button>
+                                    <button onclick="setReportStatusFilter('pending')" id="btn-filter-rep-pending" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/50 hover:bg-amber-100 cursor-pointer">
+                                        Chờ xử lý (<span id="count-rep-pending">0</span>)
+                                    </button>
+                                    <button onclick="setReportStatusFilter('resolved')" id="btn-filter-rep-resolved" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/50 hover:bg-emerald-100 cursor-pointer">
+                                        Đã khắc phục (<span id="count-rep-resolved">0</span>)
+                                    </button>
+                                    <button onclick="setReportStatusFilter('dismissed')" id="btn-filter-rep-dismissed" class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-white/10 hover:bg-slate-200 cursor-pointer">
+                                        Bỏ qua (<span id="count-rep-dismissed">0</span>)
+                                    </button>
+                                    <button onclick="loadBugReports(true)" class="p-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 ml-1 transition-colors cursor-pointer" title="Làm mới">
+                                        <span class="material-symbols-outlined text-[18px]">refresh</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Filter Bar -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                                <div class="relative">
+                                    <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
+                                    <input type="text" id="report-search-input" oninput="handleReportSearch(this.value)" placeholder="Tìm theo nội dung, từ vựng, URL..." 
+                                           class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium">
+                                </div>
+                                <div>
+                                    <select id="report-feature-filter" onchange="handleReportFeatureFilter(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                        <option value="">Tất cả tính năng</option>
+                                        <option value="thpt_exam">Đề thi THPT (thpt_exam)</option>
+                                        <option value="learning_session">Phiên học từ vựng (learning_session)</option>
+                                        <option value="bilingual_reading">Bài đọc song ngữ (bilingual_reading)</option>
+                                        <option value="dictionary">Tra từ điển (dictionary)</option>
+                                        <option value="general">Hệ thống chung (general)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <select id="report-type-filter" onchange="handleReportTypeFilter(this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                        <option value="">Tất cả loại vấn đề</option>
+                                        <option value="exam_question">Lỗi câu hỏi đề thi</option>
+                                        <option value="wrong_answer">Sai đáp án bài tập</option>
+                                        <option value="typo">Lỗi chính tả / dịch thuật</option>
+                                        <option value="audio">Lỗi phát âm / âm thanh</option>
+                                        <option value="ui_bug">Lỗi giao diện / nút bấm</option>
+                                        <option value="other">Góp ý / Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Reports Table -->
+                            <div class="overflow-x-auto border border-slate-200/80 dark:border-white/10 rounded-xl">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50/80 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-extrabold border-b border-slate-200 dark:border-white/10">
+                                            <th class="py-3 px-4 w-36">Thời gian</th>
+                                            <th class="py-3 px-4 w-44">Tính năng &amp; Loại</th>
+                                            <th class="py-3 px-4">Ngữ cảnh &amp; Nội dung báo lỗi</th>
+                                            <th class="py-3 px-4 w-40">Học viên</th>
+                                            <th class="py-3 px-4 w-32 text-center">Trạng thái</th>
+                                            <th class="py-3 px-4 w-28 text-right">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="reports-table-body" class="divide-y divide-slate-100 dark:divide-white/5 font-medium">
+                                        <tr>
+                                            <td colspan="6" class="py-12 text-center text-slate-400">
+                                                Đang tải dữ liệu hòm thư báo cáo...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 2: NHẬT KÝ LỖI RUNTIME (CRASH MONITORING) ⚠️ -->
+                    <div id="sys-panel-logs" class="sys-subpanel hidden space-y-6">
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-4 transition-colors">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-400 text-[11px] font-bold border border-rose-200 dark:border-rose-800/40 mb-1.5">
+                                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+                                        <span>Client Crash &amp; Error Monitoring</span>
+                                    </div>
+                                    <h4 class="font-extrabold text-base text-slate-900 dark:text-white">Nhật ký Lỗi Hệ thống (System Error Logs)</h4>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tự động ghi lại các ngoại lệ JavaScript runtime (`window.onerror`), lỗi Promise (`unhandledrejection`) từ thiết bị người học.</p>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <span id="error-logs-count-badge" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-mono font-bold text-xs">0 logs</span>
+                                    <button onclick="loadSystemErrorLogs(true)" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                        <span class="material-symbols-outlined text-[16px]">refresh</span>
+                                        <span>Làm mới</span>
+                                    </button>
+                                    <button onclick="clearOldSystemLogs()" class="px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-800/40 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
+                                        <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                                        <span>Dọn dẹp (&gt;7 ngày)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Error Logs Table -->
+                            <div class="overflow-x-auto border border-slate-200/80 dark:border-white/10 rounded-xl">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-slate-50/80 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-extrabold border-b border-slate-200 dark:border-white/10">
+                                            <th class="py-3 px-4 w-36">Thời gian</th>
+                                            <th class="py-3 px-4 w-28">Mức độ</th>
+                                            <th class="py-3 px-4 w-40">Thành phần</th>
+                                            <th class="py-3 px-4">Thông điệp Lỗi</th>
+                                            <th class="py-3 px-4 w-52">URL / Thiết bị</th>
+                                            <th class="py-3 px-4 w-28 text-right">Chi tiết</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="system-error-logs-body" class="divide-y divide-slate-100 dark:divide-white/5 font-medium">
+                                        <tr>
+                                            <td colspan="6" class="py-10 text-center text-slate-400">
+                                                Đang tải nhật ký lỗi hệ thống...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 3: KIỂM TOÁN TỪ VỰNG & AI FIX 🔍 -->
+                    <div id="sys-panel-audit" class="sys-subpanel hidden space-y-6">
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-4 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 text-[11px] font-bold border border-purple-200 dark:border-purple-800/40 mb-1.5">
+                                        <span class="material-symbols-outlined text-[15px]">auto_fix_high</span>
+                                        <span>Kiểm Soát & Làm Giàu Dữ Liệu AI</span>
+                                    </div>
+                                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Bộ Kiểm toán Chất lượng Từ vựng (Quality Audit)</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400">Nhận diện các từ vựng còn thiếu thông tin để tiến hành làm giàu dữ liệu qua AI Auto-fill.</p>
+                                </div>
+                                <button onclick="loadSystemHealth()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px]">refresh</span>
+                                    <span>Kiểm toán lại</span>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+                                <div class="p-4 rounded-2xl border border-amber-200 dark:border-amber-800/40 bg-amber-50/50 dark:bg-amber-950/20 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-amber-800 dark:text-amber-300">Từ thiếu câu ví dụ</span>
+                                        <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">format_quote</span>
+                                    </div>
+                                    <p id="quality-missing-example" class="text-2xl font-black text-amber-900 dark:text-amber-200">...</p>
+                                    <button onclick="inspectQualityIssue('missing_example')" class="text-[11px] font-bold text-amber-700 dark:text-amber-400 hover:underline">Xem và bổ sung &rarr;</button>
+                                </div>
+
+                                <div class="p-4 rounded-2xl border border-blue-200 dark:border-blue-800/40 bg-blue-50/50 dark:bg-blue-950/20 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-blue-800 dark:text-blue-300">Từ thiếu phiên âm IPA</span>
+                                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">record_voice_over</span>
+                                    </div>
+                                    <p id="quality-missing-phonetic" class="text-2xl font-black text-blue-900 dark:text-blue-200">...</p>
+                                    <button onclick="inspectQualityIssue('missing_phonetic')" class="text-[11px] font-bold text-blue-700 dark:text-blue-400 hover:underline">Xem và bổ sung &rarr;</button>
+                                </div>
+
+                                <div class="p-4 rounded-2xl border border-purple-200 dark:border-purple-800/40 bg-purple-50/50 dark:bg-purple-950/20 space-y-2">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold text-purple-800 dark:text-purple-300">Từ thiếu từ loại (POS)</span>
+                                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">category</span>
+                                    </div>
+                                    <p id="quality-missing-pos" class="text-2xl font-black text-purple-900 dark:text-purple-200">...</p>
+                                    <button onclick="inspectQualityIssue('missing_pos')" class="text-[11px] font-bold text-purple-700 dark:text-purple-400 hover:underline">Xem và bổ sung &rarr;</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SUB-PANEL 4: THỐNG KÊ BẢN GHI DATABASE & CACHE 📊 -->
+                    <div id="sys-panel-database" class="sys-subpanel hidden space-y-6">
+                        <!-- Table Records Audit -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-5 transition-colors">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Kiểm toán Số lượng Bản ghi PostgreSQL</h3>
+                                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Số lượng dòng dữ liệu thực tế đang lưu trữ trong cơ sở dữ liệu Supabase.</p>
+                                </div>
+                                <button onclick="loadSystemHealth()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[15px]">refresh</span>
+                                    <span>Đo lại</span>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="table-counts-grid">
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Words</span>
+                                    <p id="audit-words" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Topics</span>
+                                    <p id="audit-topics" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tests</span>
+                                    <p id="audit-tests" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Passages</span>
+                                    <p id="audit-passages" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Word Progress</span>
+                                    <p id="audit-progress" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Study Sessions</span>
+                                    <p id="audit-sessions" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Profiles / Users</span>
+                                    <p id="audit-users" class="text-xl font-black text-slate-900 dark:text-white mt-1">...</p>
+                                </div>
+                                <div class="p-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 text-center">
+                                    <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ping Latency</span>
+                                    <p id="audit-ping" class="text-xl font-black text-emerald-600 dark:text-emerald-400 mt-1">...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Client Cache Management -->
+                        <div class="bg-white dark:bg-[#161b22] rounded-2xl p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-4 transition-colors">
+                            <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Quản lý Cache Trình duyệt</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Xóa dữ liệu bộ nhớ đệm tạm thời (LocalStorage) trên trình duyệt này khi bạn vừa thay đổi cấu trúc dữ liệu hoặc phiên học.</p>
                             <div>
-                                <h3 class="font-extrabold text-base text-slate-900">Kiểm toán Số lượng Bản ghi PostgreSQL</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Số lượng dòng dữ liệu thực tế đang lưu trữ trong cơ sở dữ liệu Supabase.</p>
+                                <button onclick="clearAppCache()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 dark:hover:text-rose-400 font-bold text-xs text-slate-700 dark:text-slate-300 transition-colors inline-flex items-center gap-1.5 border border-slate-200 dark:border-white/10">
+                                    <span class="material-symbols-outlined text-base">delete_sweep</span>
+                                    <span>Xóa Cache & Tải Lại Trang</span>
+                                </button>
                             </div>
-                            <button onclick="loadSystemHealth()" class="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[15px]">refresh</span>
-                                <span>Đo lại</span>
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="table-counts-grid">
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Words</span>
-                                <p id="audit-words" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Topics</span>
-                                <p id="audit-topics" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tests</span>
-                                <p id="audit-tests" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Passages</span>
-                                <p id="audit-passages" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Word Progress</span>
-                                <p id="audit-progress" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Study Sessions</span>
-                                <p id="audit-sessions" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Profiles / Users</span>
-                                <p id="audit-users" class="text-xl font-black text-slate-900 mt-1">...</p>
-                            </div>
-                            <div class="p-4 rounded-xl bg-slate-50 border border-slate-200/70 text-center">
-                                <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ping Latency</span>
-                                <p id="audit-ping" class="text-xl font-black text-emerald-600 mt-1">...</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Quality Audit Inspector -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
-                        <h3 class="font-extrabold text-base text-slate-900">Bộ Kiểm toán Chất lượng Từ vựng (Quality Audit)</h3>
-                        <p class="text-xs text-slate-500">Nhận diện các từ vựng còn thiếu thông tin để tiến hành làm giàu dữ liệu qua AI Auto-fill.</p>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                            <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50/50 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-amber-800">Từ thiếu câu ví dụ</span>
-                                    <span class="material-symbols-outlined text-amber-600">format_quote</span>
-                                </div>
-                                <p id="quality-missing-example" class="text-2xl font-black text-amber-900">...</p>
-                                <button onclick="inspectQualityIssue('missing_example')" class="text-[11px] font-bold text-amber-700 hover:underline">Xem và bổ sung &rarr;</button>
-                            </div>
-
-                            <div class="p-4 rounded-2xl border border-blue-200 bg-blue-50/50 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-blue-800">Từ thiếu phiên âm IPA</span>
-                                    <span class="material-symbols-outlined text-blue-600">record_voice_over</span>
-                                </div>
-                                <p id="quality-missing-phonetic" class="text-2xl font-black text-blue-900">...</p>
-                                <button onclick="inspectQualityIssue('missing_phonetic')" class="text-[11px] font-bold text-blue-700 hover:underline">Xem và bổ sung &rarr;</button>
-                            </div>
-
-                            <div class="p-4 rounded-2xl border border-purple-200 bg-purple-50/50 space-y-2">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-xs font-bold text-purple-800">Từ thiếu từ loại (POS)</span>
-                                    <span class="material-symbols-outlined text-purple-600">category</span>
-                                </div>
-                                <p id="quality-missing-pos" class="text-2xl font-black text-purple-900">...</p>
-                                <button onclick="inspectQualityIssue('missing_pos')" class="text-[11px] font-bold text-purple-700 hover:underline">Xem và bổ sung &rarr;</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Client Cache Management -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-4">
-                        <h3 class="font-extrabold text-base text-slate-900">Quản lý Cache Trình duyệt</h3>
-                        <p class="text-xs text-slate-500">Xóa dữ liệu bộ nhớ đệm tạm thời (LocalStorage) trên trình duyệt này khi bạn vừa thay đổi cấu trúc dữ liệu hoặc phiên học.</p>
-                        <div>
-                            <button onclick="clearAppCache()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 hover:text-rose-600 font-bold text-xs text-slate-700 transition-colors inline-flex items-center gap-1.5 border border-slate-200">
-                                <span class="material-symbols-outlined text-base">delete_sweep</span>
-                                <span>Xóa Cache & Tải Lại Trang</span>
-                            </button>
                         </div>
                     </div>
                 </section>
@@ -2092,8 +2166,8 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 <div class="flex items-center gap-2.5 text-amber-600 dark:text-amber-400">
                     <span class="material-symbols-outlined text-2xl">card_giftcard</span>
                     <div>
-                        <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Tặng Gói HiVocab PRO Thủ Công</h3>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Cấp đặc quyền Pro cho học viên mà không cần thanh toán</p>
+                        <h3 id="modal-grant-pro-title" class="font-extrabold text-base text-slate-900 dark:text-white">Tặng Gói HiVocab PRO Thủ Công</h3>
+                        <p id="modal-grant-pro-subtitle" class="text-xs text-slate-500 dark:text-slate-400">Cấp đặc quyền Pro cho học viên mà không cần thanh toán</p>
                     </div>
                 </div>
                 <button onclick="closeGrantProModal()" class="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer">
@@ -2102,12 +2176,22 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             </div>
 
             <form id="form-grant-pro" onsubmit="handleGrantProSubmit(event)" class="p-6 space-y-4">
-                <!-- Chọn User -->
-                <div>
+                <!-- Chọn User (Single Mode) -->
+                <div id="grant-pro-single-container">
                     <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Học Viên Nhận Gói <span class="text-rose-500">*</span></label>
-                    <input type="text" id="grant-pro-email" required placeholder="Nhập email học viên (ví dụ: student@gmail.com)" 
+                    <input type="text" id="grant-pro-email" placeholder="Nhập email học viên (ví dụ: student@gmail.com)" 
                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 font-medium">
                     <p class="text-[11px] text-slate-400 mt-1">Hệ thống sẽ tra cứu User ID từ email và tự động nâng cấp quyền.</p>
+                </div>
+
+                <!-- Chọn User (Bulk Mode) -->
+                <div id="grant-pro-bulk-container" class="hidden space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Danh Sách Học Viên Đã Chọn (<span id="grant-pro-bulk-count" class="text-amber-600 font-extrabold">0</span>)</label>
+                        <span class="text-[10px] font-bold text-amber-700 bg-amber-100 dark:bg-amber-900/40 px-2 py-0.5 rounded-full">Nâng hàng loạt</span>
+                    </div>
+                    <div id="grant-pro-bulk-list" class="max-h-32 overflow-y-auto p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 flex flex-wrap gap-1.5 custom-scrollbar text-xs">
+                    </div>
                 </div>
 
                 <!-- Chọn Gói Cước -->
@@ -2167,7 +2251,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                     </button>
                     <button type="submit" id="btn-submit-grant-pro" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[18px]">verified</span>
-                        <span>Kích Hoạt Tặng Gói PRO</span>
+                        <span id="btn-submit-grant-pro-text">Kích Hoạt Tặng Gói PRO</span>
                     </button>
                 </div>
             </form>
@@ -2205,6 +2289,9 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         let allProTopicsCache = [];
         let allProTestsCache = [];
         let allProPassagesCache = [];
+        let selectedSubUsers = new Map(); // id -> email
+        let isBulkGrantMode = false;
+        let currentSystemSubTab = 'reports';
 
         // 0. THEME & DARK MODE
         function toggleAdminDarkMode() {
@@ -2383,10 +2470,17 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 reports: 'Hòm thư Báo cáo Người dùng 🚩',
                 words: 'Kho Từ vựng Hệ thống',
                 bulk: 'Nhập Từ vựng Hàng loạt từ Excel',
-                performance: 'Kiểm tra Hiệu năng Website & Database',
-                system: 'Trạng thái Hệ thống & Kiểm toán'
+                performance: 'Đo Hiệu Năng Web (Benchmark)',
+                system: 'Giám sát Lỗi, Báo cáo & Kiểm toán Hệ thống'
             };
             document.getElementById('topbar-title').textContent = titles[tab] || 'Admin Portal';
+
+            // Route 'reports' to unified system tab
+            if (tab === 'reports') {
+                await switchTab('system');
+                switchSystemSubTab('reports');
+                return;
+            }
 
             // Gọi hàm tải dữ liệu theo từng tab
             if (tab === 'overview') await loadSystemAnalytics();
@@ -2395,13 +2489,19 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             if (tab === 'pro_content') await loadProContentData();
             if (tab === 'users') await loadAdminUsers();
             if (tab === 'thpt') await loadThptAdminExams();
-            if (tab === 'reports') await loadBugReports();
             if (tab === 'words') await loadWordsList(1);
             if (tab === 'performance') {
                 await runPerformanceBenchmark();
-                await loadSystemErrorLogs();
             }
-            if (tab === 'system') await loadSystemHealth();
+            if (tab === 'system') {
+                await Promise.all([
+                    loadBugReports(false),
+                    loadSystemErrorLogs(false),
+                    loadSystemHealth()
+                ]);
+                updateSystemBadges();
+                switchSystemSubTab(currentSystemSubTab || 'reports');
+            }
         }
 
         async function refreshCurrentTab() {
@@ -2787,7 +2887,8 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="py-12 text-center text-slate-400">Không tìm thấy học viên nào phù hợp.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" class="py-12 text-center text-slate-400">Không tìm thấy học viên nào phù hợp.</td></tr>';
+                updateBulkBar();
                 return;
             }
 
@@ -2817,8 +2918,16 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                         ? '<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-500 font-bold text-[10px]">Đã hết hạn</span>'
                         : '<span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-500 font-bold text-[10px]">Chưa đăng ký</span>');
 
+                const isChecked = selectedSubUsers.has(p.id);
+
                 return `
-                    <tr class="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors">
+                    <tr class="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors ${isChecked ? 'bg-amber-50/40 dark:bg-amber-950/20' : ''}">
+                        <td class="py-3.5 px-4 text-center">
+                            <input type="checkbox" class="sub-user-checkbox w-4 h-4 rounded text-amber-500 focus:ring-amber-500 cursor-pointer" 
+                                   data-id="${p.id}" data-email="${escAttr(email)}" 
+                                   ${isChecked ? 'checked' : ''} 
+                                   onchange="onSubCheckboxChange(this, '${p.id}', '${escAttr(email)}')">
+                        </td>
                         <td class="py-3.5 px-4">
                             <div class="flex items-center gap-2.5">
                                 <div class="w-8 h-8 rounded-xl ${isActivePro ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300'} font-black text-xs flex items-center justify-center flex-shrink-0">
@@ -2854,9 +2963,154 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                     </tr>
                 `;
             }).join('');
+
+            updateBulkBar();
+        }
+
+        function onSubCheckboxChange(cb, userId, email) {
+            if (cb.checked) {
+                selectedSubUsers.set(userId, email);
+            } else {
+                selectedSubUsers.delete(userId);
+            }
+            const row = cb.closest('tr');
+            if (row) {
+                if (cb.checked) {
+                    row.classList.add('bg-amber-50/40', 'dark:bg-amber-950/20');
+                } else {
+                    row.classList.remove('bg-amber-50/40', 'dark:bg-amber-950/20');
+                }
+            }
+            updateBulkBar();
+        }
+
+        function toggleSelectAllSubs(checked) {
+            const checkboxes = document.querySelectorAll('.sub-user-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = checked;
+                const uid = cb.dataset.id;
+                const uemail = cb.dataset.email;
+                if (checked) {
+                    selectedSubUsers.set(uid, uemail);
+                } else {
+                    selectedSubUsers.delete(uid);
+                }
+                const row = cb.closest('tr');
+                if (row) {
+                    if (checked) {
+                        row.classList.add('bg-amber-50/40', 'dark:bg-amber-950/20');
+                    } else {
+                        row.classList.remove('bg-amber-50/40', 'dark:bg-amber-950/20');
+                    }
+                }
+            });
+            updateBulkBar();
+        }
+
+        function clearSelectedSubs() {
+            selectedSubUsers.clear();
+            const selectAll = document.getElementById('sub-select-all');
+            if (selectAll) selectAll.checked = false;
+            document.querySelectorAll('.sub-user-checkbox').forEach(cb => {
+                cb.checked = false;
+                const row = cb.closest('tr');
+                if (row) row.classList.remove('bg-amber-50/40', 'dark:bg-amber-950/20');
+            });
+            updateBulkBar();
+        }
+
+        function updateBulkBar() {
+            const bar = document.getElementById('sub-bulk-bar');
+            const countEl = document.getElementById('sub-bulk-count');
+            const selectAll = document.getElementById('sub-select-all');
+            const size = selectedSubUsers.size;
+
+            if (bar) {
+                if (size > 0) {
+                    bar.classList.remove('hidden');
+                } else {
+                    bar.classList.add('hidden');
+                }
+            }
+            if (countEl) {
+                countEl.textContent = `Đã chọn ${size} học viên`;
+            }
+
+            const visibleCheckboxes = document.querySelectorAll('.sub-user-checkbox');
+            if (selectAll && visibleCheckboxes.length > 0) {
+                const allChecked = Array.from(visibleCheckboxes).every(cb => cb.checked);
+                const someChecked = Array.from(visibleCheckboxes).some(cb => cb.checked);
+                selectAll.checked = allChecked;
+                selectAll.indeterminate = !allChecked && someChecked;
+            } else if (selectAll) {
+                selectAll.checked = false;
+                selectAll.indeterminate = false;
+            }
+        }
+
+        function openBulkGrantProModal() {
+            if (selectedSubUsers.size === 0) {
+                showToast('Vui lòng tích chọn ít nhất 1 học viên từ danh sách!', 'warning');
+                return;
+            }
+
+            isBulkGrantMode = true;
+            const singleContainer = document.getElementById('grant-pro-single-container');
+            const bulkContainer = document.getElementById('grant-pro-bulk-container');
+            if (singleContainer) singleContainer.classList.add('hidden');
+            if (bulkContainer) bulkContainer.classList.remove('hidden');
+
+            const titleEl = document.getElementById('modal-grant-pro-title');
+            const subtitleEl = document.getElementById('modal-grant-pro-subtitle');
+            const countEl = document.getElementById('grant-pro-bulk-count');
+            if (titleEl) titleEl.textContent = `Tặng Gói PRO Hàng Loạt (${selectedSubUsers.size} học viên)`;
+            if (subtitleEl) subtitleEl.textContent = `Cấp đặc quyền Pro đồng loạt cho ${selectedSubUsers.size} học viên đã chọn`;
+            if (countEl) countEl.textContent = selectedSubUsers.size;
+
+            const bulkList = document.getElementById('grant-pro-bulk-list');
+            if (bulkList) {
+                bulkList.innerHTML = Array.from(selectedSubUsers.entries()).map(([uid, email]) => `
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-100 dark:bg-amber-900/40 text-amber-900 dark:text-amber-200 font-bold text-xs border border-amber-200 dark:border-amber-700/50">
+                        <span>${escHtml(email)}</span>
+                        <button type="button" onclick="removeSelectedSub('${uid}')" class="hover:text-rose-600 text-amber-700 dark:text-amber-400 p-0.5 cursor-pointer" title="Bỏ chọn">
+                            <span class="material-symbols-outlined text-[14px]">close</span>
+                        </button>
+                    </span>
+                `).join('');
+            }
+
+            const modal = document.getElementById('modal-grant-pro');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function removeSelectedSub(userId) {
+            selectedSubUsers.delete(userId);
+            const cb = document.querySelector(`.sub-user-checkbox[data-id="${userId}"]`);
+            if (cb) {
+                cb.checked = false;
+                const row = cb.closest('tr');
+                if (row) row.classList.remove('bg-amber-50/40', 'dark:bg-amber-950/20');
+            }
+            updateBulkBar();
+            if (selectedSubUsers.size === 0) {
+                closeGrantProModal();
+            } else {
+                openBulkGrantProModal();
+            }
         }
 
         function openGrantProModal(userId, email) {
+            isBulkGrantMode = false;
+            const singleContainer = document.getElementById('grant-pro-single-container');
+            const bulkContainer = document.getElementById('grant-pro-bulk-container');
+            if (singleContainer) singleContainer.classList.remove('hidden');
+            if (bulkContainer) bulkContainer.classList.add('hidden');
+
+            const titleEl = document.getElementById('modal-grant-pro-title');
+            const subtitleEl = document.getElementById('modal-grant-pro-subtitle');
+            if (titleEl) titleEl.textContent = 'Tặng Gói HiVocab PRO Thủ Công';
+            if (subtitleEl) subtitleEl.textContent = 'Cấp đặc quyền Pro cho học viên mà không cần thanh toán';
+
             const input = document.getElementById('grant-pro-email');
             if (input) input.value = email || '';
             const modal = document.getElementById('modal-grant-pro');
@@ -2878,91 +3132,135 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
 
         async function handleGrantProSubmit(e) {
             e.preventDefault();
-            const email = (document.getElementById('grant-pro-email').value || '').trim();
             const planEl = document.querySelector('input[name="grant-pro-plan"]:checked');
             const plan = planEl ? planEl.value : '1m';
             const reason = (document.getElementById('grant-pro-reason').value || '').trim();
             const btn = document.getElementById('btn-submit-grant-pro');
 
-            if (!email) {
-                showToast('Vui lòng nhập email học viên!', 'error');
-                return;
+            const now = new Date();
+            let expiresAt = null;
+            let daysAdded = 30;
+
+            if (plan === '1m') {
+                daysAdded = 30;
+                expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (plan === '6m') {
+                daysAdded = 180;
+                expiresAt = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (plan === '1y') {
+                daysAdded = 365;
+                expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
+            } else if (plan === 'lifetime') {
+                expiresAt = null;
+            } else if (plan === 'custom') {
+                const customDays = parseInt(document.getElementById('grant-pro-custom-days').value, 10);
+                if (!customDays || customDays <= 0) {
+                    showToast('Vui lòng nhập số ngày hợp lệ!', 'error');
+                    return;
+                }
+                daysAdded = customDays;
+                expiresAt = new Date(now.getTime() + customDays * 24 * 60 * 60 * 1000).toISOString();
             }
 
             btn.disabled = true;
             btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">sync</span><span>Đang xử lý...</span>';
 
             try {
-                // Find user by email in profiles
-                const cleanEmail = email.toLowerCase().trim();
-                const { data: userProfile, error: userErr } = await sb
-                    .from('profiles')
-                    .select('id, email')
-                    .ilike('email', cleanEmail)
-                    .maybeSingle();
+                if (isBulkGrantMode) {
+                    if (selectedSubUsers.size === 0) {
+                        throw new Error('Chưa chọn học viên nào!');
+                    }
+                    const userIds = Array.from(selectedSubUsers.keys());
 
-                if (userErr || !userProfile) {
-                    throw new Error(`Không tìm thấy tài khoản học viên với email "${email}". Học viên cần đăng nhập HiVocab ít nhất 1 lần.`);
+                    // 1. Batch update profiles
+                    const { error: updateErr } = await sb
+                        .from('profiles')
+                        .update({
+                            tier: plan === 'lifetime' ? 'lifetime' : 'pro',
+                            subscription_plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
+                            subscription_status: 'active',
+                            subscription_started_at: now.toISOString(),
+                            subscription_expires_at: expiresAt,
+                        })
+                        .in('id', userIds);
+
+                    if (updateErr) throw updateErr;
+
+                    // 2. Batch insert orders
+                    const orderRows = Array.from(selectedSubUsers.entries()).map(([uId, uEmail], index) => ({
+                        order_code: Number(String(Date.now()).slice(-9)) + index,
+                        user_id: uId,
+                        user_email: uEmail,
+                        plan_id: plan === 'lifetime' ? 'pro_lifetime' : `pro_${plan}`,
+                        plan_name: `HiVocab Pro ${plan === 'lifetime' ? 'Trọn Đời' : plan}`,
+                        amount: 0,
+                        status: 'PAID',
+                        plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
+                        payment_method: 'MANUAL_GIFT_BULK',
+                        description: reason ? `Admin tặng hàng loạt: ${reason}` : 'Admin tặng gói hàng loạt',
+                        admin_note: reason ? `Admin tặng hàng loạt: ${reason}` : 'Admin tặng gói hàng loạt',
+                        paid_at: now.toISOString(),
+                        payment_time: now.toISOString(),
+                    }));
+                    await sb.from('orders').insert(orderRows);
+
+                    showToast(`Đã tặng thành công gói PRO cho ${userIds.length} học viên!`, 'success');
+                    clearSelectedSubs();
+                    closeGrantProModal();
+                    await loadSubscriptionsData();
+                } else {
+                    // Single user mode
+                    const email = (document.getElementById('grant-pro-email').value || '').trim();
+                    if (!email) {
+                        showToast('Vui lòng nhập email học viên!', 'error');
+                        return;
+                    }
+
+                    const cleanEmail = email.toLowerCase().trim();
+                    const { data: userProfile, error: userErr } = await sb
+                        .from('profiles')
+                        .select('id, email')
+                        .ilike('email', cleanEmail)
+                        .maybeSingle();
+
+                    if (userErr || !userProfile) {
+                        throw new Error(`Không tìm thấy tài khoản học viên với email "${email}". Học viên cần đăng nhập HiVocab ít nhất 1 lần.`);
+                    }
+
+                    const { error: updateErr } = await sb
+                        .from('profiles')
+                        .update({
+                            tier: plan === 'lifetime' ? 'lifetime' : 'pro',
+                            subscription_plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
+                            subscription_status: 'active',
+                            subscription_started_at: now.toISOString(),
+                            subscription_expires_at: expiresAt,
+                        })
+                        .eq('id', userProfile.id);
+
+                    if (updateErr) throw updateErr;
+
+                    const orderCode = Number(String(Date.now()).slice(-9));
+                    await sb.from('orders').insert({
+                        order_code: orderCode,
+                        user_id: userProfile.id,
+                        user_email: userProfile.email,
+                        plan_id: plan === 'lifetime' ? 'pro_lifetime' : `pro_${plan}`,
+                        plan_name: `HiVocab Pro ${plan === 'lifetime' ? 'Trọn Đời' : plan}`,
+                        amount: 0,
+                        status: 'PAID',
+                        plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
+                        payment_method: 'MANUAL_GIFT',
+                        description: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
+                        admin_note: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
+                        paid_at: now.toISOString(),
+                        payment_time: now.toISOString(),
+                    });
+
+                    showToast(`Đã tặng thành công gói PRO cho học viên ${email}!`, 'success');
+                    closeGrantProModal();
+                    await loadSubscriptionsData();
                 }
-
-                // Compute expires_at
-                const now = new Date();
-                let expiresAt = null;
-                let daysAdded = 30;
-
-                if (plan === '1m') {
-                    daysAdded = 30;
-                    expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
-                } else if (plan === '6m') {
-                    daysAdded = 180;
-                    expiresAt = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000).toISOString();
-                } else if (plan === '1y') {
-                    daysAdded = 365;
-                    expiresAt = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString();
-                } else if (plan === 'lifetime') {
-                    expiresAt = null; // Lifetime has null expiration or 100 years
-                } else if (plan === 'custom') {
-                    const customDays = parseInt(document.getElementById('grant-pro-custom-days').value, 10);
-                    if (!customDays || customDays <= 0) throw new Error('Vui lòng nhập số ngày hợp lệ!');
-                    daysAdded = customDays;
-                    expiresAt = new Date(now.getTime() + customDays * 24 * 60 * 60 * 1000).toISOString();
-                }
-
-                // Update profiles
-                const { error: updateErr } = await sb
-                    .from('profiles')
-                    .update({
-                        tier: plan === 'lifetime' ? 'lifetime' : 'pro',
-                        subscription_plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
-                        subscription_status: 'active',
-                        subscription_started_at: now.toISOString(),
-                        subscription_expires_at: expiresAt,
-                    })
-                    .eq('id', userProfile.id);
-
-                if (updateErr) throw updateErr;
-
-                // Insert into orders for record
-                const orderCode = Number(String(Date.now()).slice(-9));
-                await sb.from('orders').insert({
-                    order_code: orderCode,
-                    user_id: userProfile.id,
-                    user_email: userProfile.email,
-                    plan_id: plan === 'lifetime' ? 'pro_lifetime' : `pro_${plan}`,
-                    plan_name: `HiVocab Pro ${plan === 'lifetime' ? 'Trọn Đời' : plan}`,
-                    amount: 0,
-                    status: 'PAID',
-                    plan: plan === 'lifetime' ? 'pro_lifetime' : plan,
-                    payment_method: 'MANUAL_GIFT',
-                    description: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
-                    admin_note: reason ? `Admin tặng: ${reason}` : 'Admin tặng gói thủ công',
-                    paid_at: now.toISOString(),
-                    payment_time: now.toISOString(),
-                });
-
-                showToast(`Đã tặng thành công gói PRO cho học viên ${email}!`, 'success');
-                closeGrantProModal();
-                await loadSubscriptionsData();
             } catch (err) {
                 console.error('handleGrantProSubmit error:', err);
                 showToast('Lỗi tặng gói PRO: ' + err.message, 'error');
@@ -3985,6 +4283,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 }
 
                 renderBugReports();
+                updateSystemBadges();
                 if (showFeedbackToast) showToast(`Đã đồng bộ ${total} báo cáo người dùng!`, 'success');
             } catch (err) {
                 console.error('[loadBugReports] Error:', err);
@@ -4177,6 +4476,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 showToast(`Đã chuyển trạng thái sang "${newStatus}"!`, 'success');
                 closeReportDetail();
                 renderBugReports();
+                updateSystemBadges();
             } catch (err) {
                 console.error('[saveReportTriage] Error:', err);
                 showToast(`Cập nhật thất bại: ${err.message}`, 'error');
@@ -4236,6 +4536,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 if (badge) badge.textContent = `${systemErrorLogsCache.length} logs`;
 
                 renderSystemErrorLogs();
+                updateSystemBadges();
                 if (showFeedbackToast) showToast(`Đã tải ${systemErrorLogsCache.length} lỗi hệ thống mới nhất!`, 'success');
             } catch (err) {
                 console.error('[loadSystemErrorLogs] Error:', err);
@@ -5038,6 +5339,64 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             } catch (err) {
                 showToast('Lỗi xóa cache: ' + err.message, 'error');
             }
+        }
+
+        function switchSystemSubTab(subTab) {
+            currentSystemSubTab = subTab;
+            const tabs = ['reports', 'logs', 'audit', 'database'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`btn-sys-subtab-${t}`);
+                const panel = document.getElementById(`sys-panel-${t}`);
+                if (btn) {
+                    if (t === subTab) {
+                        btn.className = 'sys-subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-primary text-white shadow-xs flex items-center gap-1.5 cursor-pointer';
+                    } else {
+                        btn.className = 'sys-subtab-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 flex items-center gap-1.5 cursor-pointer';
+                    }
+                }
+                if (panel) {
+                    if (t === subTab) {
+                        panel.classList.remove('hidden');
+                    } else {
+                        panel.classList.add('hidden');
+                    }
+                }
+            });
+
+            if (subTab === 'reports') loadBugReports();
+            else if (subTab === 'logs') loadSystemErrorLogs();
+            else if (subTab === 'audit' || subTab === 'database') loadSystemHealth();
+        }
+
+        function updateSystemBadges() {
+            const pendingReports = bugReportsCache.filter(r => (r.status || 'pending') === 'pending').length;
+            const errorCount = systemErrorLogsCache.length;
+            const repBadge = document.getElementById('sys-subtab-badge-reports');
+            const logBadge = document.getElementById('sys-subtab-badge-logs');
+            const navBadge = document.getElementById('nav-badge-system');
+
+            if (repBadge) repBadge.textContent = pendingReports;
+            if (logBadge) logBadge.textContent = errorCount;
+            if (navBadge) {
+                const totalIssues = pendingReports + errorCount;
+                navBadge.textContent = `${totalIssues} vấn đề`;
+                if (totalIssues > 0) {
+                    navBadge.className = 'ml-auto bg-rose-100 dark:bg-rose-900/30 text-rose-700 dark:text-rose-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold';
+                } else {
+                    navBadge.className = 'ml-auto bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-extrabold';
+                    navBadge.textContent = '0 lỗi';
+                }
+            }
+        }
+
+        async function refreshSystemData() {
+            await Promise.all([
+                loadBugReports(false),
+                loadSystemErrorLogs(false),
+                loadSystemHealth()
+            ]);
+            updateSystemBadges();
+            showToast('Đã làm mới toàn bộ thông tin hệ thống & lỗi!', 'info');
         }
 
         // 9. UI HELPERS & NOTIFICATIONS
