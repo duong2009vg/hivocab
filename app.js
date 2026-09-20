@@ -1672,6 +1672,9 @@ window._loadLessons = async function() {
         window._lessonsCache = window._lessonsCache || {};
         window._lessonsCache[topicId] = lessons;
 
+        const currentTopicObj = (window._allTopics || []).find(t => t.id === topicId);
+        const isTopicPro = Boolean(currentTopicObj?.is_pro);
+
         listEl.innerHTML = lessons.map(lesson => {
             const prog = lesson.progress || 0;
             const barColor = prog >= 80 ? 'bg-green-500' : prog >= 40 ? 'bg-primary' : 'bg-yellow-400';
@@ -1679,10 +1682,17 @@ window._loadLessons = async function() {
             <div onclick="window._openLesson('${topicId}', ${lesson.index})"
                  class="cursor-pointer group bg-surface-container-lowest/80 backdrop-blur-[24px] rounded-2xl p-5 border border-outline-variant/20 soft-shadow flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg fade-in">
                 <div class="flex items-start justify-between gap-2">
-                    <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                        <span class="material-symbols-outlined text-primary text-[22px]">menu_book</span>
+                    <div class="w-10 h-10 rounded-xl ${isTopicPro ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' : 'bg-primary/10 text-primary'} flex items-center justify-center shrink-0">
+                        <span class="material-symbols-outlined text-[22px]">${isTopicPro ? 'workspace_premium' : 'menu_book'}</span>
                     </div>
-                    <span class="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">${prog}%</span>
+                    <div class="flex items-center gap-1.5">
+                        ${isTopicPro ? `
+                        <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-xs">
+                            <span class="material-symbols-outlined text-[12px]">lock</span>
+                            PRO
+                        </span>` : ''}
+                        <span class="text-xs font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">${prog}%</span>
+                    </div>
                 </div>
                 <div class="flex-1">
                     <h3 class="font-bold text-on-surface group-hover:text-primary transition-colors">${_esc(lesson.name)}</h3>
@@ -1842,19 +1852,55 @@ window._renderCamPassages = function(testIndex = 0) {
     listEl.innerHTML = html;
 };
 
+// ── KIỂM TRA QUYỀN TRUY CẬP PRO TẬP TRUNG (Khóa chặt không kẽ hở) ──
+window.checkProAccess = async function({ topicId, passageId, showModal = true } = {}) {
+    try {
+        if (typeof HiDB === 'undefined') return true;
+        const isPro = await HiDB.isUserPro();
+        if (isPro) return true; // User đã là PRO: được phép truy cập 100%
+
+        // 1. Kiểm tra passage cụ thể (đối với Cambridge IELTS)
+        if (passageId && passageId !== '__unlinked__') {
+            if (window._camHierarchy?.tests) {
+                for (const t of window._camHierarchy.tests) {
+                    const p = (t.passages || []).find(item => item.id === passageId);
+                    if (p && p.isPro) {
+                        if (showModal && typeof window.openPricingModal === 'function') {
+                            window.openPricingModal();
+                        }
+                        return false;
+                    }
+                }
+            }
+        }
+
+        // 2. Kiểm tra topic (ví dụ: Cambridge, Destination C1-C2, SAT 3500...)
+        const tid = topicId || window._currentTopicId;
+        if (tid) {
+            let topic = (window._allTopics || []).find(t => t.id === tid);
+            if (!topic && typeof HiDB.getTopics === 'function') {
+                const topics = await HiDB.getTopics().catch(() => []);
+                topic = (topics || []).find(t => t.id === tid);
+            }
+            if (topic && topic.is_pro) {
+                if (showModal && typeof window.openPricingModal === 'function') {
+                    window.openPricingModal();
+                }
+                return false;
+            }
+        }
+
+        return true;
+    } catch (err) {
+        console.warn('[checkProAccess]', err);
+        return true;
+    }
+};
+
 // ── MỞ PASSAGE (Cambridge) ───────────────────────────────────────
 window._openPassage = async function(topicId, passageId, testId, passageNumber, passageTitle, topicLabel, testName, isPro) {
-    if (isPro) {
-        const userIsPro = typeof HiDB !== 'undefined' ? await HiDB.isUserPro() : false;
-        if (!userIsPro) {
-            if (typeof window.openPricingModal === 'function') {
-                window.openPricingModal();
-            } else {
-                alert('Nội dung này thuộc gói HiVocab PRO. Vui lòng nâng cấp để mở khóa!');
-            }
-            return;
-        }
-    }
+    const hasAccess = await window.checkProAccess({ topicId, passageId });
+    if (!hasAccess) return;
 
     const topicName = window._currentTopicName || '—';
     window._currentTopicId        = topicId;
@@ -1880,7 +1926,10 @@ window._openPassage = async function(topicId, passageId, testId, passageNumber, 
 };
 
 // ── MỞ TỪ VỰNG TỰ THÊM (Unlinked words) ──────────────────────────
-window._openUnlinkedWords = function(topicId) {
+window._openUnlinkedWords = async function(topicId) {
+    const hasAccess = await window.checkProAccess({ topicId });
+    if (!hasAccess) return;
+
     const topicName = window._currentTopicName || '—';
     window._currentTopicId        = topicId;
     window._currentPassageId      = '__unlinked__';
@@ -1906,7 +1955,10 @@ window._openUnlinkedWords = function(topicId) {
 };
 
 // ── MỞ LESSON (Non-CAM) ──────────────────────────────────────────
-window._openLesson = function(topicId, lessonIndex) {
+window._openLesson = async function(topicId, lessonIndex) {
+    const hasAccess = await window.checkProAccess({ topicId });
+    if (!hasAccess) return;
+
     // Tra cứu tên từ cache
     const cachedLessons = window._lessonsCache?.[topicId] || [];
     const lesson = cachedLessons.find(l => l.index === lessonIndex);
@@ -2004,6 +2056,30 @@ window._loadLessonWords = async function() {
 
     if (!topicId && topicId !== 0) {
         listEl.innerHTML = `<p class="text-center py-12 text-on-surface-variant">Không tìm thấy bài học.</p>`;
+        return;
+    }
+
+    // KIỂM TRA QUYỀN PRO: Không cho phép xem trước danh sách từ của chủ đề/passage PRO
+    const hasAccess = await window.checkProAccess({ topicId, passageId, showModal: false });
+    if (!hasAccess) {
+        listEl.innerHTML = `
+            <div class="col-span-full py-16 text-center space-y-4 max-w-md mx-auto">
+                <div class="w-16 h-16 rounded-3xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
+                    <span class="material-symbols-outlined text-3xl">lock</span>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-xl font-black text-on-surface">Nội dung dành riêng cho gói PRO</h3>
+                    <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+                        Chủ đề này thuộc gói tài liệu cao cấp. Nâng cấp HiVocab PRO để mở khóa toàn bộ từ vựng và luyện tập không giới hạn.
+                    </p>
+                </div>
+                <div class="pt-2">
+                    <button onclick="window.openPricingModal()" class="py-2.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer inline-flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">diamond</span>
+                        <span>Mở khóa PRO ngay</span>
+                    </button>
+                </div>
+            </div>`;
         return;
     }
 
@@ -4459,17 +4535,9 @@ window._currentReaderPassage = null;
 
 // ── Đọc bài đọc song ngữ (Chuyển tiếp sang chế độ Đọc Chủ Động độc lập) ──
 window._openPassageReader = async function(passageId, btnEl, isPro) {
-    if (isPro) {
-        const userIsPro = typeof HiDB !== 'undefined' ? await HiDB.isUserPro() : false;
-        if (!userIsPro) {
-            if (typeof window.openPricingModal === 'function') {
-                window.openPricingModal();
-            } else {
-                alert('Bài đọc này thuộc gói HiVocab PRO. Vui lòng nâng cấp để mở khóa!');
-            }
-            return;
-        }
-    }
+    const hasAccess = await window.checkProAccess({ topicId: window._currentTopicId, passageId });
+    if (!hasAccess) return;
+
     if (btnEl) {
         btnEl.classList.add('opacity-75', 'scale-95');
         const icon = btnEl.querySelector('.material-symbols-outlined');
@@ -5076,8 +5144,15 @@ if (document.readyState === 'loading') {
 }
 
 // CẬP NHẬT UI PROFILE (dùng chung cho desktop + mobile)
-window._updateProfileUI = function(user) {
-    if (!user) return;
+window._updateProfileUI = async function(user) {
+    if (!user) {
+        document.querySelectorAll('.profile-pro-badge').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('inline-flex');
+        });
+        document.querySelectorAll('.btn-upgrade-pro').forEach(el => el.classList.remove('hidden'));
+        return;
+    }
     const name = user.user_metadata?.full_name || user.email.split('@')[0];
     const avatar = user.user_metadata?.avatar_url;
 
@@ -5117,6 +5192,43 @@ window._updateProfileUI = function(user) {
     if (authBtn) {
         authBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">logout</span><span>Đăng xuất</span>';
         authBtn.className = 'w-full flex items-center gap-2 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors border-t border-outline-variant/15 cursor-pointer';
+    }
+
+    // KIỂM TRA TRẠNG THÁI PRO VÀ CẬP NHẬT UI
+    try {
+        const isPro = typeof HiDB !== 'undefined' ? await HiDB.isUserPro() : false;
+        window._isUserPro = isPro;
+
+        // Cập nhật huy hiệu PRO cạnh Profile
+        document.querySelectorAll('.profile-pro-badge').forEach(el => {
+            if (isPro) {
+                el.classList.remove('hidden');
+                el.classList.add('inline-flex');
+            } else {
+                el.classList.add('hidden');
+                el.classList.remove('inline-flex');
+            }
+        });
+
+        // Tự động ẩn / hiện nút Nâng cấp PRO
+        document.querySelectorAll('.btn-upgrade-pro').forEach(el => {
+            if (isPro) {
+                el.classList.add('hidden');
+            } else {
+                el.classList.remove('hidden');
+            }
+        });
+
+        // Viền Avatar ánh vàng nổi bật nếu là thành viên PRO
+        if (isPro) {
+            avatarDesk?.classList.add('ring-2', 'ring-amber-500/70');
+            avatarMob?.classList.add('ring-2', 'ring-amber-500/70');
+        } else {
+            avatarDesk?.classList.remove('ring-2', 'ring-amber-500/70');
+            avatarMob?.classList.remove('ring-2', 'ring-amber-500/70');
+        }
+    } catch (e) {
+        console.warn('[_updateProfileUI check PRO error]', e);
     }
 };
 

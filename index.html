@@ -940,57 +940,68 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 
 <!-- ==================== UI DÙNG CHUNG (SIDEBAR / HEADER / BOTTOM NAV) ==================== -->
 <nav id="main-sidebar" class="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-5 bg-surface/85 backdrop-blur-2xl border-r border-outline-variant/30 z-50 transition-colors" style="display: none;">
-    <div class="mb-6 shrink-0">
+    <div class="mb-5 shrink-0">
         <a onclick="window.navigateTo('dashboard')" class="inline-flex cursor-pointer" aria-label="Hi - Trang chu"><img class="brand-logo" src="logo-mark.svg" alt="Hi"/></a>
-        <div onclick="window.handleProfileClick()" title="Đăng nhập / Hồ sơ cá nhân" class="mt-4 flex items-center gap-3 p-2 rounded-2xl hover:bg-surface-container dark:hover:bg-[#25292F] transition-all duration-200 cursor-pointer border border-transparent hover:border-outline-variant/20">
-            <div id="profile-avatar-container" class="w-10 h-10 rounded-full bg-surface-container-high dark:bg-[#25292F] flex items-center justify-center overflow-hidden bg-cover bg-center ring-1 ring-outline-variant/30"><span class="material-symbols-outlined text-outline text-[20px]">person</span></div>
-            <div class="min-w-0 flex-1"><div id="profile-name" class="font-semibold text-[13px] text-on-surface truncate">Hi Learner</div><div id="profile-email" class="text-on-surface-variant text-[11px] truncate text-primary font-medium">Nhấn để đăng nhập</div></div>
+        <div onclick="window.handleProfileClick()" title="Đăng nhập / Hồ sơ cá nhân" class="mt-3.5 flex items-center gap-3 p-2 rounded-2xl hover:bg-surface-container dark:hover:bg-[#25292F] transition-all duration-200 cursor-pointer border border-transparent hover:border-outline-variant/20">
+            <div id="profile-avatar-container" class="w-10 h-10 rounded-full bg-surface-container-high dark:bg-[#25292F] flex items-center justify-center overflow-hidden bg-cover bg-center ring-1 ring-outline-variant/30 shrink-0"><span class="material-symbols-outlined text-outline text-[20px]">person</span></div>
+            <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 min-w-0">
+                    <div id="profile-name" class="font-bold text-[13px] text-on-surface truncate">Hi Learner</div>
+                    <span id="profile-pro-badge" class="profile-pro-badge hidden shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-md shadow-xs">
+                        <span class="material-symbols-outlined text-[10px] icon-fill">workspace_premium</span>PRO
+                    </span>
+                </div>
+                <div id="profile-email" class="text-on-surface-variant text-[11px] truncate font-medium">Nhấn để đăng nhập</div>
+            </div>
         </div>
     </div>
-    <button onclick="startSession()" class="mb-5 shrink-0 w-full py-2.5 px-4 bg-primary text-on-primary rounded-full font-semibold text-[13px] tracking-tight transition-all duration-200 active:scale-[0.98] shadow-sm hover:opacity-95 cursor-pointer">Bắt đầu ôn tập</button>
-    <div class="flex flex-col gap-1 flex-1 overflow-y-auto pr-1">
-        <a onclick="window.navigateTo('dashboard')" id="nav-desktop-dashboard" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">home</span><span>Trang chủ</span></a>
-        <a onclick="navigateTo('topics')" id="nav-desktop-topics" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">grid_view</span><span>Chủ đề</span></a>
-        <a onclick="navigateTo('library')" id="nav-desktop-library" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">explore</span><span>Thư viện</span></a>
-        <a onclick="navigateTo('vocabulary')" id="nav-desktop-vocabulary" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">auto_stories</span><span>Kho từ vựng</span></a>
-        <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">school</span><span>Luyện Đề THPT</span></a>
-        <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-3 px-3.5 h-11 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[22px]">search</span><span>Tra từ</span></a>
+    <button onclick="startSession()" class="mb-4 shrink-0 w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-semibold text-[13px] tracking-tight transition-all duration-200 active:scale-[0.98] shadow-sm hover:opacity-95 flex items-center justify-center gap-2 cursor-pointer">
+        <span class="material-symbols-outlined text-[18px]">play_circle</span>
+        <span>Bắt đầu ôn tập</span>
+    </button>
+    <div class="flex flex-col gap-1 flex-1 overflow-y-auto pr-1 select-none">
+        <a onclick="window.navigateTo('dashboard')" id="nav-desktop-dashboard" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">home</span><span>Trang chủ</span></a>
+        <a onclick="navigateTo('topics')" id="nav-desktop-topics" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Chủ đề</span></a>
+        <a onclick="navigateTo('library')" id="nav-desktop-library" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">explore</span><span>Thư viện</span></a>
+        <a onclick="navigateTo('vocabulary')" id="nav-desktop-vocabulary" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">auto_stories</span><span>Kho từ vựng</span></a>
+        <a onclick="navigateTo('exercises')" id="nav-desktop-exercises" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">school</span><span>Luyện Đề THPT</span></a>
+        <a onclick="navigateTo('dictionary')" id="nav-desktop-dictionary" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">search</span><span>Tra từ</span></a>
     </div>
-    <div class="mt-auto shrink-0 flex flex-col gap-1 pt-4 border-t border-outline-variant/20 dark:border-[#31353A]">
-        <button onclick="window.openPricingModal()" class="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl transition-all duration-200 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md shadow-amber-500/20 cursor-pointer text-xs font-extrabold text-left mb-2">
-            <span class="material-symbols-outlined text-[18px]">diamond</span>
-            <span class="truncate">Nâng cấp HiVocab PRO</span>
+    <div class="mt-auto shrink-0 flex flex-col gap-1 pt-3 border-t border-outline-variant/20 dark:border-[#31353A]">
+        <button id="sidebar-upgrade-pro-btn" onclick="window.openPricingModal()" class="btn-upgrade-pro w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-200 bg-amber-500/10 hover:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 cursor-pointer text-xs font-bold mb-1.5 group">
+            <div class="flex items-center gap-2 truncate">
+                <span class="material-symbols-outlined text-[16px] text-amber-500 icon-fill group-hover:scale-110 transition-transform">diamond</span>
+                <span class="truncate">Nâng cấp PRO</span>
+            </div>
+            <span class="material-symbols-outlined text-[14px] text-amber-500/70 group-hover:translate-x-0.5 transition-transform">arrow_forward</span>
         </button>
-        <button onclick="window.openWelcomeModal()" class="w-full flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-200 bg-amber-500/10 text-amber-900 dark:text-amber-300 border border-amber-400/30 hover:bg-amber-500/20 cursor-pointer text-xs font-bold text-left mb-1">
-            <span class="text-base">🎁</span>
-            <span class="truncate">Quà tặng 2T & Zalo Admin</span>
-        </button>
-        <a onclick="navigateTo('settings')" id="nav-desktop-settings" class="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-on-surface text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">settings</span><span>Cài đặt</span></a>
-        <a onclick="window.handleLogout()" class="flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container dark:hover:bg-[#25292F] hover:text-error text-[14px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[20px]">logout</span><span>Đăng xuất</span></a>
-        <a href="/privacy.html" target="_blank" class="flex items-center gap-2 px-3.5 py-1.5 text-[11px] text-on-surface-variant/70 hover:text-primary transition-colors"><span class="material-symbols-outlined text-[15px]">verified_user</span><span>Quyền riêng tư (Privacy)</span></a>
+        <a onclick="navigateTo('settings')" id="nav-desktop-settings" class="sidebar-item flex items-center gap-3 px-3.5 h-9 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[19px]">settings</span><span>Cài đặt</span></a>
+        <a onclick="window.handleLogout()" class="flex items-center gap-3 px-3.5 h-9 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-error text-[13.5px] font-medium cursor-pointer"><span class="material-symbols-outlined text-[19px]">logout</span><span>Đăng xuất</span></a>
     </div>
 </nav>
 
 <!-- Standalone Mobile Profile Dropdown -->
 <div id="mobile-profile-dropdown" class="hidden fixed right-4 w-56 bg-surface rounded-2xl shadow-2xl border border-outline-variant/20 z-[9999] overflow-hidden fade-in" style="top: max(calc(env(safe-area-inset-top, 0px) + 20px), 72px);">
     <div onclick="if(!window.HiDB?.currentUser){window.navigateTo('login');document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')}" class="px-4 py-3 border-b border-outline-variant/15 cursor-pointer hover:bg-surface-container/50 transition-colors">
-        <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
+        <div class="flex items-center gap-1.5 min-w-0">
+            <div id="mobile-dropdown-name" class="font-bold text-sm text-on-surface truncate">Hi Learner</div>
+            <span id="mobile-profile-pro-badge" class="profile-pro-badge hidden shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-md shadow-xs">
+                <span class="material-symbols-outlined text-[10px] icon-fill">workspace_premium</span>PRO
+            </span>
+        </div>
         <div id="mobile-dropdown-email" class="text-xs text-on-surface-variant truncate mt-0.5">Vui lòng đăng nhập</div>
     </div>
-    <button onclick="window.openPricingModal(); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/15 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
-        <span class="material-symbols-outlined text-[18px]">diamond</span><span>Nâng cấp PRO (VietQR)</span>
-    </button>
-    <button onclick="window.openWelcomeModal(); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-amber-900 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
-        <span class="text-base">🎁</span><span>Quà tặng & Zalo Admin</span>
+    <button id="mobile-upgrade-pro-btn" onclick="window.openPricingModal(); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="btn-upgrade-pro w-full flex items-center justify-between px-4 py-2.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer">
+        <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px] text-amber-500">diamond</span><span>Nâng cấp PRO</span>
+        </div>
+        <span class="material-symbols-outlined text-[14px] text-amber-500/70">arrow_forward</span>
     </button>
     <button onclick="navigateTo('settings'); document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-on-surface hover:bg-surface-container dark:hover:bg-[#25292F] transition-colors cursor-pointer">
         <span class="material-symbols-outlined text-[18px] text-on-surface-variant">settings</span>Cài đặt
     </button>
-    <a href="/privacy.html" target="_blank" onclick="document.getElementById('mobile-profile-dropdown')?.classList.add('hidden')" class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-        <span class="material-symbols-outlined text-[16px]">verified_user</span>Quyền riêng tư (Privacy)
-    </a>
     <button id="mobile-dropdown-auth-btn" onclick="window.handleMobileDropdownAuth()" class="w-full flex items-center gap-2 px-4 py-3 text-sm text-primary hover:bg-primary/10 transition-colors border-t border-outline-variant/15 cursor-pointer font-semibold">
-        <span class="material-symbols-outlined text-[18px]">login</span><span>Đăng nhập</span>
+        <span class="material-symbols-outlined text-[18px]">login</span><span>Đăng xuất</span>
     </button>
 </div>
 
@@ -2680,11 +2691,11 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260912-v1"></script>
 <script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>
-<script src="sessionUI.js?v=20260913-monitoring-v1"></script>
+<script src="sessionUI.js?v=20260920-lock-v1"></script>
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
-<script src="bilingualReading.js?v=20260916-perf-v2"></script>
+<script src="bilingualReading.js?v=20260920-lock-v1"></script>
 <script src="library.js?v=20260914-remove-game-v6"></script>
-<script src="pricing.js?v=20260920-v3"></script>
+<script src="pricing.js?v=20260920-v4"></script>
 
 <!-- @include 'templates/modals.html' -->
 
@@ -2697,7 +2708,7 @@ html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--
 </button>
 
 <script src="dictionary.js"></script>
-<script defer src="app.js?v=20260920-v1"></script>
+<script defer src="app.js?v=20260920-pro-v2"></script>
 <script type="module" src="/src/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {

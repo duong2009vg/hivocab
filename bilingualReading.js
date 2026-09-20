@@ -50,6 +50,12 @@
 
     // ── KHỞI ĐỘNG CHẾ ĐỘ ĐỌC TỪ TASKBAR / NÚT HỌC ───────────────────
     window.startBilingualReading = async function(passageId) {
+        // KIỂM TRA BẢO MẬT GÓI PRO: Khóa chặt chế độ đọc song ngữ
+        if (typeof window.checkProAccess === 'function') {
+            const hasAccess = await window.checkProAccess({ topicId: window._currentTopicId, passageId });
+            if (!hasAccess) return;
+        }
+
         // Ghi nhận trang hiện tại để nút Thoát quay lại đúng chỗ
         const activePageEl = Array.from(document.querySelectorAll('.page')).find(p => p.classList.contains('active'));
         if (activePageEl && activePageEl.id) {
@@ -139,6 +145,11 @@
 
     // ── MỞ TRANG ĐỌC & DỊCH ĐỘC LẬP ────────────────────────────────
     async function openReadingPage(passageId) {
+        if (typeof window.checkProAccess === 'function') {
+            const hasAccess = await window.checkProAccess({ topicId: window._currentTopicId, passageId });
+            if (!hasAccess) return;
+        }
+
         // Cập nhật navigation
         if (typeof window.navigateTo === 'function') {
             window.navigateTo('bilingual-reading');

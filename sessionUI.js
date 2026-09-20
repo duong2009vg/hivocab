@@ -1552,6 +1552,12 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
     const lessonIndex = window._currentLessonIndex !== undefined ? window._currentLessonIndex : null;
     const testId      = window._currentTestId;
 
+    // KIỂM TRA BẢO MẬT GÓI PRO: Khóa chặt 100% không cho truy cập Flashcard/Trắc nghiệm/Điền từ/Nghe của chủ đề PRO
+    if (typeof window.checkProAccess === 'function') {
+        const hasAccess = await window.checkProAccess({ topicId, passageId });
+        if (!hasAccess) return;
+    }
+
     // Return target when closing practice
     const returnTarget = (passageId || lessonIndex !== null) ? 'lesson-detail' : (topicId ? 'topic-detail' : 'dashboard');
     const closeBtn = document.getElementById('learning-close-btn');

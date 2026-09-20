@@ -471,9 +471,13 @@
             window.HiSound.playSuccess();
         }
 
-        // Xóa cache profile để lấy quyền PRO mới
+        // Xóa cache profile để lấy quyền PRO mới và cập nhật ngay giao diện
         if (window.HiDB && typeof window.HiDB.getUserProfile === 'function') {
-            window.HiDB.getUserProfile(true);
+            window.HiDB.getUserProfile(true).then(() => {
+                if (window.HiDB.getCurrentUser && typeof window._updateProfileUI === 'function') {
+                    window.HiDB.getCurrentUser().then(u => window._updateProfileUI(u));
+                }
+            }).catch(() => {});
         }
     }
 
