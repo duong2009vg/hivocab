@@ -959,11 +959,20 @@ html:not(.router-ready)[data-initial-route="library"] #page-library { display: b
 @media (min-width: 1024px) {
     html.user-logged-in #main-sidebar { display: flex !important; }
     body:has(#page-landing.active) #main-sidebar,
+    body:has(#page-learning.active) #main-sidebar,
+    body:has(#page-bilingual-reading.active) #main-sidebar,
     body:has(#page-topic-detail.active) #main-sidebar,
     body:has(#page-lesson-detail.active) #main-sidebar,
     body:has(#page-thpt-room.active) #main-sidebar {
         display: none !important;
     }
+}
+
+/* Đảm bảo ẩn cả bottom nav trên mobile khi đang trong phiên học / đọc song ngữ / phòng thi */
+body:has(#page-learning.active) #mobile-bottom-nav,
+body:has(#page-bilingual-reading.active) #mobile-bottom-nav,
+body:has(#page-thpt-room.active) #mobile-bottom-nav {
+    display: none !important;
 }
 
 /* Trên màn hình Mobile / Tablet (< 1024px): Tuyệt đối KHÔNG hiển thị main-sidebar/sub-sidebar để tránh xung đột với bottom dock taskbar */
@@ -2751,7 +2760,7 @@ html:not(.router-ready)[data-initial-route="library"] #page-library { display: b
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260921-v8"></script>
 <script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>
-<script src="sessionUI.js?v=20260921-v5"></script>
+<script src="sessionUI.js?v=20260921-v9"></script>
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
 <script src="bilingualReading.js?v=20260920-lock-v1"></script>
 <script src="library.js?v=20260921-v7"></script>
@@ -2768,7 +2777,7 @@ html:not(.router-ready)[data-initial-route="library"] #page-library { display: b
 </button>
 
 <script src="dictionary.js"></script>
-<script defer src="app.js?v=20260921-v8"></script>
+<script defer src="app.js?v=20260921-v9"></script>
 <script type="module" src="/src/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {

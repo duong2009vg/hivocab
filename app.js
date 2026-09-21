@@ -191,18 +191,24 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
     
     // Sidebar Desktop
     const sidebar = document.getElementById('main-sidebar');
-    if(sidebar) sidebar.style.display = isMainTab ? '' : 'none';
+    if (sidebar) {
+        if (isMainTab) {
+            sidebar.style.removeProperty('display');
+        } else {
+            sidebar.style.setProperty('display', 'none', 'important');
+        }
+    }
     
     // Mobile Bottom Navigation
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if (bottomNav) {
-        const shouldShowBottomNav = (isMainTab || isTopicDetail) && pageName !== 'landing';
+        const shouldShowBottomNav = (isMainTab || isTopicDetail) && pageName !== 'landing' && pageName !== 'learning' && pageName !== 'bilingual-reading' && pageName !== 'thpt-room';
         if (shouldShowBottomNav) {
             bottomNav.classList.remove('hidden');
-            bottomNav.style.display = '';
+            bottomNav.style.removeProperty('display');
         } else {
             bottomNav.classList.add('hidden');
-            bottomNav.style.display = 'none';
+            bottomNav.style.setProperty('display', 'none', 'important');
         }
     }
     // Khi vào trang Topics: render tabs + grid

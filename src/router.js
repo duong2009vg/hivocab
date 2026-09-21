@@ -94,17 +94,23 @@ export function navigateTo(targetPageId, options = {}) {
     const isTopicDetail = (pageId === 'topic-detail' || pageId === 'lesson-detail');
 
     const sidebar = document.getElementById('main-sidebar');
-    if (sidebar) sidebar.style.display = isMainTab ? '' : 'none';
+    if (sidebar) {
+      if (isMainTab) {
+        sidebar.style.removeProperty('display');
+      } else {
+        sidebar.style.setProperty('display', 'none', 'important');
+      }
+    }
 
     const bottomNav = document.getElementById('mobile-bottom-nav');
     if (bottomNav) {
-      const shouldShowBottomNav = (isMainTab || isTopicDetail) && pageId !== 'landing';
+      const shouldShowBottomNav = (isMainTab || isTopicDetail) && pageId !== 'landing' && pageId !== 'learning' && pageId !== 'bilingual-reading' && pageId !== 'thpt-room';
       if (shouldShowBottomNav) {
         bottomNav.classList.remove('hidden');
-        bottomNav.style.display = '';
+        bottomNav.style.removeProperty('display');
       } else {
         bottomNav.classList.add('hidden');
-        bottomNav.style.display = 'none';
+        bottomNav.style.setProperty('display', 'none', 'important');
       }
     }
 

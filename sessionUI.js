@@ -1459,6 +1459,9 @@ window.startSession = async function() {
     document.getElementById('learning-streak-container').style.display  = 'flex';
     document.getElementById('learning-close-btn').setAttribute('onclick', "navigateTo('dashboard')");
 
+    document.getElementById('main-sidebar')?.style.setProperty('display', 'none', 'important');
+    document.getElementById('mobile-bottom-nav')?.style.setProperty('display', 'none', 'important');
+
     navigateTo('learning');
 
     try {
@@ -1561,6 +1564,9 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
     if (progContainer) progContainer.style.display = 'flex';
     const streakContainer = document.getElementById('learning-streak-container');
     if (streakContainer) streakContainer.style.display = 'flex';
+
+    document.getElementById('main-sidebar')?.style.setProperty('display', 'none', 'important');
+    document.getElementById('mobile-bottom-nav')?.style.setProperty('display', 'none', 'important');
 
     navigateTo('learning');
 
