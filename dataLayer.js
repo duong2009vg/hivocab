@@ -2437,7 +2437,8 @@ window.HiDB = (() => {
                 created_at,
                 user_id
             `, { count: 'exact' })
-            .eq('is_public', true);
+            .eq('is_public', true)
+            .not('author_name', 'is', null);
 
         // Lọc theo tag
         if (tag && tag !== 'all' && tag !== 'Tất cả') {
@@ -2487,35 +2488,23 @@ window.HiDB = (() => {
             }
         }
 
-        // Lấy 3-4 từ vựng xem trước (sneak peek) và đếm tổng số từ cho mỗi topic
+        // Đếm số lượng từ vựng riêng (không lấy sneak peek để tối ưu tốc độ)
         const topicIds = topics.map(t => t.id);
-        let sampleWordsByTopic = {};
         let wordCountByTopic = {};
-
         if (topicIds.length > 0) {
             const { data: wordsData } = await client
                 .from('words')
-                .select('id, topic_id, word, phonetic, meaning')
-                .in('topic_id', topicIds)
-                .limit(400);
-
+                .select('topic_id')
+                .in('topic_id', topicIds);
             (wordsData || []).forEach(w => {
-                if (!sampleWordsByTopic[w.topic_id]) sampleWordsByTopic[w.topic_id] = [];
-                if (sampleWordsByTopic[w.topic_id].length < 4) {
-                    sampleWordsByTopic[w.topic_id].push({
-                        word: w.word,
-                        phonetic: w.phonetic,
-                        meaning: w.meaning
-                    });
-                }
                 wordCountByTopic[w.topic_id] = (wordCountByTopic[w.topic_id] || 0) + 1;
             });
         }
 
         const enrichedTopics = topics.map(t => ({
             ...t,
-            totalWords: wordCountByTopic[t.id] || 0,
-            sneakPeekWords: sampleWordsByTopic[t.id] || [],
+            totalWords: wordCountByTopic[t.id] || t.word_count || 0,
+            sneakPeekWords: [],
             hasLiked: userLikedTopicIds.has(t.id)
         }));
 
@@ -2834,6 +2823,7 @@ window.HiDB = (() => {
                 tags: safeTags
             })
             .eq('id', topicId)
+            .eq('user_id', user.id)
             .select()
             .single();
 
@@ -2848,10 +2838,13 @@ window.HiDB = (() => {
     async function unpublishTopic(topicId) {
         await ensureReady(4000).catch(() => {});
         const client = _getClient();
+        const user = await getCurrentUser();
+        if (!user) throw new Error('Vui lòng đăng nhập!');
         const { data, error } = await client
             .from('topics')
             .update({ is_public: false })
             .eq('id', topicId)
+            .eq('user_id', user.id)
             .select()
             .single();
 

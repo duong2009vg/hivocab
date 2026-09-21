@@ -424,7 +424,7 @@
     }
 
     /**
-     * Render the list of Public Topic Cards (Threads style)
+     * Render the list of Public Topic Cards (simplified - no word preview, no comments)
      */
     function renderFeedList(topics, isLikedView = false) {
         const list = document.getElementById('lib-feed-list');
@@ -441,8 +441,8 @@
                     if (emptyTitle) emptyTitle.textContent = 'Bạn chưa thích bộ từ vựng nào';
                     if (emptySub) emptySub.textContent = 'Hãy dạo quanh Thư viện và bấm ❤️ để lưu lại những bộ từ tâm đắc!';
                 } else {
-                    if (emptyTitle) emptyTitle.textContent = 'Không tìm thấy bộ từ nào';
-                    if (emptySub) emptySub.textContent = 'Thử đổi từ khóa tìm kiếm hoặc chọn tag khác xem nhé!';
+                    if (emptyTitle) emptyTitle.textContent = 'Chưa có bộ từ nào được chia sẻ';
+                    if (emptySub) emptySub.textContent = 'Hãy tạo bộ từ và bật công khai để chia sẻ với cộng đồng!';
                 }
             }
             return;
@@ -455,46 +455,36 @@
             const avatar = topic.author_avatar;
             const timeAgo = formatTimeAgo(topic.created_at);
             const totalWords = topic.totalWords || topic.word_count || 0;
-            const sneakPeeks = topic.sneakPeekWords || [];
             const tags = Array.isArray(topic.tags) ? topic.tags : [];
             const hasLiked = !!topic.hasLiked;
             const likeCount = Number(topic.like_count || 0);
             const cloneCount = Number(topic.clone_count || 0);
-            const commentCount = Number(topic.comment_count || 0);
-
-            // Initials fallback
             const initials = author.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() || 'HI';
 
             return `
-                <article class="thread-item px-3.5 sm:px-4 py-3.5 sm:py-4 transition-colors hover:bg-surface-container-lowest/40 dark:hover:bg-neutral-900/40 flex gap-3 sm:gap-3.5 relative" id="thread-card-${esc(topic.id)}">
-                    <!-- Left Column: Avatar + Badge + Thread Spine -->
+                <article class="thread-item px-4 py-3.5 transition-colors hover:bg-surface-container-lowest/40 dark:hover:bg-neutral-900/40 flex gap-3 relative border-b border-outline-variant/10 last:border-0" id="thread-card-${esc(topic.id)}">
+                    <!-- Left: Avatar -->
                     <div class="flex flex-col items-center shrink-0 w-9 sm:w-10">
-                        <!-- Avatar with + Badge -->
                         <div class="relative cursor-pointer" onclick="window.openThreadDetail('${esc(topic.id)}')">
                             <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-black text-xs shrink-0 overflow-hidden bg-cover bg-center border border-outline-variant/20 shadow-2xs"
                                  ${avatar ? `style="background-image: url('${esc(avatar)}')"` : ''}>
                                 ${!avatar ? `<span>${esc(initials)}</span>` : ''}
                             </div>
-                            <!-- Plus (+) Badge Button -->
+                            <!-- + badge -->
                             <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
                                     title="Lưu bộ từ về kho"
                                     class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 flex items-center justify-center shadow-xs border-2 border-surface dark:border-black active:scale-90 transition-transform cursor-pointer">
                                 <span class="material-symbols-outlined text-[13px] font-bold leading-none">add</span>
                             </button>
                         </div>
-
-                        <!-- Vertical Spine Connector (Thread line) -->
-                        <div class="w-[2px] bg-neutral-200 dark:bg-neutral-800 rounded-full flex-1 my-2 min-h-[36px]"></div>
-
-                        <!-- Mini thread node preview -->
-                        <div class="w-3.5 h-3.5 rounded-full bg-surface-container-high/60 dark:bg-neutral-800/80 border border-outline-variant/20 flex items-center justify-center shrink-0">
-                            <div class="w-1.5 h-1.5 rounded-full bg-outline-variant/60"></div>
-                        </div>
+                        <!-- Thread spine -->
+                        <div class="w-[2px] bg-neutral-200 dark:bg-neutral-800 rounded-full flex-1 my-2 min-h-[24px]"></div>
+                        <div class="w-3 h-3 rounded-full bg-surface-container-high/60 dark:bg-neutral-800/80 border border-outline-variant/20 shrink-0"></div>
                     </div>
 
-                    <!-- Right Column: Content + Word Card + Action Bar -->
+                    <!-- Right: Content -->
                     <div class="flex-1 min-w-0 flex flex-col gap-1.5">
-                        <!-- Header row: Author > Tag • timeAgo + Threads logo -->
+                        <!-- Header row -->
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-1.5 flex-wrap min-w-0">
                                 <span class="font-bold text-sm text-on-surface hover:underline cursor-pointer truncate" onclick="window.openThreadDetail('${esc(topic.id)}')">
@@ -509,94 +499,47 @@
                                 <span class="text-xs text-outline shrink-0">•</span>
                                 <span class="text-xs text-outline shrink-0">${esc(timeAgo)}</span>
                             </div>
-
-                            <!-- Threads logo icon on top right -->
-                            <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)" class="text-outline hover:text-on-surface p-1 rounded-full cursor-pointer transition-colors" title="Chia sẻ">
-                                <svg class="w-4 h-4 fill-current opacity-70 hover:opacity-100" viewBox="0 0 24 24">
-                                    <path d="M12.186 24C5.467 24 0 18.533 0 11.814 0 5.095 5.467 0 12.186 0c6.643 0 11.814 5.095 11.814 11.814 0 4.887-2.618 8.877-6.88 10.366l-1.077-2.072c3.21-1.121 5.176-4.148 5.176-8.294 0-5.388-4.148-9.536-9.033-9.536-4.885 0-9.033 4.148-9.033 9.536 0 5.388 4.148 9.536 9.033 9.536 2.84 0 5.405-1.34 7.037-3.486l1.792 1.543C18.66 22.096 15.602 24 12.186 24zM12.186 16.702c-2.67 0-4.888-2.218-4.888-4.888 0-2.67 2.218-4.888 4.888-4.888 2.67 0 4.888 2.218 4.888 4.888 0 1.258-.475 2.454-1.332 3.359l-1.62-1.62a2.38 2.38 0 0 0 .543-1.739c0-1.325-1.074-2.399-2.399-2.399-1.325 0-2.399 1.074-2.399 2.399 0 1.325 1.074 2.399 2.399 2.399.537 0 1.033-.178 1.433-.48l1.62 1.62c-1.025.867-2.336 1.349-3.725 1.349z"/>
-                                </svg>
+                            <!-- Share icon -->
+                            <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)" class="text-outline hover:text-on-surface p-1 rounded-full cursor-pointer transition-colors shrink-0" title="Sao chép liên kết">
+                                <span class="material-symbols-outlined text-[18px]">ios_share</span>
                             </button>
                         </div>
 
-                        <!-- Topic Title & Description (Clickable) -->
-                        <div class="cursor-pointer space-y-1" onclick="window.openThreadDetail('${esc(topic.id)}')">
+                        <!-- Deck title (clickable to open detail) -->
+                        <div class="cursor-pointer" onclick="window.openThreadDetail('${esc(topic.id)}')">
                             <h3 class="text-sm sm:text-[15px] font-bold text-on-surface hover:text-primary transition-colors leading-snug">
                                 ${esc(topic.name)}
                             </h3>
-                            ${topic.description ? `
-                                <p class="text-xs sm:text-sm text-on-surface-variant leading-relaxed whitespace-pre-line line-clamp-3">
-                                    ${esc(topic.description)}
-                                </p>
-                            ` : ''}
+                            <div class="flex items-center gap-3 mt-1 text-xs text-outline">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px] text-primary">auto_stories</span>
+                                    <span>${totalWords} từ vựng</span>
+                                </span>
+                                ${tags.slice(1, 3).map(t => `<span class="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">#${esc(t)}</span>`).join('')}
+                            </div>
                         </div>
 
-                        <!-- Attached Vocabulary Card (Rounded-2xl preview container) -->
-                        ${sneakPeeks.length > 0 ? `
-                            <div onclick="window.openThreadDetail('${esc(topic.id)}')"
-                                 class="mt-1 rounded-2xl p-3 sm:p-3.5 bg-surface-container-low/80 dark:bg-[#141414] border border-outline-variant/20 dark:border-neutral-800 transition-all cursor-pointer shadow-2xs hover:border-outline-variant/40 space-y-2">
-                                <div class="flex items-center justify-between text-[11px] font-bold text-outline pb-1 border-b border-outline-variant/10 dark:border-neutral-800">
-                                    <span class="flex items-center gap-1.5 text-on-surface font-semibold">
-                                        <span class="material-symbols-outlined text-[15px] text-primary">auto_stories</span>
-                                        <span>${totalWords} từ vựng</span>
-                                    </span>
-                                    <span class="text-primary font-bold hover:underline flex items-center gap-0.5 text-[11px]">
-                                        Xem toàn bộ &rarr;
-                                    </span>
-                                </div>
-                                <div class="flex flex-col gap-1 divide-y divide-outline-variant/10 dark:divide-neutral-800/60">
-                                    ${sneakPeeks.map(w => `
-                                        <div class="pt-1 first:pt-0 flex items-center justify-between gap-2 text-xs">
-                                            <div class="flex items-center gap-2 min-w-0">
-                                                <button type="button" onclick="window.playWordAudio('${esc(w.word)}', event)"
-                                                        class="w-6 h-6 rounded-full bg-surface-container-high dark:bg-neutral-800 hover:bg-primary/20 hover:text-primary flex items-center justify-center text-outline transition-colors shrink-0" title="Phát âm">
-                                                    <span class="material-symbols-outlined text-[13px]">volume_up</span>
-                                                </button>
-                                                <span class="font-bold text-on-surface truncate">${esc(w.word)}</span>
-                                                ${w.phonetic ? `<span class="text-[11px] text-outline font-mono hidden sm:inline">${esc(w.phonetic)}</span>` : ''}
-                                            </div>
-                                            <span class="text-[11px] text-on-surface-variant font-medium truncate text-right max-w-[170px] sm:max-w-[240px]">${esc(w.meaning || '—')}</span>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        ` : ''}
-
-                        <!-- Action Bar (Threads style ♡ 💬 🔁 ✈) -->
-                        <div class="flex items-center justify-between pt-2 text-on-surface-variant select-none">
-                            <div class="flex items-center gap-5 sm:gap-6">
-                                <!-- Like button -->
+                        <!-- Action bar: Like + Save -->
+                        <div class="flex items-center justify-between pt-1.5 text-on-surface-variant select-none">
+                            <div class="flex items-center gap-5">
+                                <!-- Like -->
                                 <button type="button" onclick="window.handleThreadLike('${esc(topic.id)}', this)"
                                         class="flex items-center gap-1 text-xs hover:text-rose-500 transition-colors cursor-pointer active:scale-90 ${hasLiked ? 'text-rose-500 font-bold' : 'text-on-surface-variant'}"
                                         data-topic-id="${esc(topic.id)}" data-liked="${hasLiked}">
                                     <span class="material-symbols-outlined text-[20px] ${hasLiked ? 'fill-1 text-rose-500' : ''}">favorite</span>
                                     <span class="like-count text-xs">${likeCount || ''}</span>
                                 </button>
-
-                                <!-- Comment button -->
-                                <button type="button" onclick="window.openThreadComments('${esc(topic.id)}', '${esc(topic.name)}', event)"
-                                        class="flex items-center gap-1 text-xs hover:text-primary transition-colors cursor-pointer active:scale-90">
-                                    <span class="material-symbols-outlined text-[20px]">chat_bubble</span>
-                                    <span class="text-xs">${commentCount || ''}</span>
-                                </button>
-
-                                <!-- Repost / Clone button -->
+                                <!-- Save / Clone -->
                                 <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
                                         class="flex items-center gap-1 text-xs hover:text-emerald-500 transition-colors cursor-pointer active:scale-90" title="Lưu về kho từ của tôi">
-                                    <span class="material-symbols-outlined text-[20px]">sync_alt</span>
+                                    <span class="material-symbols-outlined text-[20px]">bookmark_add</span>
                                     <span class="clone-count text-xs">${cloneCount || ''}</span>
                                 </button>
-
-                                <!-- Share button -->
-                                <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)"
-                                        class="flex items-center gap-1 text-xs hover:text-primary transition-colors cursor-pointer active:scale-90" title="Chia sẻ liên kết">
-                                    <span class="material-symbols-outlined text-[19px]">send</span>
-                                </button>
                             </div>
-
-                            <!-- Quick Clone Button for Desktop -->
+                            <!-- Desktop quick save -->
                             <button type="button" onclick="window.handleThreadClone('${esc(topic.id)}', this, event)"
                                     class="hidden sm:flex items-center gap-1 px-3 py-1 rounded-full bg-primary/10 hover:bg-primary text-primary hover:text-on-primary font-bold text-xs transition-all active:scale-95 cursor-pointer shadow-2xs">
-                                <span class="material-symbols-outlined text-[15px]">bookmark_add</span>
+                                <span class="material-symbols-outlined text-[14px]">bookmark_add</span>
                                 <span>Lưu về kho</span>
                             </button>
                         </div>
@@ -954,15 +897,13 @@
         const content = document.getElementById('thread-detail-content');
         if (!modal || !content) return;
 
+        // Hiển thị modal ngay lập tức, nhưng CHƯA khóa cuộn trang
+        // (chỉ khóa sau khi dữ liệu đã tải xong)
         content.scrollTop = 0;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        if (typeof window.lockBodyScroll === 'function') {
-            window.lockBodyScroll(true);
-        } else {
-            document.body.style.overflow = 'hidden';
-        }
 
+        // Hiển thị spinner trong modal - chưa khóa body scroll
         content.innerHTML = `
             <div class="flex flex-col items-center justify-center py-20 gap-3">
                 <span class="material-symbols-outlined text-primary text-4xl animate-spin">refresh</span>
@@ -991,6 +932,13 @@
                 return;
             }
 
+            // Dữ liệu đã có → khóa cuộn trang và render
+            if (typeof window.lockBodyScroll === 'function') {
+                window.lockBodyScroll(true);
+            } else {
+                document.body.style.overflow = 'hidden';
+            }
+            content.scrollTop = 0;
             renderThreadChainView(topicDetail);
         } catch (err) {
             console.error('[Library] openThreadDetail error:', err);
@@ -1134,10 +1082,9 @@
                         <span class="material-symbols-outlined text-[20px] ${topic.hasLiked ? 'fill-1 text-rose-500' : ''}">favorite</span>
                         <span class="like-count">${topic.like_count || 0}</span>
                     </button>
-                    <button type="button" onclick="window.openThreadComments('${esc(topic.id)}', '${esc(topic.name)}', event)"
+                    <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)"
                         class="flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-                        <span class="material-symbols-outlined text-[20px]">chat_bubble</span>
-                        <span>${topic.comment_count || 0}</span>
+                        <span class="material-symbols-outlined text-[20px]">ios_share</span>
                     </button>
                 </div>
 

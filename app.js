@@ -101,11 +101,32 @@ window.handleProfileClick = function() {
 window.lockBodyScroll = function(lock) {
     try {
         if (lock) {
+            // Lưu vị trí cuộn hiện tại để khôi phục sau
+            const scrollY = window.scrollY || document.documentElement.scrollTop;
+            document.body.dataset.scrollY = scrollY;
             document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
         } else {
+            // Khôi phục vị trí cuộn
+            const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
             document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            delete document.body.dataset.scrollY;
+            if (scrollY) {
+                window.scrollTo(0, scrollY);
+            }
         }
-    } catch(e) {}
+    } catch(e) {
+        try {
+            document.body.style.overflow = lock ? 'hidden' : '';
+        } catch(_) {}
+    }
 };
 
 var navigateTo;
