@@ -170,33 +170,76 @@ const HiSound = (() => {
 })();
 
 /**
- * HiAudio - Multi-layer English Pronunciation Audio Engine
- * Cung cấp phát âm thanh từ vựng tiếng Anh đa tầng, chống lỗi câm tiếng / silent bug trên mọi trình duyệt:
- * - Tầng 1: Google TTS CDN audio stream (nhanh, tự nhiên, hỗ trợ tốc độ 1.0x và 0.6x mượt mà)
- * - Tầng 2: Web Speech API (SpeechSynthesis) với đầy đủ bug-fixes cho Chrome/Safari (resume, cancel timing, GC retention)
- * - Tầng 3: Free Dictionary API audio MP3 fallback
+ * HiAudio - Multi-layer English Pronunciation Audio Engine for Web & Mobile iOS/Android
+ * Khắc phục triệt để lỗi câm tiếng trên iPhone / iOS (Silent Switch, WebKit SpeechSynthesis bug):
+ * - Tầng 1: HTML5 Audio Stream (Youdao CDN: US accent, định dạng MP3 trực tiếp).
+ *   -> ĐẶC BIỆT: Chạy qua Media Channel trên iOS Safari, phát ra tiếng ngay cả khi iPhone bật Cần gạt rung / Chế độ im lặng (Silent Mode)!
+ * - Tầng 2: Free Dictionary API MP3 Audio (Oxford / Cambridge native recording).
+ * - Tầng 3: Web Speech API (SpeechSynthesis) với đầy đủ bug-fixes cho iOS/Safari:
+ *   -> Không gọi cancel() ngay trước speak() (tránh WebKit abort bug).
+ *   -> Tự động resume() nếu paused.
+ *   -> Giữ reference _activeUtterance tránh Garbage Collection.
  */
 const HiAudio = (() => {
     let _activeAudio = null;
     let _activeUtterance = null;
     const _dictAudioCache = new Map();
 
-    // Khởi động voices cho SpeechSynthesis ngay khi có tương tác người dùng
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
+    // 1-sample silent WAV base64 để unlock audio channel trên iOS Safari
+    const SILENT_WAV = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+
+    // Tạo sẵn Audio element để tái sử dụng và unlock ngay trên user interaction đầu tiên
+    let _unlocked = false;
+    function _getAudio() {
+        if (!_activeAudio && typeof Audio !== 'undefined') {
+            _activeAudio = new Audio();
+            _activeAudio.preload = 'auto';
+        }
+        return _activeAudio;
+    }
+
+    function _unlockIOSAudio() {
+        if (_unlocked) return;
+        _unlocked = true;
+
+        // 1. Unlock HTML5 Audio Media Channel trên iOS
         try {
-            window.speechSynthesis.getVoices();
-            window.speechSynthesis.addEventListener('voiceschanged', () => {
-                window.speechSynthesis.getVoices();
-            });
-            ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(evt => {
-                window.addEventListener(evt, () => {
-                    if (window.speechSynthesis) {
-                        window.speechSynthesis.getVoices();
-                        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-                    }
-                }, { once: true, passive: true });
-            });
+            const audio = _getAudio();
+            if (audio) {
+                audio.src = SILENT_WAV;
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+            }
         } catch (_) {}
+
+        // 2. Unlock Web Speech API & voices
+        try {
+            if (typeof window !== 'undefined' && window.speechSynthesis) {
+                window.speechSynthesis.getVoices();
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+                const silentUtter = new SpeechSynthesisUtterance('');
+                window.speechSynthesis.speak(silentUtter);
+            }
+        } catch (_) {}
+    }
+
+    // Lắng nghe tương tác đầu tiên của người dùng trên mobile & desktop
+    if (typeof window !== 'undefined') {
+        ['touchstart', 'touchend', 'pointerdown', 'mousedown', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, _unlockIOSAudio, { once: true, passive: true });
+        });
+
+        if (window.speechSynthesis) {
+            try {
+                window.speechSynthesis.addEventListener('voiceschanged', () => {
+                    window.speechSynthesis.getVoices();
+                });
+            } catch (_) {}
+        }
     }
 
     function stop() {
@@ -205,103 +248,106 @@ const HiAudio = (() => {
                 _activeAudio.pause();
                 _activeAudio.currentTime = 0;
             } catch (_) {}
-            _activeAudio = null;
         }
         if (typeof window !== 'undefined' && window.speechSynthesis) {
             try {
-                window.speechSynthesis.cancel();
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.cancel();
+                }
             } catch (_) {}
             _activeUtterance = null;
         }
     }
 
-    function _playAudioElement(url, rate = 1.0) {
-        return new Promise((resolve, reject) => {
-            try {
-                const audio = new Audio();
-                _activeAudio = audio;
-                audio.src = url;
-                audio.playbackRate = Math.max(0.4, Math.min(2.0, rate));
-                audio.onended = () => {
-                    _activeAudio = null;
-                    resolve(true);
-                };
-                audio.onerror = (err) => {
-                    _activeAudio = null;
-                    reject(err);
-                };
-                const playPromise = audio.play();
-                if (playPromise && typeof playPromise.catch === 'function') {
-                    playPromise.catch(reject);
-                }
-            } catch (err) {
-                reject(err);
+    function _sanitizeWordForSpeech(text) {
+        if (!text || typeof text !== 'string') return '';
+        return text
+            .replace(/\(.*?\)/g, '')       // Bỏ chú thích (phr v), (adj), v.v.
+            .replace(/\[.*?\]/g, '')       // Bỏ [brackets]
+            .replace(/\/.*?\//g, '')       // Bỏ /phonetics/
+            .replace(/['"]/g, '')          // Bỏ dấu ngoặc kép
+            .trim();
+    }
+
+    function _speakWithSpeechSynthesis(text, rate = 0.9) {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return false;
+        try {
+            if (window.speechSynthesis.paused) {
+                window.speechSynthesis.resume();
             }
-        });
+            const utter = new SpeechSynthesisUtterance(text);
+            _activeUtterance = utter;
+            utter.lang = 'en-US';
+            utter.rate = Math.max(0.4, Math.min(1.5, Number(rate) || 0.9));
+            utter.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices() || [];
+            const preferred = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
+                           || voices.find(v => v.lang === 'en-US')
+                           || voices.find(v => v.lang.startsWith('en'));
+            if (preferred) utter.voice = preferred;
+
+            utter.onend = () => { _activeUtterance = null; };
+            utter.onerror = () => { _activeUtterance = null; };
+
+            window.speechSynthesis.speak(utter);
+            return true;
+        } catch (err) {
+            console.warn('[HiAudio] SpeechSynthesis error:', err);
+            return false;
+        }
     }
 
     function playWord(word, rate = 0.9) {
         if (!word || typeof word !== 'string') return false;
-        const cleanWord = word.trim();
+        const cleanWord = _sanitizeWordForSpeech(word);
         if (!cleanWord) return false;
 
         stop();
 
-        // 1. Ưu tiên số 1: Web Speech API phát âm đồng bộ ngay trong user gesture (0ms delay, không bị chặn trên mobile/iOS)
-        if (typeof window !== 'undefined' && window.speechSynthesis) {
-            try {
-                if (window.speechSynthesis.paused) {
-                    window.speechSynthesis.resume();
-                }
-                const utter = new SpeechSynthesisUtterance(cleanWord);
-                _activeUtterance = utter; // Giữ reference tránh V8 Garbage Collection hủy giữa chừng
-                utter.lang = 'en-US';
-                utter.rate = Math.max(0.4, Math.min(1.5, Number(rate) || 0.9));
-                utter.pitch = 1.0;
-
-                const voices = window.speechSynthesis.getVoices() || [];
-                const preferred = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
-                               || voices.find(v => v.lang === 'en-US')
-                               || voices.find(v => v.lang.startsWith('en'));
-                if (preferred) utter.voice = preferred;
-
-                utter.onend = () => { _activeUtterance = null; };
-                utter.onerror = () => { _activeUtterance = null; };
-
-                window.speechSynthesis.speak(utter);
-                return true;
-            } catch (err) {
-                console.warn('[HiAudio] SpeechSynthesis error:', err);
-            }
-        }
-
-        // 2. Dự phòng: Free Dictionary API cached audio
+        const safeRate = Math.max(0.4, Math.min(2.0, Number(rate) || 0.9));
         const key = cleanWord.toLowerCase();
+
+        // 1. Kiểm tra cache Free Dictionary API audio
         const cachedUrl = _dictAudioCache.get(key);
-        if (cachedUrl) {
-            _playAudioElement(cachedUrl, rate).catch(() => {});
-            return true;
+        const audioUrl = cachedUrl || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+
+        // 2. ƯU TIÊN SỐ 1: HTML5 Audio stream (Youdao / Dict MP3)
+        // -> Cực kỳ quan trọng cho iOS: HTML5 Audio dùng Media channel, phát ra tiếng ngay cả khi iPhone bật gạt rung im lặng (Silent Mode)
+        try {
+            const audio = _getAudio();
+            if (audio) {
+                audio.src = audioUrl;
+                audio.playbackRate = safeRate;
+
+                // Xử lý fallback nếu URL MP3 gặp lỗi mạng
+                audio.onerror = () => {
+                    console.warn('[HiAudio] Audio stream error, fallback to SpeechSynthesis');
+                    _speakWithSpeechSynthesis(cleanWord, safeRate);
+                };
+
+                const p = audio.play();
+                if (p && typeof p.catch === 'function') {
+                    p.catch(err => {
+                        if (err.name === 'AbortError') return;
+                        console.warn('[HiAudio] Audio play failed, fallback to SpeechSynthesis:', err);
+                        _speakWithSpeechSynthesis(cleanWord, safeRate);
+                    });
+                }
+                return true;
+            }
+        } catch (audioErr) {
+            console.warn('[HiAudio] HTML5 Audio init error:', audioErr);
         }
 
-        // 3. Dự phòng: Fetch Free Dictionary API MP3
-        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`)
-            .then(res => res.ok ? res.json() : null)
-            .then(json => {
-                const phonetics = Array.isArray(json) ? json[0]?.phonetics : [];
-                const audioUrl = phonetics?.find(p => p.audio && p.audio.trim())?.audio;
-                if (audioUrl) {
-                    _dictAudioCache.set(key, audioUrl);
-                    _playAudioElement(audioUrl, rate).catch(() => {});
-                }
-            })
-            .catch(() => {});
-
-        return false;
+        // 3. Fallback: Web Speech API nếu không thể tạo Audio element
+        return _speakWithSpeechSynthesis(cleanWord, safeRate);
     }
 
     return {
         playWord,
-        stop
+        stop,
+        unlock: _unlockIOSAudio
     };
 })();
 

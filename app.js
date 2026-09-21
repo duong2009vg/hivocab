@@ -2275,7 +2275,7 @@ window._loadLessonWords = async function() {
                         ${w.phonetic ? `<span class="text-sm text-outline">${_esc(w.phonetic)}</span>` : ''}
                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${lvColor[lv]}">${lvLabel[lv]}</span>
                         <button data-audio-word="${_esc(w.word)}"
-                            onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
+                            onclick="if(typeof HiAudio!=='undefined'&&HiAudio.playWord){HiAudio.playWord(this.dataset.audioWord)}else if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
                             class="ml-auto p-1 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
                             <span class="material-symbols-outlined text-[18px]">volume_up</span>
                         </button>
@@ -3208,7 +3208,9 @@ window.closeAddWordModal = function() {
 window.previewAddWordAudio = function() {
     const word = (document.getElementById('add-word-english')?.value || '').trim();
     if (!word) return;
-    if (typeof HiDict !== 'undefined' && typeof HiDict.playWordAudio === 'function') {
+    if (typeof HiAudio !== 'undefined' && typeof HiAudio.playWord === 'function') {
+        HiAudio.playWord(word);
+    } else if (typeof HiDict !== 'undefined' && typeof HiDict.playWordAudio === 'function') {
         HiDict.playWordAudio(word);
     } else if ('speechSynthesis' in window) {
         const u = new SpeechSynthesisUtterance(word);
@@ -4172,7 +4174,7 @@ window._loadVocabularyPage = async function(page = 1, search = null) {
                         
                         <div class="ml-auto flex items-center gap-1">
                             <button data-audio-word="${safeWord}"
-                                onclick="if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
+                                onclick="if(typeof HiAudio!=='undefined'&&HiAudio.playWord){HiAudio.playWord(this.dataset.audioWord)}else if(typeof HiDict!=='undefined'&&HiDict.playWordAudio){HiDict.playWordAudio(this.dataset.audioWord)}else if('speechSynthesis' in window){const u=new SpeechSynthesisUtterance(this.dataset.audioWord);u.lang='en-US';window.speechSynthesis.speak(u);}"
                                 class="p-1.5 rounded-full hover:bg-primary/10 transition-colors text-outline hover:text-primary cursor-pointer" title="Phát âm">
                                 <span class="material-symbols-outlined text-[19px]">volume_up</span>
                             </button>
