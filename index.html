@@ -945,8 +945,10 @@ html.user-logged-in:not(.router-ready)[data-initial-route="vocabulary"] #page-vo
 html.user-logged-in:not(.router-ready)[data-initial-route="exercises"] #page-exercises { display: block; }
 html.user-logged-in:not(.router-ready)[data-initial-route="dictionary"] #page-dictionary { display: block; }
 
-/* KHI CHƯA ĐĂNG NHẬP: Mặc định hiển thị landing trước khi router sẵn sàng */
-html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
+/* KHI CHƯA ĐĂNG NHẬP: Mặc định hiển thị landing trước khi router sẵn sàng (trừ khi có link chia sẻ thư viện) */
+html:not(.user-logged-in):not(.router-ready):not([data-initial-route="library"]) #page-landing { display: block; }
+html:not(.router-ready)[data-initial-route="library"] #page-landing { display: none !important; }
+html:not(.router-ready)[data-initial-route="library"] #page-library { display: block; }
 
 /* Bottom nav trên mobile khi đã đăng nhập (trước khi router sẵn sàng) */
 @media (max-width: 1023.98px) {
@@ -1004,13 +1006,17 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
                 } catch(_) {}
             }
         }
+        var curHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+        var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
+        var isDeckRoute = curHash.indexOf('d=') === 0 || curHash.indexOf('deck=') === 0 || curHash.indexOf('topic=') === 0 || curHash.indexOf('library') === 0;
+
         if (hasAuth) {
             window._isPreAuthenticated = true;
             document.documentElement.classList.add('user-logged-in');
-            var curHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
-            var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
-            var initialRoute = (!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) ? 'dashboard' : curHash.split('?')[0];
+            var initialRoute = isDeckRoute ? 'library' : ((!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) ? 'dashboard' : curHash.split('?')[0]);
             document.documentElement.setAttribute('data-initial-route', initialRoute);
+        } else if (isDeckRoute) {
+            document.documentElement.setAttribute('data-initial-route', 'library');
         }
     } catch (e) {}
 })();
@@ -2740,7 +2746,7 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
 
 
 <!-- ==================== BACKEND MODULES ==================== -->
-<script src="dataLayer.js?v=20260920-v1"></script>
+<script src="dataLayer.js?v=20260921-v3"></script>
 <script src="aiHint.js"></script>
 <script src="dashboardStats.js"></script>
 <script src="soundEngine.js?v=20260912-v1"></script>
@@ -2748,7 +2754,7 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
 <script src="sessionUI.js?v=20260920-lock-v1"></script>
 <script src="thptExam.js?v=20260913-monitoring-v1"></script>
 <script src="bilingualReading.js?v=20260920-lock-v1"></script>
-<script src="library.js?v=20260914-remove-game-v6"></script>
+<script src="library.js?v=20260921-v3"></script>
 <script src="pricing.js?v=20260920-v4"></script>
 
 <!-- @include 'templates/modals.html' -->
@@ -2762,7 +2768,7 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
 </button>
 
 <script src="dictionary.js"></script>
-<script defer src="app.js?v=20260920-v5"></script>
+<script defer src="app.js?v=20260921-v3"></script>
 <script type="module" src="/src/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {

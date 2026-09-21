@@ -112,7 +112,19 @@ var navigateTo;
 window.navigateTo = navigateTo = function(page, preserveHash = false){
     try { document.documentElement.classList.add('router-ready'); } catch(_) {}
     window.lockBodyScroll(false);
-    const rawPage = (page || '').split('?')[0].replace(/^#/, '').replace(/^page-/, '');
+
+    // Đảm bảo đóng modal chi tiết bộ từ nếu đang mở và chuyển sang trang khác
+    if (typeof window.closeThreadDetail === 'function') {
+        const modal = document.getElementById('modal-thread-detail');
+        if (modal && !modal.classList.contains('hidden')) {
+            window.closeThreadDetail(false);
+        }
+    }
+
+    let rawPage = (page || '').split('?')[0].replace(/^#/, '').replace(/^page-/, '');
+    if (rawPage.startsWith('d=') || rawPage.startsWith('deck=') || rawPage.startsWith('topic=')) {
+        rawPage = 'library';
+    }
     const pageName = (rawPage === 'thpt') ? 'exercises' : rawPage;
 
     // Chuyển game vào trực tiếp dashboard học tập
@@ -490,8 +502,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const authInfo = window._parseAuthRedirectInfo();
     const h = window.location.hash.slice(1);
     const searchParams = new URLSearchParams(window.location.search || '');
-    const hasDeepDeck = searchParams.has('topic') || searchParams.has('deck');
-    const deepDeckId = searchParams.get('topic') || searchParams.get('deck');
+    const hasDeepDeck = searchParams.has('topic') || searchParams.has('deck') || searchParams.has('d') || h.startsWith('d=') || h.startsWith('topic=') || h.startsWith('deck=') || h.startsWith('library');
+    const deepDeckId = searchParams.get('topic') || searchParams.get('deck') || searchParams.get('d');
 
     if (authInfo.hasError) {
         // Lưu thông tin lỗi để hiển thị modal cảnh báo rõ ràng khi DOMContentLoaded sẵn sàng
@@ -503,10 +515,13 @@ window.addEventListener('DOMContentLoaded', () => {
         window.navigateTo('landing', true);
     } else if (h && (h.includes('access_token=') || authInfo.isPkceCode)) {
         window.navigateTo(isLoggedIn ? 'dashboard' : 'landing', true);
-    } else if (h && h !== 'landing' && h !== 'login') {
-        window.navigateTo(h);
+    } else if (hasDeepDeck && (h.startsWith('d=') || h.startsWith('topic=') || h.startsWith('deck='))) {
+        // Link trực tiếp dạng #d=..., #topic=..., #deck=... -> chuyển thẳng vào trang library và bảo lưu hash để mở modal
+        window.navigateTo('library', true);
     } else if (hasDeepDeck && deepDeckId) {
         window.navigateTo('library?topic=' + encodeURIComponent(deepDeckId));
+    } else if (h && h !== 'landing' && h !== 'login') {
+        window.navigateTo(h);
     } else {
         if (isLoggedIn) {
             window.navigateTo('dashboard');
@@ -5204,7 +5219,7 @@ async function bootstrapHiDB() {
         const activePageId = document.querySelector('.page.active')?.id;
         const search = window.location.search || '';
         const hash = window.location.hash || '';
-        if (hash.includes('library') || activePageId === 'page-library' || search.includes('topic=') || search.includes('deck=')) {
+        if (hash.includes('library') || hash.includes('d=') || activePageId === 'page-library' || search.includes('topic=') || search.includes('deck=') || search.includes('d=')) {
             if (window.loadCommunityLibrary) {
                 window.loadCommunityLibrary();
             }

@@ -2775,40 +2775,38 @@ window.HiDB = (() => {
     async function getUserCreatedTopics() {
         await ensureReady(4000).catch(() => {});
         const user = await getCurrentUser();
-        if (!user) return [];
+        if (!user || !user.id) return [];
 
         const client = _getClient();
         try {
             const { data, error } = await client
                 .from('topics')
-                .select(`
-                    id,
-                    name,
-                    icon,
-                    category,
-                    description,
-                    is_public,
-                    tags,
-                    like_count,
-                    clone_count,
-                    created_at,
-                    words (id)
-                `)
+                .select('id, name, icon, category, description, is_public, tags, like_count, clone_count, created_at, user_id')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
             if (error) throw error;
+            if (!data || data.length === 0) return [];
 
-            return (data || []).map(t => ({
+            const topicIds = data.map(t => t.id);
+            const { data: wordsData } = await client
+                .from('words')
+                .select('topic_id')
+                .in('topic_id', topicIds);
+
+            const countMap = {};
+            (wordsData || []).forEach(w => {
+                countMap[w.topic_id] = (countMap[w.topic_id] || 0) + 1;
+            });
+
+            return data.map(t => ({
                 ...t,
-                word_count: (t.words || []).length,
-                totalWords: (t.words || []).length
+                word_count: countMap[t.id] || 0,
+                totalWords: countMap[t.id] || 0
             }));
         } catch (err) {
-            console.warn('[getUserCreatedTopics] Fallback to getTopics filter:', err);
-            // Fallback lấy toàn bộ topics và lọc theo user_id
-            const all = await getTopics().catch(() => []);
-            return all.filter(t => t.user_id === user.id);
+            console.error('[getUserCreatedTopics] Error:', err);
+            return [];
         }
     }
 

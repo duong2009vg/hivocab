@@ -39,6 +39,9 @@ export function onNavigate(callback) {
 
 export function navigateTo(targetPageId, options = {}) {
   let pageId = (targetPageId || 'dashboard').replace(/^#/, '').replace(/^page-/, '');
+  if (pageId.startsWith('d=') || pageId.startsWith('deck=') || pageId.startsWith('topic=')) {
+    pageId = 'library';
+  }
   if (pageId === 'thpt') {
     pageId = 'exercises';
   }
@@ -124,6 +127,9 @@ export function initRouter() {
 
   const normalizeRoute = (raw) => {
     const r = (raw || '').replace(/^#/, '').replace(/^page-/, '');
+    if (r.startsWith('d=') || r.startsWith('deck=') || r.startsWith('topic=')) {
+      return 'library';
+    }
     const clean = r.split('?')[0];
     return clean === 'thpt' ? 'exercises' : clean;
   };

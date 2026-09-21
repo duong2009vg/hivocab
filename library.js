@@ -145,45 +145,134 @@
     }
 
     /**
+     * URL Shortening Utilities for Community Decks (Base64url 22-char UUID compression)
+     */
+    function encodeTopicShortCode(uuid) {
+        if (!uuid || typeof uuid !== 'string') return uuid;
+        const clean = uuid.toLowerCase().replace(/[^0-9a-f]/g, '');
+        if (clean.length !== 32) return uuid;
+        try {
+            const bytes = new Uint8Array(16);
+            for (let i = 0; i < 16; i++) {
+                bytes[i] = parseInt(clean.substr(i * 2, 2), 16);
+            }
+            let bin = '';
+            for (let i = 0; i < 16; i++) bin += String.fromCharCode(bytes[i]);
+            return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        } catch (e) {
+            console.warn('[encodeTopicShortCode] Fallback to raw uuid:', e);
+            return uuid;
+        }
+    }
+
+    function decodeTopicShortCode(code) {
+        if (!code || typeof code !== 'string') return code;
+        const trimmed = code.trim();
+        // Standard 36-char UUID format with hyphens
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trimmed)) {
+            return trimmed.toLowerCase();
+        }
+        // 32-char hex without hyphens
+        if (/^[0-9a-f]{32}$/i.test(trimmed)) {
+            return [
+                trimmed.slice(0, 8),
+                trimmed.slice(8, 12),
+                trimmed.slice(12, 16),
+                trimmed.slice(16, 20),
+                trimmed.slice(20, 32)
+            ].join('-').toLowerCase();
+        }
+        // 22-char base64url format
+        if (/^[A-Za-z0-9_-]{22}$/.test(trimmed)) {
+            try {
+                let base64 = trimmed.replace(/-/g, '+').replace(/_/g, '/');
+                while (base64.length % 4) base64 += '=';
+                const bin = atob(base64);
+                if (bin.length === 16) {
+                    let hex = '';
+                    for (let i = 0; i < bin.length; i++) {
+                        hex += bin.charCodeAt(i).toString(16).padStart(2, '0');
+                    }
+                    return [
+                        hex.slice(0, 8),
+                        hex.slice(8, 12),
+                        hex.slice(12, 16),
+                        hex.slice(16, 20),
+                        hex.slice(20, 32)
+                    ].join('-').toLowerCase();
+                }
+            } catch (e) {
+                console.warn('[decodeTopicShortCode] Error decoding base64:', e);
+            }
+        }
+        return trimmed;
+    }
+
+    function extractDeepTopicId() {
+        const hash = window.location.hash || '';
+        const search = window.location.search || '';
+
+        let rawCode = null;
+        const dHashMatch = hash.match(/[#?&]d=([^&]+)/);
+        const topicHashMatch = hash.match(/[#?&](?:topic|deck)=([^&]+)/);
+        const dSearchMatch = search.match(/[?&]d=([^&]+)/);
+        const topicSearchMatch = search.match(/[?&](?:topic|deck)=([^&]+)/);
+
+        if (dHashMatch && dHashMatch[1]) {
+            rawCode = decodeURIComponent(dHashMatch[1]);
+        } else if (dSearchMatch && dSearchMatch[1]) {
+            rawCode = decodeURIComponent(dSearchMatch[1]);
+        } else if (topicHashMatch && topicHashMatch[1]) {
+            rawCode = decodeURIComponent(topicHashMatch[1]);
+        } else if (topicSearchMatch && topicSearchMatch[1]) {
+            rawCode = decodeURIComponent(topicSearchMatch[1]);
+        }
+
+        if (!rawCode) return null;
+        return decodeTopicShortCode(rawCode);
+    }
+
+    /**
      * Initialize / Load Community Library
      */
+    let _isLibraryLoading = false;
+    let _lastOpenedDeepTopicId = null;
+
     async function loadCommunityLibrary(tab) {
         if (tab) state.currentTab = tab;
         renderTagsBar();
         updateTabButtonsUI();
 
-        // Đảm bảo HiDB đã hoàn tất khởi tạo trước khi gọi Supabase
-        if (typeof HiDB !== 'undefined' && HiDB.ensureReady) {
-            try { await HiDB.ensureReady(4000); } catch (e) {}
-        }
-
-        // Khởi tạo Supabase Realtime channel lắng nghe bài đăng mới
-        initRealtimeSubscription();
-
-        if (state.currentTab === 'feed') {
-            await fetchPublicFeed();
-        } else if (state.currentTab === 'my') {
-            await fetchMyTopics();
-        } else if (state.currentTab === 'liked') {
-            await fetchLikedTopics();
-        }
-
-        // Kiểm tra deep link chia sẻ #library?topic=UUID hoặc ?topic=... hoặc ?deck=...
-        let deepTopicId = null;
-        const hash = window.location.hash || '';
-        const search = window.location.search || '';
-        const hashMatch = hash.match(/[?&](?:topic|deck)=([^&]+)/);
-        const searchMatch = search.match(/[?&](?:topic|deck)=([^&]+)/);
-        if (hashMatch && hashMatch[1]) {
-            deepTopicId = decodeURIComponent(hashMatch[1]);
-        } else if (searchMatch && searchMatch[1]) {
-            deepTopicId = decodeURIComponent(searchMatch[1]);
-        }
-
-        if (deepTopicId) {
+        // Kiểm tra xem có deep link chia sẻ bộ từ không (mở ngay, không chờ feed)
+        const deepTopicId = extractDeepTopicId();
+        if (deepTopicId && deepTopicId !== _lastOpenedDeepTopicId) {
+            _lastOpenedDeepTopicId = deepTopicId;
             setTimeout(() => {
                 openThreadDetail(deepTopicId);
-            }, 300);
+            }, 60);
+        }
+
+        if (_isLibraryLoading) return;
+        _isLibraryLoading = true;
+
+        try {
+            // Đảm bảo HiDB đã hoàn tất khởi tạo trước khi gọi Supabase
+            if (typeof HiDB !== 'undefined' && HiDB.ensureReady) {
+                try { await HiDB.ensureReady(4000); } catch (e) {}
+            }
+
+            // Khởi tạo Supabase Realtime channel lắng nghe bài đăng mới
+            initRealtimeSubscription();
+
+            if (state.currentTab === 'feed') {
+                await fetchPublicFeed();
+            } else if (state.currentTab === 'my') {
+                await fetchMyTopics();
+            } else if (state.currentTab === 'liked') {
+                await fetchLikedTopics();
+            }
+        } finally {
+            _isLibraryLoading = false;
         }
     }
 
@@ -273,10 +362,6 @@
             let myCreatedTopics = [];
             if (typeof HiDB !== 'undefined' && HiDB.getUserCreatedTopics) {
                 myCreatedTopics = await HiDB.getUserCreatedTopics();
-            } else if (typeof HiDB !== 'undefined' && HiDB.getTopics) {
-                const topics = await HiDB.getTopics();
-                const user = HiDB.currentUser;
-                myCreatedTopics = user ? topics.filter(t => t.user_id === user.id) : [];
             }
             state.myTopics = myCreatedTopics || [];
             renderMyTopicsList(state.myTopics);
@@ -806,6 +891,7 @@
             // Quick prompt to start learning immediately
             setTimeout(() => {
                 if (confirm('Bộ từ đã được lưu vào kho của bạn. Bạn có muốn bắt đầu ôn tập bộ từ này ngay không?')) {
+                    closeThreadDetail(false);
                     if (window._openTopic) {
                         window._openTopic(newTopicId);
                     }
@@ -823,7 +909,7 @@
     }
 
     /**
-     * Share topic link
+     * Share topic link with short code
      */
     function _fallbackCopyText(text) {
         try {
@@ -837,7 +923,7 @@
             ta.select();
             document.execCommand('copy');
             document.body.removeChild(ta);
-            window.showHiToast('Đã sao chép liên kết bộ từ vựng! 📋', 'success');
+            window.showHiToast('Đã sao chép link rút gọn bộ từ vựng! 📋', 'success');
         } catch (_) {
             prompt('Sao chép liên kết bên dưới:', text);
         }
@@ -846,12 +932,12 @@
     function handleThreadShare(topicId, title, event) {
         if (event) event.stopPropagation();
         const origin = window.location.origin;
-        const path = window.location.pathname.replace(/\/index\.html$/, '/');
-        const url = `${origin}${path}#library?topic=${encodeURIComponent(topicId)}`;
+        const shortCode = encodeTopicShortCode(topicId);
+        const url = `${origin}/#d=${encodeURIComponent(shortCode)}`;
 
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).then(() => {
-                window.showHiToast('Đã sao chép liên kết bộ từ vựng! 📋', 'success');
+                window.showHiToast('Đã sao chép link rút gọn bộ từ vựng! 📋', 'success');
             }).catch(() => {
                 _fallbackCopyText(url);
             });
@@ -868,13 +954,19 @@
         const content = document.getElementById('thread-detail-content');
         if (!modal || !content) return;
 
+        content.scrollTop = 0;
         modal.classList.remove('hidden');
         modal.classList.add('flex');
-        document.body.style.overflow = 'hidden';
+        if (typeof window.lockBodyScroll === 'function') {
+            window.lockBodyScroll(true);
+        } else {
+            document.body.style.overflow = 'hidden';
+        }
 
         content.innerHTML = `
-            <div class="flex items-center justify-center py-20">
+            <div class="flex flex-col items-center justify-center py-20 gap-3">
                 <span class="material-symbols-outlined text-primary text-4xl animate-spin">refresh</span>
+                <span class="text-xs text-on-surface-variant font-medium">Đang tải bộ từ vựng...</span>
             </div>
         `;
 
@@ -886,7 +978,16 @@
             state.activeTopicDetail = topicDetail;
 
             if (!topicDetail) {
-                content.innerHTML = `<p class="text-center text-outline py-12">Không tìm thấy thông tin bộ từ vựng.</p>`;
+                content.innerHTML = `
+                    <div class="text-center py-12 flex flex-col items-center gap-3">
+                        <span class="material-symbols-outlined text-4xl text-outline">menu_book</span>
+                        <p class="text-on-surface font-bold text-sm">Không tìm thấy thông tin bộ từ vựng.</p>
+                        <p class="text-xs text-outline">Bộ từ có thể đã bị xóa hoặc đặt ở chế độ riêng tư.</p>
+                        <button type="button" onclick="window.closeThreadDetail()" class="mt-2 px-5 py-2 rounded-full bg-primary text-on-primary text-xs font-bold shadow hover:opacity-95 cursor-pointer">
+                            Quay lại Thư viện
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
@@ -894,8 +995,12 @@
         } catch (err) {
             console.error('[Library] openThreadDetail error:', err);
             content.innerHTML = `
-                <div class="text-center py-12 text-rose-600">
+                <div class="text-center py-12 flex flex-col items-center gap-3 text-rose-600">
+                    <span class="material-symbols-outlined text-4xl">error_outline</span>
                     <p class="font-bold text-sm">${esc(err.message || 'Lỗi khi tải chi tiết bộ từ.')}</p>
+                    <button type="button" onclick="window.closeThreadDetail()" class="mt-2 px-5 py-2 rounded-full bg-surface-container-high text-on-surface text-xs font-bold shadow hover:bg-surface-container-highest cursor-pointer">
+                        Đóng lại
+                    </button>
                 </div>
             `;
         }
@@ -1045,21 +1150,29 @@
         `;
     }
 
-    function closeThreadDetail() {
+    function closeThreadDetail(updateHistory = true) {
         const modal = document.getElementById('modal-thread-detail');
         if (modal) {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
-        document.body.style.overflow = '';
+        if (typeof window.lockBodyScroll === 'function') {
+            window.lockBodyScroll(false);
+        } else {
+            document.body.style.overflow = '';
+        }
         state.activeTopicDetail = null;
+        _lastOpenedDeepTopicId = null;
 
-        // Reset hash / search if it had topic= or deck=
-        if (window.location.hash.includes('topic=') || window.location.hash.includes('deck=')) {
-            try {
-                history.replaceState(null, '', window.location.pathname + '#library');
-            } catch (_) {
-                window.location.hash = 'library';
+        // Reset hash / search if it had d=, topic=, or deck=
+        if (updateHistory) {
+            const h = window.location.hash || '';
+            if (h.includes('d=') || h.includes('topic=') || h.includes('deck=')) {
+                try {
+                    history.replaceState(null, '', window.location.pathname + '#library');
+                } catch (_) {
+                    window.location.hash = 'library';
+                }
             }
         }
     }
@@ -1429,6 +1542,9 @@
     window.handleThreadShare          = handleThreadShare;
     window.openThreadDetail           = openThreadDetail;
     window.closeThreadDetail          = closeThreadDetail;
+    window.encodeTopicShortCode       = encodeTopicShortCode;
+    window.decodeTopicShortCode       = decodeTopicShortCode;
+    window.extractDeepTopicId         = extractDeepTopicId;
     window.handleTopicPublicToggle    = handleTopicPublicToggle;
     window.openHashtagModal           = openHashtagModal;
     window.toggleHashtagPill          = toggleHashtagPill;
@@ -1450,12 +1566,27 @@
     window.clearModalLibrarySearch    = clearModalLibrarySearch;
     window.handleModalQuickTag        = handleModalQuickTag;
 
+    // Lắng nghe phím Escape để đóng modal chi tiết bộ từ
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const detailModal = document.getElementById('modal-thread-detail');
+            if (detailModal && !detailModal.classList.contains('hidden')) {
+                closeThreadDetail();
+            }
+        }
+    });
+
     // Tự động kiểm tra và khởi tạo khi người dùng đang ở trang hoặc hash library hoặc có link chia sẻ
     function checkAutoInit() {
         const hash = window.location.hash || '';
         const search = window.location.search || '';
         const pageEl = document.getElementById('page-library');
-        const isLibraryActive = (pageEl && pageEl.classList.contains('active')) || hash.includes('library') || search.includes('topic=') || search.includes('deck=');
+        const isLibraryActive = (pageEl && pageEl.classList.contains('active')) || 
+                                hash.includes('library') || 
+                                hash.includes('d=') || 
+                                search.includes('topic=') || 
+                                search.includes('deck=') || 
+                                search.includes('d=');
         if (isLibraryActive) {
             setTimeout(() => {
                 loadCommunityLibrary();
@@ -1471,7 +1602,7 @@
 
     window.addEventListener('hashchange', () => {
         const hash = window.location.hash || '';
-        if (hash.includes('library')) {
+        if (hash.includes('library') || hash.includes('d=')) {
             loadCommunityLibrary();
         }
     });
