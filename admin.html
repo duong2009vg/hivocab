@@ -147,11 +147,14 @@
     <!-- 3. ADMIN PORTAL MAIN INTERFACE -->
     <div id="view-admin" class="hidden flex-1 flex flex-col lg:flex-row min-h-screen">
         
+        <!-- MOBILE SIDEBAR BACKDROP OVERLAY -->
+        <div id="sidebar-backdrop" onclick="toggleAdminSidebar(false)" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 hidden lg:hidden transition-opacity duration-300"></div>
+
         <!-- SIDEBAR -->
-        <aside id="sidebar" class="w-full lg:w-64 bg-white dark:bg-[#161b22] border-r border-slate-200 dark:border-white/10 flex-shrink-0 flex flex-col justify-between z-20 transition-colors">
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-72 lg:w-64 max-w-[85vw] bg-white dark:bg-[#161b22] border-r border-slate-200 dark:border-white/10 flex-shrink-0 flex flex-col justify-between transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none h-full overflow-y-auto custom-scrollbar">
             <div>
                 <!-- Brand Header -->
-                <div class="h-16 px-6 flex items-center justify-between border-b border-slate-200 dark:border-white/10">
+                <div class="h-16 px-5 lg:px-6 flex items-center justify-between border-b border-slate-200 dark:border-white/10 shrink-0">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-xl bg-primary text-white flex items-center justify-center font-black text-lg shadow-sm">
                             Hi
@@ -164,6 +167,10 @@
                             <p class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold tracking-wide">Enterprise Hub</p>
                         </div>
                     </div>
+                    <!-- Nút đóng sidebar trên Mobile -->
+                    <button type="button" onclick="toggleAdminSidebar(false)" class="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer" title="Đóng menu">
+                        <span class="material-symbols-outlined text-[20px]">close</span>
+                    </button>
                 </div>
 
                 <!-- Navigation Tabs -->
@@ -234,7 +241,7 @@
             </div>
 
             <!-- Sidebar Footer / Admin Info -->
-            <div class="p-4 border-t border-slate-200 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-white/[0.02]">
+            <div class="p-4 border-t border-slate-200 dark:border-white/10 space-y-3 bg-slate-50/50 dark:bg-white/[0.02] shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 font-extrabold flex items-center justify-center text-sm border border-amber-500/20 flex-shrink-0" id="admin-avatar-char">
                         A
@@ -264,28 +271,33 @@
         <div class="flex-1 flex flex-col min-w-0 bg-slate-50/70 dark:bg-[#0d1117] transition-colors">
             
             <!-- TOP BAR -->
-            <header class="h-16 border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#161b22]/80 glass-header sticky top-0 z-10 px-4 sm:px-8 flex items-center justify-between shadow-2xs transition-colors">
-                <div class="flex items-center gap-3">
-                    <h2 id="topbar-title" class="text-lg font-black text-slate-900 dark:text-white tracking-tight">Tổng quan & Phân tích Hệ thống</h2>
-                    <span id="topbar-chip" class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+            <header class="h-16 border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#161b22]/80 glass-header sticky top-0 z-30 px-3 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs transition-colors">
+                <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+                    <!-- Hamburger Menu Button trên Mobile -->
+                    <button id="mobile-sidebar-toggle" onclick="toggleAdminSidebar(true)" class="lg:hidden p-2 -ml-1 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 transition-colors shrink-0 cursor-pointer" aria-label="Mở menu quản trị" title="Menu quản trị">
+                        <span class="material-symbols-outlined text-[20px]">menu</span>
+                    </button>
+                    <h2 id="topbar-title" class="text-sm sm:text-lg font-black text-slate-900 dark:text-white tracking-tight truncate max-w-[140px] xs:max-w-[220px] sm:max-w-none">Tổng quan & Phân tích Hệ thống</h2>
+                    <span id="topbar-chip" class="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shrink-0">
                         <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
                         <span>Realtime Cloud Sync</span>
                     </span>
                 </div>
 
-                <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
                     <!-- Nút chuyển Dark/Light Mode -->
                     <button onclick="toggleAdminDarkMode()" id="admin-dark-mode-toggle" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer" title="Bật/Tắt chế độ tối">
                         <span class="material-symbols-outlined text-[18px]" id="admin-dark-mode-icon">dark_mode</span>
                     </button>
 
-                    <button onclick="refreshCurrentTab()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer" title="Làm mới dữ liệu">
+                    <button onclick="refreshCurrentTab()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 font-bold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5" title="Làm mới dữ liệu">
                         <span class="material-symbols-outlined text-[16px]">refresh</span>
                         <span class="hidden sm:inline">Làm mới</span>
                     </button>
-                    <button onclick="openWordModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-all cursor-pointer">
+                    <button onclick="openWordModal()" class="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 py-1.5 sm:px-3.5 sm:py-1.5 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-all cursor-pointer">
                         <span class="material-symbols-outlined text-[16px]">add</span>
-                        <span>Thêm Từ vựng</span>
+                        <span class="hidden sm:inline">Thêm Từ</span>
+                        <span class="sm:hidden">Từ</span>
                     </button>
                 </div>
             </header>
@@ -580,23 +592,23 @@
                     <!-- Orders Table -->
                     <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
                         <!-- Toolbar -->
-                        <div class="p-5 border-b border-slate-200 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="flex flex-1 items-center gap-3">
-                                <div class="relative flex-1 max-w-md">
+                        <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                            <div class="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+                                <div class="relative flex-1 w-full max-w-md">
                                     <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
                                     <input type="text" id="revenue-search-input" onkeyup="filterRevenueOrders()" placeholder="Tìm theo mã đơn, email hoặc ID..." 
                                            class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
                                 </div>
-                                <select id="revenue-status-filter" onchange="filterRevenueOrders()" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <select id="revenue-status-filter" onchange="filterRevenueOrders()" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="all">Tất cả trạng thái</option>
                                     <option value="PAID">Đã thanh toán (PAID)</option>
                                     <option value="PENDING">Đang chờ (PENDING)</option>
                                     <option value="CANCELLED">Đã hủy (CANCELLED)</option>
                                 </select>
                             </div>
-                            <div class="flex items-center gap-2">
+                            <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0">
                                 <span id="orders-count-badge" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 text-xs font-bold">0 đơn hàng</span>
-                                <button onclick="loadRevenueData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors" title="Tải lại đơn hàng">
+                                <button onclick="loadRevenueData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer" title="Tải lại đơn hàng">
                                     <span class="material-symbols-outlined text-[18px]">refresh</span>
                                 </button>
                             </div>
@@ -708,14 +720,14 @@
                     <!-- Subscriptions Management Table -->
                     <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
                         <!-- Toolbar -->
-                        <div class="p-5 border-b border-slate-200 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div class="flex flex-1 items-center gap-3">
-                                <div class="relative flex-1 max-w-md">
+                        <div class="p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                            <div class="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+                                <div class="relative flex-1 w-full max-w-md">
                                     <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
                                     <input type="text" id="subscriptions-search-input" onkeyup="filterSubscriptions()" placeholder="Tìm học viên theo email, tên hoặc ID..." 
                                            class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
                                 </div>
-                                <select id="subscriptions-tier-filter" onchange="filterSubscriptions()" class="px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <select id="subscriptions-tier-filter" onchange="filterSubscriptions()" class="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-700 dark:text-slate-300 font-medium focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="all">Tất cả gói</option>
                                     <option value="pro">Đang có PRO (Active)</option>
                                     <option value="expiring">Sắp hết hạn (&le; 7 ngày)</option>
@@ -723,12 +735,12 @@
                                     <option value="free">Tài khoản Miễn phí (Free)</option>
                                 </select>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <button onclick="openGrantProModal()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 transition-all cursor-pointer">
+                            <div class="flex items-center justify-between sm:justify-end gap-2.5 sm:gap-3 shrink-0">
+                                <button onclick="openGrantProModal()" class="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-xs shadow-sm flex items-center justify-center gap-1.5 transition-all cursor-pointer">
                                     <span class="material-symbols-outlined text-[18px]">card_giftcard</span>
-                                    <span>Tặng Gói PRO Thủ Công</span>
+                                    <span>Tặng Gói PRO</span>
                                 </button>
-                                <button onclick="loadSubscriptionsData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors" title="Tải lại danh sách">
+                                <button onclick="loadSubscriptionsData()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer shrink-0" title="Tải lại danh sách">
                                     <span class="material-symbols-outlined text-[18px]">refresh</span>
                                 </button>
                             </div>
@@ -844,37 +856,37 @@
                 <section id="section-users" class="hidden space-y-6">
                     
                     <!-- Filters & Search Toolbar -->
-                    <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div class="flex flex-1 items-center gap-3">
-                            <div class="relative flex-1 max-w-md">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 transition-colors">
+                        <div class="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+                            <div class="relative flex-1 w-full max-w-md">
                                 <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
                                 <input type="text" id="users-search-input" onkeyup="filterUsers()" placeholder="Tìm học viên theo email hoặc ID..." 
-                                       class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
+                                       class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium">
                             </div>
-                            <select id="users-role-filter" onchange="filterUsers()" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <select id="users-role-filter" onchange="filterUsers()" class="w-full sm:w-auto px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                 <option value="">Tất cả Vai trò</option>
                                 <option value="user">Học viên (User)</option>
                                 <option value="admin">Quản trị viên (Admin)</option>
                             </select>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <button onclick="openAddAdminModal()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-amber-500/20 transition-all cursor-pointer" title="Cấp quyền Quản trị viên mới">
+                        <div class="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+                            <button onclick="openAddAdminModal()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm shadow-amber-500/20 transition-all cursor-pointer" title="Cấp quyền Quản trị viên mới">
                                 <span class="material-symbols-outlined text-[17px]">person_add</span>
                                 <span>Thêm Admin</span>
                             </button>
-                            <span id="users-count-badge" class="text-xs font-extrabold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">0 học viên</span>
-                            <button onclick="loadAdminUsers()" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer" title="Làm mới danh sách">
+                            <span id="users-count-badge" class="text-xs font-extrabold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/10 px-3 py-1.5 rounded-xl">0 học viên</span>
+                            <button onclick="loadAdminUsers()" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors cursor-pointer" title="Làm mới danh sách">
                                 <span class="material-symbols-outlined text-lg">refresh</span>
                             </button>
                         </div>
                     </div>
 
                     <!-- Users Table -->
-                    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                                <thead class="bg-slate-50 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-white/10">
                                     <tr>
                                         <th class="py-3.5 px-4">Học Viên</th>
                                         <th class="py-3.5 px-4">Vai Trò</th>
@@ -885,7 +897,7 @@
                                         <th class="py-3.5 px-4 text-right">Thao Tác</th>
                                     </tr>
                                 </thead>
-                                <tbody id="users-table-body" class="divide-y divide-slate-100 font-medium">
+                                <tbody id="users-table-body" class="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-700 dark:text-slate-300">
                                     <tr><td colspan="7" class="py-12 text-center text-slate-400">Đang tải danh sách người dùng...</td></tr>
                                 </tbody>
                             </table>
@@ -897,14 +909,14 @@
                 <!-- VIEW 3: TESTS & BILINGUAL PASSAGES CMS               -->
                 <!-- ==================================================== -->
                 <section id="section-tests" class="hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-5">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 sm:p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-5 transition-colors">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                             <div>
-                                <h3 class="font-extrabold text-base text-slate-900">Quản lý Đề thi & Bài đọc Song ngữ</h3>
-                                <p class="text-xs text-slate-500 mt-0.5">Hỗ trợ toàn bộ các bộ sách Cambridge IELTS (CAM 10–21) và IELTS Actual Tests (VOL 1–9).</p>
+                                <h3 class="font-extrabold text-base text-slate-900 dark:text-white">Quản lý Đề thi &amp; Bài đọc Song ngữ</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Hỗ trợ toàn bộ các bộ sách Cambridge IELTS (CAM 10–21) và IELTS Actual Tests (VOL 1–9).</p>
                             </div>
                             <div class="flex items-center gap-3">
-                                <select id="cam-topic-select" onchange="loadTestsForTopic()" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <select id="cam-topic-select" onchange="loadTestsForTopic()" class="w-full sm:w-auto px-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="">Đang tải danh sách Đề thi...</option>
                                 </select>
                             </div>
@@ -988,17 +1000,17 @@
                 <section id="section-words" class="hidden space-y-6">
                     
                     <!-- Search & Filter Controls -->
-                    <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-2xs space-y-3">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                            <div class="relative md:col-span-2">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-3 transition-colors">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3">
+                            <div class="relative sm:col-span-2">
                                 <span class="material-symbols-outlined absolute left-3.5 top-2.5 text-slate-400 text-lg">search</span>
                                 <input type="text" id="words-search-input" onkeyup="handleWordSearch()" placeholder="Tìm theo từ vựng hoặc nghĩa tiếng Việt..." 
-                                       class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium">
+                                       class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/20 font-medium">
                             </div>
-                            <select id="words-topic-filter" onchange="loadWordsList(1)" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <select id="words-topic-filter" onchange="loadWordsList(1)" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                 <option value="">Tất cả Topics</option>
                             </select>
-                            <select id="words-quality-filter" onchange="loadWordsList(1)" class="px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                            <select id="words-quality-filter" onchange="loadWordsList(1)" class="w-full px-3.5 py-2 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                 <option value="">Tất cả chất lượng dữ liệu</option>
                                 <option value="missing_example">⚠️ Thiếu câu ví dụ</option>
                                 <option value="missing_phonetic">⚠️ Thiếu phiên âm IPA</option>
@@ -1006,20 +1018,20 @@
                             </select>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
-                            <div class="flex items-center gap-2">
-                                <span class="text-slate-500 font-semibold">Hiển thị mỗi trang:</span>
-                                <select id="words-per-page-select" onchange="changeWordsPerPage()" class="px-2 py-1 rounded-lg border border-slate-200 font-bold text-slate-700">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100 dark:border-white/10 text-xs">
+                            <div class="flex items-center justify-between sm:justify-start gap-2">
+                                <span class="text-slate-500 dark:text-slate-400 font-semibold">Hiển thị mỗi trang:</span>
+                                <select id="words-per-page-select" onchange="changeWordsPerPage()" class="px-2 py-1 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-[#161b22] font-bold text-slate-700 dark:text-slate-300">
                                     <option value="25">25 từ</option>
                                     <option value="50">50 từ</option>
                                     <option value="100">100 từ</option>
                                 </select>
                             </div>
-                            <div class="flex items-center gap-2">
-                                <button onclick="loadWordsList(1)" class="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition-colors" title="Làm mới">
+                            <div class="flex items-center justify-end gap-2">
+                                <button onclick="loadWordsList(1)" class="p-2 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 transition-colors" title="Làm mới">
                                     <span class="material-symbols-outlined text-base">refresh</span>
                                 </button>
-                                <button onclick="openWordModal()" class="px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5">
+                                <button onclick="openWordModal()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5">
                                     <span class="material-symbols-outlined text-base">add</span>
                                     <span>Thêm Từ Mới</span>
                                 </button>
@@ -1028,10 +1040,10 @@
                     </div>
 
                     <!-- Words Table -->
-                    <div class="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl border border-slate-200/90 dark:border-white/10 shadow-2xs overflow-hidden transition-colors">
                         <div class="overflow-x-auto custom-scrollbar">
                             <table class="w-full text-left text-xs">
-                                <thead class="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                                <thead class="bg-slate-50 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-white/10">
                                     <tr>
                                         <th class="py-3 px-4">Từ vựng (Word)</th>
                                         <th class="py-3 px-4">Phiên âm IPA</th>
@@ -1042,21 +1054,21 @@
                                         <th class="py-3 px-4 text-right">Thao tác</th>
                                     </tr>
                                 </thead>
-                                <tbody id="words-table-body" class="divide-y divide-slate-100 font-medium">
+                                <tbody id="words-table-body" class="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-700 dark:text-slate-300">
                                     <tr><td colspan="7" class="py-12 text-center text-slate-400">Đang tải dữ liệu từ vựng...</td></tr>
                                 </tbody>
                             </table>
                         </div>
 
                         <!-- Pagination Footer -->
-                        <div class="px-5 py-3.5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-                            <span id="words-pagination-info" class="font-bold text-slate-700">Trang 1</span>
+                        <div class="px-4 sm:px-5 py-3.5 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+                            <span id="words-pagination-info" class="font-bold text-slate-700 dark:text-slate-300">Trang 1</span>
                             <div class="flex items-center gap-1.5">
-                                <button id="btn-prev-page" onclick="changeWordPage(-1)" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold">
+                                <button id="btn-prev-page" onclick="changeWordPage(-1)" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed font-bold">
                                     Trước
                                 </button>
-                                <span id="current-page-num" class="px-3 py-1 font-black text-slate-900 bg-slate-100 rounded-lg">1</span>
-                                <button id="btn-next-page" onclick="changeWordPage(1)" class="px-3.5 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-bold">
+                                <span id="current-page-num" class="px-3 py-1 font-black text-slate-900 dark:text-white bg-slate-100 dark:bg-white/10 rounded-lg">1</span>
+                                <button id="btn-next-page" onclick="changeWordPage(1)" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-40 disabled:cursor-not-allowed font-bold">
                                     Sau
                                 </button>
                             </div>
@@ -1068,62 +1080,62 @@
                 <!-- VIEW 5: BULK VOCABULARY IMPORT                       -->
                 <!-- ==================================================== -->
                 <section id="section-bulk" class="hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs space-y-6">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 sm:p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs space-y-6 transition-colors">
                         <div>
-                            <h3 class="font-extrabold text-base text-slate-900 flex items-center gap-2">
+                            <h3 class="font-extrabold text-base text-slate-900 dark:text-white flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary text-xl">upload_file</span>
                                 <span>Nhập Từ vựng Hàng loạt (Bulk Import from Excel/Sheets)</span>
                             </h3>
-                            <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                                 Tiết kiệm thời gian bằng cách sao chép các hàng từ Excel hoặc Google Sheets và dán trực tiếp vào ô bên dưới. Hệ thống tự động nhận diện các cột được phân cách bằng dấu Tab.
                             </p>
                         </div>
 
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Chọn Topic Đích <span class="text-rose-500">*</span></label>
-                                <select id="bulk-topic-select" onchange="loadBulkPassages()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Chọn Topic Đích <span class="text-rose-500">*</span></label>
+                                <select id="bulk-topic-select" onchange="loadBulkPassages()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="">-- Chọn Topic --</option>
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Chọn Bài đọc (Passage) - Tùy chọn</label>
-                                <select id="bulk-passage-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Chọn Bài đọc (Passage) - Tùy chọn</label>
+                                <select id="bulk-passage-select" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-[#161b22] text-xs font-medium text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20">
                                     <option value="">-- Toàn bộ Topic / Không gán Passage --</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <label class="block text-xs font-bold text-slate-700">Dữ liệu từ vựng (Tab-separated) <span class="text-rose-500">*</span></label>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Dữ liệu từ vựng (Tab-separated) <span class="text-rose-500">*</span></label>
                                 <span class="text-[11px] text-slate-400">Thứ tự cột khuyến nghị: <strong>Word [Tab] POS [Tab] IPA [Tab] Nghĩa [Tab] Ví dụ</strong></span>
                             </div>
                             <textarea id="bulk-paste-input" rows="8" placeholder="abandon	v	/əˈbændən/	từ bỏ, ruồng bỏ	They had to abandon their car in the heavy snow.
 abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to support our conclusion." 
-                                      class="w-full p-3.5 rounded-xl border border-slate-300 font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 custom-scrollbar"></textarea>
+                                      class="w-full p-3.5 rounded-xl border border-slate-300 dark:border-white/10 bg-white dark:bg-white/5 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 custom-scrollbar"></textarea>
                         </div>
 
-                        <div class="flex items-center justify-between pt-2">
-                            <button type="button" onclick="parseBulkPreview()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-colors flex items-center gap-1.5">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
+                            <button type="button" onclick="parseBulkPreview()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
                                 <span class="material-symbols-outlined text-[16px]">visibility</span>
                                 <span>Xem trước dữ liệu (Preview)</span>
                             </button>
-                            <button type="button" id="btn-execute-bulk" onclick="executeBulkImport()" disabled class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5">
+                            <button type="button" id="btn-execute-bulk" onclick="executeBulkImport()" disabled class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer">
                                 <span class="material-symbols-outlined text-[16px]">cloud_upload</span>
                                 <span>Thực hiện Nhập vào Database</span>
                             </button>
                         </div>
 
                         <!-- Preview Table Container -->
-                        <div id="bulk-preview-container" class="hidden space-y-3 pt-4 border-t border-slate-200">
+                        <div id="bulk-preview-container" class="hidden space-y-3 pt-4 border-t border-slate-200 dark:border-white/10">
                             <div class="flex items-center justify-between">
-                                <h4 class="font-bold text-xs text-slate-900">Bản xem trước (<span id="bulk-preview-count">0</span> từ hợp lệ)</h4>
-                                <span class="text-[11px] text-emerald-600 font-bold">Sẵn sàng nhập</span>
+                                <h4 class="font-bold text-xs text-slate-900 dark:text-white">Bản xem trước (<span id="bulk-preview-count">0</span> từ hợp lệ)</h4>
+                                <span class="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold">Sẵn sàng nhập</span>
                             </div>
-                            <div class="max-h-60 overflow-y-auto border border-slate-200 rounded-xl custom-scrollbar">
+                            <div class="max-h-60 overflow-y-auto border border-slate-200 dark:border-white/10 rounded-xl custom-scrollbar">
                                 <table class="w-full text-left text-xs">
-                                    <thead class="bg-slate-50 text-slate-500 font-bold text-[10px] uppercase tracking-wider sticky top-0">
+                                    <thead class="bg-slate-50 dark:bg-white/[0.02] text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider sticky top-0">
                                         <tr>
                                             <th class="py-2 px-3">#</th>
                                             <th class="py-2 px-3">Word</th>
@@ -1133,7 +1145,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                                             <th class="py-2 px-3">Ví dụ</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="bulk-preview-tbody" class="divide-y divide-slate-100 font-medium"></tbody>
+                                    <tbody id="bulk-preview-tbody" class="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-700 dark:text-slate-300"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -1146,19 +1158,19 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 <section id="section-performance" class="hidden space-y-6">
                     
                     <!-- Header & Real-time Benchmark Action Bar -->
-                    <div class="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="bg-white dark:bg-[#161b22] rounded-2xl p-4 sm:p-6 border border-slate-200/90 dark:border-white/10 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-colors">
                         <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200 mb-2">
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold border border-emerald-200 dark:border-emerald-800/40 mb-2">
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 <span>Realtime Diagnostic Engine</span>
                             </div>
-                            <h3 class="font-black text-xl text-slate-900 tracking-tight">Kiểm tra Hiệu năng Website & Database</h3>
-                            <p class="text-xs text-slate-500 mt-1">Đo lường thời gian thực độ trễ mạng, phản hồi cơ sở dữ liệu Supabase, tài nguyên CDN và bộ nhớ trình duyệt.</p>
+                            <h3 class="font-black text-xl text-slate-900 dark:text-white tracking-tight">Kiểm tra Hiệu năng Website &amp; Database</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Đo lường thời gian thực độ trễ mạng, phản hồi cơ sở dữ liệu Supabase, tài nguyên CDN và bộ nhớ trình duyệt.</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span id="perf-last-run" class="text-[11px] text-slate-400 font-medium">Chưa chạy đo lường</span>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between sm:justify-end gap-3 shrink-0">
+                            <span id="perf-last-run" class="text-[11px] text-slate-400 font-medium text-center sm:text-right">Chưa chạy đo lường</span>
                             <button onclick="runPerformanceBenchmark()" id="btn-run-benchmark" 
-                                    class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark active:scale-[0.98] text-white text-xs font-bold flex items-center gap-2 shadow-md shadow-primary/20 transition-all cursor-pointer">
+                                    class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark active:scale-[0.98] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all cursor-pointer">
                                 <span class="material-symbols-outlined text-[18px]">speed</span>
                                 <span>Chạy Đo Lường Ngay</span>
                             </button>
@@ -1552,7 +1564,7 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                                     <h4 class="font-extrabold text-base text-slate-900 dark:text-white">Nhật ký Lỗi Hệ thống (System Error Logs)</h4>
                                     <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tự động ghi lại các ngoại lệ JavaScript runtime (`window.onerror`), lỗi Promise (`unhandledrejection`) từ thiết bị người học.</p>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="flex flex-wrap items-center gap-2">
                                     <span id="error-logs-count-badge" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-mono font-bold text-xs">0 logs</span>
                                     <button onclick="loadSystemErrorLogs(true)" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer">
                                         <span class="material-symbols-outlined text-[16px]">refresh</span>
@@ -2433,9 +2445,39 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
             window.location.reload();
         }
 
+        // MOBILE SIDEBAR CONTROLLER
+        function toggleAdminSidebar(open) {
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            if (!sidebar || !backdrop) return;
+            if (open) {
+                sidebar.classList.remove('-translate-x-full');
+                sidebar.classList.add('translate-x-0');
+                backdrop.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                sidebar.classList.remove('translate-x-0');
+                backdrop.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Đóng sidebar khi nhấn phím Escape hoặc phóng to màn hình desktop
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') toggleAdminSidebar(false);
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) toggleAdminSidebar(false);
+        });
+
         // 2. TAB SWITCHING
         async function switchTab(tab) {
             currentTab = tab;
+
+            // Tự động đóng drawer sidebar trên mobile và cuộn lên đầu nội dung
+            toggleAdminSidebar(false);
+            try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(_) {}
             
             // Cập nhật giao diện Sidebar
             document.querySelectorAll('.admin-nav-item').forEach(btn => {
