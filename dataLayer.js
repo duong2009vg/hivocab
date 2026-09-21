@@ -2438,7 +2438,6 @@ window.HiDB = (() => {
                 user_id
             `, { count: 'exact' })
             .eq('is_public', true)
-            .not('author_name', 'is', null)
             .not('name', 'ilike', '%mai phương%')
             .not('name', 'ilike', '%mai phuong%')
             .not('author_name', 'ilike', '%mai phương%')
@@ -2461,12 +2460,13 @@ window.HiDB = (() => {
             }
         }
 
-        // Sắp xếp
-        if (sort === 'popular' || sort === 'likes') {
+        // Sắp xếp: mặc định bài mới công khai luôn xuất hiện ngay trên đầu bảng feed
+        if (sort === 'likes') {
             query = query.order('like_count', { ascending: false }).order('created_at', { ascending: false });
         } else if (sort === 'clones') {
             query = query.order('clone_count', { ascending: false }).order('created_at', { ascending: false });
         } else {
+            // Mặc định: bài mới công khai luôn ở đầu feed
             query = query.order('created_at', { ascending: false });
         }
 
@@ -2824,23 +2824,23 @@ window.HiDB = (() => {
         const safeTags = Array.isArray(tags) ? tags : String(tags || '').split(',').map(t => t.trim()).filter(Boolean);
 
         const updatePayload = {
-            is_public: true
+            is_public: true,
+            author_name: authorName,
+            author_avatar: authorAvatar,
+            created_at: new Date().toISOString()
         };
-        if (authorName) updatePayload.author_name = authorName;
-        if (authorAvatar) updatePayload.author_avatar = authorAvatar;
         if (description) updatePayload.description = String(description).trim();
         if (safeTags && safeTags.length > 0) updatePayload.tags = safeTags;
 
         let { error } = await client
             .from('topics')
             .update(updatePayload)
-            .eq('id', topicId)
-            .eq('user_id', user.id);
+            .eq('id', topicId);
 
         if (error) {
             const res = await client
                 .from('topics')
-                .update(updatePayload)
+                .update({ is_public: true, author_name: authorName })
                 .eq('id', topicId);
             if (res.error) throw res.error;
         }
@@ -2861,16 +2861,9 @@ window.HiDB = (() => {
         let { error } = await client
             .from('topics')
             .update({ is_public: false })
-            .eq('id', topicId)
-            .eq('user_id', user.id);
+            .eq('id', topicId);
 
-        if (error) {
-            const res = await client
-                .from('topics')
-                .update({ is_public: false })
-                .eq('id', topicId);
-            if (res.error) throw res.error;
-        }
+        if (error) throw error;
 
         _topicsCache = null;
         return true;

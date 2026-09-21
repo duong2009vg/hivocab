@@ -1170,6 +1170,11 @@
             // Re-render để hiển thị đầy đủ thanh action công khai (chia sẻ link)
             renderMyTopicsList(state.myTopics);
 
+            // Tải lại feed cộng đồng ngay để sẵn sàng hiển thị khi chuyển tab
+            setTimeout(() => {
+                fetchPublicFeed();
+            }, 100);
+
         } catch (err) {
             console.error('[handleTopicPublicToggle] error:', err);
             // Revert lại trạng thái cũ nếu lỗi
