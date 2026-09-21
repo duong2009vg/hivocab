@@ -2661,7 +2661,7 @@ window.HiDB = (() => {
     }
 
     /**
-     * 1-Click Clone bộ từ vựng từ Thư viện về kho cá nhân.
+     * 1-Click Clone bộ từ vựng từ Thư viện về kho cá nhân, mặc định lưu vào thư mục "Từ vựng của tôi".
      */
     async function clonePublicTopic(topicId) {
         await ensureReady(4000).catch(() => {});
@@ -2671,16 +2671,145 @@ window.HiDB = (() => {
             throw new Error('Vui lòng đăng nhập để lưu bộ từ này về kho cá nhân!');
         }
 
-        const { data: newTopicId, error } = await client.rpc('clone_public_topic', {
-            target_topic_id: topicId,
-            target_user_id: user.id
-        });
+        const targetFolder = 'Từ vựng của tôi';
 
-        if (error) throw error;
+        // Đảm bảo thư mục lưu trong localStorage
+        try {
+            const stored = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+            if (!stored.some(f => f.name.toLowerCase() === targetFolder.toLowerCase())) {
+                stored.unshift({ name: targetFolder, isExam: false });
+                localStorage.setItem('hivocab_user_folders', JSON.stringify(stored));
+            }
+        } catch (_) {}
+
+        let newTopicId = null;
+
+        // Thử gọi RPC clone_public_topic trước
+        try {
+            const { data: rpcId, error: rpcErr } = await client.rpc('clone_public_topic', {
+                target_topic_id: topicId,
+                target_user_id: user.id
+            });
+            if (!rpcErr && rpcId) {
+                newTopicId = rpcId;
+                // Cập nhật category về "Từ vựng của tôi"
+                await client.from('topics').update({ category: targetFolder }).eq('id', newTopicId).catch(() => {});
+            }
+        } catch (_) {}
+
+        // Fallback kiên cố nếu RPC không tồn tại hoặc lỗi
+        if (!newTopicId) {
+            // 1. Lấy thông tin topic nguồn
+            const { data: srcTopic, error: srcErr } = await client
+                .from('topics')
+                .select('*')
+                .eq('id', topicId)
+                .single();
+            if (srcErr || !srcTopic) {
+                throw new Error('Không tìm thấy bộ từ vựng nguồn để lưu!');
+            }
+
+            // 2. Tạo topic mới cho người dùng
+            const { data: newTopic, error: createErr } = await client
+                .from('topics')
+                .insert({
+                    user_id: user.id,
+                    name: srcTopic.name,
+                    category: targetFolder,
+                    icon: srcTopic.icon || 'folder',
+                    description: srcTopic.description || '',
+                    is_public: false
+                })
+                .select()
+                .single();
+
+            if (createErr || !newTopic) {
+                throw createErr || new Error('Không thể tạo bộ từ vựng mới.');
+            }
+            newTopicId = newTopic.id;
+
+            // 3. Lấy tất cả từ vựng từ topic nguồn
+            const { data: srcWords } = await client
+                .from('words')
+                .select('*')
+                .eq('topic_id', topicId);
+
+            // 4. Chèn từ vựng vào topic mới
+            if (srcWords && srcWords.length > 0) {
+                const wordsToInsert = srcWords.map(w => ({
+                    topic_id: newTopicId,
+                    user_id: user.id,
+                    word: w.word,
+                    meaning: w.meaning,
+                    phonetic: w.phonetic,
+                    part_of_speech: w.part_of_speech || w.pos,
+                    example: w.example || w.example_sentence,
+                    example_vi: w.example_vi,
+                    audio_url: w.audio_url,
+                    notes: w.notes
+                }));
+
+                // Chèn theo lô 50 từ để tránh vượt ngưỡng giới hạn payload
+                const chunkSize = 50;
+                for (let i = 0; i < wordsToInsert.length; i += chunkSize) {
+                    const chunk = wordsToInsert.slice(i, i + chunkSize);
+                    await client.from('words').insert(chunk).catch(err => console.warn('[clonePublicTopic] Word insert error:', err));
+                }
+            }
+
+            // 5. Tăng lượt clone trên topic nguồn
+            try {
+                const curClones = Number(srcTopic.clone_count || 0) + 1;
+                await client.from('topics').update({ clone_count: curClones }).eq('id', topicId);
+            } catch (_) {}
+        }
 
         _topicsCache = null;
         _invalidateVocabularyCache();
         return newTopicId;
+    }
+
+    /**
+     * Lấy danh sách các topic do chính người dùng hiện tại tạo (My Decks)
+     */
+    async function getUserCreatedTopics() {
+        await ensureReady(4000).catch(() => {});
+        const user = await getCurrentUser();
+        if (!user) return [];
+
+        const client = _getClient();
+        try {
+            const { data, error } = await client
+                .from('topics')
+                .select(`
+                    id,
+                    name,
+                    icon,
+                    category,
+                    description,
+                    is_public,
+                    tags,
+                    like_count,
+                    clone_count,
+                    created_at,
+                    words (id)
+                `)
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            return (data || []).map(t => ({
+                ...t,
+                word_count: (t.words || []).length,
+                totalWords: (t.words || []).length
+            }));
+        } catch (err) {
+            console.warn('[getUserCreatedTopics] Fallback to getTopics filter:', err);
+            // Fallback lấy toàn bộ topics và lọc theo user_id
+            const all = await getTopics().catch(() => []);
+            return all.filter(t => t.user_id === user.id);
+        }
     }
 
     /**
@@ -2850,6 +2979,7 @@ window.HiDB = (() => {
         publishTopic,
         unpublishTopic,
         getUserLikedTopics,
+        getUserCreatedTopics,
     };
 
 })();

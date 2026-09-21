@@ -639,6 +639,11 @@ const HiMock = (() => {
             return [];
         },
 
+        getUserCreatedTopics: async () => {
+            const topics = _load(STORAGE_KEYS.topics, SAMPLE_TOPICS);
+            return topics.filter(t => t.user_id || t.id.startsWith('cloned_') || t.id.startsWith('custom_'));
+        },
+
         init: () => { console.log('[HiMock] Mock DB initialized'); },
     };
 

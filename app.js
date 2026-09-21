@@ -489,6 +489,9 @@ window.addEventListener('DOMContentLoaded', () => {
     // Khởi tạo trang ban đầu
     const authInfo = window._parseAuthRedirectInfo();
     const h = window.location.hash.slice(1);
+    const searchParams = new URLSearchParams(window.location.search || '');
+    const hasDeepDeck = searchParams.has('topic') || searchParams.has('deck');
+    const deepDeckId = searchParams.get('topic') || searchParams.get('deck');
 
     if (authInfo.hasError) {
         // Lưu thông tin lỗi để hiển thị modal cảnh báo rõ ràng khi DOMContentLoaded sẵn sàng
@@ -502,6 +505,8 @@ window.addEventListener('DOMContentLoaded', () => {
         window.navigateTo(isLoggedIn ? 'dashboard' : 'landing', true);
     } else if (h && h !== 'landing' && h !== 'login') {
         window.navigateTo(h);
+    } else if (hasDeepDeck && deepDeckId) {
+        window.navigateTo('library?topic=' + encodeURIComponent(deepDeckId));
     } else {
         if (isLoggedIn) {
             window.navigateTo('dashboard');
@@ -1281,6 +1286,7 @@ window._activeCategory = 'all';
 window._allTopics      = [];
 window._topicCategories = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
 const DEFAULT_TOPIC_CATEGORIES = [
+    'Từ vựng của tôi',
     'IELTS Actual Tests',
     'CAM',
     'Destination C1-C2',
@@ -1300,6 +1306,7 @@ function _topicCategoryValue(category) {
 
 function _topicCategoryIcon(category) {
     const compact = _topicCategoryValue(category).toLowerCase().replace(/[\s/_-]+/g, '');
+    if (compact.includes('tuvungcuatoi') || compact.includes('cuatoi')) return 'folder_special';
     if (compact.includes('actual') || compact.includes('vol')) return 'library_books';
     if (compact.includes('dest')) return 'school';
     if (compact === 'cam' || compact.includes('cambridge')) return 'menu_book';
@@ -1314,9 +1321,15 @@ function _topicCategoryIcon(category) {
 
 function _getSavedFolders() {
     try {
-        return JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+        let folders = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+        if (!Array.isArray(folders)) folders = [];
+        if (!folders.some(f => (f?.name || '').trim().toLowerCase() === 'từ vựng của tôi')) {
+            folders.unshift({ name: 'Từ vựng của tôi', isExam: false });
+            try { localStorage.setItem('hivocab_user_folders', JSON.stringify(folders)); } catch(e) {}
+        }
+        return folders;
     } catch {
-        return [];
+        return [{ name: 'Từ vựng của tôi', isExam: false }];
     }
 }
 
@@ -5175,8 +5188,9 @@ async function bootstrapHiDB() {
             if (!window._isPasswordRecoveryMode) {
                 const curPage = document.querySelector('.page.active')?.id;
                 const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+                const cleanHash = rawHash.split('?')[0];
                 const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
-                const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login' && !rawHash.includes('access_token=');
+                const hasTargetRoute = cleanHash && cleanHash !== 'landing' && cleanHash !== 'login' && !rawHash.includes('access_token=');
 
                 if (isLandingOrLogin || isAuthHash) {
                     if (!hasTargetRoute) {
@@ -5186,9 +5200,11 @@ async function bootstrapHiDB() {
             }
         }
 
-        // Tự động load thư viện nếu đang ở trang library hoặc hash #library
+        // Tự động load thư viện nếu đang ở trang library hoặc hash #library hoặc query param deck
         const activePageId = document.querySelector('.page.active')?.id;
-        if (window.location.hash.includes('library') || activePageId === 'page-library') {
+        const search = window.location.search || '';
+        const hash = window.location.hash || '';
+        if (hash.includes('library') || activePageId === 'page-library' || search.includes('topic=') || search.includes('deck=')) {
             if (window.loadCommunityLibrary) {
                 window.loadCommunityLibrary();
             }

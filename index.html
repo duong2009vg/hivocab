@@ -1009,7 +1009,7 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
             document.documentElement.classList.add('user-logged-in');
             var curHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
             var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
-            var initialRoute = (!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) ? 'dashboard' : curHash;
+            var initialRoute = (!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) ? 'dashboard' : curHash.split('?')[0];
             document.documentElement.setAttribute('data-initial-route', initialRoute);
         }
     } catch (e) {}
@@ -1513,12 +1513,6 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
                     <span class="material-symbols-outlined text-rose-500 text-[15px]">favorite</span>
                 </button>
             </div>
-
-            <!-- Nút chia sẻ nhanh -->
-            <button onclick="window.openComposeThreadModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary font-bold text-xs transition-all active:scale-95 cursor-pointer shrink-0">
-                <span class="material-symbols-outlined text-[17px]">add_circle</span>
-                <span class="hidden sm:inline">Chia sẻ bộ từ</span>
-            </button>
         </div>
 
         <!-- Search bar + Sort filter -->
@@ -1541,20 +1535,6 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
         <!-- Horizontal Trending Tag Pills -->
         <div class="flex items-center gap-2 overflow-x-auto px-3 sm:px-0 py-1 scrollbar-hide select-none" id="lib-tags-bar">
             <!-- Rendered by library.js -->
-        </div>
-
-        <!-- Quick Compose Post Card (Exact Threads style: Avatar + Username + What's new?) -->
-        <div id="lib-quick-compose" class="px-4 py-3 sm:rounded-2xl sm:border border-b border-outline-variant/15 dark:border-neutral-800/80 bg-surface dark:bg-neutral-950/40 flex items-center gap-3 cursor-pointer hover:bg-surface-container-lowest/40 transition-colors" onclick="window.openComposeThreadModal()">
-            <div id="lib-quick-avatar" class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-container-high text-on-surface flex items-center justify-center font-black text-xs shrink-0 overflow-hidden bg-cover bg-center border border-outline-variant/20">
-                <span class="material-symbols-outlined text-[20px] text-outline">person</span>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p id="lib-quick-username" class="font-bold text-sm text-on-surface truncate">hivocab</p>
-                <p class="text-xs sm:text-sm text-outline truncate mt-0.5">Có gì mới? Đăng bộ từ vựng của bạn...</p>
-            </div>
-            <button type="button" class="px-3.5 py-1.5 rounded-full bg-neutral-900 text-white dark:bg-white dark:text-neutral-950 font-bold text-xs shrink-0 active:scale-95 transition-transform cursor-pointer shadow-2xs">
-                Đăng
-            </button>
         </div>
 
         <!-- Loading spinner -->
@@ -1617,10 +1597,6 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
                 <p id="td-subtitle" class="text-on-surface-variant mt-sm">Chọn một lesson để bắt đầu học</p>
             </div>
             <div class="flex items-center gap-2 sm:gap-3">
-                <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-3.5 py-2.5 rounded-xl transition-all active:scale-95 flex items-center gap-1.5 shrink-0 cursor-pointer" title="Chia sẻ bộ từ lên Thư viện Cộng đồng">
-                    <span class="material-symbols-outlined text-[18px]">public</span>
-                    <span>Chia sẻ Thư viện</span>
-                </button>
                 <button onclick="window.openAddWordModal()" class="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <span class="material-symbols-outlined text-[18px]">add</span>
                     <span>Thêm từ vựng</span>
@@ -1637,9 +1613,6 @@ html:not(.user-logged-in):not(.router-ready) #page-landing { display: block; }
                         <p id="td-subtitle-mobile" class="text-sm text-on-surface-variant mt-1">Chọn một lesson để bắt đầu học</p>
                     </div>
                     <div class="flex items-center gap-1.5 shrink-0">
-                        <button onclick="window.openComposeThreadModal(window._currentTopicId)" class="bg-primary/10 text-primary font-bold text-xs p-2.5 rounded-xl transition-all active:scale-95 flex items-center justify-center shrink-0 cursor-pointer" title="Chia sẻ Thư viện">
-                            <span class="material-symbols-outlined text-[16px]">public</span>
-                        </button>
                         <button type="button" onclick="event.stopPropagation(); window.openAddWordModal();" class="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:opacity-85 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer" style="touch-action: manipulation; -webkit-tap-highlight-color: transparent;">
                             <span class="material-symbols-outlined text-[16px] pointer-events-none">add</span>
                             <span class="pointer-events-none">Thêm từ</span>

@@ -160,25 +160,6 @@
         // Khởi tạo Supabase Realtime channel lắng nghe bài đăng mới
         initRealtimeSubscription();
 
-        // Cập nhật thông tin và avatar người dùng trên compose box
-        try {
-            if (typeof HiDB !== 'undefined' && HiDB.getCurrentUser) {
-                const user = await HiDB.getCurrentUser();
-                const avatarEl = document.getElementById('lib-quick-avatar');
-                const userEl = document.getElementById('lib-quick-username');
-                const name = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'hivocab';
-                const avatarUrl = user?.user_metadata?.avatar_url;
-
-                if (userEl) userEl.textContent = name;
-                if (avatarUrl) {
-                    if (avatarEl) {
-                        avatarEl.style.backgroundImage = `url('${avatarUrl}')`;
-                        avatarEl.innerHTML = '';
-                    }
-                }
-            }
-        } catch (e) {}
-
         if (state.currentTab === 'feed') {
             await fetchPublicFeed();
         } else if (state.currentTab === 'my') {
@@ -187,13 +168,22 @@
             await fetchLikedTopics();
         }
 
-        // Kiểm tra deep link chia sẻ #library?topic=UUID
+        // Kiểm tra deep link chia sẻ #library?topic=UUID hoặc ?topic=... hoặc ?deck=...
+        let deepTopicId = null;
         const hash = window.location.hash || '';
-        if (hash.includes('topic=')) {
-            const match = hash.match(/topic=([^&]+)/);
-            if (match && match[1]) {
-                setTimeout(() => openThreadDetail(match[1]), 300);
-            }
+        const search = window.location.search || '';
+        const hashMatch = hash.match(/[?&](?:topic|deck)=([^&]+)/);
+        const searchMatch = search.match(/[?&](?:topic|deck)=([^&]+)/);
+        if (hashMatch && hashMatch[1]) {
+            deepTopicId = decodeURIComponent(hashMatch[1]);
+        } else if (searchMatch && searchMatch[1]) {
+            deepTopicId = decodeURIComponent(searchMatch[1]);
+        }
+
+        if (deepTopicId) {
+            setTimeout(() => {
+                openThreadDetail(deepTopicId);
+            }, 300);
         }
     }
 
@@ -207,22 +197,18 @@
 
         const searchContainer = document.getElementById('lib-search-container');
         const tagsBar = document.getElementById('lib-tags-bar');
-        const quickCompose = document.getElementById('lib-quick-compose');
 
         if (tab === 'feed') {
             if (searchContainer) searchContainer.classList.remove('hidden');
             if (tagsBar) tagsBar.classList.remove('hidden');
-            if (quickCompose) quickCompose.classList.remove('hidden');
             fetchPublicFeed();
         } else if (tab === 'my') {
             if (searchContainer) searchContainer.classList.add('hidden');
             if (tagsBar) tagsBar.classList.add('hidden');
-            if (quickCompose) quickCompose.classList.remove('hidden');
             fetchMyTopics();
         } else if (tab === 'liked') {
             if (searchContainer) searchContainer.classList.add('hidden');
             if (tagsBar) tagsBar.classList.add('hidden');
-            if (quickCompose) quickCompose.classList.add('hidden');
             fetchLikedTopics();
         }
     }
@@ -284,15 +270,19 @@
     async function fetchMyTopics() {
         setLoading(true);
         try {
-            let allTopics = [];
-            if (typeof HiDB !== 'undefined' && HiDB.getTopics) {
-                allTopics = await HiDB.getTopics();
+            let myCreatedTopics = [];
+            if (typeof HiDB !== 'undefined' && HiDB.getUserCreatedTopics) {
+                myCreatedTopics = await HiDB.getUserCreatedTopics();
+            } else if (typeof HiDB !== 'undefined' && HiDB.getTopics) {
+                const topics = await HiDB.getTopics();
+                const user = HiDB.currentUser;
+                myCreatedTopics = user ? topics.filter(t => t.user_id === user.id) : [];
             }
-            state.myTopics = allTopics || [];
+            state.myTopics = myCreatedTopics || [];
             renderMyTopicsList(state.myTopics);
         } catch (err) {
             console.error('[Library] fetchMyTopics error:', err);
-            renderFeedError(err.message || 'Không thể tải danh sách bộ từ.');
+            renderFeedError(err.message || 'Không thể tải danh sách bộ từ của bạn.');
         } finally {
             setLoading(false);
         }
@@ -554,66 +544,76 @@
         if (empty) empty.classList.add('hidden');
 
         list.innerHTML = `
-            <div class="bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0">
-                    <span class="material-symbols-outlined text-primary text-2xl">public</span>
-                    <div class="min-w-0">
-                        <p class="text-xs sm:text-sm font-bold text-on-surface">Chia sẻ kiến thức cùng cộng đồng</p>
-                        <p class="text-[11px] text-on-surface-variant truncate">Đưa các bộ từ vựng tâm đắc của bạn lên thư viện mở của HiVocab.</p>
-                    </div>
+            <div class="bg-surface-container-low dark:bg-neutral-900/60 border border-outline-variant/20 rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <span class="material-symbols-outlined text-2xl">public</span>
                 </div>
-                <button onclick="window.openComposeThreadModal()" class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-bold text-xs shrink-0 active:scale-95 shadow-xs">
-                    + Chia sẻ ngay
-                </button>
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs sm:text-sm font-bold text-on-surface">Bộ từ vựng cá nhân của bạn</p>
+                    <p class="text-[11px] text-on-surface-variant">Gạt công tắc công khai để chia sẻ bộ từ với cộng đồng người học trên Thư viện mở.</p>
+                </div>
             </div>
             ${topics.map(topic => {
                 const isPublic = !!topic.is_public;
                 const likes = Number(topic.like_count || 0);
                 const clones = Number(topic.clone_count || 0);
+                const tags = Array.isArray(topic.tags) ? topic.tags : [];
 
                 return `
-                    <div class="bg-surface rounded-2xl p-4 border border-outline-variant/20 hover:border-outline-variant/40 transition-all flex flex-col gap-3">
-                        <div class="flex items-start justify-between gap-2">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-base shrink-0">
+                    <div class="bg-surface rounded-2xl p-4 border border-outline-variant/20 hover:border-outline-variant/40 transition-all flex flex-col gap-3" id="my-topic-card-${esc(topic.id)}">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-black text-lg shrink-0">
                                     <span class="material-symbols-outlined">${esc(topic.icon || 'auto_stories')}</span>
                                 </div>
-                                <div>
-                                    <h4 class="font-bold text-sm sm:text-base text-on-surface">${esc(topic.name)}</h4>
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="font-bold text-sm sm:text-base text-on-surface truncate">${esc(topic.name)}</h4>
                                     <div class="flex items-center gap-2 mt-0.5 text-xs text-outline">
                                         <span>${topic.word_count || 0} từ</span>
                                         <span>•</span>
-                                        <span class="font-semibold ${isPublic ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500'}">
-                                            ${isPublic ? '🌐 Công khai trên Thư viện' : '🔒 Riêng tư'}
+                                        <span class="font-semibold topic-status-label ${isPublic ? 'text-primary' : 'text-slate-500'}">
+                                            ${isPublic ? '🌐 Công khai' : '🔒 Riêng tư'}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             
-                            <div class="flex items-center gap-1.5 shrink-0">
-                                ${isPublic ? `
-                                    <button type="button" onclick="window.handleUnpublishTopic('${esc(topic.id)}')"
-                                        class="px-2.5 py-1 rounded-full text-xs font-bold text-outline hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors border border-outline-variant/30">
-                                        Thu hồi
-                                    </button>
-                                ` : `
-                                    <button type="button" onclick="window.handlePublishUserTopic('${esc(topic.id)}')"
-                                        class="px-3 py-1 rounded-full text-xs font-bold text-primary hover:bg-primary/10 transition-colors border border-primary/30">
-                                        Chia sẻ
-                                    </button>
-                                `}
-                                <button type="button" onclick="window._openTopic('${esc(topic.id)}')"
-                                    class="px-3 py-1 rounded-full text-xs font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-colors">
+                            <!-- Actions: Settings-style Toggle Switch + Vào học -->
+                            <div class="flex items-center gap-3 shrink-0">
+                                <div class="flex items-center gap-2" title="${isPublic ? 'Đang công khai - Gạt để chuyển sang riêng tư' : 'Đang riêng tư - Gạt để công khai lên thư viện'}">
+                                    <span class="text-xs font-semibold text-on-surface-variant hidden sm:inline">
+                                        ${isPublic ? 'Công khai' : 'Riêng tư'}
+                                    </span>
+                                    <label class="relative inline-flex items-center cursor-pointer select-none">
+                                        <input type="checkbox" class="sr-only peer my-topic-toggle" ${isPublic ? 'checked' : ''} onchange="window.handleTopicPublicToggle('${esc(topic.id)}', this.checked, this)">
+                                        <div class="w-11 h-6 bg-outline-variant/60 dark:bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    </label>
+                                </div>
+
+                                <button type="button" onclick="window._openTopic ? window._openTopic('${esc(topic.id)}') : (window.location.hash = 'topic-detail')"
+                                    class="px-3 py-1.5 rounded-xl text-xs font-bold bg-surface-container-high hover:bg-surface-container-highest text-on-surface transition-colors cursor-pointer">
                                     Vào học
                                 </button>
                             </div>
                         </div>
 
                         ${isPublic ? `
-                            <div class="flex items-center gap-4 text-xs text-on-surface-variant pt-2 border-t border-outline-variant/10">
-                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-rose-500">favorite</span> ${likes} lượt thích</span>
-                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary">bookmark_add</span> ${clones} lượt lưu về</span>
-                                ${topic.description ? `<p class="text-[11px] text-outline truncate flex-1 ml-2">"${esc(topic.description)}"</p>` : ''}
+                            <div class="flex items-center justify-between gap-3 text-xs text-on-surface-variant pt-2.5 border-t border-outline-variant/10">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <span class="flex items-center gap-1 shrink-0"><span class="material-symbols-outlined text-[16px] text-rose-500">favorite</span> ${likes} thích</span>
+                                    <span class="flex items-center gap-1 shrink-0"><span class="material-symbols-outlined text-[16px] text-primary">bookmark_add</span> ${clones} lượt lưu</span>
+                                    ${tags.length > 0 ? `
+                                        <div class="hidden sm:flex items-center gap-1 truncate">
+                                            ${tags.slice(0, 3).map(t => `<span class="text-[10px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">#${esc(t)}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+
+                                <button type="button" onclick="window.handleThreadShare('${esc(topic.id)}', '${esc(topic.name)}', event)"
+                                    class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold text-primary hover:bg-primary/10 transition-colors cursor-pointer shrink-0" title="Sao chép liên kết chia sẻ">
+                                    <span class="material-symbols-outlined text-[16px]">share</span>
+                                    <span>Chia sẻ link</span>
+                                </button>
                             </div>
                         ` : ''}
                     </div>
@@ -825,17 +825,38 @@
     /**
      * Share topic link
      */
+    function _fallbackCopyText(text) {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            ta.style.top = '-9999px';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            window.showHiToast('Đã sao chép liên kết bộ từ vựng! 📋', 'success');
+        } catch (_) {
+            prompt('Sao chép liên kết bên dưới:', text);
+        }
+    }
+
     function handleThreadShare(topicId, title, event) {
         if (event) event.stopPropagation();
-        const url = `${window.location.origin}${window.location.pathname}#library?topic=${topicId}`;
-        if (navigator.clipboard) {
+        const origin = window.location.origin;
+        const path = window.location.pathname.replace(/\/index\.html$/, '/');
+        const url = `${origin}${path}#library?topic=${encodeURIComponent(topicId)}`;
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(url).then(() => {
                 window.showHiToast('Đã sao chép liên kết bộ từ vựng! 📋', 'success');
             }).catch(() => {
-                window.showHiToast(`Liên kết: ${url}`, 'info');
+                _fallbackCopyText(url);
             });
         } else {
-            window.showHiToast(`Liên kết: ${url}`, 'info');
+            _fallbackCopyText(url);
         }
     }
 
@@ -1032,123 +1053,226 @@
         }
         document.body.style.overflow = '';
         state.activeTopicDetail = null;
+
+        // Reset hash / search if it had topic= or deck=
+        if (window.location.hash.includes('topic=') || window.location.hash.includes('deck=')) {
+            try {
+                history.replaceState(null, '', window.location.pathname + '#library');
+            } catch (_) {
+                window.location.hash = 'library';
+            }
+        }
+    }
+
+    let _pendingPublishTopicId = null;
+    let _pendingPublishToggleEl = null;
+
+    const SUGGESTED_HASHTAGS = [
+        'IELTS', 'TOEIC', 'Giao tiếp', 'Cam19', 'SAT', 'Collocations', 
+        'Idioms', 'Từ vựng C1-C2', 'THPT Quốc Gia', 'Oxford 3000', 'B1-B2'
+    ];
+
+    /**
+     * Handle switch toggle in "Bộ từ của tôi"
+     */
+    async function handleTopicPublicToggle(topicId, isChecked, toggleEl) {
+        if (!topicId) return;
+
+        if (isChecked) {
+            // Revert switch temporarily until confirmed in modal
+            toggleEl.checked = false;
+            _pendingPublishTopicId = topicId;
+            _pendingPublishToggleEl = toggleEl;
+            openHashtagModal(topicId);
+        } else {
+            // Turn off -> unpublish
+            await handleUnpublishTopic(topicId, toggleEl);
+        }
     }
 
     /**
-     * Compose / Share Topic Modal
+     * Open Hashtag Picker Modal for publishing
      */
-    async function openComposeThreadModal(preselectedTopicId = null) {
-        const modal = document.getElementById('modal-compose-thread');
-        const select = document.getElementById('compose-topic-select');
-        if (!modal || !select) return;
+    function openHashtagModal(topicId) {
+        const modal = document.getElementById('modal-hashtag-publish');
+        if (!modal) return;
+
+        _pendingPublishTopicId = topicId;
+        const topic = (state.myTopics || []).find(t => String(t.id) === String(topicId));
+        const namePreview = document.getElementById('pub-topic-name-preview');
+        const pillsContainer = document.getElementById('pub-hashtag-pills');
+        const tagsInput = document.getElementById('pub-tags-input');
+        const descInput = document.getElementById('pub-desc-input');
+
+        if (namePreview) {
+            namePreview.textContent = topic ? topic.name : 'Bộ từ vựng';
+        }
+
+        const existingTags = Array.isArray(topic?.tags) ? topic.tags : [];
+        if (tagsInput) {
+            tagsInput.value = existingTags.join(', ');
+        }
+        if (descInput) {
+            descInput.value = topic?.description || '';
+        }
+
+        if (pillsContainer) {
+            const currentTagsSet = new Set(existingTags.map(t => t.toLowerCase()));
+            pillsContainer.innerHTML = SUGGESTED_HASHTAGS.map(tag => {
+                const isSelected = currentTagsSet.has(tag.toLowerCase());
+                return `
+                    <button type="button" onclick="window.toggleHashtagPill('${esc(tag)}', this)"
+                        class="hashtag-pill px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
+                            isSelected 
+                            ? 'bg-primary text-on-primary border-primary' 
+                            : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant border-outline-variant/30'
+                        }">
+                        #${esc(tag)}
+                    </button>
+                `;
+            }).join('');
+        }
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
         document.body.style.overflow = 'hidden';
-
-        // Populate user topics
-        select.innerHTML = '<option value="">Đang tải danh sách chủ đề của bạn...</option>';
-        try {
-            let topics = [];
-            if (typeof HiDB !== 'undefined' && HiDB.getTopics) {
-                topics = await HiDB.getTopics();
-            }
-            if (!topics || topics.length === 0) {
-                select.innerHTML = '<option value="">(Bạn chưa có bộ từ vựng nào - hãy tạo ở tab Chủ đề)</option>';
-            } else {
-                select.innerHTML = topics.map(t => `
-                    <option value="${esc(t.id)}" ${t.id === preselectedTopicId ? 'selected' : ''}>
-                        ${esc(t.name)} (${t.word_count || 0} từ) ${t.is_public ? '— [Đã chia sẻ]' : ''}
-                    </option>
-                `).join('');
-            }
-        } catch (err) {
-            console.error('[openComposeThreadModal] error:', err);
-            select.innerHTML = '<option value="">Lỗi tải danh sách chủ đề</option>';
-        }
     }
 
-    function closeComposeThreadModal() {
-        const modal = document.getElementById('modal-compose-thread');
+    /**
+     * Toggle Pill click in Hashtag Modal
+     */
+    function toggleHashtagPill(tag, btn) {
+        const input = document.getElementById('pub-tags-input');
+        if (!input) return;
+
+        let currentTags = input.value.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean);
+        const lowerTag = tag.toLowerCase();
+        const index = currentTags.findIndex(t => t.toLowerCase() === lowerTag);
+
+        if (index >= 0) {
+            currentTags.splice(index, 1);
+            if (btn) {
+                btn.className = 'hashtag-pill px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer bg-surface-container hover:bg-surface-container-high text-on-surface-variant border-outline-variant/30';
+            }
+        } else {
+            currentTags.push(tag);
+            if (btn) {
+                btn.className = 'hashtag-pill px-3 py-1 rounded-full text-xs font-semibold border transition-all cursor-pointer bg-primary text-on-primary border-primary';
+            }
+        }
+        input.value = currentTags.join(', ');
+    }
+
+    /**
+     * Cancel Hashtag Modal
+     */
+    function cancelHashtagModal() {
+        const modal = document.getElementById('modal-hashtag-publish');
         if (modal) {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
         }
         document.body.style.overflow = '';
+        if (_pendingPublishToggleEl) {
+            _pendingPublishToggleEl.checked = false;
+        }
+        _pendingPublishTopicId = null;
+        _pendingPublishToggleEl = null;
     }
 
-    async function submitComposeThread() {
-        const select = document.getElementById('compose-topic-select');
-        const descInput = document.getElementById('compose-desc-input');
-        const tagsInput = document.getElementById('compose-tags-input');
-        const submitBtn = document.getElementById('compose-submit-btn');
-
-        const topicId = select?.value;
-        const description = descInput?.value || '';
-        const tagsStr = tagsInput?.value || '';
-
-        if (!topicId) {
-            window.showHiToast('Vui lòng chọn một bộ từ vựng để chia sẻ!', 'error');
+    /**
+     * Confirm Hashtag Publish
+     */
+    async function confirmHashtagPublish() {
+        if (!_pendingPublishTopicId) {
+            cancelHashtagModal();
             return;
         }
 
+        const tagsInput = document.getElementById('pub-tags-input');
+        const descInput = document.getElementById('pub-desc-input');
+        const confirmBtn = document.getElementById('pub-confirm-btn');
+
+        const tagsStr = tagsInput?.value || '';
+        const description = descInput?.value || '';
         const tags = tagsStr.split(',').map(t => t.trim().replace(/^#/, '')).filter(Boolean);
 
         try {
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">refresh</span><span>Đang đăng...</span>';
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">refresh</span><span>Đang xử lý...</span>';
             }
 
             if (typeof HiDB !== 'undefined' && HiDB.publishTopic) {
                 await HiDB.publishTopic({
-                    topicId,
+                    topicId: _pendingPublishTopicId,
                     description,
                     tags
                 });
             }
 
-            window.showHiToast('Đã đăng bộ từ vựng lên Thư viện thành công! 🚀', 'success');
-            closeComposeThreadModal();
+            window.showHiToast('Đã công khai bộ từ vựng lên Thư viện thành công! 🎉', 'success');
 
-            // Reset form
-            if (descInput) descInput.value = '';
-            if (tagsInput) tagsInput.value = '';
+            if (_pendingPublishToggleEl) {
+                _pendingPublishToggleEl.checked = true;
+            }
 
-            // Refresh library feed
-            state.currentTab = 'feed';
-            loadCommunityLibrary('feed');
+            const modal = document.getElementById('modal-hashtag-publish');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+            document.body.style.overflow = '';
+            _pendingPublishTopicId = null;
+            _pendingPublishToggleEl = null;
+
+            // Refresh list
+            await fetchMyTopics();
 
         } catch (err) {
-            console.error('[submitComposeThread] error:', err);
-            window.showHiToast(err.message || 'Lỗi khi chia sẻ bộ từ.', 'error');
+            console.error('[confirmHashtagPublish] error:', err);
+            window.showHiToast(err.message || 'Lỗi khi công khai bộ từ.', 'error');
         } finally {
-            if (submitBtn) {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span>Đăng lên Thư viện</span>';
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<span>Xác nhận công khai</span><span class="material-symbols-outlined text-base">check</span>';
             }
         }
     }
 
-    function handlePublishUserTopic(topicId) {
-        openComposeThreadModal(topicId);
-    }
-
-    async function handleUnpublishTopic(topicId) {
-        if (!confirm('Bạn có chắc chắn muốn ngừng chia sẻ bộ từ này lên Thư viện? (Dữ liệu của bạn trong Kho từ vẫn được giữ nguyên)')) {
-            return;
-        }
+    /**
+     * Unpublish Topic
+     */
+    async function handleUnpublishTopic(topicId, toggleEl) {
         try {
             if (typeof HiDB !== 'undefined' && HiDB.unpublishTopic) {
                 await HiDB.unpublishTopic(topicId);
             }
-            window.showHiToast('Đã gỡ bộ từ khỏi Thư viện.', 'success');
-            fetchMyTopics();
+            window.showHiToast('Đã chuyển bộ từ về trạng thái Riêng tư.', 'success');
+            if (toggleEl) {
+                toggleEl.checked = false;
+            }
+            await fetchMyTopics();
         } catch (err) {
             console.error('[handleUnpublishTopic] error:', err);
-            window.showHiToast(err.message || 'Lỗi khi thu hồi.', 'error');
+            window.showHiToast(err.message || 'Lỗi khi chuyển trạng thái riêng tư.', 'error');
+            if (toggleEl) {
+                toggleEl.checked = true;
+            }
         }
     }
+
+    // Compatibility aliases
+    function openComposeThreadModal(preselectedTopicId = null) {
+        if (preselectedTopicId) openHashtagModal(preselectedTopicId);
+        else {
+            switchLibraryTab('my');
+            window.showHiToast('Gạt công tắc Công khai tại bộ từ bạn muốn chia sẻ nhé!', 'info');
+        }
+    }
+    function closeComposeThreadModal() { cancelHashtagModal(); }
+    function submitComposeThread() { confirmHashtagPublish(); }
+    function handlePublishUserTopic(topicId) { openHashtagModal(topicId); }
 
     /**
      * Comments Drawer & Logic
@@ -1305,6 +1429,11 @@
     window.handleThreadShare          = handleThreadShare;
     window.openThreadDetail           = openThreadDetail;
     window.closeThreadDetail          = closeThreadDetail;
+    window.handleTopicPublicToggle    = handleTopicPublicToggle;
+    window.openHashtagModal           = openHashtagModal;
+    window.toggleHashtagPill          = toggleHashtagPill;
+    window.cancelHashtagModal         = cancelHashtagModal;
+    window.confirmHashtagPublish      = confirmHashtagPublish;
     window.openComposeThreadModal     = openComposeThreadModal;
     window.closeComposeThreadModal    = closeComposeThreadModal;
     window.submitComposeThread        = submitComposeThread;
@@ -1321,11 +1450,12 @@
     window.clearModalLibrarySearch    = clearModalLibrarySearch;
     window.handleModalQuickTag        = handleModalQuickTag;
 
-    // Tự động kiểm tra và khởi tạo khi người dùng đang ở trang hoặc hash library
+    // Tự động kiểm tra và khởi tạo khi người dùng đang ở trang hoặc hash library hoặc có link chia sẻ
     function checkAutoInit() {
         const hash = window.location.hash || '';
+        const search = window.location.search || '';
         const pageEl = document.getElementById('page-library');
-        const isLibraryActive = (pageEl && pageEl.classList.contains('active')) || hash.includes('library');
+        const isLibraryActive = (pageEl && pageEl.classList.contains('active')) || hash.includes('library') || search.includes('topic=') || search.includes('deck=');
         if (isLibraryActive) {
             setTimeout(() => {
                 loadCommunityLibrary();

@@ -1321,55 +1321,70 @@
   </div>
 </div>
 
-<!-- ==================== MODAL: CHIA SẺ BỘ TỪ LÊN THƯ VIỆN ==================== -->
-<div id="modal-compose-thread" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
-  <div class="bg-surface rounded-3xl shadow-2xl border border-outline-variant/30 w-full max-w-[540px] max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-    <div class="px-5 py-4 border-b border-outline-variant/15 flex items-center justify-between bg-surface/90 backdrop-blur-md">
+<!-- ==================== MODAL: CHỌN HASHTAG CÔNG KHAI BỘ TỪ ==================== -->
+<div id="modal-hashtag-publish" class="fixed inset-0 z-[10000] hidden items-center justify-center p-3 sm:p-4" style="background:rgba(0,0,0,0.65);backdrop-filter:blur(6px)">
+  <div class="bg-surface dark:bg-neutral-900 rounded-3xl shadow-2xl border border-outline-variant/30 dark:border-neutral-800 w-full max-w-[500px] max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <!-- Header -->
+    <div class="px-5 py-4 border-b border-outline-variant/15 dark:border-neutral-800 flex items-center justify-between bg-surface/90 dark:bg-neutral-900/90 backdrop-blur-md">
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary text-xl">public</span>
-        <h3 class="font-bold text-sm sm:text-base text-on-surface">Chia sẻ bộ từ lên Thư viện mở</h3>
+        <span class="material-symbols-outlined text-primary text-xl">tag</span>
+        <h3 class="font-bold text-sm sm:text-base text-on-surface">Chọn thẻ Hashtag cho bộ từ</h3>
       </div>
-      <button type="button" onclick="window.closeComposeThreadModal()" class="text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container cursor-pointer transition-colors">
+      <button type="button" onclick="window.cancelHashtagModal()" class="text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container cursor-pointer transition-colors" title="Đóng">
         <span class="material-symbols-outlined text-xl">close</span>
       </button>
     </div>
 
-    <form onsubmit="event.preventDefault(); window.submitComposeThread();" class="p-5 overflow-y-auto flex flex-col gap-4">
+    <!-- Body -->
+    <div class="p-5 overflow-y-auto flex flex-col gap-4">
       <div>
-        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">1. Chọn bộ từ vựng của bạn *</label>
-        <select id="compose-topic-select" required class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden cursor-pointer">
+        <h4 id="pub-topic-name-preview" class="font-bold text-base text-on-surface truncate">Tên bộ từ</h4>
+        <p class="text-xs text-on-surface-variant mt-0.5">Chọn các thẻ hashtag phù hợp để người học dễ dàng tìm thấy bộ từ của bạn trên Thư viện mở.</p>
+      </div>
+
+      <!-- Quick select pills -->
+      <div>
+        <label class="block text-xs font-bold text-outline uppercase tracking-wider mb-2">Thẻ gợi ý (bấm chọn):</label>
+        <div class="flex flex-wrap gap-1.5" id="pub-hashtag-pills">
           <!-- Populated by JS -->
-        </select>
+        </div>
       </div>
 
+      <!-- Custom tags input -->
       <div>
-        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">2. Lời giới thiệu / Mẹo học cùng bộ từ</label>
-        <textarea id="compose-desc-input" rows="3" placeholder="Chia sẻ nguồn tài liệu, band điểm phù hợp hoặc cách bạn ghi nhớ những từ này..."
-                  class="w-full text-xs sm:text-sm p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline resize-none"></textarea>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Hashtag đã chọn:</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-2.5 text-primary text-[18px]">tag</span>
+          <input id="pub-tags-input" type="text" placeholder="IELTS, Cam19, 7.5+, GiaoTiếp..."
+                 class="w-full text-xs sm:text-sm pl-9 pr-3.5 py-2.5 rounded-xl bg-surface-container-low dark:bg-neutral-950 border border-outline-variant/30 dark:border-neutral-800 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline"/>
+        </div>
+        <p class="text-[11px] text-outline mt-1">Bấm các thẻ gợi ý phía trên hoặc tự nhập thêm thẻ phân cách bằng dấu phẩy.</p>
       </div>
 
+      <!-- Optional short note -->
       <div>
-        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">3. Thẻ chủ đề (Hashtags)</label>
-        <input id="compose-tags-input" type="text" placeholder="IELTS, Cam19, 7.5+, GiaoTiếp (phân cách bằng dấu phẩy)"
-               class="w-full text-xs sm:text-sm px-3.5 py-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline"/>
-        <p class="text-[11px] text-outline mt-1">Giúp các bạn học viên khác dễ dàng tìm thấy bộ từ của bạn qua bộ lọc.</p>
+        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Mẹo học / Ghi chú (tùy chọn):</label>
+        <textarea id="pub-desc-input" rows="2" placeholder="Ví dụ: Tổng hợp collocations band 7.5+, học 10 từ mỗi ngày..."
+                  class="w-full text-xs sm:text-sm p-3 rounded-xl bg-surface-container-low dark:bg-neutral-950 border border-outline-variant/30 dark:border-neutral-800 text-on-surface focus:border-primary focus:outline-hidden placeholder:text-outline resize-none"></textarea>
       </div>
 
-      <div class="bg-primary/5 border border-primary/20 rounded-xl p-3 text-xs text-on-surface-variant flex items-start gap-2">
+      <!-- Info note -->
+      <div class="bg-primary/5 dark:bg-primary/10 border border-primary/20 rounded-xl p-3 text-xs text-on-surface-variant flex items-start gap-2">
         <span class="material-symbols-outlined text-primary text-base shrink-0 mt-0.5">info</span>
-        <span>Bộ từ sẽ xuất hiện công khai trên nguồn cấp Thư viện. Các bạn học viên khác có thể xem, thả tim và lưu về tài khoản để học Spaced Repetition.</span>
+        <span>Bộ từ sẽ chuyển sang trạng thái <strong>Công khai</strong> trên Thư viện. Bạn có thể gạt công tắc để chuyển lại về <strong>Riêng tư</strong> bất cứ lúc nào.</span>
       </div>
 
-      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/15">
-        <button type="button" onclick="window.closeComposeThreadModal()" class="px-4 py-2.5 rounded-full text-xs font-bold text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer">
+      <!-- Footer Buttons -->
+      <div class="flex items-center justify-end gap-2.5 pt-2 border-t border-outline-variant/15 dark:border-neutral-800">
+        <button type="button" onclick="window.cancelHashtagModal()" class="px-4 py-2 rounded-full text-xs font-bold text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer">
           Hủy bỏ
         </button>
-        <button id="compose-submit-btn" type="submit" class="px-5 py-2.5 rounded-full bg-primary text-on-primary font-bold text-xs sm:text-sm shadow-md hover:bg-surface-tint active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
-          <span>Đăng lên Thư viện</span>
-          <span class="material-symbols-outlined text-base">arrow_forward</span>
+        <button id="pub-confirm-btn" type="button" onclick="window.confirmHashtagPublish()" class="px-5 py-2 rounded-full bg-primary text-on-primary font-bold text-xs sm:text-sm shadow-md hover:bg-surface-tint active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+          <span>Xác nhận công khai</span>
+          <span class="material-symbols-outlined text-base">check</span>
         </button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 

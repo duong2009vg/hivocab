@@ -124,7 +124,8 @@ export function initRouter() {
 
   const normalizeRoute = (raw) => {
     const r = (raw || '').replace(/^#/, '').replace(/^page-/, '');
-    return r === 'thpt' ? 'exercises' : r;
+    const clean = r.split('?')[0];
+    return clean === 'thpt' ? 'exercises' : clean;
   };
 
   const handleHashChange = () => {
