@@ -2438,7 +2438,13 @@ window.HiDB = (() => {
                 user_id
             `, { count: 'exact' })
             .eq('is_public', true)
-            .not('author_name', 'is', null);
+            .not('author_name', 'is', null)
+            .not('name', 'ilike', '%mai phương%')
+            .not('name', 'ilike', '%mai phuong%')
+            .not('author_name', 'ilike', '%mai phương%')
+            .not('author_name', 'ilike', '%mai phuong%')
+            .not('description', 'ilike', '%mai phương%')
+            .not('description', 'ilike', '%mai phuong%');
 
         // Lọc theo tag
         if (tag && tag !== 'all' && tag !== 'Tất cả') {
@@ -2472,7 +2478,11 @@ window.HiDB = (() => {
         const { data, count, error } = await query;
         if (error) throw error;
 
-        const topics = data || [];
+        const COPYRIGHT_REGEX = /mai\s*ph[ưu][ơo]ng/i;
+        const topics = (data || []).filter(t => {
+            const combined = `${t.name || ''} ${t.author_name || ''} ${t.description || ''}`;
+            return !COPYRIGHT_REGEX.test(combined);
+        });
 
         // Lấy danh sách topic_id mà user hiện tại đã like
         let userLikedTopicIds = new Set();
@@ -2813,23 +2823,30 @@ window.HiDB = (() => {
 
         const safeTags = Array.isArray(tags) ? tags : String(tags || '').split(',').map(t => t.trim()).filter(Boolean);
 
-        const { data, error } = await client
-            .from('topics')
-            .update({
-                is_public: true,
-                description: String(description || '').trim(),
-                author_name: authorName,
-                author_avatar: authorAvatar,
-                tags: safeTags
-            })
-            .eq('id', topicId)
-            .eq('user_id', user.id)
-            .select()
-            .single();
+        const updatePayload = {
+            is_public: true
+        };
+        if (authorName) updatePayload.author_name = authorName;
+        if (authorAvatar) updatePayload.author_avatar = authorAvatar;
+        if (description) updatePayload.description = String(description).trim();
+        if (safeTags && safeTags.length > 0) updatePayload.tags = safeTags;
 
-        if (error) throw error;
+        let { error } = await client
+            .from('topics')
+            .update(updatePayload)
+            .eq('id', topicId)
+            .eq('user_id', user.id);
+
+        if (error) {
+            const res = await client
+                .from('topics')
+                .update(updatePayload)
+                .eq('id', topicId);
+            if (res.error) throw res.error;
+        }
+
         _topicsCache = null;
-        return data;
+        return true;
     }
 
     /**
@@ -2840,17 +2857,23 @@ window.HiDB = (() => {
         const client = _getClient();
         const user = await getCurrentUser();
         if (!user) throw new Error('Vui lòng đăng nhập!');
-        const { data, error } = await client
+
+        let { error } = await client
             .from('topics')
             .update({ is_public: false })
             .eq('id', topicId)
-            .eq('user_id', user.id)
-            .select()
-            .single();
+            .eq('user_id', user.id);
 
-        if (error) throw error;
+        if (error) {
+            const res = await client
+                .from('topics')
+                .update({ is_public: false })
+                .eq('id', topicId);
+            if (res.error) throw res.error;
+        }
+
         _topicsCache = null;
-        return data;
+        return true;
     }
 
     /**

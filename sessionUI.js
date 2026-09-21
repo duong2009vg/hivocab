@@ -1358,22 +1358,19 @@ const HiSessionUI = (() => {
             window.HiAudio.playWord(word, rate);
             return;
         }
-        if (!window.speechSynthesis) return;
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
         try {
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-            setTimeout(() => {
-                const utter = new SpeechSynthesisUtterance(word);
-                utter.lang = 'en-US';
-                utter.rate = rate;
-                utter.pitch = 1;
-                const voices = window.speechSynthesis.getVoices();
-                const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
-                               || voices.find(v => v.lang === 'en-US')
-                               || voices.find(v => v.lang.startsWith('en'));
-                if (preferred) utter.voice = preferred;
-                window.speechSynthesis.speak(utter);
-            }, 30);
+            const utter = new SpeechSynthesisUtterance(word);
+            utter.lang = 'en-US';
+            utter.rate = rate;
+            utter.pitch = 1;
+            const voices = window.speechSynthesis.getVoices();
+            const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
+                           || voices.find(v => v.lang === 'en-US')
+                           || voices.find(v => v.lang.startsWith('en'));
+            if (preferred) utter.voice = preferred;
+            window.speechSynthesis.speak(utter);
         } catch (_) {}
     }
 
@@ -1415,22 +1412,19 @@ window.HiSpeak = function(word, rate = 0.9) {
         window.HiAudio.playWord(word, rate);
         return;
     }
-    if (!window.speechSynthesis) return;
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
     try {
         if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-        setTimeout(() => {
-            const utter = new SpeechSynthesisUtterance(word);
-            utter.lang = 'en-US';
-            utter.rate = rate;
-            utter.pitch = 1;
-            const voices = window.speechSynthesis.getVoices();
-            const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
-                           || voices.find(v => v.lang === 'en-US')
-                           || voices.find(v => v.lang.startsWith('en'));
-            if (preferred) utter.voice = preferred;
-            window.speechSynthesis.speak(utter);
-        }, 30);
+        const utter = new SpeechSynthesisUtterance(word);
+        utter.lang = 'en-US';
+        utter.rate = rate;
+        utter.pitch = 1;
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = voices.find(v => v.lang === 'en-US' && !v.localService)
+                       || voices.find(v => v.lang === 'en-US')
+                       || voices.find(v => v.lang.startsWith('en'));
+        if (preferred) utter.voice = preferred;
+        window.speechSynthesis.speak(utter);
     } catch (_) {}
 };
 

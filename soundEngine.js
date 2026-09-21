@@ -181,16 +181,21 @@ const HiAudio = (() => {
     let _activeUtterance = null;
     const _dictAudioCache = new Map();
 
-    // Khởi động voices cho SpeechSynthesis ngay khi có tương tác
+    // Khởi động voices cho SpeechSynthesis ngay khi có tương tác người dùng
     if (typeof window !== 'undefined' && window.speechSynthesis) {
         try {
             window.speechSynthesis.getVoices();
             window.speechSynthesis.addEventListener('voiceschanged', () => {
                 window.speechSynthesis.getVoices();
             });
-            window.addEventListener('pointerdown', () => {
-                if (window.speechSynthesis) window.speechSynthesis.getVoices();
-            }, { once: true });
+            ['pointerdown', 'touchstart', 'mousedown', 'keydown'].forEach(evt => {
+                window.addEventListener(evt, () => {
+                    if (window.speechSynthesis) {
+                        window.speechSynthesis.getVoices();
+                        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+                    }
+                }, { once: true, passive: true });
+            });
         } catch (_) {}
     }
 
@@ -235,99 +240,61 @@ const HiAudio = (() => {
         });
     }
 
-    function _playSpeechSynthesis(text, rate = 0.9) {
-        return new Promise((resolve) => {
-            if (typeof window === 'undefined' || !window.speechSynthesis) {
-                resolve(false);
-                return;
-            }
-            try {
-                // Chromium bug fix: resume nếu bị paused
-                if (window.speechSynthesis.paused) {
-                    window.speechSynthesis.resume();
-                }
-                if (window.speechSynthesis.speaking) {
-                    window.speechSynthesis.cancel();
-                }
-
-                setTimeout(() => {
-                    try {
-                        const utter = new SpeechSynthesisUtterance(text);
-                        _activeUtterance = utter; // Ngăn V8 garbage collection huỷ âm thanh
-                        utter.lang = 'en-US';
-                        utter.rate = Math.max(0.4, Math.min(1.5, rate));
-                        utter.pitch = 1;
-
-                        const voices = window.speechSynthesis.getVoices() || [];
-                        const preferred = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
-                                       || voices.find(v => v.lang === 'en-US')
-                                       || voices.find(v => v.lang.startsWith('en'));
-                        if (preferred) utter.voice = preferred;
-
-                        utter.onend = () => {
-                            _activeUtterance = null;
-                            resolve(true);
-                        };
-                        utter.onerror = () => {
-                            _activeUtterance = null;
-                            resolve(false);
-                        };
-
-                        window.speechSynthesis.speak(utter);
-                    } catch (_) {
-                        _activeUtterance = null;
-                        resolve(false);
-                    }
-                }, 30);
-            } catch (_) {
-                resolve(false);
-            }
-        });
-    }
-
-    async function playWord(word, rate = 0.9) {
+    function playWord(word, rate = 0.9) {
         if (!word || typeof word !== 'string') return false;
         const cleanWord = word.trim();
         if (!cleanWord) return false;
 
         stop();
 
-        const key = cleanWord.toLowerCase();
-
-        // 1. Thử cached URL nếu đã có
-        const cachedUrl = _dictAudioCache.get(key);
-        if (cachedUrl) {
+        // 1. Ưu tiên số 1: Web Speech API phát âm đồng bộ ngay trong user gesture (0ms delay, không bị chặn trên mobile/iOS)
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
             try {
-                await _playAudioElement(cachedUrl, rate);
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+                const utter = new SpeechSynthesisUtterance(cleanWord);
+                _activeUtterance = utter; // Giữ reference tránh V8 Garbage Collection hủy giữa chừng
+                utter.lang = 'en-US';
+                utter.rate = Math.max(0.4, Math.min(1.5, Number(rate) || 0.9));
+                utter.pitch = 1.0;
+
+                const voices = window.speechSynthesis.getVoices() || [];
+                const preferred = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
+                               || voices.find(v => v.lang === 'en-US')
+                               || voices.find(v => v.lang.startsWith('en'));
+                if (preferred) utter.voice = preferred;
+
+                utter.onend = () => { _activeUtterance = null; };
+                utter.onerror = () => { _activeUtterance = null; };
+
+                window.speechSynthesis.speak(utter);
                 return true;
-            } catch (_) {}
+            } catch (err) {
+                console.warn('[HiAudio] SpeechSynthesis error:', err);
+            }
         }
 
-        // 2. Thử Google Translate TTS CDN (chuẩn giọng bản ngữ, độ trễ cực thấp)
-        const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=en&q=${encodeURIComponent(cleanWord)}`;
-        try {
-            await _playAudioElement(googleUrl, rate);
+        // 2. Dự phòng: Free Dictionary API cached audio
+        const key = cleanWord.toLowerCase();
+        const cachedUrl = _dictAudioCache.get(key);
+        if (cachedUrl) {
+            _playAudioElement(cachedUrl, rate).catch(() => {});
             return true;
-        } catch (_) {}
+        }
 
-        // 3. Fallback Web Speech API (đã fix pause bug và GC retention)
-        const ttsOk = await _playSpeechSynthesis(cleanWord, rate);
-        if (ttsOk) return true;
-
-        // 4. Fallback Free Dictionary API audio
-        try {
-            const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
-            if (res.ok) {
-                const json = await res.json();
+        // 3. Dự phòng: Fetch Free Dictionary API MP3
+        fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`)
+            .then(res => res.ok ? res.json() : null)
+            .then(json => {
                 const phonetics = Array.isArray(json) ? json[0]?.phonetics : [];
                 const audioUrl = phonetics?.find(p => p.audio && p.audio.trim())?.audio;
                 if (audioUrl) {
                     _dictAudioCache.set(key, audioUrl);
-                    await _playAudioElement(audioUrl, rate);
-                    return true;
+                    _playAudioElement(audioUrl, rate).catch(() => {});
                 }
-            }
-        } catch (_) {}
+            })
+            .catch(() => {});
 
         return false;
     }

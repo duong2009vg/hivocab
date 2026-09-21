@@ -74,16 +74,13 @@
             window.HiAudio.playWord(word, 0.9);
             return;
         }
-        if (!window.speechSynthesis) return;
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
         try {
             if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-            if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
-            setTimeout(() => {
-                const utter = new SpeechSynthesisUtterance(word);
-                utter.lang = 'en-US';
-                utter.rate = 0.88;
-                window.speechSynthesis.speak(utter);
-            }, 30);
+            const utter = new SpeechSynthesisUtterance(word);
+            utter.lang = 'en-US';
+            utter.rate = 0.88;
+            window.speechSynthesis.speak(utter);
         } catch (err) {
             console.warn('[playWordAudio] Audio error:', err);
         }
@@ -1133,20 +1130,58 @@
     ];
 
     /**
-     * Handle switch toggle in "Bộ từ của tôi"
+     * Handle switch toggle in "Bộ từ của tôi" (Direct instant toggle)
      */
     async function handleTopicPublicToggle(topicId, isChecked, toggleEl) {
         if (!topicId) return;
 
-        if (isChecked) {
-            // Revert switch temporarily until confirmed in modal
-            toggleEl.checked = false;
-            _pendingPublishTopicId = topicId;
-            _pendingPublishToggleEl = toggleEl;
-            openHashtagModal(topicId);
-        } else {
-            // Turn off -> unpublish
-            await handleUnpublishTopic(topicId, toggleEl);
+        const card = document.getElementById(`my-topic-card-${topicId}`);
+        const statusLabel = card ? card.querySelector('.topic-status-label') : null;
+        const toggleText = toggleEl ? toggleEl.closest('div')?.querySelector('span') : null;
+
+        // Optimistic UI update
+        if (statusLabel) {
+            statusLabel.textContent = isChecked ? '🌐 Công khai' : '🔒 Riêng tư';
+            statusLabel.className = `font-semibold topic-status-label ${isChecked ? 'text-primary' : 'text-slate-500'}`;
+        }
+        if (toggleText) {
+            toggleText.textContent = isChecked ? 'Công khai' : 'Riêng tư';
+        }
+
+        try {
+            if (isChecked) {
+                if (typeof HiDB !== 'undefined' && HiDB.publishTopic) {
+                    await HiDB.publishTopic({ topicId });
+                }
+                window.showHiToast('Đã công khai bộ từ vựng lên Thư viện! 🎉', 'success');
+            } else {
+                if (typeof HiDB !== 'undefined' && HiDB.unpublishTopic) {
+                    await HiDB.unpublishTopic(topicId);
+                }
+                window.showHiToast('Đã chuyển bộ từ về trạng thái Riêng tư.', 'success');
+            }
+
+            // Cập nhật trạng thái trong state.myTopics
+            const topic = (state.myTopics || []).find(t => String(t.id) === String(topicId));
+            if (topic) {
+                topic.is_public = isChecked;
+            }
+
+            // Re-render để hiển thị đầy đủ thanh action công khai (chia sẻ link)
+            renderMyTopicsList(state.myTopics);
+
+        } catch (err) {
+            console.error('[handleTopicPublicToggle] error:', err);
+            // Revert lại trạng thái cũ nếu lỗi
+            if (toggleEl) toggleEl.checked = !isChecked;
+            if (statusLabel) {
+                statusLabel.textContent = !isChecked ? '🌐 Công khai' : '🔒 Riêng tư';
+                statusLabel.className = `font-semibold topic-status-label ${!isChecked ? 'text-primary' : 'text-slate-500'}`;
+            }
+            if (toggleText) {
+                toggleText.textContent = !isChecked ? 'Công khai' : 'Riêng tư';
+            }
+            window.showHiToast(err.message || 'Không thể thay đổi trạng thái bộ từ lúc này.', 'error');
         }
     }
 

@@ -70,18 +70,18 @@ function copyStaticAssetsPlugin() {
       if (fs.existsSync(distHtmlPath)) {
         let html = fs.readFileSync(distHtmlPath, 'utf-8');
         const legacyScripts = [
-          '<script src="dataLayer.js?v=20260921-v4"></script>',
+          '<script src="dataLayer.js?v=20260921-v5"></script>',
           '<script src="aiHint.js"></script>',
           '<script src="dashboardStats.js"></script>',
-          '<script src="soundEngine.js?v=20260912-v1"></script>',
+          '<script src="soundEngine.js?v=20260921-v5"></script>',
           '<script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>',
-          '<script src="sessionUI.js?v=20260920-lock-v1"></script>',
+          '<script src="sessionUI.js?v=20260921-v5"></script>',
           '<script src="thptExam.js?v=20260913-monitoring-v1"></script>',
           '<script src="bilingualReading.js?v=20260920-lock-v1"></script>',
-          '<script src="library.js?v=20260921-v4"></script>',
+          '<script src="library.js?v=20260921-v5"></script>',
           '<script src="pricing.js?v=20260920-v4"></script>',
           '<script src="dictionary.js"></script>',
-          '<script defer src="app.js?v=20260921-v4"></script>',
+          '<script defer src="app.js?v=20260921-v5"></script>',
         ].join('\n');
         // Inject right before </body>
         if (!html.includes('dataLayer.js')) {
