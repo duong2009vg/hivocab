@@ -57,15 +57,16 @@ window.HiDB = (() => {
     function _cacheGet(key) {
         const cached = _cache.get(key);
         if (!cached) return null;
-        if (Date.now() - cached.savedAt > CACHE_TTL_MS) {
+        const ttl = cached.ttl || CACHE_TTL_MS;
+        if (Date.now() - cached.savedAt > ttl) {
             _cache.delete(key);
             return null;
         }
         return cached.value;
     }
 
-    function _cacheSet(key, value) {
-        _cache.set(key, { value, savedAt: Date.now() });
+    function _cacheSet(key, value, ttl = CACHE_TTL_MS) {
+        _cache.set(key, { value, savedAt: Date.now(), ttl });
         return value;
     }
 
@@ -88,6 +89,36 @@ window.HiDB = (() => {
         clearCache('cam-hierarchy:');
         clearCache('passage-words:');
         clearCache('test-words:');
+        clearCache('dashboard-stats:');
+        clearCache('monthly-sessions:');
+    }
+
+    /**
+     * Gắn thông tin tiến độ word_progress chỉ riêng cho user hiện tại (tránh unindexed join toàn DB)
+     */
+    async function _attachUserWordProgress(words, user) {
+        if (!user || !words || words.length === 0) {
+            return new Map();
+        }
+        const progMap = new Map();
+        try {
+            const wordIds = words.map(w => w.id).filter(Boolean);
+            const client = _getClient();
+            for (let i = 0; i < wordIds.length; i += 200) {
+                const batch = wordIds.slice(i, i + 200);
+                const { data: progData } = await client
+                    .from('word_progress')
+                    .select('word_id, level, next_review_at, last_reviewed_at, review_count')
+                    .eq('user_id', user.id)
+                    .in('word_id', batch);
+                if (progData) {
+                    progData.forEach(p => progMap.set(p.word_id, p));
+                }
+            }
+        } catch (err) {
+            console.warn('[HiDB] _attachUserWordProgress error:', err);
+        }
+        return progMap;
     }
 
 
@@ -353,17 +384,7 @@ window.HiDB = (() => {
 
         let query = _getClient()
             .from('topics')
-            .select(`
-                id,
-                name,
-                icon,
-                category,
-                created_at,
-                words (
-                    id,
-                    word_progress ( level, user_id )
-                )
-            `)
+            .select('id, name, icon, category, is_pro, created_at')
             .order('created_at', { ascending: true });
 
         if (user) {
@@ -372,27 +393,45 @@ window.HiDB = (() => {
             query = query.is('user_id', null);
         }
 
-        const { data, error } = await query;
+        const { data: topicsData, error } = await query;
         if (error) throw error;
+        if (!topicsData || topicsData.length === 0) return _cacheSet(cacheKey, []);
 
-        const topics = (data || []).map(topic => {
-            const words = topic.words || [];
-            const totalWords = words.length;
+        // Đếm số từ và map wordIds theo từng topic
+        const topicIds = topicsData.map(t => t.id);
+        const { data: wordsData } = await _getClient()
+            .from('words')
+            .select('id, topic_id')
+            .in('topic_id', topicIds);
 
-            const progresses = user
-                ? words.flatMap(w => w.word_progress || []).filter(p => p && p.user_id === user.id)
-                : [];
+        const wordCountMap = new Map();
+        const wordsByTopic = new Map();
+        (wordsData || []).forEach(w => {
+            wordCountMap.set(w.topic_id, (wordCountMap.get(w.topic_id) || 0) + 1);
+            if (user) {
+                if (!wordsByTopic.has(w.topic_id)) wordsByTopic.set(w.topic_id, []);
+                wordsByTopic.get(w.topic_id).push(w);
+            }
+        });
 
-            const totalLevel = progresses.reduce((sum, p) => sum + (p && p.level ? p.level : 0), 0);
-            const progress   = totalWords > 0
-                ? Math.round((totalLevel / (totalWords * 5)) * 100)
-                : 0;
+        // Chỉ lấy tiến độ của riêng user này
+        const progMap = await _attachUserWordProgress(wordsData || [], user);
+
+        const topics = topicsData.map(topic => {
+            const totalWords = wordCountMap.get(topic.id) || 0;
+            let progress = 0;
+            if (user && totalWords > 0) {
+                const wordsInTopic = wordsByTopic.get(topic.id) || [];
+                const totalLevel = wordsInTopic.reduce((sum, w) => sum + (progMap.get(w.id)?.level || 0), 0);
+                progress = Math.round((totalLevel / (totalWords * 5)) * 100);
+            }
 
             return {
-                id:         topic.id,       // ← QUAN TRỌNG: cần cho _openTopic
+                id:         topic.id,
                 name:       topic.name,
                 icon:       topic.icon,
                 category:   normalizeTopicCategory(topic.category),
+                is_pro:     Boolean(topic.is_pro),
                 totalWords,
                 progress,
                 createdAt:  topic.created_at,
@@ -475,8 +514,7 @@ window.HiDB = (() => {
                     phonetic,
                     meaning,
                     example_sentence,
-                    image_url,
-                    word_progress ( level, next_review_at, last_reviewed_at, review_count )
+                    image_url
                 `)
                 .eq('topic_id', topicId)
                 .order('created_at', { ascending: true })
@@ -495,9 +533,10 @@ window.HiDB = (() => {
             }
         }
 
+        const progMap = await _attachUserWordProgress(allData, user);
+
         return _cacheSet(cacheKey, allData.map(w => {
-            // Lấy progress của user hiện tại (nếu có)
-            const progress = (w.word_progress || [])[0] || null;
+            const progress = progMap.get(w.id) || null;
             return {
                 id:              w.id,
                 word:            w.word,
@@ -876,7 +915,7 @@ window.HiDB = (() => {
         while (hasMore) {
             const { data, error } = await client
                 .from('words')
-                .select(`id, lesson_name, lesson_order, word_order, word_progress ( level, user_id )`)
+                .select('id, lesson_name, lesson_order, word_order')
                 .eq('topic_id', topicId)
                 .order('lesson_order', { ascending: true, nullsFirst: false })
                 .order('word_order', { ascending: true, nullsFirst: false })
@@ -884,10 +923,10 @@ window.HiDB = (() => {
                 .range(from, from + PAGE_SIZE - 1);
 
             if (error) {
-                // Fallback without lesson_name / lesson_order if schema is older
+                // Fallback nếu cột lesson_name / lesson_order chưa có
                 const { data: fallback, error: fbErr } = await client
                     .from('words')
-                    .select(`id, word_progress ( level, user_id )`)
+                    .select('id')
                     .eq('topic_id', topicId)
                     .order('created_at', { ascending: true });
                 if (fbErr) throw fbErr;
@@ -911,10 +950,14 @@ window.HiDB = (() => {
 
     async function getLessonWordsQuery(topicId, lessonIndex) {
         const client = _getClient();
+        const user = await getCurrentUser().catch(() => null);
+
+        let words = [];
+        let hasLessonMeta = false;
+
         const queryWithLessonMeta = client
             .from('words')
-            .select(`id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_name, lesson_order, word_order,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
+            .select('id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_name, lesson_order, word_order')
             .eq('topic_id', topicId)
             .eq('lesson_order', lessonIndex)
             .order('word_order', { ascending: true, nullsFirst: false })
@@ -922,20 +965,33 @@ window.HiDB = (() => {
 
         const result = await queryWithLessonMeta;
         if (!result.error && (result.data || []).length > 0) {
-            return { words: result.data, hasLessonMeta: true };
+            words = result.data;
+            hasLessonMeta = true;
+        } else {
+            const LESSON_SIZE = 50;
+            const fallback = await client
+                .from('words')
+                .select('id, word, pos, phonetic, meaning, example_sentence, image_url')
+                .eq('topic_id', topicId)
+                .order('created_at', { ascending: true })
+                .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
+
+            if (fallback.error) throw fallback.error;
+            words = fallback.data || [];
+            hasLessonMeta = false;
         }
 
-        const LESSON_SIZE = 50;
-        const fallback = await client
-            .from('words')
-            .select(`id, word, pos, phonetic, meaning, example_sentence, image_url,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )`)
-            .eq('topic_id', topicId)
-            .order('created_at', { ascending: true })
-            .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
+        // Lấy tiến độ word_progress chỉ riêng cho user hiện tại (tránh query thừa toàn hệ thống)
+        const progMap = await _attachUserWordProgress(words, user);
+        words = words.map(w => {
+            const p = progMap.get(w.id);
+            return {
+                ...w,
+                word_progress: p ? [p] : []
+            };
+        });
 
-        if (fallback.error) throw fallback.error;
-        return { words: fallback.data || [], hasLessonMeta: false };
+        return { words, hasLessonMeta };
     }
 
     async function getLessonsInTopic(topicId) {
@@ -946,6 +1002,9 @@ window.HiDB = (() => {
         if (cached) return cached;
 
         const { words, hasLessonMeta } = await getWordsForLessonQuery(topicId);
+
+        // Lấy tiến độ theo user gọn nhẹ
+        const progressMap = await _attachUserWordProgress(words, user);
 
         const wordsWithNamedLessons = hasLessonMeta
             ? (words || []).filter(w => w.lesson_name && w.lesson_order !== null && w.lesson_order !== undefined)
@@ -969,8 +1028,7 @@ window.HiDB = (() => {
                 .map(([lessonIndex, group]) => {
                     const chunk = group.words;
                     const totalLevel = user ? chunk.reduce((sum, w) => {
-                        const p = (w.word_progress || []).find(p => p.user_id === user.id);
-                        return sum + (p?.level ?? 0);
+                        return sum + (progressMap.get(w.id)?.level ?? 0);
                     }, 0) : 0;
                     return {
                         id:         `lesson-${topicId}-${lessonIndex}`,
@@ -991,8 +1049,7 @@ window.HiDB = (() => {
             const chunk = allWords.slice(i, i + LESSON_SIZE);
             const lessonIndex = Math.floor(i / LESSON_SIZE);
             const totalLevel = user ? chunk.reduce((sum, w) => {
-                const p = (w.word_progress || []).find(p => p.user_id === user.id);
-                return sum + (p?.level ?? 0);
+                return sum + (progressMap.get(w.id)?.level ?? 0);
             }, 0) : 0;
             lessons.push({
                 id:         `lesson-${topicId}-${lessonIndex}`,
@@ -1234,17 +1291,16 @@ window.HiDB = (() => {
                     meaning,
                     example_sentence,
                     image_url,
-                    created_at,
-                    word_progress ( level, user_id )
+                    created_at
                 `)
                 .eq('topic_id', topicId)
                 .is('passage_id', null)
                 .order('created_at', { ascending: true });
 
+            const unlinkedProgMap = await _attachUserWordProgress(unlinkedData || [], user);
+
             for (const w of (unlinkedData || [])) {
-                const userProgress = user
-                    ? (w.word_progress || []).find(p => p.user_id === user.id)
-                    : null;
+                const userProgress = unlinkedProgMap.get(w.id) || null;
                 unlinkedWords.push({
                     id:              w.id,
                     word:            w.word,
@@ -1276,8 +1332,7 @@ window.HiDB = (() => {
                         example_sentence,
                         image_url,
                         word_order,
-                        created_at,
-                        word_progress ( level, user_id )
+                        created_at
                     `)
                     .eq('topic_id', topicId)
                     .order('created_at', { ascending: true })
@@ -1296,10 +1351,10 @@ window.HiDB = (() => {
                 }
             }
 
+            const progMap = await _attachUserWordProgress(allWords, user);
+
             for (const w of allWords) {
-                const userProgress = user
-                    ? (w.word_progress || []).find(p => p.user_id === user.id)
-                    : null;
+                const userProgress = progMap.get(w.id) || null;
                 const wordObj = {
                     id:              w.id,
                     word:            w.word,
@@ -1436,8 +1491,7 @@ window.HiDB = (() => {
                 image_url,
                 passage_id,
                 word_order,
-                created_at,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )
+                created_at
             `)
             .eq('passage_id', passageId)
             .order('word_order', { ascending: true, nullsFirst: false })
@@ -1445,8 +1499,10 @@ window.HiDB = (() => {
 
         if (error) throw error;
 
+        const progMap = await _attachUserWordProgress(data || [], user);
+
         return _cacheSet(cacheKey, (data || []).map(w => {
-            const progress = (w.word_progress || [])[0] || null;
+            const progress = progMap.get(w.id) || null;
             return {
                 id:              w.id,
                 word:            w.word,
@@ -1520,8 +1576,7 @@ window.HiDB = (() => {
                 image_url,
                 passage_id,
                 word_order,
-                created_at,
-                word_progress ( level, next_review_at, last_reviewed_at, review_count )
+                created_at
             `)
             .in('passage_id', pIds)
             .order('word_order', { ascending: true, nullsFirst: false })
@@ -1529,8 +1584,10 @@ window.HiDB = (() => {
 
         if (error) throw error;
 
+        const progMap = await _attachUserWordProgress(data || [], user);
+
         return _cacheSet(cacheKey, (data || []).map(w => {
-            const progress = (w.word_progress || [])[0] || null;
+            const progress = progMap.get(w.id) || null;
             return {
                 id:              w.id,
                 word:            w.word,
@@ -1875,32 +1932,48 @@ window.HiDB = (() => {
         const user = await getCurrentUser();
         if (!user) throw new Error('Chưa đăng nhập');
 
+        const cacheKey = `dashboard-stats:${user.id}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return cached;
+
         const now = new Date().toISOString();
 
-        // Số từ cần ôn
-        const { count: wordsDueCount } = await _getClient()
-            .from('word_progress')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', user.id)
-            .lte('next_review_at', now);
+        // 1. Số từ cần ôn
+        let wordsDueCount = 0;
+        try {
+            const { count, error } = await _getClient()
+                .from('word_progress')
+                .select('id', { count: 'exact', head: true })
+                .eq('user_id', user.id)
+                .lte('next_review_at', now);
+            if (!error && count !== null) wordsDueCount = count;
+        } catch (e) {
+            console.warn('[HiDB] getDashboardStats wordsDueCount error:', e);
+        }
 
-        // Phân bố level
-        const { data: progressData } = await _getClient()
-            .from('word_progress')
-            .select('word_id, level')
-            .eq('user_id', user.id);
-
+        // 2. Phân bố level
         const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
         const progressWordIds = new Set();
-        (progressData || []).forEach(p => {
-            if (p.word_id) progressWordIds.add(p.word_id);
-            const lv = Number(p.level) ?? 0;
-            if (lv >= 0 && lv <= 5) {
-                memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
-            } else {
-                memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
+        try {
+            const { data: progressData, error } = await _getClient()
+                .from('word_progress')
+                .select('word_id, level')
+                .eq('user_id', user.id);
+
+            if (!error && progressData) {
+                progressData.forEach(p => {
+                    if (p.word_id) progressWordIds.add(p.word_id);
+                    const lv = Number(p.level) ?? 0;
+                    if (lv >= 0 && lv <= 5) {
+                        memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
+                    } else {
+                        memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
+                    }
+                });
             }
-        });
+        } catch (e) {
+            console.warn('[HiDB] getDashboardStats progressData error:', e);
+        }
 
         // Đếm thêm các từ trong sổ tay cá nhân của user chưa có bản ghi word_progress (tính là Lv 0)
         try {
@@ -1921,22 +1994,37 @@ window.HiDB = (() => {
             }
         } catch (_) {}
 
+        // 3. Tính streak: đếm ngày liên tiếp từ hôm nay trở về trước
+        let streak = 0;
+        try {
+            const { data: sessions, error } = await _getClient()
+                .from('study_sessions')
+                .select('session_date')
+                .eq('user_id', user.id)
+                .order('session_date', { ascending: false })
+                .limit(365);
 
-        // Tính streak: đếm ngày liên tiếp từ hôm nay trở về trước
-        const { data: sessions } = await _getClient()
-            .from('study_sessions')
-            .select('session_date')
-            .eq('user_id', user.id)
-            .order('session_date', { ascending: false })
-            .limit(365);
+            if (!error && sessions) {
+                streak = _calculateStreak(sessions);
+            } else {
+                throw error || new Error('Sessions load failed');
+            }
+        } catch (e) {
+            console.warn('[HiDB] getDashboardStats sessions error, checking local fallback:', e);
+            try {
+                const localSessions = JSON.parse(localStorage.getItem('hi_study_sessions') || '{}');
+                const sessionDates = Object.keys(localSessions).map(d => ({ session_date: d })).sort((a,b) => b.session_date.localeCompare(a.session_date));
+                streak = _calculateStreak(sessionDates);
+            } catch (_) {}
+        }
 
-        const streak = _calculateStreak(sessions || []);
-
-        return {
+        const statsResult = {
             wordsDueCount: wordsDueCount ?? 0,
             streak,
             memoryLevels,
         };
+
+        return _cacheSet(cacheKey, statsResult, 60000); // cache 60 giây
     }
 
     /**
@@ -2021,6 +2109,10 @@ window.HiDB = (() => {
 
         if (!user) return result;
 
+        const cacheKey = `monthly-sessions:${user.id}:${year}-${month}`;
+        const cached = _cacheGet(cacheKey);
+        if (cached) return Object.assign(result, cached);
+
         // 2. Query từ Supabase study_sessions
         const startMonthStr = String(month).padStart(2, '0');
         const startDateStr = `${year}-${startMonthStr}-01`;
@@ -2036,12 +2128,15 @@ window.HiDB = (() => {
                 .lte('session_date', endDateStr);
 
             if (!error && data) {
+                const dbMap = {};
                 data.forEach(row => {
                     const dateKey = typeof row.session_date === 'string' 
                         ? row.session_date.split('T')[0] 
                         : row.session_date;
-                    result[dateKey] = Number(row.words_reviewed || 0);
+                    dbMap[dateKey] = Number(row.words_reviewed || 0);
+                    result[dateKey] = dbMap[dateKey];
                 });
+                _cacheSet(cacheKey, dbMap, 60000); // 60s TTL
             }
         } catch (err) {
             console.warn('[HiDB] getMonthlyStudySessions error:', err);
@@ -2498,22 +2593,39 @@ window.HiDB = (() => {
             }
         }
 
-        // Đếm số lượng từ vựng riêng (không lấy sneak peek để tối ưu tốc độ)
+        // Đếm số lượng từ vựng riêng (kết hợp in-memory cache để tối ưu tốc độ)
         const topicIds = topics.map(t => t.id);
         let wordCountByTopic = {};
         if (topicIds.length > 0) {
-            const { data: wordsData } = await client
-                .from('words')
-                .select('topic_id')
-                .in('topic_id', topicIds);
-            (wordsData || []).forEach(w => {
-                wordCountByTopic[w.topic_id] = (wordCountByTopic[w.topic_id] || 0) + 1;
-            });
+            try {
+                const missingTopicIds = topicIds.filter(id => {
+                    const cachedCount = _cacheGet(`topic-count:${id}`);
+                    if (cachedCount !== null && cachedCount !== undefined) {
+                        wordCountByTopic[id] = cachedCount;
+                        return false;
+                    }
+                    return true;
+                });
+
+                if (missingTopicIds.length > 0) {
+                    const { data: wordsData } = await client
+                        .from('words')
+                        .select('topic_id')
+                        .in('topic_id', missingTopicIds);
+                    (wordsData || []).forEach(w => {
+                        wordCountByTopic[w.topic_id] = (wordCountByTopic[w.topic_id] || 0) + 1;
+                    });
+                    missingTopicIds.forEach(id => {
+                        _cacheSet(`topic-count:${id}`, wordCountByTopic[id] || 0, 10 * 60 * 1000);
+                    });
+                }
+            } catch (_) {}
         }
 
         const enrichedTopics = topics.map(t => ({
             ...t,
-            totalWords: wordCountByTopic[t.id] || t.word_count || 0,
+            totalWords: wordCountByTopic[t.id] ?? t.word_count ?? 0,
+            word_count: wordCountByTopic[t.id] ?? t.word_count ?? 0,
             sneakPeekWords: [],
             hasLiked: userLikedTopicIds.has(t.id)
         }));
