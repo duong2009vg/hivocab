@@ -70,7 +70,7 @@ function copyStaticAssetsPlugin() {
       if (fs.existsSync(distHtmlPath)) {
         let html = fs.readFileSync(distHtmlPath, 'utf-8');
         const legacyScripts = [
-          '<script src="dataLayer.js?v=20260922-v10"></script>',
+          '<script src="dataLayer.js?v=20260922-v11"></script>',
           '<script src="aiHint.js"></script>',
           '<script src="dashboardStats.js"></script>',
           '<script src="soundEngine.js?v=20260921-v8"></script>',

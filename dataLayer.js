@@ -695,16 +695,24 @@ window.HiDB = (() => {
 
         if (existing) return existing;
 
-        // Hoặc lấy topic đầu tiên do user này tạo
-        const { data: firstTopic } = await _getClient()
-            .from('topics')
-            .select('id, name, icon')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: true })
-            .limit(1)
-            .maybeSingle();
+        // Nếu chưa có, tự động tạo mới chủ đề "Sổ tay từ vựng của tôi"
+        try {
+            const { data: created } = await _getClient()
+                .from('topics')
+                .insert({
+                    user_id: user.id,
+                    name: 'Sổ tay từ vựng của tôi',
+                    category: 'personal',
+                    icon: 'collections_bookmark',
+                    is_public: false
+                })
+                .select('id, name, icon')
+                .single();
 
-        return firstTopic || null;
+            if (created) return created;
+        } catch (_) {}
+
+        return null;
     }
 
     /**
@@ -784,114 +792,75 @@ window.HiDB = (() => {
      */
     async function getVocabularyPage(page = 1, pageSize = 50, search = '', levelFilter = null, topicIdFilter = null) {
         const user = await getCurrentUser().catch(() => null);
+        if (!user) return { words: [], total: 0, page: 1, pageSize };
+
         const safePage = Math.max(1, Number(page) || 1);
         const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 50));
         const safeSearch = String(search || '').trim();
         const safeLevel = (levelFilter !== undefined && levelFilter !== null && levelFilter !== '') ? Number(levelFilter) : null;
         const safeTopicId = topicIdFilter ? String(topicIdFilter).trim() : null;
 
-        const cacheKey = `vocabulary:${user?.id || 'anon'}:${safePage}:${safePageSize}:${safeSearch.toLowerCase()}:${safeLevel}:${safeTopicId}`;
+        const cacheKey = `vocabulary:${user.id}:${safePage}:${safePageSize}:${safeSearch.toLowerCase()}:${safeLevel}:${safeTopicId}`;
         const cached = _cacheGet(cacheKey);
         if (cached) return cached;
 
-        const rpcParams = {
-            p_page: safePage,
-            p_page_size: safePageSize,
-            p_search: safeSearch,
-        };
-        if (safeLevel !== null && !isNaN(safeLevel)) {
-            rpcParams.p_level_filter = safeLevel;
-        }
-        if (safeTopicId) {
-            rpcParams.p_topic_id = safeTopicId;
-        }
-
-        const { data: rpcRows, error: rpcError } = await _getClient().rpc('get_vocabulary_page', rpcParams);
-
-        if (!rpcError) {
-            const rows = rpcRows || [];
-            return _cacheSet(cacheKey, {
-                words: rows.map(row => ({
-                    id: row.id,
-                    topicId: row.topic_id,
-                    word: row.word,
-                    pos: row.pos || '',
-                    phonetic: row.phonetic,
-                    meaning: row.meaning,
-                    exampleSentence: row.example_sentence,
-                    topicName: row.topic_name,
-                    level: row.level ?? 0,
-                    nextReviewAt: row.next_review_at,
-                    lastReviewedAt: row.last_reviewed_at,
-                    reviewCount: row.review_count ?? 0,
-                })),
-                total: Number(rows[0]?.total_count || 0),
-                page: safePage,
-                pageSize: safePageSize,
-            });
-        }
-
-        // Fallback Supabase client-side query nếu RPC không khả dụng
         const start = (safePage - 1) * safePageSize;
-        let query = _getClient()
-            .from('words')
-            .select(`
-                id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
-                topics!inner ( id, name, user_id ),
-                word_progress ( level, next_review_at, last_reviewed_at, review_count, user_id )
-            `, { count: 'exact' });
 
-        if (user?.id) {
-            query = query.eq('word_progress.user_id', user.id);
-        }
+        // Truy vấn trực tiếp từ bảng word_progress của user để chỉ lấy các từ user đã học / lưu
+        let query = _getClient()
+            .from('word_progress')
+            .select(`
+                level, next_review_at, last_reviewed_at, review_count, user_id,
+                words!inner (
+                    id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
+                    topics ( id, name )
+                )
+            `, { count: 'exact' })
+            .eq('user_id', user.id);
 
         if (safeTopicId) {
-            query = query.eq('topic_id', safeTopicId);
+            query = query.eq('words.topic_id', safeTopicId);
         }
 
         if (safeLevel !== null && !isNaN(safeLevel)) {
             if (safeLevel === -1) {
-                query = query.lte('word_progress.next_review_at', new Date().toISOString());
-            } else if (safeLevel === 0) {
-                const personalTopic = await ensureUserPersonalTopic().catch(() => null);
-                if (personalTopic?.id) {
-                    query = query.eq('topic_id', personalTopic.id);
-                }
-                query = query.or('level.eq.0,level.is.null', { foreignTable: 'word_progress' });
+                query = query.lte('next_review_at', new Date().toISOString());
             } else {
-                query = query.eq('word_progress.level', safeLevel);
+                query = query.eq('level', safeLevel);
             }
         }
 
-
         if (safeSearch) {
             const escaped = safeSearch.replace(/[,%_()]/g, ' ').trim();
-            query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%`);
+            query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%`, { foreignTable: 'words' });
         }
 
-        query = query.order('created_at', { ascending: false })
+        query = query.order('last_reviewed_at', { ascending: false, nullsFirst: false })
             .range(start, start + safePageSize - 1);
 
         const { data, error, count } = await query;
-        if (error) throw error;
+        if (error) {
+            console.error('[HiDB] getVocabularyPage error:', error);
+            throw error;
+        }
 
         return _cacheSet(cacheKey, {
             words: (data || []).map(row => {
-                const progress = (row.word_progress || [])[0] || null;
+                const w = row.words || {};
                 return {
-                    id: row.id,
-                    topicId: row.topic_id,
-                    word: row.word,
-                    pos: row.pos || '',
-                    phonetic: row.phonetic,
-                    meaning: row.meaning,
-                    exampleSentence: row.example_sentence,
-                    imageUrl: row.image_url || null,
-                    topicName: row.topics?.name || '',
-                    level: progress?.level ?? 0,
-                    nextReviewAt: progress?.next_review_at ?? null,
-                    lastReviewedAt: progress?.last_reviewed_at ?? null,
-                    reviewCount: progress?.review_count ?? 0,
+                    id: w.id,
+                    topicId: w.topic_id,
+                    word: w.word,
+                    pos: w.pos || '',
+                    phonetic: w.phonetic,
+                    meaning: w.meaning,
+                    exampleSentence: w.example_sentence,
+                    imageUrl: w.image_url || null,
+                    topicName: w.topics?.name || '',
+                    level: row.level ?? 0,
+                    nextReviewAt: row.next_review_at ?? null,
+                    lastReviewedAt: row.last_reviewed_at ?? null,
+                    reviewCount: row.review_count ?? 0,
                 };
             }),
             total: Number(count || 0),
@@ -1951,9 +1920,8 @@ window.HiDB = (() => {
             console.warn('[HiDB] getDashboardStats wordsDueCount error:', e);
         }
 
-        // 2. Phân bố level
+        // 2. Phân bố level (chỉ tính các từ user thực sự đã học / có tiến độ trong word_progress)
         const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
-        const progressWordIds = new Set();
         try {
             const { data: progressData, error } = await _getClient()
                 .from('word_progress')
@@ -1962,7 +1930,6 @@ window.HiDB = (() => {
 
             if (!error && progressData) {
                 progressData.forEach(p => {
-                    if (p.word_id) progressWordIds.add(p.word_id);
                     const lv = Number(p.level) ?? 0;
                     if (lv >= 0 && lv <= 5) {
                         memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
@@ -1974,25 +1941,6 @@ window.HiDB = (() => {
         } catch (e) {
             console.warn('[HiDB] getDashboardStats progressData error:', e);
         }
-
-        // Đếm thêm các từ trong sổ tay cá nhân của user chưa có bản ghi word_progress (tính là Lv 0)
-        try {
-            const personalTopic = await ensureUserPersonalTopic();
-            if (personalTopic?.id) {
-                const { data: notebookWords } = await _getClient()
-                    .from('words')
-                    .select('id')
-                    .eq('topic_id', personalTopic.id);
-
-                if (notebookWords && notebookWords.length > 0) {
-                    notebookWords.forEach(w => {
-                        if (!progressWordIds.has(w.id)) {
-                            memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
-                        }
-                    });
-                }
-            }
-        } catch (_) {}
 
         // 3. Tính streak: đếm ngày liên tiếp từ hôm nay trở về trước
         let streak = 0;
@@ -2873,6 +2821,7 @@ window.HiDB = (() => {
 
         _topicsCache = null;
         _invalidateVocabularyCache();
+        if (user?.id) _cacheDel(`dashboard-stats:${user.id}`);
         return newTopicId;
     }
 
