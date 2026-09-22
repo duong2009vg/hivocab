@@ -3,7 +3,7 @@
 // Tra cứu từ vựng và tự động sinh phiên âm IPA, nghĩa tiếng Việt, câu ví dụ qua CKEY AI
 
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
-const CKEY_MODEL = 'gpt-5.6-luna';
+const CKEY_MODEL = 'deepseek-v4-flash';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
