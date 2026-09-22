@@ -1,9 +1,10 @@
 // functions/api/example.js
-// POST /api/example — dùng Groq tạo 1 câu ví dụ tiếng Anh tự nhiên
+// POST /api/example — dùng CKEY tạo 1 câu ví dụ tiếng Anh tự nhiên
 // Body: { term: "break a leg", isPhrase: true }
 // Returns: { ok: true, sentence: "..." }
 
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
+const CKEY_MODEL = 'gpt-5.6-luna';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -53,9 +54,9 @@ export async function onRequestPost(context) {
         });
     }
 
-    const apiKey = env.GROQ_API_KEY;
+    const apiKey = env.CKEY_API_KEY;
     if (!apiKey) {
-        return new Response(JSON.stringify({ ok: false, error: 'GROQ_API_KEY not configured' }), {
+        return new Response(JSON.stringify({ ok: false, error: 'CKEY_API_KEY not configured' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -85,29 +86,29 @@ export async function onRequestPost(context) {
     const prompt = `Write exactly one short, natural English example sentence that clearly uses the ${label} "${term}" in context. Return only the sentence — no quotes, no explanation, nothing else.`;
 
     try {
-        const groqRes = await fetch(GROQ_URL, {
+        const ckeyRes = await fetch(CKEY_URL, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model:       'openai/gpt-oss-20b',
+                model:       CKEY_MODEL,
                 messages:    [{ role: 'user', content: prompt }],
                 max_tokens:  150,
                 temperature: 0.5,
             }),
         });
 
-        if (!groqRes.ok) {
-            const err = await groqRes.text();
-            return new Response(JSON.stringify({ ok: false, error: `Groq error: ${err}` }), {
+        if (!ckeyRes.ok) {
+            const err = await ckeyRes.text();
+            return new Response(JSON.stringify({ ok: false, error: `CKEY error: ${err}` }), {
                 status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
 
-        const data     = await groqRes.json();
+        const data     = await ckeyRes.json();
         const msg      = data.choices?.[0]?.message;
         const raw      = (msg?.content || msg?.reasoning || '').trim();
         const sentence = raw.replace(/^["""''`]+|["""''`]+$/g, '').trim();

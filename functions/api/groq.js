@@ -1,6 +1,6 @@
 // ============================================================
-// GROQ PROXY  |  functions/api/groq.js
-// Cloudflare Pages Function — forward request đến Groq API
+// CKEY LLM PROXY  |  functions/api/groq.js
+// Cloudflare Pages Function — forward request đến CKEY OpenAI-compatible API
 // ============================================================
 
 const rateLimitMap = new Map();
@@ -27,13 +27,8 @@ function isRateLimited(ip, maxRequests = 20, windowMs = 60000) {
     return record.count > maxRequests;
 }
 
-const ALLOWED_MODELS = new Set([
-    'groq/compound-mini',
-    'openai/gpt-oss-20b',
-    'llama-3.1-8b-instant',
-    'llama-3.3-70b-versatile',
-    'mixtral-8x7b-32768'
-]);
+const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
+const CKEY_MODEL = 'gpt-5.6-luna';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -79,7 +74,8 @@ export async function onRequestPost(context) {
 
     const { model, messages, temperature = 0.5, max_tokens = 250 } = body || {};
 
-    const targetModel = ALLOWED_MODELS.has(model) ? model : 'openai/gpt-oss-20b';
+    // Do not allow the browser to select an arbitrary provider/model.
+    const targetModel = CKEY_MODEL;
 
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 5) {
         return new Response(JSON.stringify({ error: 'Invalid messages array (must contain 1-5 items)' }), {
@@ -113,10 +109,10 @@ export async function onRequestPost(context) {
     const clampedMaxTokens = Math.min(Math.max(Number(max_tokens) || 200, 10), 300);
     const clampedTemp = Math.min(Math.max(Number(temperature) || 0.5, 0.0), 1.0);
 
-    const apiKey = env.GROQ_API_KEY;
+    const apiKey = env.CKEY_API_KEY;
     if (!apiKey) {
         return new Response(JSON.stringify({
-            error: 'Missing GROQ_API_KEY — add it in Cloudflare Pages → Settings → Environment Variables'
+            error: 'Missing CKEY_API_KEY — add it in Cloudflare Pages → Settings → Environment Variables'
         }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -124,7 +120,7 @@ export async function onRequestPost(context) {
     }
 
     try {
-        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const response = await fetch(CKEY_URL, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${apiKey}`,
