@@ -92,7 +92,7 @@ export async function onRequestPost(context) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model:       'groq/compound-mini',
+                model:       'openai/gpt-oss-20b',
                 messages:    [{ role: 'user', content: prompt }],
                 max_tokens:  150,
                 temperature: 0.5,
@@ -102,7 +102,7 @@ export async function onRequestPost(context) {
         if (!groqRes.ok) {
             const err = await groqRes.text();
             return new Response(JSON.stringify({ ok: false, error: `Groq error: ${err}` }), {
-                status: 502,
+                status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }

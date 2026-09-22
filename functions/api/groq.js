@@ -79,7 +79,7 @@ export async function onRequestPost(context) {
 
     const { model, messages, temperature = 0.5, max_tokens = 250 } = body || {};
 
-    const targetModel = ALLOWED_MODELS.has(model) ? model : 'groq/compound-mini';
+    const targetModel = ALLOWED_MODELS.has(model) ? model : 'openai/gpt-oss-20b';
 
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 5) {
         return new Response(JSON.stringify({ error: 'Invalid messages array (must contain 1-5 items)' }), {

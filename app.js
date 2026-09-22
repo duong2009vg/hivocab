@@ -3271,15 +3271,37 @@ window.triggerAiLookup = async function() {
     if (aiText) aiText.textContent = 'AI đang tra cứu...';
 
     try {
-        const res = await fetch('/api/ai-lookup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ word })
-        });
+        let data = null;
+        try {
+            const res = await fetch('/api/ai-lookup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word })
+            });
+            const text = await res.text();
+            try { data = JSON.parse(text); } catch (_) {}
+        } catch (netErr) {
+            console.warn('[triggerAiLookup] Network error on /api/ai-lookup:', netErr);
+        }
 
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-            throw new Error(data.error || 'Không thể tra cứu thông tin từ AI.');
+        // Fallback sang HiDict (Free Dictionary + DeepL) nếu AI chưa phản hồi
+        if (!data || !data.ok) {
+            console.warn('[triggerAiLookup] /api/ai-lookup error or invalid JSON, falling back to HiDict...');
+            if (typeof HiDict !== 'undefined' && typeof HiDict.lookupWord === 'function') {
+                const dictResult = await HiDict.lookupWord(word);
+                if (dictResult) {
+                    data = {
+                        ok: true,
+                        phonetic: dictResult.phonetic || '',
+                        meaning: dictResult.viSummary || (dictResult.meanings?.[0]?.definitions?.[0]?.definition) || '',
+                        example: dictResult.example || ''
+                    };
+                }
+            }
+        }
+
+        if (!data || !data.ok) {
+            throw new Error(data?.error || 'Không thể tra cứu thông tin từ AI. Vui lòng kiểm tra lại từ hoặc kết nối mạng.');
         }
 
         const phonetic = data.phonetic || data.data?.phonetic || '';
@@ -3720,15 +3742,20 @@ window.generateBulkWordsAi = async function() {
     if (aiText) aiText.textContent = `AI đang phân tích ${wordList.length} từ...`;
 
     try {
-        const res = await fetch('/api/ai-lookup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ words: wordList })
-        });
-
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-            throw new Error(data.error || 'Lỗi tra cứu hàng loạt từ AI.');
+        let data = null;
+        try {
+            const res = await fetch('/api/ai-lookup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ words: wordList })
+            });
+            const text = await res.text();
+            try { data = JSON.parse(text); } catch (_) {}
+            if (!res.ok || !data || !data.ok) {
+                throw new Error(data?.error || 'Lỗi tra cứu hàng loạt từ AI.');
+            }
+        } catch (fetchErr) {
+            throw new Error(fetchErr.message || 'Lỗi kết nối tới AI. Vui lòng thử lại.');
         }
 
         const results = data.results || [];

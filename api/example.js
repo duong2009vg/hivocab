@@ -68,7 +68,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model:       'groq/compound-mini',
+                model:       'openai/gpt-oss-20b',
                 messages:    [{ role: 'user', content: prompt }],
                 max_tokens:  150,
                 temperature: 0.5,
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
 
         if (!groqRes.ok) {
             const err = await groqRes.text();
-            return res.status(502).json({ ok: false, error: `Groq error: ${err}` });
+            return res.status(500).json({ ok: false, error: `Groq error: ${err}` });
         }
 
         const data     = await groqRes.json();

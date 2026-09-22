@@ -48,3 +48,41 @@
 4. Chạy một vòng UAT thanh toán bằng sandbox hoặc giao dịch kiểm thử có hoàn tiền, rồi mới sign-off thương mại.
 
 **Trạng thái sau kiểm thử:** tài khoản PRO đã được đăng xuất; không có thao tác thanh toán hay thay đổi dữ liệu học được gửi.
+
+## Đánh giá cấu trúc và hiệu năng
+
+### Cấu trúc hiện tại
+
+Website **chưa thật sự gọn**, nhưng chưa cần viết lại toàn bộ ngay trước phát hành. Repo đang dùng song song:
+
+- SPA ESM trong `src/` với router/component/service nhỏ.
+- Nhiều script legacy ở thư mục gốc như `app.js`, `dataLayer.js`, `thptExam.js`, `sessionUI.js`, `library.js`, `bilingualReading.js`, `pricing.js`.
+- `vite.config.js` phải copy thủ công các script legacy và re-inject chúng vào `dist/index.html`.
+- HTML lớn chứa gần như toàn bộ page/modal markup; `index.html` khoảng 193 KB, `admin.html` khoảng 370 KB.
+- CSS bị phân tán giữa `src/styles`, `public/themes.css` và `css/hivocab.min.css`; service worker còn precache cả hai stylesheet.
+- Repo có khoảng 578 file và dữ liệu đề thi `public/data/thpt_exams.json` khoảng 6,2 MB.
+- `package.json` chưa có script test/lint/type-check tự động.
+
+Đây là dấu hiệu của kiến trúc chuyển tiếp. Nó vẫn vận hành được, nhưng mỗi lần sửa route/auth/modal có rủi ro ảnh hưởng script khác hoặc thứ tự tải.
+
+### Đo nhanh production
+
+- HTML landing: khoảng 341 KB raw, khoảng 60–61 KB truyền qua Brotli.
+- TTFB đo từ nhiều lần request: khoảng 0,31–1,12 giây; tổng request landing khoảng 0,41–1,24 giây.
+- Các script/CSS/font first-party được tham chiếu ban đầu cộng lại khoảng 1,4 MB compressed; riêng Material Symbols font khoảng 1,13 MB.
+- `app.js` khoảng 260 KB raw / 53 KB Brotli; `themes.css` khoảng 152 KB raw / 108 KB Brotli.
+- `thpt_exams.json` khoảng 6,18 MB raw / khoảng 0,95 MB Brotli; request riêng mất khoảng 1,2–1,56 giây.
+- Cloudflare đang nén Brotli tốt, nhưng landing đang báo `cf-cache-status: DYNAMIC`; HTML không được edge-cache lâu.
+
+**Đánh giá:** tốc độ hiện tại **chấp nhận được trên desktop/mạng nhanh**, nhưng **chưa tối ưu cho lần truy cập đầu trên mobile/3G/4G yếu**. Service worker giúp các lần truy cập sau nhanh hơn, nhưng không giải quyết tải lần đầu.
+
+### Khuyến nghị refactor
+
+1. Trước launch: sửa các blocker QA-01/02/03, không rewrite toàn bộ.
+2. Sau launch: chọn một entry architecture; chuyển dần logic đang dùng trong các script gốc vào `src/`, rồi bỏ cơ chế copy/re-inject legacy của Vite.
+3. Lazy-load module theo route; landing không nên tải logic luyện đề, thư viện, thanh toán và session cùng lúc.
+4. Chia `thpt_exams.json` theo đề/năm hoặc tải qua API khi mở trang Luyện đề.
+5. Thay font Material Symbols full bằng subset cần dùng hoặc SVG/icon component; xóa file âm thanh trùng tên/nội dung.
+6. Thêm `npm run lint`, test router/auth và smoke E2E cho login, dashboard, payment gate và các route chính; đặt performance budget cho HTML/JS/CSS/font.
+
+**Kết luận hiệu năng:** chưa cần tối ưu khẩn cấp ở tầng server, nhưng nên tối ưu payload và lazy-loading trước khi chạy marketing lớn hoặc mở rộng người dùng.

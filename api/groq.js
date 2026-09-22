@@ -70,7 +70,7 @@ export default async function handler(req, res) {
     const { model, messages, temperature = 0.5, max_tokens = 250 } = req.body || {};
 
     // Validate Model
-    const targetModel = ALLOWED_MODELS.has(model) ? model : 'groq/compound-mini';
+    const targetModel = ALLOWED_MODELS.has(model) ? model : 'openai/gpt-oss-20b';
 
     // Validate Messages
     if (!Array.isArray(messages) || messages.length === 0 || messages.length > 5) {

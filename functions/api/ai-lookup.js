@@ -142,7 +142,7 @@ Respond ONLY with a valid JSON object in this exact format:
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                model: 'groq/compound-mini',
+                model: 'openai/gpt-oss-20b',
                 messages: [
                     {
                         role: 'system',
@@ -159,7 +159,7 @@ Respond ONLY with a valid JSON object in this exact format:
             }),
         });
 
-        // Fallback sang model ổn định nếu compound-mini có lỗi
+        // Fallback sang model openai/gpt-oss-120b nếu 20b có lỗi
         if (!groqRes.ok) {
             groqRes = await fetch(GROQ_URL, {
                 method: 'POST',
@@ -168,7 +168,7 @@ Respond ONLY with a valid JSON object in this exact format:
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'llama-3.1-8b-instant',
+                    model: 'openai/gpt-oss-120b',
                     messages: [
                         {
                             role: 'system',
@@ -189,7 +189,7 @@ Respond ONLY with a valid JSON object in this exact format:
         if (!groqRes.ok) {
             const errText = await groqRes.text();
             return new Response(JSON.stringify({ ok: false, error: `Lỗi từ Groq API: ${errText}` }), {
-                status: 502,
+                status: 500,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
