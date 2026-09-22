@@ -277,7 +277,6 @@
      * Switch Sub-tab
      */
     function switchLibraryTab(tab) {
-        if (state.currentTab === tab) return;
         state.currentTab = tab;
         updateTabButtonsUI();
 
@@ -321,7 +320,7 @@
      * Fetch Public Feed
      */
     async function fetchPublicFeed() {
-        setLoading(true);
+        if (state.currentTab === 'feed') setLoading(true);
         try {
             if (typeof HiDB !== 'undefined' && HiDB.ensureReady) {
                 await HiDB.ensureReady(4000).catch(() => {});
@@ -336,17 +335,23 @@
             } else {
                 state.topics = [];
             }
-            renderFeedList(state.topics);
+            if (state.currentTab === 'feed') {
+                renderFeedList(state.topics);
+            }
         } catch (err) {
             console.error('[Library] fetchPublicFeed error:', err);
-            if (!state._feedRetried) {
-                state._feedRetried = true;
-                setTimeout(() => fetchPublicFeed(), 1200);
-                return;
+            if (state.currentTab === 'feed') {
+                if (!state._feedRetried) {
+                    state._feedRetried = true;
+                    setTimeout(() => fetchPublicFeed(), 1200);
+                    return;
+                }
+                renderFeedError(err.message || 'Không thể tải thư viện. Vui lòng thử lại.');
             }
-            renderFeedError(err.message || 'Không thể tải thư viện. Vui lòng thử lại.');
         } finally {
-            setLoading(false);
+            if (state.currentTab === 'feed') {
+                setLoading(false);
+            }
         }
     }
 
@@ -354,19 +359,25 @@
      * Fetch My Shared Topics
      */
     async function fetchMyTopics() {
-        setLoading(true);
+        if (state.currentTab === 'my') setLoading(true);
         try {
             let myCreatedTopics = [];
             if (typeof HiDB !== 'undefined' && HiDB.getUserCreatedTopics) {
                 myCreatedTopics = await HiDB.getUserCreatedTopics();
             }
             state.myTopics = myCreatedTopics || [];
-            renderMyTopicsList(state.myTopics);
+            if (state.currentTab === 'my') {
+                renderMyTopicsList(state.myTopics);
+            }
         } catch (err) {
             console.error('[Library] fetchMyTopics error:', err);
-            renderFeedError(err.message || 'Không thể tải danh sách bộ từ của bạn.');
+            if (state.currentTab === 'my') {
+                renderFeedError(err.message || 'Không thể tải danh sách bộ từ của bạn.');
+            }
         } finally {
-            setLoading(false);
+            if (state.currentTab === 'my') {
+                setLoading(false);
+            }
         }
     }
 
@@ -374,19 +385,25 @@
      * Fetch Liked Topics
      */
     async function fetchLikedTopics() {
-        setLoading(true);
+        if (state.currentTab === 'liked') setLoading(true);
         try {
             if (typeof HiDB !== 'undefined' && HiDB.getUserLikedTopics) {
                 state.likedTopics = await HiDB.getUserLikedTopics();
             } else {
                 state.likedTopics = [];
             }
-            renderFeedList(state.likedTopics, true);
+            if (state.currentTab === 'liked') {
+                renderFeedList(state.likedTopics, true);
+            }
         } catch (err) {
             console.error('[Library] fetchLikedTopics error:', err);
-            renderFeedError(err.message || 'Không thể tải danh sách đã thích.');
+            if (state.currentTab === 'liked') {
+                renderFeedError(err.message || 'Không thể tải danh sách đã thích.');
+            }
         } finally {
-            setLoading(false);
+            if (state.currentTab === 'liked') {
+                setLoading(false);
+            }
         }
     }
 
@@ -1135,6 +1152,8 @@
     async function handleTopicPublicToggle(topicId, isChecked, toggleEl) {
         if (!topicId) return;
 
+        if (toggleEl) toggleEl.disabled = true;
+
         const card = document.getElementById(`my-topic-card-${topicId}`);
         const statusLabel = card ? card.querySelector('.topic-status-label') : null;
         const toggleText = toggleEl ? toggleEl.closest('div')?.querySelector('span') : null;
@@ -1167,13 +1186,13 @@
                 topic.is_public = isChecked;
             }
 
-            // Re-render để hiển thị đầy đủ thanh action công khai (chia sẻ link)
-            renderMyTopicsList(state.myTopics);
+            // Xóa cache feed công cộng để khi user chuyển tab "Khám phá" sẽ tải lại dữ liệu mới nhất
+            state.topics = [];
 
-            // Tải lại feed cộng đồng ngay để sẵn sàng hiển thị khi chuyển tab
-            setTimeout(() => {
-                fetchPublicFeed();
-            }, 100);
+            // Re-render danh sách "Bộ từ của tôi" để hiển thị/ẩn thanh action công khai (chia sẻ link)
+            if (state.currentTab === 'my') {
+                renderMyTopicsList(state.myTopics);
+            }
 
         } catch (err) {
             console.error('[handleTopicPublicToggle] error:', err);
@@ -1187,6 +1206,8 @@
                 toggleText.textContent = !isChecked ? 'Công khai' : 'Riêng tư';
             }
             window.showHiToast(err.message || 'Không thể thay đổi trạng thái bộ từ lúc này.', 'error');
+        } finally {
+            if (toggleEl) toggleEl.disabled = false;
         }
     }
 

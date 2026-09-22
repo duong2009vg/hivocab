@@ -2534,11 +2534,7 @@ window.HiDB = (() => {
             `, { count: 'exact' })
             .eq('is_public', true)
             .not('name', 'ilike', '%mai phương%')
-            .not('name', 'ilike', '%mai phuong%')
-            .not('author_name', 'ilike', '%mai phương%')
-            .not('author_name', 'ilike', '%mai phuong%')
-            .not('description', 'ilike', '%mai phương%')
-            .not('description', 'ilike', '%mai phuong%');
+            .not('name', 'ilike', '%mai phuong%');
 
         // Lọc theo tag
         if (tag && tag !== 'all' && tag !== 'Tất cả') {
@@ -2935,13 +2931,15 @@ window.HiDB = (() => {
 
         const safeTags = Array.isArray(tags) ? tags : String(tags || '').split(',').map(t => t.trim()).filter(Boolean);
 
+        const descClean = description ? String(description).trim() : '';
+
         const updatePayload = {
             is_public: true,
             author_name: authorName,
             author_avatar: authorAvatar,
+            description: descClean,
             created_at: new Date().toISOString()
         };
-        if (description) updatePayload.description = String(description).trim();
         if (safeTags && safeTags.length > 0) updatePayload.tags = safeTags;
 
         let { error } = await client
@@ -2950,9 +2948,15 @@ window.HiDB = (() => {
             .eq('id', topicId);
 
         if (error) {
+            console.warn('[publishTopic] Full update failed, falling back to basic fields:', error);
+            const basicPayload = {
+                is_public: true,
+                author_name: authorName,
+                description: descClean
+            };
             const res = await client
                 .from('topics')
-                .update({ is_public: true, author_name: authorName })
+                .update(basicPayload)
                 .eq('id', topicId);
             if (res.error) throw res.error;
         }
