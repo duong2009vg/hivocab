@@ -945,10 +945,12 @@ html.user-logged-in:not(.router-ready)[data-initial-route="vocabulary"] #page-vo
 html.user-logged-in:not(.router-ready)[data-initial-route="exercises"] #page-exercises { display: block; }
 html.user-logged-in:not(.router-ready)[data-initial-route="dictionary"] #page-dictionary { display: block; }
 
-/* KHI CHƯA ĐĂNG NHẬP: Mặc định hiển thị landing trước khi router sẵn sàng (trừ khi có link chia sẻ thư viện) */
-html:not(.user-logged-in):not(.router-ready):not([data-initial-route="library"]) #page-landing { display: block; }
+/* KHI CHƯA ĐĂNG NHẬP: Mặc định hiển thị landing trước khi router sẵn sàng (trừ khi có link chia sẻ thư viện hoặc vào form đăng nhập) */
+html:not(.user-logged-in):not(.router-ready):not([data-initial-route="library"]):not([data-initial-route="login"]) #page-landing { display: block; }
 html:not(.router-ready)[data-initial-route="library"] #page-landing { display: none !important; }
 html:not(.router-ready)[data-initial-route="library"] #page-library { display: block; }
+html:not(.user-logged-in):not(.router-ready)[data-initial-route="login"] #page-landing { display: none !important; }
+html:not(.user-logged-in):not(.router-ready)[data-initial-route="login"] #page-login { display: block; }
 
 /* Bottom nav trên mobile khi đã đăng nhập (trước khi router sẵn sàng) */
 @media (max-width: 1023.98px) {
@@ -1015,15 +1017,19 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                 } catch(_) {}
             }
         }
+        var curPath = (window.location.pathname || '').replace(/^\/+/, '').replace(/\/+$/, '');
         var curHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
         var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
         var isDeckRoute = curHash.indexOf('d=') === 0 || curHash.indexOf('deck=') === 0 || curHash.indexOf('topic=') === 0 || curHash.indexOf('library') === 0;
+        var isLoginRoute = curHash === 'login' || curPath === 'login';
 
         if (hasAuth) {
             window._isPreAuthenticated = true;
             document.documentElement.classList.add('user-logged-in');
-            var initialRoute = isDeckRoute ? 'library' : ((!curHash || curHash === 'landing' || curHash === 'login' || isAuthHash) ? 'dashboard' : curHash.split('?')[0]);
+            var initialRoute = isDeckRoute ? 'library' : ((!curHash || curHash === 'landing' || isLoginRoute || isAuthHash) ? 'dashboard' : curHash.split('?')[0]);
             document.documentElement.setAttribute('data-initial-route', initialRoute);
+        } else if (isLoginRoute) {
+            document.documentElement.setAttribute('data-initial-route', 'login');
         } else if (isDeckRoute) {
             document.documentElement.setAttribute('data-initial-route', 'library');
         }
@@ -1534,7 +1540,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
         <div id="lib-search-container" class="flex items-center gap-2 px-3 sm:px-0 pt-2 sm:pt-0">
             <div class="relative flex-1">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
-                <input id="lib-search-input" type="text" placeholder="Tìm bộ từ, tác giả, #hashtag..." oninput="window.handleLibrarySearch(this.value)"
+                <input id="lib-search-input" type="text" aria-label="Tìm kiếm bộ từ, tác giả hoặc hashtag" placeholder="Tìm bộ từ, tác giả, #hashtag..." oninput="window.handleLibrarySearch(this.value)"
                        class="w-full pl-9 pr-8 py-2 text-xs sm:text-sm rounded-2xl bg-surface-container-low dark:bg-neutral-900 border border-outline-variant/30 dark:border-neutral-800 focus:border-primary focus:outline-hidden transition-all text-on-surface placeholder:text-outline"/>
                 <button id="lib-search-clear" onclick="window.clearLibrarySearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface cursor-pointer">
                     <span class="material-symbols-outlined text-[16px]">close</span>
@@ -1708,7 +1714,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                 </button>
                 <div class="relative w-full lg:w-72">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
-                    <input id="ld-search" oninput="window.filterLessonWords()" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary border-t-0 border-l-0 border-r-0 rounded-t-DEFAULT pl-10 pr-4 py-3 text-base text-on-surface placeholder:text-outline focus:ring-0 transition-colors" placeholder="Tìm kiếm từ vựng..." type="text"/>
+                    <input id="ld-search" aria-label="Tìm kiếm từ vựng trong bài học" oninput="window.filterLessonWords()" class="w-full bg-surface-container-low border-b-2 border-transparent focus:border-primary border-t-0 border-l-0 border-r-0 rounded-t-DEFAULT pl-10 pr-4 py-3 text-base text-on-surface placeholder:text-outline focus:ring-0 transition-colors" placeholder="Tìm kiếm từ vựng..." type="text"/>
                 </div>
             </div>
         </div>
@@ -1857,6 +1863,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none select-none">search</span>
                 <input id="thpt-search-input" 
                        type="text" 
+                       aria-label="Tìm kiếm đề thi THPT Quốc Gia"
                        oninput="window.ThptExam && window.ThptExam.onSearchInput(this.value)"
                        onkeydown="if(event.key==='Escape') window.ThptExam && window.ThptExam.clearSearch()"
                        placeholder="Tìm kiếm đề thi (theo tên trường, tỉnh/thành phố, số đề...)..."
@@ -2169,7 +2176,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
             <!-- Search Input -->
             <div class="relative flex-1 max-w-md">
                 <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
-                <input id="vocab-search" oninput="window._filterVocabList()"
+                <input id="vocab-search" aria-label="Tìm kiếm từ vựng hoặc nghĩa tiếng Việt" oninput="window._filterVocabList()"
                        class="w-full pl-10 pr-9 py-2.5 bg-surface-container-low border border-outline-variant/25 focus:border-primary focus:bg-surface transition-all outline-none rounded-2xl text-xs sm:text-sm text-on-surface placeholder:text-outline/70 shadow-2xs"
                        placeholder="Tìm kiếm từ vựng, nghĩa tiếng Việt..."/>
                 <button id="vocab-search-clear" onclick="window.clearVocabSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface p-1">
@@ -2260,6 +2267,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[22px]">search</span>
             <input id="dict-input"
                    type="text"
+                   aria-label="Nhập từ hoặc cụm từ tiếng Anh để tra từ điển"
                    placeholder="Nhập từ hoặc cụm từ tiếng Anh..."
                    autocomplete="off" spellcheck="false"
                    onkeydown="if(event.key==='Enter') window.dictSearch()"
@@ -2777,7 +2785,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
 </button>
 
 <script src="dictionary.js"></script>
-<script defer src="app.js?v=20260921-v9"></script>
+<script defer src="app.js?v=20260922-v12"></script>
 <script type="module" src="/src/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {

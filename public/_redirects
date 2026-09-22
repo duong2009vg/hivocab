@@ -4,3 +4,4 @@
 # Adding a rewrite to a .html file triggers an infinite 308 redirect loop.
 
 /app      /index.html    200
+/login    /index.html    200

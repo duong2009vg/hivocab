@@ -179,6 +179,9 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
         if (pageName === 'thpt-room') {
             el.style.setProperty('display', 'flex', 'important');
         }
+        if (pageName === 'login' && typeof window.switchAuthMode === 'function') {
+            window.switchAuthMode('login');
+        }
         window.scrollTo(0, 0);
     }
     if (!preserveHash) window.location.hash = page;
@@ -528,6 +531,8 @@ window.addEventListener('DOMContentLoaded', () => {
     // Khởi tạo trang ban đầu
     const authInfo = window._parseAuthRedirectInfo();
     const h = window.location.hash.slice(1);
+    const pathname = (window.location.pathname || '').replace(/^\/+/, '').replace(/\/+$/, '');
+    const isLoginRoute = (h === 'login' || pathname === 'login');
     const searchParams = new URLSearchParams(window.location.search || '');
     const hasDeepDeck = searchParams.has('topic') || searchParams.has('deck') || searchParams.has('d') || h.startsWith('d=') || h.startsWith('topic=') || h.startsWith('deck=') || h.startsWith('library');
     const deepDeckId = searchParams.get('topic') || searchParams.get('deck') || searchParams.get('d');
@@ -547,7 +552,13 @@ window.addEventListener('DOMContentLoaded', () => {
         window.navigateTo('library', true);
     } else if (hasDeepDeck && deepDeckId) {
         window.navigateTo('library?topic=' + encodeURIComponent(deepDeckId));
-    } else if (h && h !== 'landing' && h !== 'login') {
+    } else if (isLoginRoute) {
+        if (isLoggedIn) {
+            window.navigateTo('dashboard');
+        } else {
+            window.navigateTo('login');
+        }
+    } else if (h && h !== 'landing') {
         window.navigateTo(h);
     } else {
         if (isLoggedIn) {

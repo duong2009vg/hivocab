@@ -224,7 +224,7 @@ TEMPLATE = """<!DOCTYPE html>
                 <div class="space-y-2">
                     <h3 class="font-bold text-gray-900 text-sm sm:text-base">5. User Control & Data Deletion</h3>
                     <p>
-                        You have full control over your data. You may revoke HiVocab's access to your Google Account at any time via <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-semibold">Google Account Permissions</a>. You may also request complete deletion of your account and all associated vocabulary progress by emailing <a href="mailto:support@hivocab.com" class="text-blue-600 underline font-semibold"><!--email_off-->support@hivocab.com<!--/email_off--></a>. Requests are processed within 7 business days.
+                        You have full control over your data. You may revoke HiVocab's access to your Google Account at any time via <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-semibold">Google Account Permissions</a>. You may also request complete deletion of your account and all associated vocabulary progress by emailing <a href="mailto:support@hivocab.site" class="text-blue-600 underline font-semibold"><!--email_off-->support@hivocab.site<!--/email_off--></a>. Requests are processed within 7 business days.
                     </p>
                 </div>
             </div>
@@ -272,7 +272,7 @@ TEMPLATE = """<!DOCTYPE html>
                 </div>
                 <div>
                     <span class="text-gray-500 text-xs uppercase tracking-wider block">Support Email</span>
-                    <a href=\\"mailto:support@hivocab.com\\" class=\\"text-blue-600 underline font-semibold\\"><!--email_off-->support@hivocab.com<!--/email_off--></a>
+                    <a href=\"mailto:support@hivocab.site\" class=\"text-blue-600 underline font-semibold\"><!--email_off-->support@hivocab.site<!--/email_off--></a>
                 </div>
                 <div>
                     <span class="text-gray-500 text-xs uppercase tracking-wider block">Support Hotline / Zalo</span>
