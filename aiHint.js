@@ -1,7 +1,7 @@
 // ============================================================
 // HI - AI HINT ENGINE  |  aiHint.js
 // ============================================================
-// Gọi GPT-5.4 API để tạo gợi ý thông minh cho bài tập Fill-in-blank.
+// Gọi DeepSeek V4-Flash API để tạo gợi ý thông minh cho bài tập Fill-in-blank.
 // API key bảo mật server-side qua Vercel proxy (không lưu localStorage).
 //
 // Phụ thuộc: sessionEngine.js (HiSession) phải load trước.
@@ -18,7 +18,7 @@ const HiAIHint = (() => {
     // ----------------------------------------------------------
     // ⚠️ Proxy Cloudflare — API key bảo mật server-side, không lộ ra frontend
     const AI_PROXY  = '/api/groq';
-    const AI_MODEL  = 'gpt-5.4';
+    const AI_MODEL  = 'deepseek-v4-flash';
     const MAX_TOKENS  = 256;
 
     // ----------------------------------------------------------
@@ -79,14 +79,14 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
     }
 
     // ----------------------------------------------------------
-    // GPT-5.4 API CALL
+    // DEEPSEEK API CALL
     // ----------------------------------------------------------
 
     /**
-     * Gọi GPT-5.4 qua proxy và trả về text response.
+     * Gọi DeepSeek qua proxy và trả về text response.
      * API key bảo mật server-side — frontend không cần biết key.
      */
-    async function _callGpt(prompt) {
+    async function _callDeepSeek(prompt) {
         const res = await fetch(AI_PROXY, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -106,7 +106,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
 
         const data = await res.json();
         const text = data?.choices?.[0]?.message?.content?.trim();
-        if (!text) throw new Error('GPT-5.4 trả về kết quả rỗng.');
+        if (!text) throw new Error('DeepSeek trả về kết quả rỗng.');
         return text;
     }
 
@@ -124,7 +124,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
      */
     async function getHint(ctx) {
         const prompt = _buildPrompt(ctx);
-        return await _callGpt(prompt);
+        return await _callDeepSeek(prompt);
     }
 
     // ----------------------------------------------------------
@@ -155,7 +155,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
         hintEl.innerHTML = `
             <div class="flex items-center gap-2 text-primary">
                 <span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
-                <span>GPT-5.4 đang tạo gợi ý...</span>
+                <span>DeepSeek AI đang tạo gợi ý...</span>
             </div>`;
 
         try {

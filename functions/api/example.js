@@ -4,7 +4,7 @@
 // Returns: { ok: true, sentence: "..." }
 
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
-const CKEY_MODEL = 'gpt-5.4';
+const CKEY_MODEL = 'deepseek-v4-flash';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
