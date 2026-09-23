@@ -1,7 +1,7 @@
 // ============================================================
 // HI - AI HINT ENGINE  |  aiHint.js
 // ============================================================
-// Gọi Gemini API để tạo gợi ý thông minh cho bài tập Fill-in-blank.
+// Gọi GPT-5.4 API để tạo gợi ý thông minh cho bài tập Fill-in-blank.
 // API key bảo mật server-side qua Vercel proxy (không lưu localStorage).
 //
 // Phụ thuộc: sessionEngine.js (HiSession) phải load trước.
@@ -16,9 +16,9 @@ const HiAIHint = (() => {
     // ----------------------------------------------------------
     // CONSTANTS
     // ----------------------------------------------------------
-    // ⚠️ Proxy Vercel — API key bảo mật server-side, không lộ ra frontend
-    const GROQ_PROXY  = '/api/groq';
-    const GROQ_MODEL  = 'openai/gpt-oss-20b';
+    // ⚠️ Proxy Cloudflare — API key bảo mật server-side, không lộ ra frontend
+    const AI_PROXY  = '/api/groq';
+    const AI_MODEL  = 'gpt-5.4';
     const MAX_TOKENS  = 256;
 
     // ----------------------------------------------------------
@@ -79,19 +79,19 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
     }
 
     // ----------------------------------------------------------
-    // GROQ API CALL
+    // GPT-5.4 API CALL
     // ----------------------------------------------------------
 
     /**
-     * Gọi Groq qua Vercel proxy và trả về text response.
+     * Gọi GPT-5.4 qua proxy và trả về text response.
      * API key bảo mật server-side — frontend không cần biết key.
      */
-    async function _callGroq(prompt) {
-        const res = await fetch(GROQ_PROXY, {
+    async function _callGpt(prompt) {
+        const res = await fetch(AI_PROXY, {
             method:  'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model:       GROQ_MODEL,
+                model:       AI_MODEL,
                 messages:    [{ role: 'user', content: prompt }],
                 temperature: 0.7,
                 max_tokens:  MAX_TOKENS,
@@ -106,7 +106,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
 
         const data = await res.json();
         const text = data?.choices?.[0]?.message?.content?.trim();
-        if (!text) throw new Error('Groq trả về kết quả rỗng.');
+        if (!text) throw new Error('GPT-5.4 trả về kết quả rỗng.');
         return text;
     }
 
@@ -124,7 +124,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
      */
     async function getHint(ctx) {
         const prompt = _buildPrompt(ctx);
-        return await _callGroq(prompt);
+        return await _callGpt(prompt);
     }
 
     // ----------------------------------------------------------
@@ -155,7 +155,7 @@ Hãy đưa ra MỘT gợi ý thông minh (2-3 câu) bằng tiếng Việt:
         hintEl.innerHTML = `
             <div class="flex items-center gap-2 text-primary">
                 <span class="material-symbols-outlined text-[18px] animate-spin">refresh</span>
-                <span>Groq AI đang tạo gợi ý...</span>
+                <span>GPT-5.4 đang tạo gợi ý...</span>
             </div>`;
 
         try {
