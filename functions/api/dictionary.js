@@ -1,6 +1,6 @@
 // functions/api/dictionary.js
 // Cloudflare Pages Function: GET/POST /api/dictionary
-// Tra cứu từ điển chuẩn Cambridge / Oxford kết hợp Cloudflare KV & Edge Cache
+// Tra cứu từ điển kết hợp Cloudflare KV & Edge Cache
 
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
 const CKEY_MODEL = 'deepseek-v4-flash';
@@ -183,7 +183,7 @@ You MUST output strictly valid JSON matching this schema:
 
 Rules:
 1. Provide accurate CEFR level (A1 to C2).
-2. For each sense, definition_en must be learner-friendly (like Oxford 3000 / Cambridge Advanced).
+2. For each sense, definition_en must be learner-friendly (clear, concise English).
 3. definition_vi must be idiomatic Vietnamese.
 4. Provide 1 to 2 realistic example sentences per sense with natural Vietnamese translations.
 5. Provide 2 to 4 high-frequency collocations or idioms.
@@ -207,7 +207,7 @@ Rules:
                     model: GROQ_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create an Oxford/Cambridge dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,
@@ -239,7 +239,7 @@ Rules:
                     model: CKEY_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create an Oxford/Cambridge dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,

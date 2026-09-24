@@ -5164,18 +5164,43 @@ window.dictPlayUK = async function() {
     }
 };
 
-/** Phát âm Anh - Mỹ (US) */
-window.dictPlayUS = async function() {
+/** Phát âm chuẩn tức thì (1 nút loa duy nhất, zero-delay) */
+window.dictPlayAudio = function() {
     const r = window._dictCurrentResult;
-    if (!r) return;
-    if (typeof HiDict !== 'undefined' && typeof HiDict.playUS === 'function') {
-        await HiDict.playUS(r.word, r.phonetics?.audio_us);
+    if (!r || !r.word) return;
+    const cleanWord = r.word.trim();
+
+    // 1. Ưu tiên HiAudio đã tối ưu zero-latency và iOS Safari
+    if (typeof window.HiAudio !== 'undefined' && typeof window.HiAudio.playWord === 'function') {
+        window.HiAudio.playWord(cleanWord);
+        return;
+    }
+    // 2. Ưu tiên HiDict
+    if (typeof HiDict !== 'undefined' && typeof HiDict.playWordAudio === 'function') {
+        HiDict.playWordAudio(cleanWord);
+        return;
+    }
+    // 3. Fallback Web Speech API
+    if ('speechSynthesis' in window) {
+        try {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(cleanWord);
+            u.lang = 'en-US';
+            window.speechSynthesis.speak(u);
+        } catch (_) {}
     }
 };
 
-/** Tương thích nút phát âm cũ */
-window.dictPlayAudio = async function() {
-    await window.dictPlayUS();
+/** Tương thích các hàm cũ */
+window.dictPlayUS = function() { window.dictPlayAudio(); };
+window.dictPlayUK = function() {
+    const r = window._dictCurrentResult;
+    if (!r || !r.word) return;
+    if (typeof HiDict !== 'undefined' && typeof HiDict.playUK === 'function') {
+        HiDict.playUK(r.word, r.phonetics?.audio_uk);
+    } else {
+        window.dictPlayAudio();
+    }
 };
 
 /** Highlight từ khóa trong câu ví dụ */
@@ -5219,7 +5244,7 @@ window.dictSearch = async function() {
     _dictShow('result');
 };
 
-/** Render kết quả tra từ chuẩn Oxford & Cambridge vào DOM */
+/** Render kết quả tra từ điển vào DOM */
 function _dictRenderResult(r) {
     // 1. Headword
     document.getElementById('dict-word').textContent = r.word;
@@ -5251,13 +5276,17 @@ function _dictRenderResult(r) {
         posEl.textContent = (r.pos || 'vocabulary').toUpperCase();
     }
 
-    // 4. Dual Pronunciation IPA
-    const ukPhonetic = r.phonetics?.uk || r.phonetic || '';
-    const usPhonetic = r.phonetics?.us || r.phonetics?.uk || r.phonetic || '';
+    // 4. Pronunciation IPA (1 nút loa duy nhất - zero delay)
+    const phonetic = r.phonetic || r.phonetics?.us || r.phonetics?.uk || '';
+    const formattedPhonetic = phonetic ? (phonetic.startsWith('/') ? phonetic : `/${phonetic}/`) : '';
+    const phoneticEl = document.getElementById('dict-phonetic');
+    if (phoneticEl) {
+        phoneticEl.textContent = formattedPhonetic;
+    }
     const ukEl = document.getElementById('dict-phonetic-uk');
     const usEl = document.getElementById('dict-phonetic-us');
-    if (ukEl) ukEl.textContent = ukPhonetic || '/—/';
-    if (usEl) usEl.textContent = usPhonetic || '/—/';
+    if (ukEl) ukEl.textContent = r.phonetics?.uk || formattedPhonetic || '';
+    if (usEl) usEl.textContent = r.phonetics?.us || formattedPhonetic || '';
 
     // 5. Quick Vietnamese Summary Banner
     const sumWrap = document.getElementById('dict-summary-wrap');

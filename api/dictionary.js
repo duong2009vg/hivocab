@@ -106,7 +106,7 @@ Return ONLY raw valid JSON.`;
                     model: GROQ_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create an Oxford/Cambridge dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,
@@ -133,7 +133,7 @@ Return ONLY raw valid JSON.`;
                     model: CKEY_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create an Oxford/Cambridge dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,

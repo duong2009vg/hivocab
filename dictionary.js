@@ -1,5 +1,5 @@
 // ============================================================
-// HI - OXFORD & CAMBRIDGE DICTIONARY ENGINE  |  dictionary.js
+// HI - VOCABULARY DICTIONARY ENGINE  |  dictionary.js
 // ============================================================
 // Tầng 1: IndexedDB & In-memory Cache trên thiết bị (0ms - 10ms)
 // Tầng 2: Cloudflare KV & Edge Cache qua /api/dictionary (20ms - 50ms)
@@ -158,7 +158,7 @@ const HiDict = (() => {
         }];
 
         return {
-            // Trường mới chuẩn Oxford / Cambridge
+            // Trường mới chuẩn cấu trúc từ điển hiện đại
             word: raw.word || '',
             cefr: raw.cefr ? String(raw.cefr).toUpperCase() : null,
             pos: raw.pos || 'vocabulary',
@@ -276,11 +276,37 @@ const HiDict = (() => {
         window.speechSynthesis.speak(utter);
     }
 
+    function playWordAudio(word, rate = 0.9) {
+        if (!word?.trim()) return;
+        const cleanWord = word.trim();
+
+        // 1. Ưu tiên HiAudio engine đã tối ưu zero-latency và iOS Safari
+        if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
+            window.HiAudio.playWord(cleanWord, rate);
+            return;
+        }
+
+        // 2. HTML5 Audio Stream tốc độ cao (<50ms CDN)
+        try {
+            const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+            const a = new Audio(audioUrl);
+            a.playbackRate = rate;
+            a.onerror = () => _speakTTS(cleanWord, 'en-US', rate);
+            const p = a.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(() => _speakTTS(cleanWord, 'en-US', rate));
+            }
+            return;
+        } catch (_) {}
+
+        // 3. Fallback tức thì: Web Speech API (0ms latency)
+        _speakTTS(cleanWord, 'en-US', rate);
+    }
+
     async function playUK(word, customUrl = null) {
         if (!word?.trim()) return;
         const cleanWord = word.trim();
 
-        // 1. Thử Audio URL chuẩn nếu có
         if (customUrl) {
             try {
                 const a = new Audio(customUrl);
@@ -289,15 +315,16 @@ const HiDict = (() => {
             } catch (_) {}
         }
 
-        // 2. Thử kho âm thanh Cambridge / FreeDict UK
-        const fallbackUrl = `https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(cleanWord.toLowerCase())}-uk.mp3`;
         try {
-            const a = new Audio(fallbackUrl);
-            await a.play();
+            const a = new Audio(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=1`);
+            a.onerror = () => _speakTTS(cleanWord, 'en-GB', 0.9);
+            const p = a.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(() => _speakTTS(cleanWord, 'en-GB', 0.9));
+            }
             return;
         } catch (_) {}
 
-        // 3. Fallback Native SpeechSynthesis giọng Anh - Anh (en-GB)
         _speakTTS(cleanWord, 'en-GB', 0.9);
     }
 
@@ -305,7 +332,6 @@ const HiDict = (() => {
         if (!word?.trim()) return;
         const cleanWord = word.trim();
 
-        // 1. Thử Audio URL chuẩn nếu có
         if (customUrl) {
             try {
                 const a = new Audio(customUrl);
@@ -314,21 +340,7 @@ const HiDict = (() => {
             } catch (_) {}
         }
 
-        // 2. Thử kho âm thanh Cambridge / FreeDict US
-        const fallbackUrl = `https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(cleanWord.toLowerCase())}-us.mp3`;
-        try {
-            const a = new Audio(fallbackUrl);
-            await a.play();
-            return;
-        } catch (_) {}
-
-        // 3. Fallback Native SpeechSynthesis giọng Anh - Mỹ (en-US)
-        _speakTTS(cleanWord, 'en-US', 0.9);
-    }
-
-    // Tương thích hàm cũ
-    async function playWordAudio(word, rate = 0.9) {
-        playUS(word);
+        playWordAudio(cleanWord, 0.9);
     }
 
     // ─────────────────────────────────────────────────────────────

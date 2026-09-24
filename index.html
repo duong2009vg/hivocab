@@ -2260,9 +2260,9 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
         <header class="flex flex-col gap-1">
             <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary text-[28px]">menu_book</span>
-                <h1 class="text-2xl lg:text-headline-lg font-bold text-on-surface">Từ điển Oxford & Cambridge</h1>
+                <h1 class="text-2xl lg:text-headline-lg font-bold text-on-surface">Từ điển</h1>
             </div>
-            <p class="text-xs sm:text-sm text-on-surface-variant">Tra cứu từ vựng học thuật song ngữ, phát âm kép Anh - Anh (UK) & Anh - Mỹ (US), cấp độ CEFR và ngữ cảnh thực tế.</p>
+            <p class="text-xs sm:text-sm text-on-surface-variant">Tra cứu từ vựng song ngữ, phát âm tức thì, cấp độ CEFR và ngữ cảnh thực tế.</p>
         </header>
 
         <!-- Search bar -->
@@ -2314,7 +2314,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                 <span class="material-symbols-outlined text-primary text-[22px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">menu_book</span>
             </div>
             <p class="text-on-surface font-semibold text-base">Đang tra cứu từ điển...</p>
-            <p class="text-on-surface-variant text-xs">Truy xuất định nghĩa chuẩn Cambridge & Oxford từ Cloudflare</p>
+            <p class="text-on-surface-variant text-xs">Tra cứu định nghĩa song ngữ và ví dụ thực tế</p>
         </div>
 
         <!-- Error / Not found -->
@@ -2324,7 +2324,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
             <p id="dict-error-desc" class="text-on-surface-variant text-sm max-w-sm">Kiểm tra lại chính tả hoặc thử các từ thông dụng khác.</p>
         </div>
 
-        <!-- Result container (Oxford & Cambridge format) -->
+        <!-- Result container -->
         <div id="dict-result" class="hidden flex-col gap-6">
 
             <!-- Word Header Card -->
@@ -2356,35 +2356,15 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                     </div>
                 </div>
 
-                <!-- Row 2: Dual Pronunciation (UK 🇬🇧 vs US 🇺🇸) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6 pt-6 border-t border-outline-variant/20">
-                    <!-- UK Pronunciation -->
-                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-500/20">
-                        <div class="flex items-center gap-2.5">
-                            <span class="px-2 py-0.5 rounded font-black text-[11px] bg-blue-600 text-white tracking-wider">UK 🇬🇧</span>
-                            <span id="dict-phonetic-uk" class="font-mono text-sm md:text-base text-on-surface font-semibold"></span>
-                        </div>
-                        <button id="dict-audio-uk-btn"
-                                onclick="window.dictPlayUK()"
-                                title="Phát âm Anh - Anh (UK)"
-                                class="w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center shadow active:scale-95 transition-all">
-                            <span class="material-symbols-outlined text-[18px]">volume_up</span>
-                        </button>
-                    </div>
-
-                    <!-- US Pronunciation -->
-                    <div class="flex items-center justify-between p-3.5 rounded-xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20">
-                        <div class="flex items-center gap-2.5">
-                            <span class="px-2 py-0.5 rounded font-black text-[11px] bg-rose-600 text-white tracking-wider">US 🇺🇸</span>
-                            <span id="dict-phonetic-us" class="font-mono text-sm md:text-base text-on-surface font-semibold"></span>
-                        </div>
-                        <button id="dict-audio-us-btn"
-                                onclick="window.dictPlayUS()"
-                                title="Phát âm Anh - Mỹ (US)"
-                                class="w-9 h-9 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center shadow active:scale-95 transition-all">
-                            <span class="material-symbols-outlined text-[18px]">volume_up</span>
-                        </button>
-                    </div>
+                <!-- Pronunciation Row (1 single audio button - zero delay) -->
+                <div class="flex items-center gap-3.5 mt-5 pt-5 border-t border-outline-variant/20">
+                    <span id="dict-phonetic" class="font-mono text-base md:text-xl text-primary font-bold tracking-wide"></span>
+                    <button id="dict-audio-btn"
+                            onclick="window.dictPlayAudio()"
+                            title="Nghe phát âm"
+                            class="w-10 h-10 rounded-full bg-primary text-on-primary hover:bg-surface-tint active:scale-95 flex items-center justify-center shadow transition-all cursor-pointer">
+                        <span class="material-symbols-outlined text-[22px]">volume_up</span>
+                    </button>
                 </div>
 
                 <!-- Row 3: Quick Vietnamese Summary Banner -->
@@ -2445,8 +2425,8 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
             <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-sm">
                 <span class="material-symbols-outlined text-[44px]">menu_book</span>
             </div>
-            <h3 class="font-bold text-on-surface text-xl">Tra cứu từ điển Oxford & Cambridge</h3>
-            <p class="text-on-surface-variant text-sm max-w-sm">Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để xem đầy đủ phát âm UK/US, cấp độ CEFR, các nét nghĩa và ví dụ thực tế.</p>
+            <h3 class="font-bold text-on-surface text-xl">Tra cứu từ điển</h3>
+            <p class="text-on-surface-variant text-sm max-w-sm">Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để xem đầy đủ phát âm, cấp độ CEFR, các nét nghĩa và ví dụ thực tế.</p>
             <div class="flex flex-wrap justify-center gap-2 mt-2">
                 <button onclick="document.getElementById('dict-input').value='abandon'; window.dictSearch()" class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors">abandon</button>
                 <button onclick="document.getElementById('dict-input').value='resilient'; window.dictSearch()" class="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors">resilient</button>
@@ -2894,8 +2874,8 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
     <span class="hidden sm:inline text-on-surface-variant group-hover:text-on-surface">Báo lỗi &amp; Góp ý</span>
 </button>
 
-<script src="dictionary.js?v=20260924-oxford-v1"></script>
-<script defer src="app.js?v=20260924-oxford-v1"></script>
+<script src="dictionary.js?v=20260924-dict-v2"></script>
+<script defer src="app.js?v=20260924-dict-v2"></script>
 <script type="module" src="/src/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
