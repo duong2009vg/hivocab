@@ -60,17 +60,44 @@ export default async function handler(req, res) {
         return res.status(429).json({ ok: false, error: 'Too many requests. Please wait a minute.' });
     }
 
-    const apiKey = process.env.DEEPL_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({ ok: false, error: 'DEEPL_API_KEY is not configured' });
-    }
-
     const texts = normalizeTexts(req.body || {});
     const sourceLang = String(req.body?.from || 'en').toUpperCase();
     const targetLang = String(req.body?.to || 'vi').toUpperCase();
 
     if (!texts.length) {
         return res.status(400).json({ ok: false, error: 'Missing text' });
+    }
+
+    const apiKey = process.env.DEEPL_API_KEY;
+
+    async function fallbackTranslate(items, targetLangCode = 'vi') {
+        const results = [];
+        for (const item of items) {
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLangCode)}&dt=t&q=${encodeURIComponent(item)}`;
+                const fRes = await fetch(url);
+                if (fRes.ok) {
+                    const data = await fRes.json();
+                    const trans = (data[0] || []).map(seg => seg[0]).join('');
+                    results.push(trans || item);
+                } else {
+                    results.push(item);
+                }
+            } catch (_) {
+                results.push(item);
+            }
+        }
+        return results;
+    }
+
+    if (!apiKey) {
+        const fallbackResults = await fallbackTranslate(texts, targetLang.toLowerCase());
+        return res.status(200).json({
+            ok: true,
+            text: fallbackResults[0] || '',
+            translations: fallbackResults,
+            source: 'fallback'
+        });
     }
 
     try {
@@ -88,8 +115,13 @@ export default async function handler(req, res) {
         });
 
         if (!deeplRes.ok) {
-            const errText = await deeplRes.text();
-            return res.status(502).json({ ok: false, error: `DeepL error ${deeplRes.status}: ${errText}` });
+            const fallbackResults = await fallbackTranslate(texts, targetLang.toLowerCase());
+            return res.status(200).json({
+                ok: true,
+                text: fallbackResults[0] || '',
+                translations: fallbackResults,
+                source: 'fallback'
+            });
         }
 
         const data = await deeplRes.json();
@@ -99,11 +131,15 @@ export default async function handler(req, res) {
             ok: true,
             text: translated[0] || '',
             translations: translated,
+            source: 'deepl'
         });
     } catch (error) {
-        return res.status(502).json({
-            ok: false,
-            error: error?.message || 'Translate failed',
+        const fallbackResults = await fallbackTranslate(texts, targetLang.toLowerCase());
+        return res.status(200).json({
+            ok: true,
+            text: fallbackResults[0] || '',
+            translations: fallbackResults,
+            source: 'fallback'
         });
     }
 }

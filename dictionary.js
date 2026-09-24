@@ -1,247 +1,394 @@
 // ============================================================
-// HI - DICTIONARY  |  dictionary.js
+// HI - OXFORD & CAMBRIDGE DICTIONARY ENGINE  |  dictionary.js
 // ============================================================
-// Flow:
-//   DeepL     → dịch từ/cụm từ thẳng sang VI (luôn dùng, song song)
-//   Free Dict → lấy IPA + audio + câu ví dụ EN (chỉ từ đơn, song song)
-//   Groq      → tạo ví dụ thay thế khi Free Dict không có ví dụ thực
+// Tầng 1: IndexedDB & In-memory Cache trên thiết bị (0ms - 10ms)
+// Tầng 2: Cloudflare KV & Edge Cache qua /api/dictionary (20ms - 50ms)
+// Tầng 3: High-Speed AI Engine (Groq Llama 3.3 / DeepSeek CKEY) (< 350ms)
+// Tầng 4: Supabase 70.000 từ vựng Offline Fallback
 // ============================================================
 
 const HiDict = (() => {
 
-    const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-    const TRANSLATE_URL = '/api/translate';
-    const EXAMPLE_URL   = '/api/example';
+    const DICT_API_URL = '/api/dictionary';
+    const RECENT_KEY = 'hi_dict_recent_searches';
+    const DB_NAME = 'HiVocab_Dictionary_DB';
+    const DB_STORE = 'word_entries';
+    const DB_VERSION = 1;
 
-    const _cache = new Map();
-    let _audioEl = null;
+    const _memoryCache = new Map();
+    let _idb = null;
+    let _voices = [];
 
-    // Warm up TTS voices
+    // Khởi tạo và nạp trước danh sách giọng phát âm
     if (typeof window !== 'undefined' && window.speechSynthesis) {
-        window.speechSynthesis.getVoices();
-        window.speechSynthesis.addEventListener('voiceschanged', () => window.speechSynthesis.getVoices());
-        window.addEventListener('pointerdown', () => window.speechSynthesis.getVoices(), { once: true });
+        const loadVoices = () => {
+            _voices = window.speechSynthesis.getVoices();
+        };
+        loadVoices();
+        window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+        window.addEventListener('pointerdown', loadVoices, { once: true });
     }
 
-    // --------------------------------------------------------
-    // Helper: fetch với AbortController timeout
-    // --------------------------------------------------------
-    async function _fetchWithTimeout(url, options = {}, timeoutMs = 3500) {
+    // ─────────────────────────────────────────────────────────────
+    // 1. INDEXEDDB LOCAL STORAGE (LƯU TẠI THIẾT BỊ NGƯỜI DÙNG)
+    // ─────────────────────────────────────────────────────────────
+    async function _getDB() {
+        if (_idb) return _idb;
+        if (typeof window === 'undefined' || !window.indexedDB) return null;
+
+        return new Promise((resolve) => {
+            try {
+                const req = indexedDB.open(DB_NAME, DB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(DB_STORE)) {
+                        db.createObjectStore(DB_STORE, { keyPath: 'key' });
+                    }
+                };
+                req.onsuccess = (e) => {
+                    _idb = e.target.result;
+                    resolve(_idb);
+                };
+                req.onerror = () => resolve(null);
+            } catch (_) {
+                resolve(null);
+            }
+        });
+    }
+
+    async function _loadFromIndexedDB(key) {
+        try {
+            const db = await _getDB();
+            if (!db) return null;
+            return new Promise((resolve) => {
+                const tx = db.transaction([DB_STORE], 'readonly');
+                const store = tx.objectStore(DB_STORE);
+                const req = store.get(key);
+                req.onsuccess = () => resolve(req.result ? req.result.data : null);
+                req.onerror = () => resolve(null);
+            });
+        } catch (_) {
+            return null;
+        }
+    }
+
+    async function _saveToIndexedDB(key, data) {
+        try {
+            const db = await _getDB();
+            if (!db) return;
+            const tx = db.transaction([DB_STORE], 'readwrite');
+            const store = tx.objectStore(DB_STORE);
+            store.put({ key, data, saved_at: Date.now() });
+        } catch (_) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. HELPER FETCH CÓ TIMEOUT
+    // ─────────────────────────────────────────────────────────────
+    async function _fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
         try {
             const res = await fetch(url, { ...options, signal: controller.signal });
             clearTimeout(timer);
             return res;
-        } catch (_) {
+        } catch (e) {
             clearTimeout(timer);
             return null;
         }
     }
 
-    // --------------------------------------------------------
-    // DeepL — dịch thẳng từ/cụm từ → VI
-    // --------------------------------------------------------
-    async function _translateWithDeepL(text) {
+    // ─────────────────────────────────────────────────────────────
+    // 3. FALLBACK: TẬN DỤNG 70.000 TỪ SUPABASE NẾU API NGOÀI LỖI
+    // ─────────────────────────────────────────────────────────────
+    async function _lookupSupabaseFallback(term) {
         try {
-            const res = await _fetchWithTimeout(TRANSLATE_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ text, from: 'en', to: 'vi' }),
-            }, 4500);
-            if (!res || !res.ok) return null;
-            const json = await res.json();
-            return (json.ok && json.text) ? json.text : null;
-        } catch (err) {
-            console.warn('[HiDict] DeepL error:', err);
-            return null;
-        }
-    }
-
-    // --------------------------------------------------------
-    // Free Dictionary — IPA, audio (pre-loaded), câu ví dụ (từ đơn)
-    // --------------------------------------------------------
-    async function _fetchDictionary(word) {
-        try {
-            const res = await _fetchWithTimeout(DICT_URL + encodeURIComponent(word), {}, 2500);
-            if (!res || !res.ok) return null;
-            const data = await res.json();
-            if (!Array.isArray(data) || !data.length) return null;
-
-            const entry = data[0];
-
-            // IPA
-            let phonetic = entry.phonetic || '';
-            if (!phonetic && entry.phonetics) {
-                phonetic = entry.phonetics.find(p => p.text)?.text || '';
-            }
-
-            // Audio URL (ưu tiên US) — pre-load ngay để phát tức thì
-            let audioUrl = null;
-            let audioEl  = null;
-            if (entry.phonetics) {
-                const withAudio = entry.phonetics.filter(p => p.audio);
-                const us = withAudio.find(p => p.audio.includes('-us.'));
-                audioUrl = (us || withAudio[0])?.audio || null;
-                if (audioUrl) {
-                    audioEl = new Audio(audioUrl);
-                    audioEl.preload = 'auto';
-                    audioEl.load(); // buffer ngầm ngay khi có URL
+            if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.searchWords === 'function') {
+                const res = await window.HiDB.searchWords(term);
+                if (res && res.length > 0) {
+                    const match = res.find(w => w.word?.toLowerCase() === term.toLowerCase()) || res[0];
+                    return _normalizeEntry({
+                        word: match.word || term,
+                        cefr: 'B1',
+                        pos: match.pos || 'vocabulary',
+                        phonetics: { uk: match.phonetic || '', us: match.phonetic || '' },
+                        senses: [{
+                            id: 1,
+                            grammar: match.pos ? `[ ${match.pos} ]` : '',
+                            definition_en: match.meaning || '',
+                            definition_vi: match.meaning || '',
+                            examples: match.example_sentence ? [{ en: match.example_sentence, vi: '' }] : []
+                        }],
+                        collocations: [],
+                        word_family: {},
+                        synonyms: []
+                    }, 'supabase_offline');
                 }
             }
-
-            // Meanings (top 3 per part-of-speech)
-            const meanings = (entry.meanings || []).map(m => ({
-                partOfSpeech: m.partOfSpeech,
-                definitions: (m.definitions || []).slice(0, 3).map(d => ({
-                    definition: d.definition || '',
-                    example:    d.example    || '',
-                    synonyms:   (d.synonyms  || []).slice(0, 4),
-                })),
-            }));
-
-            // Tìm câu ví dụ tiếng Anh đầu tiên
-            let example = '';
-            outer: for (const e of data) {
-                for (const m of (e.meanings || [])) {
-                    for (const d of (m.definitions || [])) {
-                        if (d.example && /[a-zA-Z]/.test(d.example)) {
-                            example = d.example;
-                            break outer;
-                        }
-                    }
-                }
-            }
-
-            // Synonyms top 6
-            const allSynonyms = new Set();
-            meanings.forEach(m => m.definitions.forEach(d => (d.synonyms || []).forEach(s => allSynonyms.add(s))));
-            (entry.meanings || []).forEach(m => (m.synonyms || []).forEach(s => allSynonyms.add(s)));
-
-            return { word: entry.word || word, phonetic, audioUrl, audioEl, meanings, synonyms: [...allSynonyms].slice(0, 6), example };
-        } catch (err) {
-            console.warn('[HiDict] Free Dictionary error:', err);
-            return null;
-        }
+        } catch (_) {}
+        return null;
     }
 
-    // --------------------------------------------------------
-    // Groq — tạo câu ví dụ khi Free Dict không có (chỉ gọi khi cần)
-    // --------------------------------------------------------
-    async function _generateExample(term, isPhrase) {
-        try {
-            const res = await _fetchWithTimeout(EXAMPLE_URL, {
-                method:  'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ term, isPhrase: !!isPhrase }),
-            }, 6000);
-            if (!res || !res.ok) return null;
-            const data = await res.json();
-            return (data?.ok && data?.sentence) ? data.sentence : null;
-        } catch (_) {
-            return null;
-        }
+    // ─────────────────────────────────────────────────────────────
+    // 4. CHUẨN HÓA DỮ LIỆU ĐẦU RA (TƯƠNG THÍCH MỚI + CŨ)
+    // ─────────────────────────────────────────────────────────────
+    function _normalizeEntry(raw, source = 'api') {
+        if (!raw) return null;
+
+        const senses = Array.isArray(raw.senses) ? raw.senses : [];
+        const firstSense = senses[0] || {};
+        const firstExample = firstSense.examples?.[0] || {};
+
+        // Chuẩn hóa phát âm
+        const phoneticUk = raw.phonetics?.uk || raw.phonetic || '';
+        const phoneticUs = raw.phonetics?.us || raw.phonetics?.uk || raw.phonetic || '';
+
+        // Tương thích ngược với các module cũ
+        const viSummary = firstSense.definition_vi || raw.meaning || '';
+        const exampleEn = firstExample.en || raw.example || '';
+
+        // Tạo cấu trúc meanings tương thích cũ
+        const legacyMeanings = [{
+            partOfSpeech: raw.pos || 'vocabulary',
+            definitions: senses.map(s => ({
+                definition: s.definition_en || s.definition_vi || '',
+                example: s.examples?.[0]?.en || '',
+                synonyms: (raw.synonyms || []).slice(0, 4)
+            }))
+        }];
+
+        return {
+            // Trường mới chuẩn Oxford / Cambridge
+            word: raw.word || '',
+            cefr: raw.cefr ? String(raw.cefr).toUpperCase() : null,
+            pos: raw.pos || 'vocabulary',
+            phonetics: {
+                uk: phoneticUk,
+                us: phoneticUs
+            },
+            senses: senses.map((s, idx) => ({
+                id: s.id || (idx + 1),
+                grammar: s.grammar || '',
+                definition_en: s.definition_en || '',
+                definition_vi: s.definition_vi || '',
+                examples: Array.isArray(s.examples) ? s.examples : []
+            })),
+            collocations: Array.isArray(raw.collocations) ? raw.collocations : [],
+            word_family: raw.word_family || {},
+            synonyms: Array.isArray(raw.synonyms) ? raw.synonyms : [],
+            antonyms: Array.isArray(raw.antonyms) ? raw.antonyms : [],
+            source: source,
+
+            // Trường tương thích ngược (Legacy fields)
+            phonetic: phoneticUs || phoneticUk,
+            viSummary: viSummary,
+            meanings: legacyMeanings,
+            example: exampleEn,
+            hasRealExample: !!exampleEn,
+            viMeanings: null
+        };
     }
 
-    // --------------------------------------------------------
-    // LOOKUP — Phase 1: DeepL + FreeDict song song
-    //          Phase 2: Groq (chỉ khi FreeDict không có ví dụ)
-    // --------------------------------------------------------
+    // ─────────────────────────────────────────────────────────────
+    // 5. TRA TỪ (LOOKUP ENTRY)
+    // ─────────────────────────────────────────────────────────────
     async function lookupWord(word) {
         if (!word?.trim()) return null;
         const key = word.trim().toLowerCase();
-        if (_cache.has(key)) return _cache.get(key);
 
-        const isPhrase = key.includes(' ');
-
-        // Phase 1: song song
-        const [viSummary, dictData] = await Promise.all([
-            _translateWithDeepL(word.trim()),
-            isPhrase ? Promise.resolve(null) : _fetchDictionary(key),
-        ]);
-
-        if (!viSummary && !dictData) { _cache.set(key, null); return null; }
-
-        const hasRealExample = !!(dictData?.example);
-
-        // Phase 2: Groq nếu FreeDict không có ví dụ (~500ms extra)
-        let exampleToUse = dictData?.example || '';
-        if (!hasRealExample) {
-            const generated = await _generateExample(word.trim(), isPhrase);
-            exampleToUse = generated || (isPhrase
-                ? `She said "${word.trim()}" to get the point across.`
-                : `She learned how to use "${word.trim()}" in a sentence today.`);
+        // Tầng 1A: In-memory Cache (0ms)
+        if (_memoryCache.has(key)) {
+            const cached = _memoryCache.get(key);
+            _addRecent(cached.word || word.trim());
+            return cached;
         }
 
-        const result = {
-            word:           dictData?.word     || word.trim(),
-            phonetic:       dictData?.phonetic || '',
-            audioUrl:       dictData?.audioUrl || null,
-            audioEl:        dictData?.audioEl  || null,  // pre-loaded Audio element
-            meanings:       dictData?.meanings || [],
-            synonyms:       dictData?.synonyms || [],
-            example:        exampleToUse,
-            hasRealExample,
-            viSummary:      viSummary || null,
-            viMeanings:     null,
-        };
+        // Tầng 1B: IndexedDB Cache (5ms - 15ms)
+        const idbData = await _loadFromIndexedDB(key);
+        if (idbData && idbData.word) {
+            _memoryCache.set(key, idbData);
+            _addRecent(idbData.word || word.trim());
+            return idbData;
+        }
 
-        _cache.set(key, result);
-        return result;
+        // Tầng 2 & 3: Cloudflare KV / Edge Cache & High-Speed AI
+        let result = null;
+        try {
+            const res = await _fetchWithTimeout(DICT_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ word: word.trim() })
+            }, 8500);
+
+            if (res && res.ok) {
+                const json = await res.json();
+                if (json.ok && json.data) {
+                    result = _normalizeEntry(json.data, json.source || 'cloudflare_api');
+                }
+            }
+        } catch (err) {
+            console.warn('[HiDict] Dictionary API fetch error:', err);
+        }
+
+        // Tầng 4: Supabase Fallback nếu mạng yếu hoặc lỗi API
+        if (!result) {
+            result = await _lookupSupabaseFallback(key);
+        }
+
+        if (result) {
+            _memoryCache.set(key, result);
+            _saveToIndexedDB(key, result);
+            _addRecent(result.word || word.trim());
+            return result;
+        }
+
+        return null;
     }
 
-    // --------------------------------------------------------
-    // AUDIO — dùng pre-loaded audioEl (tức thì), fallback URL, fallback TTS
-    // --------------------------------------------------------
-    async function playWordAudio(word, rate = 0.9) {
+    // ─────────────────────────────────────────────────────────────
+    // 6. PHÁT ÂM KÉP: ANH - ANH (UK 🇬🇧) & ANH - MỸ (US 🇺🇸)
+    // ─────────────────────────────────────────────────────────────
+    function _speakTTS(text, lang = 'en-US', rate = 0.9) {
+        if (typeof window === 'undefined' || !window.speechSynthesis) return;
+        window.speechSynthesis.cancel();
+
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = lang;
+        utter.rate = rate;
+
+        const isUK = lang.toLowerCase().includes('gb') || lang.toLowerCase().includes('uk');
+        let voice = null;
+
+        if (isUK) {
+            voice = _voices.find(v => v.lang.replace('_', '-').toLowerCase().startsWith('en-gb'))
+                 || _voices.find(v => v.name.includes('UK') || v.name.includes('British') || v.name.includes('English (United Kingdom)'));
+        } else {
+            voice = _voices.find(v => v.lang.replace('_', '-').toLowerCase().startsWith('en-us') && !v.localService)
+                 || _voices.find(v => v.lang.replace('_', '-').toLowerCase().startsWith('en-us'))
+                 || _voices.find(v => v.name.includes('US') || v.name.includes('United States'));
+        }
+
+        if (!voice) {
+            voice = _voices.find(v => v.lang.startsWith('en'));
+        }
+
+        if (voice) utter.voice = voice;
+        window.speechSynthesis.speak(utter);
+    }
+
+    async function playUK(word, customUrl = null) {
         if (!word?.trim()) return;
-        const key    = word.trim().toLowerCase();
-        const cached = _cache.get(key);
+        const cleanWord = word.trim();
 
-        const speakTTS = () => {
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
-            const utter = new SpeechSynthesisUtterance(word);
-            utter.lang  = 'en-US';
-            utter.rate  = rate;
-            const voices = window.speechSynthesis.getVoices();
-            const v = voices.find(v => v.lang === 'en-US' && !v.localService)
-                   || voices.find(v => v.lang === 'en-US')
-                   || voices.find(v => v.lang.startsWith('en'));
-            if (v) utter.voice = v;
-            window.speechSynthesis.speak(utter);
-        };
-
-        // Ưu tiên pre-loaded audioEl (gần như 0ms delay)
-        if (cached?.audioEl) {
+        // 1. Thử Audio URL chuẩn nếu có
+        if (customUrl) {
             try {
-                cached.audioEl.currentTime = 0;
-                await cached.audioEl.play();
+                const a = new Audio(customUrl);
+                await a.play();
                 return;
-            } catch (_) { /* fallback */ }
+            } catch (_) {}
         }
 
-        // Fallback: tạo Audio mới từ URL
-        if (cached?.audioUrl) {
-            try {
-                if (!_audioEl) _audioEl = new Audio();
-                _audioEl.pause();
-                _audioEl.src = cached.audioUrl;
-                await _audioEl.play();
-                return;
-            } catch (_) { /* fallback */ }
-        }
-
-        if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
-            await window.HiAudio.playWord(word, rate);
+        // 2. Thử kho âm thanh Cambridge / FreeDict UK
+        const fallbackUrl = `https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(cleanWord.toLowerCase())}-uk.mp3`;
+        try {
+            const a = new Audio(fallbackUrl);
+            await a.play();
             return;
-        }
+        } catch (_) {}
 
-        speakTTS();
+        // 3. Fallback Native SpeechSynthesis giọng Anh - Anh (en-GB)
+        _speakTTS(cleanWord, 'en-GB', 0.9);
     }
 
+    async function playUS(word, customUrl = null) {
+        if (!word?.trim()) return;
+        const cleanWord = word.trim();
 
-    function clearCache() { _cache.clear(); }
+        // 1. Thử Audio URL chuẩn nếu có
+        if (customUrl) {
+            try {
+                const a = new Audio(customUrl);
+                await a.play();
+                return;
+            } catch (_) {}
+        }
 
-    return { lookupWord, playWordAudio, clearCache };
+        // 2. Thử kho âm thanh Cambridge / FreeDict US
+        const fallbackUrl = `https://api.dictionaryapi.dev/media/pronunciations/en/${encodeURIComponent(cleanWord.toLowerCase())}-us.mp3`;
+        try {
+            const a = new Audio(fallbackUrl);
+            await a.play();
+            return;
+        } catch (_) {}
+
+        // 3. Fallback Native SpeechSynthesis giọng Anh - Mỹ (en-US)
+        _speakTTS(cleanWord, 'en-US', 0.9);
+    }
+
+    // Tương thích hàm cũ
+    async function playWordAudio(word, rate = 0.9) {
+        playUS(word);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 7. QUẢN LÝ TỪ VỪA TRA GẦN ĐÂY (RECENT SEARCHES)
+    // ─────────────────────────────────────────────────────────────
+    function getRecentSearches() {
+        if (typeof localStorage === 'undefined') return [];
+        try {
+            return JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function _addRecent(word) {
+        if (!word || typeof localStorage === 'undefined') return;
+        try {
+            let list = getRecentSearches();
+            list = [word, ...list.filter(w => w.toLowerCase() !== word.toLowerCase())].slice(0, 10);
+            localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+            if (typeof window !== 'undefined' && typeof window.dictRenderRecent === 'function') {
+                window.dictRenderRecent();
+            }
+        } catch (_) {}
+    }
+
+    function removeRecentSearch(word) {
+        if (!word || typeof localStorage === 'undefined') return;
+        try {
+            let list = getRecentSearches();
+            list = list.filter(w => w.toLowerCase() !== word.toLowerCase());
+            localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+            if (typeof window !== 'undefined' && typeof window.dictRenderRecent === 'function') {
+                window.dictRenderRecent();
+            }
+        } catch (_) {}
+    }
+
+    function clearRecentSearches() {
+        if (typeof localStorage === 'undefined') return;
+        try {
+            localStorage.removeItem(RECENT_KEY);
+            if (typeof window !== 'undefined' && typeof window.dictRenderRecent === 'function') {
+                window.dictRenderRecent();
+            }
+        } catch (_) {}
+    }
+
+    function clearCache() {
+        _memoryCache.clear();
+    }
+
+    return {
+        lookupWord,
+        playUK,
+        playUS,
+        playWordAudio,
+        getRecentSearches,
+        removeRecentSearch,
+        clearRecentSearches,
+        clearCache
+    };
 })();

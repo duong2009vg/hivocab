@@ -15,11 +15,11 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
 -- 2. ĐỒNG BỘ CÁC USER HIỆN TẠI VÀ THIẾT LẬP ADMIN BAN ĐẦU
 INSERT INTO public.profiles (id, email, role)
-SELECT id, email, CASE WHEN email = 'mitthoi60@gmail.com' THEN 'admin' ELSE 'user' END
+SELECT id, email, CASE WHEN email IN ('mitthoi60@gmail.com', 'bach97847@gmail.com', 'mitthoi604@gmail.com') THEN 'admin' ELSE 'user' END
 FROM auth.users
 ON CONFLICT (id) DO UPDATE 
 SET email = EXCLUDED.email,
-    role = CASE WHEN EXCLUDED.email = 'mitthoi60@gmail.com' THEN 'admin' ELSE profiles.role END;
+    role = CASE WHEN EXCLUDED.email IN ('mitthoi60@gmail.com', 'bach97847@gmail.com', 'mitthoi604@gmail.com') THEN 'admin' ELSE profiles.role END;
 
 -- 3. TỰ ĐỘNG TẠO PROFILE KHI CÓ USER MỚI ĐĂNG KÝ
 CREATE OR REPLACE FUNCTION public.handle_new_user()

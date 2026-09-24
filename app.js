@@ -237,6 +237,12 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
             window.ThptExam && window.ThptExam.init();
         }, 0);
     }
+    // Khi vào trang Dictionary: render từ vừa tra gần đây
+    if (pageName === 'dictionary') {
+        setTimeout(() => {
+            window.dictRenderRecent && window.dictRenderRecent();
+        }, 0);
+    }
     // Khi vào topic-detail: load danh sách lesson
     if (pageName === 'topic-detail') {
         window._loadLessons && window._loadLessons();
@@ -3272,31 +3278,38 @@ window.triggerAiLookup = async function() {
 
     try {
         let data = null;
-        try {
-            const res = await fetch('/api/ai-lookup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ word })
-            });
-            const text = await res.text();
-            try { data = JSON.parse(text); } catch (_) {}
-        } catch (netErr) {
-            console.warn('[triggerAiLookup] Network error on /api/ai-lookup:', netErr);
-        }
 
-        // Fallback sang HiDict (Free Dictionary + DeepL) nếu AI chưa phản hồi
-        if (!data || !data.ok) {
-            console.warn('[triggerAiLookup] /api/ai-lookup error or invalid JSON, falling back to HiDict...');
-            if (typeof HiDict !== 'undefined' && typeof HiDict.lookupWord === 'function') {
+        // 1. Ưu tiên tra qua HiDict Engine (có sẵn IndexedDB, Cloudflare KV & Oxford AI)
+        if (typeof HiDict !== 'undefined' && typeof HiDict.lookupWord === 'function') {
+            try {
                 const dictResult = await HiDict.lookupWord(word);
                 if (dictResult) {
                     data = {
                         ok: true,
-                        phonetic: dictResult.phonetic || '',
-                        meaning: dictResult.viSummary || (dictResult.meanings?.[0]?.definitions?.[0]?.definition) || '',
-                        example: dictResult.example || ''
+                        phonetic: dictResult.phonetics?.us || dictResult.phonetics?.uk || dictResult.phonetic || '',
+                        meaning: dictResult.senses?.[0]?.definition_vi || dictResult.viSummary || (dictResult.meanings?.[0]?.definitions?.[0]?.definition) || '',
+                        example: dictResult.senses?.[0]?.examples?.[0]?.en || dictResult.example || ''
                     };
                 }
+            } catch (dictErr) {
+                console.warn('[triggerAiLookup] HiDict error:', dictErr);
+            }
+        }
+
+        // 2. Dự phòng: gọi /api/ai-lookup nếu HiDict chưa có kết quả
+        if (!data || !data.ok) {
+            try {
+                const res = await fetch('/api/ai-lookup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word })
+                });
+                if (res.ok) {
+                    const text = await res.text();
+                    try { data = JSON.parse(text); } catch (_) {}
+                }
+            } catch (netErr) {
+                console.warn('[triggerAiLookup] Network error on /api/ai-lookup:', netErr);
             }
         }
 
@@ -4869,14 +4882,322 @@ function _dictShow(state) {
     });
 }
 
-/** Tra từ — gọi HiDict (DeepL) và render kết quả ngay lập tức */
+let _dictSuggestTimer = null;
+const _dictSuggestCache = new Map();
+let _dictActiveSuggestIdx = -1;
+
+/** Xử lý khi người dùng gõ vào ô tìm kiếm (kèm Autocomplete 70.000 từ) */
+window.dictOnInput = function(val) {
+    const clearBtn = document.getElementById('dict-clear-btn');
+    if (clearBtn) {
+        if (val && val.trim().length > 0) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+    }
+
+    const trimmed = (val || '').trim();
+    if (trimmed.length < 2) {
+        window.dictHideSuggestions();
+        return;
+    }
+
+    if (_dictSuggestTimer) clearTimeout(_dictSuggestTimer);
+    _dictSuggestTimer = setTimeout(() => {
+        window.dictFetchSuggestions(trimmed);
+    }, 150);
+};
+
+/** Lấy gợi ý từ vựng từ 70.000 từ trong Supabase */
+window.dictFetchSuggestions = async function(query) {
+    const q = query.toLowerCase();
+    if (_dictSuggestCache.has(q)) {
+        window.dictRenderSuggestions(_dictSuggestCache.get(q), q);
+        return;
+    }
+
+    try {
+        let list = [];
+        // 1. Thử dùng HiDB Supabase client nếu có
+        const sb = (typeof window.HiDB !== 'undefined' && typeof window.HiDB.getSupabase === 'function') 
+            ? window.HiDB.getSupabase() 
+            : null;
+
+        if (sb) {
+            const { data, error } = await sb
+                .from('words')
+                .select('word, meaning, pos')
+                .ilike('word', `${q}%`)
+                .order('word')
+                .limit(8);
+
+            if (!error && Array.isArray(data)) {
+                list = data;
+            }
+        } else {
+            // 2. Fallback REST API
+            const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+            const res = await fetch(`https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words?word=ilike.${encodeURIComponent(q)}%25&select=word,meaning,pos&order=word&limit=8`, {
+                headers: {
+                    'apikey': anonKey,
+                    'Authorization': `Bearer ${anonKey}`
+                }
+            });
+            if (res.ok) {
+                list = await res.json();
+            }
+        }
+
+        // Lọc trùng lặp từ (deduplicate)
+        const seen = new Set();
+        const uniqueList = [];
+        for (const item of list) {
+            const wLower = (item.word || '').toLowerCase();
+            if (wLower && !seen.has(wLower)) {
+                seen.add(wLower);
+                uniqueList.push(item);
+            }
+        }
+
+        _dictSuggestCache.set(q, uniqueList);
+        window.dictRenderSuggestions(uniqueList, q);
+    } catch (err) {
+        console.warn('[dictFetchSuggestions] Error:', err);
+        window.dictHideSuggestions();
+    }
+};
+
+/** Render dropdown gợi ý */
+window.dictRenderSuggestions = function(list, query) {
+    const dropdown = document.getElementById('dict-suggestions-dropdown');
+    if (!dropdown) return;
+
+    if (!list || list.length === 0) {
+        window.dictHideSuggestions();
+        return;
+    }
+
+    _dictActiveSuggestIdx = -1;
+
+    dropdown.innerHTML = list.map((item, idx) => {
+        const word = item.word || '';
+        const meaning = item.meaning || '';
+        const pos = item.pos || '';
+
+        // Highlight phần khớp với query
+        const safeWord = _escHtml(word);
+        const matchIdx = word.toLowerCase().indexOf(query.toLowerCase());
+        let highlightedWord = safeWord;
+        if (matchIdx >= 0) {
+            const before = safeWord.slice(0, matchIdx);
+            const match = safeWord.slice(matchIdx, matchIdx + query.length);
+            const after = safeWord.slice(matchIdx + query.length);
+            highlightedWord = `${before}<span class="text-primary font-black underline decoration-primary/40">${match}</span>${after}`;
+        }
+
+        return `
+            <div id="dict-suggest-item-${idx}" 
+                 data-suggest-idx="${idx}"
+                 data-word="${_escHtml(word)}"
+                 class="dict-suggest-item px-4 py-3 hover:bg-surface-container-high/80 cursor-pointer flex items-center justify-between gap-3 transition-colors group"
+                 onmouseenter="window.dictHighlightSuggestion(${idx})"
+                 onclick="window.dictSelectSuggestion('${_escHtml(word)}')">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="material-symbols-outlined text-[18px] text-outline group-hover:text-primary transition-colors shrink-0">search</span>
+                    <span class="font-bold text-on-surface text-sm md:text-base group-hover:text-primary transition-colors">${highlightedWord}</span>
+                    ${pos ? `<span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase bg-surface-container text-on-surface-variant shrink-0">${_escHtml(pos)}</span>` : ''}
+                </div>
+                ${meaning ? `<span class="text-xs text-on-surface-variant truncate max-w-[200px] text-right shrink-0">${_escHtml(meaning)}</span>` : ''}
+            </div>
+        `;
+    }).join('');
+
+    dropdown.classList.remove('hidden');
+};
+
+/** Xử lý phím mũi tên và Enter trên thanh tìm kiếm */
+window.dictOnKeyDown = function(e) {
+    const dropdown = document.getElementById('dict-suggestions-dropdown');
+    const isShowing = dropdown && !dropdown.classList.contains('hidden');
+
+    if (e.key === 'ArrowDown' && isShowing) {
+        e.preventDefault();
+        const items = dropdown.querySelectorAll('.dict-suggest-item');
+        if (items.length > 0) {
+            _dictActiveSuggestIdx = (_dictActiveSuggestIdx + 1) % items.length;
+            window.dictHighlightSuggestion(_dictActiveSuggestIdx);
+        }
+        return;
+    }
+
+    if (e.key === 'ArrowUp' && isShowing) {
+        e.preventDefault();
+        const items = dropdown.querySelectorAll('.dict-suggest-item');
+        if (items.length > 0) {
+            _dictActiveSuggestIdx = (_dictActiveSuggestIdx - 1 + items.length) % items.length;
+            window.dictHighlightSuggestion(_dictActiveSuggestIdx);
+        }
+        return;
+    }
+
+    if (e.key === 'Escape') {
+        window.dictHideSuggestions();
+        return;
+    }
+
+    if (e.key === 'Enter') {
+        if (isShowing && _dictActiveSuggestIdx >= 0) {
+            const activeItem = document.getElementById(`dict-suggest-item-${_dictActiveSuggestIdx}`);
+            if (activeItem && activeItem.dataset.word) {
+                e.preventDefault();
+                window.dictSelectSuggestion(activeItem.dataset.word);
+                return;
+            }
+        }
+        window.dictHideSuggestions();
+        window.dictSearch();
+    }
+};
+
+/** Highlight item khi di chuột hoặc bấm phím mũi tên */
+window.dictHighlightSuggestion = function(idx) {
+    _dictActiveSuggestIdx = idx;
+    const items = document.querySelectorAll('.dict-suggest-item');
+    items.forEach((item, i) => {
+        if (i === idx) {
+            item.classList.add('bg-surface-container-high/90');
+        } else {
+            item.classList.remove('bg-surface-container-high/90');
+        }
+    });
+};
+
+/** Chọn một từ từ gợi ý */
+window.dictSelectSuggestion = function(word) {
+    const input = document.getElementById('dict-input');
+    if (input) {
+        input.value = word;
+        window.dictOnInput(word);
+    }
+    window.dictHideSuggestions();
+    window.dictSearch();
+};
+
+/** Ẩn dropdown gợi ý */
+window.dictHideSuggestions = function() {
+    const dropdown = document.getElementById('dict-suggestions-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+    _dictActiveSuggestIdx = -1;
+};
+
+// Đóng dropdown khi bấm ra ngoài
+if (typeof document !== 'undefined') {
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#dict-input') && !e.target.closest('#dict-suggestions-dropdown')) {
+            window.dictHideSuggestions();
+        }
+    });
+}
+
+/** Xóa nội dung ô tìm kiếm */
+window.dictClearInput = function() {
+    const input = document.getElementById('dict-input');
+    if (input) {
+        input.value = '';
+        input.focus();
+    }
+    const clearBtn = document.getElementById('dict-clear-btn');
+    if (clearBtn) clearBtn.classList.add('hidden');
+    window.dictHideSuggestions();
+};
+
+/** Render danh sách từ vừa tra gần đây */
+window.dictRenderRecent = function() {
+    if (typeof HiDict === 'undefined') return;
+    const wrap = document.getElementById('dict-recent-wrap');
+    const chips = document.getElementById('dict-recent-chips');
+    if (!wrap || !chips) return;
+
+    const recents = typeof HiDict.getRecentSearches === 'function' ? HiDict.getRecentSearches() : [];
+    if (!recents || recents.length === 0) {
+        wrap.classList.add('hidden');
+        wrap.classList.remove('flex');
+        return;
+    }
+
+    chips.innerHTML = recents.map(w => {
+        const safe = _escHtml(w);
+        return `<div class="group inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-xs font-semibold text-on-surface transition-all cursor-pointer shadow-xs">
+            <span onclick="document.getElementById('dict-input').value='${safe}'; window.dictOnInput('${safe}'); window.dictSearch()">${safe}</span>
+            <button onclick="event.stopPropagation(); HiDict.removeRecentSearch('${safe}'); window.dictRenderRecent()" class="text-outline hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity">
+                <span class="material-symbols-outlined text-[13px]">close</span>
+            </button>
+        </div>`;
+    }).join('');
+
+    wrap.classList.remove('hidden');
+    wrap.classList.add('flex');
+};
+
+/** Xóa toàn bộ lịch sử tra */
+window.dictClearRecent = function() {
+    if (typeof HiDict !== 'undefined' && typeof HiDict.clearRecentSearches === 'function') {
+        HiDict.clearRecentSearches();
+    }
+    window.dictRenderRecent();
+};
+
+/** Sao chép từ vựng vào clipboard */
+window.dictCopyWord = function() {
+    const r = window._dictCurrentResult;
+    if (!r || !r.word) return;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(r.word);
+        if (typeof showToast === 'function') showToast(`Đã sao chép "${r.word}" vào bộ nhớ tạm!`, 'success');
+    }
+};
+
+/** Phát âm Anh - Anh (UK) */
+window.dictPlayUK = async function() {
+    const r = window._dictCurrentResult;
+    if (!r) return;
+    if (typeof HiDict !== 'undefined' && typeof HiDict.playUK === 'function') {
+        await HiDict.playUK(r.word, r.phonetics?.audio_uk);
+    }
+};
+
+/** Phát âm Anh - Mỹ (US) */
+window.dictPlayUS = async function() {
+    const r = window._dictCurrentResult;
+    if (!r) return;
+    if (typeof HiDict !== 'undefined' && typeof HiDict.playUS === 'function') {
+        await HiDict.playUS(r.word, r.phonetics?.audio_us);
+    }
+};
+
+/** Tương thích nút phát âm cũ */
+window.dictPlayAudio = async function() {
+    await window.dictPlayUS();
+};
+
+/** Highlight từ khóa trong câu ví dụ */
+function _dictHighlightWord(sentence, targetWord) {
+    if (!sentence) return '';
+    if (!targetWord) return _escHtml(sentence);
+
+    const safeSentence = _escHtml(sentence);
+    const cleanWord = targetWord.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(`\\b(${cleanWord}[a-zA-Z]*)\\b`, 'gi');
+
+    return safeSentence.replace(regex, '<strong class="text-primary font-extrabold underline decoration-primary/40 decoration-2 underline-offset-2">$1</strong>');
+}
+
+/** Tra từ — gọi HiDict (Cloudflare KV + AI Engine) */
 window.dictSearch = async function() {
     const input = document.getElementById('dict-input');
     const word  = input?.value?.trim();
     if (!word) return;
 
     if (typeof HiDict === 'undefined') {
-        alert('Lỗi: dictionary.js chưa được load.');
+        alert('Lỗi: dictionary.js chưa được nạp.');
         return;
     }
 
@@ -4887,93 +5208,193 @@ window.dictSearch = async function() {
 
     if (!result) {
         _dictShow('error');
+        const descEl = document.getElementById('dict-error-desc');
+        if (descEl) descEl.textContent = `Không thể tìm thấy thông tin cho từ "${word}". Vui lòng thử lại.`;
         return;
     }
 
     window._dictCurrentResult = result;
     _dictRenderResult(result);
+    window.dictRenderRecent();
     _dictShow('result');
 };
 
-/** Render kết quả tra từ vào DOM */
+/** Render kết quả tra từ chuẩn Oxford & Cambridge vào DOM */
 function _dictRenderResult(r) {
-    // Word & phonetic
-    document.getElementById('dict-word').textContent     = r.word;
-    document.getElementById('dict-phonetic').textContent = r.phonetic || '';
+    // 1. Headword
+    document.getElementById('dict-word').textContent = r.word;
 
-    // Nghĩa tiếng Việt từ DeepL — hiện ngay, không cần chờ
-    const viSumEl = document.getElementById('dict-vi-summary');
-    if (viSumEl) {
-        if (r.viSummary) {
-            viSumEl.textContent = r.viSummary;
-            viSumEl.classList.remove('hidden');
+    // 2. CEFR Level Badge
+    const cefrEl = document.getElementById('dict-cefr-badge');
+    if (cefrEl) {
+        if (r.cefr) {
+            cefrEl.textContent = r.cefr;
+            cefrEl.className = 'px-2.5 py-1 rounded-full text-xs font-black tracking-wider uppercase';
+            if (['A1', 'A2'].includes(r.cefr)) {
+                cefrEl.classList.add('bg-emerald-500/15', 'text-emerald-600', 'dark:text-emerald-400', 'border', 'border-emerald-500/30');
+            } else if (['B1', 'B2'].includes(r.cefr)) {
+                cefrEl.classList.add('bg-sky-500/15', 'text-sky-600', 'dark:text-sky-400', 'border', 'border-sky-500/30');
+            } else if (['C1', 'C2'].includes(r.cefr)) {
+                cefrEl.classList.add('bg-amber-500/15', 'text-amber-600', 'dark:text-amber-400', 'border', 'border-amber-500/30');
+            } else {
+                cefrEl.classList.add('bg-primary/10', 'text-primary', 'border', 'border-primary/20');
+            }
+            cefrEl.classList.remove('hidden');
         } else {
-            viSumEl.classList.add('hidden');
+            cefrEl.classList.add('hidden');
+        }
+    }
+
+    // 3. Part of speech
+    const posEl = document.getElementById('dict-pos-badge');
+    if (posEl) {
+        posEl.textContent = (r.pos || 'vocabulary').toUpperCase();
+    }
+
+    // 4. Dual Pronunciation IPA
+    const ukPhonetic = r.phonetics?.uk || r.phonetic || '';
+    const usPhonetic = r.phonetics?.us || r.phonetics?.uk || r.phonetic || '';
+    const ukEl = document.getElementById('dict-phonetic-uk');
+    const usEl = document.getElementById('dict-phonetic-us');
+    if (ukEl) ukEl.textContent = ukPhonetic || '/—/';
+    if (usEl) usEl.textContent = usPhonetic || '/—/';
+
+    // 5. Quick Vietnamese Summary Banner
+    const sumWrap = document.getElementById('dict-summary-wrap');
+    const sumEl = document.getElementById('dict-vi-summary');
+    const summaryText = r.viSummary || r.senses?.[0]?.definition_vi || '';
+    if (sumWrap && sumEl) {
+        if (summaryText) {
+            sumEl.textContent = summaryText;
+            sumWrap.classList.remove('hidden');
+            sumWrap.classList.add('flex');
+        } else {
+            sumWrap.classList.add('hidden');
+            sumWrap.classList.remove('flex');
+        }
+    }
+
+    // 6. Senses & Definitions List (Chuẩn Oxford & Cambridge)
+    const meaningsEl = document.getElementById('dict-meanings');
+    meaningsEl.innerHTML = '';
+
+    const sensesToRender = (r.senses && r.senses.length > 0) ? r.senses : (r.meanings?.[0]?.definitions || []);
+
+    sensesToRender.forEach((sense, idx) => {
+        const senseNumber = sense.id || (idx + 1);
+        const grammarLabel = sense.grammar ? `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/10 text-primary border border-primary/20 uppercase">${_escHtml(sense.grammar)}</span>` : '';
+        const defEn = sense.definition_en || sense.definition || '';
+        const defVi = sense.definition_vi || '';
+        const examples = Array.isArray(sense.examples) ? sense.examples : (sense.example ? [{ en: sense.example, vi: '' }] : []);
+
+        const examplesHtml = examples.map(ex => {
+            const exEn = typeof ex === 'string' ? ex : (ex.en || '');
+            const exVi = typeof ex === 'object' ? (ex.vi || '') : '';
+            return `
+                <div class="mt-2.5 pl-3 border-l-2 border-secondary-fixed-dim/60">
+                    <p class="text-sm md:text-base text-on-surface leading-relaxed">${_dictHighlightWord(exEn, r.word)}</p>
+                    ${exVi ? `<p class="text-xs md:text-sm text-on-surface-variant italic mt-0.5">${_escHtml(exVi)}</p>` : ''}
+                </div>
+            `;
+        }).join('');
+
+        const card = document.createElement('div');
+        card.className = 'glass-card soft-shadow rounded-2xl p-5 md:p-6 border border-outline-variant/20 hover:border-primary/30 transition-all';
+        card.innerHTML = `
+            <div class="flex items-start justify-between gap-3 mb-3">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-black flex items-center justify-center shrink-0 shadow-xs">${senseNumber}</span>
+                    ${grammarLabel}
+                </div>
+                <button onclick="window.dictOpenSaveModal(${idx})" 
+                        title="Lưu nét nghĩa này vào Sổ từ"
+                        class="text-xs font-bold text-primary hover:text-surface-tint flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors">
+                    <span class="material-symbols-outlined text-[15px]">bookmark_add</span>
+                    <span>Lưu nghĩa này</span>
+                </button>
+            </div>
+
+            <div class="flex flex-col gap-1">
+                ${defEn ? `<p class="text-base md:text-lg font-bold text-on-surface leading-snug">${_escHtml(defEn)}</p>` : ''}
+                ${defVi ? `<p class="text-sm md:text-base font-semibold text-primary/95 leading-relaxed mt-0.5">${_escHtml(defVi)}</p>` : ''}
+            </div>
+
+            ${examplesHtml ? `<div class="mt-2 flex flex-col">${examplesHtml}</div>` : ''}
+        `;
+        meaningsEl.appendChild(card);
+    });
+
+    // 7. Collocations & Idioms Card
+    const colocWrap = document.getElementById('dict-collocations-wrap');
+    const colocList = document.getElementById('dict-collocations-list');
+    if (colocWrap && colocList) {
+        if (r.collocations && r.collocations.length > 0) {
+            colocList.innerHTML = r.collocations.map(c => `
+                <div class="p-3.5 rounded-xl bg-surface-container/60 hover:bg-surface-container border border-outline-variant/20 transition-colors flex flex-col gap-0.5">
+                    <span class="font-bold text-sm text-primary cursor-pointer hover:underline"
+                          onclick="document.getElementById('dict-input').value='${_escHtml(c.phrase)}'; window.dictOnInput('${_escHtml(c.phrase)}'); window.dictSearch()">${_escHtml(c.phrase)}</span>
+                    <span class="text-xs text-on-surface-variant">${_escHtml(c.meaning || '')}</span>
+                </div>
+            `).join('');
+            colocWrap.classList.remove('hidden');
+        } else {
+            colocWrap.classList.add('hidden');
+        }
+    }
+
+    // 8. Word Family & Synonyms Cards
+    const extrasWrap = document.getElementById('dict-extras-wrap');
+    const familyWrap = document.getElementById('dict-family-wrap');
+    const familyList = document.getElementById('dict-family-list');
+    const synWrap = document.getElementById('dict-synonyms-wrap');
+    const synEl = document.getElementById('dict-synonyms');
+
+    let hasExtras = false;
+
+    // Word Family
+    if (familyWrap && familyList) {
+        const familyKeys = Object.keys(r.word_family || {}).filter(k => r.word_family[k]);
+        if (familyKeys.length > 0) {
+            familyList.innerHTML = familyKeys.map(k => `
+                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container/80 border border-outline-variant/20 text-xs">
+                    <span class="text-outline uppercase font-bold text-[10px]">${_escHtml(k)}:</span>
+                    <span class="font-bold text-on-surface cursor-pointer hover:text-primary hover:underline"
+                          onclick="document.getElementById('dict-input').value='${_escHtml(r.word_family[k])}'; window.dictOnInput('${_escHtml(r.word_family[k])}'); window.dictSearch()">${_escHtml(r.word_family[k])}</span>
+                </div>
+            `).join('');
+            familyWrap.classList.remove('hidden');
+            familyWrap.classList.add('flex');
+            hasExtras = true;
+        } else {
+            familyWrap.classList.add('hidden');
+            familyWrap.classList.remove('flex');
         }
     }
 
     // Synonyms
-    const synWrap = document.getElementById('dict-synonyms-wrap');
-    const synEl   = document.getElementById('dict-synonyms');
-    if (r.synonyms?.length > 0) {
-        synEl.innerHTML = r.synonyms.map(s => {
-            const safeAttr = typeof _esc === 'function' ? _esc(s) : s;
-            return `<span class="px-3 py-1 rounded-full bg-secondary-container/60 text-on-secondary-container text-xs font-medium cursor-pointer hover:bg-secondary-container transition-colors"
-                          data-search-word="${safeAttr}"
-                          onclick="document.getElementById('dict-input').value=this.dataset.searchWord; window.dictSearch()">${safeAttr}</span>`;
-        }).join('');
-        synWrap.classList.remove('hidden');
-    } else {
-        synWrap.classList.add('hidden');
+    if (synWrap && synEl) {
+        const synList = r.synonyms || [];
+        if (synList.length > 0) {
+            synEl.innerHTML = synList.map(s => {
+                const safeAttr = typeof _esc === 'function' ? _esc(s) : s;
+                return `<span class="px-3 py-1.5 rounded-full bg-secondary-container/60 hover:bg-secondary-container text-on-secondary-container text-xs font-semibold cursor-pointer transition-colors"
+                              data-search-word="${safeAttr}"
+                              onclick="document.getElementById('dict-input').value=this.dataset.searchWord; window.dictOnInput(this.dataset.searchWord); window.dictSearch()">${safeAttr}</span>`;
+            }).join('');
+            synWrap.classList.remove('hidden');
+            synWrap.classList.add('flex');
+            hasExtras = true;
+        } else {
+            synWrap.classList.add('hidden');
+            synWrap.classList.remove('flex');
+        }
     }
 
-    // Meanings (tiếng Anh từ Free Dictionary — nếu có)
-    const meaningsEl = document.getElementById('dict-meanings');
-    meaningsEl.innerHTML = '';
-
-    const posColors = {
-        noun:        'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-        verb:        'bg-green-500/10 text-green-600 dark:text-green-400',
-        adjective:   'bg-orange-500/10 text-orange-600 dark:text-orange-400',
-        adverb:      'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-        preposition: 'bg-pink-500/10 text-pink-600 dark:text-pink-400',
-    };
-
-    (r.meanings || []).forEach((meaning, mi) => {
-        const colorClass = posColors[meaning.partOfSpeech] || 'bg-surface-container text-on-surface-variant';
-
-        const defs = (meaning.definitions || []).map((d, i) => `
-            <div class="flex gap-3 ${i > 0 ? 'mt-4 pt-4 border-t border-outline-variant/15' : ''}">
-                <span class="w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">${i + 1}</span>
-                <div class="flex-1">
-                    <p class="text-sm md:text-base text-on-surface leading-relaxed">${_escHtml(d.definition)}</p>
-                    ${d.example ? `<p class="mt-2 text-xs md:text-sm text-on-surface-variant italic border-l-2 border-secondary-fixed-dim pl-3">"${_escHtml(d.example)}"</p>` : ''}
-                </div>
-            </div>
-        `).join('');
-
-        const card = document.createElement('div');
-        card.className = 'glass-card soft-shadow rounded-2xl p-5 md:p-6';
-        card.innerHTML = `
-            <div class="flex items-center gap-2 mb-4">
-                <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${colorClass}">${meaning.partOfSpeech}</span>
-            </div>
-            <div class="flex flex-col">
-                ${defs}
-            </div>
-        `;
-        meaningsEl.appendChild(card);
-    });
+    if (extrasWrap) {
+        if (hasExtras) extrasWrap.classList.remove('hidden');
+        else extrasWrap.classList.add('hidden');
+    }
 }
-
-
-
-/** Phát âm từ đang hiển thị */
-window.dictPlayAudio = async function() {
-    const r = window._dictCurrentResult;
-    if (!r) return;
-    await HiDict.playWordAudio(r.word);
-};
 
 /** Escape HTML */
 function _escHtml(str) {
@@ -4987,10 +5408,12 @@ function _escHtml(str) {
 
 // ── MODAL: Lưu từ vào chủ đề ────────────────────────────────
 
-/** Mở modal chọn chủ đề để lưu từ */
-window.dictOpenSaveModal = async function() {
+/** Mở modal chọn chủ đề để lưu từ (hoặc lưu nét nghĩa cụ thể) */
+window.dictOpenSaveModal = async function(senseIdx = null) {
     const r = window._dictCurrentResult;
     if (!r) return;
+
+    window._dictSelectedSenseIdx = (typeof senseIdx === 'number' && senseIdx >= 0) ? senseIdx : null;
 
     if (typeof window.openTopicPicker === 'function') {
         window.openTopicPicker(async (dest) => {
@@ -5012,39 +5435,36 @@ window.dictSaveWord = async function(topicId, topicName, passageId = null, passa
         topicName = found ? found.name : 'chủ đề';
     }
 
-    const errEl = document.getElementById('save-word-error');
+    const senseIdx = window._dictSelectedSenseIdx;
+    const selectedSense = (typeof senseIdx === 'number' && r.senses?.[senseIdx]) ? r.senses[senseIdx] : null;
 
-    // ── Xác định meaning (ưu tiên tiếng Việt) ────────────────────
+    // ── Xác định meaning (ưu tiên nghĩa của sense được chọn hoặc tiếng Việt) ──
     let meaning = '';
-
-    if (r.viSummary) {
-        // Lấy viSummary làm nghĩa chính (ngắn gọn, tiếng Việt)
+    if (selectedSense) {
+        meaning = selectedSense.definition_vi || selectedSense.definition_en || '';
+    } else if (r.viSummary) {
         meaning = r.viSummary;
-    } else if (r.viMeanings?.[0]?.viDefinitions?.[0]) {
-        // Fallback: nghĩa tiếng Việt từ viMeanings đầu tiên
-        meaning = r.viMeanings[0].viDefinitions[0];
+    } else if (r.senses?.[0]?.definition_vi) {
+        meaning = r.senses[0].definition_vi;
     } else {
-        // Cuối cùng: dùng nghĩa tiếng Anh (có ghi chú)
         meaning = r.meanings?.[0]?.definitions?.[0]?.definition || '';
-        if (meaning) meaning = `[EN] ${meaning}`;
     }
 
-    // ── Câu ví dụ (từ Free Dictionary / fallback tổng hợp) ──────
-    let example = r.example || '';
-    if (!example && Array.isArray(r.meanings)) {
-        for (const m of r.meanings) {
-            for (const d of (m.definitions || [])) {
-                if (d.example) { example = d.example; break; }
-            }
-            if (example) break;
-        }
+    // ── Xác định câu ví dụ ──
+    let example = '';
+    if (selectedSense && selectedSense.examples?.[0]?.en) {
+        example = selectedSense.examples[0].en;
+    } else if (r.example) {
+        example = r.example;
+    } else if (r.senses?.[0]?.examples?.[0]?.en) {
+        example = r.senses[0].examples[0].en;
     }
     if (!example && r.word) {
         example = `She learned how to use "${r.word}" in a sentence today.`;
     }
 
-    // ── Phonetic ──────────────────────────────────────────────────
-    const phonetic = r.phonetic || '';
+    // ── Phonetic ──
+    const phonetic = r.phonetics?.us || r.phonetics?.uk || r.phonetic || '';
 
     try {
         if (typeof HiDB === 'undefined') throw new Error('HiDB chưa sẵn sàng.');
@@ -5056,22 +5476,16 @@ window.dictSaveWord = async function(topicId, topicName, passageId = null, passa
             passageId:       passageId || null,
         });
 
-        // Thành công
-        window.dictCloseSaveModal();
-        const displayDest = fullLabel || (passageTitle ? `${topicName} · ${passageTitle}` : topicName);
-        _dictToast(`✓ Đã lưu "${r.word}" vào "${displayDest}"`);
         if (typeof showToast === 'function') {
-            showToast(`✓ Đã lưu "${r.word}" vào "${displayDest}"`, 'success');
+            showToast(`Đã lưu "${r.word}" vào chủ đề "${topicName}"!`, 'success');
         }
-
-    } catch(err) {
-        if (errEl) {
-            errEl.textContent = 'Lỗi: ' + err.message;
-            errEl.classList.remove('hidden');
-        }
+    } catch (err) {
+        console.error('[dictSaveWord] Error:', err);
         if (typeof showToast === 'function') {
-            showToast('Lỗi lưu từ: ' + err.message, 'error');
+            showToast('Không thể lưu từ: ' + (err.message || 'Lỗi không xác định'), 'error');
         }
+    } finally {
+        window._dictSelectedSenseIdx = null;
     }
 };
 

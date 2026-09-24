@@ -49,18 +49,26 @@ function copyStaticAssetsPlugin() {
         console.log('[copy-assets] Copied css/ directory');
       }
 
-      // Copy functions/
+      // Copy functions/ recursively
+      function copyDirRecursive(src, dest) {
+        if (!fs.existsSync(src)) return;
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+        for (const item of fs.readdirSync(src)) {
+          const sPath = resolve(src, item);
+          const dPath = resolve(dest, item);
+          if (fs.statSync(sPath).isDirectory()) {
+            copyDirRecursive(sPath, dPath);
+          } else {
+            fs.copyFileSync(sPath, dPath);
+          }
+        }
+      }
+
       const functionsSrc = resolve(__dirname, 'functions');
       const functionsDest = resolve(outDir, 'functions');
       if (fs.existsSync(functionsSrc)) {
-        if (!fs.existsSync(functionsDest)) fs.mkdirSync(functionsDest, { recursive: true });
-        for (const f of fs.readdirSync(functionsSrc)) {
-          const srcPath = resolve(functionsSrc, f);
-          if (fs.statSync(srcPath).isFile()) {
-            fs.copyFileSync(srcPath, resolve(functionsDest, f));
-          }
-        }
-        console.log('[copy-assets] Copied functions/ directory');
+        copyDirRecursive(functionsSrc, functionsDest);
+        console.log('[copy-assets] Copied functions/ recursively');
       }
 
       // 2. Re-inject legacy non-module scripts into dist/index.html
@@ -80,8 +88,8 @@ function copyStaticAssetsPlugin() {
           '<script src="bilingualReading.js?v=20260920-lock-v1"></script>',
           '<script src="library.js?v=20260922-v10"></script>',
           '<script src="pricing.js?v=20260920-v4"></script>',
-          '<script src="dictionary.js"></script>',
-          '<script defer src="app.js?v=20260922-v13"></script>',
+          '<script src="dictionary.js?v=20260924-oxford-v1"></script>',
+          '<script defer src="app.js?v=20260924-oxford-v1"></script>',
         ].join('\n');
         // Inject right before </body>
         if (!html.includes('dataLayer.js')) {

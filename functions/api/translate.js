@@ -62,14 +62,6 @@ export async function onRequestPost(context) {
         });
     }
 
-    const apiKey = env.DEEPL_API_KEY;
-    if (!apiKey) {
-        return new Response(JSON.stringify({ ok: false, error: 'DEEPL_API_KEY is not configured' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-
     let body = {};
     try {
         body = await request.json();
@@ -91,6 +83,41 @@ export async function onRequestPost(context) {
         });
     }
 
+    const apiKey = env.DEEPL_API_KEY;
+
+    async function fallbackTranslate(items, targetLangCode = 'vi') {
+        const results = [];
+        for (const item of items) {
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLangCode)}&dt=t&q=${encodeURIComponent(item)}`;
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    const trans = (data[0] || []).map(seg => seg[0]).join('');
+                    results.push(trans || item);
+                } else {
+                    results.push(item);
+                }
+            } catch (_) {
+                results.push(item);
+            }
+        }
+        return results;
+    }
+
+    if (!apiKey) {
+        const fallbackResults = await fallbackTranslate(texts, targetLang.toLowerCase());
+        return new Response(JSON.stringify({
+            ok: true,
+            text: fallbackResults[0] || '',
+            translations: fallbackResults,
+            source: 'fallback'
+        }), {
+            status: 200,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
     try {
         const deeplRes = await fetch(DEEPL_URL, {
             method: 'POST',
@@ -106,9 +133,15 @@ export async function onRequestPost(context) {
         });
 
         if (!deeplRes.ok) {
-            const errText = await deeplRes.text();
-            return new Response(JSON.stringify({ ok: false, error: `DeepL error ${deeplRes.status}: ${errText}` }), {
-                status: 502,
+            console.warn(`[Translate] DeepL failed with status ${deeplRes.status}, switching to fallback...`);
+            const fallbackResults = await fallbackTranslate(texts, targetLang.toLowerCase());
+            return new Response(JSON.stringify({
+                ok: true,
+                text: fallbackResults[0] || '',
+                translations: fallbackResults,
+                source: 'fallback'
+            }), {
+                status: 200,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
@@ -120,16 +153,21 @@ export async function onRequestPost(context) {
             ok: true,
             text: translated[0] || '',
             translations: translated,
+            source: 'deepl'
         }), {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     } catch (error) {
+        console.warn('[Translate] DeepL request exception, falling back:', error);
+        const fallbackResults = await fallbackTranslate(texts, targetLang.toLowerCase());
         return new Response(JSON.stringify({
-            ok: false,
-            error: error?.message || 'Translate failed',
+            ok: true,
+            text: fallbackResults[0] || '',
+            translations: fallbackResults,
+            source: 'fallback'
         }), {
-            status: 502,
+            status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
