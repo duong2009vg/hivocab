@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 import fs from 'fs';
@@ -125,7 +126,7 @@ function htmlPartialsPlugin() {
 }
 
 export default defineConfig({
-  plugins: [htmlPartialsPlugin(), copyStaticAssetsPlugin()],
+  plugins: [react(), htmlPartialsPlugin(), copyStaticAssetsPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
