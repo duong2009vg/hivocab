@@ -99,107 +99,173 @@ const HiDict = (() => {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 3. FALLBACK: TẬN DỤNG 70.000 TỪ SUPABASE NẾU API NGOÀI LỖI
+    // 3. TẦNG 2: ƯU TIÊN TRA CỨU TRỰC TIẾP TỪ DATABASE 70.000 TỪ
+    //    (0 AI Tokens - Hoàn toàn miễn phí & phản hồi tức thì)
     // ─────────────────────────────────────────────────────────────
-    async function _lookupSupabaseFallback(term) {
+    const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+    const SB_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words';
+
+    function _extractPos(rawPos, rawMeaning) {
+        if (rawPos && typeof rawPos === 'string' && rawPos.trim()) return rawPos.trim().toLowerCase();
+        if (!rawMeaning || typeof rawMeaning !== 'string') return 'từ vựng';
+        const m = rawMeaning.match(/^\(([a-zA-Z\s]+)\)/);
+        if (m && m[1]) {
+            const tag = m[1].toLowerCase().trim();
+            if (tag === 'v') return 'verb';
+            if (tag === 'n') return 'noun';
+            if (tag === 'adj') return 'adjective';
+            if (tag === 'adv') return 'adverb';
+            if (tag === 'prep') return 'preposition';
+            if (tag === 'conj') return 'conjunction';
+            return tag;
+        }
+        return 'từ vựng';
+    }
+
+    function _cleanMeaning(rawMeaning) {
+        if (!rawMeaning || typeof rawMeaning !== 'string') return '';
+        return rawMeaning.replace(/^(\([a-zA-Z\s]+\)|\[[a-zA-Z\s]+\])\s*/, '').trim();
+    }
+
+    function _formatDatabaseEntries(cleanWord, list) {
+        if (!list || list.length === 0) return null;
+
+        const main = list.find(w => w.phonetic && w.example_sentence) || list[0];
+        const phonetic = list.find(w => w.phonetic)?.phonetic || main.phonetic || '';
+        const pos = _extractPos(main.pos, main.meaning);
+        const meaning = _cleanMeaning(main.meaning);
+        const example = main.example_sentence || list.find(w => w.example_sentence)?.example_sentence || '';
+
+        // Thu thập các nét nghĩa khác nhau nếu có nhiều dòng trong database
+        const distinctEntries = [];
+        const seenMeanings = new Set();
+        for (const item of list) {
+            const mClean = _cleanMeaning(item.meaning);
+            if (mClean && !seenMeanings.has(mClean.toLowerCase())) {
+                seenMeanings.add(mClean.toLowerCase());
+                distinctEntries.push({
+                    meaning: mClean,
+                    pos: _extractPos(item.pos, item.meaning),
+                    example: item.example_sentence || '',
+                    example_vi: ''
+                });
+            }
+        }
+
+        const entries = distinctEntries.length > 0 ? distinctEntries : [{ meaning, pos, example, example_vi: '' }];
+
+        return {
+            word: main.word || cleanWord,
+            phonetic: phonetic,
+            pos: pos,
+            meaning: meaning,
+            example: example,
+            example_vi: '',
+            entries: entries,
+            source: 'database',
+            viSummary: meaning,
+            senses: entries.map((e, idx) => ({
+                id: idx + 1,
+                grammar: e.pos ? `[ ${e.pos} ]` : '',
+                definition_vi: e.meaning,
+                examples: e.example ? [{ en: e.example, vi: '' }] : []
+            }))
+        };
+    }
+
+    async function _lookupAppDatabase(cleanWord) {
+        if (!cleanWord) return null;
         try {
-            if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.searchWords === 'function') {
-                const res = await window.HiDB.searchWords(term);
-                if (res && res.length > 0) {
-                    const match = res.find(w => w.word?.toLowerCase() === term.toLowerCase()) || res[0];
-                    return _normalizeEntry({
-                        word: match.word || term,
-                        cefr: 'B1',
-                        pos: match.pos || 'vocabulary',
-                        phonetics: { uk: match.phonetic || '', us: match.phonetic || '' },
-                        senses: [{
-                            id: 1,
-                            grammar: match.pos ? `[ ${match.pos} ]` : '',
-                            definition_en: match.meaning || '',
-                            definition_vi: match.meaning || '',
-                            examples: match.example_sentence ? [{ en: match.example_sentence, vi: '' }] : []
-                        }],
-                        collocations: [],
-                        word_family: {},
-                        synonyms: []
-                    }, 'supabase_offline');
+            // 1. Thử dùng client HiDB nếu có
+            if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getClient === 'function') {
+                const client = window.HiDB.getClient();
+                if (client) {
+                    const { data, error } = await client
+                        .from('words')
+                        .select('id, word, meaning, pos, phonetic, example_sentence')
+                        .ilike('word', cleanWord)
+                        .limit(5);
+                    if (!error && Array.isArray(data) && data.length > 0) {
+                        return _formatDatabaseEntries(cleanWord, data);
+                    }
                 }
             }
-        } catch (_) {}
+
+            // 2. Direct REST API (nhanh 30ms - 60ms)
+            const endpoint = `${SB_URL}?word=ilike.${encodeURIComponent(cleanWord)}&select=id,word,meaning,pos,phonetic,example_sentence&limit=5`;
+            const res = await _fetchWithTimeout(endpoint, {
+                headers: {
+                    'apikey': SB_ANON_KEY,
+                    'Authorization': `Bearer ${SB_ANON_KEY}`
+                }
+            }, 3500);
+
+            if (res && res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data) && data.length > 0) {
+                    return _formatDatabaseEntries(cleanWord, data);
+                }
+            }
+        } catch (err) {
+            console.warn('[HiDict] Database lookup error:', err);
+        }
         return null;
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 4. CHUẨN HÓA DỮ LIỆU ĐẦU RA (TƯƠNG THÍCH MỚI + CŨ)
+    // 4. CHUẨN HÓA DỮ LIỆU ĐẦU RA (TỐI GIẢN: NGHĨA VIỆT, IPA, VÍ DỤ)
     // ─────────────────────────────────────────────────────────────
     function _normalizeEntry(raw, source = 'api') {
         if (!raw) return null;
 
-        const senses = Array.isArray(raw.senses) ? raw.senses : [];
-        const firstSense = senses[0] || {};
-        const firstExample = firstSense.examples?.[0] || {};
+        const meaning = raw.meaning || raw.viSummary || raw.senses?.[0]?.definition_vi || '';
+        const phonetic = raw.phonetic || raw.phonetics?.us || raw.phonetics?.uk || '';
+        const example = raw.example || raw.senses?.[0]?.examples?.[0]?.en || '';
+        const exampleVi = raw.example_vi || raw.senses?.[0]?.examples?.[0]?.vi || '';
+        const pos = raw.pos || 'từ vựng';
 
-        // Chuẩn hóa phát âm
-        const phoneticUk = raw.phonetics?.uk || raw.phonetic || '';
-        const phoneticUs = raw.phonetics?.us || raw.phonetics?.uk || raw.phonetic || '';
-
-        // Tương thích ngược với các module cũ
-        const viSummary = firstSense.definition_vi || raw.meaning || '';
-        const exampleEn = firstExample.en || raw.example || '';
-
-        // Tạo cấu trúc meanings tương thích cũ
-        const legacyMeanings = [{
-            partOfSpeech: raw.pos || 'vocabulary',
-            definitions: senses.map(s => ({
-                definition: s.definition_en || s.definition_vi || '',
-                example: s.examples?.[0]?.en || '',
-                synonyms: (raw.synonyms || []).slice(0, 4)
-            }))
-        }];
+        const entries = (Array.isArray(raw.entries) && raw.entries.length > 0)
+            ? raw.entries
+            : (Array.isArray(raw.senses) && raw.senses.length > 0)
+                ? raw.senses.map(s => ({
+                    meaning: s.definition_vi || s.definition_en || '',
+                    pos: s.grammar ? s.grammar.replace(/[\[\]]/g, '').trim() : pos,
+                    example: s.examples?.[0]?.en || '',
+                    example_vi: s.examples?.[0]?.vi || ''
+                }))
+                : [{ meaning, pos, example, example_vi: exampleVi }];
 
         return {
-            // Trường mới chuẩn cấu trúc từ điển hiện đại
             word: raw.word || '',
-            cefr: raw.cefr ? String(raw.cefr).toUpperCase() : null,
-            pos: raw.pos || 'vocabulary',
-            phonetics: {
-                uk: phoneticUk,
-                us: phoneticUs
-            },
-            senses: senses.map((s, idx) => ({
-                id: s.id || (idx + 1),
-                grammar: s.grammar || '',
-                definition_en: s.definition_en || '',
-                definition_vi: s.definition_vi || '',
-                examples: Array.isArray(s.examples) ? s.examples : []
-            })),
-            collocations: Array.isArray(raw.collocations) ? raw.collocations : [],
-            word_family: raw.word_family || {},
-            synonyms: Array.isArray(raw.synonyms) ? raw.synonyms : [],
-            antonyms: Array.isArray(raw.antonyms) ? raw.antonyms : [],
+            phonetic: phonetic,
+            pos: pos,
+            meaning: meaning,
+            example: example,
+            example_vi: exampleVi,
+            entries: entries,
             source: source,
-
-            // Trường tương thích ngược (Legacy fields)
-            phonetic: phoneticUs || phoneticUk,
-            viSummary: viSummary,
-            meanings: legacyMeanings,
-            example: exampleEn,
-            hasRealExample: !!exampleEn,
-            viMeanings: null
+            viSummary: meaning,
+            senses: entries.map((e, idx) => ({
+                id: idx + 1,
+                grammar: e.pos ? `[ ${e.pos} ]` : '',
+                definition_vi: e.meaning,
+                examples: e.example ? [{ en: e.example, vi: e.example_vi || '' }] : []
+            }))
         };
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 5. TRA TỪ (LOOKUP ENTRY)
+    // 5. TRA TỪ (LOOKUP ENTRY - DATABASE -> KV -> AI FALLBACK)
     // ─────────────────────────────────────────────────────────────
     async function lookupWord(word) {
         if (!word?.trim()) return null;
-        const key = word.trim().toLowerCase();
+        const cleanWord = word.trim();
+        const key = cleanWord.toLowerCase();
 
         // Tầng 1A: In-memory Cache (0ms)
         if (_memoryCache.has(key)) {
             const cached = _memoryCache.get(key);
-            _addRecent(cached.word || word.trim());
+            _addRecent(cached.word || cleanWord);
             return cached;
         }
 
@@ -207,38 +273,37 @@ const HiDict = (() => {
         const idbData = await _loadFromIndexedDB(key);
         if (idbData && idbData.word) {
             _memoryCache.set(key, idbData);
-            _addRecent(idbData.word || word.trim());
+            _addRecent(idbData.word || cleanWord);
             return idbData;
         }
 
-        // Tầng 2 & 3: Cloudflare KV / Edge Cache & High-Speed AI
-        let result = null;
-        try {
-            const res = await _fetchWithTimeout(DICT_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ word: word.trim() })
-            }, 8500);
+        // Tầng 2: Ưu tiên tối đa Database 70.000 từ của App (0 AI cost, 0 token, cực nhanh ~50ms)
+        let result = await _lookupAppDatabase(cleanWord);
 
-            if (res && res.ok) {
-                const json = await res.json();
-                if (json.ok && json.data) {
-                    result = _normalizeEntry(json.data, json.source || 'cloudflare_api');
-                }
-            }
-        } catch (err) {
-            console.warn('[HiDict] Dictionary API fetch error:', err);
-        }
-
-        // Tầng 4: Supabase Fallback nếu mạng yếu hoặc lỗi API
+        // Tầng 3: Nếu KHÔNG có trong Database -> Fallback sang Cloudflare KV & Lightweight AI
         if (!result) {
-            result = await _lookupSupabaseFallback(key);
+            try {
+                const res = await _fetchWithTimeout(DICT_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ word: cleanWord })
+                }, 6000);
+
+                if (res && res.ok) {
+                    const json = await res.json();
+                    if (json.ok && json.data) {
+                        result = _normalizeEntry(json.data, json.source || 'cloudflare_api');
+                    }
+                }
+            } catch (err) {
+                console.warn('[HiDict] Fallback API error:', err);
+            }
         }
 
         if (result) {
             _memoryCache.set(key, result);
             _saveToIndexedDB(key, result);
-            _addRecent(result.word || word.trim());
+            _addRecent(result.word || cleanWord);
             return result;
         }
 

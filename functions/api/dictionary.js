@@ -145,55 +145,26 @@ async function handleDictionaryLookup(context, rawWord) {
         });
     }
 
-    const systemPrompt = `You are an elite bilingual lexicographer creating authentic Oxford and Cambridge learner's dictionary entries for Vietnamese learners of English.
-You MUST output strictly valid JSON matching this schema:
+    const systemPrompt = `You are a concise English-Vietnamese dictionary assistant.
+For the requested English word, return strictly raw JSON with this exact schema:
 {
   "word": "${word}",
-  "cefr": "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | null,
-  "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom" | "phrasal verb",
-  "phonetics": {
-    "uk": "/.../",
-    "us": "/.../"
-  },
-  "senses": [
-    {
-      "id": 1,
-      "grammar": "[ C ]" | "[ U ]" | "[ T ]" | "[ I ]" | "[ C/U ]" | "[ transitive ]" | "",
-      "definition_en": "clear, simple learner definition in English",
-      "definition_vi": "dịch nghĩa tiếng Việt chuẩn xác, súc tích",
-      "examples": [
-        {
-          "en": "Authentic example sentence using the word naturally.",
-          "vi": "Bản dịch tiếng Việt tự nhiên của câu ví dụ."
-        }
-      ]
-    }
-  ],
-  "collocations": [
-    { "phrase": "common collocation or phrasal verb", "meaning": "nghĩa tiếng Việt" }
-  ],
-  "word_family": {
-    "noun": "...",
-    "verb": "...",
-    "adjective": "...",
-    "adverb": "..."
-  },
-  "synonyms": ["syn1", "syn2", "syn3"]
+  "phonetic": "/.../",
+  "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom",
+  "meaning": "nghĩa tiếng Việt ngắn gọn, chuẩn xác",
+  "example": "Authentic example sentence in English",
+  "example_vi": "Bản dịch tiếng Việt của câu ví dụ"
 }
-
 Rules:
-1. Provide accurate CEFR level (A1 to C2).
-2. For each sense, definition_en must be learner-friendly (clear, concise English).
-3. definition_vi must be idiomatic Vietnamese.
-4. Provide 1 to 2 realistic example sentences per sense with natural Vietnamese translations.
-5. Provide 2 to 4 high-frequency collocations or idioms.
-6. Provide accurate IPA for both UK and US.
-7. Return ONLY valid raw JSON with NO markdown text around it.`;
+1. Provide accurate IPA phonetic notation.
+2. Provide concise, natural Vietnamese meaning.
+3. Provide 1 authentic example sentence with its natural Vietnamese translation.
+4. Output strictly raw JSON only, no markdown, no explanation.`;
 
     let parsedResult = null;
     let providerUsed = '';
 
-    // Ưu tiên Groq (siêu nhanh ~250-350ms), fallback DeepSeek CKEY
+    // Ưu tiên Groq (siêu nhanh ~150-250ms), fallback DeepSeek CKEY
     if (groqKey) {
         try {
             providerUsed = 'groq';
@@ -207,11 +178,11 @@ Rules:
                     model: GROQ_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Lookup word: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,
-                    max_tokens: 1200
+                    max_tokens: 250
                 })
             });
 
@@ -239,11 +210,11 @@ Rules:
                     model: CKEY_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Lookup word: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,
-                    max_tokens: 1200
+                    max_tokens: 250
                 })
             });
 
@@ -267,20 +238,15 @@ Rules:
         });
     }
 
-    // Chuẩn hóa dữ liệu kết quả
+    // Chuẩn hóa dữ liệu kết quả đơn giản: nghĩa tiếng Việt, IPA, ví dụ
     const finalData = {
         word: parsedResult.word || word,
-        cefr: parsedResult.cefr ? String(parsedResult.cefr).toUpperCase() : null,
-        pos: parsedResult.pos || 'vocabulary',
-        phonetics: {
-            uk: parsedResult.phonetics?.uk || '',
-            us: parsedResult.phonetics?.us || parsedResult.phonetics?.uk || ''
-        },
-        senses: Array.isArray(parsedResult.senses) ? parsedResult.senses : [],
-        collocations: Array.isArray(parsedResult.collocations) ? parsedResult.collocations : [],
-        word_family: parsedResult.word_family || {},
-        synonyms: Array.isArray(parsedResult.synonyms) ? parsedResult.synonyms.slice(0, 8) : [],
-        antonyms: Array.isArray(parsedResult.antonyms) ? parsedResult.antonyms.slice(0, 5) : [],
+        phonetic: parsedResult.phonetic || '',
+        pos: parsedResult.pos || 'từ vựng',
+        meaning: parsedResult.meaning || '',
+        example: parsedResult.example || '',
+        example_vi: parsedResult.example_vi || '',
+        viSummary: parsedResult.meaning || '',
         updated_at: new Date().toISOString()
     };
 

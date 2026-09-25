@@ -2336,6 +2336,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                             <h2 id="dict-word" class="text-3xl md:text-5xl font-black text-on-surface tracking-tight"></h2>
                             <span id="dict-cefr-badge" class="hidden px-2.5 py-1 rounded-full text-xs font-black tracking-wider uppercase"></span>
                             <span id="dict-pos-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-surface-container text-on-surface-variant"></span>
+                            <span id="dict-source-badge" class="hidden px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase"></span>
                         </div>
                     </div>
 
@@ -2371,7 +2372,7 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
                 <div id="dict-summary-wrap" class="hidden mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20 items-start gap-3">
                     <span class="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">translate</span>
                     <div class="flex-1">
-                        <p class="text-xs font-bold text-primary uppercase tracking-wider mb-0.5">Nghĩa tiếng Việt tổng quát</p>
+                        <p class="text-xs font-bold text-primary uppercase tracking-wider mb-0.5">Nghĩa tiếng Việt</p>
                         <p id="dict-vi-summary" class="text-base md:text-lg font-bold text-on-surface leading-snug"></p>
                     </div>
                 </div>
@@ -2381,8 +2382,8 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
             <div class="flex flex-col gap-3">
                 <div class="flex items-center justify-between px-1">
                     <h3 class="text-xs font-bold text-outline uppercase tracking-widest flex items-center gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">format_list_numbered</span>
-                        Các nét nghĩa (Definitions & Senses)
+                        <span class="material-symbols-outlined text-[16px]">format_quote</span>
+                        Chi tiết nghĩa &amp; Ví dụ
                     </h3>
                 </div>
                 <div id="dict-meanings" class="flex flex-col gap-4"></div>
@@ -2874,8 +2875,8 @@ body:has(#page-thpt-room.active) #mobile-bottom-nav {
     <span class="hidden sm:inline text-on-surface-variant group-hover:text-on-surface">Báo lỗi &amp; Góp ý</span>
 </button>
 
-<script src="dictionary.js?v=20260924-dict-v2"></script>
-<script defer src="app.js?v=20260924-dict-v2"></script>
+<script src="dictionary.js?v=20260925-simpledict-v1"></script>
+<script defer src="app.js?v=20260925-simpledict-v1"></script>
 <script type="module" src="/src/main.js"></script>
 <script>
 if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {

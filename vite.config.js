@@ -88,8 +88,8 @@ function copyStaticAssetsPlugin() {
           '<script src="bilingualReading.js?v=20260920-lock-v1"></script>',
           '<script src="library.js?v=20260922-v10"></script>',
           '<script src="pricing.js?v=20260920-v4"></script>',
-          '<script src="dictionary.js?v=20260924-dict-v2"></script>',
-          '<script defer src="app.js?v=20260924-dict-v2"></script>',
+          '<script src="dictionary.js?v=20260925-simpledict-v1"></script>',
+          '<script defer src="app.js?v=20260925-simpledict-v1"></script>',
         ].join('\n');
         // Inject right before </body>
         if (!html.includes('dataLayer.js')) {

@@ -5249,7 +5249,7 @@ function _dictRenderResult(r) {
     // 1. Headword
     document.getElementById('dict-word').textContent = r.word;
 
-    // 2. CEFR Level Badge
+    // 2. CEFR Level Badge (nếu có)
     const cefrEl = document.getElementById('dict-cefr-badge');
     if (cefrEl) {
         if (r.cefr) {
@@ -5273,10 +5273,30 @@ function _dictRenderResult(r) {
     // 3. Part of speech
     const posEl = document.getElementById('dict-pos-badge');
     if (posEl) {
-        posEl.textContent = (r.pos || 'vocabulary').toUpperCase();
+        posEl.textContent = (r.pos || 'từ vựng').toUpperCase();
     }
 
-    // 4. Pronunciation IPA (1 nút loa duy nhất - zero delay)
+    // 4. Source Badge (Kho từ 70K / Cloudflare KV / AI)
+    const sourceEl = document.getElementById('dict-source-badge');
+    if (sourceEl) {
+        if (r.source === 'database') {
+            sourceEl.textContent = 'Kho từ 70K';
+            sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
+            sourceEl.classList.remove('hidden');
+        } else if (r.source === 'cloudflare_kv') {
+            sourceEl.textContent = 'Bộ nhớ đệm KV';
+            sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30';
+            sourceEl.classList.remove('hidden');
+        } else if (r.source) {
+            sourceEl.textContent = 'AI Tra Cứu';
+            sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+            sourceEl.classList.remove('hidden');
+        } else {
+            sourceEl.classList.add('hidden');
+        }
+    }
+
+    // 5. Pronunciation IPA (1 nút loa duy nhất - zero delay)
     const phonetic = r.phonetic || r.phonetics?.us || r.phonetics?.uk || '';
     const formattedPhonetic = phonetic ? (phonetic.startsWith('/') ? phonetic : `/${phonetic}/`) : '';
     const phoneticEl = document.getElementById('dict-phonetic');
@@ -5288,10 +5308,10 @@ function _dictRenderResult(r) {
     if (ukEl) ukEl.textContent = r.phonetics?.uk || formattedPhonetic || '';
     if (usEl) usEl.textContent = r.phonetics?.us || formattedPhonetic || '';
 
-    // 5. Quick Vietnamese Summary Banner
+    // 6. Quick Vietnamese Summary Banner
     const sumWrap = document.getElementById('dict-summary-wrap');
     const sumEl = document.getElementById('dict-vi-summary');
-    const summaryText = r.viSummary || r.senses?.[0]?.definition_vi || '';
+    const summaryText = r.meaning || r.viSummary || r.senses?.[0]?.definition_vi || '';
     if (sumWrap && sumEl) {
         if (summaryText) {
             sumEl.textContent = summaryText;
@@ -5303,36 +5323,40 @@ function _dictRenderResult(r) {
         }
     }
 
-    // 6. Senses & Definitions List (Chuẩn Oxford & Cambridge)
+    // 7. Senses & Definitions List (Nghĩa & Ví dụ)
     const meaningsEl = document.getElementById('dict-meanings');
     meaningsEl.innerHTML = '';
 
-    const sensesToRender = (r.senses && r.senses.length > 0) ? r.senses : (r.meanings?.[0]?.definitions || []);
+    const entriesToRender = (Array.isArray(r.entries) && r.entries.length > 0)
+        ? r.entries
+        : (Array.isArray(r.senses) && r.senses.length > 0)
+            ? r.senses.map(s => ({
+                meaning: s.definition_vi || s.definition_en || '',
+                pos: s.grammar ? s.grammar.replace(/[\[\]]/g, '').trim() : (r.pos || ''),
+                example: s.examples?.[0]?.en || '',
+                example_vi: s.examples?.[0]?.vi || ''
+            }))
+            : [{
+                meaning: r.meaning || r.viSummary || '',
+                pos: r.pos || '',
+                example: r.example || '',
+                example_vi: r.example_vi || ''
+            }];
 
-    sensesToRender.forEach((sense, idx) => {
-        const senseNumber = sense.id || (idx + 1);
-        const grammarLabel = sense.grammar ? `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/10 text-primary border border-primary/20 uppercase">${_escHtml(sense.grammar)}</span>` : '';
-        const defEn = sense.definition_en || sense.definition || '';
-        const defVi = sense.definition_vi || '';
-        const examples = Array.isArray(sense.examples) ? sense.examples : (sense.example ? [{ en: sense.example, vi: '' }] : []);
-
-        const examplesHtml = examples.map(ex => {
-            const exEn = typeof ex === 'string' ? ex : (ex.en || '');
-            const exVi = typeof ex === 'object' ? (ex.vi || '') : '';
-            return `
-                <div class="mt-2.5 pl-3 border-l-2 border-secondary-fixed-dim/60">
-                    <p class="text-sm md:text-base text-on-surface leading-relaxed">${_dictHighlightWord(exEn, r.word)}</p>
-                    ${exVi ? `<p class="text-xs md:text-sm text-on-surface-variant italic mt-0.5">${_escHtml(exVi)}</p>` : ''}
-                </div>
-            `;
-        }).join('');
+    entriesToRender.forEach((entry, idx) => {
+        const itemNumber = idx + 1;
+        const entryMeaning = entry.meaning || '';
+        const entryPos = entry.pos || r.pos || '';
+        const grammarLabel = entryPos ? `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/10 text-primary border border-primary/20 uppercase">${_escHtml(entryPos)}</span>` : '';
+        const exEn = entry.example || '';
+        const exVi = entry.example_vi || '';
 
         const card = document.createElement('div');
         card.className = 'glass-card soft-shadow rounded-2xl p-5 md:p-6 border border-outline-variant/20 hover:border-primary/30 transition-all';
         card.innerHTML = `
             <div class="flex items-start justify-between gap-3 mb-3">
                 <div class="flex items-center gap-2 flex-wrap">
-                    <span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-black flex items-center justify-center shrink-0 shadow-xs">${senseNumber}</span>
+                    ${entriesToRender.length > 1 ? `<span class="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-black flex items-center justify-center shrink-0 shadow-xs">${itemNumber}</span>` : ''}
                     ${grammarLabel}
                 </div>
                 <button onclick="window.dictOpenSaveModal(${idx})" 
@@ -5344,11 +5368,15 @@ function _dictRenderResult(r) {
             </div>
 
             <div class="flex flex-col gap-1">
-                ${defEn ? `<p class="text-base md:text-lg font-bold text-on-surface leading-snug">${_escHtml(defEn)}</p>` : ''}
-                ${defVi ? `<p class="text-sm md:text-base font-semibold text-primary/95 leading-relaxed mt-0.5">${_escHtml(defVi)}</p>` : ''}
+                <p class="text-base md:text-lg font-bold text-on-surface leading-snug">${_escHtml(entryMeaning)}</p>
             </div>
 
-            ${examplesHtml ? `<div class="mt-2 flex flex-col">${examplesHtml}</div>` : ''}
+            ${exEn ? `
+                <div class="mt-3 pl-3.5 border-l-2 border-primary/60">
+                    <p class="text-sm md:text-base text-on-surface leading-relaxed">${_dictHighlightWord(exEn, r.word)}</p>
+                    ${exVi ? `<p class="text-xs md:text-sm text-on-surface-variant italic mt-1">${_escHtml(exVi)}</p>` : ''}
+                </div>
+            ` : ''}
         `;
         meaningsEl.appendChild(card);
     });

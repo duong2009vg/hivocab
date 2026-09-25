@@ -53,42 +53,21 @@ export default async function handler(req, res) {
         return res.status(500).json({ ok: false, error: 'Chưa cấu hình API Key AI trên server.' });
     }
 
-    const systemPrompt = `You are an elite bilingual lexicographer creating authentic Oxford and Cambridge learner's dictionary entries for Vietnamese learners of English.
-You MUST output strictly valid JSON matching this schema:
+    const systemPrompt = `You are a concise English-Vietnamese dictionary assistant.
+For the requested English word, return strictly raw JSON with this exact schema:
 {
   "word": "${word}",
-  "cefr": "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | null,
-  "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom" | "phrasal verb",
-  "phonetics": {
-    "uk": "/.../",
-    "us": "/.../"
-  },
-  "senses": [
-    {
-      "id": 1,
-      "grammar": "[ C ]" | "[ U ]" | "[ T ]" | "[ I ]" | "[ C/U ]" | "",
-      "definition_en": "clear, simple learner definition in English",
-      "definition_vi": "dịch nghĩa tiếng Việt chuẩn xác, súc tích",
-      "examples": [
-        {
-          "en": "Authentic example sentence.",
-          "vi": "Bản dịch tiếng Việt."
-        }
-      ]
-    }
-  ],
-  "collocations": [
-    { "phrase": "collocation", "meaning": "nghĩa tiếng Việt" }
-  ],
-  "word_family": {
-    "noun": "...",
-    "verb": "...",
-    "adjective": "...",
-    "adverb": "..."
-  },
-  "synonyms": ["syn1", "syn2"]
+  "phonetic": "/.../",
+  "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom",
+  "meaning": "nghĩa tiếng Việt ngắn gọn, chuẩn xác",
+  "example": "Authentic example sentence in English",
+  "example_vi": "Bản dịch tiếng Việt của câu ví dụ"
 }
-Return ONLY raw valid JSON.`;
+Rules:
+1. Provide accurate IPA phonetic notation.
+2. Provide concise, natural Vietnamese meaning.
+3. Provide 1 authentic example sentence with its natural Vietnamese translation.
+4. Output strictly raw JSON only, no markdown, no explanation.`;
 
     let parsedResult = null;
     let providerUsed = '';
@@ -106,11 +85,11 @@ Return ONLY raw valid JSON.`;
                     model: GROQ_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Lookup word: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,
-                    max_tokens: 1200
+                    max_tokens: 250
                 })
             });
             if (groqRes.ok) {
@@ -133,11 +112,11 @@ Return ONLY raw valid JSON.`;
                     model: CKEY_MODEL,
                     messages: [
                         { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Create a comprehensive learner dictionary entry for: "${word}"` }
+                        { role: 'user', content: `Lookup word: "${word}"` }
                     ],
                     response_format: { type: 'json_object' },
                     temperature: 0.2,
-                    max_tokens: 1200
+                    max_tokens: 250
                 })
             });
             if (ckeyRes.ok) {
@@ -156,16 +135,12 @@ Return ONLY raw valid JSON.`;
         ok: true,
         data: {
             word: parsedResult.word || word,
-            cefr: parsedResult.cefr ? String(parsedResult.cefr).toUpperCase() : null,
-            pos: parsedResult.pos || 'vocabulary',
-            phonetics: {
-                uk: parsedResult.phonetics?.uk || '',
-                us: parsedResult.phonetics?.us || parsedResult.phonetics?.uk || ''
-            },
-            senses: Array.isArray(parsedResult.senses) ? parsedResult.senses : [],
-            collocations: Array.isArray(parsedResult.collocations) ? parsedResult.collocations : [],
-            word_family: parsedResult.word_family || {},
-            synonyms: Array.isArray(parsedResult.synonyms) ? parsedResult.synonyms.slice(0, 8) : [],
+            phonetic: parsedResult.phonetic || '',
+            pos: parsedResult.pos || 'từ vựng',
+            meaning: parsedResult.meaning || '',
+            example: parsedResult.example || '',
+            example_vi: parsedResult.example_vi || '',
+            viSummary: parsedResult.meaning || '',
             updated_at: new Date().toISOString()
         },
         source: providerUsed
