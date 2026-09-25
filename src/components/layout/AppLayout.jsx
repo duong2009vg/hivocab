@@ -1,9 +1,10 @@
 // src/components/layout/AppLayout.jsx
-// Main application layout with Sidebar and Mobile Dock
+// Main application layout with Sidebar, Header and Mobile Dock
 
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
+import Header from './Header.jsx';
 import BottomNav from './BottomNav.jsx';
 import { useAuthStore } from '../../stores/authStore.js';
 import { useThemeStore } from '../../stores/themeStore.js';
@@ -27,7 +28,10 @@ export function AppLayout() {
 
             {/* Main Content Area */}
             <div className="lg:ml-64 min-h-screen flex flex-col pb-24 lg:pb-8">
-                <Outlet />
+                <Header />
+                <main className="flex-1">
+                    <Outlet />
+                </main>
             </div>
         </div>
     );
