@@ -11,7 +11,7 @@ function copyStaticAssetsPlugin() {
       const outDir = resolve(__dirname, 'dist');
       if (!fs.existsSync(outDir)) return;
 
-      // 1. Root scripts required by index.html and app.html
+      // 1. Root scripts required by index.html
       const rootScripts = [
         'app.js',
         'dataLayer.js',
