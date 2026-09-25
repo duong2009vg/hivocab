@@ -5229,12 +5229,37 @@ window.dictSearch = async function() {
     _dictShow('loading');
     window._dictCurrentResult = null;
 
-    const result = await HiDict.lookupWord(word);
+    // Reset tiêu đề và mô tả loading ban đầu
+    const titleEl = document.getElementById('dict-loading-title');
+    const descEl  = document.getElementById('dict-loading-desc');
+    if (titleEl) titleEl.textContent = 'Đang tra cứu từ điển...';
+    if (descEl)  descEl.textContent  = 'Kiểm tra cơ sở dữ liệu và bộ nhớ đệm...';
+
+    // Cập nhật trạng thái loading mượt mà khi từ cần AI fallback sinh nghĩa
+    const t1 = setTimeout(() => {
+        if (titleEl) titleEl.textContent = 'Đang kết nối DeepSeek AI...';
+        if (descEl)  descEl.textContent  = 'Từ chưa có trong kho, AI đang tạo phiên âm, nghĩa tiếng Việt và câu ví dụ...';
+    }, 1200);
+
+    const t2 = setTimeout(() => {
+        if (titleEl) titleEl.textContent = 'DeepSeek AI đang hoàn tất...';
+        if (descEl)  descEl.textContent  = 'Đang đồng bộ và lưu kết quả vào bộ nhớ đệm Cloudflare KV siêu tốc...';
+    }, 6500);
+
+    let result = null;
+    try {
+        result = await HiDict.lookupWord(word);
+    } catch (err) {
+        console.warn('[dictSearch] lookup error:', err);
+    } finally {
+        clearTimeout(t1);
+        clearTimeout(t2);
+    }
 
     if (!result) {
         _dictShow('error');
-        const descEl = document.getElementById('dict-error-desc');
-        if (descEl) descEl.textContent = `Không thể tìm thấy thông tin cho từ "${word}". Vui lòng thử lại.`;
+        const errDesc = document.getElementById('dict-error-desc');
+        if (errDesc) errDesc.textContent = `Không thể tìm thấy thông tin cho từ "${word}". Vui lòng thử lại.`;
         return;
     }
 
@@ -5279,16 +5304,17 @@ function _dictRenderResult(r) {
     // 4. Source Badge (Kho từ 70K / Cloudflare KV / AI)
     const sourceEl = document.getElementById('dict-source-badge');
     if (sourceEl) {
-        if (r.source === 'database') {
+        const src = String(r.source || '').toLowerCase();
+        if (src === 'database') {
             sourceEl.textContent = 'Kho từ 70K';
             sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
             sourceEl.classList.remove('hidden');
-        } else if (r.source === 'cloudflare_kv') {
+        } else if (src === 'cloudflare_kv') {
             sourceEl.textContent = 'Bộ nhớ đệm KV';
             sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30';
             sourceEl.classList.remove('hidden');
-        } else if (r.source) {
-            sourceEl.textContent = 'AI Tra Cứu';
+        } else if (src) {
+            sourceEl.textContent = src.includes('deepseek') ? 'DeepSeek AI' : 'AI Tra Cứu';
             sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
             sourceEl.classList.remove('hidden');
         } else {

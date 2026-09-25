@@ -2,6 +2,8 @@
 // Cloudflare Pages Function: GET/POST /api/dictionary
 // Tra cứu từ điển kết hợp Cloudflare KV & Edge Cache
 
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-chat';
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
 const CKEY_MODEL = 'deepseek-v4-flash';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -39,27 +41,78 @@ function isRateLimited(ip, maxRequests = 45, windowMs = 60000) {
 
 function extractJson(text) {
     if (!text) return null;
-    const trimmed = text.trim();
+    let trimmed = String(text).trim();
+
+    // 1. Thử parse trực tiếp
     try {
         return JSON.parse(trimmed);
     } catch (_) {}
 
-    // Trích xuất JSON từ markdown code block ```json ... ```
+    // 2. Trích xuất từ markdown code block ```json ... ``` hoặc ``` ... ```
     const codeBlockMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
     if (codeBlockMatch && codeBlockMatch[1]) {
+        const candidate = codeBlockMatch[1].trim();
         try {
-            return JSON.parse(codeBlockMatch[1]);
-        } catch (_) {}
+            return JSON.parse(candidate);
+        } catch (_) {
+            try {
+                return JSON.parse(candidate.replace(/,\s*([\]}])/g, '$1'));
+            } catch (_) {}
+        }
     }
 
-    // Trích xuất qua bracket { ... }
-    const match = trimmed.match(/\{[\s\S]*\}/);
-    if (match) {
+    // 3. Trích xuất qua cặp dấu ngoặc nhọn đầu tiên và cuối cùng { ... }
+    const firstBrace = trimmed.indexOf('{');
+    const lastBrace = trimmed.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+        const jsonSubstring = trimmed.substring(firstBrace, lastBrace + 1);
         try {
-            return JSON.parse(match[0]);
-        } catch (_) {}
+            return JSON.parse(jsonSubstring);
+        } catch (_) {
+            try {
+                return JSON.parse(jsonSubstring.replace(/,\s*([\]}])/g, '$1'));
+            } catch (_) {}
+        }
     }
+
     return null;
+}
+
+async function fetchAI(url, apiKey, model, systemPrompt, userPrompt, timeoutMs = 22000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                model: model,
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: userPrompt }
+                ],
+                response_format: { type: 'json_object' },
+                temperature: 0.2,
+                max_tokens: 350
+            }),
+            signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (!res.ok) {
+            console.warn(`[Dictionary] Provider ${model} returned HTTP ${res.status}`);
+            return null;
+        }
+        const json = await res.json();
+        const content = json?.choices?.[0]?.message?.content;
+        return extractJson(content);
+    } catch (e) {
+        clearTimeout(timer);
+        console.warn(`[Dictionary] Provider ${model} error:`, e.name === 'AbortError' ? 'timeout' : e.message);
+        return null;
+    }
 }
 
 export async function onRequestOptions() {
@@ -130,15 +183,16 @@ async function handleDictionaryLookup(context, rawWord) {
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 2. GỌI HIGH-SPEED AI (GROQ hoặc DEEPSEEK CKEY)
+    // 2. GỌI DEEPSEEK AI HOẶC GROQ
     // ─────────────────────────────────────────────────────────────
-    const groqKey = env.GROQ_API_KEY || (typeof process !== 'undefined' ? process.env?.GROQ_API_KEY : '');
+    const deepseekKey = env.DEEPSEEK_API_KEY || env.DEEPSEEK_KEY || (typeof process !== 'undefined' ? (process.env?.DEEPSEEK_API_KEY || process.env?.DEEPSEEK_KEY) : '');
     const ckeyKey = env.CKEY_API_KEY || (typeof process !== 'undefined' ? process.env?.CKEY_API_KEY : '');
+    const groqKey = env.GROQ_API_KEY || (typeof process !== 'undefined' ? process.env?.GROQ_API_KEY : '');
 
-    if (!groqKey && !ckeyKey) {
+    if (!deepseekKey && !ckeyKey && !groqKey) {
         return new Response(JSON.stringify({
             ok: false,
-            error: 'Chưa cấu hình API Key AI (GROQ_API_KEY hoặc CKEY_API_KEY) trên Cloudflare Pages.'
+            error: 'Chưa cấu hình API Key AI (DEEPSEEK_API_KEY, CKEY_API_KEY hoặc GROQ_API_KEY) trên Cloudflare Pages.'
         }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -148,7 +202,7 @@ async function handleDictionaryLookup(context, rawWord) {
     const systemPrompt = `You are a concise English-Vietnamese dictionary assistant.
 For the requested English word, return strictly raw JSON with this exact schema:
 {
-  "word": "${word}",
+  "word": "word",
   "phonetic": "/.../",
   "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom",
   "meaning": "nghĩa tiếng Việt ngắn gọn, chuẩn xác",
@@ -156,76 +210,31 @@ For the requested English word, return strictly raw JSON with this exact schema:
   "example_vi": "Bản dịch tiếng Việt của câu ví dụ"
 }
 Rules:
-1. Provide accurate IPA phonetic notation.
-2. Provide concise, natural Vietnamese meaning.
-3. Provide 1 authentic example sentence with its natural Vietnamese translation.
+1. Provide accurate IPA phonetic notation in "phonetic".
+2. Provide concise, natural Vietnamese meaning in "meaning".
+3. Provide 1 authentic example sentence in "example" with its natural Vietnamese translation in "example_vi".
 4. Output strictly raw JSON only, no markdown, no explanation.`;
 
+    const userPrompt = `Lookup word: "${word}"`;
     let parsedResult = null;
     let providerUsed = '';
 
-    // Ưu tiên Groq (siêu nhanh ~150-250ms), fallback DeepSeek CKEY
-    if (groqKey) {
-        try {
-            providerUsed = 'groq';
-            const groqRes = await fetch(GROQ_URL, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${groqKey}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: GROQ_MODEL,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Lookup word: "${word}"` }
-                    ],
-                    response_format: { type: 'json_object' },
-                    temperature: 0.2,
-                    max_tokens: 250
-                })
-            });
-
-            if (groqRes.ok) {
-                const groqJson = await groqRes.json();
-                const content = groqJson?.choices?.[0]?.message?.content;
-                parsedResult = extractJson(content);
-            }
-        } catch (e) {
-            console.warn('[Dictionary] Groq attempt failed:', e);
-        }
+    // 1. Thử DeepSeek official nếu có key
+    if (deepseekKey) {
+        parsedResult = await fetchAI(DEEPSEEK_URL, deepseekKey, DEEPSEEK_MODEL, systemPrompt, userPrompt, 22000);
+        if (parsedResult) providerUsed = 'deepseek_ai';
     }
 
-    // Fallback sang CKEY DeepSeek nếu Groq chưa trả về hoặc chưa cấu hình
+    // 2. Thử DeepSeek qua CKEY proxy nếu chưa có kết quả
     if (!parsedResult && ckeyKey) {
-        try {
-            providerUsed = 'ckey_deepseek';
-            const ckeyRes = await fetch(CKEY_URL, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${ckeyKey}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    model: CKEY_MODEL,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        { role: 'user', content: `Lookup word: "${word}"` }
-                    ],
-                    response_format: { type: 'json_object' },
-                    temperature: 0.2,
-                    max_tokens: 250
-                })
-            });
+        parsedResult = await fetchAI(CKEY_URL, ckeyKey, CKEY_MODEL, systemPrompt, userPrompt, 22000);
+        if (parsedResult) providerUsed = 'ckey_deepseek';
+    }
 
-            if (ckeyRes.ok) {
-                const ckeyJson = await ckeyRes.json();
-                const content = ckeyJson?.choices?.[0]?.message?.content;
-                parsedResult = extractJson(content);
-            }
-        } catch (e) {
-            console.warn('[Dictionary] CKEY attempt failed:', e);
-        }
+    // 3. Fallback sang Groq nếu cả 2 phía trên chưa trả lời
+    if (!parsedResult && groqKey) {
+        parsedResult = await fetchAI(GROQ_URL, groqKey, GROQ_MODEL, systemPrompt, userPrompt, 12000);
+        if (parsedResult) providerUsed = 'groq';
     }
 
     if (!parsedResult) {
@@ -254,7 +263,7 @@ Rules:
     // 3. TỰ ĐỘNG LƯU VÀO CLOUDFLARE KV (VĨNH VIỄN / TTL 90 NGÀY)
     // ─────────────────────────────────────────────────────────────
     if (env.DICTIONARY_KV) {
-        context.waitUntil((async () => {
+        const saveKvTask = async () => {
             try {
                 await env.DICTIONARY_KV.put(cacheKey, JSON.stringify(finalData), {
                     expirationTtl: 7776000 // 90 ngày
@@ -262,7 +271,13 @@ Rules:
             } catch (err) {
                 console.warn('[Dictionary] Async KV put error:', err);
             }
-        })());
+        };
+
+        if (typeof context.waitUntil === 'function') {
+            context.waitUntil(saveKvTask());
+        } else {
+            await saveKvTask();
+        }
     }
 
     return new Response(JSON.stringify({

@@ -85,7 +85,7 @@ const HiDict = (() => {
     // ─────────────────────────────────────────────────────────────
     // 2. HELPER FETCH CÓ TIMEOUT
     // ─────────────────────────────────────────────────────────────
-    async function _fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
+    async function _fetchWithTimeout(url, options = {}, timeoutMs = 25000) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
         try {
@@ -287,7 +287,7 @@ const HiDict = (() => {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ word: cleanWord })
-                }, 6000);
+                }, 25000);
 
                 if (res && res.ok) {
                     const json = await res.json();
