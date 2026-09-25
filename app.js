@@ -5233,17 +5233,17 @@ window.dictSearch = async function() {
     const titleEl = document.getElementById('dict-loading-title');
     const descEl  = document.getElementById('dict-loading-desc');
     if (titleEl) titleEl.textContent = 'Đang tra cứu từ điển...';
-    if (descEl)  descEl.textContent  = 'Kiểm tra cơ sở dữ liệu và bộ nhớ đệm...';
+    if (descEl)  descEl.textContent  = 'Tra cứu định nghĩa song ngữ và ví dụ thực tế...';
 
-    // Cập nhật trạng thái loading mượt mà khi từ cần AI fallback sinh nghĩa
+    // Cập nhật trạng thái loading mượt mà khi từ cần AI phân tích
     const t1 = setTimeout(() => {
-        if (titleEl) titleEl.textContent = 'Đang kết nối DeepSeek AI...';
-        if (descEl)  descEl.textContent  = 'Từ chưa có trong kho, AI đang tạo phiên âm, nghĩa tiếng Việt và câu ví dụ...';
+        if (titleEl) titleEl.textContent = 'Đang phân tích nghĩa từ vựng...';
+        if (descEl)  descEl.textContent  = 'Đang tổng hợp phiên âm chuẩn, giải nghĩa chi tiết và câu ví dụ...';
     }, 1200);
 
     const t2 = setTimeout(() => {
-        if (titleEl) titleEl.textContent = 'DeepSeek AI đang hoàn tất...';
-        if (descEl)  descEl.textContent  = 'Đang đồng bộ và lưu kết quả vào bộ nhớ đệm Cloudflare KV siêu tốc...';
+        if (titleEl) titleEl.textContent = 'Sắp hoàn tất...';
+        if (descEl)  descEl.textContent  = 'Đang hoàn thiện nội dung giải nghĩa, vui lòng đợi trong giây lát...';
     }, 6500);
 
     let result = null;
@@ -5301,25 +5301,10 @@ function _dictRenderResult(r) {
         posEl.textContent = (r.pos || 'từ vựng').toUpperCase();
     }
 
-    // 4. Source Badge (Kho từ 70K / Cloudflare KV / AI)
+    // 4. Source Badge (Đã bỏ theo yêu cầu người dùng)
     const sourceEl = document.getElementById('dict-source-badge');
     if (sourceEl) {
-        const src = String(r.source || '').toLowerCase();
-        if (src === 'database') {
-            sourceEl.textContent = 'Kho từ 70K';
-            sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
-            sourceEl.classList.remove('hidden');
-        } else if (src === 'cloudflare_kv') {
-            sourceEl.textContent = 'Bộ nhớ đệm KV';
-            sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30';
-            sourceEl.classList.remove('hidden');
-        } else if (src) {
-            sourceEl.textContent = src.includes('deepseek') ? 'DeepSeek AI' : 'AI Tra Cứu';
-            sourceEl.className = 'px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30';
-            sourceEl.classList.remove('hidden');
-        } else {
-            sourceEl.classList.add('hidden');
-        }
+        sourceEl.classList.add('hidden');
     }
 
     // 5. Pronunciation IPA (1 nút loa duy nhất - zero delay)
