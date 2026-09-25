@@ -2,6 +2,4 @@
 # Note: Do not rewrite /admin, /terms, or /privacy to their .html files
 # because Cloudflare Pages Clean URLs already serves static .html files automatically.
 # Adding a rewrite to a .html file triggers an infinite 308 redirect loop.
-
-/app      /index.html    200
-/login    /index.html    200
+# /login and /app are handled cleanly by Cloudflare Functions (functions/login.js & functions/app.js)
