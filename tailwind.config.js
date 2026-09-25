@@ -6,7 +6,6 @@ export default {
   content: [
     './*.html',
     './*.js',
-    './templates/**/*.{html,js}',
     './src/**/*.{js,ts,jsx,tsx,html,vue,css}'
   ],
   darkMode: 'class',
