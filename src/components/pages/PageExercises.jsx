@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { thptOnSearchInput, thptClearSearch } from '../../legacy/legacyBridge';
 
 export function PageExercises() {
+  useEffect(() => {
+    window.ThptExam?.init?.();
+  }, []);
+
   return (
     <>
 <div id="page-exercises" className="page active">

@@ -34,6 +34,21 @@ const PageLearning = lazy(() => import('./components/pages/PageLearning.jsx'));
 function AppRoutes() {
   const { currentRoute, isMainTab, isTopicDetail } = useRoute();
 
+  // Prefetch topics in background idle time so opening "Chủ đề" is always instantaneous
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const idlePrefetch = () => {
+      import('./services/db.js').then(({ getTopics }) => {
+        getTopics().catch(() => {});
+      }).catch(() => {});
+    };
+    if ('requestIdleCallback' in window) {
+      window.requestIdleCallback(idlePrefetch, { timeout: 2500 });
+    } else {
+      setTimeout(idlePrefetch, 800);
+    }
+  }, []);
+
   const renderActivePage = () => {
     switch (currentRoute) {
       case 'landing':
@@ -51,17 +66,17 @@ function AppRoutes() {
       case 'dashboard':
         return <ProtectedRoute><PageDashboard /></ProtectedRoute>;
       case 'topics':
-        return <ProtectedRoute><PageTopics /></ProtectedRoute>;
+        return <PageTopics />;
       case 'library':
-        return <ProtectedRoute><PageLibrary /></ProtectedRoute>;
+        return <PageLibrary />;
       case 'topic-detail':
-        return <ProtectedRoute><PageTopicDetail /></ProtectedRoute>;
+        return <PageTopicDetail />;
       case 'lesson-detail':
-        return <ProtectedRoute><PageLessonDetail /></ProtectedRoute>;
+        return <PageLessonDetail />;
       case 'exercises':
-        return <ProtectedRoute><PageExercises /></ProtectedRoute>;
+        return <PageExercises />;
       case 'thpt-room':
-        return <ProtectedRoute><PageThptRoom /></ProtectedRoute>;
+        return <PageThptRoom />;
       case 'vocabulary':
         return <ProtectedRoute><PageVocabulary /></ProtectedRoute>;
       case 'dictionary':
@@ -69,9 +84,9 @@ function AppRoutes() {
       case 'settings':
         return <ProtectedRoute><PageSettings /></ProtectedRoute>;
       case 'bilingual-reading':
-        return <ProtectedRoute><PageBilingualReading /></ProtectedRoute>;
+        return <PageBilingualReading />;
       case 'learning':
-        return <ProtectedRoute><PageLearning /></ProtectedRoute>;
+        return <PageLearning />;
       default:
         return <PageLanding />;
     }

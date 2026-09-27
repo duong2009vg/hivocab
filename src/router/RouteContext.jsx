@@ -1,6 +1,6 @@
 // src/router/RouteContext.jsx
 // Centralized React Route Manager with SPA History, Deep Links & Legacy Compatibility
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 const RouteContext = createContext({
   currentRoute: 'landing',
@@ -26,18 +26,29 @@ function normalizeRoute(raw) {
 function getInitialRoute() {
   if (typeof window === 'undefined') return 'landing';
   const path = (window.location.pathname || '').replace(/^\/+/, '').replace(/\/+$/, '');
-  const hash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+  const hash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '').trim();
 
-  if (path === 'login' || hash === 'login') return 'login';
-  if (path === 'app' || hash === 'app' || hash === 'dashboard') return 'dashboard';
-  if (hash) return normalizeRoute(hash);
+  // Hash takes precedence when navigating to a specific sub-feature (e.g. /app#topics or /#topics)
+  if (hash) {
+    const clean = normalizeRoute(hash);
+    if (clean && clean !== 'landing') return clean;
+  }
 
-  const isLoggedIn = window._hasLocalAuthToken ? window._hasLocalAuthToken() : false;
+  if (path === 'login') return 'login';
+  if (path === 'app') return 'dashboard';
+
+  const isLoggedIn = (typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function')
+    ? window._hasLocalAuthToken()
+    : (typeof document !== 'undefined' && (document.documentElement.classList.contains('user-logged-in') || !!window._isPreAuthenticated));
+
   return isLoggedIn ? 'dashboard' : 'landing';
 }
 
 export function RouteProvider({ children }) {
   const [currentRoute, setCurrentRoute] = useState(getInitialRoute);
+  const activeRouteRef = useRef(currentRoute);
+  const isNavigatingRef = useRef(false);
+  const lifecycleTimerRef = useRef(null);
 
   const triggerLegacyPageLifecycle = useCallback((pageName) => {
     if (typeof window === 'undefined') return;
@@ -73,26 +84,17 @@ export function RouteProvider({ children }) {
 
       switch (pageName) {
         case 'topics':
-          window._renderCategoryTabs?.();
-          window._renderTopicsGrid?.();
+        case 'topic-detail':
+        case 'lesson-detail':
+        case 'vocabulary':
+        case 'dictionary':
+          // Owned 100% by pure React components and reactive hooks
           break;
         case 'library':
           window.loadCommunityLibrary?.();
           break;
-        case 'vocabulary':
-          window._loadVocabularyPage?.();
-          break;
         case 'exercises':
           window.ThptExam?.init?.();
-          break;
-        case 'dictionary':
-          window.dictRenderRecent?.();
-          break;
-        case 'topic-detail':
-          window._loadLessons?.();
-          break;
-        case 'lesson-detail':
-          window._loadLessonWords?.();
           break;
         case 'dashboard':
           if (typeof window.HiDashboard !== 'undefined' && typeof window.HiDashboard.refresh === 'function') {
@@ -114,15 +116,17 @@ export function RouteProvider({ children }) {
   const navigateTo = useCallback((rawTarget, preserveHash = false) => {
     const target = normalizeRoute(rawTarget);
 
-    setCurrentRoute(prev => {
-      if (prev === target) return prev;
-      return target;
-    });
+    if (activeRouteRef.current === target) {
+      return;
+    }
 
+    activeRouteRef.current = target;
+    setCurrentRoute(target);
     triggerLegacyPageLifecycle(target);
 
     // Update browser URL / history
     if (!preserveHash && typeof window !== 'undefined') {
+      isNavigatingRef.current = true;
       if (target === 'landing') {
         if (window.location.pathname !== '/' || window.location.hash) {
           window.history.pushState({ page: 'landing' }, '', '/');
@@ -138,6 +142,9 @@ export function RouteProvider({ children }) {
       } else {
         window.location.hash = target;
       }
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 60);
     }
 
     if (typeof window !== 'undefined') {
@@ -149,35 +156,45 @@ export function RouteProvider({ children }) {
   useEffect(() => {
     const handlePopState = () => {
       const newRoute = getInitialRoute();
-      setCurrentRoute(newRoute);
-      triggerLegacyPageLifecycle(newRoute);
+      if (newRoute !== activeRouteRef.current) {
+        activeRouteRef.current = newRoute;
+        setCurrentRoute(newRoute);
+        triggerLegacyPageLifecycle(newRoute);
+      }
     };
 
     const handleHashChange = () => {
-      const hash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+      if (isNavigatingRef.current) {
+        return;
+      }
+      const hash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '').trim();
       if (hash) {
         const clean = normalizeRoute(hash);
-        setCurrentRoute(clean);
-        triggerLegacyPageLifecycle(clean);
+        if (clean !== activeRouteRef.current) {
+          activeRouteRef.current = clean;
+          setCurrentRoute(clean);
+          triggerLegacyPageLifecycle(clean);
+        }
       }
     };
 
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('hashchange', handleHashChange);
 
-    // Expose global window.navigateTo for backward compatibility
-    window.navigateTo = (page, preserveHash) => {
+    // Expose global window.__reactNavigateTo and window.navigateTo for backward compatibility
+    window.__reactNavigateTo = (page, preserveHash) => {
       navigateTo(page, preserveHash);
     };
+    window.navigateTo = window.__reactNavigateTo;
 
     // Initial trigger
-    triggerLegacyPageLifecycle(currentRoute);
+    triggerLegacyPageLifecycle(activeRouteRef.current);
 
     return () => {
       window.removeEventListener('popstate', handlePopState);
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [navigateTo, triggerLegacyPageLifecycle, currentRoute]);
+  }, [navigateTo, triggerLegacyPageLifecycle]);
 
   const isMainTab = MAIN_TABS.includes(currentRoute);
   const isTopicDetail = currentRoute === 'topic-detail' || currentRoute === 'lesson-detail';

@@ -132,6 +132,10 @@ window.lockBodyScroll = function(lock) {
 var navigateTo;
 window.navigateTo = navigateTo = function(page, preserveHash = false){
     try { document.documentElement.classList.add('router-ready'); } catch(_) {}
+    if (typeof window.__reactNavigateTo === 'function') {
+        window.__reactNavigateTo(page, preserveHash);
+        return;
+    }
     window.lockBodyScroll(false);
 
     // Đảm bảo đóng modal chi tiết bộ từ nếu đang mở và chuyển sang trang khác
@@ -665,6 +669,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 window.addEventListener('hashchange', () => {
+    // Nếu React Router đã sẵn sàng, React tự quản lý hashchange để tránh xung đột & render trùng lặp
+    if (document.documentElement.classList.contains('router-ready')) {
+        return;
+    }
     const h = window.location.hash.slice(1);
     // Bỏ qua hash OAuth từ Supabase (access_token, error_description)
     if(h && !h.includes('access_token=') && !h.includes('error_description=')) {
@@ -1498,10 +1506,12 @@ window._renderTopicsGrid = async function() {
 
     const subtitleEl = document.getElementById('topics-page-subtitle');
 
-    // show spinner
-    grid.innerHTML = `<div class="flex items-center justify-center py-16 col-span-2 sm:col-span-3 lg:col-span-4">
-        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
-    </div>`;
+    // Chỉ hiển thị spinner nếu chưa có dữ liệu trong bộ nhớ để tránh giật lag / nhấp nháy
+    if (!window._allTopics || window._allTopics.length === 0) {
+        grid.innerHTML = `<div class="flex items-center justify-center py-16 col-span-2 sm:col-span-3 lg:col-span-4">
+            <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+        </div>`;
+    }
 
     try {
         let topics = window._allTopics;
@@ -1723,6 +1733,16 @@ window._loadLessons = async function() {
         return;
     }
 
+    if (window._isLoadingLessonsForTopic === topicId) {
+        return;
+    }
+    window._isLoadingLessonsForTopic = topicId;
+
+    // Skeleton
+    listEl.innerHTML = `<div class="flex items-center justify-center py-12 col-span-3">
+        <span class="material-symbols-outlined text-primary text-[40px] animate-spin">refresh</span>
+    </div>`;
+
     try {
         // Kiểm tra xem chủ đề có phân cấp Cambridge (Tests -> Passages) hay không
         let camHierarchy = null;
@@ -1869,6 +1889,8 @@ window._loadLessons = async function() {
             <span class="material-symbols-outlined text-[40px] mb-2 block">error</span>
             Lỗi tải bài học: ${_esc(err.message)}
         </div>`;
+    } finally {
+        window._isLoadingLessonsForTopic = null;
     }
 };
 
@@ -5717,14 +5739,16 @@ async function bootstrapHiDB() {
                         try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(_) {}
                     }
 
-                    const curPage = document.querySelector('.page.active')?.id;
-                    const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
-                    const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
-                    const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login' && !rawHash.includes('access_token=');
+                    if (!document.documentElement.classList.contains('router-ready')) {
+                        const curPage = document.querySelector('.page.active')?.id;
+                        const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
+                        const isLandingOrLogin = !curPage || curPage === 'page-landing' || curPage === 'page-login';
+                        const hasTargetRoute = rawHash && rawHash !== 'landing' && rawHash !== 'login' && !rawHash.includes('access_token=');
 
-                    if (isLandingOrLogin || isAuthHash) {
-                        if (!hasTargetRoute) {
-                            window.navigateTo('dashboard');
+                        if (isLandingOrLogin || isAuthHash) {
+                            if (!hasTargetRoute) {
+                                window.navigateTo('dashboard');
+                            }
                         }
                     }
                 }
@@ -5763,9 +5787,11 @@ async function bootstrapHiDB() {
 
             // CẬP NHẬT GIAO DIỆN PROFILE
             _updateProfileUI(user);
-            HiDB.getTopics().then(topics => {
-                window._allTopics = topics || [];
-            }).catch(err => console.warn('[prefetch topics]', err));
+            setTimeout(() => {
+                HiDB.getTopics().then(topics => {
+                    window._allTopics = topics || [];
+                }).catch(err => console.warn('[prefetch topics]', err));
+            }, 400);
 
             const isAuthHash = window.location.hash.includes('access_token=') || window.location.hash.includes('error_description=');
             if (isAuthHash) { 
@@ -5773,7 +5799,7 @@ async function bootstrapHiDB() {
             }
 
             // Nếu đang trong chế độ đặt lại mật khẩu, không điều hướng về dashboard
-            if (!window._isPasswordRecoveryMode) {
+            if (!window._isPasswordRecoveryMode && !document.documentElement.classList.contains('router-ready')) {
                 const curPage = document.querySelector('.page.active')?.id;
                 const rawHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
                 const cleanHash = rawHash.split('?')[0];

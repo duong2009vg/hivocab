@@ -1455,14 +1455,27 @@ if (window.speechSynthesis) {
 
 // ── 2. Thay thế startSession ────────────────────────────────
 window.startSession = async function() {
-    document.getElementById('learning-progress-container').style.display = 'flex';
-    document.getElementById('learning-streak-container').style.display  = 'flex';
-    document.getElementById('learning-close-btn').setAttribute('onclick', "navigateTo('dashboard')");
+    navigateTo('learning');
+
+    // Đợi React mount phần tử #exercise-container
+    let container = document.getElementById('exercise-container');
+    if (!container) {
+        for (let i = 0; i < 20; i++) {
+            await new Promise(r => setTimeout(r, 50));
+            container = document.getElementById('exercise-container');
+            if (container) break;
+        }
+    }
+
+    const progContainer = document.getElementById('learning-progress-container');
+    if (progContainer) progContainer.style.display = 'flex';
+    const streakContainer = document.getElementById('learning-streak-container');
+    if (streakContainer) streakContainer.style.display = 'flex';
+    const closeBtn = document.getElementById('learning-close-btn');
+    if (closeBtn) closeBtn.setAttribute('onclick', "navigateTo('dashboard')");
 
     document.getElementById('main-sidebar')?.style.setProperty('display', 'none', 'important');
     document.getElementById('mobile-bottom-nav')?.style.setProperty('display', 'none', 'important');
-
-    navigateTo('learning');
 
     try {
         HiSessionUI.init();
@@ -1478,9 +1491,11 @@ window.startSession = async function() {
                 totalLearned = lv0 + lv1 + lv2 + lv3 + lv4 + lv5;
             } catch (_) {}
 
-            const container = document.getElementById('exercise-container');
+            const activeContainer = document.getElementById('exercise-container') || container;
+            if (!activeContainer) return;
+
             if (totalLearned === 0) {
-                container.innerHTML = `
+                activeContainer.innerHTML = `
                     <div class="text-center mt-20 fade-in max-w-md mx-auto px-4">
                         <div class="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                             <span class="material-symbols-outlined text-[48px] text-primary icon-fill">school</span>
@@ -1499,7 +1514,7 @@ window.startSession = async function() {
                         </div>
                     </div>`;
             } else {
-                container.innerHTML = `
+                activeContainer.innerHTML = `
                     <div class="text-center mt-20 fade-in max-w-md mx-auto px-4">
                         <div class="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-4">
                             <span class="material-symbols-outlined text-[48px] text-green-500 icon-fill">check_circle</span>
@@ -1531,11 +1546,14 @@ window.startSession = async function() {
 
     } catch (err) {
         console.error('[startSession] Lỗi:', err);
-        document.getElementById('exercise-container').innerHTML = `
-            <div class="text-center mt-20 text-error">
-                <p class="font-bold">Lỗi khi tải phiên học.</p>
-                <p class="text-sm mt-1">${err.message}</p>
-            </div>`;
+        const activeContainer = document.getElementById('exercise-container') || container;
+        if (activeContainer) {
+            activeContainer.innerHTML = `
+                <div class="text-center mt-20 text-error">
+                    <p class="font-bold">Lỗi khi tải phiên học.</p>
+                    <p class="text-sm mt-1">${err.message}</p>
+                </div>`;
+        }
     }
 };
 
@@ -1557,6 +1575,19 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
 
     // Return target when closing practice
     const returnTarget = (passageId || lessonIndex !== null) ? 'lesson-detail' : (topicId ? 'topic-detail' : 'dashboard');
+
+    navigateTo('learning');
+
+    // Đợi React mount phần tử #exercise-container
+    let container = document.getElementById('exercise-container');
+    if (!container) {
+        for (let i = 0; i < 20; i++) {
+            await new Promise(r => setTimeout(r, 50));
+            container = document.getElementById('exercise-container');
+            if (container) break;
+        }
+    }
+
     const closeBtn = document.getElementById('learning-close-btn');
     if (closeBtn) closeBtn.setAttribute('onclick', `navigateTo('${returnTarget}')`);
 
@@ -1568,11 +1599,8 @@ window.startSinglePractice = async function(exerciseTypeIndex) {
     document.getElementById('main-sidebar')?.style.setProperty('display', 'none', 'important');
     document.getElementById('mobile-bottom-nav')?.style.setProperty('display', 'none', 'important');
 
-    navigateTo('learning');
-
     document.querySelectorAll('.exercise-step').forEach(el => el.classList.add('hidden'));
 
-    const container = document.getElementById('exercise-container');
     if (!container) return;
 
     try {

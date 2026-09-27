@@ -1,5 +1,5 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v14';
+const CACHE_NAME = 'hivocab-shell-v16';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',
@@ -54,6 +54,9 @@ self.addEventListener('fetch', (event) => {
 
   // Bỏ qua Cloudflare analytics
   if (url.hostname.includes('cloudflareinsights.com')) return;
+
+  // Bỏ qua /assets/ của Vite (đã có content hash, tránh lỗi cross-world service worker resource mismatch)
+  if (url.pathname.startsWith('/assets/')) return;
 
   // Stale-While-Revalidate cho static assets cùng origin
   if (url.origin === self.location.origin) {

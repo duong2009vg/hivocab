@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { toggleTheme, applyTheme, handleSettingsChangePassword } from '../../legacy/legacyBridge';
 
 export function PageSettings() {
+  useEffect(() => {
+    window._loadSettingsPage?.();
+  }, []);
+
   return (
     <>
 <div id="page-settings" className="page active">

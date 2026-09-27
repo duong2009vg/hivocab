@@ -9,17 +9,21 @@ export function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   const { navigateTo } = useRoute();
 
+  const hasLocalToken = (typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function')
+    ? window._hasLocalAuthToken()
+    : (typeof document !== 'undefined' && (document.documentElement.classList.contains('user-logged-in') || !!window._isPreAuthenticated));
+
   useEffect(() => {
-    if (!loading && !user) {
+    if (!loading && !user && !hasLocalToken) {
       navigateTo('login');
     }
-  }, [user, loading, navigateTo]);
+  }, [user, loading, hasLocalToken, navigateTo]);
 
-  if (loading) {
+  if (loading || (hasLocalToken && !user)) {
     return <RouteLoadingFallback />;
   }
 
-  if (!user) {
+  if (!user && !hasLocalToken) {
     return <RouteLoadingFallback />;
   }
 

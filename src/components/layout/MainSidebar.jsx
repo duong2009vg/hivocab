@@ -2,8 +2,8 @@
 // Pixel-Perfect React Sidebar with Centralized Navigation & Auth Integration
 import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { useRoute } from '../../router/RouteContext.jsx';
 import {
-  navigate,
   startSession,
   handleProfileClick,
   openPricingModal,
@@ -12,6 +12,11 @@ import {
 
 export function MainSidebar() {
   const { user } = useAuth();
+  const { currentRoute, navigateTo } = useRoute();
+
+  const activeTab = (currentRoute === 'topic-detail' || currentRoute === 'lesson-detail')
+    ? 'topics'
+    : (currentRoute === 'thpt-room' ? 'exercises' : currentRoute);
 
   return (
     <nav
@@ -20,7 +25,7 @@ export function MainSidebar() {
     >
       <div className="mb-5 shrink-0">
         <a
-          onClick={() => navigate('dashboard')}
+          onClick={() => navigateTo('dashboard')}
           className="inline-flex cursor-pointer"
           aria-label="Hi - Trang chu"
         >
@@ -66,49 +71,52 @@ export function MainSidebar() {
 
       <div className="flex flex-col gap-1 flex-1 overflow-y-auto pr-1 select-none">
         <a
-          onClick={() => navigate('dashboard')}
+          onClick={() => navigateTo('dashboard')}
           id="nav-desktop-dashboard"
-          className="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
+          className={`sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 ${activeTab === 'dashboard' ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface font-medium'} text-[13.5px] cursor-pointer`}
         >
           <span className="material-symbols-outlined text-[20px]">home</span>
           <span>Trang chủ</span>
         </a>
         <a
-          onClick={() => navigate('topics')}
+          onClick={() => navigateTo('topics')}
+          onMouseEnter={() => {
+            import('../../services/db.js').then(({ getTopics }) => getTopics().catch(() => {})).catch(() => {});
+          }}
           id="nav-desktop-topics"
-          className="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
+          className={`sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 ${activeTab === 'topics' ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface font-medium'} text-[13.5px] cursor-pointer`}
         >
           <span className="material-symbols-outlined text-[20px]">grid_view</span>
           <span>Chủ đề</span>
         </a>
         <a
-          onClick={() => navigate('library')}
+          onClick={() => navigateTo('library')}
           id="nav-desktop-library"
-          className="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
+          className={`sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 ${activeTab === 'library' ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface font-medium'} text-[13.5px] cursor-pointer`}
         >
           <span className="material-symbols-outlined text-[20px]">explore</span>
           <span>Thư viện</span>
         </a>
         <a
-          onClick={() => navigate('vocabulary')}
+          onClick={() => navigateTo('vocabulary')}
           id="nav-desktop-vocabulary"
-          className="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
+          className={`sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 ${activeTab === 'vocabulary' ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface font-medium'} text-[13.5px] cursor-pointer`}
         >
           <span className="material-symbols-outlined text-[20px]">auto_stories</span>
           <span>Kho từ vựng</span>
         </a>
         <a
-          onClick={() => navigate('exercises')}
+          onClick={() => navigateTo('exercises')}
           id="nav-desktop-exercises"
-          className="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
+          className={`sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 ${activeTab === 'exercises' ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface font-medium'} text-[13.5px] cursor-pointer`}
         >
           <span className="material-symbols-outlined text-[20px]">school</span>
           <span>Luyện Đề THPT</span>
         </a>
         <a
-          onClick={() => navigate('dictionary')}
+          onClick={() => navigateTo('dictionary')}
           id="nav-desktop-dictionary"
-          className="sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
+          className={`sidebar-item flex items-center gap-3 px-3.5 h-10 rounded-xl transition-all duration-150 ${activeTab === 'dictionary' ? 'bg-primary/10 text-primary font-bold shadow-xs' : 'text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface font-medium'} text-[13.5px] cursor-pointer`}
         >
           <span className="material-symbols-outlined text-[20px]">search</span>
           <span>Tra từ</span>

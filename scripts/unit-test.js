@@ -148,6 +148,54 @@ assert(!appContent.includes('.page.active'), 'Legacy CSS class .page.active has 
 assert(appContent.includes('<ProtectedRoute><PageDashboard /></ProtectedRoute>'), 'Dashboard route is protected with ProtectedRoute');
 assert(appContent.includes('<ProtectedRoute><PageVocabulary /></ProtectedRoute>'), 'Vocabulary route is protected with ProtectedRoute');
 assert(appContent.includes('<ProtectedRoute><PageDictionary /></ProtectedRoute>'), 'Dictionary route is protected with ProtectedRoute');
+assert(!appContent.includes('<ProtectedRoute><PageTopics />'), 'Public visitor can browse topics without login blocker');
+assert(!appContent.includes('<ProtectedRoute><PageTopicDetail />'), 'Public visitor can view topic lessons without login blocker');
+assert(!appContent.includes('<ProtectedRoute><PageLearning />'), 'Public visitor can practice lessons without login blocker');
+
+// 6. Navigation Stability & Anti-Lag Safeguards
+console.log('\n6. Checking Navigation Stability & Anti-Lag Safeguards:');
+const routeContextContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'router', 'RouteContext.jsx'), 'utf8');
+const dataLayerContent = fs.readFileSync(path.join(__dirname, '..', 'dataLayer.js'), 'utf8');
+const legacyAppContent = fs.readFileSync(path.join(__dirname, '..', 'legacyApp.js'), 'utf8');
+
+assert(routeContextContent.includes('isNavigatingRef'), 'RouteContext guards against synthetic hashchange bounce loops');
+assert(routeContextContent.includes('// Hash takes precedence'), 'RouteContext respects deep hash links over base pathname');
+assert(dataLayerContent.includes('_dedupeRequest'), 'dataLayer collapses concurrent in-flight requests to prevent request storm');
+assert(dataLayerContent.includes('Fast path 2: Tập từ lớn'), 'dataLayer employs indexed direct user progress query');
+assert(legacyAppContent.includes('router-ready'), 'legacyApp deconflicts hashchange when React router is ready');
+
+// 7. Checking Topics & Lessons Pure React 19 Architecture & Services
+console.log('\n7. Checking Topics & Lessons Pure React 19 Architecture & Services:');
+const pageTopicsContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'pages', 'PageTopics.jsx'), 'utf8');
+const pageTopicDetailContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'pages', 'PageTopicDetail.jsx'), 'utf8');
+const pageLessonDetailContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'components', 'pages', 'PageLessonDetail.jsx'), 'utf8');
+const dbServiceContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'services', 'db.js'), 'utf8');
+const soundServiceContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'services', 'sound.js'), 'utf8');
+const supabaseClientContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'supabaseClient.js'), 'utf8');
+const useTopicsContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'hooks', 'useTopics.js'), 'utf8');
+const swContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'sw.js'), 'utf8');
+const sessionUIContent = fs.readFileSync(path.join(__dirname, '..', 'sessionUI.js'), 'utf8');
+
+assert(pageTopicsContent.includes('useTopics'), 'PageTopics uses reactive useTopics hook');
+assert(!pageTopicsContent.includes('innerHTML'), 'PageTopics contains zero innerHTML DOM manipulations');
+assert(pageTopicDetailContent.includes('useTopicDetail'), 'PageTopicDetail uses reactive useTopicDetail hook');
+assert(!pageTopicDetailContent.includes('innerHTML'), 'PageTopicDetail contains zero innerHTML DOM manipulations');
+assert(pageLessonDetailContent.includes('useLessonDetail'), 'PageLessonDetail uses reactive useLessonDetail hook');
+assert(!pageLessonDetailContent.includes('innerHTML'), 'PageLessonDetail contains zero innerHTML DOM manipulations');
+// Native Supabase client (no window.HiDB dependency for data reads)
+assert(supabaseClientContent.includes('createClient'), 'supabaseClient.js creates native Supabase client via @supabase/supabase-js');
+assert(supabaseClientContent.includes('swehdtrqjyklmsefkjdf'), 'supabaseClient.js is configured with correct project URL');
+assert(dbServiceContent.includes("import { supabase }"), 'db.js imports native Supabase client directly');
+assert(dbServiceContent.includes('export async function getTopics'), 'ES Module db.js exports getTopics');
+assert(dbServiceContent.includes('fetchTopicsFromSupabase'), 'db.js has direct parallel Supabase query function');
+assert(dbServiceContent.includes('hi:topics-updated'), 'db.js fires CustomEvent for SWR re-render after background revalidation');
+assert(dbServiceContent.includes('export async function getCamHierarchy'), 'ES Module db.js exports getCamHierarchy');
+assert(useTopicsContent.includes('hi:topics-updated'), 'useTopics listens for CustomEvent to re-render on background data arrival');
+assert(soundServiceContent.includes('export function playWordAudio'), 'ES Module sound.js exports playWordAudio');
+assert(legacyAppContent.includes('window.__reactNavigateTo'), 'legacyApp delegates navigateTo to React router');
+assert(swContent.includes('/assets/'), 'Service worker bypasses /assets/ to eliminate preload mismatch');
+assert(sessionUIContent.includes('exercise-container'), 'sessionUI waits for React exercise-container before rendering');
+assert(dataLayerContent.includes('RPC_TIMEOUT'), 'dataLayer limits get_topic_summaries RPC with timeout to prevent hanging');
 
 // Summary
 console.log('\n=======================================================');
