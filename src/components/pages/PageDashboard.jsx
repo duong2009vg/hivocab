@@ -1,5 +1,5 @@
 // src/components/pages/PageDashboard.jsx
-// Pixel-Perfect React Component with Reactive State & Clean Event Handlers
+// Pixel-Perfect React Component with Reactive State, Countdown Timer, Heatmap Calendar & IELTS Goal
 import React from 'react';
 import { useDashboardStats } from '../../hooks/useDashboardStats.js';
 import {
@@ -10,7 +10,18 @@ import {
 } from '../../legacy/legacyBridge.js';
 
 export function PageDashboard() {
-  const { stats, loading } = useDashboardStats();
+  const {
+    stats,
+    loading,
+    heroState,
+    countdown,
+    calendar,
+    ieltsGoal,
+    prevMonth,
+    nextMonth,
+    showDayDetail,
+  } = useDashboardStats();
+
   const { memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } } = stats;
 
   const maxLevelCount = Math.max(
@@ -35,21 +46,11 @@ export function PageDashboard() {
     }, 150);
   };
 
-  const handlePrevMonth = () => {
-    if (typeof window !== 'undefined' && window.HiDashboard && typeof window.HiDashboard.prevMonth === 'function') {
-      window.HiDashboard.prevMonth();
-    }
-  };
-
-  const handleNextMonth = () => {
-    if (typeof window !== 'undefined' && window.HiDashboard && typeof window.HiDashboard.nextMonth === 'function') {
-      window.HiDashboard.nextMonth();
-    }
-  };
-
   const handleOpenIELTSModal = () => {
     if (typeof window !== 'undefined' && window.HiDashboard && typeof window.HiDashboard.openIELTSGoalModal === 'function') {
       window.HiDashboard.openIELTSGoalModal();
+    } else if (typeof window !== 'undefined' && typeof window.openIELTSGoalModal === 'function') {
+      window.openIELTSGoalModal();
     }
   };
 
@@ -57,6 +58,7 @@ export function PageDashboard() {
     <div id="page-dashboard" className="page active">
       <main className="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
         <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
+          {/* Header */}
           <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 className="text-2xl md:text-headline-lg font-bold text-on-surface">Trang chủ</h1>
@@ -88,69 +90,83 @@ export function PageDashboard() {
               <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-fixed rounded-full blur-3xl opacity-30"></div>
 
               {/* TRẠNG THÁI: SẴN SÀNG ÔN TẬP */}
-              <div id="dash-ready-state" className="flex flex-col items-center gap-4 z-10">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                  <span className="material-symbols-outlined text-primary text-[36px] icon-fill">menu_book</span>
+              {heroState === 'ready' && (
+                <div id="dash-ready-state" className="flex flex-col items-center gap-4 z-10 fade-in">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-1">
+                    <span className="material-symbols-outlined text-primary text-[36px] icon-fill">menu_book</span>
+                  </div>
+                  <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Đến giờ ôn tập!</h2>
+                  <p id="dashboard-words-due-text" className="text-sm md:text-body-md text-on-surface-variant max-w-md">
+                    {loading
+                      ? 'Đang tải dữ liệu...'
+                      : stats.wordsDueCount > 0
+                      ? `Bạn có ${stats.wordsDueCount} từ vựng cần được củng cố theo phương pháp lặp lại ngắt quãng hôm nay.`
+                      : 'Tuyệt vời! Bạn đã ôn xong mọi từ hôm nay.'}
+                  </p>
+                  <button
+                    id="dash-start-btn"
+                    onClick={startSession}
+                    className="bg-primary text-on-primary px-7 py-3 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">play_arrow</span>Ôn tập ngay
+                  </button>
                 </div>
-                <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Đến giờ ôn tập!</h2>
-                <p id="dashboard-words-due-text" className="text-sm md:text-body-md text-on-surface-variant max-w-md">
-                  {loading
-                    ? 'Đang tải dữ liệu...'
-                    : stats.wordsDueCount > 0
-                    ? `Bạn có ${stats.wordsDueCount} từ vựng cần được củng cố theo phương pháp lặp lại ngắt quãng hôm nay.`
-                    : 'Tuyệt vời! Bạn đã ôn xong mọi từ hôm nay.'}
-                </p>
-                <button
-                  id="dash-start-btn"
-                  onClick={startSession}
-                  className="bg-primary text-on-primary px-7 py-3 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[20px]">play_arrow</span>Ôn tập ngay
-                </button>
-              </div>
+              )}
 
               {/* TRẠNG THÁI: ĐẾM NGƯỢC */}
-              <div id="dash-countdown-state" className="hidden flex-col items-center gap-3 z-10">
-                <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-1">
-                  <span className="material-symbols-outlined text-outline text-[34px]">schedule</span>
+              {heroState === 'countdown' && (
+                <div id="dash-countdown-state" className="flex flex-col items-center gap-3 z-10 fade-in">
+                  <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-1">
+                    <span className="material-symbols-outlined text-outline text-[34px]">schedule</span>
+                  </div>
+                  <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Lần ôn tập kế tiếp</h2>
+                  <p className="text-sm text-on-surface-variant max-w-xs">Hoàn thành hôm nay! Quay lại sau:</p>
+                  <div className="flex items-center gap-2 my-1">
+                    <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
+                      <span id="cd-hours" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">
+                        {countdown.hours}
+                      </span>
+                      <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Giờ</span>
+                    </div>
+                    <span className="text-2xl font-bold text-outline">:</span>
+                    <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
+                      <span id="cd-minutes" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">
+                        {countdown.minutes}
+                      </span>
+                      <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Phút</span>
+                    </div>
+                    <span className="text-2xl font-bold text-outline">:</span>
+                    <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
+                      <span id="cd-seconds" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">
+                        {countdown.seconds}
+                      </span>
+                      <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Giây</span>
+                    </div>
+                  </div>
+                  <p id="cd-next-label" className="text-xs text-outline">
+                    {countdown.label}
+                  </p>
                 </div>
-                <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Lần ôn tập kế tiếp</h2>
-                <p className="text-sm text-on-surface-variant max-w-xs">Hoàn thành hôm nay! Quay lại sau:</p>
-                <div className="flex items-center gap-2 my-1">
-                  <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
-                    <span id="cd-hours" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">00</span>
-                    <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Giờ</span>
-                  </div>
-                  <span className="text-2xl font-bold text-outline">:</span>
-                  <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
-                    <span id="cd-minutes" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">00</span>
-                    <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Phút</span>
-                  </div>
-                  <span className="text-2xl font-bold text-outline">:</span>
-                  <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
-                    <span id="cd-seconds" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">00</span>
-                    <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Giây</span>
-                  </div>
-                </div>
-                <p id="cd-next-label" className="text-xs text-outline"></p>
-              </div>
+              )}
 
-              {/* TRẠNG THÁI: CHƯA CÓ TỪ NÀO (EMPTY STATE CHO USER MỚI) */}
-              <div id="dash-empty-state" className="hidden flex-col items-center gap-4 z-10">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                  <span className="material-symbols-outlined text-primary text-[36px] icon-fill">school</span>
+              {/* TRẠNG THÁI: CHƯA CÓ TỪ NÀO */}
+              {heroState === 'empty' && (
+                <div id="dash-empty-state" className="flex flex-col items-center gap-4 z-10 fade-in">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-1">
+                    <span className="material-symbols-outlined text-primary text-[36px] icon-fill">school</span>
+                  </div>
+                  <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Bắt đầu hành trình học từ vựng!</h2>
+                  <p className="text-sm md:text-body-md text-on-surface-variant max-w-md">
+                    Bạn chưa có từ vựng nào trong danh sách ôn tập. Hãy chọn một chủ đề để bắt đầu học những từ mới đầu tiên nhé!
+                  </p>
+                  <button
+                    onClick={() => navigate('topics')}
+                    className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">explore</span>Khám phá chủ đề
+                  </button>
                 </div>
-                <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Bắt đầu hành trình học từ vựng!</h2>
-                <p className="text-sm md:text-body-md text-on-surface-variant max-w-md">
-                  Bạn chưa có từ vựng nào trong danh sách ôn tập. Hãy chọn một chủ đề để bắt đầu học những từ mới đầu tiên nhé!
-                </p>
-                <button
-                  onClick={() => navigate('topics')}
-                  className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]">explore</span>Khám phá chủ đề
-                </button>
-              </div>
+              )}
             </section>
 
             {/* THẺ PHÂN BỐ TỪ VỰNG THEO CẤP ĐỘ */}
@@ -175,119 +191,37 @@ export function PageDashboard() {
 
               {/* 6 Cột Cấp độ (Lvl 0 -> Lvl 5) */}
               <div className="flex-1 flex items-end justify-between gap-1.5 sm:gap-2 md:gap-3 pt-3 pb-1 select-none">
-                {/* Lvl 0 */}
-                <div
-                  className="flex-1 flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleLevelClick(0)}
-                  title="Cấp 0: Chưa học / Mới tạo - Bấm để lọc"
-                >
-                  <span id="mem-lv0-count" className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">
-                    {memoryLevels.lv0 || 0}
-                  </span>
-                  <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
-                    <div
-                      id="mem-lv0-bar"
-                      className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                      style={{ backgroundColor: '#94a3b8', height: getBarHeight(memoryLevels.lv0) }}
-                    ></div>
-                  </div>
-                  <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 0</span>
-                </div>
+                {[0, 1, 2, 3, 4, 5].map((lvl) => {
+                  const key = `lv${lvl}`;
+                  const count = memoryLevels[key] || 0;
+                  const colors = ['#94a3b8', '#f97316', '#f59e0b', '#0ea5e9', '#a855f7', '#10b981'];
 
-                {/* Lvl 1 */}
-                <div
-                  className="flex-1 flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleLevelClick(1)}
-                  title="Cấp 1: Mới bắt đầu ôn - Bấm để lọc"
-                >
-                  <span id="mem-lv1-count" className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">
-                    {memoryLevels.lv1 || 0}
-                  </span>
-                  <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                  return (
                     <div
-                      id="mem-lv1-bar"
-                      className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                      style={{ backgroundColor: '#f97316', height: getBarHeight(memoryLevels.lv1) }}
-                    ></div>
-                  </div>
-                  <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 1</span>
-                </div>
-
-                {/* Lvl 2 */}
-                <div
-                  className="flex-1 flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleLevelClick(2)}
-                  title="Cấp 2: Đang làm quen - Bấm để lọc"
-                >
-                  <span id="mem-lv2-count" className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">
-                    {memoryLevels.lv2 || 0}
-                  </span>
-                  <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
-                    <div
-                      id="mem-lv2-bar"
-                      className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                      style={{ backgroundColor: '#f59e0b', height: getBarHeight(memoryLevels.lv2) }}
-                    ></div>
-                  </div>
-                  <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 2</span>
-                </div>
-
-                {/* Lvl 3 */}
-                <div
-                  className="flex-1 flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleLevelClick(3)}
-                  title="Cấp 3: Nhớ tương đối - Bấm để lọc"
-                >
-                  <span id="mem-lv3-count" className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">
-                    {memoryLevels.lv3 || 0}
-                  </span>
-                  <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
-                    <div
-                      id="mem-lv3-bar"
-                      className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                      style={{ backgroundColor: '#0ea5e9', height: getBarHeight(memoryLevels.lv3) }}
-                    ></div>
-                  </div>
-                  <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 3</span>
-                </div>
-
-                {/* Lvl 4 */}
-                <div
-                  className="flex-1 flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleLevelClick(4)}
-                  title="Cấp 4: Ghi nhớ vững - Bấm để lọc"
-                >
-                  <span id="mem-lv4-count" className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">
-                    {memoryLevels.lv4 || 0}
-                  </span>
-                  <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
-                    <div
-                      id="mem-lv4-bar"
-                      className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                      style={{ backgroundColor: '#a855f7', height: getBarHeight(memoryLevels.lv4) }}
-                    ></div>
-                  </div>
-                  <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 4</span>
-                </div>
-
-                {/* Lvl 5 */}
-                <div
-                  className="flex-1 flex flex-col items-center group cursor-pointer"
-                  onClick={() => handleLevelClick(5)}
-                  title="Cấp 5: Đã thành thạo - Bấm để lọc"
-                >
-                  <span id="mem-lv5-count" className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110">
-                    {memoryLevels.lv5 || 0}
-                  </span>
-                  <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
-                    <div
-                      id="mem-lv5-bar"
-                      className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                      style={{ backgroundColor: '#10b981', height: getBarHeight(memoryLevels.lv5) }}
-                    ></div>
-                  </div>
-                  <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">Lvl 5</span>
-                </div>
+                      key={lvl}
+                      className="flex-1 flex flex-col items-center group cursor-pointer"
+                      onClick={() => handleLevelClick(lvl)}
+                      title={`Cấp ${lvl}: Bấm để lọc`}
+                    >
+                      <span
+                        id={`mem-lv${lvl}-count`}
+                        className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110"
+                      >
+                        {count}
+                      </span>
+                      <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
+                        <div
+                          id={`mem-lv${lvl}-bar`}
+                          className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
+                          style={{ backgroundColor: colors[lvl], height: getBarHeight(count) }}
+                        ></div>
+                      </div>
+                      <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">
+                        Lvl {lvl}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             </section>
           </div>
@@ -302,17 +236,33 @@ export function PageDashboard() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">Phòng thi trực tuyến</span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-surface-container-high text-on-surface-variant">38+ Đề thi chuẩn CBT</span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
+                      Phòng thi trực tuyến
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-surface-container-high text-on-surface-variant">
+                      38+ Đề thi chuẩn CBT
+                    </span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Phòng Luyện Đề THPT Quốc Gia</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">
+                    Phòng Luyện Đề THPT Quốc Gia
+                  </h2>
                   <p className="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
-                    Luyện thi trắc nghiệm tiếng Anh chuẩn cấu trúc Đề thi Tốt nghiệp THPT mới nhất. Giao diện làm bài chuẩn CBT, bấm giờ 50 phút thực tế, thanh điều hướng câu hỏi tức thì và lời giải thích chi tiết từng câu.
+                    Luyện thi trắc nghiệm tiếng Anh chuẩn cấu trúc Đề thi Tốt nghiệp THPT mới nhất. Giao diện làm bài chuẩn
+                    CBT, bấm giờ 50 phút thực tế, thanh điều hướng câu hỏi tức thì và lời giải thích chi tiết từng câu.
                   </p>
                   <div className="flex items-center gap-3 sm:gap-4 mt-3 text-[11px] sm:text-xs text-outline flex-wrap font-medium">
-                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>Chuẩn ma trận BGD</span>
-                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>Bấm giờ tự động</span>
-                    <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>Giải thích chi tiết</span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>
+                      Chuẩn ma trận BGD
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>
+                      Bấm giờ tự động
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>
+                      Giải thích chi tiết
+                    </span>
                   </div>
                 </div>
               </div>
@@ -351,17 +301,20 @@ export function PageDashboard() {
 
                   <div className="flex items-center justify-between sm:justify-end gap-1 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-outline-variant/20 self-start sm:self-auto w-full sm:w-auto">
                     <button
-                      onClick={handlePrevMonth}
+                      onClick={prevMonth}
                       className="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors touch-manipulation cursor-pointer"
                       title="Tháng trước"
                     >
                       <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                     </button>
-                    <span id="flame-calendar-title" className="text-xs font-bold text-on-surface min-w-[95px] text-center select-none">
-                      Tháng ..., ....
+                    <span
+                      id="flame-calendar-title"
+                      className="text-xs font-bold text-on-surface min-w-[95px] text-center select-none"
+                    >
+                      Tháng {calendar.month}, {calendar.year}
                     </span>
                     <button
-                      onClick={handleNextMonth}
+                      onClick={nextMonth}
                       className="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors touch-manipulation cursor-pointer"
                       title="Tháng sau"
                     >
@@ -370,7 +323,7 @@ export function PageDashboard() {
                   </div>
                 </div>
 
-                {/* Ngày trong tuần header (T2 .. CN) */}
+                {/* Ngày trong tuần header */}
                 <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 mb-2 text-center select-none">
                   <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T2</span>
                   <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T3</span>
@@ -381,113 +334,211 @@ export function PageDashboard() {
                   <span className="text-[10px] sm:text-[11px] font-bold text-primary uppercase py-0.5">CN</span>
                 </div>
 
-                <div id="flame-calendar-grid" className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 min-h-[190px]"></div>
+                {/* Calendar Grid */}
+                <div id="flame-calendar-grid" className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 min-h-[190px]">
+                  {/* Empty cells before month start */}
+                  {Array.from({ length: calendar.startDayIndex }).map((_, i) => (
+                    <div key={`empty-${i}`} className="aspect-square rounded-lg bg-transparent opacity-0 pointer-events-none" />
+                  ))}
 
-                <div id="flame-calendar-hint" className="hidden mt-3 p-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface text-center border border-outline-variant/20 fade-in"></div>
+                  {/* Day cells */}
+                  {calendar.days.map(({ day, dateStr, count, isToday }) => {
+                    let levelClass = '';
+                    let hasFlame = false;
+
+                    if (count === 0) {
+                      levelClass =
+                        'bg-surface-container-low/60 text-on-surface-variant/70 border border-outline-variant/15 hover:bg-surface-container transition-colors';
+                    } else if (count < 10) {
+                      levelClass =
+                        'bg-orange-500/20 text-orange-600 dark:text-orange-300 font-semibold border border-orange-500/40 shadow-sm';
+                    } else if (count < 25) {
+                      levelClass =
+                        'bg-orange-500 text-white font-bold shadow-[0_2px_8px_rgba(249,115,22,0.35)]';
+                    } else {
+                      levelClass =
+                        'bg-gradient-to-br from-amber-500 via-orange-500 to-[#FF5722] text-white font-bold shadow-[0_3px_12px_rgba(255,87,34,0.45)]';
+                      hasFlame = true;
+                    }
+
+                    const todayRing = isToday
+                      ? 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2 ring-offset-surface z-10 font-black'
+                      : '';
+
+                    const tooltipText = `Ngày ${day}/${calendar.month}: ${
+                      count > 0 ? `Đã ôn ${count} từ 🔥` : 'Chưa có phiên học'
+                    }`;
+
+                    return (
+                      <div
+                        key={day}
+                        onClick={() => showDayDetail(dateStr, count)}
+                        className={`relative group/day aspect-square flex flex-col items-center justify-center rounded-lg sm:rounded-xl text-[11px] sm:text-xs md:text-sm cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation select-none ${levelClass} ${todayRing}`}
+                        title={tooltipText}
+                      >
+                        <span>{day}</span>
+                        {hasFlame && (
+                          <span className="absolute top-0.5 right-0.5 text-[9px] pointer-events-none select-none">🔥</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Calendar Hint */}
+                {calendar.hint && (
+                  <div
+                    id="flame-calendar-hint"
+                    className="mt-3 p-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface text-center border border-outline-variant/20 fade-in"
+                  >
+                    {calendar.hint}
+                  </div>
+                )}
               </div>
 
               <div className="mt-4 pt-3 border-t border-outline-variant/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
                 <div className="flex items-center gap-1.5 sm:gap-2 text-outline text-[10px] sm:text-[11px] flex-wrap">
                   <span className="font-medium">Mức độ:</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-surface-container-low border border-outline-variant/20 inline-block"></span> 0</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500/20 border border-orange-500/40 inline-block"></span> 1-9</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-orange-500 inline-block"></span> 10-24</span>
-                  <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-amber-500 to-[#FF5722] inline-block"></span> 25+🔥</span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-surface-container-low border border-outline-variant/20 inline-block"></span> 0
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-orange-500/20 border border-orange-500/40 inline-block"></span> 1-9
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-orange-500 inline-block"></span> 10-24
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-amber-500 to-[#FF5722] inline-block"></span> 25+🔥
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 text-on-surface-variant font-medium text-[11px] sm:text-xs">
-                  <span className="bg-surface-container-low px-2 py-0.5 rounded-md">Đã học: <strong id="flame-active-days" className="text-on-surface font-bold">0 ngày</strong></span>
-                  <span className="bg-primary/10 px-2 py-0.5 rounded-md text-primary">Tổng: <strong id="flame-month-words" className="font-bold">0 từ</strong></span>
+                  <span className="bg-surface-container-low px-2 py-0.5 rounded-md">
+                    Đã học: <strong id="flame-active-days" className="text-on-surface font-bold">{calendar.activeDaysCount} ngày</strong>
+                  </span>
+                  <span className="bg-primary/10 px-2 py-0.5 rounded-md text-primary">
+                    Tổng: <strong id="flame-month-words" className="font-bold">{calendar.totalWordsThisMonth} từ</strong>
+                  </span>
                 </div>
               </div>
             </section>
 
             {/* THẺ 2: MỤC TIÊU IELTS */}
             <section className="glass-card rounded-2xl p-4 sm:p-5 md:p-6 lg:p-7 lg:col-span-5 flex flex-col justify-between relative overflow-hidden">
-              <div id="ielts-goal-set-card" className="flex flex-col h-full justify-between gap-4">
-                <div>
-                  <div className="flex items-center justify-between mb-3 gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                        <span className="material-symbols-outlined text-[24px] icon-fill">military_tech</span>
+              {ieltsGoal.isSet ? (
+                <div id="ielts-goal-set-card" className="flex flex-col h-full justify-between gap-4 fade-in">
+                  <div>
+                    <div className="flex items-center justify-between mb-3 gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                          <span className="material-symbols-outlined text-[24px] icon-fill">military_tech</span>
+                        </div>
+                        <div>
+                          <h3 className="text-base sm:text-lg font-bold text-on-surface">Mục tiêu IELTS</h3>
+                          <p className="text-[11px] sm:text-xs text-on-surface-variant">Lộ trình bứt phá điểm số</p>
+                        </div>
                       </div>
+                      <button
+                        onClick={handleOpenIELTSModal}
+                        className="text-xs font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shrink-0 touch-manipulation active:scale-95 cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[15px]">edit</span>
+                        <span>Đổi mục tiêu</span>
+                      </button>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-primary/10 via-surface-container-low to-primary-fixed/20 p-3.5 sm:p-4 rounded-xl border border-primary/20 flex items-center justify-between gap-3 relative overflow-hidden mb-3 sm:mb-4">
+                      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-on-surface">Mục tiêu IELTS</h3>
-                        <p className="text-[11px] sm:text-xs text-on-surface-variant">Lộ trình bứt phá điểm số</p>
+                        <span className="text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">
+                          Thời gian đếm ngược
+                        </span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span id="ielts-countdown-days" className="text-2xl sm:text-3xl md:text-4xl font-black text-on-surface font-mono">
+                            {ieltsGoal.daysLeft}
+                          </span>
+                          <span id="ielts-countdown-label" className="text-xs sm:text-sm font-semibold text-outline">
+                            Ngày nữa
+                          </span>
+                        </div>
+                        <p className="text-[10px] sm:text-[11px] text-on-surface-variant mt-1 flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[13px] text-primary">event</span>
+                          Ngày thi: <span id="ielts-exam-date-text" className="font-bold text-on-surface">{ieltsGoal.examDateText || '—'}</span>
+                        </p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block mb-1">
+                          Mục tiêu
+                        </span>
+                        <div
+                          id="ielts-goal-overall-badge"
+                          className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-primary text-on-primary font-black text-sm sm:text-base md:text-lg shadow-sm"
+                        >
+                          Band {ieltsGoal.overall}
+                        </div>
                       </div>
                     </div>
-                    <button
-                      onClick={handleOpenIELTSModal}
-                      className="text-xs font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shrink-0 touch-manipulation active:scale-95 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[15px]">edit</span>
-                      <span>Đổi mục tiêu</span>
-                    </button>
+
+                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
+                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
+                          Listening
+                        </span>
+                        <span id="ielts-skill-listening" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
+                          {ieltsGoal.listening}
+                        </span>
+                      </div>
+                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
+                          Reading
+                        </span>
+                        <span id="ielts-skill-reading" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
+                          {ieltsGoal.reading}
+                        </span>
+                      </div>
+                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
+                          Writing
+                        </span>
+                        <span id="ielts-skill-writing" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
+                          {ieltsGoal.writing}
+                        </span>
+                      </div>
+                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
+                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
+                          Speaking
+                        </span>
+                        <span id="ielts-skill-speaking" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
+                          {ieltsGoal.speaking}
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="bg-gradient-to-br from-primary/10 via-surface-container-low to-primary-fixed/20 p-3.5 sm:p-4 rounded-xl border border-primary/20 flex items-center justify-between gap-3 relative overflow-hidden mb-3 sm:mb-4">
-                    <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
-                    <div>
-                      <span className="text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">Thời gian đếm ngược</span>
-                      <div className="flex items-baseline gap-1.5">
-                        <span id="ielts-countdown-days" className="text-2xl sm:text-3xl md:text-4xl font-black text-on-surface font-mono">0</span>
-                        <span id="ielts-countdown-label" className="text-xs sm:text-sm font-semibold text-outline">Ngày nữa</span>
-                      </div>
-                      <p className="text-[10px] sm:text-[11px] text-on-surface-variant mt-1 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[13px] text-primary">event</span>
-                        Ngày thi: <span id="ielts-exam-date-text" className="font-bold text-on-surface">—</span>
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block mb-1">Mục tiêu</span>
-                      <div id="ielts-goal-overall-badge" className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-primary text-on-primary font-black text-sm sm:text-base md:text-lg shadow-sm">
-                        Band 7.5
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
-                    <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                      <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Listening</span>
-                      <span id="ielts-skill-listening" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">7.5</span>
-                    </div>
-                    <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                      <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Reading</span>
-                      <span id="ielts-skill-reading" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">7.5</span>
-                    </div>
-                    <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                      <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Writing</span>
-                      <span id="ielts-skill-writing" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">6.5</span>
-                    </div>
-                    <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                      <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">Speaking</span>
-                      <span id="ielts-skill-speaking" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">6.5</span>
-                    </div>
+                  <div className="pt-2 border-t border-outline-variant/15">
+                    <p id="ielts-goal-motto-text" className="text-[11px] sm:text-xs italic text-on-surface-variant text-center line-clamp-2">
+                      {ieltsGoal.motto}
+                    </p>
                   </div>
                 </div>
-
-                <div className="pt-2 border-t border-outline-variant/15">
-                  <p id="ielts-goal-motto-text" className="text-[11px] sm:text-xs italic text-on-surface-variant text-center line-clamp-2">
-                    “Học tập kiên trì, tự tin chinh phục mục tiêu IELTS!”
+              ) : (
+                <div id="ielts-goal-unset-card" className="flex flex-col items-center justify-center text-center py-6 h-full gap-3 fade-in">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-1">
+                    <span className="material-symbols-outlined text-[28px] sm:text-[32px] icon-fill">flag</span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-bold text-on-surface">Bạn chưa đặt mục tiêu IELTS</h3>
+                  <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed px-2">
+                    Thiết lập band điểm 4 kỹ năng và chọn ngày thi để đồng hồ đếm ngược tạo động lực học tập mỗi ngày!
                   </p>
+                  <button
+                    onClick={handleOpenIELTSModal}
+                    className="mt-2 w-full sm:w-auto bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md hover:bg-surface-tint transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-manipulation cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">add_task</span>
+                    <span>Đặt mục tiêu IELTS ngay</span>
+                  </button>
                 </div>
-              </div>
-
-              <div id="ielts-goal-unset-card" className="hidden flex-col items-center justify-center text-center py-6 h-full gap-3">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-1">
-                  <span className="material-symbols-outlined text-[28px] sm:text-[32px] icon-fill">flag</span>
-                </div>
-                <h3 className="text-base sm:text-lg font-bold text-on-surface">Bạn chưa đặt mục tiêu IELTS</h3>
-                <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed px-2">
-                  Thiết lập band điểm 4 kỹ năng và chọn ngày thi để đồng hồ đếm ngược tạo động lực học tập mỗi ngày!
-                </p>
-                <button
-                  onClick={handleOpenIELTSModal}
-                  className="mt-2 w-full sm:w-auto bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md hover:bg-surface-tint transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-manipulation cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]">add_task</span>
-                  <span>Đặt mục tiêu IELTS ngay</span>
-                </button>
-              </div>
+              )}
             </section>
           </div>
         </div>

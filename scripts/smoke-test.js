@@ -34,6 +34,8 @@ const requiredSourceFiles = [
   'src/router/RouteContext.jsx',
   'src/legacy/legacyBridge.js',
   'src/hooks/useDashboardStats.js',
+  'src/hooks/useDictionary.js',
+  'src/hooks/useVocabulary.js',
   'legacyApp.js',
   'dataLayer.js',
   'functions/api/tts.js',
