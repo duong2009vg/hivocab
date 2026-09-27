@@ -14,7 +14,7 @@ import {
 export function PageThptRoom() {
   return (
     <>
-<div id="page-thpt-room" className="page fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col h-screen w-screen overflow-hidden">
+<div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col h-screen w-screen overflow-hidden">
     {/* Top Header: Siêu gọn gàng 1 hàng duy nhất (~38px), tối ưu không gian hiển thị bài thi */}
     <header className="h-[38px] min-h-[38px] max-h-[38px] bg-[#1a365d] text-white px-3 md:px-4 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-sm z-30 select-none">
         {/* Left: Kỳ thi & Thí sinh */}

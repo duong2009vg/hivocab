@@ -118,7 +118,7 @@ export function PageLogin() {
   };
 
   return (
-    <div id="page-login" className="page">
+    <div id="page-login" className="page active">
       <main className="relative z-10 w-full min-h-screen flex items-center justify-center px-4 md:px-6 py-10 bg-gradient-to-br from-[#1a1c2c] via-[#3a4a6b] to-[#7d87a8]">
         <div className="w-full max-w-md bg-surface/90 backdrop-blur-[24px] p-6 md:p-8 rounded-[24px] soft-shadow border border-white/50 fade-in">
           <div className="text-center mb-6">

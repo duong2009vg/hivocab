@@ -103,7 +103,9 @@ export function RouteProvider({ children }) {
           window._loadSettingsPage?.();
           break;
         case 'login':
-          window.switchAuthMode?.('login');
+          // PageLogin owns the auth mode in React. Calling the legacy DOM
+          // switcher here can race with React.lazy() and run before the form
+          // elements exist, causing null.className runtime errors.
           break;
       }
     }, 10);

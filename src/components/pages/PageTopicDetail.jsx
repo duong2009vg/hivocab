@@ -4,7 +4,7 @@ import { startSinglePractice, startBilingualReading, navigate, openAddWordModal 
 export function PageTopicDetail() {
   return (
     <>
-<div id="page-topic-detail" className="page">
+<div id="page-topic-detail" className="page active">
 {/* Sub Sidebar dùng riêng cho Chi tiết chủ đề */}
 <nav id="sub-sidebar" className="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-6 bg-surface/80 backdrop-blur-xl border-r border-outline-variant/20 shadow-sm z-50">
     <div className="mb-lg shrink-0">

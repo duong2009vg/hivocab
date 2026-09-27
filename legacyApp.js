@@ -184,7 +184,25 @@ window.navigateTo = navigateTo = function(page, preserveHash = false){
         }
         window.scrollTo(0, 0);
     }
-    if (!preserveHash) window.location.hash = page;
+    if (!preserveHash) {
+        // Keep canonical pathname routes canonical. React owns these routes,
+        // while the hash remains only for legacy feature routes.
+        if (pageName === 'landing') {
+            if (window.location.pathname !== '/' || window.location.hash) {
+                window.history.pushState({ page: 'landing' }, '', '/');
+            }
+        } else if (pageName === 'login') {
+            if (window.location.pathname !== '/login' || window.location.hash) {
+                window.history.pushState({ page: 'login' }, '', '/login');
+            }
+        } else if (pageName === 'dashboard') {
+            if (window.location.pathname !== '/app' || window.location.hash) {
+                window.history.pushState({ page: 'dashboard' }, '', '/app');
+            }
+        } else {
+            window.location.hash = page;
+        }
+    }
  
     // Điều khiển Component dùng chung (Navbar / Sidebar)
     const mainTabs = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'dictionary', 'settings'];
@@ -940,6 +958,12 @@ window.switchAuthMode = function(mode) {
     const authSubtitle = document.getElementById('auth-subtitle');
     const errBox = document.getElementById('auth-error');
     const successBox = document.getElementById('auth-success');
+
+    // React.lazy mounts the login form asynchronously. Legacy callers may
+    // arrive before those nodes exist; keep this adapter null-safe.
+    if (!tabLogin || !tabSignup || !confirmField || !btnSubmit || !authTitle || !authSubtitle || !errBox || !successBox) {
+        return;
+    }
     if (errBox) errBox.classList.add('hidden');
     if (successBox) successBox.classList.add('hidden');
 

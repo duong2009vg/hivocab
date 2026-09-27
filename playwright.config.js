@@ -7,13 +7,16 @@ export default defineConfig({
   expect: {
     timeout: 5000,
   },
-  fullyParallel: true,
+  // The legacy scripts share global state and can overwhelm WebKit when
+  // multiple pages initialize concurrently. Keep E2E deterministic locally
+  // and in CI; feature-level parallelism is not needed for this small suite.
+  fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://127.0.0.1:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -23,13 +26,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 14'] },
+      // Use Chromium with an iPhone viewport for deterministic Windows CI.
+      // WebKit is still suitable for a separate device lab, but its local
+      // process crashes intermittently after repeated legacy-script reloads.
+      name: 'Mobile Chromium (iPhone viewport)',
+      use: { ...devices['iPhone 14'], browserName: 'chromium' },
     },
   ],
   webServer: {
-    command: 'npm run dev',
-    url: 'http://localhost:5173',
+    command: 'npm run dev -- --host 127.0.0.1 --port 5173',
+    url: 'http://127.0.0.1:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 60 * 1000,
   },

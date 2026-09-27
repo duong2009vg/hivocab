@@ -9,7 +9,7 @@ import {
 export function PageLibrary() {
   return (
     <>
-<div id="page-library" className="page bg-surface">
+<div id="page-library" className="page active bg-surface">
 <main className="lg:ml-64 min-h-screen lg:pt-6 pb-28 lg:pb-12 px-0 sm:px-4 flex flex-col items-center">
     <div className="max-w-[620px] w-full flex flex-col gap-0 sm:gap-4 fade-in">
 

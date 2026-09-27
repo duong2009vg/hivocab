@@ -11,7 +11,7 @@ import {
 export function PageBilingualReading() {
   return (
     <>
-<div id="page-bilingual-reading" className="page bg-background min-h-screen">
+<div id="page-bilingual-reading" className="page active bg-background min-h-screen">
   {/* Sticky Top Header */}
   <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 sm:px-6 md:px-8 pb-2.5 sm:pb-3 flex items-center justify-between gap-2 sm:gap-3 shadow-sm mobile-sticky-top lg:pt-3">
     {/* Left: Back button & Breadcrumb Title with Quick Switcher */}

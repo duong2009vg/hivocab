@@ -15,7 +15,7 @@ import {
 export function PageLearning() {
   return (
     <>
-<div id="page-learning" className="page">
+<div id="page-learning" className="page active">
 <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl px-4 md:px-gutter pb-3 md:py-md flex items-center justify-between shadow-sm mobile-sticky-top lg:pt-3">
 <button id="learning-close-btn" onClick={() => navigate('dashboard')} className="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full cursor-pointer"><span className="material-symbols-outlined text-[20px] md:text-[24px]">close</span></button>
 <div id="learning-progress-container" className="flex-1 max-w-md mx-4 md:mx-md flex items-center gap-md"><div className="w-full h-1.5 md:h-2 bg-surface-container-highest rounded-full overflow-hidden"><div className="h-full bg-primary rounded-full transition-all duration-500" id="learn-progress" style={{"width":"0%"}}></div></div></div>

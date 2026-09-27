@@ -13,6 +13,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .vercel/
+test-results/
+playwright-report/
 
 # Unity WebGL Assets (hosted on Cloudflare R2)
 adventure-rabbit/

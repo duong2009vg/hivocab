@@ -10,7 +10,7 @@ import {
 export function PageLessonDetail() {
   return (
     <>
-<div id="page-lesson-detail" className="page">
+<div id="page-lesson-detail" className="page active">
 {/* Sidebar bên trái (desktop) */}
 <nav className="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-6 bg-surface/80 backdrop-blur-xl border-r border-outline-variant/20 shadow-sm z-50">
     <div className="mb-lg shrink-0">

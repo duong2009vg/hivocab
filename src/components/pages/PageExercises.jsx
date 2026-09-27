@@ -4,7 +4,7 @@ import { thptOnSearchInput, thptClearSearch } from '../../legacy/legacyBridge';
 export function PageExercises() {
   return (
     <>
-<div id="page-exercises" className="page">
+<div id="page-exercises" className="page active">
 <main className="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
     <div className="max-w-6xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
 
