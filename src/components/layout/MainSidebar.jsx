@@ -4,7 +4,7 @@ import React from 'react';
 export function MainSidebar() {
   return (
     <>
-<nav id="main-sidebar" className="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-5 bg-surface/85 backdrop-blur-2xl border-r border-outline-variant/30 z-50 transition-colors" style={{"display":"none"}}>
+<nav id="main-sidebar" className="hidden lg:flex flex-col h-screen fixed left-0 top-0 w-64 p-5 bg-surface/85 backdrop-blur-2xl border-r border-outline-variant/30 z-50 transition-colors">
     <div className="mb-5 shrink-0">
         <a onClick={(event) => { try { (function(event){ window.navigateTo('dashboard') }).call(this, event); } catch(e){ console.error(e); } }} className="inline-flex cursor-pointer" aria-label="Hi - Trang chu"><img className="brand-logo" src="logo-mark.svg" alt="Hi"/></a>
         <div onClick={(event) => { try { (function(event){ window.handleProfileClick() }).call(this, event); } catch(e){ console.error(e); } }} title="Đăng nhập / Hồ sơ cá nhân" className="mt-3.5 flex items-center gap-3 p-2 rounded-2xl hover:bg-surface-container dark:hover:bg-[#25292F] transition-all duration-200 cursor-pointer border border-transparent hover:border-outline-variant/20">

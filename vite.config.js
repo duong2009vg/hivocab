@@ -13,7 +13,7 @@ function copyStaticAssetsPlugin() {
 
       // 1. Root scripts required by index.html
       const rootScripts = [
-        'app.js',
+        'legacyApp.js',
         'dataLayer.js',
         'aiHint.js',
         'dashboardStats.js',
@@ -90,7 +90,7 @@ function copyStaticAssetsPlugin() {
           '<script src="library.js?v=20260922-v10"></script>',
           '<script src="pricing.js?v=20260920-v4"></script>',
           '<script src="dictionary.js?v=20260926-cleanui-v1"></script>',
-          '<script defer src="app.js?v=20260926-cleanui-v1"></script>',
+          '<script defer src="legacyApp.js?v=20260927-v1"></script>',
         ].join('\n');
         // Inject right before </body>
         if (!html.includes('dataLayer.js')) {
@@ -158,8 +158,24 @@ function ttsDevPlugin() {
   };
 }
 
+function spaRoutesPlugin() {
+  return {
+    name: 'spa-routes-plugin',
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const rawPath = req.url ? req.url.split('?')[0].replace(/\/+$/, '') : '';
+        // If route is /app or /login, redirect internally to /index.html
+        if (rawPath === '/app' || rawPath === '/login') {
+          req.url = '/index.html' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+        }
+        next();
+      });
+    }
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), ttsDevPlugin(), copyStaticAssetsPlugin()],
+  plugins: [react(), spaRoutesPlugin(), ttsDevPlugin(), copyStaticAssetsPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
