@@ -196,6 +196,57 @@ export function PageLessonDetail() {
             </div>
           </div>
 
+          {/* Chế độ học — Mobile only (Desktop dùng sidebar) */}
+          <div className="flex flex-col lg:hidden gap-2">
+            <p className="text-[11px] font-bold text-outline uppercase tracking-wider ml-1">
+              Chế độ học
+            </p>
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+              <button
+                type="button"
+                onClick={() => startPractice(0)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:bg-primary/10 hover:text-primary active:scale-95 transition-all text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer soft-shadow"
+              >
+                <span className="material-symbols-outlined text-[18px]">flash_on</span>
+                <span>Flashcard</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => startPractice(1)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:bg-primary/10 hover:text-primary active:scale-95 transition-all text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer soft-shadow"
+              >
+                <span className="material-symbols-outlined text-[18px]">quiz</span>
+                <span>Trắc Nghiệm</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => startPractice(2)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:bg-primary/10 hover:text-primary active:scale-95 transition-all text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer soft-shadow"
+              >
+                <span className="material-symbols-outlined text-[18px]">text_fields</span>
+                <span>Điền từ</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => startPractice(3)}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surface-container-lowest border border-outline-variant/20 text-on-surface-variant hover:bg-primary/10 hover:text-primary active:scale-95 transition-all text-xs font-semibold whitespace-nowrap shrink-0 cursor-pointer soft-shadow"
+              >
+                <span className="material-symbols-outlined text-[18px]">record_voice_over</span>
+                <span>Nghe và viết</span>
+              </button>
+              {isPassage && (
+                <button
+                  type="button"
+                  onClick={() => startReading()}
+                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 border border-primary/20 text-primary active:scale-95 transition-all text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer soft-shadow"
+                >
+                  <span className="material-symbols-outlined text-[18px]">menu_book</span>
+                  <span>Đọc &amp; Dịch</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Search bar & Status Filter Pills */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-surface-container-lowest/80 backdrop-blur-xl border border-outline-variant/20 rounded-2xl p-3 soft-shadow">
             {/* Search Input */}

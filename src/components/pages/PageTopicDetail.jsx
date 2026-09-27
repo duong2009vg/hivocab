@@ -49,47 +49,13 @@ export function PageTopicDetail() {
         </div>
 
         <div className="flex flex-col gap-1.5 flex-1 overflow-y-auto pr-1">
-          <p className="text-[11px] font-bold text-outline uppercase tracking-wider mb-1 ml-2 shrink-0">
-            Chế độ học
+          <p className="text-[11px] font-bold text-outline uppercase tracking-wider mb-2 ml-2 shrink-0">
+            Hướng dẫn
           </p>
-          <a
-            onClick={() => startPractice(0)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-sm font-medium"
-          >
-            <span className="material-symbols-outlined text-[20px]">flash_on</span>
-            <span>Flashcard</span>
-          </a>
-          <a
-            onClick={() => startPractice(1)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-sm font-medium"
-          >
-            <span className="material-symbols-outlined text-[20px]">quiz</span>
-            <span>Trắc Nghiệm</span>
-          </a>
-          <a
-            onClick={() => startPractice(2)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-sm font-medium"
-          >
-            <span className="material-symbols-outlined text-[20px]">text_fields</span>
-            <span>Điền từ</span>
-          </a>
-          <a
-            onClick={() => startPractice(3)}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl text-on-surface-variant hover:bg-primary/10 hover:text-primary transition-colors cursor-pointer text-sm font-medium"
-          >
-            <span className="material-symbols-outlined text-[20px]">record_voice_over</span>
-            <span>Nghe và viết</span>
-          </a>
-          {isCambridge && (
-            <a
-              id="sub-sidebar-reading-btn"
-              onClick={() => startReading()}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl text-primary font-bold bg-primary/10 hover:bg-primary/15 transition-colors cursor-pointer text-sm"
-            >
-              <span className="material-symbols-outlined text-[20px]">menu_book</span>
-              <span>Đọc &amp; Dịch</span>
-            </a>
-          )}
+          <div className="px-3 py-3 rounded-xl bg-primary/5 border border-primary/10 text-xs text-on-surface-variant leading-relaxed">
+            <span className="material-symbols-outlined text-[16px] text-primary align-middle mr-1">info</span>
+            Chọn một bài học bên dưới để bắt đầu học từ vựng và luyện tập.
+          </div>
         </div>
 
         <div className="mt-auto shrink-0 pt-4 border-t border-outline-variant/20">
