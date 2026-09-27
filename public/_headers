@@ -30,6 +30,9 @@
   Cache-Control: public, max-age=86400
 
 # HTML pages — Security headers
+/admin.html
+  Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
+
 /*
   Cache-Control: public, max-age=0, must-revalidate
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload

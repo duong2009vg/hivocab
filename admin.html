@@ -2304,6 +2304,8 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         let selectedSubUsers = new Map(); // id -> email
         let isBulkGrantMode = false;
         let currentSystemSubTab = 'reports';
+        let isCheckingAuth = false;
+        let authSubscription = null;
 
         // 0. THEME & DARK MODE
         function toggleAdminDarkMode() {
@@ -2333,13 +2335,31 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         document.addEventListener('DOMContentLoaded', async () => {
             initAdminTheme();
             sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const authState = sb.auth.onAuthStateChange((event) => {
+                if (event === 'SIGNED_OUT') {
+                    currentUser = null;
+                    showView('login');
+                    return;
+                }
+
+                // Supabase warns against awaiting auth work inside this callback.
+                // Queue the guard on the next tick after sign-in/session refresh.
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                    setTimeout(() => checkAuth(), 0);
+                }
+            });
+            authSubscription = authState?.data?.subscription || null;
             await checkAuth();
         });
 
         async function checkAuth() {
+            if (isCheckingAuth) return;
+            isCheckingAuth = true;
+
             try {
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session || !session.user) {
+                    currentUser = null;
                     showView('login');
                     return;
                 }
@@ -2372,7 +2392,10 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
                 await switchTab('overview');
             } catch (err) {
                 console.error('Auth error:', err);
+                currentUser = null;
                 showView('login');
+            } finally {
+                isCheckingAuth = false;
             }
         }
 
@@ -2441,8 +2464,16 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         }
 
         async function handleLogout() {
-            await sb.auth.signOut();
-            window.location.reload();
+            try {
+                const { error } = await sb.auth.signOut();
+                if (error) throw error;
+                currentUser = null;
+                showView('login');
+                window.history.replaceState({}, '', '/admin');
+            } catch (err) {
+                console.error('Admin logout error:', err);
+                showToast('Đăng xuất thất bại. Vui lòng thử lại.', 'error');
+            }
         }
 
         // MOBILE SIDEBAR CONTROLLER
@@ -2469,6 +2500,10 @@ abundant	adj	/əˈbʌndənt/	dồi dào, phong phú	We have abundant evidence to
         });
         window.addEventListener('resize', () => {
             if (window.innerWidth >= 1024) toggleAdminSidebar(false);
+        });
+
+        window.addEventListener('pagehide', () => {
+            authSubscription?.unsubscribe?.();
         });
 
         // 2. TAB SWITCHING
