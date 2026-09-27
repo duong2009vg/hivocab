@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "npm run build:css && vite build",
     "preview": "vite preview",
-    "test": "node scripts/smoke-test.js",
+    "test": "node scripts/smoke-test.js && node scripts/unit-test.js",
     "build:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --minify",
     "watch:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --watch"
   },
