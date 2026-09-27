@@ -351,9 +351,9 @@ const HiDict = (() => {
             return;
         }
 
-        // 2. HTML5 Audio Stream tốc độ cao (<50ms CDN)
+        // 2. HTML5 Audio Stream tốc độ cao (Google TTS Proxy)
         try {
-            const audioUrl = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+            const audioUrl = `/api/tts?text=${encodeURIComponent(cleanWord)}&tl=en`;
             const a = new Audio(audioUrl);
             a.playbackRate = rate;
             a.onerror = () => _speakTTS(cleanWord, 'en-US', rate);
@@ -381,7 +381,7 @@ const HiDict = (() => {
         }
 
         try {
-            const a = new Audio(`https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=1`);
+            const a = new Audio(`/api/tts?text=${encodeURIComponent(cleanWord)}&tl=en-GB`);
             a.onerror = () => _speakTTS(cleanWord, 'en-GB', 0.9);
             const p = a.play();
             if (p && typeof p.catch === 'function') {

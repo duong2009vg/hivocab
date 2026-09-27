@@ -113,8 +113,53 @@ function copyStaticAssetsPlugin() {
   };
 }
 
+function ttsDevPlugin() {
+  return {
+    name: 'tts-dev-plugin',
+    configureServer(server) {
+      server.middlewares.use('/api/tts', async (req, res) => {
+        try {
+          const url = new URL(req.url, 'http://localhost');
+          const text = (url.searchParams.get('text') || url.searchParams.get('q') || '').trim();
+          const lang = (url.searchParams.get('tl') || url.searchParams.get('lang') || 'en').trim();
+          if (!text) {
+            res.statusCode = 400;
+            res.end('Missing text');
+            return;
+          }
+          const sanitized = text
+            .replace(/\.{2,}/g, ' ')
+            .replace(/[/_]/g, ' ')
+            .replace(/[-]/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .slice(0, 300);
+          const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(lang)}&q=${encodeURIComponent(sanitized)}`;
+          const upstream = await fetch(googleUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+          });
+          if (!upstream.ok) {
+            res.statusCode = upstream.status;
+            res.end('TTS Error');
+            return;
+          }
+          res.setHeader('Content-Type', 'audio/mpeg');
+          res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+          const buffer = await upstream.arrayBuffer();
+          res.end(Buffer.from(buffer));
+        } catch (e) {
+          res.statusCode = 502;
+          res.end(e.message);
+        }
+      });
+    }
+  };
+}
+
 export default defineConfig({
-  plugins: [react(), copyStaticAssetsPlugin()],
+  plugins: [react(), ttsDevPlugin(), copyStaticAssetsPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

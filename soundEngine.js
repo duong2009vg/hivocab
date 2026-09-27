@@ -262,14 +262,18 @@ const HiAudio = (() => {
     function _sanitizeWordForSpeech(text) {
         if (!text || typeof text !== 'string') return '';
         return text
-            .replace(/\(.*?\)/g, '')       // Bỏ chú thích (phr v), (adj), v.v.
-            .replace(/\[.*?\]/g, '')       // Bỏ [brackets]
-            .replace(/\/.*?\//g, '')       // Bỏ /phonetics/
-            .replace(/['"]/g, '')          // Bỏ dấu ngoặc kép
+            .replace(/\(.*?\)/g, '')          // Bỏ chú thích (phr v), (adj), v.v.
+            .replace(/\[.*?\]/g, '')          // Bỏ [brackets]
+            .replace(/\/.*?\//g, '')          // Bỏ /phonetics/
+            .replace(/['"`]/g, '')            // Bỏ dấu ngoặc kép, nháy
+            .replace(/\.{2,}/g, ' ')          // Đổi dấu ... thành khoảng trắng
+            .replace(/[/_]/g, ' ')            // Đổi dấu / hoặc _ thành khoảng trắng
+            .replace(/[-]/g, ' ')             // Đổi dấu gạch nối - thành khoảng trắng
+            .replace(/\s+/g, ' ')             // Gom khoảng trắng thừa
             .trim();
     }
 
-    function _speakWithSpeechSynthesis(text, rate = 0.9) {
+    function _speakWithSpeechSynthesis(text, rate = 0.9, lang = 'en-US') {
         if (typeof window === 'undefined' || !window.speechSynthesis) return false;
         try {
             if (window.speechSynthesis.paused) {
@@ -277,13 +281,14 @@ const HiAudio = (() => {
             }
             const utter = new SpeechSynthesisUtterance(text);
             _activeUtterance = utter;
-            utter.lang = 'en-US';
+            const targetLang = (lang === 'en-GB' || lang === 'uk') ? 'en-GB' : 'en-US';
+            utter.lang = targetLang;
             utter.rate = Math.max(0.4, Math.min(1.5, Number(rate) || 0.9));
             utter.pitch = 1.0;
 
             const voices = window.speechSynthesis.getVoices() || [];
-            const preferred = voices.find(v => (v.lang === 'en-US' || v.lang.startsWith('en')) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
-                           || voices.find(v => v.lang === 'en-US')
+            const preferred = voices.find(v => (v.lang === targetLang || v.lang.startsWith(targetLang.slice(0, 2))) && (v.name.includes('Google') || v.name.includes('Natural') || !v.localService))
+                           || voices.find(v => v.lang === targetLang)
                            || voices.find(v => v.lang.startsWith('en'));
             if (preferred) utter.voice = preferred;
 
@@ -298,7 +303,7 @@ const HiAudio = (() => {
         }
     }
 
-    function playWord(word, rate = 0.9) {
+    function playWord(word, rate = 0.9, lang = 'en') {
         if (!word || typeof word !== 'string') return false;
         const cleanWord = _sanitizeWordForSpeech(word);
         if (!cleanWord) return false;
@@ -308,12 +313,14 @@ const HiAudio = (() => {
         const safeRate = Math.max(0.4, Math.min(2.0, Number(rate) || 0.9));
         const key = cleanWord.toLowerCase();
 
-        // 1. Kiểm tra cache Free Dictionary API audio
+        // 1. Kiểm tra cache Audio URL
         const cachedUrl = _dictAudioCache.get(key);
-        const audioUrl = cachedUrl || `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(cleanWord)}&type=2`;
+        // Solution 2: Google Translate TTS CDN Proxy (/api/tts)
+        // Phát âm hoàn hảo cho từ đơn, collocations, phrasal verbs, idioms và câu dài
+        const audioUrl = cachedUrl || `/api/tts?text=${encodeURIComponent(cleanWord)}&tl=${encodeURIComponent(lang || 'en')}`;
 
-        // 2. ƯU TIÊN SỐ 1: HTML5 Audio stream (Youdao / Dict MP3)
-        // -> Cực kỳ quan trọng cho iOS: HTML5 Audio dùng Media channel, phát ra tiếng ngay cả khi iPhone bật gạt rung im lặng (Silent Mode)
+        // 2. ƯU TIÊN SỐ 1: HTML5 Audio stream (Google TTS MP3)
+        // -> Cực kỳ quan trọng cho iOS: HTML5 Audio dùng Media channel, phát ra tiếng ngay cả khi iPhone bật gạt rung im lặng (Silent Mode)!
         try {
             const audio = _getAudio();
             if (audio) {
@@ -323,7 +330,7 @@ const HiAudio = (() => {
                 // Xử lý fallback nếu URL MP3 gặp lỗi mạng
                 audio.onerror = () => {
                     console.warn('[HiAudio] Audio stream error, fallback to SpeechSynthesis');
-                    _speakWithSpeechSynthesis(cleanWord, safeRate);
+                    _speakWithSpeechSynthesis(cleanWord, safeRate, lang);
                 };
 
                 const p = audio.play();
@@ -331,7 +338,7 @@ const HiAudio = (() => {
                     p.catch(err => {
                         if (err.name === 'AbortError') return;
                         console.warn('[HiAudio] Audio play failed, fallback to SpeechSynthesis:', err);
-                        _speakWithSpeechSynthesis(cleanWord, safeRate);
+                        _speakWithSpeechSynthesis(cleanWord, safeRate, lang);
                     });
                 }
                 return true;
@@ -341,7 +348,7 @@ const HiAudio = (() => {
         }
 
         // 3. Fallback: Web Speech API nếu không thể tạo Audio element
-        return _speakWithSpeechSynthesis(cleanWord, safeRate);
+        return _speakWithSpeechSynthesis(cleanWord, safeRate, lang);
     }
 
     return {
