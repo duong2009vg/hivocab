@@ -12,6 +12,10 @@ export async function onRequestOptions() {
     return new Response(null, { status: 204, headers: corsHeaders });
 }
 
+export async function onRequestHead(context) {
+    return onRequestGet(context);
+}
+
 export async function onRequestGet(context) {
     const { request } = context;
     const url = new URL(request.url);
