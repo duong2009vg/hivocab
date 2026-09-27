@@ -469,3 +469,6 @@ const HiDict = (() => {
         clearCache
     };
 })();
+
+if (typeof window !== 'undefined') window.HiDict = HiDict;
+if (typeof globalThis !== 'undefined') globalThis.HiDict = HiDict;

@@ -1,5 +1,6 @@
 // scripts/unit-test.js
 // Automated Unit & Integration Tests for HiVocab Core Logic, CSP & Router
+// Directly tests production modules (dataLayer.js, dictionary.js, App.jsx, RouteContext.jsx)
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -22,7 +23,7 @@ function assert(condition, message) {
 }
 
 console.log('=======================================================');
-console.log('🧪 RUNNING HIVOCAB INTEGRATION & LOGIC TESTS');
+console.log('🧪 RUNNING HIVOCAB INTEGRATION & DIRECT MODULE TESTS');
 console.log('=======================================================\n');
 
 // 1. Content Security Policy (CSP) Hardening Validation
@@ -40,68 +41,74 @@ assert(headersContent.includes('https://*.supabase.co'), 'public/_headers permit
 assert(headersContent.includes("X-Frame-Options: DENY"), 'Anti-Clickjacking: X-Frame-Options is DENY');
 assert(headersContent.includes("X-Content-Type-Options: nosniff"), 'Anti-MIME Sniffing: nosniff enabled');
 
-// 2. SM-2 Spaced Repetition Logic Validation
-console.log('\n2. Testing SM-2 SRS Algorithm Intervals:');
-function calculateNextReview(currentLevel, rating) {
-  // rating: 0 = Again, 1 = Hard, 2 = Good, 3 = Easy
-  const intervals = [
-    1 * 60 * 60 * 1000,       // Lvl 1: 1 hour
-    8 * 60 * 60 * 1000,       // Lvl 2: 8 hours
-    24 * 60 * 60 * 1000,      // Lvl 3: 1 day
-    3 * 24 * 60 * 60 * 1000,  // Lvl 4: 3 days
-    7 * 24 * 60 * 60 * 1000,  // Lvl 5: 7 days
-    30 * 24 * 60 * 60 * 1000, // Lvl 6+: 30 days
-  ];
+// 2. SM-2 Spaced Repetition Logic Validation (DIRECT PRODUCTION MODULE: dataLayer.js)
+console.log('\n2. Testing SM-2 SRS Algorithm via Production dataLayer.js:');
+global.window = global;
+global.document = { addEventListener: () => {} };
+const dataLayerSource = fs.readFileSync(path.resolve(rootDir, 'dataLayer.js'), 'utf8');
+eval(dataLayerSource);
 
-  let nextLevel;
-  if (rating === 0) {
-    nextLevel = Math.max(0, currentLevel - 1);
-  } else if (rating === 1) {
-    nextLevel = currentLevel;
-  } else if (rating === 2) {
-    nextLevel = Math.min(5, currentLevel + 1);
-  } else {
-    nextLevel = Math.min(5, currentLevel + 2);
-  }
+assert(typeof global.HiDB !== 'undefined', 'Production HiDB engine initialized');
+assert(typeof global.HiDB.calculateNextReview === 'function', 'HiDB.calculateNextReview is exported for tests');
+assert(typeof global.HiDB.getIntervalLabel === 'function', 'HiDB.getIntervalLabel is exported for tests');
 
-  const intervalMs = intervals[Math.min(nextLevel, intervals.length - 1)];
-  return { nextLevel, intervalMs };
-}
+// Test rating 'hard' (level decreases or stays minimum 1)
+const rHard = global.HiDB.calculateNextReview(3, 'hard');
+assert(rHard.newLevel === 2, 'Production SM-2: rating "hard" drops Level 3 down to Level 2');
+assert(rHard.nextReviewAt instanceof Date, 'Production SM-2: generates valid nextReviewAt Date');
 
-const rAgain = calculateNextReview(3, 0);
-assert(rAgain.nextLevel === 2, 'Rating 0 (Again) drops Level 3 down to Level 2');
+// Test rating 'good' (level remains the same)
+const rGood = global.HiDB.calculateNextReview(2, 'good');
+assert(rGood.newLevel === 2, 'Production SM-2: rating "good" maintains current level');
 
-const rHard = calculateNextReview(2, 1);
-assert(rHard.nextLevel === 2, 'Rating 1 (Hard) maintains current level');
+// Test rating 'easy' (level increases by 1)
+const rEasy = global.HiDB.calculateNextReview(2, 'easy');
+assert(rEasy.newLevel === 3, 'Production SM-2: rating "easy" advances Level 2 to Level 3');
 
-const rGood = calculateNextReview(2, 2);
-assert(rGood.nextLevel === 3, 'Rating 2 (Good) promotes Level 2 to Level 3');
+// Test ceiling cap at 5 (Mastered)
+const rCap = global.HiDB.calculateNextReview(5, 'easy');
+assert(rCap.newLevel === 5, 'Production SM-2: Level caps safely at 5');
 
-const rEasy = calculateNextReview(2, 3);
-assert(rEasy.nextLevel === 4, 'Rating 3 (Easy) accelerates Level 2 to Level 4');
+// Test new word (level 0 moves to level 1)
+const rNew = global.HiDB.calculateNextReview(0, 'good');
+assert(rNew.newLevel === 1, 'Production SM-2: Level 0 word advances to Level 1');
 
-const rMax = calculateNextReview(5, 2);
-assert(rMax.nextLevel === 5, 'SRS level caps safely at Level 5 (Mastered)');
+// Test interval labels
+assert(global.HiDB.getIntervalLabel(1) === '1 giờ', 'Interval label for Level 1 is "1 giờ"');
+assert(global.HiDB.getIntervalLabel(2) === '8 giờ', 'Interval label for Level 2 is "8 giờ"');
 
-// 3. Dictionary Normalization Logic Validation
-console.log('\n3. Testing Dictionary Data Normalization:');
-function extractPos(rawPos, rawMeaning) {
-  if (rawPos && typeof rawPos === 'string' && rawPos.trim()) return rawPos.trim().toLowerCase();
-  if (!rawMeaning || typeof rawMeaning !== 'string') return 'từ vựng';
-  const m = rawMeaning.match(/^\(([a-zA-Z\s]+)\)/);
-  if (m && m[1]) return m[1].toLowerCase().trim();
-  return 'từ vựng';
-}
+// 3. Dictionary Module Validation (DIRECT PRODUCTION MODULE: dictionary.js)
+console.log('\n3. Testing Dictionary Engine via Production dictionary.js:');
+let mockStorage = {};
+global.localStorage = {
+  getItem: (k) => mockStorage[k] || null,
+  setItem: (k, v) => { mockStorage[k] = String(v); },
+  removeItem: (k) => { delete mockStorage[k]; },
+  clear: () => { mockStorage = {}; }
+};
 
-function cleanMeaning(rawMeaning) {
-  if (!rawMeaning || typeof rawMeaning !== 'string') return '';
-  return rawMeaning.replace(/^(\([a-zA-Z\s]+\)|\[[a-zA-Z\s]+\])\s*/, '').trim();
-}
+const dictSource = fs.readFileSync(path.resolve(rootDir, 'dictionary.js'), 'utf8');
+eval(dictSource);
 
-assert(extractPos('verb', 'to run fast') === 'verb', 'Preserves clean pos string');
-assert(extractPos('', '(v) chạy nhanh') === 'v', 'Extracts pos tag from parenthesized meaning');
-assert(cleanMeaning('(adj) kiên cường') === 'kiên cường', 'Strips leading tag from meaning');
-assert(cleanMeaning('bỏ rơi, từ bỏ') === 'bỏ rơi, từ bỏ', 'Preserves meaning without leading tag');
+assert(typeof global.HiDict !== 'undefined', 'Production HiDict engine initialized');
+assert(typeof global.HiDict.lookupWord === 'function', 'HiDict.lookupWord is exported');
+assert(typeof global.HiDict.getRecentSearches === 'function', 'HiDict.getRecentSearches is exported');
+assert(typeof global.HiDict.removeRecentSearch === 'function', 'HiDict.removeRecentSearch is exported');
+assert(typeof global.HiDict.clearRecentSearches === 'function', 'HiDict.clearRecentSearches is exported');
+
+// Test recent searches management
+mockStorage['hi_dict_recent_searches'] = JSON.stringify(['abandon', 'resilient', 'meticulous']);
+const recents = global.HiDict.getRecentSearches();
+assert(Array.isArray(recents) && recents.length === 3, 'HiDict reads stored recent searches');
+assert(recents[0] === 'abandon', 'First recent search matches expectation');
+
+global.HiDict.removeRecentSearch('resilient');
+const afterRemove = global.HiDict.getRecentSearches();
+assert(!afterRemove.includes('resilient') && afterRemove.length === 2, 'HiDict removes specific word from recents');
+
+global.HiDict.clearRecentSearches();
+const afterClear = global.HiDict.getRecentSearches();
+assert(Array.isArray(afterClear) && afterClear.length === 0, 'HiDict clears all recent searches');
 
 // 4. Route Integrity Validation
 console.log('\n4. Checking Route Mapping Integrity:');
@@ -133,11 +140,14 @@ for (const r of expectedRoutes) {
   assert(appContent.includes(`case '${r}':`), `App.jsx handles canonical route: '${r}'`);
 }
 
-// 5. App Component Lazy Loading Integrity
-console.log('\n5. Checking Lazy Route Splitting:');
+// 5. App Component Lazy Loading Integrity & Protected Routes
+console.log('\n5. Checking Route Protection & Code Splitting:');
 assert(appContent.includes('const Modals = lazy('), 'Modals dialogs are lazy loaded');
 assert(appContent.includes('<Suspense'), 'Suspense fallback boundary encapsulates components');
 assert(!appContent.includes('.page.active'), 'Legacy CSS class .page.active has been eliminated from routing switch');
+assert(appContent.includes('<ProtectedRoute><PageDashboard /></ProtectedRoute>'), 'Dashboard route is protected with ProtectedRoute');
+assert(appContent.includes('<ProtectedRoute><PageVocabulary /></ProtectedRoute>'), 'Vocabulary route is protected with ProtectedRoute');
+assert(appContent.includes('<ProtectedRoute><PageDictionary /></ProtectedRoute>'), 'Dictionary route is protected with ProtectedRoute');
 
 // Summary
 console.log('\n=======================================================');
@@ -145,7 +155,7 @@ console.log(`📊 INTEGRATION TEST RESULTS: ${passedTests}/${totalTests} PASSED`
 console.log('=======================================================');
 
 if (passedTests === totalTests) {
-  console.log('🎉 ALL INTEGRATION TESTS PASSED SUCCESSFULLY!\n');
+  console.log('🎉 ALL INTEGRATION & PRODUCTION MODULE TESTS PASSED SUCCESSFULLY!\n');
   process.exit(0);
 } else {
   console.error(`💥 ${totalTests - passedTests} TESTS FAILED!\n`);

@@ -32,6 +32,7 @@ const requiredSourceFiles = [
   'src/App.jsx',
   'src/providers/AuthProvider.jsx',
   'src/router/RouteContext.jsx',
+  'src/components/common/ProtectedRoute.jsx',
   'src/legacy/legacyBridge.js',
   'src/hooks/useDashboardStats.js',
   'src/hooks/useDictionary.js',

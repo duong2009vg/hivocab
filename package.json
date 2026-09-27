@@ -8,10 +8,12 @@
     "build": "npm run build:css && vite build",
     "preview": "vite preview",
     "test": "node scripts/smoke-test.js && node scripts/unit-test.js",
+    "test:e2e": "playwright test",
     "build:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --minify",
     "watch:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --watch"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.10",
     "autoprefixer": "^10.4.20",

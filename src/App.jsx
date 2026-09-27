@@ -8,6 +8,7 @@ import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
 import GlobalBugReportBtn from './components/common/GlobalBugReportBtn.jsx';
 import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
+import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 
 // Code Splitting via React.lazy — Huge bundle reduction & on-demand loading
 const Modals = lazy(() => import('./components/common/Modals.jsx'));
@@ -48,29 +49,29 @@ function AppRoutes() {
       case 'login':
         return <PageLogin />;
       case 'dashboard':
-        return <PageDashboard />;
+        return <ProtectedRoute><PageDashboard /></ProtectedRoute>;
       case 'topics':
-        return <PageTopics />;
+        return <ProtectedRoute><PageTopics /></ProtectedRoute>;
       case 'library':
-        return <PageLibrary />;
+        return <ProtectedRoute><PageLibrary /></ProtectedRoute>;
       case 'topic-detail':
-        return <PageTopicDetail />;
+        return <ProtectedRoute><PageTopicDetail /></ProtectedRoute>;
       case 'lesson-detail':
-        return <PageLessonDetail />;
+        return <ProtectedRoute><PageLessonDetail /></ProtectedRoute>;
       case 'exercises':
-        return <PageExercises />;
+        return <ProtectedRoute><PageExercises /></ProtectedRoute>;
       case 'thpt-room':
-        return <PageThptRoom />;
+        return <ProtectedRoute><PageThptRoom /></ProtectedRoute>;
       case 'vocabulary':
-        return <PageVocabulary />;
+        return <ProtectedRoute><PageVocabulary /></ProtectedRoute>;
       case 'dictionary':
-        return <PageDictionary />;
+        return <ProtectedRoute><PageDictionary /></ProtectedRoute>;
       case 'settings':
-        return <PageSettings />;
+        return <ProtectedRoute><PageSettings /></ProtectedRoute>;
       case 'bilingual-reading':
-        return <PageBilingualReading />;
+        return <ProtectedRoute><PageBilingualReading /></ProtectedRoute>;
       case 'learning':
-        return <PageLearning />;
+        return <ProtectedRoute><PageLearning /></ProtectedRoute>;
       default:
         return <PageLanding />;
     }
