@@ -1,5 +1,14 @@
-// Generated 1:1 Pixel-Perfect Component: PageDictionary
 import React from 'react';
+import {
+  dictOnInput,
+  dictOnKeyDown,
+  dictSearch,
+  dictClearInput,
+  dictClearRecent,
+  dictCopyWord,
+  dictOpenSaveModal,
+  dictPlayAudio,
+} from '../../legacy/legacyBridge';
 
 export function PageDictionary() {
   return (
@@ -23,19 +32,19 @@ export function PageDictionary() {
                    type="text"
                    aria-label="Nhập từ hoặc cụm từ tiếng Anh để tra từ điển"
                    placeholder="Nhập từ, cụm từ hoặc thành ngữ tiếng Anh..."
-                   autoComplete="off" spellcheck="false"
-                   onInput={(event) => { try { (function(event){ window.dictOnInput && window.dictOnInput(this.value) }).call(this, event); } catch(e){ console.error(e); } }}
-                   onKeydown={(event) => { try { (function(event){ window.dictOnKeyDown ? window.dictOnKeyDown(event) : (event.key==='Enter' && window.dictSearch()) }).call(this, event); } catch(e){ console.error(e); } }}
+                   autoComplete="off" spellCheck="false"
+                   onInput={(e) => dictOnInput(e.target.value)}
+                   onKeyDown={(e) => dictOnKeyDown(e)}
                    className="w-full pl-12 pr-28 py-4 bg-surface-container-lowest/80 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl text-on-surface placeholder:text-outline focus:border-primary focus:outline-none text-base md:text-lg transition-colors shadow-sm"/>
             
             <button id="dict-clear-btn"
-                    onClick={(event) => { try { (function(event){ window.dictClearInput() }).call(this, event); } catch(e){ console.error(e); } }}
+                    onClick={() => dictClearInput()}
                     title="Xóa tìm kiếm"
                     className="hidden absolute right-20 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors">
                 <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
 
-            <button onClick={(event) => { try { (function(event){ window.dictSearch() }).call(this, event); } catch(e){ console.error(e); } }}
+            <button onClick={() => dictSearch()}
                     className="absolute right-3 top-1/2 -translate-y-1/2 bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-surface-tint active:scale-95 transition-all shadow-sm">
                 Tra
             </button>
@@ -53,7 +62,7 @@ export function PageDictionary() {
                     <span className="material-symbols-outlined text-[14px]">history</span>
                     Từ vừa tra gần đây
                 </span>
-                <button onClick={(event) => { try { (function(event){ window.dictClearRecent() }).call(this, event); } catch(e){ console.error(e); } }} className="text-xs text-primary/80 hover:text-primary hover:underline">Xóa tất cả</button>
+                <button onClick={() => dictClearRecent()} className="text-xs text-primary/80 hover:text-primary hover:underline">Xóa tất cả</button>
             </div>
             <div id="dict-recent-chips" className="flex flex-wrap gap-2"></div>
         </div>
@@ -92,13 +101,13 @@ export function PageDictionary() {
 
                     <div className="flex items-center gap-2 shrink-0">
                         <button id="dict-copy-btn"
-                                onClick={(event) => { try { (function(event){ window.dictCopyWord() }).call(this, event); } catch(e){ console.error(e); } }}
+                                onClick={() => dictCopyWord()}
                                 title="Sao chép từ"
                                 className="w-10 h-10 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-on-surface transition-all active:scale-95">
                             <span className="material-symbols-outlined text-[20px]">content_copy</span>
                         </button>
                         <button id="dict-save-btn"
-                                onClick={(event) => { try { (function(event){ window.dictOpenSaveModal() }).call(this, event); } catch(e){ console.error(e); } }}
+                                onClick={() => dictOpenSaveModal()}
                                 title="Lưu vào Sổ từ vựng"
                                 className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm flex items-center gap-2 shadow hover:bg-surface-tint active:scale-95 transition-all">
                             <span className="material-symbols-outlined text-[18px]">bookmark_add</span>
@@ -111,7 +120,7 @@ export function PageDictionary() {
                 <div className="flex items-center gap-3.5 mt-5 pt-5 border-t border-outline-variant/20">
                     <span id="dict-phonetic" className="font-mono text-base md:text-xl text-primary font-bold tracking-wide"></span>
                     <button id="dict-audio-btn"
-                            onClick={(event) => { try { (function(event){ window.dictPlayAudio() }).call(this, event); } catch(e){ console.error(e); } }}
+                            onClick={() => dictPlayAudio()}
                             title="Nghe phát âm"
                             className="w-10 h-10 rounded-full bg-primary text-on-primary hover:bg-surface-tint active:scale-95 flex items-center justify-center shadow transition-all cursor-pointer">
                         <span className="material-symbols-outlined text-[22px]">volume_up</span>
@@ -179,10 +188,10 @@ export function PageDictionary() {
             <h3 className="font-bold text-on-surface text-xl">Tra cứu từ điển</h3>
             <p className="text-on-surface-variant text-sm max-w-sm">Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để xem đầy đủ phát âm, cấp độ CEFR, các nét nghĩa và ví dụ thực tế.</p>
             <div className="flex flex-wrap justify-center gap-2 mt-2">
-                <button onClick={(event) => { try { (function(event){ document.getElementById('dict-input').value='abandon'; window.dictSearch() }).call(this, event); } catch(e){ console.error(e); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors">abandon</button>
-                <button onClick={(event) => { try { (function(event){ document.getElementById('dict-input').value='resilient'; window.dictSearch() }).call(this, event); } catch(e){ console.error(e); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors">resilient</button>
-                <button onClick={(event) => { try { (function(event){ document.getElementById('dict-input').value='make sense'; window.dictSearch() }).call(this, event); } catch(e){ console.error(e); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors">make sense</button>
-                <button onClick={(event) => { try { (function(event){ document.getElementById('dict-input').value='meticulous'; window.dictSearch() }).call(this, event); } catch(e){ console.error(e); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors">meticulous</button>
+                <button onClick={() => { const input = document.getElementById('dict-input'); if (input) { input.value = 'abandon'; dictSearch(); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors cursor-pointer">abandon</button>
+                <button onClick={() => { const input = document.getElementById('dict-input'); if (input) { input.value = 'resilient'; dictSearch(); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors cursor-pointer">resilient</button>
+                <button onClick={() => { const input = document.getElementById('dict-input'); if (input) { input.value = 'make sense'; dictSearch(); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors cursor-pointer">make sense</button>
+                <button onClick={() => { const input = document.getElementById('dict-input'); if (input) { input.value = 'meticulous'; dictSearch(); } }} className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors cursor-pointer">meticulous</button>
             </div>
         </div>
 

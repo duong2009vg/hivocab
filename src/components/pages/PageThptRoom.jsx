@@ -1,5 +1,15 @@
-// Generated 1:1 Pixel-Perfect Component: PageThptRoom
 import React from 'react';
+import {
+  thptPrevQuestion,
+  thptNextQuestion,
+  thptSetMobileView,
+  thptChangeFontSize,
+  thptOpenReport,
+  thptToggleFullscreen,
+  thptConfirmSubmit,
+  thptShowResultsModal,
+  thptExitRoom,
+} from '../../legacy/legacyBridge';
 
 export function PageThptRoom() {
   return (
@@ -24,13 +34,13 @@ export function PageThptRoom() {
         <div className="flex items-center gap-1.5 md:gap-2.5">
             {/* Quick Question Switcher */}
             <div className="flex items-center bg-[#0f2342] border border-blue-400/30 rounded-lg p-0.5">
-                <button type="button" onClick={(event) => { try { (function(event){ window.ThptExam.prevQuestion() }).call(this, event); } catch(e){ console.error(e); } }} className="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer" title="Câu trước (←)">
+                <button type="button" onClick={() => thptPrevQuestion()} className="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer" title="Câu trước (←)">
                     <span className="material-symbols-outlined text-[15px]">chevron_left</span>
                 </button>
                 <div className="px-1.5 text-[11px] font-mono font-bold text-blue-100 whitespace-nowrap">
                     Câu <span id="exam-current-q-num">1</span>/40
                 </div>
-                <button type="button" onClick={(event) => { try { (function(event){ window.ThptExam.nextQuestion() }).call(this, event); } catch(e){ console.error(e); } }} className="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer" title="Câu kế tiếp (→ hoặc Enter)">
+                <button type="button" onClick={() => thptNextQuestion()} className="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer" title="Câu kế tiếp (→ hoặc Enter)">
                     <span className="material-symbols-outlined text-[15px]">chevron_right</span>
                 </button>
             </div>
@@ -52,41 +62,41 @@ export function PageThptRoom() {
         <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
             {/* Mobile View Switcher (Visible only on small screens) */}
             <div className="flex md:hidden items-center bg-[#0f2342] border border-blue-400/30 p-0.5 rounded-lg text-[10px] font-bold">
-                <button type="button" id="btn-view-passage" onClick={(event) => { try { (function(event){ window.ThptExam.setMobileView('passage') }).call(this, event); } catch(e){ console.error(e); } }} className="px-1.5 py-0.5 rounded text-slate-300 hover:text-white">Đọc</button>
-                <button type="button" id="btn-view-both" onClick={(event) => { try { (function(event){ window.ThptExam.setMobileView('both') }).call(this, event); } catch(e){ console.error(e); } }} className="px-1.5 py-0.5 rounded bg-blue-600 text-white">2 bên</button>
-                <button type="button" id="btn-view-questions" onClick={(event) => { try { (function(event){ window.ThptExam.setMobileView('questions') }).call(this, event); } catch(e){ console.error(e); } }} className="px-1.5 py-0.5 rounded text-slate-300 hover:text-white">Câu</button>
+                <button type="button" id="btn-view-passage" onClick={() => thptSetMobileView('passage')} className="px-1.5 py-0.5 rounded text-slate-300 hover:text-white">Đọc</button>
+                <button type="button" id="btn-view-both" onClick={() => thptSetMobileView('both')} className="px-1.5 py-0.5 rounded bg-blue-600 text-white">2 bên</button>
+                <button type="button" id="btn-view-questions" onClick={() => thptSetMobileView('questions')} className="px-1.5 py-0.5 rounded text-slate-300 hover:text-white">Câu</button>
             </div>
 
             {/* Font size */}
             <div className="hidden lg:flex items-center gap-0.5 bg-[#0f2342] border border-blue-400/30 p-0.5 rounded-lg">
-                <button onClick={(event) => { try { (function(event){ window.ThptExam.changeFontSize(-1) }).call(this, event); } catch(e){ console.error(e); } }} className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Giảm cỡ chữ">A-</button>
-                <button onClick={(event) => { try { (function(event){ window.ThptExam.changeFontSize(1) }).call(this, event); } catch(e){ console.error(e); } }} className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
+                <button onClick={() => thptChangeFontSize(-1)} className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Giảm cỡ chữ">A-</button>
+                <button onClick={() => thptChangeFontSize(1)} className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
             </div>
 
             {/* Report Exam / Question */}
-            <button type="button" onClick={(event) => { try { (function(event){ window.ThptExam && window.ThptExam.openCurrentQuestionReport ? window.ThptExam.openCurrentQuestionReport() : window.openBugReportModal({ feature: 'thpt_exam' }) }).call(this, event); } catch(e){ console.error(e); } }} className="p-1 rounded-lg text-slate-300 hover:text-amber-300 hover:bg-white/10 transition-colors cursor-pointer" title="Báo cáo lỗi câu hỏi/đề thi">
+            <button type="button" onClick={() => thptOpenReport()} className="p-1 rounded-lg text-slate-300 hover:text-amber-300 hover:bg-white/10 transition-colors cursor-pointer" title="Báo cáo lỗi câu hỏi/đề thi">
                 <span className="material-symbols-outlined text-[18px]">flag</span>
             </button>
 
             {/* Fullscreen */}
-            <button onClick={(event) => { try { (function(event){ window.ThptExam.toggleFullscreen() }).call(this, event); } catch(e){ console.error(e); } }} className="hidden sm:flex w-6 h-6 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 items-center justify-center transition-colors cursor-pointer" title="Toàn màn hình">
+            <button onClick={() => thptToggleFullscreen()} className="hidden sm:flex w-6 h-6 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 items-center justify-center transition-colors cursor-pointer" title="Toàn màn hình">
                 <span className="material-symbols-outlined text-[16px]">fullscreen</span>
             </button>
 
             {/* Submit Button (Test Mode) */}
-            <button id="btn-submit-exam" onClick={(event) => { try { (function(event){ window.ThptExam.confirmSubmit() }).call(this, event); } catch(e){ console.error(e); } }} className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer">
+            <button id="btn-submit-exam" onClick={() => thptConfirmSubmit()} className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer">
                 <span className="material-symbols-outlined text-[14px]">send</span>
                 <span>NỘP BÀI</span>
             </button>
 
             {/* Review Mode Score / Retake Button */}
-            <button id="btn-exam-review-score" onClick={(event) => { try { (function(event){ window.ThptExam.showResultsModal(window.ThptExam.results) }).call(this, event); } catch(e){ console.error(e); } }} className="hidden px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer" title="Xem lại bảng điểm &amp; thống kê">
+            <button id="btn-exam-review-score" onClick={() => thptShowResultsModal()} className="hidden px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer" title="Xem lại bảng điểm &amp; thống kê">
                 <span className="material-symbols-outlined text-[14px]">military_tech</span>
                 <span>KẾT QUẢ</span>
             </button>
 
             {/* Exit Button */}
-            <button onClick={(event) => { try { (function(event){ window.ThptExam.exitRoom() }).call(this, event); } catch(e){ console.error(e); } }} className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Thoát phòng thi">
+            <button onClick={() => thptExitRoom()} className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Thoát phòng thi">
                 <span className="material-symbols-outlined text-[18px]">close</span>
             </button>
         </div>

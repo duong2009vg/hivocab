@@ -1,5 +1,5 @@
-// Generated 1:1 Pixel-Perfect Component: PageSettings
 import React from 'react';
+import { toggleTheme, applyTheme, handleSettingsChangePassword } from '../../legacy/legacyBridge';
 
 export function PageSettings() {
   return (
@@ -24,7 +24,7 @@ export function PageSettings() {
                         <p className="text-on-surface-variant text-sm mt-1">Giảm chói và bảo vệ mắt khi học trong môi trường thiếu sáng.</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
-                        <input  type="checkbox" id="darkModeToggle" className="sr-only peer" onChange={(event) => { try { (function(event){ window.toggleTheme() }).call(this, event); } catch(e){ console.error(e); } }} />
+                        <input  type="checkbox" id="darkModeToggle" className="sr-only peer" onChange={() => toggleTheme()} />
                         <div className="w-14 h-7 bg-outline-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-primary"></div>
                     </label>
                 </div>
@@ -37,7 +37,7 @@ export function PageSettings() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5" id="theme-picker">
 
                         {/* Auto by time */}
-                        <button onClick={(event) => { try { (function(event){ window.applyTheme('auto') }).call(this, event); } catch(e){ console.error(e); } }}
+                        <button onClick={() => applyTheme('auto')}
                                 data-theme-btn="auto"
                                 className="theme-btn flex flex-col items-center gap-2.5 p-3.5 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group bg-surface-container-low cursor-pointer">
                             <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden flex items-center justify-center bg-primary text-on-primary">
@@ -50,7 +50,7 @@ export function PageSettings() {
                         </button>
 
                         {/* Ocean (00:00 - 03:59) */}
-                        <button onClick={(event) => { try { (function(event){ window.applyTheme('ocean') }).call(this, event); } catch(e){ console.error(e); } }}
+                        <button onClick={() => applyTheme('ocean')}
                                 data-theme-btn="ocean"
                                 className="theme-btn flex flex-col items-center gap-2.5 p-3.5 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group bg-surface-container-low cursor-pointer">
                             <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
@@ -66,7 +66,7 @@ export function PageSettings() {
                         </button>
 
                         {/* Morning (Asagiri) */}
-                        <button onClick={(event) => { try { (function(event){ window.applyTheme('morning') }).call(this, event); } catch(e){ console.error(e); } }}
+                        <button onClick={() => applyTheme('morning')}
                                 data-theme-btn="morning"
                                 className="theme-btn flex flex-col items-center gap-2.5 p-3.5 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group bg-surface-container-low cursor-pointer">
                             <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
@@ -82,7 +82,7 @@ export function PageSettings() {
                         </button>
 
                         {/* Afternoon (Yuugiri) */}
-                        <button onClick={(event) => { try { (function(event){ window.applyTheme('afternoon') }).call(this, event); } catch(e){ console.error(e); } }}
+                        <button onClick={() => applyTheme('afternoon')}
                                 data-theme-btn="afternoon"
                                 className="theme-btn flex flex-col items-center gap-2.5 p-3.5 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group bg-surface-container-low cursor-pointer">
                             <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
@@ -98,7 +98,7 @@ export function PageSettings() {
                         </button>
 
                         {/* Night (Sumiyama) */}
-                        <button onClick={(event) => { try { (function(event){ window.applyTheme('night') }).call(this, event); } catch(e){ console.error(e); } }}
+                        <button onClick={() => applyTheme('night')}
                                 data-theme-btn="night"
                                 className="theme-btn flex flex-col items-center gap-2.5 p-3.5 rounded-2xl border-2 border-transparent hover:border-outline-variant/40 transition-all group bg-surface-container-low cursor-pointer">
                             <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden grid grid-cols-2 grid-rows-2">
@@ -136,7 +136,7 @@ export function PageSettings() {
                             Bạn có thể tạo hoặc đổi mật khẩu mới để đăng nhập bằng Email và Mật khẩu (kể cả khi bạn thường đăng nhập bằng Google).
                         </p>
 
-                        <form onSubmit={(event) => { try { (function(event){ window.handleSettingsChangePassword(event) }).call(this, event); } catch(e){ console.error(e); } }} className="space-y-3 max-w-md">
+                        <form onSubmit={(e) => handleSettingsChangePassword(e)} className="space-y-3 max-w-md">
                             <div>
                                 <label className="block text-xs font-semibold text-on-surface mb-1">Mật khẩu mới (tối thiểu 6 ký tự)</label>
                                 <input  type="password" id="settings-new-password" required minLength="6" placeholder="••••••••" className="w-full px-3.5 py-2.5 rounded-xl border border-outline-variant text-xs bg-surface-container-lowest text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30" />

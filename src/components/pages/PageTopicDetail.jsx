@@ -1,5 +1,5 @@
-// Generated 1:1 Pixel-Perfect Component: PageTopicDetail
 import React from 'react';
+import { startSinglePractice, startBilingualReading, navigate, openAddWordModal } from '../../legacy/legacyBridge';
 
 export function PageTopicDetail() {
   return (
@@ -14,20 +14,20 @@ export function PageTopicDetail() {
     </div>
     <div className="flex flex-col gap-base flex-1 overflow-y-auto pr-2">
         <p className="font-label-sm text-label-sm text-outline uppercase tracking-wider mb-xs ml-sm shrink-0">Chế độ học</p>
-        <a onClick={(event) => { try { (function(event){ startSinglePractice(0) }).call(this, event); } catch(e){ console.error(e); } }} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">flash_on</span><span>Flashcard</span></a>
-        <a onClick={(event) => { try { (function(event){ startSinglePractice(1) }).call(this, event); } catch(e){ console.error(e); } }} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">quiz</span><span>Trắc Nghiệm</span></a>
-        <a onClick={(event) => { try { (function(event){ startSinglePractice(2) }).call(this, event); } catch(e){ console.error(e); } }} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">text_fields</span><span>Điền từ</span></a>
-        <a onClick={(event) => { try { (function(event){ startSinglePractice(3) }).call(this, event); } catch(e){ console.error(e); } }} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">record_voice_over</span><span>Nghe và viết</span></a>
-        <a id="sub-sidebar-reading-btn" onClick={(event) => { try { (function(event){ window.startBilingualReading() }).call(this, event); } catch(e){ console.error(e); } }} className="hidden items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">menu_book</span><span>Đọc &amp; Dịch</span></a>
+        <a onClick={() => startSinglePractice(0)} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">flash_on</span><span>Flashcard</span></a>
+        <a onClick={() => startSinglePractice(1)} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">quiz</span><span>Trắc Nghiệm</span></a>
+        <a onClick={() => startSinglePractice(2)} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">text_fields</span><span>Điền từ</span></a>
+        <a onClick={() => startSinglePractice(3)} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">record_voice_over</span><span>Nghe và viết</span></a>
+        <a id="sub-sidebar-reading-btn" onClick={() => startBilingualReading()} className="hidden items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-primary-container/10 cursor-pointer hover:opacity-80 transition-opacity"><span className="material-symbols-outlined">menu_book</span><span>Đọc &amp; Dịch</span></a>
     </div>
     <div className="mt-auto shrink-0 pt-md border-t border-outline-variant/20">
-        <a onClick={(event) => { try { (function(event){ navigateTo('topics') }).call(this, event); } catch(e){ console.error(e); } }} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container cursor-pointer"><span className="material-symbols-outlined">arrow_back</span><span>Quay lại</span></a>
+        <a onClick={() => navigate('topics')} className="flex items-center gap-sm px-sm py-sm rounded-lg text-on-surface-variant hover:bg-surface-container cursor-pointer"><span className="material-symbols-outlined">arrow_back</span><span>Quay lại</span></a>
     </div>
 </nav>
 
 {/* Sub Header Mobile dùng riêng cho Chi tiết chủ đề */}
 <header id="sub-mobile-header" className="lg:hidden flex fixed top-0 w-full z-40 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 pb-2.5 items-center gap-2 mobile-sticky-top">
-    <button onClick={(event) => { try { (function(event){ navigateTo('topics') }).call(this, event); } catch(e){ console.error(e); } }} className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all active:scale-90 shrink-0 cursor-pointer" aria-label="Quay lại danh sách chủ đề">
+    <button onClick={() => navigate('topics')} className="w-10 h-10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all active:scale-90 shrink-0 cursor-pointer" aria-label="Quay lại danh sách chủ đề">
         <span className="material-symbols-outlined text-[24px]">arrow_back</span>
     </button>
     <div id="td-mobile-header-title" className="font-bold text-on-surface truncate text-base sm:text-lg">Chi tiết chủ đề</div>
@@ -42,7 +42,7 @@ export function PageTopicDetail() {
                 <p id="td-subtitle" className="text-on-surface-variant mt-sm">Chọn một lesson để bắt đầu học</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-                <button onClick={(event) => { try { (function(event){ window.openAddWordModal() }).call(this, event); } catch(e){ console.error(e); } }} className="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
+                <button onClick={() => openAddWordModal()} className="bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer">
                     <span className="material-symbols-outlined text-[18px]">add</span>
                     <span>Thêm từ vựng</span>
                 </button>
@@ -58,7 +58,7 @@ export function PageTopicDetail() {
                         <p id="td-subtitle-mobile" className="text-sm text-on-surface-variant mt-1">Chọn một lesson để bắt đầu học</p>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                        <button type="button" onClick={(event) => { try { (function(event){ event.stopPropagation(); window.openAddWordModal(); }).call(this, event); } catch(e){ console.error(e); } }} className="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:opacity-85 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer" style={{"touchAction":"manipulation","WebkitTapHighlightColor":"transparent"}}>
+                        <button type="button" onClick={(e) => { e.stopPropagation(); openAddWordModal(); }} className="bg-primary text-on-primary font-bold text-xs px-3 py-2.5 rounded-xl transition-all active:opacity-85 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer" style={{"touchAction":"manipulation","WebkitTapHighlightColor":"transparent"}}>
                             <span className="material-symbols-outlined text-[16px] pointer-events-none">add</span>
                             <span className="pointer-events-none">Thêm từ</span>
                         </button>

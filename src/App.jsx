@@ -7,10 +7,10 @@ import MainSidebar from './components/layout/MainSidebar.jsx';
 import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx';
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
 import GlobalBugReportBtn from './components/common/GlobalBugReportBtn.jsx';
-import Modals from './components/common/Modals.jsx';
 import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
 
 // Code Splitting via React.lazy — Huge bundle reduction & on-demand loading
+const Modals = lazy(() => import('./components/common/Modals.jsx'));
 const PageLanding = lazy(() => import('./components/pages/PageLanding.jsx'));
 const PageFeatures = lazy(() => import('./components/pages/PageFeatures.jsx'));
 const PageReviews = lazy(() => import('./components/pages/PageReviews.jsx'));
@@ -96,7 +96,9 @@ function AppRoutes() {
       </Suspense>
 
       <GlobalBugReportBtn />
-      <Modals />
+      <Suspense fallback={null}>
+        <Modals />
+      </Suspense>
     </div>
   );
 }

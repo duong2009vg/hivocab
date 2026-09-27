@@ -1,5 +1,5 @@
-// Generated 1:1 Pixel-Perfect Component: PageExercises
 import React from 'react';
+import { thptOnSearchInput, thptClearSearch } from '../../legacy/legacyBridge';
 
 export function PageExercises() {
   return (
@@ -39,14 +39,14 @@ export function PageExercises() {
                 <input id="thpt-search-input" 
                        type="text" 
                        aria-label="Tìm kiếm đề thi THPT Quốc Gia"
-                       onInput={(event) => { try { (function(event){ window.ThptExam && window.ThptExam.onSearchInput(this.value) }).call(this, event); } catch(e){ console.error(e); } }}
-                       onKeydown={(event) => { try { (function(event){ if(event.key==='Escape') window.ThptExam && window.ThptExam.clearSearch() }).call(this, event); } catch(e){ console.error(e); } }}
+                       onInput={(e) => thptOnSearchInput(e.target.value)}
+                       onKeyDown={(e) => { if (e.key === 'Escape') thptClearSearch(); }}
                        placeholder="Tìm kiếm đề thi (theo tên trường, tỉnh/thành phố, số đề...)..."
                        className="w-full bg-surface-container-low/60 border border-outline-variant/30 focus:border-primary focus:bg-surface-container-lowest rounded-xl pl-10 pr-9 py-2.5 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                       autoComplete="off" spellcheck="false" />
+                       autoComplete="off" spellCheck="false" />
                 <button id="thpt-search-clear" 
                         type="button"
-                        onClick={(event) => { try { (function(event){ window.ThptExam && window.ThptExam.clearSearch() }).call(this, event); } catch(e){ console.error(e); } }} 
+                        onClick={() => thptClearSearch()} 
                         className="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface p-1 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer" 
                         title="Xóa tìm kiếm">
                     <span className="material-symbols-outlined text-[18px]">close</span>

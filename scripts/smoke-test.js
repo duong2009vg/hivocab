@@ -87,6 +87,13 @@ if (fs.existsSync(assetsDir)) {
   }
   const maxKb = (maxChunkSize / 1024).toFixed(1);
   assert(maxChunkSize < 500 * 1024, `All chunks strictly under 500 kB (Largest: ${maxChunkName} at ${maxKb} kB)`);
+
+  const mainFile = jsFiles.find(f => f.startsWith('main-'));
+  if (mainFile) {
+    const mainSize = fs.statSync(path.resolve(assetsDir, mainFile)).size;
+    const mainKb = (mainSize / 1024).toFixed(1);
+    assert(mainSize < 150 * 1024, `Main entry chunk strictly under 150 kB (${mainFile} at ${mainKb} kB)`);
+  }
 }
 
 console.log('\n=======================================================');

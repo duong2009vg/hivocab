@@ -1,5 +1,5 @@
-// Generated 1:1 Pixel-Perfect Component: PageTopics
 import React from 'react';
+import { openCreateTopicModal, toggleMobileProfileDropdown } from '../../legacy/legacyBridge';
 
 export function PageTopics() {
   return (
@@ -15,11 +15,11 @@ export function PageTopics() {
                 <p id="topics-page-subtitle" className="text-xs sm:text-sm text-on-surface-variant mt-0.5 truncate sm:whitespace-normal">Quản lý và sắp xếp các lĩnh vực học tập của bạn.</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-                <button onClick={(event) => { try { (function(event){ window.openCreateTopicModal() }).call(this, event); } catch(e){ console.error(e); } }} className="bg-primary text-on-primary hover:opacity-95 font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all active:scale-[0.98] shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0">
+                <button onClick={() => openCreateTopicModal()} className="bg-primary text-on-primary hover:opacity-95 font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all active:scale-[0.98] shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0">
                     <span className="material-symbols-outlined text-[18px]">add</span>
                     <span>Tạo chủ đề</span>
                 </button>
-                <button onClick={(event) => { try { (function(event){ window.toggleMobileProfileDropdown() }).call(this, event); } catch(e){ console.error(e); } }} className="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
+                <button onClick={() => toggleMobileProfileDropdown()} className="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0" aria-label="Hồ sơ">
                     <span className="material-symbols-outlined text-outline text-sm">person</span>
                 </button>
             </div>
