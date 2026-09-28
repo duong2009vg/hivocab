@@ -160,10 +160,17 @@ export function useLessonDetail() {
   }, []);
 
   const startPractice = useCallback((modeIndex) => {
-    if (typeof window !== 'undefined' && typeof window.startSinglePractice === 'function') {
+    if (typeof window === 'undefined') return;
+    // Pass current words & mode to PageLearning via window globals
+    if (words && words.length > 0) {
+      window._currentLessonWords = words;
+      window._practiceMode = modeIndex ?? null;
+      navigateTo('learning');
+    } else if (typeof window.startSinglePractice === 'function') {
+      // Fallback to legacy bridge if words not yet loaded
       window.startSinglePractice(modeIndex);
     }
-  }, []);
+  }, [words, navigateTo]);
 
   const startReading = useCallback(() => {
     if (typeof window !== 'undefined' && typeof window.startBilingualReading === 'function') {
