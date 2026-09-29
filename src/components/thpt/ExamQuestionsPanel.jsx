@@ -146,18 +146,175 @@ function ReviewBanner({ qNum, userAnswer, correctAnswer }) {
   );
 }
 
+/**
+ * Format explanation text into React elements.
+ *
+ * The explanation JSON uses \n both for:
+ *   - Real paragraph/item breaks (before A. B. C. D. •  Giải thích: blank line)
+ *   - Soft word-wrap (line continues same sentence, ends mid-word or mid-sentence)
+ *
+ * Strategy:
+ *   1. Split by \n
+ *   2. Detect "paragraph starters": blank line, •, A./B./C./D. at start, "Giải thích", quotes "
+ *   3. All other continuation lines are appended with a space to the previous paragraph
+ *   4. Render each paragraph with ĐÚNG/SAI highlights
+ */
+function formatExplanation(text) {
+  if (!text) return null;
+
+  const rawLines = text.split('\n');
+
+  // ── Step 1: group into logical paragraphs ──────────────────────────────
+  const paragraphs = []; // { type: 'blank'|'bullet'|'option'|'text', content: string }
+  let current = null;
+
+  const isOptionStart = (s) => /^[A-D]\.\s/.test(s);
+  const isBulletStart = (s) => s.startsWith('•');
+  const isGiaiThich  = (s) => /^Gi[aả]i th[íi]ch/i.test(s) || /^Tạm dịch/i.test(s);
+  const isQuoteStart = (s) => s.startsWith('"') || s.startsWith('"') || s.startsWith('"');
+
+  const pushCurrent = () => {
+    if (current) { paragraphs.push(current); current = null; }
+  };
+
+  for (const rawLine of rawLines) {
+    const trimmed = rawLine.trim();
+
+    // Blank line → hard break
+    if (trimmed === '') {
+      pushCurrent();
+      paragraphs.push({ type: 'blank', content: '' });
+      continue;
+    }
+
+    // Bullet item
+    if (isBulletStart(trimmed)) {
+      pushCurrent();
+      current = { type: 'bullet', content: trimmed.slice(1).trim() };
+      continue;
+    }
+
+    // Option A/B/C/D line
+    if (isOptionStart(trimmed)) {
+      pushCurrent();
+      current = { type: 'option', content: trimmed };
+      continue;
+    }
+
+    // "Giải thích:" / "Tạm dịch:" section header
+    if (isGiaiThich(trimmed)) {
+      pushCurrent();
+      current = { type: 'header', content: trimmed };
+      continue;
+    }
+
+    // Quote line (passage sentence)
+    if (isQuoteStart(trimmed)) {
+      pushCurrent();
+      current = { type: 'quote', content: trimmed };
+      continue;
+    }
+
+    // Continuation line — append to current paragraph with a space
+    if (current) {
+      current.content = current.content + ' ' + trimmed;
+    } else {
+      current = { type: 'text', content: trimmed };
+    }
+  }
+  pushCurrent();
+
+  // ── Step 2: render ──────────────────────────────────────────────────────
+  const elements = [];
+  let key = 0;
+
+  for (const para of paragraphs) {
+    if (para.type === 'blank') {
+      elements.push(<div key={key++} className="h-1" />);
+      continue;
+    }
+
+    if (para.type === 'bullet') {
+      elements.push(
+        <div key={key++} className="flex items-start gap-2 pl-1 py-0.5">
+          <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+          <span className="flex-1 leading-relaxed">{highlightKeywords(para.content)}</span>
+        </div>
+      );
+      continue;
+    }
+
+    if (para.type === 'option') {
+      elements.push(
+        <p key={key++} className="leading-relaxed pl-2 border-l-2 border-blue-200 ml-1">
+          {highlightKeywords(para.content)}
+        </p>
+      );
+      continue;
+    }
+
+    if (para.type === 'header') {
+      elements.push(
+        <p key={key++} className="font-semibold text-blue-700 mt-2 leading-relaxed">
+          {highlightKeywords(para.content)}
+        </p>
+      );
+      continue;
+    }
+
+    if (para.type === 'quote') {
+      elements.push(
+        <p key={key++} className="leading-relaxed italic text-slate-600 bg-slate-50 border-l-4 border-blue-300 pl-3 py-1 rounded-r">
+          {para.content}
+        </p>
+      );
+      continue;
+    }
+
+    // Default text
+    elements.push(
+      <p key={key++} className="leading-relaxed">
+        {highlightKeywords(para.content)}
+      </p>
+    );
+  }
+
+  return elements;
+}
+
+/** Split a line and wrap ĐÚNG/SAI tokens with color badges. */
+function highlightKeywords(text) {
+  // Split on ĐÚNG or SAI surrounded by word boundaries (dash, colon, space)
+  const parts = text.split(/(ĐÚNG|SAI)/g);
+  return parts.map((part, i) => {
+    if (part === 'ĐÚNG') {
+      return (
+        <strong key={i} className="text-emerald-700 font-black">ĐÚNG</strong>
+      );
+    }
+    if (part === 'SAI') {
+      return (
+        <strong key={i} className="text-rose-600 font-black">SAI</strong>
+      );
+    }
+    return part;
+  });
+}
+
 /** Explanation/solution box shown below the options in review mode. */
 function SolutionBox({ explanation }) {
   if (!explanation) return null;
   return (
-    <div className="mt-3 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm leading-relaxed">
-      <p className="font-semibold text-blue-700 mb-1 flex items-center gap-1.5">
+    <div className="mt-3 p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm space-y-1">
+      <p className="font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
         <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
         </svg>
         Giải thích
       </p>
-      <p>{explanation}</p>
+      <div className="space-y-1">
+        {formatExplanation(explanation)}
+      </div>
     </div>
   );
 }
