@@ -532,7 +532,7 @@
                 console.error('[ThptExam] setupCandidateInfo error:', err);
             }
 
-            // 3. Switch to Room View
+            // 3. Switch to Room View (React async setState → DOM rendered on next frame)
             try {
                 this.showRoomView();
             } catch (err) {
@@ -541,45 +541,58 @@
                 if (roomEl) roomEl.classList.add('active');
             }
 
-            // 4. Render Passages (All sections continuous scroll)
-            try {
-                this.renderAllPassages();
-            } catch (err) {
-                console.error('[ThptExam] renderAllPassages error:', err);
-            }
+            // Steps 4-8: Must run AFTER React has committed PageThptRoom to the DOM.
+            // showRoomView() calls window.navigateTo() which is React setState (async).
+            // Without this delay, getElementById('exam-passage-content') returns null
+            // because React hasn't rendered PageThptRoom yet, causing the blank left panel.
+            const _renderExamContent = () => {
+                // 4. Render Passages (All sections continuous scroll)
+                try {
+                    this.renderAllPassages();
+                } catch (err) {
+                    console.error('[ThptExam] renderAllPassages error:', err);
+                }
 
-            // 5. Render Questions & Palette
-            try {
-                this.renderQuestionsAndPalette();
-            } catch (err) {
-                console.error('[ThptExam] renderQuestionsAndPalette error:', err);
-            }
+                // 5. Render Questions & Palette
+                try {
+                    this.renderQuestionsAndPalette();
+                } catch (err) {
+                    console.error('[ThptExam] renderQuestionsAndPalette error:', err);
+                }
 
-            // 6. Init Draggable Split Resizer & Restore Palette state
-            try {
-                this.initDraggableDivider();
-            } catch (err) {
-                console.error('[ThptExam] initDraggableDivider error:', err);
-            }
-            try {
-                this.restorePaletteState();
-            } catch (err) {}
-            try {
-                this.initDesktopScrollEnhancements();
-            } catch (err) {
-                console.error('[ThptExam] initDesktopScrollEnhancements error:', err);
-            }
+                // 6. Init Draggable Split Resizer & Restore Palette state
+                try {
+                    this.initDraggableDivider();
+                } catch (err) {
+                    console.error('[ThptExam] initDraggableDivider error:', err);
+                }
+                try {
+                    this.restorePaletteState();
+                } catch (err) {}
+                try {
+                    this.initDesktopScrollEnhancements();
+                } catch (err) {
+                    console.error('[ThptExam] initDesktopScrollEnhancements error:', err);
+                }
 
-            // 7. Reset mobile view
-            try {
-                this.setMobileView('both');
-            } catch (err) {}
+                // 7. Reset mobile view
+                try {
+                    this.setMobileView('both');
+                } catch (err) {}
 
-            // 8. Jump to first question
-            try {
-                this.jumpToQuestion(1);
-            } catch (err) {
-                console.error('[ThptExam] jumpToQuestion error:', err);
+                // 8. Jump to first question
+                try {
+                    this.jumpToQuestion(1);
+                } catch (err) {
+                    console.error('[ThptExam] jumpToQuestion error:', err);
+                }
+            };
+
+            // Check if DOM is already ready (e.g. revisiting same route), else wait for React render
+            if (document.getElementById('exam-passage-content')) {
+                _renderExamContent();
+            } else {
+                setTimeout(_renderExamContent, 80);
             }
         },
 
@@ -2063,3 +2076,4 @@
 
     window.ThptExam = ThptExam;
 })(window);
+
