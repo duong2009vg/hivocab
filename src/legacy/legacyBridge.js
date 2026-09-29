@@ -33,8 +33,23 @@ function safeMethodCall(objName, methodName, ...args) {
 export const navigate = (page, preserveHash = false) => safeCall('navigateTo', page, preserveHash);
 export const startSession = (...args) => safeCall('startSession', ...args);
 export const startSinglePractice = (modeIndex) => safeCall('startSinglePractice', modeIndex);
-export const startBilingualReading = () => safeCall('startBilingualReading');
-export const closeBilingualReading = () => safeCall('closeBilingualReading');
+export const startBilingualReading = (passageId) => {
+  if (passageId && typeof window !== 'undefined') {
+    window._currentPassageId = passageId;
+  }
+  return navigate('bilingual-reading');
+};
+export const closeBilingualReading = () => {
+  if (typeof window !== 'undefined') {
+    if (window._currentPassageId && window._currentPassageId !== '__unlinked__') {
+      return navigate('lesson-detail');
+    }
+    if (window._currentTopicId) {
+      return navigate('topic-detail');
+    }
+  }
+  return navigate('topics');
+};
 
 /**
  * 2. Modals & Feedback Dialogs Bridge

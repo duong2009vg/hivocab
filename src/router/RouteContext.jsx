@@ -88,6 +88,7 @@ export function RouteProvider({ children }) {
         case 'lesson-detail':
         case 'vocabulary':
         case 'dictionary':
+        case 'bilingual-reading':
           // Owned 100% by pure React components and reactive hooks
           break;
         case 'library':

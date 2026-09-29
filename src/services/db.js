@@ -273,13 +273,39 @@ export async function getWordsInLesson(topicId, lessonIndex) {
 export async function getWordsInPassage(passageId) {
   const client = getHiDB();
   if (client?.getWordsInPassage) return client.getWordsInPassage(passageId);
-  return [];
+  try {
+    const { data, error } = await supabase
+      .from('words')
+      .select('id, word, pos, phonetic, meaning, example_sentence, image_url, passage_id, word_order, created_at')
+      .eq('passage_id', passageId)
+      .order('word_order', { ascending: true, nullsFirst: false });
+    if (error) throw error;
+    return (data || []).map(w => ({
+      ...w,
+      exampleSentence: w.example_sentence || '',
+      imageUrl: w.image_url || '',
+    }));
+  } catch (err) {
+    console.warn('[db.getWordsInPassage]', err);
+    return [];
+  }
 }
 
 export async function getPassage(passageId) {
   const client = getHiDB();
   if (client?.getPassage) return client.getPassage(passageId);
-  return null;
+  try {
+    const { data, error } = await supabase
+      .from('passages')
+      .select('id, test_id, topic_id, passage_number, title, topic_label, content_en, content_vi')
+      .eq('id', passageId)
+      .single();
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.warn('[db.getPassage]', err);
+    return null;
+  }
 }
 
 export async function addWord(topicId, wordData) {
