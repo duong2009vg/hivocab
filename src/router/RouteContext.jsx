@@ -94,7 +94,7 @@ export function RouteProvider({ children }) {
           window.loadCommunityLibrary?.();
           break;
         case 'exercises':
-          window.ThptExam?.init?.();
+          // PageExercises is now full React — useThptExams hook fetches data internally
           break;
         case 'dashboard':
           if (typeof window.HiDashboard !== 'undefined' && typeof window.HiDashboard.refresh === 'function') {
