@@ -31,9 +31,11 @@
         async init() {
             try {
                 if (this.exams.length === 0) {
-                    const res = await fetch('data/thpt_exams.json?v=' + Date.now());
+                    const res = await fetch('data/thpt_exams.json?v=20260929');
                     if (res.ok) {
                         this.exams = await res.json();
+                    } else {
+                        console.warn('[ThptExam] Không tải được thpt_exams.json, status:', res.status);
                     }
                 }
             } catch (err) {
@@ -542,9 +544,9 @@
             }
 
             // Steps 4-8: Must run AFTER React has committed PageThptRoom to the DOM.
-            // showRoomView() calls window.navigateTo() which is React setState (async).
-            // Without this delay, getElementById('exam-passage-content') returns null
-            // because React hasn't rendered PageThptRoom yet, causing the blank left panel.
+            // showRoomView() triggers React.lazy() chunk load + setState (both async).
+            // Using a fixed timeout is unreliable on slow connections — instead we poll
+            // until #exam-passage-content appears, with a max timeout of 3 seconds.
             const _renderExamContent = () => {
                 // 4. Render Passages (All sections continuous scroll)
                 try {
@@ -588,11 +590,24 @@
                 }
             };
 
-            // Check if DOM is already ready (e.g. revisiting same route), else wait for React render
+            // Poll for the React-rendered DOM element instead of using a fixed delay.
+            // React.lazy() must load the chunk + React must commit before the element exists.
             if (document.getElementById('exam-passage-content')) {
+                // Already mounted (e.g. revisiting the same route)
                 _renderExamContent();
             } else {
-                setTimeout(_renderExamContent, 80);
+                const startTime = Date.now();
+                const pollInterval = setInterval(() => {
+                    if (document.getElementById('exam-passage-content')) {
+                        clearInterval(pollInterval);
+                        _renderExamContent();
+                    } else if (Date.now() - startTime > 3000) {
+                        // Timeout after 3s — render anyway as best-effort
+                        clearInterval(pollInterval);
+                        console.warn('[ThptExam] DOM polling timed out after 3s, rendering anyway');
+                        _renderExamContent();
+                    }
+                }, 30);
             }
         },
 
