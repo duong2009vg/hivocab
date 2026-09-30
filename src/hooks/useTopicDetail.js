@@ -238,10 +238,14 @@ export function useTopicDetail() {
   }, []);
 
   const startReading = useCallback((passageId) => {
-    if (typeof window !== 'undefined' && typeof window.startBilingualReading === 'function') {
-      window.startBilingualReading(passageId);
+    // Set passageId context for React's useBilingualReading hook to pick up
+    if (passageId && typeof window !== 'undefined') {
+      window._currentPassageId = passageId;
     }
-  }, []);
+    // Navigate via React router (safe for React DOM) instead of legacy window fn
+    navigateTo('bilingual-reading');
+  }, [navigateTo]);
+
 
   return {
     topicId,

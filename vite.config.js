@@ -21,8 +21,6 @@ function copyStaticAssetsPlugin() {
         'sessionEngine.js',
         'sessionUI.js',
         'thptExam.js',
-        'bilingualReading.js',
-        'library.js',
         'pricing.js',
         'dictionary.js',
         'exercises.js',
@@ -72,6 +70,17 @@ function copyStaticAssetsPlugin() {
         console.log('[copy-assets] Copied functions/ recursively');
       }
 
+      // 3. Copy standalone static HTML pages that don't need Vite processing
+      const staticPages = ['admin.html', 'privacy.html', 'terms.html'];
+      for (const page of staticPages) {
+        const src = resolve(__dirname, page);
+        const dest = resolve(outDir, page);
+        if (fs.existsSync(src)) {
+          fs.copyFileSync(src, dest);
+          console.log(`[copy-assets] Copied static page: ${page}`);
+        }
+      }
+
       // 2. Re-inject legacy non-module scripts into dist/index.html
       // Vite strips <script src="..."> tags without type="module" during build.
       // We must add them back manually so the app works in production.
@@ -86,8 +95,6 @@ function copyStaticAssetsPlugin() {
           '<script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>',
           '<script src="sessionUI.js?v=20260921-v9"></script>',
           '<script src="thptExam.js?v=20260913-monitoring-v1"></script>',
-          '<script src="bilingualReading.js?v=20260920-lock-v1"></script>',
-          '<script src="library.js?v=20260922-v10"></script>',
           '<script src="pricing.js?v=20260920-v4"></script>',
           '<script src="dictionary.js?v=20260926-cleanui-v1"></script>',
           '<script defer src="legacyApp.js?v=20260927-v1"></script>',
@@ -186,9 +193,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        admin: resolve(__dirname, 'admin.html'),
-        privacy: resolve(__dirname, 'privacy.html'),
-        terms: resolve(__dirname, 'terms.html'),
       },
       output: {
         manualChunks(id) {

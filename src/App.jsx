@@ -3,6 +3,7 @@
 import React, { Suspense, lazy } from 'react';
 import { AuthProvider } from './providers/AuthProvider.jsx';
 import { RouteProvider, useRoute } from './router/RouteContext.jsx';
+import { ModalProvider } from './context/ModalContext.jsx';
 import MainSidebar from './components/layout/MainSidebar.jsx';
 import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx';
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
@@ -122,9 +123,11 @@ function AppRoutes() {
 export function App() {
   return (
     <AuthProvider>
-      <RouteProvider>
-        <AppRoutes />
-      </RouteProvider>
+      <ModalProvider>
+        <RouteProvider>
+          <AppRoutes />
+        </RouteProvider>
+      </ModalProvider>
     </AuthProvider>
   );
 }

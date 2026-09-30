@@ -173,10 +173,14 @@ export function useLessonDetail() {
   }, [words, navigateTo]);
 
   const startReading = useCallback(() => {
-    if (typeof window !== 'undefined' && typeof window.startBilingualReading === 'function') {
-      window.startBilingualReading(passageId);
+    // Set passageId context for React's useBilingualReading hook to pick up
+    if (passageId && typeof window !== 'undefined') {
+      window._currentPassageId = passageId;
     }
-  }, [passageId]);
+    // Navigate via React router (safe for React DOM) instead of legacy window fn
+    navigateTo('bilingual-reading');
+  }, [passageId, navigateTo]);
+
 
   return {
     topicId,
