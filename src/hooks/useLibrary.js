@@ -59,12 +59,14 @@ export function useLibrary() {
     setIsLoading(true);
     setError(null);
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const uid = user?.id ?? null;
+
       let query = supabase
         .from('topics')
         .select(`
           id, name, icon, description, created_at, like_count, clone_count,
-          tags, is_public, author_name, author_avatar, word_count,
-          topic_likes(user_id)
+          tags, is_public, author_name, author_avatar, is_pro
         `)
         .eq('is_public', true)
         .order(sortBy === 'popular' ? 'like_count' : sortBy === 'clones' ? 'clone_count' : 'created_at', { ascending: false })
@@ -77,16 +79,20 @@ export function useLibrary() {
         query = query.ilike('name', `%${debouncedSearch.trim()}%`);
       }
 
-      const { data, error: err } = await query;
-      if (err) throw err;
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      const uid = user?.id ?? null;
-      
-      const enriched = (data || []).map(t => ({
+      const [topicsRes, likedRes] = await Promise.all([
+        query,
+        uid
+          ? supabase.from('topic_likes').select('topic_id').eq('user_id', uid)
+          : Promise.resolve({ data: [] }),
+      ]);
+
+      if (topicsRes.error) throw topicsRes.error;
+
+      const likedSet = new Set((likedRes.data || []).map((l) => l.topic_id));
+      const enriched = (topicsRes.data || []).map((t) => ({
         ...t,
-        hasLiked: uid ? (t.topic_likes || []).some(l => l.user_id === uid) : false,
-        totalWords: t.word_count || 0,
+        hasLiked: likedSet.has(t.id),
+        totalWords: 0,
       }));
       setTopics(enriched);
     } catch (err) {
@@ -105,11 +111,11 @@ export function useLibrary() {
       if (!user) { setTopics([]); return; }
       const { data, error: err } = await supabase
         .from('topics')
-        .select('id, name, icon, description, created_at, like_count, clone_count, tags, is_public, word_count')
+        .select('id, name, icon, description, created_at, like_count, clone_count, tags, is_public, author_name, author_avatar')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (err) throw err;
-      setTopics((data || []).map(t => ({ ...t, totalWords: t.word_count || 0 })));
+      setTopics((data || []).map(t => ({ ...t, totalWords: 0 })));
     } catch (err) {
       setError(err.message || 'Không thể tải bộ từ của bạn.');
     } finally {
@@ -123,17 +129,23 @@ export function useLibrary() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) { setTopics([]); return; }
-      const { data, error: err } = await supabase
+      const { data: likedRows, error: err } = await supabase
         .from('topic_likes')
-        .select('topic_id, topics(id, name, icon, description, created_at, like_count, clone_count, tags, is_public, word_count, author_name, author_avatar)')
+        .select('topic_id')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
       if (err) throw err;
-      const likedTopics = (data || [])
-        .map(row => row.topics)
-        .filter(Boolean)
-        .map(t => ({ ...t, hasLiked: true, totalWords: t.word_count || 0 }));
-      setTopics(likedTopics);
+      const topicIds = (likedRows || []).map(row => row.topic_id).filter(Boolean);
+      if (topicIds.length === 0) {
+        setTopics([]);
+        return;
+      }
+      const { data: topicsData, error: topicsErr } = await supabase
+        .from('topics')
+        .select('id, name, icon, description, created_at, like_count, clone_count, tags, is_public, author_name, author_avatar')
+        .in('id', topicIds);
+      if (topicsErr) throw topicsErr;
+      setTopics((topicsData || []).map(t => ({ ...t, hasLiked: true, totalWords: 0 })));
     } catch (err) {
       setError(err.message || 'Không thể tải danh sách yêu thích.');
     } finally {
@@ -229,16 +241,17 @@ export function useLibrary() {
       const uid = user?.id ?? null;
       
       const [topicRes, wordsRes, likeRes] = await Promise.all([
-        supabase.from('topics').select('id, name, icon, description, created_at, like_count, clone_count, tags, is_public, author_name, author_avatar, word_count').eq('id', topicId).eq('is_public', true).single(),
+        supabase.from('topics').select('id, name, icon, description, created_at, like_count, clone_count, tags, is_public, author_name, author_avatar').eq('id', topicId).maybeSingle(),
         supabase.from('words').select('id, word, pos, phonetic, meaning, example_sentence, notes, image_url, word_order').eq('topic_id', topicId).order('word_order', { ascending: true, nullsFirst: false }).limit(100),
         uid ? supabase.from('topic_likes').select('id').eq('topic_id', topicId).eq('user_id', uid).maybeSingle() : Promise.resolve({ data: null }),
       ]);
       if (topicRes.error) throw topicRes.error;
+      if (!topicRes.data) throw new Error('Không tìm thấy dữ liệu bộ từ vựng.');
       setActiveTopicDetail({
         ...topicRes.data,
         words: wordsRes.data || [],
         hasLiked: !!likeRes.data,
-        totalWords: topicRes.data.word_count || (wordsRes.data || []).length,
+        totalWords: (wordsRes.data || []).length,
       });
     } catch (err) {
       setDetailError(err.message || 'Không thể tải chi tiết bộ từ.');

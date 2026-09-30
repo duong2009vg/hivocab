@@ -32,124 +32,108 @@ function lsSet(topics) {
   } catch { /* quota full — ignore */ }
 }
 
-// ─── Core parallel query ─────────────────────────────────────────────────────
+// ─── Core fast query ─────────────────────────────────────────────────────────
 /**
- * Fetches topics + word-counts in two PARALLEL queries (~150ms total).
- * For authenticated users also fetches word_progress in a third parallel query.
- * Returns an array of enriched topic objects.
+ * Fetches topics with word counts & user progress.
+ * Uses get_topic_summaries RPC with 2.0s timeout (< 150ms execution).
+ * Falls back immediately to direct topics query without looping 66,000 words.
  */
 async function fetchTopicsFromSupabase() {
-  // Get current auth user (non-blocking, fast because session is in localStorage)
   const { data: { user } } = await supabase.auth.getUser();
   const uid = user?.id ?? null;
 
-  // ── Query 1: All topics ──────────────────────────────────────────────────
-  const topicsPromise = supabase
+  // 1. Try RPC get_topic_summaries with 2.0s timeout (server-side aggregation)
+  let rpcData = null;
+  let rpcError = null;
+  try {
+    const rpcPromise = supabase.rpc('get_topic_summaries');
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('RPC_TIMEOUT')), 2000)
+    );
+    const rpcRes = await Promise.race([rpcPromise, timeoutPromise]);
+    rpcData = rpcRes.data;
+    rpcError = rpcRes.error;
+  } catch (err) {
+    rpcError = err;
+  }
+
+  if (!rpcError && Array.isArray(rpcData) && rpcData.length > 0) {
+    const topics = rpcData.map((t) => {
+      const total = Number(t.total_words ?? t.totalWords ?? 0);
+      const reviewed = Number(t.reviewed_words ?? t.reviewedWords ?? 0);
+      const progress = total > 0 ? Math.round((reviewed / total) * 100) : Number(t.progress ?? 0);
+      return {
+        id: t.id,
+        name: t.name,
+        icon: t.icon || 'folder',
+        category: t.category || 'general',
+        is_pro: Boolean(t.is_pro),
+        description: t.description || null,
+        user_id: t.user_id || null,
+        totalWords: total,
+        progress: Math.min(100, Math.max(0, progress)),
+        created_at: t.created_at || null,
+      };
+    });
+
+    topics.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
+
+    // Cache to memory + localStorage
+    MEM.topics = topics;
+    MEM.topicsAt = Date.now();
+    if (uid !== MEM.progressUid) {
+      MEM.progress = null;
+      MEM.progressUid = uid;
+    }
+    lsSet(topics);
+
+    if (typeof window !== 'undefined') window._allTopics = topics;
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: topics }));
+    }
+    return topics;
+  }
+
+  // 2. Fast Fallback: Direct query on topics table (< 150ms, no 66,000 words loop)
+  let query = supabase
     .from('topics')
     .select('id, name, icon, category, is_pro, description, user_id, created_at')
     .order('category')
     .order('name');
 
-  // ── Query 2: Word counts per topic (single aggregation query) ────────────
-  // Using Supabase's group-by via PostgREST "group by" trick:
-  // SELECT topic_id, count(*) FROM words GROUP BY topic_id
-  const wordCountPromise = supabase
-    .from('words')
-    .select('topic_id')
-    .then(({ data, error }) => {
-      if (error || !data) return new Map();
-      // Group client-side (data is all word rows — Supabase returns up to 1000 by default)
-      // Use range to get all rows efficiently
-      return data; // we'll handle below after fetching all pages
-    });
+  if (uid) {
+    query = query.or(`user_id.eq.${uid},user_id.is.null`);
+  }
 
-  // ── Query 3: User progress (only for logged-in users) ───────────────────
-  const progressPromise = uid
-    ? supabase.rpc('get_topic_summaries').then(({ data, error }) => {
-        // RPC returns per-topic progress — use if fast, skip on error
-        if (error || !data) return null;
-        return data; // [{ topic_id, total_words, reviewed_words, ... }]
-      })
-    : Promise.resolve(null);
-
-  // ── Parallel fetch all word counts with pagination ───────────────────────
-  const allWordCountsPromise = (async () => {
-    const PAGE = 1000;
-    let allWords = [];
-    let from = 0;
-    while (true) {
-      const { data, error } = await supabase
-        .from('words')
-        .select('topic_id')
-        .range(from, from + PAGE - 1);
-      if (error) break;
-      if (!data || data.length === 0) break;
-      allWords = allWords.concat(data);
-      if (data.length < PAGE) break;
-      from += PAGE;
-    }
-    const map = new Map();
-    for (const row of allWords) {
-      map.set(row.topic_id, (map.get(row.topic_id) || 0) + 1);
-    }
-    return map;
-  })();
-
-  // ── Wait for topics + word counts in parallel ────────────────────────────
-  const [
-    { data: topicsRaw, error: topicsError },
-    wordCountMap,
-    rpcProgress,
-  ] = await Promise.all([
-    topicsPromise,
-    allWordCountsPromise,
-    progressPromise,
-  ]);
-
+  const { data: topicsRaw, error: topicsError } = await query;
   if (topicsError || !topicsRaw) {
     throw new Error(topicsError?.message || 'Failed to fetch topics');
   }
 
-  // Build progress map from RPC if available
-  let progressMap = null;
-  if (rpcProgress && Array.isArray(rpcProgress)) {
-    progressMap = new Map();
-    for (const row of rpcProgress) {
-      // row shape depends on SQL function — guard gracefully
-      const total = row.total_words ?? row.totalWords ?? 0;
-      const reviewed = row.reviewed_words ?? row.reviewedWords ?? 0;
-      progressMap.set(row.topic_id ?? row.id, {
-        totalWords: total,
-        progress: total > 0 ? Math.round((reviewed / total) * 100) : 0,
-      });
-    }
-  }
+  // Preserve any known word counts from existing cache
+  const existingMap = new Map((MEM.topics || []).map(t => [t.id, t.totalWords]));
 
-  // ── Merge into enriched topic objects ────────────────────────────────────
-  const topics = topicsRaw.map((t) => {
-    const wordCount = wordCountMap.get(t.id) || 0;
-    const prog = progressMap?.get(t.id);
-    return {
-      ...t,
-      totalWords: prog?.totalWords ?? wordCount,
-      progress: prog?.progress ?? 0,
-    };
-  });
+  const topics = topicsRaw.map((t) => ({
+    ...t,
+    icon: t.icon || 'folder',
+    category: t.category || 'general',
+    is_pro: Boolean(t.is_pro),
+    totalWords: existingMap.get(t.id) || 0,
+    progress: 0,
+  }));
+
+  topics.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
 
   // Cache to memory + localStorage
   MEM.topics = topics;
   MEM.topicsAt = Date.now();
-  MEM.wordCounts = wordCountMap;
   if (uid !== MEM.progressUid) {
-    MEM.progress = null; // invalidate progress on user change
+    MEM.progress = null;
     MEM.progressUid = uid;
   }
   lsSet(topics);
 
-  // Sync to window._allTopics so legacy scripts stay in sync
   if (typeof window !== 'undefined') window._allTopics = topics;
-
-  // Notify React hooks that fresh data is available (enables SWR re-render)
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: topics }));
   }

@@ -10,6 +10,7 @@ import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
 import GlobalBugReportBtn from './components/common/GlobalBugReportBtn.jsx';
 import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
 const Modals = lazy(() => import('./components/common/Modals.jsx'));
 const BugReportModal = lazy(() => import('./components/modals/BugReportModal.jsx'));
@@ -108,10 +109,12 @@ function AppRoutes() {
       {(isMainTab || isTopicDetail) && <MobileProfileDropdown />}
       {shouldShowBottomNav && <MobileBottomNav />}
 
-      {/* Render ONLY the active page inside Suspense */}
-      <Suspense fallback={<RouteLoadingFallback />}>
-        {renderActivePage()}
-      </Suspense>
+      {/* Render active page inside ErrorBoundary and Suspense to prevent blank screen */}
+      <ErrorBoundary>
+        <Suspense fallback={<RouteLoadingFallback />}>
+          {renderActivePage()}
+        </Suspense>
+      </ErrorBoundary>
 
       <GlobalBugReportBtn />
       <Suspense fallback={null}>
@@ -125,13 +128,15 @@ function AppRoutes() {
 
 export function App() {
   return (
-    <AuthProvider>
-      <ModalProvider>
-        <RouteProvider>
-          <AppRoutes />
-        </RouteProvider>
-      </ModalProvider>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <ModalProvider>
+          <RouteProvider>
+            <AppRoutes />
+          </RouteProvider>
+        </ModalProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   );
 }
 
