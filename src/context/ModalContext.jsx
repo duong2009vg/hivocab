@@ -29,12 +29,12 @@ export function ModalProvider({ children }) {
     // BRIDGE: also call legacy window handlers for modals not yet React-ified.
     // Delete each entry below once the corresponding modal is migrated.
     const legacyMap = {
-      bugReport:      () => window.openBugReportModal?.(data),
       pricingModal:   () => window.openPricingModal?.(),
       createTopic:    () => window.openCreateTopicModal?.(),
-      addWord:        () => window.openAddWordModal?.(data.topicId, data.passageId),
+      addWord:        () => (data && (data.topicId !== undefined || data.passageId !== undefined))
+        ? window.openAddWordModal?.(data.topicId, data.passageId)
+        : (window.openVocabAddModal ? window.openVocabAddModal() : window.openAddWordModal?.()),
       bulkAdd:        () => window.openVocabBulkAddModal?.(),
-      srsExplainer:   () => window.openSRSExplainerModal?.(),
       forgotPassword: () => window.openForgotPasswordModal?.(),
       authError:      () => window.openAuthErrorModal?.(data.desc),
     };

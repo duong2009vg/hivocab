@@ -1,15 +1,14 @@
 // src/components/layout/MobileProfileDropdown.jsx
-// Pixel-Perfect React Mobile Profile Dropdown with useAuth & legacyBridge
+// Pixel-Perfect React Mobile Profile Dropdown with useAuth, useRoute & useModal
 import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
-import {
-  navigate,
-  openPricingModal,
-  handleMobileDropdownAuth,
-} from '../../legacy/legacyBridge.js';
+import { useRoute } from '../../router/RouteContext.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function MobileProfileDropdown() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const { navigateTo } = useRoute();
+  const { openModal } = useModal();
 
   const closeDropdown = () => {
     const el = document.getElementById('mobile-profile-dropdown');
@@ -19,23 +18,28 @@ export function MobileProfileDropdown() {
   const handleProfileClick = () => {
     closeDropdown();
     if (!user) {
-      navigate('login');
+      navigateTo('login');
     }
   };
 
   const handleUpgrade = () => {
     closeDropdown();
-    openPricingModal();
+    openModal('pricingModal');
   };
 
   const handleSettings = () => {
     closeDropdown();
-    navigate('settings');
+    navigateTo('settings');
   };
 
-  const handleAuth = () => {
+  const handleAuth = async () => {
     closeDropdown();
-    handleMobileDropdownAuth();
+    if (user) {
+      await signOut();
+      navigateTo('landing');
+    } else {
+      navigateTo('login');
+    }
   };
 
   return (

@@ -5,9 +5,10 @@ import React, { useState, useCallback } from 'react';
 import { useThptExams } from '../../hooks/useThptExams';
 import { ExamCard } from '../thpt/ExamCard';
 import { ExamCustomTimeModal } from '../thpt/ExamModals';
-import { navigate } from '../../legacy/legacyBridge';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageExercises() {
+  const { navigateTo } = useRoute();
   const { exams, allExams, loading, error, searchQuery, setSearchQuery, bestScores } = useThptExams();
 
   // Custom time modal state
@@ -16,8 +17,8 @@ export function PageExercises() {
   // Bắt đầu thi với số phút cho trước
   const handleStart = useCallback((examId, minutes) => {
     window._thptStartConfig = { examId, minutes };
-    navigate('thpt-room', true);
-  }, []);
+    navigateTo('thpt-room', true);
+  }, [navigateTo]);
 
   // Mở modal chọn thời gian tùy chỉnh
   const handleOpenCustomTime = useCallback((examId, examTitle) => {

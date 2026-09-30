@@ -1,15 +1,9 @@
-// src/components/pages/PageDashboard.jsx
-// Pixel-Perfect React Component with Reactive State, Countdown Timer, Heatmap Calendar & IELTS Goal
 import React from 'react';
 import { useDashboardStats } from '../../hooks/useDashboardStats.js';
-import {
-  toggleMobileProfileDropdown,
-  startSession,
-  navigate,
-  filterVocabLevel,
-} from '../../legacy/legacyBridge.js';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageDashboard() {
+  const { navigateTo } = useRoute();
   const {
     stats,
     loading,
@@ -40,9 +34,11 @@ export function PageDashboard() {
   };
 
   const handleLevelClick = (lvl) => {
-    navigate('vocabulary');
+    navigateTo('vocabulary');
     setTimeout(() => {
-      filterVocabLevel(lvl);
+      if (typeof window !== 'undefined' && typeof window.filterVocabLevel === 'function') {
+        window.filterVocabLevel(lvl);
+      }
     }, 150);
   };
 
@@ -74,7 +70,7 @@ export function PageDashboard() {
                 </span>
               </div>
               <button
-                onClick={toggleMobileProfileDropdown}
+                onClick={() => typeof window !== 'undefined' && window.toggleMobileProfileDropdown?.()}
                 id="mobile-profile-avatar"
                 className="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0"
                 aria-label="Hồ sơ"
@@ -105,7 +101,7 @@ export function PageDashboard() {
                   </p>
                   <button
                     id="dash-start-btn"
-                    onClick={startSession}
+                    onClick={() => typeof window !== 'undefined' && window.startSession?.()}
                     className="bg-primary text-on-primary px-7 py-3 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[20px]">play_arrow</span>Ôn tập ngay
@@ -160,7 +156,7 @@ export function PageDashboard() {
                     Bạn chưa có từ vựng nào trong danh sách ôn tập. Hãy chọn một chủ đề để bắt đầu học những từ mới đầu tiên nhé!
                   </p>
                   <button
-                    onClick={() => navigate('topics')}
+                    onClick={() => navigateTo('topics')}
                     className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[18px]">explore</span>Khám phá chủ đề
@@ -181,7 +177,7 @@ export function PageDashboard() {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate('vocabulary')}
+                  onClick={() => navigateTo('vocabulary')}
                   className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer shrink-0"
                   title="Xem danh sách từ trong Sổ từ"
                 >
@@ -268,7 +264,7 @@ export function PageDashboard() {
               </div>
               <div className="w-full md:w-auto flex md:flex-col sm:flex-row items-stretch md:items-end justify-end gap-3 shrink-0">
                 <button
-                  onClick={() => navigate('exercises')}
+                  onClick={() => navigateTo('exercises')}
                   className="w-full md:w-auto bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>Vào phòng thi ngay</span>

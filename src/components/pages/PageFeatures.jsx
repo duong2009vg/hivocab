@@ -1,18 +1,17 @@
-// src/components/pages/PageFeatures.jsx
-// Pixel-Perfect React Features Page with Clean Bridge Integration
 import React from 'react';
-import { navigate, handleStartNow } from '../../legacy/legacyBridge.js';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageFeatures() {
+  const { navigateTo } = useRoute();
   return (
     <div id="page-features" className="page active">
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
         <div className="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
-          <a className="cursor-pointer" onClick={() => navigate('landing')} aria-label="Hi - Trang chu">
+          <a className="cursor-pointer" onClick={() => navigateTo('landing')} aria-label="Hi - Trang chu">
             <img className="brand-logo-sm" src="logo-mark.svg" alt="Hi" />
           </a>
           <button
-            onClick={() => navigate('landing')}
+            onClick={() => navigateTo('landing')}
             className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại
@@ -142,7 +141,7 @@ export function PageFeatures() {
             Đăng ký tài khoản ngay hôm nay để nhận trọn vẹn 2 tháng trải nghiệm Full tính năng hoàn toàn miễn phí!
           </p>
           <button
-            onClick={handleStartNow}
+            onClick={() => navigateTo('dashboard')}
             className="inline-flex items-center gap-2 px-8 py-3.5 bg-primary text-white font-bold rounded-xl hover:bg-primary/90 transition-all shadow-md hover:shadow-lg cursor-pointer"
           >
             <span className="material-symbols-outlined">rocket_launch</span> Bắt đầu học miễn phí

@@ -3,9 +3,10 @@
 import React from 'react';
 import { useTopicDetail } from '../../hooks/useTopicDetail.js';
 import { useRoute } from '../../router/RouteContext.jsx';
-import { openAddWordModal } from '../../legacy/legacyBridge.js';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function PageTopicDetail() {
+  const { openModal } = useModal();
   const {
     topicId,
     topicName,
@@ -102,7 +103,7 @@ export function PageTopicDetail() {
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <button
-                onClick={() => openAddWordModal(topicId)}
+                onClick={() => openModal('addWord', { topicId })}
                 className="bg-primary text-on-primary hover:opacity-95 font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -126,7 +127,7 @@ export function PageTopicDetail() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
-                    onClick={() => openAddWordModal(topicId)}
+                    onClick={() => openModal('addWord', { topicId })}
                     className="bg-primary text-on-primary font-bold text-xs px-3 py-2 rounded-xl transition-all active:opacity-85 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[16px]">add</span>

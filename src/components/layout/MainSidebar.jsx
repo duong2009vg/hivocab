@@ -3,20 +3,35 @@
 import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
-import {
-  startSession,
-  handleProfileClick,
-  openPricingModal,
-  handleLogout,
-} from '../../legacy/legacyBridge.js';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function MainSidebar() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
+  const { openModal } = useModal();
 
   const activeTab = (currentRoute === 'topic-detail' || currentRoute === 'lesson-detail')
     ? 'topics'
     : (currentRoute === 'thpt-room' ? 'exercises' : currentRoute);
+
+  const handleProfileClick = () => {
+    if (user) {
+      navigateTo('settings');
+    } else {
+      navigateTo('login');
+    }
+  };
+
+  const handleStartSession = () => {
+    if (typeof window !== 'undefined' && typeof window.startSession === 'function') {
+      window.startSession();
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigateTo('landing');
+  };
 
   return (
     <nav
@@ -62,7 +77,7 @@ export function MainSidebar() {
       </div>
 
       <button
-        onClick={startSession}
+        onClick={handleStartSession}
         className="mb-4 shrink-0 w-full py-2.5 px-4 bg-primary text-on-primary rounded-xl font-semibold text-[13px] tracking-tight transition-all duration-200 active:scale-[0.98] shadow-sm hover:opacity-95 flex items-center justify-center gap-2 cursor-pointer"
       >
         <span className="material-symbols-outlined text-[18px]">play_circle</span>
@@ -126,7 +141,7 @@ export function MainSidebar() {
       <div className="mt-auto shrink-0 flex flex-col gap-1 pt-3 border-t border-outline-variant/20 dark:border-[#31353A]">
         <button
           id="sidebar-upgrade-pro-btn"
-          onClick={openPricingModal}
+          onClick={() => openModal('pricingModal')}
           className="btn-upgrade-pro w-full flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-200 bg-amber-500/10 hover:bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 cursor-pointer text-xs font-bold mb-1.5 group"
         >
           <div className="flex items-center gap-2 truncate">
@@ -140,7 +155,7 @@ export function MainSidebar() {
           </span>
         </button>
         <a
-          onClick={() => navigate('settings')}
+          onClick={() => navigateTo('settings')}
           id="nav-desktop-settings"
           className="sidebar-item flex items-center gap-3 px-3.5 h-9 rounded-xl transition-all duration-150 text-on-surface-variant hover:bg-surface-container/70 dark:hover:bg-[#25292F] hover:text-on-surface text-[13.5px] font-medium cursor-pointer"
         >

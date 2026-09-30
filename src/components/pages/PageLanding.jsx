@@ -1,9 +1,8 @@
-// src/components/pages/PageLanding.jsx
-// Pixel-Perfect React Landing Page with Clean Navigation Bridge
 import React from 'react';
-import { navigate } from '../../legacy/legacyBridge.js';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageLanding() {
+  const { navigateTo } = useRoute();
   return (
     <div id="page-landing" className="page font-inter active">
       <div id="landing-main-wrapper" className="relative overflow-hidden w-full">
@@ -18,37 +17,37 @@ export function PageLanding() {
         <section className="relative z-10 min-h-screen flex flex-col pt-6 pb-20 px-6 sm:px-8">
           <header className="relative z-20 flex items-center justify-between mx-auto w-full max-w-7xl">
             <div className="flex-shrink-0 flex items-center">
-              <a className="cursor-pointer" onClick={() => navigate('landing')} aria-label="Hi - Trang chu">
+              <a className="cursor-pointer" onClick={() => navigateTo('landing')} aria-label="Hi - Trang chu">
                 <img className="brand-logo-hero" src="logo-mark-white.svg" alt="Hi" />
               </a>
             </div>
             <nav className="hidden lg:flex items-center space-x-1 glass-nav rounded-full px-2 py-1.5">
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigate('features')}>
+              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('features')}>
                 Tính năng
               </a>
               <div className="w-px h-4 bg-white/30 mx-1"></div>
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigate('reviews')}>
+              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('reviews')}>
                 Đánh giá
               </a>
               <div className="w-px h-4 bg-white/30 mx-1"></div>
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigate('support')}>
+              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('support')}>
                 Hỗ trợ
               </a>
               <div className="w-px h-4 bg-white/30 mx-1"></div>
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigate('faq')}>
+              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('faq')}>
                 FAQ
               </a>
             </nav>
             <div className="flex items-center space-x-3">
               <a
                 className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-white bg-white/20 hover:bg-white/30 border border-white/30 text-xs sm:text-sm font-semibold backdrop-blur-sm transition-colors cursor-pointer"
-                onClick={() => navigate('dashboard')}
+                onClick={() => navigateTo('dashboard')}
               >
                 Bắt đầu ngay
               </a>
               <a
                 className="inline-flex items-center justify-center px-5 py-2 rounded-lg text-gray-900 bg-white hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm transition-colors cursor-pointer"
-                onClick={() => navigate('login')}
+                onClick={() => navigateTo('login')}
               >
                 Đăng nhập
               </a>
@@ -71,7 +70,7 @@ export function PageLanding() {
                 <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-start">
                   <a
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-white hover:bg-gray-100 shadow-md hover:shadow-lg transition-all cursor-pointer"
-                    onClick={() => navigate('dashboard')}
+                    onClick={() => navigateTo('dashboard')}
                   >
                     <span>Bắt đầu ngay</span>
                     <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
@@ -80,7 +79,7 @@ export function PageLanding() {
               </div>
               <div className="lg:col-span-5 hidden lg:flex flex-col gap-3.5 relative ml-auto w-full max-w-[360px] fade-in" style={{ animationDelay: '0.2s' }}>
                 <div
-                  onClick={() => navigate('dashboard')}
+                  onClick={() => navigateTo('dashboard')}
                   className="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg"
                 >
                   <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
@@ -88,7 +87,7 @@ export function PageLanding() {
                   <span className="text-white text-sm font-semibold truncate">CAM 19 • Test 2 • Passage 1 →</span>
                 </div>
                 <div
-                  onClick={() => navigate('features')}
+                  onClick={() => navigateTo('features')}
                   className="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg"
                 >
                   <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
@@ -96,7 +95,7 @@ export function PageLanding() {
                   <span className="text-white text-sm font-semibold">Đọc Chủ Động & Che Dịch →</span>
                 </div>
                 <div
-                  onClick={() => navigate('dashboard')}
+                  onClick={() => navigateTo('dashboard')}
                   className="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg"
                 >
                   <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
@@ -170,11 +169,11 @@ export function PageLanding() {
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Điều hướng</h4>
             <ul className="space-y-2 text-xs sm:text-sm">
-              <li><a onClick={() => navigate('features')} className="cursor-pointer hover:text-blue-600 transition-colors">Tính năng</a></li>
-              <li><a onClick={() => navigate('reviews')} className="cursor-pointer hover:text-blue-600 transition-colors">Đánh giá</a></li>
-              <li><a onClick={() => navigate('support')} className="cursor-pointer hover:text-blue-600 transition-colors">Hỗ trợ</a></li>
-              <li><a onClick={() => navigate('faq')} className="cursor-pointer hover:text-blue-600 transition-colors">Câu hỏi thường gặp (FAQ)</a></li>
-              <li><a onClick={() => navigate('login')} className="cursor-pointer hover:text-blue-600 transition-colors">Đăng nhập / Đăng ký</a></li>
+              <li><a onClick={() => navigateTo('features')} className="cursor-pointer hover:text-blue-600 transition-colors">Tính năng</a></li>
+              <li><a onClick={() => navigateTo('reviews')} className="cursor-pointer hover:text-blue-600 transition-colors">Đánh giá</a></li>
+              <li><a onClick={() => navigateTo('support')} className="cursor-pointer hover:text-blue-600 transition-colors">Hỗ trợ</a></li>
+              <li><a onClick={() => navigateTo('faq')} className="cursor-pointer hover:text-blue-600 transition-colors">Câu hỏi thường gặp (FAQ)</a></li>
+              <li><a onClick={() => navigateTo('login')} className="cursor-pointer hover:text-blue-600 transition-colors">Đăng nhập / Đăng ký</a></li>
             </ul>
           </div>
 

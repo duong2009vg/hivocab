@@ -2,9 +2,10 @@
 // 100% Pure React Component with Reactive State, Word Filters, Audio Player & SRS Levels
 import React from 'react';
 import { useLessonDetail, SRS_LEVEL_CONFIG } from '../../hooks/useLessonDetail.js';
-import { openAddWordModal, openPricingModal } from '../../legacy/legacyBridge.js';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function PageLessonDetail() {
+  const { openModal } = useModal();
   const {
     topicId,
     topicName,
@@ -134,7 +135,7 @@ export function PageLessonDetail() {
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => openAddWordModal(topicId, passageId)}
+                onClick={() => openModal('addWord', { topicId, passageId })}
                 className="bg-primary text-on-primary hover:opacity-95 font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95 shadow-sm shadow-primary/20 flex items-center gap-1.5 shrink-0 cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -171,7 +172,7 @@ export function PageLessonDetail() {
                 <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
-                    onClick={() => openAddWordModal(topicId, passageId)}
+                    onClick={() => openModal('addWord', { topicId, passageId })}
                     className="bg-primary text-on-primary font-bold text-xs px-3 py-2 rounded-xl transition-all active:opacity-85 shadow-sm shadow-primary/20 flex items-center gap-1 shrink-0 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[16px]">add</span>
@@ -309,7 +310,7 @@ export function PageLessonDetail() {
               </div>
               <div className="pt-2">
                 <button
-                  onClick={() => openPricingModal()}
+                  onClick={() => openModal('pricingModal')}
                   className="py-2.5 px-6 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-xs shadow-md shadow-amber-500/25 transition-all cursor-pointer inline-flex items-center gap-1.5"
                 >
                   <span className="material-symbols-outlined text-base">diamond</span>

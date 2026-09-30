@@ -11,8 +11,9 @@ import GlobalBugReportBtn from './components/common/GlobalBugReportBtn.jsx';
 import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 
-// Code Splitting via React.lazy — Huge bundle reduction & on-demand loading
 const Modals = lazy(() => import('./components/common/Modals.jsx'));
+const BugReportModal = lazy(() => import('./components/modals/BugReportModal.jsx'));
+const SrsExplainerModal = lazy(() => import('./components/modals/SrsExplainerModal.jsx'));
 const PageLanding = lazy(() => import('./components/pages/PageLanding.jsx'));
 const PageFeatures = lazy(() => import('./components/pages/PageFeatures.jsx'));
 const PageReviews = lazy(() => import('./components/pages/PageReviews.jsx'));
@@ -114,6 +115,8 @@ function AppRoutes() {
 
       <GlobalBugReportBtn />
       <Suspense fallback={null}>
+        <BugReportModal />
+        <SrsExplainerModal />
         <Modals />
       </Suspense>
     </div>

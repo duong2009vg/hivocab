@@ -1,22 +1,48 @@
-// src/components/pages/PageSupport.jsx
-// Pixel-Perfect React Support Page with Clean Bridge Integration
-import React from 'react';
-import {
-  navigate,
-  copyZaloSupport,
-  handleSupportSubmit,
-} from '../../legacy/legacyBridge.js';
+import React, { useState } from 'react';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageSupport() {
+  const { navigateTo } = useRoute();
+  const [copied, setCopied] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    contact: '',
+    message: '',
+  });
+
+  const handleCopyZalo = () => {
+    const phone = '0846407898';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(phone).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      }).catch(() => {
+        prompt('Số điện thoại Zalo Admin:', phone);
+      });
+    } else {
+      prompt('Số điện thoại Zalo Admin:', phone);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const name = formData.name.trim() || 'Bạn';
+    alert(`Cảm ơn ${name}! HiVocab đã tiếp nhận thông tin của bạn. Nếu cần xử lý gấp, bạn có thể nhắn tin trực tiếp qua Zalo Admin: 0846 407 898 nhé!`);
+    setFormData({ name: '', contact: '', message: '' });
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 4000);
+  };
+
   return (
     <div id="page-support" className="page active">
       <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm">
         <div className="flex items-center justify-between mx-auto w-full max-w-7xl px-6 md:px-8 h-16 md:h-20">
-          <a className="cursor-pointer" onClick={() => navigate('landing')} aria-label="Hi - Trang chu">
+          <a className="cursor-pointer" onClick={() => navigateTo('landing')} aria-label="Hi - Trang chu">
             <img className="brand-logo-sm" src="logo-mark.svg" alt="Hi" />
           </a>
           <button
-            onClick={() => navigate('landing')}
+            onClick={() => navigateTo('landing')}
             className="text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 md:gap-2 font-medium text-sm md:text-base cursor-pointer"
           >
             <span className="material-symbols-outlined text-[20px] md:text-[24px]">arrow_back</span> Quay lại
@@ -58,11 +84,13 @@ export function PageSupport() {
             <button
               type="button"
               id="btn-copy-zalo"
-              onClick={copyZaloSupport}
+              onClick={handleCopyZalo}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-bold border border-outline-variant/40 transition-all shadow-xs cursor-pointer"
             >
-              <span className="material-symbols-outlined text-base" id="icon-copy-zalo">content_copy</span>
-              <span id="text-copy-zalo">Sao chép</span>
+              <span className="material-symbols-outlined text-base" id="icon-copy-zalo">
+                {copied ? 'check' : 'content_copy'}
+              </span>
+              <span id="text-copy-zalo">{copied ? 'Đã chép số!' : 'Sao chép'}</span>
             </button>
           </div>
 
@@ -133,7 +161,7 @@ export function PageSupport() {
 
         {/* CONTACT FORM */}
         <form
-          onSubmit={handleSupportSubmit}
+          onSubmit={handleSubmit}
           className="bg-surface-container-lowest/80 border border-outline-variant/30 rounded-2xl p-6 md:p-8 flex flex-col gap-4 fade-in shadow-sm"
           style={{ animationDelay: '0.2s' }}
         >
@@ -141,17 +169,46 @@ export function PageSupport() {
             <h2 className="font-bold text-lg text-on-surface">Gửi tin nhắn hoặc góp ý</h2>
             <p className="text-xs text-on-surface-variant mt-1">Chúng tôi trân trọng từng ý kiến đóng góp của bạn để hoàn thiện HiVocab mỗi ngày.</p>
           </div>
+          {submitted && (
+            <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-semibold">
+              ✓ Đã gửi thông tin thành công! Admin sẽ phản hồi bạn trong thời gian sớm nhất.
+            </div>
+          )}
           <div>
             <label htmlFor="support-name" className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Họ và tên</label>
-            <input type="text" id="support-name" required placeholder="Nguyễn Văn A" className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface text-sm transition-colors" />
+            <input
+              type="text"
+              id="support-name"
+              required
+              placeholder="Nguyễn Văn A"
+              value={formData.name}
+              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface text-sm transition-colors"
+            />
           </div>
           <div>
             <label htmlFor="support-contact" className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Email hoặc Số điện thoại (Zalo)</label>
-            <input type="text" id="support-contact" required placeholder="Ví dụ: nam@gmail.com hoặc 0912..." className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface text-sm transition-colors" />
+            <input
+              type="text"
+              id="support-contact"
+              required
+              placeholder="Ví dụ: nam@gmail.com hoặc 0912..."
+              value={formData.contact}
+              onChange={(e) => setFormData(prev => ({ ...prev, contact: e.target.value }))}
+              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none text-on-surface text-sm transition-colors"
+            />
           </div>
           <div>
             <label htmlFor="support-message" className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Nội dung câu hỏi / Báo lỗi</label>
-            <textarea id="support-message" required placeholder="Mô tả chi tiết câu hỏi hoặc lỗi bạn gặp phải..." rows="4" className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none resize-none text-on-surface text-sm transition-colors"></textarea>
+            <textarea
+              id="support-message"
+              required
+              placeholder="Mô tả chi tiết câu hỏi hoặc lỗi bạn gặp phải..."
+              rows="4"
+              value={formData.message}
+              onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-3 rounded-xl outline-none resize-none text-on-surface text-sm transition-colors"
+            ></textarea>
           </div>
           <button type="submit" className="w-full bg-primary text-white font-bold py-3.5 rounded-xl hover:bg-primary/90 transition-colors shadow-sm flex items-center justify-center gap-2 mt-2 cursor-pointer">
             <span className="material-symbols-outlined text-lg">send</span> Gửi thông tin cho Admin

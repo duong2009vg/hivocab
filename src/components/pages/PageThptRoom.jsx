@@ -10,9 +10,10 @@ import { ExamPassagePanel } from '../thpt/ExamPassagePanel';
 import { ExamQuestionsPanel } from '../thpt/ExamQuestionsPanel';
 import { ExamPalette } from '../thpt/ExamPalette';
 import { ExamConfirmModal, ExamResultsModal } from '../thpt/ExamModals';
-import { navigate } from '../../legacy/legacyBridge';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageThptRoom() {
+  const { navigateTo } = useRoute();
   const session = useThptSession();
   const splitPanel = useSplitPanel();
 
@@ -187,8 +188,8 @@ export function PageThptRoom() {
 
   const handleExit = useCallback(() => {
     timer.stop();
-    navigate('exercises', false);
-  }, [timer]);
+    navigateTo('exercises', false);
+  }, [timer, navigateTo]);
 
   const handleToggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {

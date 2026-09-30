@@ -8,10 +8,11 @@ import { BilingualHeader } from '../bilingual/BilingualHeader.jsx';
 import { BilingualReadingView } from '../bilingual/BilingualReadingView.jsx';
 import { BilingualGapFillView } from '../bilingual/BilingualGapFillView.jsx';
 import { BilingualVocabTooltip } from '../bilingual/BilingualVocabTooltip.jsx';
-import { openBugReportModal } from '../../legacy/legacyBridge.js';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function PageBilingualReading() {
   const { navigateTo } = useRoute();
+  const { openModal } = useModal();
 
   const {
     passage,
@@ -64,7 +65,7 @@ export function PageBilingualReading() {
   }, [navigateTo]);
 
   const handleReportError = useCallback(() => {
-    openBugReportModal({
+    openModal('bugReport', {
       feature: 'bilingual_reading',
       reportType: 'typo',
       title: passage ? `Bài đọc: ${passage.title || passage.id}` : 'Bài đọc Song ngữ',

@@ -2,9 +2,10 @@
 // 100% Pure React Component with Reactive State, Folder Categorization & Topic Cards
 import React, { useRef } from 'react';
 import { useTopics } from '../../hooks/useTopics.js';
-import { openCreateTopicModal, toggleMobileProfileDropdown } from '../../legacy/legacyBridge.js';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function PageTopics() {
+  const { openModal } = useModal();
   const {
     loading,
     error,
@@ -54,14 +55,14 @@ export function PageTopics() {
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
-                onClick={() => openCreateTopicModal()}
+                onClick={() => openModal('createTopic')}
                 className="bg-primary text-on-primary hover:opacity-95 font-semibold text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all active:scale-[0.98] shadow-xs flex items-center gap-1.5 cursor-pointer shrink-0"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
                 <span>Tạo chủ đề</span>
               </button>
               <button
-                onClick={() => toggleMobileProfileDropdown()}
+                onClick={() => typeof window !== 'undefined' && window.toggleMobileProfileDropdown?.()}
                 className="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0"
                 aria-label="Hồ sơ"
               >
@@ -202,7 +203,7 @@ export function PageTopics() {
                       <span className="material-symbols-outlined text-[48px] opacity-40">folder_open</span>
                       <p className="font-semibold">Chưa có chủ đề nào trong {activeLabel}</p>
                       <button
-                        onClick={() => openCreateTopicModal()}
+                        onClick={() => openModal('createTopic')}
                         className="mt-2 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm px-5 py-2 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                       >
                         <span className="material-symbols-outlined text-[16px]">add</span>

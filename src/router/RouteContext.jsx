@@ -58,13 +58,6 @@ export function RouteProvider({ children }) {
       window.lockBodyScroll(false);
     }
 
-    // Close thread modal if open
-    if (typeof window.closeThreadDetail === 'function') {
-      const modal = document.getElementById('modal-thread-detail');
-      if (modal && !modal.classList.contains('hidden')) {
-        window.closeThreadDetail(false);
-      }
-    }
 
     // Clean up learning keyboard events
     if (pageName !== 'learning' && typeof window.HiSessionUI !== 'undefined' && typeof window.HiSessionUI.destroy === 'function') {
@@ -92,7 +85,7 @@ export function RouteProvider({ children }) {
           // Owned 100% by pure React components and reactive hooks
           break;
         case 'library':
-          window.loadCommunityLibrary?.();
+          // PageLibrary is now pure React with useLibrary hook
           break;
         case 'exercises':
           // PageExercises is now full React — useThptExams hook fetches data internally
@@ -103,7 +96,7 @@ export function RouteProvider({ children }) {
           }
           break;
         case 'settings':
-          window._loadSettingsPage?.();
+          // PageSettings is now pure React with internal state
           break;
         case 'login':
           // PageLogin owns the auth mode in React. Calling the legacy DOM

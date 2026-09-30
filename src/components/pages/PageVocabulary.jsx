@@ -1,14 +1,7 @@
-// src/components/pages/PageVocabulary.jsx
-// Pixel-Perfect React Component with Reactive State, Filter, Search, Audio & SRS Charts
 import React from 'react';
 import { useVocabulary } from '../../hooks/useVocabulary.js';
-import {
-  openVocabAddModal,
-  openVocabBulkAddModal,
-  toggleMobileProfileDropdown,
-  openSRSExplainerModal,
-  navigate,
-} from '../../legacy/legacyBridge.js';
+import { useModal } from '../../context/ModalContext.jsx';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 const LV_LABEL = ['Mới', '1h', '8h', '1 ngày', '1 tuần', '1 tháng'];
 const LV_COLOR = [
@@ -30,6 +23,8 @@ const LEVEL_PALETTE = {
 };
 
 export function PageVocabulary() {
+  const { openModal } = useModal();
+  const { navigateTo } = useRoute();
   const {
     words,
     total,
@@ -122,7 +117,7 @@ export function PageVocabulary() {
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
-                onClick={openVocabAddModal}
+                onClick={() => openModal('addWord')}
                 className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-primary text-on-primary text-xs sm:text-sm font-semibold flex items-center gap-1.5 active:scale-[0.98] transition-all cursor-pointer shadow-xs"
               >
                 <span className="material-symbols-outlined text-[18px]">add</span>
@@ -130,7 +125,7 @@ export function PageVocabulary() {
               </button>
               <button
                 type="button"
-                onClick={openVocabBulkAddModal}
+                onClick={() => openModal('bulkAdd')}
                 className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-full bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 text-xs sm:text-sm font-semibold flex items-center gap-1.5 active:scale-[0.98] transition-all cursor-pointer"
               >
                 <span className="material-symbols-outlined text-[18px] text-primary">playlist_add</span>
@@ -138,7 +133,7 @@ export function PageVocabulary() {
               </button>
               <button
                 type="button"
-                onClick={toggleMobileProfileDropdown}
+                onClick={() => typeof window !== 'undefined' && window.toggleMobileProfileDropdown?.()}
                 className="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0"
                 aria-label="Hồ sơ"
               >
@@ -157,7 +152,7 @@ export function PageVocabulary() {
                 <h2 className="font-bold text-sm sm:text-base text-on-surface">Tổng quan SRS</h2>
                 <button
                   type="button"
-                  onClick={openSRSExplainerModal}
+                  onClick={() => openModal('srsExplainer')}
                   className="text-outline hover:text-primary transition-colors p-1 rounded-full cursor-pointer flex items-center justify-center"
                   title="Tìm hiểu về thuật toán ghi nhớ SRS & 6 cấp độ"
                 >
@@ -390,7 +385,7 @@ export function PageVocabulary() {
                     <>
                       <button
                         type="button"
-                        onClick={() => navigate('topics')}
+                        onClick={() => navigateTo('topics')}
                         className="px-4 py-2.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[16px] text-primary">explore</span>
@@ -398,7 +393,7 @@ export function PageVocabulary() {
                       </button>
                       <button
                         type="button"
-                        onClick={openVocabAddModal}
+                        onClick={() => openModal('addWord')}
                         className="px-4 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl shadow-xs hover:bg-surface-tint transition-all cursor-pointer flex items-center gap-1.5"
                       >
                         <span className="material-symbols-outlined text-[16px]">add</span>
@@ -537,7 +532,7 @@ export function PageVocabulary() {
       {/* Mobile Floating Action Button (FAB) */}
       <button
         type="button"
-        onClick={openVocabAddModal}
+        onClick={() => openModal('addWord')}
         className="lg:hidden fixed bottom-20 right-5 z-40 w-13 h-13 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.35)] active:scale-90 transition-transform cursor-pointer border border-white/20"
         title="Thêm từ mới vào Sổ từ"
         aria-label="Thêm từ vựng"
