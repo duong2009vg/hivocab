@@ -240,7 +240,8 @@ export function PageLogin() {
               </div>
             )}
 
-            <div id="turnstile-user" className="cf-turnstile my-2 flex justify-center" data-sitekey="0x4AAAAAAE9CY0FtESpbO_Cj" data-theme="auto"></div>
+            {/* Cloudflare Turnstile temporarily disabled for bots */}
+            {/* <div id="turnstile-user" className="cf-turnstile my-2 flex justify-center" data-sitekey="0x4AAAAAAE9CY0FtESpbO_Cj" data-theme="auto"></div> */}
 
             {/* Error Message */}
             {errorMessage && !isExistingAccount && (
