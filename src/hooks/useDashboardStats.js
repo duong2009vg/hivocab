@@ -1,6 +1,12 @@
 // src/hooks/useDashboardStats.js
 // Reactive hook to manage Dashboard stats, SRS memory distribution, Hero state, Flame calendar & IELTS goal
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  getDashboardStats as apiGetDashboardStats,
+  getNextReviewTime as apiGetNextReviewTime,
+  getMonthlyStudySessions as apiGetMonthlyStudySessions,
+  getIELTSGoal as apiGetIELTSGoal,
+} from '../services/db.js';
 
 const DEFAULT_LEVELS = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
 
@@ -46,45 +52,37 @@ export function useDashboardStats() {
     setError(null);
 
     try {
-      if (typeof window !== 'undefined' && window.HiDashboard && typeof window.HiDashboard.refresh === 'function') {
-        await window.HiDashboard.refresh();
-      }
+      const rawStats = await apiGetDashboardStats();
+      if (rawStats) {
+        const mem = rawStats.memoryLevels || DEFAULT_LEVELS;
+        const total =
+          (mem.lv0 || 0) +
+          (mem.lv1 || 0) +
+          (mem.lv2 || 0) +
+          (mem.lv3 || 0) +
+          (mem.lv4 || 0) +
+          (mem.lv5 || 0);
 
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getDashboardStats === 'function') {
-        const rawStats = await window.HiDB.getDashboardStats();
-        if (rawStats) {
-          const mem = rawStats.memoryLevels || DEFAULT_LEVELS;
-          const total =
-            (mem.lv0 || 0) +
-            (mem.lv1 || 0) +
-            (mem.lv2 || 0) +
-            (mem.lv3 || 0) +
-            (mem.lv4 || 0) +
-            (mem.lv5 || 0);
+        const due = rawStats.wordsDueCount || 0;
 
-          const due = rawStats.wordsDueCount || 0;
+        setStats({
+          wordsDueCount: due,
+          streak: rawStats.streak || 0,
+          memoryLevels: mem,
+          totalWordsLearned: total,
+        });
 
-          setStats({
-            wordsDueCount: due,
-            streak: rawStats.streak || 0,
-            memoryLevels: mem,
-            totalWordsLearned: total,
-          });
-
-          // Determine Hero State
-          if (total === 0) {
-            setHeroState('empty');
-          } else if (due > 0) {
-            setHeroState('ready');
-          } else {
-            setHeroState('countdown');
-            if (typeof window.HiDB.getNextReviewTime === 'function') {
-              try {
-                const nextT = await window.HiDB.getNextReviewTime();
-                setNextReviewTime(nextT ? new Date(nextT) : null);
-              } catch (_) {}
-            }
-          }
+        // Determine Hero State
+        if (total === 0) {
+          setHeroState('empty');
+        } else if (due > 0) {
+          setHeroState('ready');
+        } else {
+          setHeroState('countdown');
+          try {
+            const nextT = await apiGetNextReviewTime();
+            setNextReviewTime(nextT ? new Date(nextT) : null);
+          } catch (_) {}
         }
       }
     } catch (err) {
@@ -100,10 +98,8 @@ export function useDashboardStats() {
     const y = date.getFullYear();
     const m = date.getMonth() + 1;
     try {
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getMonthlyStudySessions === 'function') {
-        const sessions = await window.HiDB.getMonthlyStudySessions(y, m);
-        setCalendarSessions(sessions || {});
-      }
+      const sessions = await apiGetMonthlyStudySessions(y, m);
+      setCalendarSessions(sessions || {});
     } catch (err) {
       console.warn('[useDashboardStats] Calendar sessions error:', err);
     }
@@ -112,13 +108,7 @@ export function useDashboardStats() {
   // 3. Fetch IELTS Goal
   const fetchIeltsGoal = useCallback(async () => {
     try {
-      let goal = null;
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getIELTSGoal === 'function') {
-        goal = await window.HiDB.getIELTSGoal();
-      } else if (typeof localStorage !== 'undefined') {
-        const raw = localStorage.getItem('hi_ielts_goal');
-        if (raw) goal = JSON.parse(raw);
-      }
+      const goal = await apiGetIELTSGoal();
 
       if (goal && goal.examDate) {
         const examDateObj = new Date(goal.examDate);
@@ -143,30 +133,30 @@ export function useDashboardStats() {
           examDateText: dateFormatted,
           motto: goal.motto || '“Học tập kiên trì, tự tin chinh phục mục tiêu IELTS!”',
         });
-      } else {
-        setIeltsGoal((prev) => ({ ...prev, isSet: false }));
       }
     } catch (err) {
       console.warn('[useDashboardStats] IELTS goal error:', err);
     }
   }, []);
 
+  // Init Data Fetch
   useEffect(() => {
     fetchStats();
     fetchCalendarSessions(calendarDate);
     fetchIeltsGoal();
   }, [fetchStats, fetchCalendarSessions, fetchIeltsGoal, calendarDate]);
 
-  // 4. Countdown Timer Engine
+  // Countdown Timer Logic
   useEffect(() => {
-    if (heroState !== 'countdown') {
+    if (heroState !== 'countdown' || !nextReviewTime) {
       clearInterval(countdownIntervalRef.current);
       return;
     }
 
     const updateTimer = () => {
-      const target = nextReviewTime || new Date(Date.now() + 4 * 3600 * 1000);
-      const diff = target - new Date();
+      const now = new Date();
+      const target = new Date(nextReviewTime);
+      const diff = target - now;
 
       if (diff <= 0) {
         clearInterval(countdownIntervalRef.current);

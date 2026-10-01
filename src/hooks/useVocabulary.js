@@ -1,6 +1,13 @@
 // src/hooks/useVocabulary.js
 // Custom React hook to manage personal vocabulary notebook state, filters, SRS stats, and pagination
 import { useState, useEffect, useCallback, useRef } from 'react';
+import {
+  getTopics as apiGetTopics,
+  getVocabularyPage as apiGetVocabularyPage,
+  getLearnedVocabStats as apiGetLearnedVocabStats,
+  deleteWord as apiDeleteWord,
+} from '../services/db.js';
+import { playWordAudio } from '../services/audioService.js';
 
 const DEFAULT_LEVELS = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
 
@@ -45,11 +52,9 @@ export function useVocabulary() {
   // Fetch topics list
   const fetchTopics = useCallback(async () => {
     try {
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getTopics === 'function') {
-        const data = await window.HiDB.getTopics();
-        if (Array.isArray(data)) {
-          setTopics(data);
-        }
+      const data = await apiGetTopics();
+      if (Array.isArray(data)) {
+        setTopics(data);
       }
     } catch (err) {
       console.warn('[useVocabulary] fetchTopics error:', err);
@@ -59,17 +64,15 @@ export function useVocabulary() {
   // Fetch SRS stats
   const fetchSrsStats = useCallback(async () => {
     try {
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getLearnedVocabStats === 'function') {
-        const stats = await window.HiDB.getLearnedVocabStats();
-        if (stats) {
-          setSrsStats({
-            total: stats.total || 0,
-            due: stats.due || 0,
-            learning: stats.learning || 0,
-            mastered: stats.mastered || 0,
-            memoryLevels: stats.memoryLevels || DEFAULT_LEVELS,
-          });
-        }
+      const stats = await apiGetLearnedVocabStats();
+      if (stats) {
+        setSrsStats({
+          total: stats.total || 0,
+          due: stats.due || 0,
+          learning: stats.learning || 0,
+          mastered: stats.mastered || 0,
+          memoryLevels: stats.memoryLevels || DEFAULT_LEVELS,
+        });
       }
     } catch (err) {
       console.warn('[useVocabulary] fetchSrsStats error:', err);
@@ -81,12 +84,10 @@ export function useVocabulary() {
     setLoading(true);
     setError(null);
     try {
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getVocabularyPage === 'function') {
-        const result = await window.HiDB.getVocabularyPage(page, pageSize, debouncedSearch, levelFilter, topicId || null);
-        if (result) {
-          setWords(result.words || []);
-          setTotal(result.total || 0);
-        }
+      const result = await apiGetVocabularyPage(page, pageSize, debouncedSearch, levelFilter, topicId || null);
+      if (result) {
+        setWords(result.words || []);
+        setTotal(result.total || 0);
       } else {
         setWords([]);
         setTotal(0);
@@ -129,14 +130,12 @@ export function useVocabulary() {
         return;
       }
       try {
-        if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.deleteWord === 'function') {
-          await window.HiDB.deleteWord(wordId);
-          if (typeof window.showToast === 'function') {
-            window.showToast(`Đã xóa từ "${wordText}"`, 'info');
-          }
-          await fetchWords();
-          await fetchSrsStats();
+        await apiDeleteWord(wordId);
+        if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
+          window.showHiToast(`Đã xóa từ "${wordText}"`, 'info');
         }
+        await fetchWords();
+        await fetchSrsStats();
       } catch (err) {
         alert('Không thể xóa từ: ' + (err.message || 'Lỗi không xác định'));
       }
@@ -147,15 +146,7 @@ export function useVocabulary() {
   // Audio play action
   const playWord = useCallback((wordText) => {
     if (!wordText) return;
-    if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
-      window.HiAudio.playWord(wordText);
-    } else if (typeof window !== 'undefined' && window.HiDict && typeof window.HiDict.playWordAudio === 'function') {
-      window.HiDict.playWordAudio(wordText);
-    } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(wordText);
-      u.lang = 'en-US';
-      window.speechSynthesis.speak(u);
-    }
+    playWordAudio(wordText);
   }, []);
 
   return {

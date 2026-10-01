@@ -362,6 +362,7 @@ export async function getLessonsInTopic(topicId) {
 
 export async function getWordsInLesson(topicId, lessonIndex) {
   try {
+    const user = await getCurrentUser();
     const { data, error } = await supabase
       .from('words')
       .select('id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_order, word_order')
@@ -369,26 +370,43 @@ export async function getWordsInLesson(topicId, lessonIndex) {
       .eq('lesson_order', lessonIndex)
       .order('word_order', { ascending: true, nullsFirst: false });
 
-    if (!error && data && data.length > 0) {
-      return data.map((w) => ({
+    let wordsList = (!error && data && data.length > 0) ? data : [];
+    if (wordsList.length === 0) {
+      const LESSON_SIZE = 50;
+      const { data: fbData } = await supabase
+        .from('words')
+        .select('id, word, pos, phonetic, meaning, example_sentence, image_url')
+        .eq('topic_id', topicId)
+        .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
+      wordsList = fbData || [];
+    }
+
+    let progressMap = {};
+    if (user && wordsList.length > 0) {
+      const wordIds = wordsList.map((w) => w.id);
+      const { data: progData } = await supabase
+        .from('word_progress')
+        .select('word_id, level, next_review_at, last_reviewed_at, review_count')
+        .eq('user_id', user.id)
+        .in('word_id', wordIds);
+      if (progData) {
+        progData.forEach((p) => { progressMap[p.word_id] = p; });
+      }
+    }
+
+    return wordsList.map((w) => {
+      const prog = progressMap[w.id];
+      return {
         ...w,
         exampleSentence: w.example_sentence || '',
         imageUrl: w.image_url || '',
-      }));
-    }
-
-    const LESSON_SIZE = 50;
-    const { data: fbData } = await supabase
-      .from('words')
-      .select('id, word, pos, phonetic, meaning, example_sentence, image_url')
-      .eq('topic_id', topicId)
-      .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
-
-    return (fbData || []).map((w) => ({
-      ...w,
-      exampleSentence: w.example_sentence || '',
-      imageUrl: w.image_url || '',
-    }));
+        level: prog?.level ?? 0,
+        nextReviewAt: prog?.next_review_at ?? null,
+        lastReviewedAt: prog?.last_reviewed_at ?? null,
+        reviewCount: prog?.review_count ?? 0,
+        isDue: !prog || (prog.next_review_at && new Date(prog.next_review_at) <= new Date()),
+      };
+    });
   } catch (err) {
     console.warn('[db.getWordsInLesson]', err);
     return [];
@@ -397,17 +415,41 @@ export async function getWordsInLesson(topicId, lessonIndex) {
 
 export async function getWordsInPassage(passageId) {
   try {
+    const user = await getCurrentUser();
     const { data, error } = await supabase
       .from('words')
       .select('id, word, pos, phonetic, meaning, example_sentence, image_url, passage_id, word_order, created_at')
       .eq('passage_id', passageId)
       .order('word_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
-    return (data || []).map((w) => ({
-      ...w,
-      exampleSentence: w.example_sentence || '',
-      imageUrl: w.image_url || '',
-    }));
+    const wordsList = data || [];
+
+    let progressMap = {};
+    if (user && wordsList.length > 0) {
+      const wordIds = wordsList.map((w) => w.id);
+      const { data: progData } = await supabase
+        .from('word_progress')
+        .select('word_id, level, next_review_at, last_reviewed_at, review_count')
+        .eq('user_id', user.id)
+        .in('word_id', wordIds);
+      if (progData) {
+        progData.forEach((p) => { progressMap[p.word_id] = p; });
+      }
+    }
+
+    return wordsList.map((w) => {
+      const prog = progressMap[w.id];
+      return {
+        ...w,
+        exampleSentence: w.example_sentence || '',
+        imageUrl: w.image_url || '',
+        level: prog?.level ?? 0,
+        nextReviewAt: prog?.next_review_at ?? null,
+        lastReviewedAt: prog?.last_reviewed_at ?? null,
+        reviewCount: prog?.review_count ?? 0,
+        isDue: !prog || (prog.next_review_at && new Date(prog.next_review_at) <= new Date()),
+      };
+    });
   } catch (err) {
     console.warn('[db.getWordsInPassage]', err);
     return [];
@@ -561,6 +603,559 @@ export async function checkProAccess({ topicId, passageId, showModal = true } = 
   return true;
 }
 
+// ─── Vocabulary Notebook & SM-2 Spaced Repetition Engine ─────────────────────
+
+export function getIntervalMs(level) {
+  const HOUR = 60 * 60 * 1000;
+  const DAY  = 24 * HOUR;
+
+  switch (level) {
+    case 0: return HOUR;
+    case 1: return HOUR;
+    case 2: return 8 * HOUR;
+    case 3: return DAY;
+    case 4: return (5 + Math.random() * 2) * DAY;
+    case 5: return (15 + Math.random() * 15) * DAY;
+    default: return HOUR;
+  }
+}
+
+export function calculateNextReview(currentLevel, rating) {
+  let newLevel = currentLevel;
+  if (currentLevel === 0) {
+    newLevel = 1;
+  } else if (rating === 'easy') {
+    newLevel = Math.min(currentLevel + 1, 5);
+  } else if (rating === 'hard') {
+    newLevel = Math.max(currentLevel - 1, 1);
+  }
+  const intervalMs = getIntervalMs(newLevel);
+  const nextReviewAt = new Date(Date.now() + intervalMs);
+  return { newLevel, nextReviewAt };
+}
+
+export function getIntervalLabel(level) {
+  switch (level) {
+    case 1: return '1 giờ';
+    case 2: return '8 giờ';
+    case 3: return '24 giờ';
+    case 4: return '5–7 ngày';
+    case 5: return '15–30 ngày';
+    default: return 'N/A';
+  }
+}
+
+function getLocalDateString(d = new Date()) {
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+}
+
+export async function logStudySession() {
+  const user = await getCurrentUser();
+  if (!user) return;
+  const today = getLocalDateString();
+  try {
+    const { error } = await supabase.rpc('increment_session', {
+      p_user_id: user.id,
+      p_date: today,
+    });
+    if (error) {
+      const { data: existing } = await supabase
+        .from('study_sessions')
+        .select('id, words_reviewed')
+        .eq('user_id', user.id)
+        .eq('session_date', today)
+        .maybeSingle();
+
+      if (existing) {
+        await supabase
+          .from('study_sessions')
+          .update({ words_reviewed: (existing.words_reviewed || 0) + 1 })
+          .eq('id', existing.id);
+      } else {
+        await supabase
+          .from('study_sessions')
+          .insert({ user_id: user.id, session_date: today, words_reviewed: 1 });
+      }
+    }
+  } catch (err) {
+    console.warn('[db.logStudySession]', err);
+  }
+}
+
+export async function reviewWord(wordId, rating) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Chưa đăng nhập');
+
+  const { data: existing } = await supabase
+    .from('word_progress')
+    .select('level, review_count')
+    .eq('user_id', user.id)
+    .eq('word_id', wordId)
+    .maybeSingle();
+
+  const currentLevel = existing?.level ?? 0;
+  const currentCount = existing?.review_count ?? 0;
+
+  const { newLevel, nextReviewAt } = calculateNextReview(currentLevel, rating);
+
+  const payload = {
+    user_id: user.id,
+    word_id: wordId,
+    level: newLevel,
+    next_review_at: nextReviewAt.toISOString(),
+    last_reviewed_at: new Date().toISOString(),
+    review_count: currentCount + 1,
+  };
+
+  const { error } = await supabase
+    .from('word_progress')
+    .upsert(payload, { onConflict: 'user_id,word_id' });
+
+  if (error) throw error;
+  await logStudySession();
+
+  return {
+    newLevel,
+    nextReviewAt,
+    intervalLabel: getIntervalLabel(newLevel),
+  };
+}
+
+export async function reviewWordToLevel(wordId, targetLevel) {
+  const user = await getCurrentUser();
+  if (!user) throw new Error('Chưa đăng nhập');
+
+  const { data: existing } = await supabase
+    .from('word_progress')
+    .select('review_count')
+    .eq('user_id', user.id)
+    .eq('word_id', wordId)
+    .maybeSingle();
+
+  const currentCount = existing?.review_count ?? 0;
+  const newLevel = Math.max(1, Math.min(5, targetLevel));
+  const intervalMs = getIntervalMs(newLevel);
+  const nextReviewAt = new Date(Date.now() + intervalMs);
+
+  const payload = {
+    user_id: user.id,
+    word_id: wordId,
+    level: newLevel,
+    next_review_at: nextReviewAt.toISOString(),
+    last_reviewed_at: new Date().toISOString(),
+    review_count: currentCount + 1,
+  };
+
+  const { error } = await supabase
+    .from('word_progress')
+    .upsert(payload, { onConflict: 'user_id,word_id' });
+
+  if (error) throw error;
+  await logStudySession();
+
+  return {
+    newLevel,
+    nextReviewAt,
+    intervalLabel: getIntervalLabel(newLevel),
+  };
+}
+
+export async function getVocabularyPage(page = 1, pageSize = 20, search = '', levelFilter = null, topicIdFilter = null) {
+  const user = await getCurrentUser();
+  if (!user) return { words: [], total: 0, page: 1, pageSize };
+
+  const safePage = Math.max(1, Number(page) || 1);
+  const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 20));
+  const safeSearch = String(search || '').trim();
+  const safeLevel = (levelFilter !== undefined && levelFilter !== null && levelFilter !== '') ? Number(levelFilter) : null;
+  const safeTopicId = topicIdFilter ? String(topicIdFilter).trim() : null;
+
+  const start = (safePage - 1) * safePageSize;
+
+  let query = supabase
+    .from('word_progress')
+    .select(`
+      level, next_review_at, last_reviewed_at, review_count, user_id,
+      words!inner (
+        id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
+        topics ( id, name )
+      )
+    `, { count: 'exact' })
+    .eq('user_id', user.id);
+
+  if (safeTopicId) {
+    query = query.eq('words.topic_id', safeTopicId);
+  }
+
+  if (safeLevel !== null && !isNaN(safeLevel)) {
+    if (safeLevel === -1) {
+      query = query.lte('next_review_at', new Date().toISOString());
+    } else {
+      query = query.eq('level', safeLevel);
+    }
+  }
+
+  if (safeSearch) {
+    const escaped = safeSearch.replace(/[,%_()]/g, ' ').trim();
+    query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%`, { foreignTable: 'words' });
+  }
+
+  query = query
+    .order('last_reviewed_at', { ascending: false, nullsFirst: false })
+    .range(start, start + safePageSize - 1);
+
+  const { data, error, count } = await query;
+  if (error) {
+    console.error('[db.getVocabularyPage error]:', error);
+    throw error;
+  }
+
+  const words = (data || []).map((row) => {
+    const w = row.words || {};
+    return {
+      id: w.id,
+      wordId: w.id,
+      topicId: w.topic_id,
+      word: w.word,
+      pos: w.pos || '',
+      phonetic: w.phonetic,
+      meaning: w.meaning,
+      exampleSentence: w.example_sentence || '',
+      imageUrl: w.image_url || null,
+      topicName: w.topics?.name || '',
+      level: Number(row.level) || 0,
+      nextReviewAt: row.next_review_at,
+      lastReviewedAt: row.last_reviewed_at,
+      reviewCount: row.review_count || 0,
+      isDue: !row.next_review_at || new Date(row.next_review_at) <= new Date(),
+    };
+  });
+
+  return {
+    words,
+    total: count || 0,
+    page: safePage,
+    pageSize: safePageSize,
+  };
+}
+
+export async function getLearnedVocabStats() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return { total: 0, due: 0, learning: 0, mastered: 0, memoryLevels: { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } };
+  }
+
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('word_progress')
+    .select('level, next_review_at')
+    .eq('user_id', user.id);
+
+  if (error || !data) {
+    return { total: 0, due: 0, learning: 0, mastered: 0, memoryLevels: { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } };
+  }
+
+  let due = 0;
+  let learning = 0;
+  let mastered = 0;
+  const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
+
+  data.forEach((item) => {
+    const lv = Number(item.level) || 0;
+    if (lv >= 0 && lv <= 5) {
+      memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
+    } else {
+      memoryLevels.lv0++;
+    }
+    if (item.next_review_at && item.next_review_at <= now) {
+      due++;
+    }
+    if (lv >= 4) {
+      mastered++;
+    } else {
+      learning++;
+    }
+  });
+
+  return {
+    total: data.length,
+    due,
+    learning,
+    mastered,
+    memoryLevels,
+  };
+}
+
+export async function getWordsDueForReview(limit = 20) {
+  const user = await getCurrentUser();
+  if (!user) return [];
+
+  const now = new Date().toISOString();
+
+  const { data: dueWords, error } = await supabase
+    .from('word_progress')
+    .select(`
+      level,
+      next_review_at,
+      words!inner (
+        id,
+        topic_id,
+        word,
+        pos,
+        phonetic,
+        meaning,
+        example_sentence,
+        image_url,
+        topics ( id, name, icon )
+      )
+    `)
+    .eq('user_id', user.id)
+    .lte('next_review_at', now)
+    .order('next_review_at', { ascending: true })
+    .limit(limit);
+
+  if (error) {
+    console.warn('[db.getWordsDueForReview] query error:', error);
+    return [];
+  }
+
+  return (dueWords || [])
+    .filter(p => p && p.words)
+    .map(p => ({
+      wordId:          p.words.id,
+      id:              p.words.id,
+      topicId:         p.words.topic_id,
+      word:            p.words.word,
+      pos:             p.words.pos || '',
+      phonetic:        p.words.phonetic || '',
+      meaning:         p.words.meaning || '',
+      exampleSentence: p.words.example_sentence || '',
+      imageUrl:        p.words.image_url || null,
+      level:           p.level,
+      nextReviewAt:    p.next_review_at,
+      topic:           p.words.topics,
+    }));
+}
+
+function calculateStreakFromSessions(sessions) {
+  if (!sessions || !sessions.length) return 0;
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const todayStr = getLocalDateString(today);
+  const yesterdayStr = getLocalDateString(yesterday);
+
+  const firstStr = typeof sessions[0].session_date === 'string'
+    ? sessions[0].session_date.split('T')[0]
+    : getLocalDateString(new Date(sessions[0].session_date));
+
+  if (firstStr < yesterdayStr) return 0;
+
+  let streak = 1;
+  const prev = new Date(firstStr + 'T00:00:00');
+  prev.setDate(prev.getDate() - 1);
+
+  for (let i = 1; i < sessions.length; i++) {
+    const sd = typeof sessions[i].session_date === 'string'
+      ? sessions[i].session_date.split('T')[0]
+      : getLocalDateString(new Date(sessions[i].session_date));
+    if (sd === getLocalDateString(prev)) {
+      streak++;
+      prev.setDate(prev.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+export async function getDashboardStats() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      wordsDueCount: 0,
+      streak: 0,
+      memoryLevels: { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 },
+    };
+  }
+
+  const now = new Date().toISOString();
+
+  let wordsDueCount = 0;
+  try {
+    const { count, error } = await supabase
+      .from('word_progress')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .lte('next_review_at', now);
+    if (!error && count !== null) wordsDueCount = count;
+  } catch (e) {
+    console.warn('[db.getDashboardStats wordsDueCount error]:', e);
+  }
+
+  const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
+  try {
+    const { data: progressData } = await supabase
+      .from('word_progress')
+      .select('level')
+      .eq('user_id', user.id);
+
+    if (progressData) {
+      progressData.forEach(p => {
+        const lv = Number(p.level) ?? 0;
+        if (lv >= 0 && lv <= 5) {
+          memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
+        } else {
+          memoryLevels.lv0 = (memoryLevels.lv0 || 0) + 1;
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('[db.getDashboardStats memoryLevels error]:', e);
+  }
+
+  let streak = 0;
+  try {
+    const { data: sessions } = await supabase
+      .from('study_sessions')
+      .select('session_date')
+      .eq('user_id', user.id)
+      .order('session_date', { ascending: false })
+      .limit(365);
+
+    if (sessions && sessions.length > 0) {
+      streak = calculateStreakFromSessions(sessions);
+    }
+  } catch (e) {
+    console.warn('[db.getDashboardStats streak error]:', e);
+  }
+
+  return {
+    wordsDueCount,
+    streak,
+    memoryLevels,
+  };
+}
+
+export async function getNextReviewTime() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const now = new Date().toISOString();
+  const { data, error } = await supabase
+    .from('word_progress')
+    .select('next_review_at')
+    .eq('user_id', user.id)
+    .gt('next_review_at', now)
+    .order('next_review_at', { ascending: true })
+    .limit(1);
+
+  if (error || !data || data.length === 0) return null;
+  return new Date(data[0].next_review_at);
+}
+
+export async function getMonthlyStudySessions(year, month) {
+  const user = await getCurrentUser();
+  const result = {};
+
+  try {
+    const localData = JSON.parse(localStorage.getItem('hi_study_sessions') || '{}');
+    Object.assign(result, localData);
+  } catch (_) {}
+
+  if (!user) return result;
+
+  const startMonthStr = String(month).padStart(2, '0');
+  const startDateStr = `${year}-${startMonthStr}-01`;
+  const lastDay = new Date(year, month, 0).getDate();
+  const endDateStr = `${year}-${startMonthStr}-${String(lastDay).padStart(2, '0')}`;
+
+  try {
+    const { data, error } = await supabase
+      .from('study_sessions')
+      .select('session_date, words_reviewed')
+      .eq('user_id', user.id)
+      .gte('session_date', startDateStr)
+      .lte('session_date', endDateStr);
+
+    if (!error && data) {
+      data.forEach((row) => {
+        const dateKey = typeof row.session_date === 'string'
+          ? row.session_date.split('T')[0]
+          : row.session_date;
+        result[dateKey] = Number(row.words_reviewed || 0);
+      });
+    }
+  } catch (err) {
+    console.warn('[db.getMonthlyStudySessions error]:', err);
+  }
+
+  return result;
+}
+
+export async function getIELTSGoal() {
+  const user = await getCurrentUser();
+  let goal = null;
+
+  try {
+    const raw = localStorage.getItem('hi_ielts_goal');
+    if (raw) goal = JSON.parse(raw);
+  } catch (_) {}
+
+  if (user) {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('ielts_goal, ielts_exam_date, motto')
+        .eq('id', user.id)
+        .single();
+      if (data && (data.ielts_goal || data.ielts_exam_date)) {
+        goal = {
+          overall: data.ielts_goal?.overall || goal?.overall || '7.0',
+          listening: data.ielts_goal?.listening || goal?.listening || '7.0',
+          reading: data.ielts_goal?.reading || goal?.reading || '7.0',
+          writing: data.ielts_goal?.writing || goal?.writing || '6.5',
+          speaking: data.ielts_goal?.speaking || goal?.speaking || '6.5',
+          examDate: data.ielts_exam_date || goal?.examDate || '',
+          motto: data.motto || goal?.motto || '',
+        };
+      }
+    } catch (_) {}
+  }
+  return goal;
+}
+
+export async function saveIELTSGoal(goalData) {
+  const user = await getCurrentUser();
+  try {
+    localStorage.setItem('hi_ielts_goal', JSON.stringify(goalData));
+  } catch (_) {}
+
+  if (user) {
+    try {
+      await supabase
+        .from('profiles')
+        .update({
+          ielts_goal: {
+            overall: goalData.overall,
+            listening: goalData.listening,
+            reading: goalData.reading,
+            writing: goalData.writing,
+            speaking: goalData.speaking,
+          },
+          ielts_exam_date: goalData.examDate,
+          motto: goalData.motto,
+        })
+        .eq('id', user.id);
+    } catch (_) {}
+  }
+  return true;
+}
+
 export const db = {
   getCurrentUser,
   isUserPro,
@@ -578,6 +1173,21 @@ export const db = {
   updatePassageTitle,
   clonePublicTopic,
   checkProAccess,
+  // Vocabulary & SM-2
+  getVocabularyPage,
+  getLearnedVocabStats,
+  getWordsDueForReview,
+  getDashboardStats,
+  getNextReviewTime,
+  getMonthlyStudySessions,
+  getIELTSGoal,
+  saveIELTSGoal,
+  getIntervalMs,
+  calculateNextReview,
+  getIntervalLabel,
+  reviewWord,
+  reviewWordToLevel,
+  logStudySession,
 };
 
 // Expose HiDB globally for any remaining non-React call

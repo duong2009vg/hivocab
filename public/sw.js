@@ -6,7 +6,9 @@ const PRECACHE_URLS = [
   '/logo-mark.svg',
   '/themes.css',
   '/css/hivocab.min.css',
-  '/fonts/material-symbols-outlined.woff2'
+  '/fonts/material-symbols-outlined.woff2',
+  '/data/sound/correct.mp3',
+  '/data/sound/incorrect.mp3'
 ];
 
 // Các domain CDN/external — để browser tự xử lý, không intercept

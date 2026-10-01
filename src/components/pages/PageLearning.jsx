@@ -1,18 +1,18 @@
 // src/components/pages/PageLearning.jsx
-// Phase 3: Full React implementation — no sessionEngine.js / sessionUI.js dependency.
-// Words are loaded from window._currentLessonWords (set by useLessonDetail).
-// Practice mode (modeIndex) is taken from window._practiceMode.
+// 100% Pure React implementation — no sessionEngine.js / sessionUI.js dependency.
+// Loads words from window globals or directly from db.js via getWordsInLesson / getWordsInPassage / getWordsDueForReview.
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useStudySession } from '../../hooks/useStudySession.js';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { getWordsInLesson, getWordsInPassage, getWordsDueForReview } from '../../services/db.js';
 import ExerciseFlashcard  from '../learning/ExerciseFlashcard.jsx';
 import ExerciseMCQ        from '../learning/ExerciseMCQ.jsx';
 import ExerciseFill       from '../learning/ExerciseFill.jsx';
 import ExerciseListen     from '../learning/ExerciseListen.jsx';
 import ExerciseCompleted  from '../learning/ExerciseCompleted.jsx';
 
-// Mode index → allowedType mapping (mirrors sessionEngine constants)
+// Mode index → allowedType mapping
 const MODE_TYPE_MAP = {
   0: 'flashcard',
   1: 'mcq',
@@ -35,45 +35,60 @@ export function PageLearning() {
   } = useStudySession();
 
   const [soundMuted, setSoundMuted] = useState(false);
+  const [isLoadingWords, setIsLoadingWords] = useState(true);
+  const [noWordsToStudy, setNoWordsToStudy] = useState(false);
   const initialized = useRef(false);
 
-  // ── Init: load words from window globals ───────────────────────────────────
+  // ── Init: load words ────────────────────────────────────────────────────────
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
 
-    const words = typeof window !== 'undefined'
-      ? (window._currentLessonWords || window._currentSessionWords || [])
-      : [];
+    async function initSession() {
+      setIsLoadingWords(true);
+      setNoWordsToStudy(false);
 
-    const modeIndex = typeof window !== 'undefined' ? (window._practiceMode ?? null) : null;
-    const allowedType = modeIndex !== null ? (MODE_TYPE_MAP[modeIndex] || null) : null;
+      const modeIndex = typeof window !== 'undefined' ? (window._practiceMode ?? null) : null;
+      const allowedType = modeIndex !== null ? (MODE_TYPE_MAP[modeIndex] || null) : null;
 
-    if (words.length > 0) {
-      startSession(words, allowedType);
-    } else {
-      // Fallback: try to get words from HiDB
-      if (typeof window !== 'undefined' && window.HiDB) {
-        const topicId    = window._currentTopicId;
-        const lessonIdx  = window._currentLessonIndex ?? 0;
-        const passageId  = window._currentPassageId;
+      let words = typeof window !== 'undefined'
+        ? (window._currentLessonWords || window._currentSessionWords || [])
+        : [];
 
-        const fetchFn = passageId
-          ? window.HiDB.getWordsInPassage?.(passageId)
-          : window.HiDB.getWordsInLesson?.(topicId, lessonIdx);
+      if (!words || words.length === 0) {
+        const topicId = typeof window !== 'undefined' ? window._currentTopicId : null;
+        const lessonIdx = typeof window !== 'undefined' ? (window._currentLessonIndex ?? 0) : 0;
+        const passageId = typeof window !== 'undefined' ? window._currentPassageId : null;
 
-        Promise.resolve(fetchFn).then(fetched => {
-          if (fetched && fetched.length > 0) {
-            startSession(fetched, allowedType);
+        try {
+          if (passageId) {
+            words = await getWordsInPassage(passageId);
+          } else if (topicId) {
+            words = await getWordsInLesson(topicId, lessonIdx);
+          } else {
+            // General SRS review session
+            words = await getWordsDueForReview(20);
           }
-        }).catch(() => {});
+        } catch (err) {
+          console.warn('[PageLearning] Failed to fetch fallback words:', err);
+        }
+      }
+
+      if (words && words.length > 0) {
+        startSession(words, allowedType);
+        setIsLoadingWords(false);
+      } else {
+        setIsLoadingWords(false);
+        setNoWordsToStudy(true);
       }
     }
+
+    initSession();
   }, [startSession]);
 
   // ── Sound mute ─────────────────────────────────────────────────────────────
   const handleToggleSound = useCallback(() => {
-    setSoundMuted(m => {
+    setSoundMuted((m) => {
       const next = !m;
       if (typeof window !== 'undefined' && window.HiSound?.setMuted) {
         window.HiSound.setMuted(next);
@@ -98,18 +113,50 @@ export function PageLearning() {
   // ── Back (to lesson detail) ──────────────────────────────────────────────────
   const handleClose = useCallback(() => {
     endSession();
-    navigateTo('lesson-detail');
+    const hasLessonContext = typeof window !== 'undefined' && (window._currentTopicId || window._currentPassageId);
+    navigateTo(hasLessonContext ? 'lesson-detail' : 'dashboard');
   }, [endSession, navigateTo]);
 
   // ── Loading state ────────────────────────────────────────────────────────────
-  if (!session.isActive && !isComplete) {
+  if (isLoadingWords || (!session.isActive && !isComplete && !noWordsToStudy)) {
     return (
-      <div id="page-learning" className="page active">
-        <div className="flex flex-col items-center justify-center min-h-[100dvh] gap-4 text-on-surface-variant">
-          <span className="material-symbols-outlined text-[48px] animate-spin" style={{ animationDuration: '1.5s' }}>
+      <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center bg-surface">
+        <div className="flex flex-col items-center justify-center gap-4 text-on-surface-variant">
+          <span className="material-symbols-outlined text-[48px] animate-spin text-primary" style={{ animationDuration: '1.2s' }}>
             autorenew
           </span>
-          <p className="text-sm">Đang tải bài tập...</p>
+          <p className="text-sm font-medium">Đang tải bài tập...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Empty state (No words found) ─────────────────────────────────────────────
+  if (noWordsToStudy) {
+    return (
+      <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center p-6 bg-surface text-center">
+        <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4 text-emerald-500 border border-emerald-500/20">
+          <span className="material-symbols-outlined text-[42px]">check_circle</span>
+        </div>
+        <h2 className="text-xl sm:text-2xl font-bold text-on-surface mb-2">Chưa có từ vựng cần ôn tập!</h2>
+        <p className="text-sm text-on-surface-variant max-w-md mb-8 leading-relaxed">
+          Bạn đã hoàn thành xuất sắc các từ cần ôn hôm nay, hoặc chưa có từ nào trong danh sách. Hãy khám phá thêm các chủ đề mới để bắt đầu học nhé!
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <button
+            onClick={() => navigateTo('topics')}
+            className="px-6 py-2.5 bg-primary text-on-primary rounded-xl font-bold text-sm flex items-center gap-2 hover:opacity-95 active:scale-95 transition-all shadow-sm cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">explore</span>
+            <span>Khám phá chủ đề</span>
+          </button>
+          <button
+            onClick={() => navigateTo('dashboard')}
+            className="px-6 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-xl font-medium text-sm border border-outline-variant/30 flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[18px]">home</span>
+            <span>Về trang chủ</span>
+          </button>
         </div>
       </div>
     );

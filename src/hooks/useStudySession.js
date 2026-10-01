@@ -188,29 +188,17 @@ function generateExerciseData(word, type, allWords) {
   }
 }
 
+import { reviewWord } from '../services/db.js';
+
 // ─── SRS: reviewWord via Supabase directly ────────────────────────────────────
 
 async function reviewWordInDB(wordId, rating) {
   if (!wordId) return;
-  // Delegate to window.HiDB if available (has full SRS logic)
-  if (typeof window !== 'undefined' && window.HiDB?.reviewWord) {
-    try { await window.HiDB.reviewWord(wordId, rating); } catch {}
-    return;
-  }
-  // Fallback: direct Supabase upsert (simplified — no SRS calculation)
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-    const levelMap = { easy: 3, good: 2, hard: 1 };
-    const level = levelMap[rating] ?? 1;
-    await supabase.from('word_progress').upsert({
-      user_id: user.id,
-      word_id: wordId,
-      level,
-      last_reviewed_at: new Date().toISOString(),
-      review_count: 1,
-    }, { onConflict: 'user_id,word_id' });
-  } catch {}
+    await reviewWord(wordId, rating);
+  } catch (err) {
+    console.warn('[useStudySession] reviewWordInDB error:', err);
+  }
 }
 
 // ─── Session State Factory ────────────────────────────────────────────────────
@@ -249,6 +237,7 @@ export function useStudySession() {
     : null;
 
   const isComplete = session.isActive &&
+    session.allWords.length > 0 &&
     session.completed.length >= session.allWords.length;
 
   const progress = {

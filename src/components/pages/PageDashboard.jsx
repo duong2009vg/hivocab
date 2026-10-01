@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useDashboardStats } from '../../hooks/useDashboardStats.js';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { getWordsDueForReview } from '../../services/db.js';
 
 export function PageDashboard() {
   const { navigateTo } = useRoute();
@@ -15,6 +16,34 @@ export function PageDashboard() {
     nextMonth,
     showDayDetail,
   } = useDashboardStats();
+
+  const handleStartReview = useCallback(async () => {
+    try {
+      const dueWords = await getWordsDueForReview(20);
+      if (dueWords && dueWords.length > 0) {
+        if (typeof window !== 'undefined') {
+          window._currentSessionWords = dueWords;
+          window._currentLessonWords = dueWords;
+          window._practiceMode = null;
+        }
+        navigateTo('learning');
+      } else {
+        if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
+          window.showHiToast('Hiện không có từ vựng nào đến hạn ôn tập hôm nay.', 'info');
+        }
+      }
+    } catch (err) {
+      console.warn('[Dashboard] handleStartReview error:', err);
+      navigateTo('learning');
+    }
+  }, [navigateTo]);
+
+  useEffect(() => {
+    window.startSession = handleStartReview;
+    return () => {
+      delete window.startSession;
+    };
+  }, [handleStartReview]);
 
   const { memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } } = stats;
 
@@ -101,7 +130,7 @@ export function PageDashboard() {
                   </p>
                   <button
                     id="dash-start-btn"
-                    onClick={() => typeof window !== 'undefined' && window.startSession?.()}
+                    onClick={handleStartReview}
                     className="bg-primary text-on-primary px-7 py-3 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <span className="material-symbols-outlined text-[20px]">play_arrow</span>Ôn tập ngay

@@ -4,19 +4,19 @@
 
 const SOUND_PATHS = {
   correct: [
-    'data/sound/correct.mp3',
-    'data/sound/correct%20sound.mp3',
-    'data/sound/correct sound.mp3',
+    '/data/sound/correct.mp3',
+    '/data/sound/correct%20sound.mp3',
+    '/data/sound/correct sound.mp3',
   ],
   incorrect: [
-    'data/sound/incorrect.mp3',
-    'data/sound/incorrect%20sound.mp3',
-    'data/sound/incorrect sound.mp3',
+    '/data/sound/incorrect.mp3',
+    '/data/sound/incorrect%20sound.mp3',
+    '/data/sound/incorrect sound.mp3',
   ],
   complete: [
-    'data/sound/complete.mp3',
-    'data/sound/complete%20session%20study.mp3',
-    'data/sound/complete session study.mp3',
+    '/data/sound/complete.mp3',
+    '/data/sound/complete%20session%20study.mp3',
+    '/data/sound/complete session study.mp3',
   ],
 };
 
@@ -314,10 +314,15 @@ class AudioEngine {
 
 export const HiAudio = new AudioEngine();
 
+export function playWordAudio(word, rate = 0.9, lang = 'en') {
+  return HiAudio.playWord(word, rate, lang);
+}
+
 // Expose globals for backward-compatibility
 if (typeof window !== 'undefined') {
   window.HiSound = HiSound;
   window.HiAudio = HiAudio;
+  window.playWordAudio = playWordAudio;
 }
 
-export default { HiSound, HiAudio };
+export default { HiSound, HiAudio, playWordAudio };
