@@ -41,11 +41,11 @@ assert(headersContent.includes('https://*.supabase.co'), 'public/_headers permit
 assert(headersContent.includes("X-Frame-Options: DENY"), 'Anti-Clickjacking: X-Frame-Options is DENY');
 assert(headersContent.includes("X-Content-Type-Options: nosniff"), 'Anti-MIME Sniffing: nosniff enabled');
 
-// 2. SM-2 Spaced Repetition Logic Validation (DIRECT PRODUCTION MODULE: dataLayer.js)
+// 2. SM-2 Spaced Repetition Logic Validation (ARCHIVED REFERENCE MODULE: dataLayer.js)
 console.log('\n2. Testing SM-2 SRS Algorithm via Production dataLayer.js:');
 global.window = global;
 global.document = { addEventListener: () => {} };
-const dataLayerSource = fs.readFileSync(path.resolve(rootDir, 'dataLayer.js'), 'utf8');
+const dataLayerSource = fs.readFileSync(path.resolve(rootDir, 'archive/legacy/dataLayer.js'), 'utf8');
 eval(dataLayerSource);
 
 assert(typeof global.HiDB !== 'undefined', 'Production HiDB engine initialized');
@@ -87,7 +87,7 @@ global.localStorage = {
   clear: () => { mockStorage = {}; }
 };
 
-const dictSource = fs.readFileSync(path.resolve(rootDir, 'dictionary.js'), 'utf8');
+const dictSource = fs.readFileSync(path.resolve(rootDir, 'archive/legacy/dictionary.js'), 'utf8');
 eval(dictSource);
 
 assert(typeof global.HiDict !== 'undefined', 'Production HiDict engine initialized');
@@ -155,8 +155,8 @@ assert(!appContent.includes('<ProtectedRoute><PageLearning />'), 'Public visitor
 // 6. Navigation Stability & Anti-Lag Safeguards
 console.log('\n6. Checking Navigation Stability & Anti-Lag Safeguards:');
 const routeContextContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'router', 'RouteContext.jsx'), 'utf8');
-const dataLayerContent = fs.readFileSync(path.join(__dirname, '..', 'dataLayer.js'), 'utf8');
-const legacyAppContent = fs.readFileSync(path.join(__dirname, '..', 'legacyApp.js'), 'utf8');
+const dataLayerContent = fs.readFileSync(path.join(__dirname, '..', 'archive', 'legacy', 'dataLayer.js'), 'utf8');
+const legacyAppContent = fs.readFileSync(path.join(__dirname, '..', 'archive', 'legacy', 'legacyApp.js'), 'utf8');
 
 assert(routeContextContent.includes('isNavigatingRef'), 'RouteContext guards against synthetic hashchange bounce loops');
 assert(routeContextContent.includes('// Hash takes precedence'), 'RouteContext respects deep hash links over base pathname');
@@ -174,7 +174,7 @@ const soundServiceContent = fs.readFileSync(path.join(__dirname, '..', 'src', 's
 const supabaseClientContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'lib', 'supabaseClient.js'), 'utf8');
 const useTopicsContent = fs.readFileSync(path.join(__dirname, '..', 'src', 'hooks', 'useTopics.js'), 'utf8');
 const swContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'sw.js'), 'utf8');
-const sessionUIContent = fs.readFileSync(path.join(__dirname, '..', 'sessionUI.js'), 'utf8');
+const sessionUIContent = fs.readFileSync(path.join(__dirname, '..', 'archive', 'legacy', 'sessionUI.js'), 'utf8');
 
 assert(pageTopicsContent.includes('useTopics'), 'PageTopics uses reactive useTopics hook');
 assert(!pageTopicsContent.includes('innerHTML'), 'PageTopics contains zero innerHTML DOM manipulations');
