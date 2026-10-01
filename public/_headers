@@ -18,6 +18,10 @@
 /*.data
   Cache-Control: public, max-age=31536000, immutable
 
+# Service Worker — Không cache
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
 # JS & CSS — Cache 1 giờ, stale 1 ngày
 /*.js
   Cache-Control: public, max-age=3600, stale-while-revalidate=86400

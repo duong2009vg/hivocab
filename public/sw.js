@@ -1,5 +1,5 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v16';
+const CACHE_NAME = 'hivocab-shell-v17';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',
@@ -58,7 +58,7 @@ self.addEventListener('fetch', (event) => {
   // Bỏ qua /assets/ của Vite (đã có content hash, tránh lỗi cross-world service worker resource mismatch)
   if (url.pathname.startsWith('/assets/')) return;
 
-  // Stale-While-Revalidate cho static assets cùng origin
+  // Xử lý các tài nguyên cùng origin
   if (url.origin === self.location.origin) {
     const isNavigationRequest = event.request.mode === 'navigate'
       || event.request.destination === 'document'
@@ -73,6 +73,32 @@ self.addEventListener('fetch', (event) => {
       },
     );
 
+    // 1. Navigation requests (HTML documents): LUÔN ưu tiên mạng (Network-First)
+    // để trình duyệt luôn nhận file index.html mới nhất, tránh tình trạng chunk hash bị lệch sau khi deploy
+    if (isNavigationRequest) {
+      event.respondWith(
+        fetch(event.request)
+          .then((networkResponse) => {
+            if (networkResponse && networkResponse.status === 200) {
+              const responseClone = networkResponse.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+              }).catch(() => {});
+            }
+            return networkResponse;
+          })
+          .catch(() => {
+            // Khi không có kết nối internet: dùng app shell đã lưu trong cache
+            return caches.match(event.request).then((cached) => {
+              if (cached) return cached;
+              return caches.match('/').then((shell) => shell || offlineResponse());
+            });
+          })
+      );
+      return;
+    }
+
+    // 2. Static non-HTML assets (CSS, SVG, fonts): Stale-While-Revalidate
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         const fetchPromise = fetch(event.request).then((networkResponse) => {
@@ -80,23 +106,11 @@ self.addEventListener('fetch', (event) => {
             const responseClone = networkResponse.clone();
             caches.open(CACHE_NAME).then((cache) => {
               return cache.put(event.request, responseClone);
-            }).catch(() => {
-              // Bỏ qua lỗi cache; response mạng vẫn được trả về cho người dùng.
-            });
+            }).catch(() => {});
           }
           return networkResponse;
         }).catch(() => {
-          // Luôn trả về một Response hợp lệ. Trước đây khi cache miss,
-          // nhánh này trả undefined và làm FetchEvent reject với
-          // "Failed to convert value to 'Response'".
           if (cachedResponse) return cachedResponse;
-
-          // /app#topics chỉ gửi request /app lên server. Dùng app shell
-          // đã precache để SPA vẫn có thể khởi động khi mạng chập chờn.
-          if (isNavigationRequest) {
-            return caches.match('/').then((shellResponse) => shellResponse || offlineResponse());
-          }
-
           return offlineResponse();
         });
 

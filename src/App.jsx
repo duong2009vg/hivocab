@@ -1,6 +1,7 @@
 // src/App.jsx
 // Main Application with Centralized Auth, Dynamic Routing & Code Splitting
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
+import { lazyWithRetry as lazy } from './utils/lazyWithRetry.js';
 import { AuthProvider } from './providers/AuthProvider.jsx';
 import { RouteProvider, useRoute } from './router/RouteContext.jsx';
 import { ModalProvider } from './context/ModalContext.jsx';
