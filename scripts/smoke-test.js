@@ -32,22 +32,25 @@ const requiredSourceFiles = [
   'src/App.jsx',
   'src/providers/AuthProvider.jsx',
   'src/router/RouteContext.jsx',
+  'src/context/ToastContext.jsx',
+  'src/context/ModalContext.jsx',
   'src/components/common/ProtectedRoute.jsx',
-  'src/legacy/legacyBridge.js',
   'src/hooks/useDashboardStats.js',
   'src/hooks/useDictionary.js',
   'src/hooks/useVocabulary.js',
   'src/hooks/useTopics.js',
   'src/hooks/useTopicDetail.js',
   'src/hooks/useLessonDetail.js',
+  'src/hooks/useSound.js',
   'src/lib/supabaseClient.js',
   'src/services/db.js',
-  'src/services/sound.js',
+  'src/services/audioService.js',
   'src/components/pages/PageTopics.jsx',
   'src/components/pages/PageTopicDetail.jsx',
   'src/components/pages/PageLessonDetail.jsx',
-  'legacyApp.js',
-  'dataLayer.js',
+  'src/components/modals/CreateTopicModal.jsx',
+  'src/components/modals/AddWordModal.jsx',
+  'src/components/modals/PricingModal.jsx',
   'functions/api/tts.js',
   'functions/app.js',
   'functions/login.js',
@@ -61,7 +64,7 @@ for (const relPath of requiredSourceFiles) {
   assert(fs.existsSync(fullPath), `File exists: ${relPath}`);
 }
 
-// 2. Production Build Verification
+// 2. Production Build Verification (100% Pure React SPA)
 console.log('\n2. Checking Production Build Artifacts (dist/):');
 const distDir = path.resolve(rootDir, 'dist');
 assert(fs.existsSync(distDir), 'Directory dist/ exists');
@@ -71,13 +74,14 @@ assert(fs.existsSync(distIndex), 'File dist/index.html exists');
 
 if (fs.existsSync(distIndex)) {
   const html = fs.readFileSync(distIndex, 'utf-8');
-  assert(html.includes('legacyApp.js'), 'dist/index.html includes legacyApp.js');
-  assert(html.includes('dataLayer.js'), 'dist/index.html includes dataLayer.js');
-  assert(html.includes('soundEngine.js'), 'dist/index.html includes soundEngine.js');
-  assert(!html.includes('<script defer src="app.js'), 'No collision: dist/index.html does not request legacy app.js directly');
+  assert(!html.includes('legacyApp.js'), 'dist/index.html is clean: NO legacyApp.js');
+  assert(!html.includes('dataLayer.js'), 'dist/index.html is clean: NO dataLayer.js');
+  assert(!html.includes('soundEngine.js'), 'dist/index.html is clean: NO soundEngine.js');
+  assert(html.includes('<div id="root"></div>'), 'dist/index.html includes React root container');
+  assert(html.includes('/assets/main-'), 'dist/index.html includes modern React main bundle');
 }
 
-assert(fs.existsSync(path.resolve(distDir, 'legacyApp.js')), 'dist/legacyApp.js is copied to dist');
+assert(!fs.existsSync(path.resolve(distDir, 'legacyApp.js')), 'dist/ is clean: no legacyApp.js copied');
 assert(fs.existsSync(path.resolve(distDir, 'functions/api/tts.js')), 'dist/functions/api/tts.js is present');
 
 // 3. Bundle Size Check

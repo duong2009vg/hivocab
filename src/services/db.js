@@ -216,47 +216,186 @@ export async function isUserPro() {
   return false;
 }
 
-// ─── Delegate remaining ops to window.HiDB (mutation ops, legacy queries) ───
-// These are not performance-critical (user-triggered, infrequent)
-
-function getHiDB() {
-  if (typeof window !== 'undefined' && window.HiDB) return window.HiDB;
-  return null;
-}
+// ─── Native Supabase Mutations & Domain Queries ──────────────────────────────
 
 export async function createTopic(name, icon = 'folder', category = 'general') {
-  const client = getHiDB();
-  if (client?.createTopic) return client.createTopic(name, icon, category);
-  throw new Error('Database service is not ready.');
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Vui lòng đăng nhập để tạo chủ đề.');
+  
+  const { data, error } = await supabase
+    .from('topics')
+    .insert({
+      user_id: user.id,
+      name: String(name || '').trim(),
+      icon: icon || 'folder',
+      category: category || 'general',
+      is_public: false,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  MEM.topics = null; // Invalidate cache
+  return data;
 }
 
 export async function deleteTopic(topicId) {
-  const client = getHiDB();
-  if (client?.deleteTopic) return client.deleteTopic(topicId);
-  throw new Error('Database service is not ready.');
+  const { error } = await supabase
+    .from('topics')
+    .delete()
+    .eq('id', topicId);
+
+  if (error) throw error;
+  MEM.topics = null; // Invalidate cache
+  return true;
 }
 
 export async function getCamHierarchy(topicId) {
-  const client = getHiDB();
-  if (client?.getCamHierarchy) return client.getCamHierarchy(topicId);
-  return null;
+  try {
+    const { data: testsData, error: testsErr } = await supabase
+      .from('tests')
+      .select('id, name, test_order, is_pro')
+      .eq('topic_id', topicId)
+      .order('test_order', { ascending: true });
+
+    if (testsErr || !testsData || testsData.length === 0) return null;
+
+    const { data: passagesData, error: passagesErr } = await supabase
+      .from('passages')
+      .select('id, test_id, passage_number, title, topic_label, content_en, content_vi, is_pro')
+      .eq('topic_id', topicId)
+      .order('passage_number', { ascending: true });
+
+    if (passagesErr || !passagesData) return null;
+
+    const passagesByTest = new Map();
+    passagesData.forEach((p) => {
+      if (!passagesByTest.has(p.test_id)) passagesByTest.set(p.test_id, []);
+      passagesByTest.get(p.test_id).push({
+        id: p.id,
+        testId: p.test_id,
+        passageNumber: p.passage_number,
+        title: p.title || `Passage ${p.passage_number}`,
+        topicLabel: p.topic_label,
+        contentEn: p.content_en,
+        contentVi: p.content_vi,
+        isPro: Boolean(p.is_pro),
+        totalWords: 0,
+        progress: 0,
+      });
+    });
+
+    const tests = testsData.map((t) => ({
+      id: t.id,
+      name: t.name,
+      testOrder: t.test_order,
+      isPro: Boolean(t.is_pro),
+      passages: passagesByTest.get(t.id) || [],
+    }));
+
+    return {
+      tests,
+      unlinkedWords: [],
+      totalWords: 0,
+      progress: 0,
+    };
+  } catch (err) {
+    console.warn('[db.getCamHierarchy] error:', err);
+    return null;
+  }
 }
 
 export async function getLessonsInTopic(topicId) {
-  const client = getHiDB();
-  if (client?.getLessonsInTopic) return client.getLessonsInTopic(topicId);
-  return [];
+  try {
+    const { data, error } = await supabase
+      .from('words')
+      .select('id, word, lesson_name, lesson_order, word_order')
+      .eq('topic_id', topicId)
+      .order('lesson_order', { ascending: true, nullsFirst: false })
+      .order('word_order', { ascending: true, nullsFirst: false });
+
+    if (error || !data || data.length === 0) return [];
+
+    const LESSON_SIZE = 50;
+    const namedLessons = data.filter((w) => w.lesson_name && w.lesson_order !== null);
+
+    if (namedLessons.length > 0) {
+      const groups = new Map();
+      for (const w of namedLessons) {
+        const order = Number(w.lesson_order);
+        if (!groups.has(order)) groups.set(order, { name: w.lesson_name, words: [] });
+        groups.get(order).words.push(w);
+      }
+      return Array.from(groups.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([order, g]) => ({
+          id: `lesson-${topicId}-${order}`,
+          topicId,
+          index: order,
+          name: g.name,
+          totalWords: g.words.length,
+          progress: 0,
+          wordIds: g.words.map((w) => w.id),
+        }));
+    }
+
+    const lessons = [];
+    for (let i = 0; i < data.length; i += LESSON_SIZE) {
+      const chunk = data.slice(i, i + LESSON_SIZE);
+      const idx = Math.floor(i / LESSON_SIZE);
+      lessons.push({
+        id: `lesson-${topicId}-${idx}`,
+        topicId,
+        index: idx,
+        name: `Lesson ${idx + 1}`,
+        totalWords: chunk.length,
+        progress: 0,
+        wordIds: chunk.map((w) => w.id),
+      });
+    }
+    return lessons;
+  } catch (err) {
+    console.warn('[db.getLessonsInTopic]', err);
+    return [];
+  }
 }
 
 export async function getWordsInLesson(topicId, lessonIndex) {
-  const client = getHiDB();
-  if (client?.getWordsInLesson) return client.getWordsInLesson(topicId, lessonIndex);
-  return [];
+  try {
+    const { data, error } = await supabase
+      .from('words')
+      .select('id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_order, word_order')
+      .eq('topic_id', topicId)
+      .eq('lesson_order', lessonIndex)
+      .order('word_order', { ascending: true, nullsFirst: false });
+
+    if (!error && data && data.length > 0) {
+      return data.map((w) => ({
+        ...w,
+        exampleSentence: w.example_sentence || '',
+        imageUrl: w.image_url || '',
+      }));
+    }
+
+    const LESSON_SIZE = 50;
+    const { data: fbData } = await supabase
+      .from('words')
+      .select('id, word, pos, phonetic, meaning, example_sentence, image_url')
+      .eq('topic_id', topicId)
+      .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
+
+    return (fbData || []).map((w) => ({
+      ...w,
+      exampleSentence: w.example_sentence || '',
+      imageUrl: w.image_url || '',
+    }));
+  } catch (err) {
+    console.warn('[db.getWordsInLesson]', err);
+    return [];
+  }
 }
 
 export async function getWordsInPassage(passageId) {
-  const client = getHiDB();
-  if (client?.getWordsInPassage) return client.getWordsInPassage(passageId);
   try {
     const { data, error } = await supabase
       .from('words')
@@ -264,7 +403,7 @@ export async function getWordsInPassage(passageId) {
       .eq('passage_id', passageId)
       .order('word_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
-    return (data || []).map(w => ({
+    return (data || []).map((w) => ({
       ...w,
       exampleSentence: w.example_sentence || '',
       imageUrl: w.image_url || '',
@@ -276,8 +415,6 @@ export async function getWordsInPassage(passageId) {
 }
 
 export async function getPassage(passageId) {
-  const client = getHiDB();
-  if (client?.getPassage) return client.getPassage(passageId);
   try {
     const { data, error } = await supabase
       .from('passages')
@@ -292,27 +429,135 @@ export async function getPassage(passageId) {
   }
 }
 
-export async function addWord(topicId, wordData) {
-  const client = getHiDB();
-  if (client?.addWord) return client.addWord(topicId, wordData);
-  throw new Error('Database service is not ready.');
+export async function addWord(topicId, { word, phonetic = '', meaning, exampleSentence = '', notes = '', passageId = null }) {
+  const { data: { user } } = await supabase.auth.getUser();
+  const payload = {
+    topic_id: topicId,
+    word: String(word || '').trim(),
+    phonetic: String(phonetic || '').trim(),
+    meaning: String(meaning || '').trim(),
+    example_sentence: String(exampleSentence || '').trim(),
+    notes: String(notes || '').trim(),
+  };
+  if (passageId) payload.passage_id = passageId;
+
+  const { data, error } = await supabase
+    .from('words')
+    .insert(payload)
+    .select()
+    .single();
+  if (error) throw error;
+
+  if (user?.id && data?.id) {
+    await supabase.from('word_progress').upsert({
+      user_id: user.id,
+      word_id: data.id,
+      level: 1,
+      next_review_at: new Date().toISOString(),
+      review_count: 0,
+      created_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,word_id' }).catch(() => {});
+  }
+  return data;
 }
 
 export async function deleteWord(wordId) {
-  const client = getHiDB();
-  if (client?.deleteWord) return client.deleteWord(wordId);
-  throw new Error('Database service is not ready.');
+  const { error } = await supabase
+    .from('words')
+    .delete()
+    .eq('id', wordId);
+  if (error) throw error;
+  return true;
 }
 
 export async function updatePassageTitle(passageId, title) {
-  const client = getHiDB();
-  if (client?.updatePassageTitle) return client.updatePassageTitle(passageId, title);
+  const { error } = await supabase
+    .from('passages')
+    .update({ title })
+    .eq('id', passageId);
+  if (error) throw error;
+  return true;
+}
+
+export async function clonePublicTopic(topicId) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Vui lòng đăng nhập để lưu bộ từ!');
+
+  const { data: srcTopic, error: srcErr } = await supabase
+    .from('topics')
+    .select('name, icon, category, description')
+    .eq('id', topicId)
+    .single();
+  if (srcErr || !srcTopic) throw new Error('Không tìm thấy bộ từ nguồn.');
+
+  const { data: newTopic, error: createErr } = await supabase
+    .from('topics')
+    .insert({
+      user_id: user.id,
+      name: `${srcTopic.name} (Bản sao)`,
+      icon: srcTopic.icon || 'folder',
+      category: 'personal',
+      description: srcTopic.description || null,
+      is_public: false,
+    })
+    .select()
+    .single();
+  if (createErr || !newTopic) throw createErr;
+
+  try {
+    await supabase.rpc('increment_topic_clones', { p_topic_id: topicId });
+  } catch (_) {}
+
+  const { data: srcWords } = await supabase
+    .from('words')
+    .select('word, pos, phonetic, meaning, example_sentence, notes, image_url, word_order')
+    .eq('topic_id', topicId);
+
+  if (srcWords && srcWords.length > 0) {
+    const wordsToInsert = srcWords.map((w) => ({
+      ...w,
+      topic_id: newTopic.id,
+      passage_id: null,
+    }));
+    await supabase.from('words').insert(wordsToInsert);
+  }
+
+  MEM.topics = null;
+  return newTopic.id;
 }
 
 export async function checkProAccess({ topicId, passageId, showModal = true } = {}) {
-  if (typeof window !== 'undefined' && typeof window.checkProAccess === 'function') {
-    return window.checkProAccess({ topicId, passageId, showModal });
+  const isPro = await isUserPro();
+  if (isPro) return true;
+
+  if (topicId) {
+    const { data } = await supabase
+      .from('topics')
+      .select('is_pro')
+      .eq('id', topicId)
+      .maybeSingle();
+    if (data?.is_pro) {
+      if (showModal && typeof window !== 'undefined' && window.__modalContext?.openModal) {
+        window.__modalContext.openModal('pricingModal');
+      }
+      return false;
+    }
   }
+
+  if (passageId) {
+    const { data } = await supabase
+      .from('passages')
+      .select('is_pro')
+      .eq('id', passageId)
+      .maybeSingle();
+    if (data?.is_pro) {
+      if (showModal && typeof window !== 'undefined' && window.__modalContext?.openModal) {
+        window.__modalContext.openModal('pricingModal');
+      }
+      return false;
+    }
+  }
+
   return true;
 }
 
@@ -331,7 +576,14 @@ export const db = {
   addWord,
   deleteWord,
   updatePassageTitle,
+  clonePublicTopic,
   checkProAccess,
 };
+
+// Expose HiDB globally for any remaining non-React call
+if (typeof window !== 'undefined') {
+  window.HiDB = db;
+  window.checkProAccess = checkProAccess;
+}
 
 export default db;

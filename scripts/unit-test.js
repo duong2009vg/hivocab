@@ -142,7 +142,7 @@ for (const r of expectedRoutes) {
 
 // 5. App Component Lazy Loading Integrity & Protected Routes
 console.log('\n5. Checking Route Protection & Code Splitting:');
-assert(appContent.includes('const Modals = lazy('), 'Modals dialogs are lazy loaded');
+assert(appContent.includes('const CreateTopicModal = lazy(') && appContent.includes('const PricingModal = lazy('), 'Pure React modals are lazy loaded individually');
 assert(appContent.includes('<Suspense'), 'Suspense fallback boundary encapsulates components');
 assert(!appContent.includes('.page.active'), 'Legacy CSS class .page.active has been eliminated from routing switch');
 assert(appContent.includes('<ProtectedRoute><PageDashboard /></ProtectedRoute>'), 'Dashboard route is protected with ProtectedRoute');

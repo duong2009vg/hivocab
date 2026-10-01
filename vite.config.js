@@ -11,33 +11,7 @@ function copyStaticAssetsPlugin() {
       const outDir = resolve(__dirname, 'dist');
       if (!fs.existsSync(outDir)) return;
 
-      // 1. Root scripts required by index.html
-      const rootScripts = [
-        'legacyApp.js',
-        'dataLayer.js',
-        'aiHint.js',
-        'dashboardStats.js',
-        'soundEngine.js',
-        'sessionEngine.js',
-        'sessionUI.js',
-        'thptExam.js',
-        'pricing.js',
-        'dictionary.js',
-        'exercises.js',
-        'mockData.js',
-        'groq.js',
-      ];
-
-      for (const file of rootScripts) {
-        const src = resolve(__dirname, file);
-        const dest = resolve(outDir, file);
-        if (fs.existsSync(src)) {
-          fs.copyFileSync(src, dest);
-          console.log(`[copy-assets] Copied script: ${file}`);
-        }
-      }
-
-      // Copy css/
+      // 1. Copy css/
       const cssSrc = resolve(__dirname, 'css');
       const cssDest = resolve(outDir, 'css');
       if (fs.existsSync(cssSrc)) {
@@ -48,7 +22,7 @@ function copyStaticAssetsPlugin() {
         console.log('[copy-assets] Copied css/ directory');
       }
 
-      // Copy functions/ recursively
+      // 2. Copy functions/ recursively
       function copyDirRecursive(src, dest) {
         if (!fs.existsSync(src)) return;
         if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
@@ -78,42 +52,6 @@ function copyStaticAssetsPlugin() {
         if (fs.existsSync(src)) {
           fs.copyFileSync(src, dest);
           console.log(`[copy-assets] Copied static page: ${page}`);
-        }
-      }
-
-      // 2. Re-inject legacy non-module scripts into dist/index.html
-      // Vite strips <script src="..."> tags without type="module" during build.
-      // We must add them back manually so the app works in production.
-      const distHtmlPath = resolve(outDir, 'index.html');
-      if (fs.existsSync(distHtmlPath)) {
-        let html = fs.readFileSync(distHtmlPath, 'utf-8');
-        const legacyScripts = [
-          '<script src="dataLayer.js?v=20260922-v11"></script>',
-          '<script src="aiHint.js"></script>',
-          '<script src="dashboardStats.js"></script>',
-          '<script src="soundEngine.js?v=20260921-v8"></script>',
-          '<script src="sessionEngine.js?v=20260913-qa-fix-v1"></script>',
-          '<script src="sessionUI.js?v=20260921-v9"></script>',
-          '<script src="thptExam.js?v=20260913-monitoring-v1"></script>',
-          '<script src="pricing.js?v=20260920-v4"></script>',
-          '<script src="dictionary.js?v=20260926-cleanui-v1"></script>',
-          '<script defer src="legacyApp.js?v=20260927-v1"></script>',
-        ].join('\n');
-        // Inject right before </body>
-        if (!html.includes('dataLayer.js')) {
-          const replaced = html.replace(/<\/body>/i, `${legacyScripts}\n</body>`);
-          if (replaced !== html) {
-            fs.writeFileSync(distHtmlPath, replaced, 'utf-8');
-            console.log('[copy-assets] Re-injected legacy scripts into dist/index.html');
-          } else {
-            console.warn('[copy-assets] WARNING: Could not find </body> in dist/index.html to inject scripts!');
-            // Fallback: append before </html>
-            const replaced2 = html.replace(/<\/html>/i, `${legacyScripts}\n</html>`);
-            fs.writeFileSync(distHtmlPath, replaced2, 'utf-8');
-            console.log('[copy-assets] Injected before </html> as fallback');
-          }
-        } else {
-          console.log('[copy-assets] dataLayer.js already found in dist/index.html, skipping injection');
         }
       }
     }

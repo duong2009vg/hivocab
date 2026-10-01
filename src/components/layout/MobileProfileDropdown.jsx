@@ -15,6 +15,29 @@ export function MobileProfileDropdown() {
     if (el) el.classList.add('hidden');
   };
 
+  React.useEffect(() => {
+    window.toggleMobileProfileDropdown = () => {
+      const el = document.getElementById('mobile-profile-dropdown');
+      if (el) el.classList.toggle('hidden');
+    };
+
+    const handleOutsideClick = (e) => {
+      const el = document.getElementById('mobile-profile-dropdown');
+      if (el && !el.classList.contains('hidden')) {
+        const isTrigger = e.target.closest('.mobile-user-avatar') || e.target.closest('[data-mobile-avatar]');
+        if (!el.contains(e.target) && !isTrigger) {
+          el.classList.add('hidden');
+        }
+      }
+    };
+
+    document.addEventListener('click', handleOutsideClick);
+    return () => {
+      delete window.toggleMobileProfileDropdown;
+      document.removeEventListener('click', handleOutsideClick);
+    };
+  }, []);
+
   const handleProfileClick = () => {
     closeDropdown();
     if (!user) {

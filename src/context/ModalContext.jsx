@@ -1,14 +1,10 @@
 // src/context/ModalContext.jsx
-// React context for controlling modal visibility.
-// Acts as a thin bridge during migration: React state is source of truth,
-// but legacy window.* functions are still called for backward compat.
-// Once each modal is rewritten as React, remove its legacyMap entry.
-import React, { createContext, useContext, useState, useCallback } from 'react';
+// 100% Pure React Modal State Management
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 
 const ModalContext = createContext(null);
 
 export function ModalProvider({ children }) {
-  // Each modal: open (bool) + optional data payload
   const [modals, setModals] = useState({
     bugReport:      { open: false, data: null },
     pricingModal:   { open: false },
@@ -21,38 +17,36 @@ export function ModalProvider({ children }) {
   });
 
   const openModal = useCallback((modalName, data = {}) => {
-    setModals(prev => ({
+    setModals((prev) => ({
       ...prev,
       [modalName]: { open: true, ...data },
     }));
-
-    // BRIDGE: also call legacy window handlers for modals not yet React-ified.
-    // Delete each entry below once the corresponding modal is migrated.
-    const legacyMap = {
-      pricingModal:   () => window.openPricingModal?.(),
-      createTopic:    () => window.openCreateTopicModal?.(),
-      addWord:        () => (data && (data.topicId !== undefined || data.passageId !== undefined))
-        ? window.openAddWordModal?.(data.topicId, data.passageId)
-        : (window.openVocabAddModal ? window.openVocabAddModal() : window.openAddWordModal?.()),
-      bulkAdd:        () => window.openVocabBulkAddModal?.(),
-      forgotPassword: () => window.openForgotPasswordModal?.(),
-      authError:      () => window.openAuthErrorModal?.(data.desc),
-    };
-    legacyMap[modalName]?.();
   }, []);
 
   const closeModal = useCallback((modalName) => {
-    setModals(prev => ({
+    setModals((prev) => ({
       ...prev,
       [modalName]: { ...prev[modalName], open: false },
     }));
   }, []);
 
-  // Expose to window so legacy (non-React) scripts can still trigger modals
-  // via window.__modalContext.openModal(name, data).
-  React.useEffect(() => {
+  // Expose global aliases so any non-React code can still trigger React modals
+  useEffect(() => {
     window.__modalContext = { openModal, closeModal };
-    return () => { delete window.__modalContext; };
+    window.openPricingModal = () => openModal('pricingModal');
+    window.closePricingModal = () => closeModal('pricingModal');
+    window.openCreateTopicModal = () => openModal('createTopic');
+    window.closeCreateTopicModal = () => closeModal('createTopic');
+    window.openAddWordModal = (topicId, passageId) => openModal('addWord', { topicId, passageId });
+    window.closeAddWordModal = () => closeModal('addWord');
+    window.openVocabBulkAddModal = () => openModal('bulkAdd');
+    window.closeVocabBulkAddModal = () => closeModal('bulkAdd');
+    window.openForgotPasswordModal = () => openModal('forgotPassword');
+    window.openAuthErrorModal = (desc) => openModal('authError', { desc });
+
+    return () => {
+      delete window.__modalContext;
+    };
   }, [openModal, closeModal]);
 
   return (
@@ -64,7 +58,7 @@ export function ModalProvider({ children }) {
 
 export function useModal() {
   const ctx = useContext(ModalContext);
-  if (!ctx) throw new Error('useModal must be used inside <ModalProvider>');
+  if (!ctx) throw new Error('useModal must be used inside ModalProvider');
   return ctx;
 }
 

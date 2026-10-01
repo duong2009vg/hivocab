@@ -4,6 +4,7 @@ import React, { Suspense, lazy } from 'react';
 import { AuthProvider } from './providers/AuthProvider.jsx';
 import { RouteProvider, useRoute } from './router/RouteContext.jsx';
 import { ModalProvider } from './context/ModalContext.jsx';
+import { ToastProvider } from './context/ToastContext.jsx';
 import MainSidebar from './components/layout/MainSidebar.jsx';
 import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx';
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
@@ -12,9 +13,15 @@ import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
-const Modals = lazy(() => import('./components/common/Modals.jsx'));
+// 100% Pure React Modals
 const BugReportModal = lazy(() => import('./components/modals/BugReportModal.jsx'));
 const SrsExplainerModal = lazy(() => import('./components/modals/SrsExplainerModal.jsx'));
+const CreateTopicModal = lazy(() => import('./components/modals/CreateTopicModal.jsx'));
+const AddWordModal = lazy(() => import('./components/modals/AddWordModal.jsx'));
+const BulkAddWordModal = lazy(() => import('./components/modals/BulkAddWordModal.jsx'));
+const PricingModal = lazy(() => import('./components/modals/PricingModal.jsx'));
+const ForgotPasswordModal = lazy(() => import('./components/modals/ForgotPasswordModal.jsx'));
+const AuthErrorModal = lazy(() => import('./components/modals/AuthErrorModal.jsx'));
 const PageLanding = lazy(() => import('./components/pages/PageLanding.jsx'));
 const PageFeatures = lazy(() => import('./components/pages/PageFeatures.jsx'));
 const PageReviews = lazy(() => import('./components/pages/PageReviews.jsx'));
@@ -120,7 +127,12 @@ function AppRoutes() {
       <Suspense fallback={null}>
         <BugReportModal />
         <SrsExplainerModal />
-        <Modals />
+        <CreateTopicModal />
+        <AddWordModal />
+        <BulkAddWordModal />
+        <PricingModal />
+        <ForgotPasswordModal />
+        <AuthErrorModal />
       </Suspense>
     </div>
   );
@@ -131,9 +143,11 @@ export function App() {
     <ErrorBoundary>
       <AuthProvider>
         <ModalProvider>
-          <RouteProvider>
-            <AppRoutes />
-          </RouteProvider>
+          <ToastProvider>
+            <RouteProvider>
+              <AppRoutes />
+            </RouteProvider>
+          </ToastProvider>
         </ModalProvider>
       </AuthProvider>
     </ErrorBoundary>
