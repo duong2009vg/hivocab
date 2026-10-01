@@ -74,8 +74,16 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport }) 
     }
     const char = raw.slice(-1).toUpperCase();
     setValues(prev => { const n = [...prev]; n[flatIdx] = char; return n; });
+    if (e.target) e.target.scrollLeft = 0;
     if (flatIdx < boxes.length - 1) {
-      setTimeout(() => { inputRefs.current[flatIdx + 1]?.focus(); inputRefs.current[flatIdx + 1]?.select(); }, 10);
+      setTimeout(() => {
+        const next = inputRefs.current[flatIdx + 1];
+        if (next) {
+          next.focus();
+          next.select();
+          next.scrollLeft = 0;
+        }
+      }, 10);
     }
   }, [submitted, boxes.length]);
 
@@ -163,8 +171,8 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport }) 
   }, [submitted, values, d.answer, onSubmit, boxes]);
 
   function inputClass(flatIdx) {
-    const base = 'w-7 h-9 sm:w-8 sm:h-10 text-center text-sm sm:text-base font-bold uppercase border-2 rounded-lg bg-surface outline-none transition-all';
-    if (!submitted) return `${base} border-outline-variant/40 focus:border-primary focus:bg-primary/5 text-on-surface`;
+    const base = 'w-9 h-11 sm:w-11 sm:h-13 md:w-12 md:h-14 p-0 m-0 text-center text-base sm:text-xl font-bold uppercase border-2 rounded-xl bg-surface outline-none transition-all font-mono leading-none flex items-center justify-center shadow-2xs select-none';
+    if (!submitted) return `${base} border-outline-variant/40 focus:border-primary focus:bg-primary/5 text-on-surface focus:ring-2 focus:ring-primary/20`;
     if (submitted.correct) return `${base} border-green-500 bg-green-50 text-green-700`;
     return `${base} border-error bg-error-container/20 text-error`;
   }
@@ -296,12 +304,14 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport }) 
                       disabled={!!submitted}
                       data-listen-index={flatIdx}
                       className={inputClass(flatIdx)}
+                      style={{ caretColor: 'transparent', textAlign: 'center' }}
                       autoComplete="off"
                       autoCorrect="off"
                       autoCapitalize="characters"
                       spellCheck={false}
-                      onFocus={e => e.target.select()}
-                      onClick={e => e.target.select()}
+                      onFocus={e => { e.target.select(); e.target.scrollLeft = 0; }}
+                      onBlur={e => { e.target.scrollLeft = 0; }}
+                      onClick={e => { e.target.select(); e.target.scrollLeft = 0; }}
                       onChange={e => handleInput(e, flatIdx)}
                       onKeyDown={e => handleKeyDown(e, flatIdx)}
                     />
