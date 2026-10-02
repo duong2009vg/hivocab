@@ -201,19 +201,25 @@ export async function isUserPro() {
   if (!user) return false;
   const { data } = await supabase
     .from('profiles')
-    .select('tier, subscription_plan, subscription_expires_at')
+    .select('tier, subscription_plan, subscription_expires_at, is_pro')
     .eq('id', user.id)
-    .single();
+    .maybeSingle();
   if (!data) return false;
-  const tier = data.tier || data.subscription_plan;
-  if (tier === 'pro' || tier === 'lifetime') {
-    // Check expiry
-    if (data.subscription_expires_at) {
-      return new Date(data.subscription_expires_at) > new Date();
-    }
+  const isProTier = (
+    Boolean(data.is_pro) ||
+    data.tier === 'pro' ||
+    data.tier === 'lifetime' ||
+    data.subscription_plan === 'pro_lifetime' ||
+    data.subscription_plan === 'lifetime'
+  );
+  if (!isProTier) return false;
+  if (data.tier === 'lifetime' || data.subscription_plan === 'pro_lifetime' || data.subscription_plan === 'lifetime') {
     return true;
   }
-  return false;
+  if (!data.subscription_expires_at) {
+    return Boolean(data.is_pro);
+  }
+  return new Date(data.subscription_expires_at) > new Date();
 }
 
 // ─── Native Supabase Mutations & Domain Queries ──────────────────────────────

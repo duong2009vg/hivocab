@@ -36,6 +36,7 @@ function getInitialRoute() {
 
   if (path === 'login') return 'login';
   if (path === 'app') return 'dashboard';
+  if (path === 'admin') return 'admin';
 
   const isLoggedIn = (typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function')
     ? window._hasLocalAuthToken()

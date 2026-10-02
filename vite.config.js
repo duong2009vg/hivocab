@@ -45,7 +45,7 @@ function copyStaticAssetsPlugin() {
       }
 
       // 3. Copy standalone static HTML pages that don't need Vite processing
-      const staticPages = ['admin.html', 'privacy.html', 'terms.html'];
+      const staticPages = ['privacy.html', 'terms.html'];
       for (const page of staticPages) {
         const src = resolve(__dirname, page);
         const dest = resolve(outDir, page);
@@ -109,8 +109,8 @@ function spaRoutesPlugin() {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         const rawPath = req.url ? req.url.split('?')[0].replace(/\/+$/, '') : '';
-        // If route is /app or /login, redirect internally to /index.html
-        if (rawPath === '/app' || rawPath === '/login') {
+        // If route is /app, /login, or /admin, redirect internally to /index.html
+        if (rawPath === '/app' || rawPath === '/login' || rawPath === '/admin') {
           req.url = '/index.html' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
         }
         next();

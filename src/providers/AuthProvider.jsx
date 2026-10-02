@@ -1,15 +1,37 @@
 // src/providers/AuthProvider.jsx
 // Centralized Authentication Provider for HiVocab React
-// Uses native @supabase/supabase-js client — no dependency on window.HiDB for auth events.
-// Legacy scripts (dataLayer.js) still manage their own auth state independently.
+// Synchronizes Auth state, Profile, PRO Subscription & Admin Role
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
+
+export function checkIsPro(profile) {
+  if (!profile) return false;
+  const isProTier = (
+    Boolean(profile.is_pro) ||
+    profile.tier === 'pro' ||
+    profile.tier === 'lifetime' ||
+    profile.subscription_plan === 'pro_lifetime' ||
+    profile.subscription_plan === 'lifetime'
+  );
+  if (!isProTier) return false;
+  if (profile.tier === 'lifetime' || profile.subscription_plan === 'pro_lifetime' || profile.subscription_plan === 'lifetime') {
+    return true;
+  }
+  if (!profile.subscription_expires_at) {
+    return Boolean(profile.is_pro);
+  }
+  return new Date(profile.subscription_expires_at) > new Date();
+}
 
 const AuthContext = createContext({
   user: null,
   session: null,
+  profile: null,
+  isPro: false,
+  isAdmin: false,
   loading: true,
   error: null,
+  refreshProfile: async () => {},
   signInWithEmail: async () => {},
   signUpWithEmail: async () => {},
   signInWithGoogle: async () => {},
@@ -19,18 +41,55 @@ const AuthContext = createContext({
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const fetchProfile = useCallback(async (userId) => {
+    if (!userId) {
+      setProfile(null);
+      return null;
+    }
+    try {
+      const { data, error: err } = await supabase
+        .from('profiles')
+        .select('id, email, full_name, avatar_url, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, is_pro')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (err) {
+        console.warn('[AuthProvider] fetchProfile error:', err.message);
+        return null;
+      }
+      setProfile(data);
+      return data;
+    } catch (e) {
+      console.warn('[AuthProvider] fetchProfile exception:', e);
+      return null;
+    }
+  }, []);
+
+  const refreshProfile = useCallback(async () => {
+    if (user?.id) {
+      return fetchProfile(user.id);
+    }
+    return null;
+  }, [user?.id, fetchProfile]);
 
   useEffect(() => {
     // 1. Get current session immediately from localStorage (synchronous in practice)
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s ?? null);
-      setUser(s?.user ?? null);
-      setLoading(false);
+      const u = s?.user ?? null;
+      setUser(u);
+
+      if (u) {
+        fetchProfile(u.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
 
       // Sync to DOM & legacy scripts
-      const u = s?.user ?? null;
       if (typeof document !== 'undefined') {
         document.documentElement.classList.toggle('user-logged-in', !!u);
       }
@@ -42,7 +101,13 @@ export function AuthProvider({ children }) {
       const newUser = newSession?.user ?? null;
       setSession(newSession ?? null);
       setUser(newUser);
-      setLoading(false);
+
+      if (newUser) {
+        fetchProfile(newUser.id).finally(() => setLoading(false));
+      } else {
+        setProfile(null);
+        setLoading(false);
+      }
 
       // Sync to DOM & legacy scripts
       if (typeof document !== 'undefined') {
@@ -66,24 +131,28 @@ export function AuthProvider({ children }) {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchProfile]);
 
   const signInWithEmail = useCallback(async (email, password, captchaToken) => {
     setError(null);
-    // Delegate to legacy HiDB if available (handles captcha + custom logic)
     if (typeof window !== 'undefined' && window.HiDB?.signInWithPassword) {
       const res = await window.HiDB.signInWithPassword(email, password, captchaToken);
       if (res?.user) {
         setUser(res.user);
         setSession(res.session);
+        await fetchProfile(res.user.id);
       }
       return res;
     }
-    // Fallback: use native Supabase client
     const { data, error: e } = await supabase.auth.signInWithPassword({ email, password });
     if (e) throw e;
+    if (data?.user) {
+      setUser(data.user);
+      setSession(data.session);
+      await fetchProfile(data.user.id);
+    }
     return data;
-  }, []);
+  }, [fetchProfile]);
 
   const signUpWithEmail = useCallback(async (email, password, captchaToken) => {
     setError(null);
@@ -110,13 +179,13 @@ export function AuthProvider({ children }) {
     setError(null);
     try {
       await supabase.auth.signOut();
-      // Also sign out legacy layer if present
       if (typeof window !== 'undefined' && window.HiDB?.signOut) {
         await window.HiDB.signOut().catch(() => {});
       }
     } finally {
       setUser(null);
       setSession(null);
+      setProfile(null);
       if (typeof document !== 'undefined') {
         document.documentElement.classList.remove('user-logged-in');
       }
@@ -129,11 +198,18 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const isPro = checkIsPro(profile);
+  const isAdmin = Boolean(profile?.role === 'admin');
+
   const value = {
     user,
     session,
+    profile,
+    isPro,
+    isAdmin,
     loading,
     error,
+    refreshProfile,
     signInWithEmail,
     signUpWithEmail,
     signInWithGoogle,
