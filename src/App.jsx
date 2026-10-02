@@ -41,6 +41,7 @@ const PageDictionary = lazy(() => import('./components/pages/PageDictionary.jsx'
 const PageSettings = lazy(() => import('./components/pages/PageSettings.jsx'));
 const PageBilingualReading = lazy(() => import('./components/pages/PageBilingualReading.jsx'));
 const PageLearning = lazy(() => import('./components/pages/PageLearning.jsx'));
+const PageAdmin = lazy(() => import('./components/admin/PageAdmin.jsx'));
 
 function AppRoutes() {
   const { currentRoute, isMainTab, isTopicDetail } = useRoute();
@@ -98,6 +99,8 @@ function AppRoutes() {
         return <PageBilingualReading />;
       case 'learning':
         return <PageLearning />;
+      case 'admin':
+        return <PageAdmin />;
       default:
         return <PageLanding />;
     }
@@ -108,7 +111,8 @@ function AppRoutes() {
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
     currentRoute !== 'bilingual-reading' &&
-    currentRoute !== 'thpt-room';
+    currentRoute !== 'thpt-room' &&
+    currentRoute !== 'admin';
 
   return (
     <div id="app-root" className="min-h-screen bg-background text-on-background font-sans antialiased">
@@ -124,7 +128,7 @@ function AppRoutes() {
         </Suspense>
       </ErrorBoundary>
 
-      <GlobalBugReportBtn />
+      {currentRoute !== 'admin' && <GlobalBugReportBtn />}
       <Suspense fallback={null}>
         <BugReportModal />
         <SrsExplainerModal />
