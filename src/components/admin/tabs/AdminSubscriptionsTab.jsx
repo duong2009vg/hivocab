@@ -160,54 +160,54 @@ export function AdminSubscriptionsTab({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <div
           onClick={() => setTierFilter('PRO')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            tierFilter === 'PRO' ? 'bg-amber-500/10 border-amber-500' : 'bg-surface border-outline-variant/20 hover:border-amber-500/40'
+          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
+            tierFilter === 'PRO' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
           }`}
         >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase">Hội viên PRO</span>
-            <span className="material-symbols-outlined text-amber-500 text-[18px]">verified</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Hội viên PRO</span>
+            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'PRO' ? 'text-primary' : 'text-on-surface-variant/70'}`}>verified</span>
           </div>
-          <p className="text-xl font-black text-amber-600 dark:text-amber-400">{stats.activePro}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.activePro}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('LIFETIME')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            tierFilter === 'LIFETIME' ? 'bg-purple-500/10 border-purple-500' : 'bg-surface border-outline-variant/20 hover:border-purple-500/40'
+          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
+            tierFilter === 'LIFETIME' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
           }`}
         >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase">Trọn đời</span>
-            <span className="material-symbols-outlined text-purple-500 text-[18px]">all_inclusive</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Trọn đời</span>
+            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'LIFETIME' ? 'text-primary' : 'text-on-surface-variant/70'}`}>all_inclusive</span>
           </div>
-          <p className="text-xl font-black text-purple-600 dark:text-purple-400">{stats.lifetime}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.lifetime}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('EXPIRING')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            tierFilter === 'EXPIRING' ? 'bg-rose-500/10 border-rose-500' : 'bg-surface border-outline-variant/20 hover:border-rose-500/40'
+          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
+            tierFilter === 'EXPIRING' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
           }`}
         >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase">Sắp hết hạn (&le;7d)</span>
-            <span className="material-symbols-outlined text-rose-500 text-[18px]">alarm</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Sắp hết hạn (&le;7d)</span>
+            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'EXPIRING' ? 'text-primary' : 'text-on-surface-variant/70'}`}>alarm</span>
           </div>
-          <p className="text-xl font-black text-rose-600 dark:text-rose-400">{stats.expiring}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.expiring}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('FREE')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-            tierFilter === 'FREE' ? 'bg-blue-500/10 border-blue-500' : 'bg-surface border-outline-variant/20 hover:border-blue-500/40'
+          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
+            tierFilter === 'FREE' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
           }`}
         >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase">Miễn phí</span>
-            <span className="material-symbols-outlined text-blue-500 text-[18px]">person</span>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Miễn phí</span>
+            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'FREE' ? 'text-primary' : 'text-on-surface-variant/70'}`}>person</span>
           </div>
-          <p className="text-xl font-black text-on-surface">{stats.free}</p>
+          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.free}</p>
         </div>
       </div>
 

@@ -148,22 +148,22 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
     <div className="space-y-6 animate-fade-in">
       {/* Top Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20">
+        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/15 shadow-2xs">
           <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Doanh thu Thực nhận</p>
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1">{formatCurrency(totalRevenue)}</p>
-          <p className="text-xs text-on-surface-variant mt-0.5">{paidCount} đơn thanh toán thành công</p>
+          <p className="text-2xl lg:text-3xl font-extrabold text-on-surface mt-1 tabular-nums">{formatCurrency(totalRevenue)}</p>
+          <p className="text-xs text-on-surface-variant/80 mt-1 font-medium">{paidCount} đơn thanh toán thành công</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20">
+        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/15 shadow-2xs">
           <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Đơn Chờ Xử lý</p>
-          <p className="text-2xl font-black text-amber-500 mt-1">{pendingCount}</p>
-          <p className="text-xs text-on-surface-variant mt-0.5">Khách đã mở mã QR PayOS</p>
+          <p className="text-2xl lg:text-3xl font-extrabold text-on-surface mt-1 tabular-nums">{pendingCount}</p>
+          <p className="text-xs text-on-surface-variant/80 mt-1 font-medium">Khách đã mở mã QR PayOS</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20">
+        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/15 shadow-2xs">
           <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Tổng Đơn Hệ thống</p>
-          <p className="text-2xl font-black text-on-surface mt-1">{orders.length}</p>
-          <p className="text-xs text-on-surface-variant mt-0.5">Bao gồm PayOS và Tặng quà</p>
+          <p className="text-2xl lg:text-3xl font-extrabold text-on-surface mt-1 tabular-nums">{orders.length}</p>
+          <p className="text-xs text-on-surface-variant/80 mt-1 font-medium">Bao gồm PayOS và Tặng quà</p>
         </div>
       </div>
 

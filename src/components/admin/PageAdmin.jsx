@@ -192,7 +192,7 @@ export function PageAdmin() {
 
   return (
     <AdminProtectedRoute>
-      <div className="min-h-screen bg-surface-container/30 text-on-surface flex font-sans">
+      <div className="min-h-screen bg-surface-container/20 text-on-surface flex font-sans">
         {/* Sidebar */}
         <AdminSidebar
           activeTab={activeTab}
@@ -212,7 +212,7 @@ export function PageAdmin() {
             activeProCount={stats.activePro}
           />
 
-          <main className="flex-1 p-4 lg:p-8 max-w-(--breakpoint-2xl) w-full mx-auto">
+          <main className="flex-1 p-4 lg:p-6 lg:p-8 max-w-[1560px] w-full mx-auto">
             {renderActiveTabContent()}
           </main>
         </div>
