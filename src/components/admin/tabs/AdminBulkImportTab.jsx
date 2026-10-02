@@ -15,11 +15,15 @@ export function AdminBulkImportTab() {
   useEffect(() => {
     supabase
       .from('topics')
-      .select('id, name, word_count')
+      .select('id, name, words(count)')
       .order('name', { ascending: true })
       .then(({ data }) => {
-        setTopics(data || []);
-        if (data && data.length > 0) setSelectedTopicId(data[0].id);
+        const mapped = (data || []).map((t) => ({
+          ...t,
+          word_count: t.words?.[0]?.count || 0,
+        }));
+        setTopics(mapped);
+        if (mapped && mapped.length > 0) setSelectedTopicId(mapped[0].id);
       });
   }, []);
 

@@ -2,8 +2,9 @@
 // Fetch, cache, search và load điểm cao nhất cho danh sách đề thi THPT
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { supabase } from '../lib/supabaseClient.js';
 
-const EXAMS_CACHE_KEY = 'thpt_exams_cache_v20260929';
+const EXAMS_CACHE_KEY = 'thpt_exams_cache_v20261002';
 const BEST_SCORES_KEY = 'thpt_best_scores';
 
 function removeAccents(str) {
@@ -50,20 +51,35 @@ export function useThptExams() {
         }
       } catch (_) {}
 
-      // 2. Fetch from network
+      // 2. Fetch from Supabase first for real-time admin edits
       try {
         setLoading(true);
         setError(null);
+
+        const { data: supaData, error: supaErr } = await supabase
+          .from('thpt_exams')
+          .select('id, title, total_questions, duration_minutes, is_pro, sections, questions')
+          .order('id', { ascending: true });
+
+        if (!supaErr && supaData && supaData.length > 0) {
+          if (!cancelled) {
+            setExams(supaData);
+            setLoading(false);
+            try { sessionStorage.setItem(EXAMS_CACHE_KEY, JSON.stringify(supaData)); } catch (_) {}
+            return;
+          }
+        }
+
+        // 3. Fallback to local json file if Supabase fails
         const res = await fetch('data/thpt_exams.json?v=20260929');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!cancelled) {
           setExams(data);
           setLoading(false);
-          // Cache in sessionStorage so revisiting the page is instant
           try {
             sessionStorage.setItem(EXAMS_CACHE_KEY, JSON.stringify(data));
-          } catch (_) {} // quota exceeded is fine
+          } catch (_) {}
         }
       } catch (err) {
         if (!cancelled) {

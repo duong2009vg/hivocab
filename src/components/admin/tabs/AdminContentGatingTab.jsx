@@ -18,17 +18,25 @@ export function AdminContentGatingTab() {
       if (subTab === 'topics') {
         const { data, error } = await supabase
           .from('topics')
-          .select('id, name, icon, is_pro, word_count, created_at')
+          .select('id, name, icon, is_pro, created_at, words(count)')
           .order('name', { ascending: true });
         if (error) throw error;
-        setItems(data || []);
+        const mapped = (data || []).map((t) => ({
+          ...t,
+          word_count: t.words?.[0]?.count || 0,
+        }));
+        setItems(mapped);
       } else if (subTab === 'thpt') {
         const { data, error } = await supabase
           .from('thpt_exams')
-          .select('id, name, year, total_questions, is_pro, created_at')
-          .order('year', { ascending: false });
+          .select('id, title, year, total_questions, duration_minutes, is_pro, created_at')
+          .order('id', { ascending: true });
         if (error) throw error;
-        setItems(data || []);
+        const mapped = (data || []).map((e) => ({
+          ...e,
+          name: e.title,
+        }));
+        setItems(mapped);
       } else if (subTab === 'passages') {
         const { data, error } = await supabase
           .from('passages')

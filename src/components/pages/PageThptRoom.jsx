@@ -50,7 +50,7 @@ export function PageThptRoom() {
       // Try cache first
       let examData = null;
       try {
-        const cached = sessionStorage.getItem('thpt_exams_cache_v20260929');
+        const cached = sessionStorage.getItem('thpt_exams_cache_v20261002') || sessionStorage.getItem('thpt_exams_cache_v20260929');
         if (cached) {
           const arr = JSON.parse(cached);
           examData = arr.find(e => e.id === examId);
@@ -64,7 +64,7 @@ export function PageThptRoom() {
           if (res.ok) {
             const arr = await res.json();
             examData = arr.find(e => e.id === examId);
-            try { sessionStorage.setItem('thpt_exams_cache_v20260929', JSON.stringify(arr)); } catch (_) {}
+            try { sessionStorage.setItem('thpt_exams_cache_v20261002', JSON.stringify(arr)); } catch (_) {}
           }
         } catch (_) {}
       }
