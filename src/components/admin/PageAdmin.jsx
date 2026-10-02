@@ -72,7 +72,7 @@ export function PageAdmin() {
         supabase.from('thpt_exams').select('*', { count: 'exact', head: true }),
         supabase.from('passages').select('*', { count: 'exact', head: true }),
         supabase.from('words').select('*', { count: 'exact', head: true }),
-        supabase.from('bug_reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('system_error_logs').select('*', { count: 'exact', head: true }),
       ]);
 
       if (profRes.status === 'fulfilled' && profRes.value.data) {
