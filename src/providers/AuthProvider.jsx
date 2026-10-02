@@ -6,19 +6,20 @@ import { supabase } from '../lib/supabaseClient.js';
 
 export function checkIsPro(profile) {
   if (!profile) return false;
+  const plan = String(profile.subscription_plan || '').toLowerCase();
   const isProTier = (
-    Boolean(profile.is_pro) ||
     profile.tier === 'pro' ||
     profile.tier === 'lifetime' ||
-    profile.subscription_plan === 'pro_lifetime' ||
-    profile.subscription_plan === 'lifetime'
+    plan === 'lifetime' ||
+    plan.startsWith('pro') ||
+    Boolean(profile.is_pro)
   );
   if (!isProTier) return false;
-  if (profile.tier === 'lifetime' || profile.subscription_plan === 'pro_lifetime' || profile.subscription_plan === 'lifetime') {
+  if (profile.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime') {
     return true;
   }
   if (!profile.subscription_expires_at) {
-    return Boolean(profile.is_pro);
+    return isProTier;
   }
   return new Date(profile.subscription_expires_at) > new Date();
 }
@@ -53,7 +54,7 @@ export function AuthProvider({ children }) {
     try {
       const { data, error: err } = await supabase
         .from('profiles')
-        .select('id, email, full_name, avatar_url, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, is_pro')
+        .select('id, email, full_name, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, created_at')
         .eq('id', userId)
         .maybeSingle();
 

@@ -62,7 +62,7 @@ export function PageAdmin() {
       ] = await Promise.allSettled([
         supabase
           .from('profiles')
-          .select('id, email, full_name, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, is_pro, created_at')
+          .select('id, email, full_name, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, created_at')
           .order('created_at', { ascending: false }),
         supabase
           .from('orders')

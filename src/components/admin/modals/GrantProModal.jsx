@@ -60,7 +60,6 @@ export function GrantProModal({
             subscription_status: 'active',
             subscription_started_at: now.toISOString(),
             subscription_expires_at: newExpiresAt,
-            is_pro: true,
           })
           .eq('id', target.id);
 

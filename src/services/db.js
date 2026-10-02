@@ -201,23 +201,23 @@ export async function isUserPro() {
   if (!user) return false;
   const { data } = await supabase
     .from('profiles')
-    .select('tier, subscription_plan, subscription_expires_at, is_pro')
+    .select('tier, subscription_plan, subscription_expires_at')
     .eq('id', user.id)
     .maybeSingle();
   if (!data) return false;
+  const plan = String(data.subscription_plan || '').toLowerCase();
   const isProTier = (
-    Boolean(data.is_pro) ||
     data.tier === 'pro' ||
     data.tier === 'lifetime' ||
-    data.subscription_plan === 'pro_lifetime' ||
-    data.subscription_plan === 'lifetime'
+    plan === 'lifetime' ||
+    plan.startsWith('pro')
   );
   if (!isProTier) return false;
-  if (data.tier === 'lifetime' || data.subscription_plan === 'pro_lifetime' || data.subscription_plan === 'lifetime') {
+  if (data.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime') {
     return true;
   }
   if (!data.subscription_expires_at) {
-    return Boolean(data.is_pro);
+    return true;
   }
   return new Date(data.subscription_expires_at) > new Date();
 }

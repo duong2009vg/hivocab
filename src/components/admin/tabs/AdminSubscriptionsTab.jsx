@@ -22,16 +22,18 @@ export function AdminSubscriptionsTab({
 
   // Helper to compute user PRO status
   const evaluateProStatus = (p) => {
-    const isProTier =
-      Boolean(p.is_pro) ||
+    const plan = String(p.subscription_plan || '').toLowerCase();
+    const isProTier = (
       p.tier === 'pro' ||
       p.tier === 'lifetime' ||
-      p.subscription_plan === 'pro_lifetime' ||
-      p.subscription_plan === 'lifetime';
+      plan === 'lifetime' ||
+      plan.startsWith('pro') ||
+      Boolean(p.is_pro)
+    );
 
     const expiresAt = p.subscription_expires_at ? new Date(p.subscription_expires_at) : null;
     const isExpired = expiresAt && expiresAt < now;
-    const isLifetime = p.tier === 'lifetime' || p.subscription_plan === 'lifetime' || p.subscription_plan === 'pro_lifetime' || (!expiresAt && isProTier);
+    const isLifetime = p.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime' || (!expiresAt && isProTier);
     const isActivePro = isProTier && !isExpired;
     const isExpiringSoon = isActivePro && expiresAt && expiresAt <= sevenDaysLater && !isLifetime;
 
@@ -118,7 +120,6 @@ export function AdminSubscriptionsTab({
           subscription_plan: 'free',
           subscription_status: 'expired',
           subscription_expires_at: now.toISOString(),
-          is_pro: false,
         })
         .eq('id', p.id);
 
