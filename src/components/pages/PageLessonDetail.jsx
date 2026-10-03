@@ -254,7 +254,8 @@ export function PageLessonDetail() {
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Verbatim Stitch Desktop Screen      */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex flex-1 flex-col min-w-0 overflow-y-auto px-8 py-7 lg:pl-64 xl:pl-72 w-full max-w-[1536px] mx-auto min-h-screen">
+      <div className="hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
+        <main className="flex-1 px-8 py-7 flex flex-col min-w-0 overflow-y-auto">
         
         {/* Breadcrumbs & Top Quick Actions */}
         <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-dashed border-[#b8ae9f]">
@@ -621,6 +622,7 @@ export function PageLessonDetail() {
             </div>
           </div>
         </div>
+        </main>
       </div>
     </div>
   );

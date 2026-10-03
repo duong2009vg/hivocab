@@ -106,6 +106,15 @@ function AppRoutes() {
     }
   };
 
+  const shouldShowSidebar =
+    (isMainTab || isTopicDetail) &&
+    currentRoute !== 'landing' &&
+    currentRoute !== 'learning' &&
+    currentRoute !== 'bilingual-reading' &&
+    currentRoute !== 'thpt-room' &&
+    currentRoute !== 'admin' &&
+    currentRoute !== 'login';
+
   const shouldShowBottomNav =
     (isMainTab || isTopicDetail) &&
     currentRoute !== 'landing' &&
@@ -117,7 +126,7 @@ function AppRoutes() {
   return (
     <div id="app-root" className="min-h-screen bg-background text-on-background font-sans antialiased">
       {/* Conditionally render Layout components only when needed */}
-      {isMainTab && <MainSidebar />}
+      {shouldShowSidebar && <MainSidebar />}
       {(isMainTab || isTopicDetail) && <MobileProfileDropdown />}
       {shouldShowBottomNav && <MobileBottomNav />}
 
