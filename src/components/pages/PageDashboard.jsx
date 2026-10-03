@@ -396,10 +396,10 @@ export function PageDashboard() {
 
             {/* Calendar Matrix */}
             <div className="space-y-1">
-              {calendar.weeks.map((week, wIdx) => (
+              {(calendar?.weeks || []).map((week, wIdx) => (
                 <div key={wIdx} className="grid grid-cols-7 gap-1 text-center text-xs font-semibold">
-                  {week.map((day, dIdx) => {
-                    if (!day.date) {
+                  {(week || []).map((day, dIdx) => {
+                    if (!day?.date) {
                       return <span key={dIdx} className="py-1.5 opacity-0">0</span>;
                     }
                     const isToday = day.isToday;
@@ -485,65 +485,6 @@ export function PageDashboard() {
           </button>
         </div>
 
-        {/* Mobile Bottom Navigation Bar */}
-        <nav
-          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-[#FAF5EB]/95 backdrop-blur-md border-t-[3.5px] border-[#382E2B]"
-          data-purpose="bottom-navigation"
-        >
-          <div className="w-full max-w-[430px] flex justify-around items-center py-2 px-2">
-            {/* Tab 1: Trang chủ (Active) */}
-            <div className="flex flex-col items-center cursor-pointer px-2 py-0.5">
-              <div className="w-11 h-8 rounded-full border-2 border-[#577B4A] bg-[#EAF3E7] flex items-center justify-center text-[#3D5A32] shadow-sm">
-                <span className="material-symbols-outlined text-[20px]">home</span>
-              </div>
-              <span className="text-[11px] font-bold text-[#3D5A32] mt-0.5">Trang chủ</span>
-            </div>
-
-            {/* Tab 2: Chủ đề */}
-            <div
-              onClick={() => navigateTo('topics')}
-              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
-            >
-              <div className="w-11 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[20px]">category</span>
-              </div>
-              <span className="text-[11px] font-bold mt-0.5">Chủ đề</span>
-            </div>
-
-            {/* Tab 3: Thư viện */}
-            <div
-              onClick={() => navigateTo('library')}
-              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
-            >
-              <div className="w-11 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[20px]">explore</span>
-              </div>
-              <span className="text-[11px] font-bold mt-0.5">Thư viện</span>
-            </div>
-
-            {/* Tab 4: Sổ từ */}
-            <div
-              onClick={() => navigateTo('vocabulary')}
-              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
-            >
-              <div className="w-11 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[20px]">bookmark</span>
-              </div>
-              <span className="text-[11px] font-bold mt-0.5">Sổ từ</span>
-            </div>
-
-            {/* Tab 5: Tra từ */}
-            <div
-              onClick={() => navigateTo('dictionary')}
-              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
-            >
-              <div className="w-11 h-8 flex items-center justify-center">
-                <span className="material-symbols-outlined text-[20px]">search</span>
-              </div>
-              <span className="text-[11px] font-bold mt-0.5">Tra từ</span>
-            </div>
-          </div>
-        </nav>
       </div>
 
       {/* ========================================================================= */}
@@ -551,7 +492,7 @@ export function PageDashboard() {
       {/* ========================================================================= */}
       <div className="hidden lg:flex w-full min-h-screen crayon-paper-desktop">
         {/* Main Content Area (Offset by existing App Sidebar on desktop) */}
-        <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-64 xl:pl-72">
           {/* Desktop TopBar */}
           <header className="px-8 py-5 border-b-2 border-[#e6dcce] bg-[#fbf8f2]/90 backdrop-blur-sm sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -790,10 +731,10 @@ export function PageDashboard() {
 
                   {/* Days Grid */}
                   <div className="space-y-1">
-                    {calendar.weeks.map((week, wIdx) => (
+                    {(calendar?.weeks || []).map((week, wIdx) => (
                       <div key={wIdx} className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-crayonText">
-                        {week.map((day, dIdx) => {
-                          if (!day.date) {
+                        {(week || []).map((day, dIdx) => {
+                          if (!day?.date) {
                             return <div key={dIdx}></div>;
                           }
                           const isToday = day.isToday;

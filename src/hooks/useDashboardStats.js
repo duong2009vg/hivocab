@@ -200,12 +200,19 @@ export function useDashboardStats() {
     });
   }, []);
 
-  const showDayDetail = useCallback((dateStr, count) => {
+  const showDayDetail = useCallback((dateStrOrDay, count) => {
+    let dateStr = dateStrOrDay;
+    let cnt = count;
+    if (typeof dateStrOrDay === 'object' && dateStrOrDay !== null) {
+      dateStr = dateStrOrDay.dateStr || dateStrOrDay.date;
+      cnt = dateStrOrDay.count;
+    }
+    if (!dateStr) return;
     const [y, m, d] = dateStr.split('-');
     const formatted = `${d}/${m}/${y}`;
     const msg =
-      count > 0
-        ? `🔥 Ngày ${formatted}: Bạn đã ôn luyện chăm chỉ và hoàn thành ${count} từ vựng!`
+      (cnt || 0) > 0
+        ? `🔥 Ngày ${formatted}: Bạn đã ôn luyện chăm chỉ và hoàn thành ${cnt} từ vựng!`
         : `⚪ Ngày ${formatted}: Chưa có phiên học nào trong ngày này.`;
 
     setCalendarHint(msg);
@@ -241,10 +248,31 @@ export function useDashboardStats() {
     }
     daysList.push({
       day,
+      date: dateStr,
       dateStr,
       count,
       isToday: isCurrentMonth && day === todayDate,
     });
+  }
+
+  // Compute weeks array for 7-column calendar
+  const weeks = [];
+  let currentWeek = [];
+  for (let i = 0; i < startDayIndex; i++) {
+    currentWeek.push({ day: null, date: null, dateStr: null, count: 0, isToday: false });
+  }
+  for (const dayItem of daysList) {
+    currentWeek.push(dayItem);
+    if (currentWeek.length === 7) {
+      weeks.push(currentWeek);
+      currentWeek = [];
+    }
+  }
+  if (currentWeek.length > 0) {
+    while (currentWeek.length < 7) {
+      currentWeek.push({ day: null, date: null, dateStr: null, count: 0, isToday: false });
+    }
+    weeks.push(currentWeek);
   }
 
   return {
@@ -256,10 +284,13 @@ export function useDashboardStats() {
     calendar: {
       year: calYear,
       month: calMonth,
+      monthYear: `Tháng ${calMonth}, ${calYear}`,
       startDayIndex,
       days: daysList,
+      weeks,
       activeDaysCount,
       totalWordsThisMonth,
+      totalWordsLearned: totalWordsThisMonth,
       hint: calendarHint,
     },
     ieltsGoal,
