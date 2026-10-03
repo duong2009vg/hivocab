@@ -137,40 +137,35 @@ export function PageDashboard() {
       {/* MOBILE LAYOUT */}
       <div className="block lg:hidden w-full">
         <div className="w-full max-w-[430px] min-h-screen flex flex-col px-4 pt-3 pb-8 relative mx-auto bg-[#FAF5EB]">
-          {/* Header Section */}
-          <section className="mt-1 mb-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h1 className="text-3xl font-bold tracking-tight text-[#382E2B] flex items-center gap-1.5">
-                    Trang chủ <span className="text-2xl">🌿</span>
-                  </h1>
-                  <span className="bg-[#E5EFE2] text-[#557A46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#8FB383]">Đang học</span>
-                </div>
-                <p className="text-[14px] text-[#6E5D53] mt-1 font-medium">Hôm nay là một ngày tuyệt vời để học cùng hổ nhỏ! ✏️</p>
-              </div>
-              <div className="flex flex-col items-end space-y-1">
-                <span className="text-xl text-[#F4B41A] drop-shadow-sm select-none">★</span>
-                <span className="text-lg text-[#DE5D53] select-none">❤</span>
-              </div>
+          {/* Header Section: Tinh gọn chỉ icon chuỗi ngày giữ lửa bên trái và avatar bên phải */}
+          <section className="mt-1 mb-4 flex items-center justify-between">
+            <div className="inline-flex items-center space-x-1.5 bg-[#382E2B] text-[#FFF9F0] py-2 px-3.5 rounded-2xl shadow-sm">
+              <span className="text-base">🔥</span>
+              <span className="text-sm font-bold tracking-wide">{streak} Ngày giữ lửa</span>
             </div>
-            
-            {/* Quick Action Pills */}
-            <div className="flex items-center space-x-2.5 mt-3.5">
-              <div className="flex-1 bg-[#382E2B] text-[#FFF9F0] py-2 px-3 rounded-2xl flex items-center justify-center space-x-1.5 shadow-sm cursor-pointer">
-                <span className="text-base">🔥</span>
-                <span className="text-sm font-bold tracking-wide">{streak} Ngày giữ lửa</span>
-              </div>
-              <div onClick={() => navigateTo('vocabulary')} className="flex-1 bg-[#FAF5EB] text-[#4E403B] py-2 px-3 rounded-2xl flex items-center justify-center space-x-1.5 cursor-pointer" style={{ border: '2.5px dashed #4E403B' }}>
-                <span className="text-base">📖</span>
-                <span className="text-sm font-bold">Xem sổ tay</span>
-              </div>
-              <button aria-label="Tài khoản" onClick={() => typeof window !== 'undefined' && window.toggleMobileProfileDropdown?.()} className="w-10 h-10 rounded-2xl border-2 border-[#382E2B] bg-[#FFFBF2] flex items-center justify-center text-[#382E2B] shadow-sm">
+            <button
+              aria-label="Tài khoản"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.toggleMobileProfileDropdown) {
+                  window.toggleMobileProfileDropdown();
+                } else {
+                  navigateTo('settings');
+                }
+              }}
+              className="w-10 h-10 rounded-2xl border-2 border-[#382E2B] bg-[#FFFBF2] flex items-center justify-center text-[#382E2B] shadow-sm hover:bg-[#FAF5EB] transition-all overflow-hidden"
+            >
+              {profile?.avatar_url || user?.user_metadata?.avatar_url ? (
+                <img
+                  src={profile?.avatar_url || user?.user_metadata?.avatar_url}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              </button>
-            </div>
+              )}
+            </button>
           </section>
 
           {/* Mascot Review Hero Card */}

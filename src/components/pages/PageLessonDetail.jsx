@@ -101,39 +101,48 @@ export function PageLessonDetail() {
           </div>
         </section>
 
-        {/* Study Modes: 3 Buttons */}
+        {/* Study Modes: 4 Buttons */}
         <section className="mb-4">
           <div className="flex items-center justify-between mb-2 px-0.5">
             <h3 className="text-xs font-bold text-[#1e1b17] uppercase tracking-wide">CHẾ ĐỘ HỌC</h3>
-            <span className="text-xs text-[#4b6540] font-bold">3 bài tập</span>
+            <span className="text-xs text-[#4b6540] font-bold">4 bài tập</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
             <button
               onClick={() => startPractice(0)}
-              className="bg-white rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#feab79]/30 flex items-center justify-center text-sm">
                 ⚡
               </div>
-              <span className="text-xs font-bold text-[#1e1b17]">Flashcard</span>
+              <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Flashcard</span>
             </button>
             <button
               onClick={() => startPractice(1)}
-              className="bg-white rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#c3e8ff] flex items-center justify-center text-sm">
                 ❓
               </div>
-              <span className="text-xs font-bold text-[#1e1b17]">Trắc nghiệm</span>
+              <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Trắc nghiệm</span>
             </button>
             <button
               onClick={() => startPractice(2)}
-              className="bg-white rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#ccecbc] flex items-center justify-center text-sm">
                 ✏️
               </div>
-              <span className="text-xs font-bold text-[#1e1b17]">Điền từ</span>
+              <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Điền từ</span>
+            </button>
+            <button
+              onClick={() => startPractice(3)}
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#f3e8ff] flex items-center justify-center text-sm text-[#8b5cf6]">
+                🎧
+              </div>
+              <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Nghe chính tả</span>
             </button>
           </div>
         </section>
