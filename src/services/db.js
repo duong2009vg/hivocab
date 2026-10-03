@@ -274,48 +274,68 @@ export async function getCamHierarchy(topicId) {
 
     if (passagesErr || !passagesData) return null;
 
-    // Fetch word counts and user progress for passages in this topic
-    const user = await getCurrentUser().catch(() => null);
-    const { data: wordsData } = await supabase
-      .from('words')
-      .select('id, passage_id')
-      .eq('topic_id', topicId);
+    // Fetch exact word counts for all passages in parallel (bypasses 1000-row PostgREST limit)
+    const [countResults, topicCountRes, user] = await Promise.all([
+      Promise.all(
+        passagesData.map(async (p) => {
+          const { count } = await supabase
+            .from('words')
+            .select('*', { count: 'exact', head: true })
+            .eq('passage_id', p.id);
+          return [p.id, count || 0];
+        })
+      ),
+      supabase
+        .from('words')
+        .select('*', { count: 'exact', head: true })
+        .eq('topic_id', topicId),
+      getCurrentUser().catch(() => null),
+    ]);
 
-    const wordCountByPassage = new Map();
-    const wordIds = (wordsData || []).map((w) => {
-      if (w.passage_id) {
-        wordCountByPassage.set(w.passage_id, (wordCountByPassage.get(w.passage_id) || 0) + 1);
-      }
-      return w.id;
-    });
+    const wordCountByPassage = new Map(countResults);
 
-    let progressMap = {};
-    if (user && wordIds.length > 0) {
-      const { data: progData } = await supabase
-        .from('word_progress')
-        .select('word_id, level')
-        .eq('user_id', user.id)
-        .in('word_id', wordIds);
-      if (progData) {
-        progData.forEach((p) => {
-          progressMap[p.word_id] = p.level;
-        });
+    // Fetch user progress if logged in
+    let learnedByPassage = new Map();
+    let totalLearnedWords = 0;
+    if (user) {
+      try {
+        const { data: progData } = await supabase
+          .from('word_progress')
+          .select('word_id, level')
+          .eq('user_id', user.id)
+          .gt('level', 0)
+          .limit(2000);
+
+        if (progData && progData.length > 0) {
+          const learnedWordIds = progData.map((p) => p.word_id);
+          const { data: learnedWordsData } = await supabase
+            .from('words')
+            .select('id, passage_id')
+            .eq('topic_id', topicId)
+            .in('id', learnedWordIds);
+
+          if (learnedWordsData) {
+            totalLearnedWords = learnedWordsData.length;
+            learnedWordsData.forEach((w) => {
+              if (w.passage_id) {
+                learnedByPassage.set(w.passage_id, (learnedByPassage.get(w.passage_id) || 0) + 1);
+              }
+            });
+          }
+        }
+      } catch (e) {
+        console.warn('[db.getCamHierarchy] progress error:', e);
       }
     }
 
-    const learnedByPassage = new Map();
-    (wordsData || []).forEach((w) => {
-      if (w.passage_id && progressMap[w.id] > 0) {
-        learnedByPassage.set(w.passage_id, (learnedByPassage.get(w.passage_id) || 0) + 1);
-      }
-    });
-
     const passagesByTest = new Map();
+    let grandTotalWords = 0;
     passagesData.forEach((p) => {
       if (!passagesByTest.has(p.test_id)) passagesByTest.set(p.test_id, []);
       const pWords = wordCountByPassage.get(p.id) || 0;
       const pLearned = learnedByPassage.get(p.id) || 0;
       const pProg = pWords > 0 ? Math.round((pLearned / pWords) * 100) : 0;
+      grandTotalWords += pWords;
       passagesByTest.get(p.test_id).push({
         id: p.id,
         testId: p.test_id,
@@ -339,15 +359,14 @@ export async function getCamHierarchy(topicId) {
       passages: passagesByTest.get(t.id) || [],
     }));
 
-    const totalWords = wordsData?.length || 0;
-    const learnedWords = Object.keys(progressMap).filter((id) => progressMap[id] > 0).length;
-    const progress = totalWords > 0 ? Math.round((learnedWords / totalWords) * 100) : 0;
+    const totalWords = topicCountRes?.count || grandTotalWords;
+    const progress = totalWords > 0 ? Math.round((totalLearnedWords / totalWords) * 100) : 0;
 
     return {
       tests,
       unlinkedWords: [],
       totalWords,
-      learnedWords,
+      learnedWords: totalLearnedWords,
       progress,
     };
   } catch (err) {
