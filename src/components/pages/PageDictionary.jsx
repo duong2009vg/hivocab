@@ -1,5 +1,5 @@
 // src/components/pages/PageDictionary.jsx
-// Pixel-Perfect React Component with Reactive State, Autocomplete & Instant Audio
+// 100% Pixel-Perfect match to Stitch Design (desktop_dictionary.html & mobile_dictionary.html)
 import React, { useRef, useEffect } from 'react';
 import { useDictionary } from '../../hooks/useDictionary.js';
 
@@ -60,21 +60,6 @@ export function PageDictionary() {
     }
   };
 
-  const highlightMatch = (text, matchWord) => {
-    if (!text || !matchWord) return text;
-    const regex = new RegExp(`(${matchWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-    const parts = text.split(regex);
-    return parts.map((part, i) =>
-      part.toLowerCase() === matchWord.toLowerCase() ? (
-        <strong key={i} className="text-primary font-bold">
-          {part}
-        </strong>
-      ) : (
-        part
-      )
-    );
-  };
-
   const formattedPhonetic = result
     ? result.phonetic || result.phonetics?.us || result.phonetics?.uk || ''
     : '';
@@ -99,440 +84,465 @@ export function PageDictionary() {
         ]
     : [];
 
-  const viSummary = result ? result.meaning || result.viSummary || result.senses?.[0]?.definition_vi || '' : '';
-
-  const sampleWords = ['abandon', 'resilient', 'make sense', 'meticulous'];
+  const suggestedWords = ['resilient', 'abandon', 'make sense', 'meticulous', 'serendipity'];
 
   return (
-    <div id="page-dictionary" className="page active">
-      <main className="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
-        <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
-          {/* Header */}
-          <header className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[28px]">menu_book</span>
-              <h1 className="text-2xl lg:text-headline-lg font-bold text-on-surface">Từ điển</h1>
+    <div id="page-dictionary" className="page active min-h-screen text-[#2e2823] bg-[#fff9f0] font-['Quicksand',sans-serif]">
+
+      {/* ========================================================================= */}
+      {/* MOBILE LAYOUT (block lg:hidden) - 100% Match to mobile_dictionary.html    */}
+      {/* ========================================================================= */}
+      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen px-4 pt-3 pb-28">
+        {/* Mobile Header Bar */}
+        <header className="flex justify-between items-center w-full py-2 mb-3">
+          <div className="flex items-center space-x-2">
+            <span className="text-2xl">📖</span>
+            <h1 className="text-2xl font-bold text-[#4b6540] tracking-tight">Từ điển</h1>
+          </div>
+          <span className="text-xs font-bold text-[#4b6540] bg-[#eef5ec] px-2.5 py-1 rounded-full border border-[#86a378]">
+            HiVocab
+          </span>
+        </header>
+
+        {/* Search Box */}
+        <section className="w-full mb-4">
+          <div
+            ref={inputRef}
+            className="border-[2.5px] border-[#3d352e] bg-white rounded-full p-1.5 pl-4 flex items-center justify-between shadow-[2px_3px_0px_rgba(61,53,46,0.15)] focus-within:ring-2 focus-within:ring-[#4b6540]/40 relative"
+          >
+            <div className="flex items-center space-x-2.5 flex-1 min-w-0 pr-2">
+              <span className="text-lg text-[#74796f] flex-shrink-0">🔍</span>
+              <input
+                value={query}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Nhập từ, cụm từ hoặc thành ngữ..."
+                className="w-full bg-transparent border-none p-0 text-sm font-bold text-[#1e1b17] placeholder-[#74796f] focus:outline-none"
+                type="text"
+              />
+              {query && (
+                <button onClick={clearInput} className="text-xs text-[#74796f] font-bold px-1.5">
+                  ✕
+                </button>
+              )}
             </div>
-          </header>
-
-          {/* Search bar */}
-          <div ref={inputRef} className="relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline text-[22px]">
-              search
-            </span>
-            <input
-              id="dict-input"
-              type="text"
-              value={query}
-              onChange={(e) => handleInputChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              aria-label="Nhập từ hoặc cụm từ tiếng Anh để tra từ điển"
-              placeholder="Nhập từ, cụm từ hoặc thành ngữ tiếng Anh..."
-              autoComplete="off"
-              spellCheck="false"
-              className="w-full pl-12 pr-28 py-4 bg-surface-container-lowest/80 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl text-on-surface placeholder:text-outline focus:border-primary focus:outline-none text-base md:text-lg transition-colors shadow-sm"
-            />
-
-            {query && (
-              <button
-                id="dict-clear-btn"
-                type="button"
-                onClick={clearInput}
-                title="Xóa tìm kiếm"
-                className="absolute right-20 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full flex items-center justify-center text-outline hover:text-on-surface hover:bg-surface-container transition-colors cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            )}
-
             <button
-              type="button"
               onClick={() => searchWord()}
-              className="absolute right-3 top-1/2 -translate-y-1/2 bg-primary text-on-primary px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-surface-tint active:scale-95 transition-all shadow-sm cursor-pointer"
+              className="bg-[#33302c] text-white text-xs px-5 py-2 rounded-full font-bold shadow-sm active:scale-95 transition-transform cursor-pointer"
+              type="button"
             >
               Tra
             </button>
 
-            {/* Autocomplete suggestions dropdown */}
+            {/* Mobile Autocomplete Suggestions */}
             {showSuggestions && suggestions.length > 0 && (
-              <div
-                id="dict-suggestions-dropdown"
-                className="absolute left-0 right-0 top-full mt-2 bg-surface-container-lowest/95 backdrop-blur-[24px] border border-outline-variant/30 rounded-2xl soft-shadow overflow-hidden z-50 divide-y divide-outline-variant/15 max-h-80 overflow-y-auto"
-              >
-                {suggestions.map((item, idx) => {
-                  const isMatch = item.word.toLowerCase().startsWith(query.toLowerCase());
-                  const matchPart = isMatch ? item.word.slice(0, query.length) : '';
-                  const restPart = isMatch ? item.word.slice(query.length) : item.word;
-
-                  return (
-                    <div
-                      key={idx}
-                      onClick={() => searchWord(item.word)}
-                      className={`p-3.5 flex items-center justify-between cursor-pointer transition-colors ${
-                        activeSuggestIdx === idx
-                          ? 'bg-primary/10 text-primary'
-                          : 'hover:bg-surface-container-high/60 text-on-surface'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="material-symbols-outlined text-outline text-[18px]">search</span>
-                        <span className="font-semibold text-sm">
-                          {isMatch ? (
-                            <>
-                              <strong className="text-primary font-black underline decoration-primary/40">
-                                {matchPart}
-                              </strong>
-                              {restPart}
-                            </>
-                          ) : (
-                            item.word
-                          )}
-                        </span>
-                        {item.pos && (
-                          <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-surface-container text-on-surface-variant">
-                            {item.pos}
-                          </span>
-                        )}
-                      </div>
-                      {item.meaning && (
-                        <span className="text-xs text-on-surface-variant truncate max-w-xs">{item.meaning}</span>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Recent searches chips */}
-          {recentSearches.length > 0 && (
-            <div id="dict-recent-wrap" className="flex flex-col gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-outline uppercase tracking-wider flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[14px]">history</span>
-                  Từ vừa tra gần đây
-                </span>
-                <button
-                  type="button"
-                  onClick={clearRecent}
-                  className="text-xs text-primary/80 hover:text-primary hover:underline cursor-pointer"
-                >
-                  Xóa tất cả
-                </button>
-              </div>
-              <div id="dict-recent-chips" className="flex flex-wrap gap-2">
-                {recentSearches.map((w, idx) => (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-[#3d352e] rounded-2xl shadow-[3px_4px_0px_#3d352e] overflow-hidden z-30">
+                {suggestions.map((s, idx) => (
                   <div
-                    key={idx}
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 cursor-pointer transition-colors"
+                    key={s.id || idx}
+                    onClick={() => searchWord(s.word)}
+                    className={`px-4 py-2.5 text-xs flex items-center justify-between cursor-pointer border-b border-gray-100 last:border-0 ${
+                      activeSuggestIdx === idx ? 'bg-[#f4ede6] font-bold' : 'hover:bg-gray-50'
+                    }`}
                   >
-                    <span onClick={() => searchWord(w)}>{w}</span>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeRecent(w);
-                      }}
-                      className="text-outline hover:text-red-500 opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[13px]">close</span>
-                    </button>
+                    <span className="font-bold text-[#1e1b17]">{s.word}</span>
+                    <span className="text-[11px] text-[#74796f] truncate max-w-[180px]">{s.meaning}</span>
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </section>
 
-          {/* Loading state */}
-          {status === 'loading' && (
-            <div id="dict-loading" className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="relative w-14 h-14">
-                <div className="w-14 h-14 rounded-full border-4 border-primary/20 border-t-primary animate-spin"></div>
-                <span className="material-symbols-outlined text-primary text-[22px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  menu_book
-                </span>
+        {/* Recent Searches Section */}
+        {recentSearches.length > 0 && (
+          <section className="w-full mb-5">
+            <div className="flex justify-between items-center mb-2 px-1">
+              <div className="flex items-center space-x-1 text-xs text-[#74796f] font-bold">
+                <span>🕒</span>
+                <span>TỪ VỪA TRA GẦN ĐÂY</span>
               </div>
-              <p id="dict-loading-title" className="text-on-surface font-semibold text-base">
-                Đang tra cứu từ điển...
-              </p>
-              <p id="dict-loading-desc" className="text-on-surface-variant text-xs">
-                Tra cứu định nghĩa song ngữ và ví dụ thực tế
-              </p>
+              <button onClick={clearRecent} className="text-[11px] font-bold text-[#4b6540] hover:underline">
+                Xóa tất cả
+              </button>
             </div>
-          )}
-
-          {/* Error / Not found state */}
-          {status === 'error' && (
-            <div id="dict-error" className="flex flex-col items-center justify-center py-16 gap-3 text-center">
-              <span className="material-symbols-outlined text-[56px] text-outline">search_off</span>
-              <h3 className="font-bold text-on-surface text-xl">Không tìm thấy từ này</h3>
-              <p id="dict-error-desc" className="text-on-surface-variant text-sm max-w-sm">
-                {errorMessage || 'Kiểm tra lại chính tả hoặc thử các từ thông dụng khác.'}
-              </p>
-            </div>
-          )}
-
-          {/* Result container */}
-          {status === 'result' && result && (
-            <div id="dict-result" className="flex flex-col gap-6">
-              {/* Word Header Card */}
-              <div className="glass-card soft-shadow rounded-2xl p-6 md:p-8">
-                {/* Row 1: Word + Badges + Actions */}
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex flex-wrap items-center gap-3">
-                      <h2 id="dict-word" className="text-3xl md:text-5xl font-black text-on-surface tracking-tight">
-                        {result.word}
-                      </h2>
-                      {result.cefr && (
-                        <span
-                          id="dict-cefr-badge"
-                          className="px-2.5 py-1 rounded-full text-xs font-black tracking-wider uppercase bg-primary text-on-primary"
-                        >
-                          {result.cefr}
-                        </span>
-                      )}
-                      <span
-                        id="dict-pos-badge"
-                        className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide bg-surface-container text-on-surface-variant"
-                      >
-                        {result.pos || 'từ vựng'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      id="dict-copy-btn"
-                      type="button"
-                      onClick={() => copyWord(result.word)}
-                      title="Sao chép từ"
-                      className="w-10 h-10 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-on-surface transition-all active:scale-95 cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">content_copy</span>
-                    </button>
-                    <button
-                      id="dict-save-btn"
-                      type="button"
-                      onClick={openSaveModal}
-                      title="Lưu vào Sổ từ vựng"
-                      className="px-4 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm flex items-center gap-2 shadow hover:bg-surface-tint active:scale-95 transition-all cursor-pointer"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">bookmark_add</span>
-                      <span>Lưu từ</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Pronunciation Row */}
-                <div className="flex items-center gap-3.5 mt-5 pt-5 border-t border-outline-variant/20">
-                  <span id="dict-phonetic" className="font-mono text-base md:text-xl text-primary font-bold tracking-wide">
-                    {formattedPhonetic ? (formattedPhonetic.startsWith('/') ? formattedPhonetic : `/${formattedPhonetic}/`) : ''}
+            <div className="flex flex-wrap gap-1.5">
+              {recentSearches.map((term, i) => (
+                <div
+                  key={i}
+                  className="bg-white border-2 border-[#3d352e] px-3 py-1 rounded-full text-xs font-bold shadow-[1.5px_2px_0px_rgba(61,53,46,0.12)] flex items-center space-x-1.5"
+                >
+                  <span onClick={() => searchWord(term)} className="cursor-pointer">
+                    {term}
                   </span>
-                  <button
-                    id="dict-audio-btn"
-                    type="button"
-                    onClick={() => playAudio(result.word)}
-                    title="Nghe phát âm"
-                    className="w-10 h-10 rounded-full bg-primary text-on-primary hover:bg-surface-tint active:scale-95 flex items-center justify-center shadow transition-all cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[22px]">volume_up</span>
+                  <button onClick={() => removeRecent(term)} className="text-gray-400 hover:text-gray-700 ml-1 text-xs">
+                    ✕
                   </button>
                 </div>
+              ))}
+            </div>
+          </section>
+        )}
 
-                {/* Row 3: Quick Vietnamese Summary Banner */}
-                {viSummary && (
-                  <div
-                    id="dict-summary-wrap"
-                    className="mt-4 p-4 rounded-xl bg-primary/10 border border-primary/20 flex items-start gap-3"
-                  >
-                    <span className="material-symbols-outlined text-primary text-[22px] shrink-0 mt-0.5">translate</span>
-                    <div className="flex-1">
-                      <p className="text-xs font-bold text-primary uppercase tracking-wider mb-0.5">Nghĩa tiếng Việt</p>
-                      <p id="dict-vi-summary" className="text-base md:text-lg font-bold text-on-surface leading-snug">
-                        {viSummary}
-                      </p>
-                    </div>
+        {/* Mobile Result State */}
+        {status === 'loading' ? (
+          <div className="py-16 text-center text-[#74796f]">
+            <span className="inline-block text-3xl animate-spin mb-2">🔄</span>
+            <p className="text-sm font-bold">Đang tra cứu từ điển...</p>
+          </div>
+        ) : status === 'error' ? (
+          <div className="p-4 bg-red-50 border-2 border-red-300 rounded-2xl text-center text-red-700 text-xs font-bold">
+            {errorMessage || 'Không tìm thấy từ vựng này. Vui lòng thử lại.'}
+          </div>
+        ) : result ? (
+          <section className="bg-white border-[2.5px] border-[#3d352e] rounded-[24px] p-5 shadow-[3px_4px_0px_#3d352e] space-y-4">
+            <div className="flex items-start justify-between pb-3 border-b-2 border-dashed border-[#e8e1db]">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-2xl font-black text-[#1e1b17]">{result.word}</h2>
+                  {result.cefr && (
+                    <span className="bg-[#f5b745] text-xs font-black px-2 py-0.5 rounded-full border border-[#3d352e]">
+                      {result.cefr}
+                    </span>
+                  )}
+                  {result.pos && (
+                    <span className="bg-[#e9f1e6] text-[#658a5c] text-xs font-bold px-2 py-0.5 rounded-md border border-[#658a5c]/30">
+                      {result.pos}
+                    </span>
+                  )}
+                </div>
+                {formattedPhonetic && (
+                  <div className="flex items-center space-x-2 mt-1 text-xs font-mono text-[#74796f]">
+                    <span>{formattedPhonetic}</span>
+                    <button
+                      onClick={() => playAudio(result.word)}
+                      className="px-2 py-0.5 rounded-md bg-[#FAF5EB] border border-[#3d352e] text-[10px] font-bold active:scale-95"
+                    >
+                      🔊 Nghe
+                    </button>
                   </div>
                 )}
               </div>
+              <button
+                onClick={openSaveModal}
+                className="bg-[#e87248] text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-[#3d352e] shadow-xs active:scale-95"
+              >
+                + Thêm
+              </button>
+            </div>
 
-              {/* Senses & Definitions Section */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between px-1">
-                  <h3 className="text-xs font-bold text-outline uppercase tracking-widest flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px]">format_quote</span>
-                    Chi tiết nghĩa &amp; Ví dụ
-                  </h3>
+            {/* Definitions */}
+            {entriesToRender.map((entry, idx) => (
+              <div key={idx} className="space-y-2">
+                <div className="text-xs font-bold uppercase text-[#e87248] flex items-center gap-1">
+                  <span>🏷️</span>
+                  <span>NGHĨA TIẾNG VIỆT {entriesToRender.length > 1 ? `#${idx + 1}` : ''}</span>
                 </div>
-                <div id="dict-meanings" className="flex flex-col gap-4">
-                  {entriesToRender.map((entry, idx) => (
+                <p className="text-base font-bold text-[#1e1b17] leading-snug">
+                  {entry.meaning}
+                </p>
+
+                {entry.example && (
+                  <div className="p-3 bg-[#FAF5EB] rounded-xl border border-dashed border-[#d8c8b4] text-xs text-[#594B43]">
+                    <span className="font-bold text-[#e87248] block mb-0.5">Ví dụ:</span>
+                    <p className="italic font-medium">"{entry.example}"</p>
+                    {entry.example_vi && <p className="text-[11px] text-[#74796f] mt-1">→ {entry.example_vi}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </section>
+        ) : (
+          <div className="bg-white border-2 border-[#3d352e] rounded-3xl p-6 text-center shadow-xs">
+            <span className="text-4xl block mb-2">🔍</span>
+            <h3 className="font-bold text-base text-[#1e1b17]">Tra cứu từ vựng tức thì</h3>
+            <p className="text-xs text-[#74796f] mt-1 mb-4 leading-relaxed">
+              Nhập từ vựng, thành ngữ hoặc cụm từ bất kỳ vào ô tìm kiếm bên trên để tra cứu nghĩa đầy đủ.
+            </p>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {suggestedWords.map((word) => (
+                <button
+                  key={word}
+                  onClick={() => searchWord(word)}
+                  className="px-3 py-1 rounded-full bg-[#fcf3e8] border border-[#3d352e] text-xs font-bold hover:bg-[#FAF5EB]"
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Match to desktop_dictionary.html   */}
+      {/* ========================================================================= */}
+      <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-64 xl:pl-72">
+        {/* Header Section */}
+        <header className="p-8 pb-4">
+          <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3.5">
+              <div className="w-14 h-14 rounded-2xl bg-[#e9f1e6] border-2 border-[#3a342e] shadow-[2px_2px_0px_#3a342e] flex items-center justify-center text-3xl">
+                📖
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h2 className="text-3xl font-extrabold text-[#2e2823] tracking-tight">Tra Cứu Từ Điển</h2>
+                  <span className="text-xs font-bold bg-[#f5b745] border border-[#3a342e] px-2 py-0.5 rounded-full shadow-[2px_2px_0px_#3a342e]">
+                    Song ngữ Anh - Việt
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-[#787067] mt-1">
+                  Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để tra đầy đủ phát âm, CEFR, nét nghĩa và ví dụ tranh vẽ.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <div className="bg-[#fffcf7] border-2 border-[#3a342e] px-3.5 py-1.5 rounded-2xl shadow-[2px_2px_0px_#3a342e] flex items-center space-x-2 text-xs font-bold">
+                <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
+                <span>Kho từ: 150.000+ từ sáp</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Search & Results */}
+        <div className="max-w-6xl mx-auto px-8 w-full pb-12 space-y-7">
+          {/* Big Search Bar Container */}
+          <section className="space-y-4">
+            <div
+              ref={inputRef}
+              className="relative bg-[#fffcf7] border-2 border-[#3a342e] rounded-full p-2 pl-6 shadow-[3px_3px_0px_#3a342e] flex items-center"
+            >
+              <span className="text-xl text-[#787067] mr-3">🔍</span>
+              <input
+                value={query}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Nhập từ, cụm từ hoặc thành ngữ..."
+                className="w-full bg-transparent border-none text-base md:text-lg font-bold text-[#2e2823] placeholder:text-stone-400 focus:outline-none"
+                type="text"
+              />
+              {query && (
+                <button onClick={clearInput} className="text-sm text-stone-400 hover:text-stone-700 font-bold px-3">
+                  ✕
+                </button>
+              )}
+              <button
+                onClick={() => searchWord()}
+                className="bg-[#2e2823] hover:bg-stone-800 text-white font-bold text-sm md:text-base px-7 py-3 rounded-full border-2 border-[#3a342e] transition-transform active:scale-95 shadow-[2px_2px_0px_#3a342e] flex items-center space-x-2 cursor-pointer shrink-0"
+              >
+                <span>Tra từ</span>
+              </button>
+
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-[#fffcf7] border-2 border-[#3a342e] rounded-3xl shadow-[4px_4px_0px_#3a342e] overflow-hidden z-30">
+                  {suggestions.map((s, idx) => (
                     <div
-                      key={idx}
-                      className="glass-card soft-shadow rounded-2xl p-5 md:p-6 border border-outline-variant/20 hover:border-primary/30 transition-all"
+                      key={s.id || idx}
+                      onClick={() => searchWord(s.word)}
+                      className={`px-6 py-3 text-sm flex items-center justify-between cursor-pointer border-b border-[#3a342e]/10 last:border-0 ${
+                        activeSuggestIdx === idx ? 'bg-[#fdf0ea] font-bold' : 'hover:bg-[#faf6ee]'
+                      }`}
                     >
-                      <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {entriesToRender.length > 1 && (
-                            <span className="w-6 h-6 rounded-full bg-primary text-on-primary text-xs font-black flex items-center justify-center shrink-0 shadow-xs">
-                              {idx + 1}
-                            </span>
-                          )}
-                          {entry.pos && (
-                            <span className="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-primary/10 text-primary border border-primary/20 uppercase">
-                              {entry.pos}
-                            </span>
-                          )}
-                        </div>
+                      <span className="font-bold text-[#2e2823]">{s.word}</span>
+                      <span className="text-xs text-[#787067] truncate max-w-md">{s.meaning}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Recent Searches Row */}
+            {recentSearches.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                <div className="flex items-center flex-wrap gap-2">
+                  <span className="flex items-center text-xs font-bold uppercase tracking-wider text-[#787067] mr-1">
+                    <span className="mr-1">🕒</span> TỪ VỪA TRA GẦN ĐÂY:
+                  </span>
+                  {recentSearches.map((term, i) => (
+                    <button
+                      key={i}
+                      className="bg-white border-2 border-[#3a342e] px-3 py-1 rounded-full text-xs font-bold shadow-[2px_2px_0px_#3a342e] hover:bg-stone-50 flex items-center space-x-1.5 transition-colors cursor-pointer"
+                    >
+                      <span onClick={() => searchWord(term)}>{term}</span>
+                      <span onClick={() => removeRecent(term)} className="text-stone-400 hover:text-stone-700 ml-1">
+                        ✕
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                <button onClick={clearRecent} className="text-xs font-bold text-[#658a5c] hover:underline shrink-0 cursor-pointer">
+                  Xóa tất cả
+                </button>
+              </div>
+            )}
+
+            {/* Suggested Words Row */}
+            <div className="flex items-center flex-wrap gap-2 pt-1 text-sm">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#787067] mr-1">
+                ✨ TỪ KHÓA HAY GẶP:
+              </span>
+              {suggestedWords.map((word) => (
+                <button
+                  key={word}
+                  onClick={() => searchWord(word)}
+                  className="bg-[#fcf3e8] border border-[#3a342e] px-3 py-1 rounded-full text-xs font-bold hover:bg-[#fdf0ea] text-[#2e2823] cursor-pointer"
+                >
+                  {word}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* Result Master-Detail Grid (12 cols) */}
+          {status === 'loading' ? (
+            <div className="py-24 text-center text-[#787067] bg-[#fffcf7] rounded-3xl border-2 border-[#3a342e]">
+              <span className="inline-block text-4xl animate-spin mb-3">🔄</span>
+              <p className="text-base font-bold">Đang tra cứu từ điển...</p>
+            </div>
+          ) : status === 'error' ? (
+            <div className="p-8 bg-red-50 border-2 border-red-300 rounded-3xl text-center text-red-700 font-bold">
+              {errorMessage || 'Không tìm thấy từ vựng này trong kho từ điển.'}
+            </div>
+          ) : result ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
+              {/* Left Column: Word Details (7 cols) */}
+              <section className="lg:col-span-7 space-y-6">
+                <div className="bg-[#fffcf7] border-2 border-[#3a342e] rounded-3xl p-6 sm:p-7 shadow-[3px_3px_0px_#3a342e] space-y-6">
+                  {/* Word Header */}
+                  <div className="flex flex-wrap items-start justify-between gap-4 pb-5 border-b-2 border-[#3a342e]/30">
+                    <div>
+                      <div className="flex items-center space-x-3">
+                        <h3 className="text-4xl font-extrabold text-[#2e2823] tracking-tight">{result.word}</h3>
+                        {result.cefr && (
+                          <span className="bg-[#f5b745] border-2 border-[#3a342e] text-[#2e2823] text-xs font-black px-2.5 py-0.5 rounded-full shadow-[2px_2px_0px_#3a342e]">
+                            {result.cefr}
+                          </span>
+                        )}
+                        {result.pos && (
+                          <span className="bg-[#e9f1e6] border border-[#3a342e] text-[#658a5c] text-xs font-bold px-2 py-0.5 rounded-md">
+                            {result.pos}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center space-x-3 mt-2 text-sm font-semibold text-[#787067]">
+                        {formattedPhonetic && <span className="font-mono text-base text-stone-700">{formattedPhonetic}</span>}
                         <button
-                          type="button"
-                          onClick={() => {
-                            if (typeof window !== 'undefined' && typeof window.dictOpenSaveModal === 'function') {
-                              window.dictOpenSaveModal(idx);
-                            } else {
-                              openSaveModal();
-                            }
-                          }}
-                          title="Lưu nét nghĩa này vào Sổ từ"
-                          className="text-xs font-bold text-primary hover:text-surface-tint flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors cursor-pointer"
+                          onClick={() => playAudio(result.word)}
+                          className="bg-white hover:bg-stone-100 border border-[#3a342e] px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 shadow-[2px_2px_0px_#3a342e] cursor-pointer"
                         >
-                          <span className="material-symbols-outlined text-[15px]">bookmark_add</span>
-                          <span>Lưu nghĩa này</span>
+                          <span>🔊 Phát âm</span>
                         </button>
                       </div>
+                    </div>
 
-                      <div className="flex flex-col gap-1">
-                        <p className="text-base md:text-lg font-bold text-on-surface leading-snug">{entry.meaning}</p>
+                    <button
+                      onClick={openSaveModal}
+                      className="bg-[#e87248] hover:bg-[#d96339] text-white border-2 border-[#3a342e] rounded-2xl px-4 py-2.5 text-sm font-extrabold shadow-[3px_3px_0px_#3a342e] flex items-center space-x-2 transition-transform active:scale-95 cursor-pointer"
+                    >
+                      <span className="text-base leading-none">+</span>
+                      <span>Thêm vào Sổ từ</span>
+                    </button>
+                  </div>
+
+                  {/* Vietnamese Definition */}
+                  {entriesToRender.map((entry, idx) => (
+                    <div key={idx} className="space-y-3 pt-1 border-b border-[#3a342e]/10 pb-5 last:border-0 last:pb-0">
+                      <div className="space-y-1.5">
+                        <div className="text-xs font-extrabold tracking-wider uppercase text-[#e87248] flex items-center space-x-1.5">
+                          <span>🏷️</span>
+                          <span>NGHĨA TIẾNG VIỆT {entriesToRender.length > 1 ? `#${idx + 1}` : ''}</span>
+                        </div>
+                        <p className="text-xl font-bold text-[#2e2823] leading-snug">
+                          {entry.meaning}
+                        </p>
                       </div>
 
                       {entry.example && (
-                        <div className="mt-3 pl-3.5 border-l-2 border-primary/60">
-                          <p className="text-sm md:text-base text-on-surface leading-relaxed">
-                            {highlightMatch(entry.example, result.word)}
-                          </p>
-                          {entry.example_vi && (
-                            <p className="text-xs md:text-sm text-on-surface-variant italic mt-1">
-                              {entry.example_vi}
+                        <div className="space-y-2">
+                          <div className="text-xs font-extrabold tracking-wider uppercase text-[#2e2823] flex items-center space-x-1.5">
+                            <span>💬</span>
+                            <span>VÍ DỤ NGỮ CẢNH THỰC TẾ</span>
+                          </div>
+                          <div className="bg-[#fdf0ea]/60 border-2 border-dashed border-[#3a342e] p-4 rounded-2xl space-y-1.5">
+                            <p className="text-sm font-bold text-[#2e2823] leading-relaxed">
+                              "{entry.example}"
                             </p>
-                          )}
+                            {entry.example_vi && (
+                              <p className="text-xs font-semibold text-[#787067]">
+                                → {entry.example_vi}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       )}
                     </div>
                   ))}
                 </div>
-              </div>
+              </section>
 
-              {/* Collocations & Idioms Card */}
-              {result.collocations && result.collocations.length > 0 && (
-                <div id="dict-collocations-wrap" className="glass-card soft-shadow rounded-2xl p-6">
-                  <h4 className="text-xs font-bold text-outline uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-primary">link</span>
-                    Cụm từ &amp; Thành ngữ thường gặp (Collocations &amp; Idioms)
-                  </h4>
-                  <div id="dict-collocations-list" className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {result.collocations.map((c, idx) => (
-                      <div
-                        key={idx}
-                        className="p-3.5 rounded-xl bg-surface-container/60 hover:bg-surface-container border border-outline-variant/20 transition-colors flex flex-col gap-0.5"
-                      >
-                        <span
-                          onClick={() => searchWord(c.phrase)}
-                          className="font-bold text-sm text-primary cursor-pointer hover:underline"
-                        >
-                          {c.phrase}
-                        </span>
-                        <span className="text-xs text-on-surface-variant">{c.meaning || ''}</span>
-                      </div>
-                    ))}
+              {/* Right Column: Mascot Co-learner & Memory Tip (5 cols) */}
+              <section className="lg:col-span-5 space-y-6">
+                <div className="bg-[#fffcf7] border-2 border-[#3a342e] rounded-3xl p-6 shadow-[3px_3px_0px_#3a342e] relative overflow-hidden">
+                  <div className="text-center space-y-3">
+                    <div className="inline-block bg-[#e9f1e6] text-[#658a5c] border border-[#3a342e] px-3 py-1 rounded-full text-xs font-bold">
+                      🐾 Bạn đồng hành học từ vựng
+                    </div>
+                    <div className="relative w-40 h-40 mx-auto flex items-center justify-center">
+                      <img
+                        alt="Bé Hổ Mascot"
+                        src="/mascot/mascot_cozy.png"
+                        className="w-full h-full object-contain filter drop-shadow-sm transition-transform hover:scale-105 duration-300 mix-blend-multiply"
+                      />
+                    </div>
+                    <div className="relative bg-white border-2 border-[#3a342e] rounded-2xl p-3.5 shadow-[2px_2px_0px_#3a342e] text-left">
+                      <div className="text-xs font-extrabold text-[#e87248]">Bé Hổ Churbito gợi ý:</div>
+                      <p className="text-xs font-bold text-[#2e2823] mt-1 leading-relaxed">
+                        "Lưu từ <strong className="text-[#e87248] underline">{result.word}</strong> vào Sổ từ cá nhân ngay để thuật toán SRS nhắc bạn ôn lại sau 1 giờ nhé!"
+                      </p>
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Word Family & Synonyms Card */}
-              {((result.word_family && Object.keys(result.word_family).length > 0) ||
-                (result.synonyms && result.synonyms.length > 0)) && (
-                <div id="dict-extras-wrap" className="glass-card soft-shadow rounded-2xl p-6 flex flex-col gap-5">
-                  {result.word_family && Object.keys(result.word_family).length > 0 && (
-                    <div id="dict-family-wrap" className="flex flex-col gap-2.5">
-                      <h4 className="text-xs font-bold text-outline uppercase tracking-widest flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px] text-primary">family_restroom</span>
-                        Gia đình từ vựng (Word Family)
-                      </h4>
-                      <div id="dict-family-list" className="flex flex-wrap gap-2">
-                        {Object.entries(result.word_family).map(([k, v], idx) => (
-                          <div
-                            key={idx}
-                            className="px-3 py-1.5 rounded-xl bg-surface-container-high/60 border border-outline-variant/25 text-xs font-semibold flex items-center gap-1.5"
-                          >
-                            <span className="text-outline uppercase text-[10px]">{k}:</span>
-                            <span
-                              onClick={() => searchWord(v)}
-                              className="text-on-surface font-bold cursor-pointer hover:text-primary hover:underline"
-                            >
-                              {v}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {result.synonyms && result.synonyms.length > 0 && (
-                    <div
-                      id="dict-synonyms-wrap"
-                      className="flex flex-col gap-2.5 pt-4 border-t border-outline-variant/20"
+                <div className="bg-white border-2 border-[#3a342e] rounded-3xl p-5 shadow-[2px_2px_0px_#3a342e] space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xl">⚡</span>
+                    <h4 className="font-bold text-sm text-[#2e2823]">Thao tác nhanh</h4>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => copyWord(result.word)}
+                      className="w-full text-left p-2.5 rounded-xl border border-[#3a342e] text-xs font-bold hover:bg-[#fdf0ea] transition-colors flex items-center justify-between cursor-pointer"
                     >
-                      <h4 className="text-xs font-bold text-outline uppercase tracking-widest flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[16px] text-primary">sync_alt</span>
-                        Từ đồng nghĩa (Synonyms)
-                      </h4>
-                      <div id="dict-synonyms" className="flex flex-wrap gap-2">
-                        {result.synonyms.map((s, idx) => (
-                          <span
-                            key={idx}
-                            onClick={() => searchWord(s)}
-                            className="px-3 py-1.5 rounded-full bg-secondary-container/60 hover:bg-secondary-container text-on-secondary-container text-xs font-semibold cursor-pointer transition-colors"
-                          >
-                            {s}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                      <span>📋 Sao chép từ vựng</span>
+                      <span className="text-xs">→</span>
+                    </button>
+                    <button
+                      onClick={openSaveModal}
+                      className="w-full text-left p-2.5 rounded-xl bg-[#e87248] text-white text-xs font-bold hover:bg-[#d96339] transition-colors flex items-center justify-between cursor-pointer"
+                    >
+                      <span>💾 Lưu vào Sổ từ</span>
+                      <span className="text-xs">→</span>
+                    </button>
+                  </div>
                 </div>
-              )}
+              </section>
             </div>
-          )}
-
-          {/* Empty state (initial) */}
-          {status === 'empty' && (
-            <div id="dict-empty" className="flex flex-col items-center justify-center py-20 gap-4 text-center">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-sm">
-                <span className="material-symbols-outlined text-[44px]">menu_book</span>
-              </div>
-              <h3 className="font-bold text-on-surface text-xl">Tra cứu từ điển</h3>
-              <p className="text-on-surface-variant text-sm max-w-sm">
-                Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để xem đầy đủ phát âm, cấp độ CEFR, các nét
-                nghĩa và ví dụ thực tế.
+          ) : (
+            <div className="bg-[#fffcf7] border-2 border-[#3a342e] rounded-3xl p-12 text-center shadow-[3px_3px_0px_#3a342e]">
+              <span className="text-5xl block mb-3">📖</span>
+              <h3 className="text-xl font-black text-[#2e2823]">Tra cứu từ vựng cùng HiVocab</h3>
+              <p className="text-sm font-semibold text-[#787067] mt-1 max-w-md mx-auto">
+                Nhập từ tiếng Anh để khám phá phiên âm, nghĩa tiếng Việt chuẩn xác và ví dụ ngữ cảnh sinh động.
               </p>
-              <div className="flex flex-wrap justify-center gap-2 mt-2">
-                {sampleWords.map((w, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => searchWord(w)}
-                    className="px-3 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high text-xs font-semibold text-on-surface border border-outline-variant/30 transition-colors cursor-pointer"
-                  >
-                    {w}
-                  </button>
-                ))}
-              </div>
             </div>
           )}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
-
 export default PageDictionary;
