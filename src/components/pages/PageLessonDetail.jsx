@@ -1,475 +1,629 @@
-import React from 'react';
-import useLessonDetail from '../../hooks/useLessonDetail';
-import { useModal } from '../../context/ModalContext';
+// src/components/pages/PageLessonDetail.jsx
+// 100% Pixel-Perfect match to Stitch Design (desktop_lesson_detail.html & mobile_lesson_detail.html)
+import React, { useMemo } from 'react';
+import { useLessonDetail } from '../../hooks/useLessonDetail.js';
+import { useModal } from '../../context/ModalContext.jsx';
 
-export default function PageLessonDetail() {
+export function PageLessonDetail() {
   const {
-    topicId, topicName, passageId, lessonName, words, filteredWords,
-    loading, error, progressPercent,
-    searchQuery, setSearchQuery,
-    statusFilter, setStatusFilter,
-    handleDeleteWord, handlePlayWord,
-    startPractice, startReading, goBack
+    topicId,
+    topicName,
+    passageId,
+    lessonName,
+    words,
+    filteredWords,
+    loading,
+    error,
+    progressPercent,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter,
+    handleDeleteWord,
+    handlePlayWord,
+    startPractice,
+    startReading,
+    goBack,
   } = useLessonDetail();
-  
+
   const { openModal } = useModal();
 
-  if (loading) return <div className="p-8 text-center text-crayonCharcoal">Đang tải dữ liệu bài học...</div>;
-  if (error) return <div className="p-8 text-center text-red-500">Lỗi: {error}</div>;
+  const isPassage = Boolean(passageId && passageId !== '__unlinked__');
 
-  const totalCount = words?.length || 0;
-  const newCount = words?.filter(w => w.status === 'new' || !w.status).length || 0;
-  const learningCount = words?.filter(w => w.status === 'learning').length || 0;
-  const masteredCount = words?.filter(w => w.status === 'mastered').length || 0;
+  // Stats calculation
+  const newCount = useMemo(() => words.filter((w) => (w.level || 0) === 0).length, [words]);
+  const learningCount = useMemo(() => words.filter((w) => (w.level || 0) >= 1 && (w.level || 0) <= 3).length, [words]);
+  const masteredCount = useMemo(() => words.filter((w) => (w.level || 0) >= 4).length, [words]);
 
-  const renderHighlightedExample = (sentence, targetWord) => {
-    if (!sentence || !targetWord) return sentence;
-    const parts = sentence.split(new RegExp(`(${targetWord})`, 'gi'));
-    return parts.map((part, i) => 
-      part.toLowerCase() === targetWord.toLowerCase() 
-        ? <span key={i} className="font-bold text-crayonOrange underline decoration-wavy">{part}</span> 
-        : part
-    );
+  const handleAddWord = () => {
+    openModal('addWord', { topicId, passageId: isPassage ? passageId : null });
   };
 
   return (
-    <>
-      <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+    <div id="page-lesson-detail" className="page active min-h-screen text-[#322e2b] font-['Quicksand',sans-serif] bg-[#faf7f2]" style={{ backgroundImage: 'radial-gradient(#e2d9cd 1px, transparent 1px), radial-gradient(#eedecb 0.7px, transparent 0.7px)', backgroundSize: '24px 24px, 12px 12px', backgroundPosition: '0 0, 6px 6px' }}>
+
+      {/* ========================================================================= */}
+      {/* MOBILE LAYOUT (block lg:hidden) - Verbatim Stitch Mobile Screen           */}
+      {/* ========================================================================= */}
+      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col px-4 pt-3 pb-28">
+        {/* Top Header */}
+        <header className="flex items-center justify-between py-2 mb-2">
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={goBack}
+              aria-label="Quay lại"
+              className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#1e1b17] border-2 border-[#3d352e] shadow-[1.5px_2px_0px_#3d352e] active:scale-95 transition-transform"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+              </svg>
+            </button>
+            <h1 className="font-bold text-lg text-[#1e1b17] truncate max-w-[200px]">
+              {lessonName || 'Bài học'}
+            </h1>
+          </div>
+          <div className="flex items-center gap-1.5 bg-[#ccecbc] px-3 py-1 rounded-full border-2 border-[#3d352e] shadow-xs">
+            <span className="text-xs">🌱</span>
+            <span className="text-xs font-bold text-[#092104]">Churbito</span>
+          </div>
+        </header>
+
+        {/* Lesson Overview Card */}
+        <section className="bg-white rounded-[24px] border-[2.5px] border-[#3d352e] shadow-[3px_4px_0px_rgba(61,53,46,0.15)] p-4 mb-4 relative overflow-hidden">
+          <div className="flex justify-between items-start mb-2">
+            <div>
+              <span className="inline-block bg-[#f4ede6] px-3 py-0.5 rounded-full text-[11px] font-bold text-[#43483f] border border-[#c4c8bc] mb-1">
+                {isPassage ? 'Reading Passage' : 'Lesson'}
+              </span>
+              <h2 className="text-xl font-bold text-[#1e1b17] leading-tight">{lessonName}</h2>
+              <p className="text-xs text-[#43483f] mt-0.5 font-medium">{words.length} từ vựng</p>
+            </div>
+            <button
+              onClick={handleAddWord}
+              className="flex items-center gap-1 bg-[#33302c] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm active:scale-95 transition-transform"
+            >
+              <span>+ Thêm từ</span>
+            </button>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mt-3 pt-2.5 border-t border-dashed border-[#e8e1db]">
+            <div className="flex justify-between items-center mb-1 text-xs">
+              <span className="text-[#43483f]">Tiến độ ghi nhớ</span>
+              <span className="font-bold text-[#1e1b17]">{progressPercent}%</span>
+            </div>
+            <div className="w-full h-3 bg-[#f4ede6] rounded-full p-0.5 border border-[#3d352e]/30 overflow-hidden">
+              <div
+                className="h-full bg-[#86a378] rounded-full transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        {/* Study Modes: 3 Buttons */}
+        <section className="mb-4">
+          <div className="flex items-center justify-between mb-2 px-0.5">
+            <h3 className="text-xs font-bold text-[#1e1b17] uppercase tracking-wide">CHẾ ĐỘ HỌC</h3>
+            <span className="text-xs text-[#4b6540] font-bold">3 bài tập</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => startPractice(0)}
+              className="bg-white rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#feab79]/30 flex items-center justify-center text-sm">
+                ⚡
+              </div>
+              <span className="text-xs font-bold text-[#1e1b17]">Flashcard</span>
+            </button>
+            <button
+              onClick={() => startPractice(1)}
+              className="bg-white rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#c3e8ff] flex items-center justify-center text-sm">
+                ❓
+              </div>
+              <span className="text-xs font-bold text-[#1e1b17]">Trắc nghiệm</span>
+            </button>
+            <button
+              onClick={() => startPractice(2)}
+              className="bg-white rounded-2xl p-2.5 flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#ccecbc] flex items-center justify-center text-sm">
+                ✏️
+              </div>
+              <span className="text-xs font-bold text-[#1e1b17]">Điền từ</span>
+            </button>
+          </div>
+        </section>
+
+        {/* Search & Status Filters */}
+        <section className="space-y-2.5 mb-4">
+          <div className="relative flex items-center">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Tìm từ, phát âm, nghĩa..."
+              className="w-full pl-9 pr-4 py-2 bg-white rounded-full border-2 border-[#3d352e] shadow-[1.5px_2px_0px_rgba(61,53,46,0.12)] text-xs text-[#1e1b17] placeholder-[#74796f] focus:outline-none"
+            />
+            <svg className="w-4 h-4 text-[#74796f] absolute left-3 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            {[
+              { id: 'all', label: `Tất cả (${words.length})` },
+              { id: 'new', label: `Từ mới (${newCount})` },
+              { id: 'learning', label: `Đang ôn (${learningCount})` },
+              { id: 'mastered', label: `Đã thuộc (${masteredCount})` },
+            ].map((chip) => {
+              const isActive = statusFilter === chip.id;
+              return (
+                <button
+                  key={chip.id}
+                  onClick={() => setStatusFilter(chip.id)}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border-2 border-[#3d352e] whitespace-nowrap active:scale-95 transition-transform ${
+                    isActive
+                      ? 'bg-[#33302c] text-white shadow-[1.5px_2px_0px_#3d352e]'
+                      : 'bg-white text-[#43483f]'
+                  }`}
+                >
+                  {chip.label}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Word Cards List */}
+        <section className="space-y-3 flex-1">
+          {filteredWords.length === 0 ? (
+            <div className="text-center py-12 text-[#74796f]">
+              <p className="font-bold">Không tìm thấy từ vựng nào</p>
+            </div>
+          ) : (
+            filteredWords.map((word, index) => {
+              const status = (word.level || 0) >= 4 ? 'mastered' : (word.level || 0) >= 1 ? 'learning' : 'new';
+              const statusLabel = status === 'mastered' ? 'Đã thuộc' : status === 'learning' ? 'Đang ôn' : 'Mới';
+              const statusClass =
+                status === 'mastered'
+                  ? 'bg-[#ccecbc] text-[#092104]'
+                  : status === 'learning'
+                  ? 'bg-[#ffdbc9] text-[#70370f]'
+                  : 'bg-[#c3e8ff] text-[#3b6379]';
+
+              return (
+                <article
+                  key={word.id || index}
+                  className="bg-white rounded-[24px] border-[2.5px] border-[#3d352e] shadow-[3px_4px_0px_rgba(61,53,46,0.15)] p-4 relative"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <span className="w-8 h-8 rounded-full bg-[#f4ede6] flex items-center justify-center font-bold text-sm text-[#1e1b17] border border-[#3d352e]/30">
+                        {index + 1}
+                      </span>
+                      <div>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-lg font-bold text-[#1e1b17]">{word.word}</span>
+                          {word.phonetic && (
+                            <span className="text-xs text-[#74796f]">{word.phonetic}</span>
+                          )}
+                          <span className={`px-2 py-0.2 rounded-full text-[10px] font-bold ${statusClass}`}>
+                            {statusLabel}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handlePlayWord(word.word)}
+                      aria-label="Phát âm từ"
+                      className="p-1.5 text-[#1e1b17] hover:text-[#4b6540] active:scale-90 transition-transform cursor-pointer"
+                    >
+                      <span className="text-lg">🔊</span>
+                    </button>
+                  </div>
+
+                  {/* Meaning & Definition */}
+                  <div className="mt-2.5 pl-10">
+                    {word.pos && (
+                      <div className="text-[11px] text-[#74796f] font-semibold mb-0.5">
+                        {word.pos}
+                      </div>
+                    )}
+                    <p className="text-sm font-bold text-[#1e1b17]">{word.meaning}</p>
+
+                    {/* Example Sentence in Sketch Quote */}
+                    {(word.exampleSentence || word.example_sentence) && (
+                      <div className="mt-2 p-2.5 bg-[#faf2ec] rounded-r-2xl border-l-[3px] border-[#feab79]">
+                        <p className="text-xs text-[#1e1b17] italic leading-relaxed">
+                          "{word.exampleSentence || word.example_sentence}"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })
+          )}
+        </section>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Verbatim Stitch Desktop Screen      */}
+      {/* ========================================================================= */}
+      <div className="hidden lg:flex flex-1 flex-col min-w-0 overflow-y-auto px-8 py-7 lg:pl-64 xl:pl-72 w-full max-w-[1536px] mx-auto min-h-screen">
         
-        .material-symbols-outlined {
-          font-family: 'Material Symbols Outlined';
-          font-weight: normal;
-          font-style: normal;
-          font-size: 20px;
-          line-height: 1;
-          display: inline-block;
-          vertical-align: middle;
-        }
-
-        /* Desktop Crayon Textures */
-        .bg-paper {
-          background-color: #faf7f2;
-          background-image: radial-gradient(#e2d9cd 1px, transparent 1px), radial-gradient(#eedecb 0.7px, transparent 0.7px);
-          background-size: 24px 24px, 12px 12px;
-          background-position: 0 0, 6px 6px;
-        }
-        .crayon-btn-press:active {
-          transform: translate(2px, 2px);
-          box-shadow: 1px 1px 0px #322e2b;
-        }
-
-        /* Mobile Textures */
-        .paper-texture {
-          background-color: #fff8f3;
-          background-image: radial-gradient(#ece3da 0.8px, transparent 0.8px);
-          background-size: 14px 14px;
-        }
-        .crayon-card {
-          border: 3px solid #3d352e;
-          box-shadow: 3px 4px 0px rgba(61, 53, 46, 0.15);
-          border-radius: 24px;
-        }
-        .crayon-chip {
-          border: 2px solid #3d352e;
-          box-shadow: 1.5px 2px 0px rgba(61, 53, 46, 0.12);
-        }
-        .sketch-quote {
-          border-left: 3px solid #feab79;
-          background-color: #faf2ec;
-          border-radius: 0 16px 16px 0;
-        }
-      `}} />
-
-      {/* ========================================= */}
-      {/* DESKTOP VIEW */}
-      {/* ========================================= */}
-      <div className="hidden lg:flex flex-1 flex-col min-w-0 overflow-y-auto bg-paper px-8 py-7 lg:pl-64 xl:pl-72 min-h-screen text-crayonCharcoal">
         {/* Breadcrumbs & Top Quick Actions */}
         <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-dashed border-[#b8ae9f]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-crayonSubtle">
-            <button onClick={goBack} className="hover:text-crayonCharcoal flex items-center gap-1.5">
-              <span className="">←</span> Quay lại
+          <div className="flex items-center gap-2 text-sm font-semibold text-[#78726b]">
+            <button
+              onClick={goBack}
+              className="hover:text-[#322e2b] flex items-center gap-1.5 cursor-pointer font-bold"
+            >
+              <span>←</span>
+              <span>Quay lại</span>
             </button>
-            <span className="">/</span>
-            <span className="hover:text-crayonCharcoal">Chủ đề & Khóa học</span>
-            <span className="">/</span>
-            <span className="hover:text-crayonCharcoal">{topicName || 'Topic'}</span>
-            <span className="">/</span>
-            <span className="text-crayonCharcoal font-bold bg-white px-2 py-0.5 rounded-full border border-crayonCharcoal text-xs">
-              {lessonName || 'Lesson'}
+            <span>/</span>
+            <span onClick={goBack} className="hover:text-[#322e2b] cursor-pointer">
+              {topicName || 'Chủ đề'}
+            </span>
+            <span>/</span>
+            <span className="text-[#322e2b] font-bold bg-white px-2.5 py-0.5 rounded-full border border-[#322e2b] text-xs">
+              {lessonName}
             </span>
           </div>
+
           <div className="flex items-center gap-3">
-            <button className="px-3.5 py-1.5 text-xs font-bold bg-white rounded-full border-2 border-crayonCharcoal shadow-crayonSm hover:bg-gray-50 flex items-center gap-1.5">
-              <span className="">🔖</span> Quản lý bài học
-            </button>
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-crayonSageLight rounded-full border border-crayonSage text-xs font-bold text-crayonSage">
-              <span className="">🌱</span> Churbito Level 1
+            {isPassage && (
+              <button
+                onClick={startReading}
+                className="px-3.5 py-1.5 text-xs font-bold bg-white rounded-full border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>📖</span>
+                <span>Đọc bài song ngữ</span>
+              </button>
+            )}
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#eef5ec] rounded-full border border-[#799b6e] text-xs font-bold text-[#799b6e]">
+              <span>🌱</span>
+              <span>Churbito Level 1</span>
             </div>
           </div>
         </div>
 
         {/* Hero Header: Lesson Overview Banner */}
-        <section className="bg-white rounded-crayonLg border-2 border-crayonCharcoal shadow-crayon p-6 mb-7 relative overflow-hidden">
+        <section className="bg-white rounded-[22px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] p-6 mb-7 relative overflow-hidden">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-2xl">
               <div className="flex items-center gap-2.5 mb-2">
-                <span className="px-3 py-0.5 text-xs font-bold bg-crayonBgMuted text-crayonCharcoal border border-crayonCharcoal rounded-full">
-                  Lesson
+                <span className="px-3 py-0.5 text-xs font-bold bg-[#f4ede4] text-[#322e2b] border border-[#322e2b] rounded-full">
+                  {isPassage ? 'Reading Passage' : 'Lesson'}
                 </span>
-                <span className="px-2.5 py-0.5 text-xs font-bold bg-crayonYellowLight text-crayonCharcoal border border-crayonCharcoal rounded-full">
-                  {topicName || 'Topic'}
+                <span className="px-2.5 py-0.5 text-xs font-bold bg-[#fff9e6] text-[#322e2b] border border-[#322e2b] rounded-full">
+                  IELTS Academic Reading
                 </span>
-                <span className="text-xs text-crayonSubtle font-medium">Ước tính học: ~25 phút</span>
+                <span className="text-xs text-[#78726b] font-medium">Ước tính học: ~25 phút</span>
               </div>
-              <h1 className="text-3xl font-title font-bold text-crayonCharcoal tracking-tight mb-2">
+              <h1 className="text-3xl font-bold text-[#322e2b] tracking-tight mb-2">
                 {lessonName}
               </h1>
-              <p className="text-sm text-crayonSubtle font-medium leading-relaxed">
-                Tổng hợp {totalCount} từ vựng, cụm collocations và ngữ cảnh mẫu trích xuất từ bài học.
+              <p className="text-sm text-[#78726b] font-medium leading-relaxed">
+                Tổng hợp {words.length} từ vựng học thuật cao cấp, cụm collocations và ngữ cảnh trích xuất từ bài học này.
               </p>
             </div>
+
+            {/* Action Buttons */}
             <div className="flex flex-row md:flex-col lg:flex-row items-center gap-3 shrink-0">
-              <button onClick={() => openModal('addWord', { topicId, passageId })} className="px-4 py-2.5 bg-crayonCharcoal hover:bg-black text-white font-title font-bold text-sm rounded-crayonMd border-2 border-crayonCharcoal shadow-crayonSm crayon-btn-press flex items-center gap-2">
-                <span className="">+</span> Thêm từ vào bài
+              <button
+                onClick={handleAddWord}
+                className="px-4 py-2.5 bg-[#322e2b] hover:bg-black text-white font-bold text-sm rounded-[16px] border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] flex items-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              >
+                <span>+</span>
+                <span>Thêm từ vào bài</span>
               </button>
-              <button onClick={() => startPractice(0)} className="px-5 py-2.5 bg-crayonSage hover:bg-[#688a5d] text-white font-title font-bold text-sm rounded-crayonMd border-2 border-crayonCharcoal shadow-crayon crayon-btn-press flex items-center gap-2">
-                <span className="">🚀</span> Bắt đầu học ngay
+              <button
+                onClick={() => startPractice(0)}
+                className="px-5 py-2.5 bg-[#799b6e] hover:bg-[#688a5d] text-white font-bold text-sm rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] flex items-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+              >
+                <span>🚀</span>
+                <span>Bắt đầu học ngay</span>
               </button>
             </div>
           </div>
+
+          {/* Memorization Progress Bar */}
           <div className="mt-6 pt-5 border-t border-dashed border-[#dcd4c7]">
             <div className="flex items-center justify-between text-xs font-bold mb-2">
-              <span className="text-crayonCharcoal flex items-center gap-1.5">
-                <span className="">📊</span> Tiến độ ghi nhớ bài học
+              <span className="text-[#322e2b] flex items-center gap-1.5">
+                <span>📊</span> Tiến độ ghi nhớ bài học
               </span>
-              <span className="text-crayonCharcoal font-title">{progressPercent}% <span className="font-normal text-crayonSubtle">({masteredCount} / {totalCount} từ)</span></span>
+              <span className="text-[#322e2b] font-bold">
+                {progressPercent}% <span className="font-normal text-[#78726b]">({masteredCount} / {words.length} từ)</span>
+              </span>
             </div>
-            <div className="w-full h-4 bg-crayonBgMuted rounded-full border-2 border-crayonCharcoal p-0.5 overflow-hidden">
-              <div className="h-full bg-crayonSage rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} title={`${progressPercent}% Đã làm quen`}></div>
+            <div className="w-full h-4 bg-[#f4ede4] rounded-full border-2 border-[#322e2b] p-0.5 overflow-hidden">
+              <div
+                className="h-full bg-[#799b6e] rounded-full transition-all duration-500"
+                style={{ width: `${progressPercent}%` }}
+              ></div>
             </div>
           </div>
         </section>
 
-        {/* Learning Modes Section */}
+        {/* Learning Modes Section (4 Cards Grid) */}
         <section className="mb-7">
           <div className="flex items-center justify-between mb-3.5">
-            <h2 className="text-base font-title font-bold uppercase tracking-wider text-crayonCharcoal flex items-center gap-2">
-              <span className="">✏️</span> Chế Độ Học Tập
+            <h2 className="text-base font-bold uppercase tracking-wider text-[#322e2b] flex items-center gap-2">
+              <span>✏️</span> Chế Độ Học Tập
             </h2>
-            <span className="text-xs font-bold text-crayonSubtle bg-crayonBgMuted px-2.5 py-1 rounded-full border border-crayonCharcoal/30">
+            <span className="text-xs font-bold text-[#78726b] bg-[#f4ede4] px-2.5 py-1 rounded-full border border-[#322e2b]/30">
               4 dạng bài tập rèn luyện
             </span>
           </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button onClick={() => startPractice(0)} className="group p-4 bg-white hover:bg-crayonOrangeLight rounded-crayonMd border-2 border-crayonCharcoal shadow-crayon crayon-btn-press text-left transition-all">
+            {/* Flashcard */}
+            <button
+              onClick={() => startPractice(0)}
+              className="group p-4 bg-white hover:bg-[#fff2ec] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+            >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-crayonSm bg-crayonOrangeLight border-2 border-crayonCharcoal flex items-center justify-center text-crayonOrange text-lg group-hover:scale-105 transition-transform">⚡</div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-crayonOrange text-white rounded-full">Phổ biến</span>
+                <div className="w-10 h-10 rounded-xl bg-[#fff2ec] border-2 border-[#322e2b] flex items-center justify-center text-[#e87248] text-lg group-hover:scale-105 transition-transform">
+                  ⚡
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#e87248] text-white rounded-full">
+                  Phổ biến
+                </span>
               </div>
-              <h3 className="font-title font-bold text-sm text-crayonCharcoal mb-1">Flashcard</h3>
-              <p className="text-xs text-crayonSubtle font-medium leading-snug">Lật thẻ ghi nhớ hai mặt & phản xạ từ vựng tức thì.</p>
+              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Flashcard</h3>
+              <p className="text-xs text-[#78726b] font-medium leading-snug">
+                Lật thẻ ghi nhớ hai mặt &amp; phản xạ từ vựng tức thì.
+              </p>
             </button>
-            <button onClick={() => startPractice(1)} className="group p-4 bg-white hover:bg-crayonYellowLight rounded-crayonMd border-2 border-crayonCharcoal shadow-crayon crayon-btn-press text-left transition-all">
+
+            {/* Trắc nghiệm */}
+            <button
+              onClick={() => startPractice(1)}
+              className="group p-4 bg-white hover:bg-[#fff9e6] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+            >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-crayonSm bg-crayonYellowLight border-2 border-crayonCharcoal flex items-center justify-center text-[#d49817] text-lg group-hover:scale-105 transition-transform">❔</div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-crayonYellow text-crayonCharcoal rounded-full border border-crayonCharcoal">SRS v2</span>
+                <div className="w-10 h-10 rounded-xl bg-[#fff9e6] border-2 border-[#322e2b] flex items-center justify-center text-[#d49817] text-lg group-hover:scale-105 transition-transform">
+                  ❔
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#f5c35b] text-[#322e2b] rounded-full border border-[#322e2b]">
+                  SRS v2
+                </span>
               </div>
-              <h3 className="font-title font-bold text-sm text-crayonCharcoal mb-1">Trắc Nghiệm</h3>
-              <p className="text-xs text-crayonSubtle font-medium leading-snug">Chọn nghĩa tiếng Việt & ngữ cảnh câu chính xác.</p>
+              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Trắc Nghiệm</h3>
+              <p className="text-xs text-[#78726b] font-medium leading-snug">
+                Chọn nghĩa tiếng Việt &amp; ngữ cảnh câu chính xác.
+              </p>
             </button>
-            <button onClick={() => startPractice(2)} className="group p-4 bg-white hover:bg-crayonSageLight rounded-crayonMd border-2 border-crayonCharcoal shadow-crayon crayon-btn-press text-left transition-all">
+
+            {/* Điền từ */}
+            <button
+              onClick={() => startPractice(2)}
+              className="group p-4 bg-white hover:bg-[#eef5ec] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+            >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-crayonSm bg-crayonSageLight border-2 border-crayonCharcoal flex items-center justify-center text-crayonSage text-lg group-hover:scale-105 transition-transform">✏️</div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-crayonSage text-white rounded-full">Ghi nhớ</span>
+                <div className="w-10 h-10 rounded-xl bg-[#eef5ec] border-2 border-[#322e2b] flex items-center justify-center text-[#799b6e] text-lg group-hover:scale-105 transition-transform">
+                  ✏️
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#799b6e] text-white rounded-full">
+                  Ghi nhớ
+                </span>
               </div>
-              <h3 className="font-title font-bold text-sm text-crayonCharcoal mb-1">Điền Từ Khuyết</h3>
-              <p className="text-xs text-crayonSubtle font-medium leading-snug">Nhập chữ cái đúng chuẩn ngữ pháp & phát âm.</p>
+              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Điền Từ Khuyết</h3>
+              <p className="text-xs text-[#78726b] font-medium leading-snug">
+                Nhập chữ cái đúng chuẩn ngữ pháp &amp; phát âm.
+              </p>
             </button>
-            <button onClick={() => startPractice(3)} className="group p-4 bg-white hover:bg-[#ede9fe] rounded-crayonMd border-2 border-crayonCharcoal shadow-crayon crayon-btn-press text-left transition-all">
+
+            {/* Nghe chép chính tả */}
+            <button
+              onClick={() => startPractice(3)}
+              className="group p-4 bg-white hover:bg-[#f3e8ff] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+            >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-crayonSm bg-[#f3e8ff] border-2 border-crayonCharcoal flex items-center justify-center text-crayonPurple text-lg group-hover:scale-105 transition-transform">🎧</div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-crayonPurple text-white rounded-full">Nghe hiểu</span>
+                <div className="w-10 h-10 rounded-xl bg-[#f3e8ff] border-2 border-[#322e2b] flex items-center justify-center text-[#b39ddb] text-lg group-hover:scale-105 transition-transform">
+                  🎧
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#b39ddb] text-white rounded-full">
+                  Nghe hiểu
+                </span>
               </div>
-              <h3 className="font-title font-bold text-sm text-crayonCharcoal mb-1">Nghe Chính Tả</h3>
-              <p className="text-xs text-crayonSubtle font-medium leading-snug">Luyện tai nghe phát âm chuẩn giọng Anh - Mỹ.</p>
+              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Nghe Chính Tả</h3>
+              <p className="text-xs text-[#78726b] font-medium leading-snug">
+                Luyện tai nghe phát âm chuẩn giọng Anh - Mỹ.
+              </p>
             </button>
           </div>
         </section>
 
-        {/* Filter, Search and Tab Section */}
-        <section className="bg-white p-4 rounded-crayonMd border-2 border-crayonCharcoal shadow-crayonSm mb-6">
+        {/* Filter and Search Bar */}
+        <section className="bg-white p-4 rounded-[16px] border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] mb-6">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
             <div className="relative w-full lg:w-96">
-              <input 
+              <input
+                type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-paper rounded-crayonSm border-2 border-crayonCharcoal text-sm font-medium focus:ring-0 focus:border-crayonSage focus:bg-white placeholder-crayonSubtle" 
-                placeholder="Tìm từ, phát âm, nghĩa tiếng Việt..." 
-                type="text" 
+                placeholder="Tìm từ, phát âm, nghĩa tiếng Việt..."
+                className="w-full pl-10 pr-4 py-2 bg-[#faf7f2] rounded-xl border-2 border-[#322e2b] text-sm font-medium focus:ring-0 focus:border-[#799b6e] focus:bg-white placeholder-[#78726b]"
               />
-              <span className="absolute left-3.5 top-2.5 text-crayonSubtle text-sm">🔍</span>
+              <span className="absolute left-3.5 top-2.5 text-[#78726b] text-sm">🔍</span>
             </div>
+
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-              <button onClick={() => setStatusFilter('all')} className={`px-4 py-1.5 rounded-full text-xs font-bold ${statusFilter === 'all' ? 'bg-crayonCharcoal text-white shadow-crayonSm' : 'bg-white text-crayonCharcoal hover:bg-paper transition-colors'} border-2 border-crayonCharcoal`}>
-                Tất cả ({totalCount})
-              </button>
-              <button onClick={() => setStatusFilter('new')} className={`px-4 py-1.5 rounded-full text-xs font-bold ${statusFilter === 'new' ? 'bg-crayonCharcoal text-white shadow-crayonSm' : 'bg-white text-crayonCharcoal hover:bg-paper transition-colors'} border-2 border-crayonCharcoal`}>
-                Từ mới ({newCount})
-              </button>
-              <button onClick={() => setStatusFilter('learning')} className={`px-4 py-1.5 rounded-full text-xs font-bold ${statusFilter === 'learning' ? 'bg-crayonCharcoal text-white shadow-crayonSm' : 'bg-white text-crayonCharcoal hover:bg-paper transition-colors'} border-2 border-crayonCharcoal`}>
-                Đang ôn ({learningCount})
-              </button>
-              <button onClick={() => setStatusFilter('mastered')} className={`px-4 py-1.5 rounded-full text-xs font-bold ${statusFilter === 'mastered' ? 'bg-crayonCharcoal text-white shadow-crayonSm' : 'bg-white text-crayonCharcoal hover:bg-paper transition-colors'} border-2 border-crayonCharcoal`}>
-                Đã thuộc ({masteredCount})
-              </button>
+              {[
+                { id: 'all', label: `Tất cả (${words.length})` },
+                { id: 'new', label: `Từ mới (${newCount})` },
+                { id: 'learning', label: `Đang ôn (${learningCount})` },
+                { id: 'mastered', label: `Đã thuộc (${masteredCount})` },
+              ].map((btn) => {
+                const isActive = statusFilter === btn.id;
+                return (
+                  <button
+                    key={btn.id}
+                    onClick={() => setStatusFilter(btn.id)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-bold border-2 border-[#322e2b] transition-colors cursor-pointer ${
+                      isActive
+                        ? 'bg-[#322e2b] text-white shadow-[2px_2px_0px_#322e2b]'
+                        : 'bg-white text-[#322e2b] hover:bg-[#faf7f2]'
+                    }`}
+                  >
+                    {btn.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
 
-        {/* Two-Column Main Content Layout */}
+        {/* Two-Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
-          {/* Left Column: Vocabulary Cards List (Span 8) */}
+          {/* Left Column: Word Cards List (Span 8) */}
           <div className="lg:col-span-8 space-y-4">
-            {filteredWords && filteredWords.map((word, index) => (
-              <article key={word.id || index} className="bg-white rounded-crayonLg border-2 border-crayonCharcoal shadow-crayon p-5 transition-transform hover:-translate-y-0.5">
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border-2 border-crayonCharcoal flex items-center justify-center font-bold text-sm bg-crayonBgMuted">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <h3 className="text-xl font-title font-bold text-crayonCharcoal">{word.word}</h3>
-                        {word.phonetic && <span className="text-sm font-semibold text-crayonSubtle tracking-wide">{word.phonetic}</span>}
-                        <span className={`text-[11px] font-bold px-2 py-0.5 border rounded-md ${word.status === 'mastered' ? 'bg-crayonSageLight text-crayonSage border-crayonSage' : word.status === 'learning' ? 'bg-crayonYellowLight text-[#d49817] border-[#d49817]' : 'bg-crayonOrangeLight text-crayonOrange border-crayonOrange'}`}>
-                          {word.status === 'mastered' ? 'Đã thuộc' : word.status === 'learning' ? 'Đang ôn' : 'Mới'}
-                        </span>
+            {filteredWords.length === 0 ? (
+              <div className="bg-white rounded-[22px] border-2 border-[#322e2b] p-12 text-center text-[#78726b]">
+                <p className="font-bold text-base">Không có từ vựng nào phù hợp bộ lọc.</p>
+              </div>
+            ) : (
+              filteredWords.map((word, index) => {
+                const status = (word.level || 0) >= 4 ? 'mastered' : (word.level || 0) >= 1 ? 'learning' : 'new';
+                const statusLabel = status === 'mastered' ? 'Đã thuộc' : status === 'learning' ? 'Đang ôn' : 'Mới';
+                const statusClass =
+                  status === 'mastered'
+                    ? 'bg-[#eef5ec] text-[#799b6e] border-[#799b6e]'
+                    : status === 'learning'
+                    ? 'bg-[#fff9e6] text-[#d49817] border-[#d49817]'
+                    : 'bg-[#fff2ec] text-[#e87248] border-[#e87248]';
+
+                return (
+                  <article
+                    key={word.id || index}
+                    className="bg-white rounded-[22px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] p-5 transition-transform hover:-translate-y-0.5"
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full border-2 border-[#322e2b] flex items-center justify-center font-bold text-sm bg-[#f4ede4]">
+                          {index + 1}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-3 flex-wrap">
+                            <h3 className="text-xl font-bold text-[#322e2b]">{word.word}</h3>
+                            {word.phonetic && (
+                              <span className="text-sm font-semibold text-[#78726b] tracking-wide">
+                                {word.phonetic}
+                              </span>
+                            )}
+                            <span className={`text-[11px] font-bold px-2 py-0.5 border rounded-md ${statusClass}`}>
+                              {statusLabel}
+                            </span>
+                          </div>
+                          {word.pos && (
+                            <div className="text-xs text-[#78726b] font-semibold mt-0.5 flex items-center gap-1">
+                              <span>✕</span> {word.pos}
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-xs text-crayonSubtle font-semibold mt-0.5 flex items-center gap-1">
-                        <span className="">✕</span> {word.pos || 'Từ vựng'}
+
+                      {/* Audio & Delete Buttons */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handlePlayWord(word.word)}
+                          className="w-8 h-8 rounded-xl border-2 border-[#322e2b] flex items-center justify-center hover:bg-[#f4ede4] transition-colors cursor-pointer text-sm"
+                          title="Phát âm"
+                        >
+                          🔊
+                        </button>
+                        <button
+                          onClick={() => handleDeleteWord(word.id, word.word)}
+                          className="w-8 h-8 rounded-xl border-2 border-[#322e2b] flex items-center justify-center hover:bg-rose-50 text-rose-500 transition-colors cursor-pointer text-sm"
+                          title="Xóa từ"
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => handlePlayWord(word.word)} className="w-8 h-8 rounded-crayonSm border-2 border-crayonCharcoal flex items-center justify-center hover:bg-crayonBgMuted transition-colors" title="Phát âm">
-                      🔊
-                    </button>
-                    <button onClick={() => handleDeleteWord(word.id, word.word)} className="w-8 h-8 rounded-crayonSm border-2 border-crayonCharcoal flex items-center justify-center hover:bg-crayonBgMuted transition-colors text-red-500" title="Xóa/Báo cáo">
-                      🚩
-                    </button>
-                  </div>
-                </div>
-                <div className="mb-3 pl-11">
-                  <p className="text-base font-bold text-crayonCharcoal">{word.meaning}</p>
-                  {word.definition && <p className="text-xs text-crayonSubtle font-medium">{word.definition}</p>}
-                </div>
-                {word.exampleSentence && (
-                  <div className="ml-11 p-3.5 bg-crayonOrangeLight/50 rounded-crayonMd border-l-4 border-crayonOrange border-t border-r border-b border-crayonOrange/30">
-                    <p className="text-sm italic font-medium text-crayonCharcoal mb-1">
-                      {renderHighlightedExample(word.exampleSentence, word.word)}
-                    </p>
-                    {word.exampleTranslation && (
-                      <p className="text-xs text-crayonSubtle">({word.exampleTranslation})</p>
+
+                    {/* Meaning */}
+                    <div className="mb-3 pl-11">
+                      <p className="text-base font-bold text-[#322e2b]">{word.meaning}</p>
+                      {word.notes && (
+                        <p className="text-xs text-[#78726b] font-medium mt-0.5">{word.notes}</p>
+                      )}
+                    </div>
+
+                    {/* Example Sentence Context Box */}
+                    {(word.exampleSentence || word.example_sentence) && (
+                      <div className="ml-11 p-3.5 bg-[#fff2ec]/50 rounded-[14px] border-l-4 border-[#e87248] border-t border-r border-b border-[#e87248]/30">
+                        <p className="text-sm italic font-medium text-[#322e2b] mb-1">
+                          "{word.exampleSentence || word.example_sentence}"
+                        </p>
+                      </div>
                     )}
-                  </div>
-                )}
-              </article>
-            ))}
+                  </article>
+                );
+              })
+            )}
           </div>
 
-          {/* Right Column: Mascot Guide & Lesson Notes (Span 4) */}
-          <div className="lg:col-span-4 space-y-5">
-            <div className="bg-white rounded-crayonLg border-2 border-crayonCharcoal shadow-crayon p-5 text-center relative overflow-hidden">
-              <div className="inline-block px-3 py-0.5 bg-crayonSageLight text-crayonSage font-bold text-xs rounded-full border border-crayonSage mb-3">
-                🌱 BẠN ĐỒNG HÀNH ÔN TẬP
+          {/* Right Column: Mini Mascot & Lesson Stats (Span 4) */}
+          <div className="lg:col-span-4 space-y-4">
+            {/* Mascot Companion Box */}
+            <div className="p-4 bg-[#fff9e6]/60 rounded-[16px] border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] flex items-center gap-3">
+              <div className="w-14 h-14 shrink-0 rounded-xl overflow-hidden bg-white border border-[#322e2b] p-1 flex items-center justify-center">
+                <img
+                  alt="Bé Hổ Mascot"
+                  className="w-full h-full object-contain"
+                  src="/mascot/mascot_cozy.png"
+                />
               </div>
-              <div className="w-48 h-48 mx-auto my-1 flex items-center justify-center">
-                <img alt="Bé Hổ Mascot" className="w-full h-full object-contain filter drop-shadow-sm hover:scale-105 transition-transform duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1WhLdB59cxwqOugmyuan_YP_-qByGV59-nTiw2fcRTppnlmKwFY8CyUY3A0FKztN21eVPSSgsRaLdVu6ad_QcR6Ev8llHmy6VYJY0Px6ys8ENmMB5wpcrhDcFXKQuRX5c79HZecsOmdanQxxLirnu3eZ2vuPAdsCSdyPCNgllA2TSndkn-YTmLyXgBT029ah-2pOgpwJe68c6qed5T5h4YeWIR1EOhKTzuxU_BZb13bVMKFicCPACxDy27z" />
-              </div>
-              <div className="mt-2 p-3 bg-paper rounded-crayonMd border-2 border-dashed border-crayonCharcoal text-left">
-                <div className="flex items-center gap-1.5 font-bold text-xs text-crayonOrange mb-1">
-                  <span className="">💬</span> Lời nhắn từ Bé Hổ Churbito:
-                </div>
-                <p className="text-xs font-semibold text-crayonCharcoal leading-relaxed">
-                  "Bài học này có nhiều từ vựng về di sản kiến trúc rất hay gặp trong bài thi IELTS Reading. Cố gắng ghi nhớ các collocations ngữ cảnh nhé bạn ơi!"
+              <div>
+                <span className="text-[11px] font-bold text-[#e87248] uppercase tracking-wide block">
+                  Bé Hổ Đồng Hành
+                </span>
+                <p className="text-xs font-semibold text-[#322e2b] leading-snug">
+                  "Ôn tập 10 phút hôm nay để giữ chuỗi nha bạn ơi!"
                 </p>
               </div>
-              <button onClick={() => startPractice(0)} className="mt-4 w-full py-2.5 bg-crayonSage hover:bg-[#688a5d] text-white font-title font-bold text-sm rounded-crayonMd border-2 border-crayonCharcoal shadow-crayonSm crayon-btn-press transition-all flex items-center justify-center gap-2">
-                <span className="">⚡</span> Bắt đầu ôn tập {Math.min(10, totalCount)} từ đầu tiên
-              </button>
             </div>
-            <div className="bg-white rounded-crayonLg border-2 border-crayonCharcoal shadow-crayonSm p-4">
-              <div className="flex items-center gap-2 text-xs font-bold text-crayonCharcoal mb-1">
-                <span className="">📚</span> Nguồn Bài Đọc Gốc
-              </div>
-              <p className="text-xs text-crayonSubtle font-medium leading-normal">
-                Trích đoạn: <strong className="text-crayonCharcoal">{lessonName}</strong>
-              </p>
-              {passageId && (
-                <div className="mt-3 flex items-center justify-between text-[11px] font-bold">
-                  <button onClick={startReading} className="text-crayonSage hover:underline flex items-center gap-1">
-                    Xem toàn bộ bài đọc gốc ↗
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
 
-
-      {/* ========================================= */}
-      {/* MOBILE VIEW */}
-      {/* ========================================= */}
-      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col px-5 pt-4 pb-28 paper-texture text-[#1e1b17]" style={{ minHeight: 'max(884px, 100dvh)' }}>
-        {/* Top Navigation Header */}
-        <header className="flex items-center justify-between py-2 mb-2">
-          <div className="flex items-center gap-2">
-            <button onClick={goBack} aria-label="Quay lại" className="w-10 h-10 rounded-full bg-[#f4ede6] flex items-center justify-center text-[#1e1b17] hover:bg-[#eee7e1] transition-transform active:scale-95 border-2 border-[#3d352e]">
-              <span className="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
-            </button>
-            <h1 className="font-['Comfortaa'] text-[22px] font-bold text-[#1e1b17] tracking-tight">{lessonName}</h1>
-          </div>
-          <div className="flex items-center gap-1.5 bg-[#ccecbc] px-3 py-1 rounded-full border-2 border-[#3d352e]">
-            <span className="text-xs">🌱</span>
-            <span className="font-['Comfortaa'] text-[11px] text-[#092104] font-bold">Churbito</span>
-          </div>
-        </header>
-
-        {/* Header Card: Lesson Overview */}
-        <section className="crayon-card bg-[#ffffff] p-5 mb-6 relative overflow-hidden">
-          <div className="absolute -right-6 -bottom-6 w-20 h-20 bg-[#feab79]/20 rounded-full pointer-events-none"></div>
-          <div className="flex justify-between items-start mb-3">
-            <div>
-              <span className="inline-block bg-[#f4ede6] px-3 py-0.5 rounded-full font-['Comfortaa'] text-[11px] text-[#43483f] font-bold border border-[#c4c8bc] mb-1.5">
-                Lesson
-              </span>
-              <h2 className="font-['Comfortaa'] text-[28px] font-bold text-[#1e1b17] leading-none">{lessonName}</h2>
-              <p className="font-['Plus_Jakarta_Sans'] text-[14px] text-[#43483f] mt-1 font-medium">{totalCount} từ vựng</p>
-            </div>
-            <button onClick={() => openModal('addWord', { topicId, passageId })} className="flex items-center gap-1 bg-[#33302c] text-[#f7efe9] font-['Comfortaa'] text-[13px] font-bold px-4 py-2 rounded-full hover:opacity-90 transition-transform active:scale-95 shadow-sm">
-              <span className="material-symbols-outlined text-sm font-bold" data-icon="add">add</span>
-              <span>Thêm từ</span>
-            </button>
-          </div>
-          <div className="mt-4 pt-3 border-t-2 border-dashed border-[#e8e1db]">
-            <div className="flex justify-between items-center mb-1.5 font-['Comfortaa'] text-[13px]">
-              <span className="text-[#43483f] font-bold">Tiến độ ghi nhớ</span>
-              <span className="font-bold text-[#1e1b17]">{progressPercent}%</span>
-            </div>
-            <div className="w-full h-3.5 bg-[#f4ede6] rounded-full p-0.5 border border-[#3d352e]/30 overflow-hidden relative">
-              <div className="h-full bg-[#86a378] rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }}></div>
-            </div>
-          </div>
-        </section>
-
-        {/* Study Modes */}
-        <section className="mb-6">
-          <div className="flex items-center justify-between mb-2.5 px-0.5">
-            <h3 className="font-['Comfortaa'] text-[15px] font-bold text-[#1e1b17] tracking-wide uppercase">Chế độ học</h3>
-            <span className="text-xs text-[#4b6540] font-bold">3 bài tập</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            <button onClick={() => startPractice(0)} className="crayon-card bg-[#ffffff] py-3 px-2 flex flex-col items-center justify-center gap-1.5 hover:bg-[#fff8f3] transition-all active:scale-95 text-center">
-              <div className="w-9 h-9 rounded-full bg-[#feab79]/40 flex items-center justify-center text-[#8d4e24] border border-[#3d352e]/20">
-                <span className="material-symbols-outlined" data-icon="bolt">bolt</span>
-              </div>
-              <span className="font-['Comfortaa'] text-[13px] font-bold text-[#1e1b17]">Flashcard</span>
-            </button>
-            <button onClick={() => startPractice(1)} className="crayon-card bg-[#ffffff] py-3 px-2 flex flex-col items-center justify-center gap-1.5 hover:bg-[#fff8f3] transition-all active:scale-95 text-center">
-              <div className="w-9 h-9 rounded-full bg-[#c3e8ff] flex items-center justify-center text-[#3b6379] border border-[#3d352e]/20">
-                <span className="material-symbols-outlined" data-icon="help_center">help_center</span>
-              </div>
-              <span className="font-['Comfortaa'] text-[13px] font-bold text-[#1e1b17]">Trắc Nghiệm</span>
-            </button>
-            <button onClick={() => startPractice(2)} className="crayon-card bg-[#ffffff] py-3 px-2 flex flex-col items-center justify-center gap-1.5 hover:bg-[#fff8f3] transition-all active:scale-95 text-center">
-              <div className="w-9 h-9 rounded-full bg-[#ccecbc] flex items-center justify-center text-[#4b6540] border border-[#3d352e]/20">
-                <span className="material-symbols-outlined" data-icon="edit_note">edit_note</span>
-              </div>
-              <span className="font-['Comfortaa'] text-[13px] font-bold text-[#1e1b17]">Điền từ</span>
-            </button>
-          </div>
-        </section>
-
-        {/* Search & Filters */}
-        <section className="space-y-3 mb-6">
-          <div className="relative flex items-center">
-            <span className="material-symbols-outlined absolute left-3.5 text-[#74796f] pointer-events-none" data-icon="search">search</span>
-            <input 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-[#ffffff] crayon-chip rounded-full font-['Plus_Jakarta_Sans'] text-[14px] text-[#1e1b17] placeholder:text-[#c4c8bc] focus:outline-none focus:ring-2 focus:ring-[#4b6540]/40" 
-              placeholder="Tìm từ, phát âm, nghĩa tiếng Việt..." 
-              type="text"
-            />
-          </div>
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <button onClick={() => setStatusFilter('all')} className={`px-4 py-1.5 rounded-full font-['Comfortaa'] text-[13px] crayon-chip whitespace-nowrap active:scale-95 transition-transform ${statusFilter === 'all' ? 'bg-[#33302c] text-[#f7efe9] font-bold' : 'bg-[#ffffff] text-[#43483f] font-medium hover:bg-[#f4ede6]'}`}>
-              Tất cả
-            </button>
-            <button onClick={() => setStatusFilter('new')} className={`px-4 py-1.5 rounded-full font-['Comfortaa'] text-[13px] crayon-chip whitespace-nowrap active:scale-95 transition-transform ${statusFilter === 'new' ? 'bg-[#33302c] text-[#f7efe9] font-bold' : 'bg-[#ffffff] text-[#43483f] font-medium hover:bg-[#f4ede6]'}`}>
-              Từ mới
-            </button>
-            <button onClick={() => setStatusFilter('learning')} className={`px-4 py-1.5 rounded-full font-['Comfortaa'] text-[13px] crayon-chip whitespace-nowrap active:scale-95 transition-transform ${statusFilter === 'learning' ? 'bg-[#33302c] text-[#f7efe9] font-bold' : 'bg-[#ffffff] text-[#43483f] font-medium hover:bg-[#f4ede6]'}`}>
-              Đang ôn
-            </button>
-            <button onClick={() => setStatusFilter('mastered')} className={`px-4 py-1.5 rounded-full font-['Comfortaa'] text-[13px] crayon-chip whitespace-nowrap active:scale-95 transition-transform ${statusFilter === 'mastered' ? 'bg-[#33302c] text-[#f7efe9] font-bold' : 'bg-[#ffffff] text-[#43483f] font-medium hover:bg-[#f4ede6]'}`}>
-              Đã thuộc
-            </button>
-          </div>
-        </section>
-
-        {/* Vocabulary Cards List */}
-        <section className="space-y-4 mb-8">
-          {filteredWords && filteredWords.map((word, index) => (
-            <article key={word.id || index} className="crayon-card bg-[#ffffff] p-4 relative mb-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="w-8 h-8 rounded-full bg-[#f4ede6] flex items-center justify-center font-['Comfortaa'] text-[18px] font-bold text-[#1e1b17] border border-[#3d352e]/30">
-                    {index + 1}
+            {/* Lesson Quick Stats Box */}
+            <div className="p-4 bg-white rounded-[16px] border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] space-y-3">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#78726b]">
+                Phân bố ghi nhớ bài học
+              </h4>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="flex items-center gap-1.5 font-bold text-[#e87248]">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#e87248]"></span> Từ mới (Lvl 0)
                   </span>
-                  <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-['Comfortaa'] text-[22px] text-[#1e1b17] font-bold">{word.word}</span>
-                      {word.phonetic && <span className="font-['Plus_Jakarta_Sans'] text-[14px] text-[#43483f]">{word.phonetic}</span>}
-                      <span className={`inline-block px-2 py-0.5 rounded-full font-['Comfortaa'] text-[11px] font-bold ${word.status === 'mastered' ? 'bg-[#ccecbc] text-[#092104]' : word.status === 'learning' ? 'bg-[#ffdbc9] text-[#70370f]' : 'bg-[#c3e8ff] text-[#3b6379]'}`}>
-                        {word.status === 'mastered' ? 'Đã thuộc' : word.status === 'learning' ? 'Đang ôn' : 'Mới'}
-                      </span>
-                    </div>
-                  </div>
+                  <span className="font-bold">{newCount} từ</span>
                 </div>
-                <button onClick={() => handlePlayWord(word.word)} aria-label="Phát âm từ" className="p-1.5 text-[#43483f] hover:text-[#4b6540] active:scale-90 transition-transform">
-                  <span className="material-symbols-outlined" data-icon="volume_up">volume_up</span>
-                </button>
-              </div>
-              <div className="mt-2.5 pl-10">
-                <div className="flex items-center gap-1.5 text-[#74796f] text-xs mb-1">
-                  <span className="material-symbols-outlined text-sm" data-icon="close">close</span>
-                  <span className="font-['Comfortaa'] text-[11px] font-bold">{word.pos || 'Từ vựng'}</span>
+                <div className="flex justify-between items-center text-xs">
+                  <span className="flex items-center gap-1.5 font-bold text-[#d49817]">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#f5c35b]"></span> Đang ôn (Lvl 1-3)
+                  </span>
+                  <span className="font-bold">{learningCount} từ</span>
                 </div>
-                <p className="font-['Plus_Jakarta_Sans'] text-[16px] text-[#1e1b17] font-bold">{word.meaning}</p>
-                {word.exampleSentence && (
-                  <div className="mt-2.5 p-3 sketch-quote">
-                    <p className="font-['Plus_Jakarta_Sans'] text-[14px] text-[#1e1b17] italic leading-relaxed">
-                      {word.exampleSentence}
-                    </p>
-                  </div>
-                )}
+                <div className="flex justify-between items-center text-xs">
+                  <span className="flex items-center gap-1.5 font-bold text-[#799b6e]">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#799b6e]"></span> Đã thuộc (Lvl 4-5)
+                  </span>
+                  <span className="font-bold">{masteredCount} từ</span>
+                </div>
               </div>
-            </article>
-          ))}
-        </section>
-
-        {/* Floating FAB for Context Action (e.g. general report flag like in design) */}
-        <div className="fixed bottom-24 right-5 z-40">
-          <button aria-label="Cắm cờ ôn tập" className="w-14 h-14 rounded-full bg-[#ffffff] border-[3px] border-[#3d352e] shadow-lg flex items-center justify-center text-[#ba1a1a] hover:bg-[#ffdad6] transition-transform active:scale-90">
-            <span className="material-symbols-outlined text-2xl font-bold" data-icon="flag">flag</span>
-          </button>
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
+
+export default PageLessonDetail;
