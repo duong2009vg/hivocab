@@ -1,10 +1,15 @@
-import React, { useCallback, useEffect } from 'react';
+// src/components/pages/PageDashboard.jsx
+// Cozy Study Room Crayon Picture Book Redesign (Google Stitch)
+// 100% Faithful Desktop (2560px) + Mobile (780px) Responsive Implementation
+import React, { useCallback, useEffect, useState } from 'react';
 import { useDashboardStats } from '../../hooks/useDashboardStats.js';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 import { getWordsDueForReview } from '../../services/db.js';
 
 export function PageDashboard() {
   const { navigateTo } = useRoute();
+  const { user, profile } = useAuth();
   const {
     stats,
     loading,
@@ -16,6 +21,29 @@ export function PageDashboard() {
     nextMonth,
     showDayDetail,
   } = useDashboardStats();
+
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Random word of the day
+  const dailyWord = {
+    word: 'embellish',
+    ipa: '/ɪmˈbel.ɪʃ/',
+    pos: 'động từ',
+    level: 'C1 Academic',
+    meaning: 'Trang trí, tô điểm hoặc làm đẹp thêm cho một câu chuyện / sự vật.',
+    example: '"He couldn\'t resist embellishing the story of his tiger encounter."',
+  };
+
+  const handlePlayAudio = (word) => {
+    if (typeof window !== 'undefined' && window.HiAudio?.playWord) {
+      window.HiAudio.playWord(word, 0.9);
+    } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      const utter = new SpeechSynthesisUtterance(word);
+      utter.lang = 'en-US';
+      utter.rate = 0.9;
+      window.speechSynthesis.speak(utter);
+    }
+  };
 
   const handleStartReview = useCallback(async () => {
     try {
@@ -58,8 +86,8 @@ export function PageDashboard() {
   );
 
   const getBarHeight = (count) => {
-    if (!count || count === 0) return '10px';
-    return `${Math.max(12, Math.round((count / maxLevelCount) * 100))}%`;
+    if (!count || count === 0) return '6px';
+    return `${Math.max(14, Math.round((count / maxLevelCount) * 100))}%`;
   };
 
   const handleLevelClick = (lvl) => {
@@ -79,495 +107,827 @@ export function PageDashboard() {
     }
   };
 
+  const handleOpenAddWord = () => {
+    if (typeof window !== 'undefined' && typeof window.openAddWordModal === 'function') {
+      window.openAddWordModal();
+    }
+  };
+
+  const userName = profile?.full_name || user?.email?.split('@')[0] || 'bạn học';
+
+  // Choose Mascot based on Hero state
+  const mascotImg =
+    heroState === 'countdown'
+      ? '/mascot/mascot_celebrating.png'
+      : stats.wordsDueCount > 0
+      ? '/mascot/mascot_cozy.png'
+      : '/mascot/mascot_waving.png';
+
   return (
-    <div id="page-dashboard" className="page active">
-      <main className="lg:ml-64 min-h-screen mobile-page-top lg:pt-8 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-12 flex flex-col">
-        <div className="max-w-5xl mx-auto w-full flex-1 flex flex-col gap-6 lg:gap-8 fade-in">
-          {/* Header */}
-          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
-              <h1 className="text-2xl md:text-headline-lg font-bold text-on-surface">Trang chủ</h1>
-              <p className="text-sm md:text-body-lg text-on-surface-variant mt-0.5 sm:mt-1">
-                Hôm nay là một ngày tuyệt vời để học.
-              </p>
+    <div id="page-dashboard" className="page active min-h-screen text-[#3d352e] font-nunito selection:bg-orange-200">
+      {/* ========================================================================= */}
+      {/* 1. MOBILE LAYOUT (< 1024px) - 100% FAITHFUL TO STITCH MOBILE DESIGN     */}
+      {/* ========================================================================= */}
+      <div className="lg:hidden w-full min-h-screen crayon-paper-bg px-4 pt-3 pb-28 relative flex flex-col items-center">
+        <main className="w-full max-w-[430px] flex flex-col" data-purpose="mobile-viewport">
+          {/* Main Mobile Header */}
+          <section className="mt-1 mb-4" data-purpose="home-header">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-3xl font-extrabold tracking-tight text-[#382E2B] font-quicksand flex items-center gap-1.5">
+                    Trang chủ <span className="text-2xl">🌿</span>
+                  </h1>
+                  <span className="bg-[#E5EFE2] text-[#557A46] text-xs font-bold px-2.5 py-1 rounded-full border border-[#8FB383]">
+                    Đang học
+                  </span>
+                </div>
+                <p className="text-[14px] text-[#6E5D53] mt-1 font-medium">
+                  Hôm nay là một ngày tuyệt vời để học cùng hổ nhỏ! ✏️
+                </p>
+              </div>
+              <div className="flex flex-col items-end space-y-1">
+                <span className="text-xl text-[#F4B41A] select-none">★</span>
+                <span className="text-lg text-[#DE5D53] select-none">❤</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2.5 self-stretch sm:self-auto justify-between sm:justify-end">
-              <div className="glass-card px-4 py-2 rounded-full flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#FF5722] icon-fill text-lg">local_fire_department</span>
-                <span id="dashboard-streak-badge" className="font-bold text-sm text-on-surface">
-                  {stats.streak > 0 ? `${stats.streak} Ngày` : '0 Ngày'}
+
+            {/* Quick Action Badges */}
+            <div className="flex items-center space-x-2.5 mt-3.5" data-purpose="header-action-pills">
+              {/* Streak pill */}
+              <div className="flex-1 bg-[#382E2B] text-[#FFF9F0] py-2 px-3 rounded-2xl flex items-center justify-center space-x-1.5 shadow-sm crayon-btn">
+                <span className="text-base">🔥</span>
+                <span className="text-sm font-bold tracking-wide">
+                  {stats.streak > 0 ? `${stats.streak} Ngày giữ lửa` : '0 Ngày giữ lửa'}
                 </span>
               </div>
+
+              {/* Sổ tay pill */}
+              <div
+                onClick={() => navigateTo('vocabulary')}
+                className="flex-1 bg-[#FAF5EB] text-[#4E403B] py-2 px-3 rounded-2xl crayon-border-dashed flex items-center justify-center space-x-1.5 crayon-btn cursor-pointer"
+              >
+                <span className="text-base">📖</span>
+                <span className="text-sm font-bold">Xem sổ tay</span>
+              </div>
+
+              {/* Profile button */}
               <button
                 onClick={() => typeof window !== 'undefined' && window.toggleMobileProfileDropdown?.()}
-                id="mobile-profile-avatar"
-                className="mobile-user-avatar lg:hidden w-9 h-9 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden bg-cover bg-center active:scale-90 transition-transform cursor-pointer border border-outline-variant/30 shrink-0"
-                aria-label="Hồ sơ"
+                aria-label="Tài khoản"
+                className="w-10 h-10 rounded-2xl border-2 border-[#382E2B] bg-[#FFFBF2] flex items-center justify-center text-[#382E2B] shadow-sm crayon-btn shrink-0"
               >
-                <span className="material-symbols-outlined text-outline text-sm">person</span>
+                <span className="text-base">🐯</span>
               </button>
-            </div>
-          </header>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
-            {/* HERO CARD */}
-            <section className="glass-card rounded-xl p-6 lg:p-8 lg:col-span-7 flex flex-col justify-center items-center text-center min-h-[260px] lg:min-h-[320px] relative overflow-hidden group">
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-primary-fixed rounded-full blur-3xl opacity-30"></div>
-
-              {/* TRẠNG THÁI: SẴN SÀNG ÔN TẬP */}
-              {heroState === 'ready' && (
-                <div id="dash-ready-state" className="flex flex-col items-center gap-4 z-10 fade-in">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <span className="material-symbols-outlined text-primary text-[36px] icon-fill">menu_book</span>
-                  </div>
-                  <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Đến giờ ôn tập!</h2>
-                  <p id="dashboard-words-due-text" className="text-sm md:text-body-md text-on-surface-variant max-w-md">
-                    {loading
-                      ? 'Đang tải dữ liệu...'
-                      : stats.wordsDueCount > 0
-                      ? `Bạn có ${stats.wordsDueCount} từ vựng cần được củng cố theo phương pháp lặp lại ngắt quãng hôm nay.`
-                      : 'Tuyệt vời! Bạn đã ôn xong mọi từ hôm nay.'}
-                  </p>
-                  <button
-                    id="dash-start-btn"
-                    onClick={handleStartReview}
-                    className="bg-primary text-on-primary px-7 py-3 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">play_arrow</span>Ôn tập ngay
-                  </button>
-                </div>
-              )}
-
-              {/* TRẠNG THÁI: ĐẾM NGƯỢC */}
-              {heroState === 'countdown' && (
-                <div id="dash-countdown-state" className="flex flex-col items-center gap-3 z-10 fade-in">
-                  <div className="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center mb-1">
-                    <span className="material-symbols-outlined text-outline text-[34px]">schedule</span>
-                  </div>
-                  <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Lần ôn tập kế tiếp</h2>
-                  <p className="text-sm text-on-surface-variant max-w-xs">Hoàn thành hôm nay! Quay lại sau:</p>
-                  <div className="flex items-center gap-2 my-1">
-                    <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
-                      <span id="cd-hours" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">
-                        {countdown.hours}
-                      </span>
-                      <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Giờ</span>
-                    </div>
-                    <span className="text-2xl font-bold text-outline">:</span>
-                    <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
-                      <span id="cd-minutes" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">
-                        {countdown.minutes}
-                      </span>
-                      <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Phút</span>
-                    </div>
-                    <span className="text-2xl font-bold text-outline">:</span>
-                    <div className="flex flex-col items-center bg-surface-container-high px-4 py-3 rounded-xl min-w-[64px]">
-                      <span id="cd-seconds" className="text-2xl md:text-3xl font-bold text-on-surface font-mono">
-                        {countdown.seconds}
-                      </span>
-                      <span className="text-[10px] text-outline uppercase tracking-widest mt-0.5">Giây</span>
-                    </div>
-                  </div>
-                  <p id="cd-next-label" className="text-xs text-outline">
-                    {countdown.label}
-                  </p>
-                </div>
-              )}
-
-              {/* TRẠNG THÁI: CHƯA CÓ TỪ NÀO */}
-              {heroState === 'empty' && (
-                <div id="dash-empty-state" className="flex flex-col items-center gap-4 z-10 fade-in">
-                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-1">
-                    <span className="material-symbols-outlined text-primary text-[36px] icon-fill">school</span>
-                  </div>
-                  <h2 className="text-xl md:text-headline-md font-bold text-on-surface">Bắt đầu hành trình học từ vựng!</h2>
-                  <p className="text-sm md:text-body-md text-on-surface-variant max-w-md">
-                    Bạn chưa có từ vựng nào trong danh sách ôn tập. Hãy chọn một chủ đề để bắt đầu học những từ mới đầu tiên nhé!
-                  </p>
-                  <button
-                    onClick={() => navigateTo('topics')}
-                    className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-semibold text-sm shadow-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">explore</span>Khám phá chủ đề
-                  </button>
-                </div>
-              )}
-            </section>
-
-            {/* THẺ PHÂN BỐ TỪ VỰNG THEO CẤP ĐỘ */}
-            <section className="glass-card rounded-2xl p-5 sm:p-6 lg:p-7 lg:col-span-5 flex flex-col justify-between min-h-[260px] lg:min-h-[320px] relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-2 sm:mb-4">
-                <div>
-                  <h3 className="text-[10px] md:text-xs font-extrabold text-outline uppercase tracking-wider mb-0.5">
-                    Trạng thái bộ nhớ
-                  </h3>
-                  <div className="text-base sm:text-lg lg:text-xl font-bold text-on-surface">
-                    Phân bố từ vựng theo cấp độ
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigateTo('vocabulary')}
-                  className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer shrink-0"
-                  title="Xem danh sách từ trong Sổ từ"
-                >
-                  Chi tiết <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-                </button>
-              </div>
-
-              {/* 6 Cột Cấp độ (Lvl 0 -> Lvl 5) */}
-              <div className="flex-1 flex items-end justify-between gap-1.5 sm:gap-2 md:gap-3 pt-3 pb-1 select-none">
-                {[0, 1, 2, 3, 4, 5].map((lvl) => {
-                  const key = `lv${lvl}`;
-                  const count = memoryLevels[key] || 0;
-                  const colors = ['#94a3b8', '#f97316', '#f59e0b', '#0ea5e9', '#a855f7', '#10b981'];
-
-                  return (
-                    <div
-                      key={lvl}
-                      className="flex-1 flex flex-col items-center group cursor-pointer"
-                      onClick={() => handleLevelClick(lvl)}
-                      title={`Cấp ${lvl}: Bấm để lọc`}
-                    >
-                      <span
-                        id={`mem-lv${lvl}-count`}
-                        className="text-xs sm:text-sm font-bold text-on-surface mb-1.5 transition-transform group-hover:scale-110"
-                      >
-                        {count}
-                      </span>
-                      <div className="w-full flex items-end justify-center h-[120px] sm:h-[135px] lg:h-[150px]">
-                        <div
-                          id={`mem-lv${lvl}-bar`}
-                          className="w-5 sm:w-6 lg:w-7 rounded-full transition-all duration-700 ease-out group-hover:brightness-95 shadow-sm"
-                          style={{ backgroundColor: colors[lvl], height: getBarHeight(count) }}
-                        ></div>
-                      </div>
-                      <span className="text-[11px] sm:text-xs font-bold text-on-surface-variant mt-2 group-hover:text-primary transition-colors">
-                        Lvl {lvl}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
-
-          {/* BANNER ĐẶC QUYỀN: PHÒNG LUYỆN ĐỀ THPT QUỐC GIA */}
-          <section className="glass-card rounded-3xl p-6 sm:p-7 lg:p-8 relative overflow-hidden group border border-outline-variant/25 transition-all hover:border-primary/40 hover:shadow-xl">
-            <div className="absolute -top-24 -right-24 w-80 h-80 bg-primary/10 rounded-full blur-3xl pointer-events-none group-hover:bg-primary/15 transition-colors"></div>
-            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div className="flex items-start gap-4 sm:gap-5 max-w-2xl">
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-xs group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[32px] sm:text-[36px] icon-fill">school</span>
-                </div>
-                <div>
-                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/20">
-                      Phòng thi trực tuyến
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-semibold bg-surface-container-high text-on-surface-variant">
-                      38+ Đề thi chuẩn CBT
-                    </span>
-                  </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">
-                    Phòng Luyện Đề THPT Quốc Gia
-                  </h2>
-                  <p className="text-xs sm:text-sm text-on-surface-variant mt-1 leading-relaxed">
-                    Luyện thi trắc nghiệm tiếng Anh chuẩn cấu trúc Đề thi Tốt nghiệp THPT mới nhất. Giao diện làm bài chuẩn
-                    CBT, bấm giờ 50 phút thực tế, thanh điều hướng câu hỏi tức thì và lời giải thích chi tiết từng câu.
-                  </p>
-                  <div className="flex items-center gap-3 sm:gap-4 mt-3 text-[11px] sm:text-xs text-outline flex-wrap font-medium">
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>
-                      Chuẩn ma trận BGD
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>
-                      Bấm giờ tự động
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[15px] text-emerald-500">check_circle</span>
-                      Giải thích chi tiết
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div className="w-full md:w-auto flex md:flex-col sm:flex-row items-stretch md:items-end justify-end gap-3 shrink-0">
-                <button
-                  onClick={() => navigateTo('exercises')}
-                  className="w-full md:w-auto bg-primary text-on-primary hover:bg-surface-tint font-bold text-sm px-6 py-3.5 rounded-2xl shadow-md hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <span>Vào phòng thi ngay</span>
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </button>
-              </div>
             </div>
           </section>
 
-          {/* HÀNG 2: LỊCH GIỮ LỬA & MỤC TIÊU IELTS */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 lg:gap-8">
-            {/* THẺ 1: LỊCH GIỮ LỬA */}
-            <section className="glass-card rounded-2xl p-4 sm:p-5 md:p-6 lg:p-7 lg:col-span-7 flex flex-col justify-between relative overflow-hidden">
-              <div>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-[#FF5722] shrink-0">
-                      <span className="material-symbols-outlined text-[24px] icon-fill">local_fire_department</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-base sm:text-lg font-bold text-on-surface">Lịch giữ lửa</h3>
-                        <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-[#FF5722] bg-orange-500/10 px-2.5 py-0.5 rounded-full">
-                          <span id="flame-streak-count">{stats.streak || 0}</span> ngày liên tiếp
-                        </span>
-                      </div>
-                      <p className="text-[11px] sm:text-xs text-on-surface-variant">Mức độ chuyên cần ôn luyện mỗi ngày</p>
-                    </div>
-                  </div>
+          {/* Mascot Review Hero Card (Mobile) */}
+          <section className="mb-5 text-center flex flex-col items-center justify-center relative select-none">
+            <div className="inline-flex items-center space-x-2 bg-[#F5EFE0] px-3 py-1 rounded-full border border-[#D9CEBA] shadow-sm mb-1">
+              <span className="text-[11px] font-bold text-[#86756C] uppercase tracking-wider">
+                Lặp lại ngắt quãng SRS
+              </span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D53]"></span>
+              <span className="text-xs text-[#DE5D53] font-bold">
+                {stats.wordsDueCount || 0} từ cần ôn
+              </span>
+            </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-1 bg-surface-container-low px-2.5 py-1.5 rounded-xl border border-outline-variant/20 self-start sm:self-auto w-full sm:w-auto">
-                    <button
-                      onClick={prevMonth}
-                      className="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors touch-manipulation cursor-pointer"
-                      title="Tháng trước"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-                    </button>
-                    <span
-                      id="flame-calendar-title"
-                      className="text-xs font-bold text-on-surface min-w-[95px] text-center select-none"
-                    >
-                      Tháng {calendar.month}, {calendar.year}
+            <div className="my-2 relative flex justify-center items-center">
+              <img
+                alt="Bé hổ mascot chibi"
+                className="w-52 h-52 object-contain select-none transition-transform duration-300 hover:scale-105 filter drop-shadow-sm mix-blend-multiply"
+                src={mascotImg}
+              />
+            </div>
+
+            <div className="max-w-xs mx-auto space-y-1">
+              <h2 className="text-2xl font-black text-[#382E2B] tracking-tight font-quicksand">
+                {heroState === 'countdown' ? 'Lần ôn tập kế tiếp' : 'Đến giờ ôn tập rồi bạn ơi!'}
+              </h2>
+              <p className="text-sm text-[#6A5A50] font-medium leading-relaxed">
+                {heroState === 'countdown' ? (
+                  <span>
+                    Nghỉ ngơi chút nhé! Quay lại sau:{' '}
+                    <strong className="text-[#F0783C] font-bold">
+                      {countdown?.hours || 0}g {countdown?.minutes || 0}p
+                    </strong>
+                  </span>
+                ) : stats.wordsDueCount > 0 ? (
+                  <span>
+                    Bạn có{' '}
+                    <strong className="text-[#F0783C] font-bold text-base">
+                      {stats.wordsDueCount} từ vựng
+                    </strong>{' '}
+                    đang chờ được củng cố ✨
+                  </span>
+                ) : (
+                  <span>Tuyệt vời! Bạn đã hoàn thành tất cả từ cần ôn hôm nay.</span>
+                )}
+              </p>
+            </div>
+
+            <div className="mt-3.5">
+              <button
+                onClick={handleStartReview}
+                className="inline-flex items-center justify-center space-x-2 px-6 py-2.5 bg-[#759864] hover:bg-[#6A8B5A] text-white text-base font-bold rounded-full border-[2.5px] border-[#382E2B] shadow-[2px_3px_0px_#382E2B] crayon-btn transition-transform active:scale-95"
+              >
+                <span className="w-5 h-5 rounded-full bg-[#FAF5EB] text-[#759864] text-xs flex items-center justify-center font-bold">
+                  ▶
+                </span>
+                <span>Ôn tập ngay ({stats.wordsDueCount || 0} từ) ✏️</span>
+              </button>
+            </div>
+          </section>
+
+          {/* Memory Status SRS (Mobile) */}
+          <section className="bg-[#FFFDF7] p-4 border-[2.5px] border-[#443833] rounded-[26px] shadow-[3px_4px_0px_#443833] relative overflow-hidden mb-4">
+            <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
+              <div className="flex items-center space-x-2">
+                <span className="w-7 h-7 rounded-xl bg-[#E1EDDB] border border-[#8DAA68] flex items-center justify-center text-sm shadow-sm">
+                  🔄
+                </span>
+                <h2 className="text-xl font-bold text-[#382E2B] tracking-wide font-quicksand">
+                  Tổng quan SRS
+                </h2>
+              </div>
+              <div className="flex items-center space-x-2">
+                <span className="px-2.5 py-0.5 text-xs font-bold text-[#382E2B] bg-[#EADDC7] rounded-full border border-dashed border-[#86756C]">
+                  {stats.totalWordsCount || 0} từ
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between mt-3 mb-2">
+              <span className="text-[11px] font-bold tracking-wider text-[#8A796F] uppercase">
+                Phân bố từ vựng theo cấp độ
+              </span>
+              <button
+                onClick={() => navigateTo('vocabulary')}
+                className="text-xs text-[#DE5D53] font-bold hover:underline flex items-center gap-0.5"
+              >
+                Chi tiết ➔
+              </button>
+            </div>
+
+            <div className="pt-3 pb-2 flex items-end justify-between px-1 text-center">
+              {[0, 1, 2, 3, 4, 5].map((lvl) => {
+                const count = memoryLevels[`lv${lvl}`] || 0;
+                const colors = [
+                  'bg-[#96A0A8]',
+                  'bg-[#F0783C]',
+                  'bg-[#ECA43B]',
+                  'bg-[#4CA9D6]',
+                  'bg-[#A682BD]',
+                  'bg-[#6EB882]',
+                ];
+                return (
+                  <div
+                    key={lvl}
+                    onClick={() => handleLevelClick(lvl)}
+                    className="flex flex-col items-center flex-1 cursor-pointer group"
+                  >
+                    <span className="text-sm font-bold text-[#382E2B]">{count}</span>
+                    <div className="h-24 flex items-end justify-center w-full py-1">
+                      <div
+                        className={`w-5 ${colors[lvl]} border-2 border-[#382E2B] rounded-full relative shadow-sm transition-all group-hover:opacity-90`}
+                        style={{ height: getBarHeight(count) }}
+                      />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#7A6B62] mt-1">
+                      Lvl {lvl}
                     </span>
-                    <button
-                      onClick={nextMonth}
-                      className="p-1 rounded-lg text-outline hover:text-on-surface hover:bg-surface-container transition-colors touch-manipulation cursor-pointer"
-                      title="Tháng sau"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-                    </button>
                   </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-2 pt-2.5 border-t border-dashed border-[#DECDBB] flex items-center justify-between text-xs text-[#827165]">
+              <span className="font-medium">Chu kỳ SRS v4 thông minh</span>
+              <span className="bg-[#FDEAE2] text-[#DE5D53] border border-[#F6C6C2] px-2.5 py-0.5 rounded-full font-bold">
+                Cần ôn: {stats.wordsDueCount || 0} từ
+              </span>
+            </div>
+          </section>
+
+          {/* Exam Hall Card (Mobile) */}
+          <section className="bg-white border-[3px] border-[#382E2B] rounded-[26px] p-4.5 mb-4 shadow-[2px_3px_0px_#382E2B]">
+            <div className="flex items-start space-x-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#E6F3FB] border-2 border-[#382E2B] flex items-center justify-center text-2xl shrink-0 shadow-sm">
+                🎓
+              </div>
+              <div className="flex-1">
+                <div className="flex flex-wrap gap-1.5 mb-1">
+                  <span className="text-[11px] font-bold text-[#2A7BA0] bg-[#E1F1FA] px-2.5 py-0.5 rounded-full border border-[#BCE1F5]">
+                    PHÒNG THI TRỰC TUYẾN
+                  </span>
+                  <span className="text-[11px] font-bold text-[#826E5F] bg-[#F3ECE0] px-2 py-0.5 rounded-full border border-[#DED4C3]">
+                    38+ Đề chuẩn CBT
+                  </span>
                 </div>
+                <h3 className="text-lg font-bold text-[#382E2B] leading-snug font-quicksand">
+                  Phòng Luyện Đề THPT Quốc Gia & IELTS
+                </h3>
+              </div>
+            </div>
+            <p className="text-xs text-[#6B5A4E] mt-2.5 leading-relaxed">
+              Luyện trắc nghiệm tiếng Anh chuẩn cấu trúc đề thi chính thức mới nhất. Bấm giờ 50 phút thực tế, điều hướng tức thì và giải thích chi tiết.
+            </p>
+            <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-[#4E4138] font-bold">
+              <div className="flex items-center space-x-1.5">
+                <span className="text-xs bg-[#EAF5E4] text-[#557A46] border border-[#8FB383] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  ✓
+                </span>
+                <span>Chuẩn ma trận BGD</span>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="text-xs bg-[#EAF5E4] text-[#557A46] border border-[#8FB383] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  ✓
+                </span>
+                <span>Bấm giờ tự động</span>
+              </div>
+            </div>
+            <div className="mt-3.5">
+              <button
+                onClick={() => navigateTo('thpt-room')}
+                className="w-full bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2 crayon-btn transition-colors"
+              >
+                <span>Vào phòng thi ngay</span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">38 đề ➔</span>
+              </button>
+            </div>
+          </section>
 
-                {/* Ngày trong tuần header */}
-                <div className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 mb-2 text-center select-none">
-                  <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T2</span>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T3</span>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T4</span>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T5</span>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T6</span>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-outline uppercase py-0.5">T7</span>
-                  <span className="text-[10px] sm:text-[11px] font-bold text-primary uppercase py-0.5">CN</span>
+          {/* Streak Calendar Card (Mobile) */}
+          <section className="bg-white border-[3px] border-[#382E2B] rounded-[26px] p-4.5 mb-4 shadow-[2px_3px_0px_#382E2B]">
+            <div className="flex items-center justify-between pb-2 border-b-2 border-dashed border-[#E3D9C6]">
+              <div className="flex items-center space-x-2">
+                <span className="w-8 h-8 rounded-full bg-[#FEEFEA] border border-[#F8C8B8] flex items-center justify-center text-lg">
+                  🔥
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-[#382E2B] font-quicksand">Lịch giữ lửa</h3>
+                  <p className="text-[11px] text-[#7C6C62]">Mức độ chuyên cần ôn luyện mỗi ngày</p>
                 </div>
+              </div>
+              <span className="text-xs font-bold text-[#E65F2B] bg-[#FDEAE2] px-2.5 py-1 rounded-full border border-[#F7BFAB]">
+                {stats.streak || 0} ngày liên tiếp
+              </span>
+            </div>
 
-                {/* Calendar Grid */}
-                <div id="flame-calendar-grid" className="grid grid-cols-7 gap-1 sm:gap-1.5 md:gap-2 min-h-[190px]">
-                  {/* Empty cells before month start */}
-                  {Array.from({ length: calendar.startDayIndex }).map((_, i) => (
-                    <div key={`empty-${i}`} className="aspect-square rounded-lg bg-transparent opacity-0 pointer-events-none" />
-                  ))}
+            {/* Month Navigator */}
+            <div className="flex items-center justify-between mt-3 mb-2 px-2 py-1.5 bg-[#FAF5EB] rounded-2xl border-2 border-[#382E2B]">
+              <button onClick={prevMonth} className="text-sm font-bold text-[#382E2B] px-2 hover:opacity-75">
+                ‹
+              </button>
+              <span className="text-sm font-bold text-[#382E2B] font-quicksand">
+                {calendar.monthYear || 'Tháng này'}
+              </span>
+              <button onClick={nextMonth} className="text-sm font-bold text-[#382E2B] px-2 hover:opacity-75">
+                ›
+              </button>
+            </div>
 
-                  {/* Day cells */}
-                  {calendar.days.map(({ day, dateStr, count, isToday }) => {
-                    let levelClass = '';
-                    let hasFlame = false;
+            {/* Weekday Labels */}
+            <div className="grid grid-cols-7 text-center text-xs font-bold text-[#86756C] mt-2 mb-1">
+              <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+            </div>
 
-                    if (count === 0) {
-                      levelClass =
-                        'bg-surface-container-low/60 text-on-surface-variant/70 border border-outline-variant/15 hover:bg-surface-container transition-colors';
-                    } else if (count < 10) {
-                      levelClass =
-                        'bg-orange-500/20 text-orange-600 dark:text-orange-300 font-semibold border border-orange-500/40 shadow-sm';
-                    } else if (count < 25) {
-                      levelClass =
-                        'bg-orange-500 text-white font-bold shadow-[0_2px_8px_rgba(249,115,22,0.35)]';
-                    } else {
-                      levelClass =
-                        'bg-gradient-to-br from-amber-500 via-orange-500 to-[#FF5722] text-white font-bold shadow-[0_3px_12px_rgba(255,87,34,0.45)]';
-                      hasFlame = true;
+            {/* Calendar Matrix */}
+            <div className="space-y-1">
+              {calendar.weeks.map((week, wIdx) => (
+                <div key={wIdx} className="grid grid-cols-7 gap-1 text-center text-xs font-semibold">
+                  {week.map((day, dIdx) => {
+                    if (!day.date) {
+                      return <span key={dIdx} className="py-1.5 opacity-0">0</span>;
                     }
-
-                    const todayRing = isToday
-                      ? 'ring-2 ring-primary ring-offset-1 sm:ring-offset-2 ring-offset-surface z-10 font-black'
-                      : '';
-
-                    const tooltipText = `Ngày ${day}/${calendar.month}: ${
-                      count > 0 ? `Đã ôn ${count} từ 🔥` : 'Chưa có phiên học'
-                    }`;
-
+                    const isToday = day.isToday;
+                    const count = day.count || 0;
                     return (
                       <div
-                        key={day}
-                        onClick={() => showDayDetail(dateStr, count)}
-                        className={`relative group/day aspect-square flex flex-col items-center justify-center rounded-lg sm:rounded-xl text-[11px] sm:text-xs md:text-sm cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation select-none ${levelClass} ${todayRing}`}
-                        title={tooltipText}
+                        key={dIdx}
+                        onClick={() => showDayDetail(day)}
+                        className={`py-1.5 rounded-xl cursor-pointer transition-transform active:scale-95 ${
+                          isToday
+                            ? 'bg-[#E6F3FB] border-[2px] border-[#2A7BA0] text-[#1B5672] font-black shadow-xs'
+                            : count > 0
+                            ? 'bg-[#FCD8BE] border border-[#F0783C] text-[#933D0D] font-bold'
+                            : 'border border-[#E3D9C8] text-[#9E8E84]'
+                        }`}
                       >
-                        <span>{day}</span>
-                        {hasFlame && (
-                          <span className="absolute top-0.5 right-0.5 text-[9px] pointer-events-none select-none">🔥</span>
-                        )}
+                        {day.day}
                       </div>
                     );
                   })}
                 </div>
+              ))}
+            </div>
 
-                {/* Calendar Hint */}
-                {calendar.hint && (
-                  <div
-                    id="flame-calendar-hint"
-                    className="mt-3 p-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface text-center border border-outline-variant/20 fade-in"
-                  >
-                    {calendar.hint}
-                  </div>
-                )}
+            {/* Activity Legend & Counter */}
+            <div className="mt-3 pt-2.5 border-t border-[#F0E8D9] flex flex-wrap items-center justify-between text-[11px] text-[#78685E]">
+              <div className="flex items-center space-x-2">
+                <span>Mức độ:</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#E8DFC8]"></span> 0</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#FCD8BE]"></span> 1-9</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#F0783C]"></span> 10-24</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#DE5D53]"></span> 25+🔥</span>
+              </div>
+            </div>
+            <div className="mt-2 flex space-x-2 text-xs">
+              <span className="bg-[#FAF5EB] border border-[#D9CDB8] text-[#69574C] px-2.5 py-1 rounded-full font-bold">
+                Đã học: {calendar.activeDaysCount || 0} ngày
+              </span>
+              <span className="bg-[#FAF5EB] border border-[#D9CDB8] text-[#69574C] px-2.5 py-1 rounded-full font-bold">
+                Tổng: {calendar.totalWordsLearned || 0} từ
+              </span>
+            </div>
+          </section>
+
+          {/* IELTS Target Goal Card (Mobile) */}
+          <section className="bg-white border-[3px] border-[#382E2B] rounded-[26px] p-4.5 mb-6 text-center shadow-[2px_3px_0px_#382E2B]">
+            <div className="w-11 h-11 mx-auto rounded-2xl bg-[#FDF0EE] border-2 border-[#382E2B] flex items-center justify-center text-xl mb-2 shadow-sm">
+              🚩
+            </div>
+            <h3 className="text-base font-bold text-[#382E2B] font-quicksand">
+              {ieltsGoal?.targetOverall ? `Mục tiêu IELTS ${ieltsGoal.targetOverall}` : 'Bạn chưa đặt mục tiêu IELTS'}
+            </h3>
+            <p className="text-xs text-[#6B5A4E] mt-1 max-w-xs mx-auto leading-relaxed">
+              {ieltsGoal?.testDate
+                ? `Còn ${ieltsGoal.daysRemaining || 0} ngày đến kỳ thi. Tiến độ từ vựng đạt ${ieltsGoal.progressPercent || 0}%.`
+                : 'Thiết lập band điểm 4 kỹ năng và chọn ngày thi để đồng hồ đếm ngược tạo động lực học tập mỗi ngày.'}
+            </p>
+            <button
+              onClick={handleOpenIELTSModal}
+              className="mt-3.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#382E2B] py-2 px-4 rounded-2xl text-xs font-bold border-2 border-[#382E2B] crayon-btn inline-flex items-center space-x-1.5 shadow-sm"
+            >
+              <span>🎯 Thiết lập mục tiêu ngay</span>
+            </button>
+          </section>
+
+          {/* Mascot Signature Footer */}
+          <footer className="text-center py-2 mb-4">
+            <div className="w-8 h-8 mx-auto mb-1 text-[#8C7B71] text-lg select-none">🐾</div>
+            <p className="text-xs text-[#8C7B71] font-medium italic">
+              Trang 1 / {stats.totalWordsCount || 0} từ trong tập vẽ tranh sáp màu
+            </p>
+          </footer>
+        </main>
+
+        {/* Mobile Floating Action Button (Red Stamp) */}
+        <div className="fixed bottom-20 right-5 z-40 max-w-[430px]">
+          <button
+            onClick={handleOpenAddWord}
+            aria-label="Thêm từ vựng mới"
+            className="w-13 h-13 p-3 bg-[#DE5D53] hover:bg-[#C84F45] text-white rounded-full border-[3px] border-[#382E2B] shadow-lg flex items-center justify-center crayon-btn transition-transform"
+          >
+            <span className="material-symbols-outlined text-[24px]">add</span>
+          </button>
+        </div>
+
+        {/* Mobile Bottom Navigation Bar */}
+        <nav
+          className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-[#FAF5EB]/95 backdrop-blur-md border-t-[3.5px] border-[#382E2B]"
+          data-purpose="bottom-navigation"
+        >
+          <div className="w-full max-w-[430px] flex justify-around items-center py-2 px-2">
+            {/* Tab 1: Trang chủ (Active) */}
+            <div className="flex flex-col items-center cursor-pointer px-2 py-0.5">
+              <div className="w-11 h-8 rounded-full border-2 border-[#577B4A] bg-[#EAF3E7] flex items-center justify-center text-[#3D5A32] shadow-sm">
+                <span className="material-symbols-outlined text-[20px]">home</span>
+              </div>
+              <span className="text-[11px] font-bold text-[#3D5A32] mt-0.5">Trang chủ</span>
+            </div>
+
+            {/* Tab 2: Chủ đề */}
+            <div
+              onClick={() => navigateTo('topics')}
+              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
+            >
+              <div className="w-11 h-8 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[20px]">category</span>
+              </div>
+              <span className="text-[11px] font-bold mt-0.5">Chủ đề</span>
+            </div>
+
+            {/* Tab 3: Thư viện */}
+            <div
+              onClick={() => navigateTo('library')}
+              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
+            >
+              <div className="w-11 h-8 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[20px]">explore</span>
+              </div>
+              <span className="text-[11px] font-bold mt-0.5">Thư viện</span>
+            </div>
+
+            {/* Tab 4: Sổ từ */}
+            <div
+              onClick={() => navigateTo('vocabulary')}
+              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
+            >
+              <div className="w-11 h-8 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[20px]">bookmark</span>
+              </div>
+              <span className="text-[11px] font-bold mt-0.5">Sổ từ</span>
+            </div>
+
+            {/* Tab 5: Tra từ */}
+            <div
+              onClick={() => navigateTo('dictionary')}
+              className="flex flex-col items-center cursor-pointer px-2 py-0.5 text-[#736359] hover:text-[#382E2B]"
+            >
+              <div className="w-11 h-8 flex items-center justify-center">
+                <span className="material-symbols-outlined text-[20px]">search</span>
+              </div>
+              <span className="text-[11px] font-bold mt-0.5">Tra từ</span>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. DESKTOP LAYOUT (>= 1024px) - 100% FAITHFUL TO STITCH DESKTOP DESIGN   */}
+      {/* ========================================================================= */}
+      <div className="hidden lg:flex w-full min-h-screen crayon-paper-desktop">
+        {/* Main Content Area (Offset by existing App Sidebar on desktop) */}
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
+          {/* Desktop TopBar */}
+          <header className="px-8 py-5 border-b-2 border-[#e6dcce] bg-[#fbf8f2]/90 backdrop-blur-sm sticky top-0 z-20 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-black text-[#3d352e] font-quicksand">
+                  Chào {userName}, bạn học ơi! 🌿
+                </h1>
+              </div>
+              <p className="text-xs text-softMuted mt-0.5">
+                Hôm nay là một ngày tuyệt vời để ghi nhớ thêm những từ vựng mới cùng bé hổ.
+              </p>
+            </div>
+
+            {/* Search, Streak & Quick Actions */}
+            <div className="flex items-center gap-3">
+              {/* Search Bar with Crayon Feel */}
+              <div className="relative w-64 lg:w-72">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && searchQuery.trim()) {
+                      navigateTo('dictionary');
+                      setTimeout(() => {
+                        if (typeof window !== 'undefined' && window.HiDict?.lookupWord) {
+                          window.HiDict.lookupWord(searchQuery.trim());
+                        }
+                      }, 200);
+                    }
+                  }}
+                  placeholder="Tìm nhanh từ vựng, chủ đề..."
+                  className="w-full pl-10 pr-4 py-2 text-xs bg-white rounded-full crayon-border focus:ring-2 focus:ring-[#5d8063] focus:outline-none transition-all placeholder:text-softMuted/70"
+                />
+                <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-softMuted text-[16px]">
+                  search
+                </span>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-outline-variant/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
-                <div className="flex items-center gap-1.5 sm:gap-2 text-outline text-[10px] sm:text-[11px] flex-wrap">
-                  <span className="font-medium">Mức độ:</span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-surface-container-low border border-outline-variant/20 inline-block"></span> 0
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-orange-500/20 border border-orange-500/40 inline-block"></span> 1-9
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-orange-500 inline-block"></span> 10-24
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-br from-amber-500 to-[#FF5722] inline-block"></span> 25+🔥
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 sm:gap-3 text-on-surface-variant font-medium text-[11px] sm:text-xs">
-                  <span className="bg-surface-container-low px-2 py-0.5 rounded-md">
-                    Đã học: <strong id="flame-active-days" className="text-on-surface font-bold">{calendar.activeDaysCount} ngày</strong>
-                  </span>
-                  <span className="bg-primary/10 px-2 py-0.5 rounded-md text-primary">
-                    Tổng: <strong id="flame-month-words" className="font-bold">{calendar.totalWordsThisMonth} từ</strong>
-                  </span>
-                </div>
+              {/* Streak Badge */}
+              <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-orange-100 text-terracotta font-black text-xs crayon-border shadow-crayonSm">
+                <span className="text-base animate-bounce">🔥</span>
+                <span>{stats.streak || 0} ngày liên tiếp</span>
               </div>
-            </section>
 
-            {/* THẺ 2: MỤC TIÊU IELTS */}
-            <section className="glass-card rounded-2xl p-4 sm:p-5 md:p-6 lg:p-7 lg:col-span-5 flex flex-col justify-between relative overflow-hidden">
-              {ieltsGoal.isSet ? (
-                <div id="ielts-goal-set-card" className="flex flex-col h-full justify-between gap-4 fade-in">
-                  <div>
-                    <div className="flex items-center justify-between mb-3 gap-2">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                          <span className="material-symbols-outlined text-[24px] icon-fill">military_tech</span>
-                        </div>
-                        <div>
-                          <h3 className="text-base sm:text-lg font-bold text-on-surface">Mục tiêu IELTS</h3>
-                          <p className="text-[11px] sm:text-xs text-on-surface-variant">Lộ trình bứt phá điểm số</p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleOpenIELTSModal}
-                        className="text-xs font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1 shrink-0 touch-manipulation active:scale-95 cursor-pointer"
-                      >
-                        <span className="material-symbols-outlined text-[15px]">edit</span>
-                        <span>Đổi mục tiêu</span>
-                      </button>
-                    </div>
+              {/* Quick Action: Thêm từ mới */}
+              <button
+                onClick={handleOpenAddWord}
+                className="bg-terracotta hover:bg-[#b85135] text-white font-bold text-xs px-4 py-2 rounded-full crayon-border shadow-crayonOrange active:translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[16px]">add</span>
+                <span>Thêm từ mới</span>
+              </button>
+            </div>
+          </header>
 
-                    <div className="bg-gradient-to-br from-primary/10 via-surface-container-low to-primary-fixed/20 p-3.5 sm:p-4 rounded-xl border border-primary/20 flex items-center justify-between gap-3 relative overflow-hidden mb-3 sm:mb-4">
-                      <div className="absolute -right-6 -bottom-6 w-24 h-24 bg-primary/10 rounded-full blur-2xl pointer-events-none"></div>
-                      <div>
-                        <span className="text-[9px] sm:text-[10px] font-bold text-primary uppercase tracking-widest block mb-0.5">
-                          Thời gian đếm ngược
-                        </span>
-                        <div className="flex items-baseline gap-1.5">
-                          <span id="ielts-countdown-days" className="text-2xl sm:text-3xl md:text-4xl font-black text-on-surface font-mono">
-                            {ieltsGoal.daysLeft}
-                          </span>
-                          <span id="ielts-countdown-label" className="text-xs sm:text-sm font-semibold text-outline">
-                            Ngày nữa
-                          </span>
-                        </div>
-                        <p className="text-[10px] sm:text-[11px] text-on-surface-variant mt-1 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[13px] text-primary">event</span>
-                          Ngày thi: <span id="ielts-exam-date-text" className="font-bold text-on-surface">{ieltsGoal.examDateText || '—'}</span>
-                        </p>
+          {/* Desktop Body */}
+          <main className="p-8 flex-1 max-w-[1536px] w-full mx-auto">
+            <div className="grid grid-cols-12 gap-8 items-start">
+              {/* Left Column (7 cols) */}
+              <div className="col-span-12 xl:col-span-8 lg:col-span-7 space-y-7">
+                {/* Hero Study Widget */}
+                <section className="bg-[#fffdf9] rounded-3xl p-6 lg:p-7 crayon-border shadow-crayon relative overflow-hidden">
+                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 justify-between">
+                    {/* Left text & SRS Action */}
+                    <div className="space-y-4 max-w-md">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e9efe9] text-[#5d8063] border border-[#5d8063]/30 text-xs font-bold">
+                        <span className="material-symbols-outlined text-[15px]">auto_awesome</span>
+                        <span>Thuật toán ngắt quãng Spaced Repetition</span>
                       </div>
-                      <div className="text-right shrink-0">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block mb-1">
-                          Mục tiêu
-                        </span>
-                        <div
-                          id="ielts-goal-overall-badge"
-                          className="px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-xl bg-primary text-on-primary font-black text-sm sm:text-base md:text-lg shadow-sm"
+
+                      <h2 className="text-2xl lg:text-3xl font-black text-crayonText font-quicksand leading-tight">
+                        {heroState === 'countdown' ? (
+                          <>
+                            Đã ôn xong hôm nay!<br />
+                            <span className="text-[#5d8063]">Quay lại sau {countdown?.hours || 0}g {countdown?.minutes || 0}p.</span>
+                          </>
+                        ) : (
+                          <>
+                            Đến giờ ôn tập rồi!<br />
+                            <span className="text-terracotta">{stats.wordsDueCount || 0} từ vựng</span> đang chờ bạn.
+                          </>
+                        )}
+                      </h2>
+
+                      {/* Mascot Speech Bubble */}
+                      <div className="bg-cream/80 border-2 border-[#3d352e] rounded-2xl p-3.5 relative inline-block text-xs font-semibold text-crayonText">
+                        <span className="font-bold text-terracotta">Bé Hổ nhắc:</span>{' '}
+                        {stats.wordsDueCount > 0
+                          ? `"Cùng bé hổ hoàn thành ${stats.wordsDueCount} từ hôm nay nhé! 🐾"`
+                          : `"Bạn đã học rất chăm chỉ, bé hổ khen ngợi bạn nè! ⭐"`}
+                        <div className="absolute -left-2 top-4 w-3 h-3 bg-cream border-l-2 border-b-2 border-crayonText rotate-45"></div>
+                      </div>
+
+                      <div className="pt-2 flex flex-wrap items-center gap-3">
+                        <button
+                          onClick={handleStartReview}
+                          className="bg-terracotta hover:bg-[#b85135] text-white text-sm font-black px-6 py-3 rounded-2xl crayon-border shadow-crayonOrange active:translate-y-1 transition-all flex items-center gap-2.5 cursor-pointer"
                         >
-                          Band {ieltsGoal.overall}
+                          <span className="material-symbols-outlined text-[18px]">play_arrow</span>
+                          <span>Ôn tập ngay ({stats.wordsDueCount || 0} từ SRS)</span>
+                        </button>
+                        <span className="text-xs font-semibold text-softMuted">
+                          Mất tầm ~{Math.max(3, Math.round((stats.wordsDueCount || 1) * 0.4))} phút
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Right Mascot Image */}
+                    <div className="shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center">
+                      <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
+                      <img
+                        alt="Bé hổ mascot chibi ấm cúng"
+                        className="w-full h-full object-contain relative z-10 mix-blend-multiply drop-shadow-sm transition-transform hover:scale-105 duration-300"
+                        src={mascotImg}
+                      />
+                    </div>
+                  </div>
+                </section>
+
+                {/* SRS Level Distribution (Desktop) */}
+                <section className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-black text-crayonText font-quicksand flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[#5d8063]">bar_chart</span>
+                        Phân bố từ vựng theo cấp độ SRS
+                      </h3>
+                      <p className="text-xs text-softMuted">
+                        Theo dõi mức độ khắc sâu vào trí nhớ dài hạn của bạn
+                      </p>
+                    </div>
+                    <span className="text-xs font-extrabold bg-[#f5ede0] px-3 py-1 rounded-full border border-crayonText/20">
+                      Tổng cộng: {stats.totalWordsCount || 0} từ
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-6 gap-3 pt-3">
+                    {[
+                      { lvl: 0, label: 'Cấp 0', sub: 'Mới học', color: 'bg-gray-200' },
+                      { lvl: 1, label: 'Cấp 1', sub: 'Đang ôn', color: 'bg-terracotta' },
+                      { lvl: 2, label: 'Cấp 2', sub: 'Quen dần', color: 'bg-warmAmber' },
+                      { lvl: 3, label: 'Cấp 3', sub: 'Ghi nhớ', color: 'bg-softBlue' },
+                      { lvl: 4, label: 'Cấp 4', sub: 'Vững vàng', color: 'bg-softPurple' },
+                      { lvl: 5, label: 'Cấp 5', sub: 'Bậc thầy ⭐', color: 'bg-sage' },
+                    ].map((item) => {
+                      const count = memoryLevels[`lv${item.lvl}`] || 0;
+                      return (
+                        <div
+                          key={item.lvl}
+                          onClick={() => handleLevelClick(item.lvl)}
+                          className="flex flex-col items-center bg-[#faf6f0] p-3 rounded-2xl border border-dashed border-gray-300 text-center cursor-pointer hover:border-terracotta transition-colors group"
+                        >
+                          <span className="text-[11px] font-bold text-softMuted uppercase tracking-wider">
+                            {item.label}
+                          </span>
+                          <div className="w-full h-24 flex items-end justify-center my-2">
+                            <div
+                              className={`w-8 rounded-t-lg ${item.color} transition-all group-hover:opacity-90`}
+                              style={{ height: getBarHeight(count) }}
+                            />
+                          </div>
+                          <span className="text-sm font-black text-crayonText">{count}</span>
+                          <span className="text-[10px] text-softMuted">{item.sub}</span>
                         </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-4 gap-1.5 sm:gap-2 text-center">
-                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
-                          Listening
-                        </span>
-                        <span id="ielts-skill-listening" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
-                          {ieltsGoal.listening}
-                        </span>
-                      </div>
-                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
-                          Reading
-                        </span>
-                        <span id="ielts-skill-reading" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
-                          {ieltsGoal.reading}
-                        </span>
-                      </div>
-                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
-                          Writing
-                        </span>
-                        <span id="ielts-skill-writing" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
-                          {ieltsGoal.writing}
-                        </span>
-                      </div>
-                      <div className="bg-surface-container-low/80 p-2 sm:p-2.5 rounded-xl border border-outline-variant/15 flex flex-col items-center justify-center">
-                        <span className="text-[9px] sm:text-[10px] font-bold text-outline uppercase tracking-wider block truncate max-w-full">
-                          Speaking
-                        </span>
-                        <span id="ielts-skill-speaking" className="text-sm sm:text-base font-extrabold text-primary mt-0.5 block">
-                          {ieltsGoal.speaking}
-                        </span>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
+                </section>
 
-                  <div className="pt-2 border-t border-outline-variant/15">
-                    <p id="ielts-goal-motto-text" className="text-[11px] sm:text-xs italic text-on-surface-variant text-center line-clamp-2">
-                      {ieltsGoal.motto}
+                {/* Exam Preparation Room Banner (Desktop) */}
+                <section className="bg-gradient-to-r from-[#eef4ee] to-[#f7eee4] rounded-3xl p-6 crayon-border relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-5">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-sage text-white text-xs font-black uppercase">
+                        HOT
+                      </span>
+                      <span className="text-xs font-bold text-softMuted">Mới cập nhật 2026</span>
+                    </div>
+                    <h3 className="text-xl font-black text-crayonText font-quicksand">
+                      Phòng Luyện Đề THPT Quốc Gia & Thi Thử CBT
+                    </h3>
+                    <p className="text-xs text-softMuted max-w-md">
+                      Kho ngân hàng 38+ đề thi chuẩn cấu trúc Bộ Giáo dục, tích hợp bộ đếm giờ tự động 50 phút và giải thích từ vựng chi tiết sau mỗi câu.
                     </p>
+                    <div className="flex items-center gap-4 pt-1 text-xs font-bold text-crayonText">
+                      <span className="flex items-center gap-1.5">⏱️ 50 phút</span>
+                      <span className="flex items-center gap-1.5">📝 50 câu hỏi</span>
+                      <span className="flex items-center gap-1.5">👥 1,420 bạn đang luyện</span>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div id="ielts-goal-unset-card" className="flex flex-col items-center justify-center text-center py-6 h-full gap-3 fade-in">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-1">
-                    <span className="material-symbols-outlined text-[28px] sm:text-[32px] icon-fill">flag</span>
+                  <button
+                    onClick={() => navigateTo('thpt-room')}
+                    className="shrink-0 bg-sage hover:bg-sage-dark text-white font-black text-sm px-5 py-3 rounded-2xl crayon-border shadow-crayon active:translate-y-0.5 transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>Vào phòng thi ngay</span>
+                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                  </button>
+                </section>
+              </div>
+
+              {/* Right Column (5 cols) */}
+              <div className="col-span-12 xl:col-span-4 lg:col-span-5 space-y-7">
+                {/* Streak Calendar Card (Desktop) */}
+                <section className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-terracotta text-lg border border-orange-200">
+                        🔥
+                      </div>
+                      <div>
+                        <h3 className="text-base font-black text-crayonText font-quicksand">Lịch giữ lửa</h3>
+                        <p className="text-[11px] text-softMuted">Mức độ chuyên cần ôn luyện mỗi ngày</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-terracotta bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
+                      {stats.streak || 0} ngày liên tiếp
+                    </span>
                   </div>
-                  <h3 className="text-base sm:text-lg font-bold text-on-surface">Bạn chưa đặt mục tiêu IELTS</h3>
-                  <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed px-2">
-                    Thiết lập band điểm 4 kỹ năng và chọn ngày thi để đồng hồ đếm ngược tạo động lực học tập mỗi ngày!
-                  </p>
+
+                  {/* Month Navigator */}
+                  <div className="flex items-center justify-between px-3 py-2 bg-[#fbf8f3] rounded-2xl crayon-border text-sm font-bold text-crayonText">
+                    <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted">
+                      ‹
+                    </button>
+                    <span className="font-quicksand font-extrabold">{calendar.monthYear}</span>
+                    <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted">
+                      ›
+                    </button>
+                  </div>
+
+                  {/* Days of week */}
+                  <div className="grid grid-cols-7 gap-1 text-center text-xs font-black text-softMuted/80">
+                    <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
+                  </div>
+
+                  {/* Days Grid */}
+                  <div className="space-y-1">
+                    {calendar.weeks.map((week, wIdx) => (
+                      <div key={wIdx} className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-crayonText">
+                        {week.map((day, dIdx) => {
+                          if (!day.date) {
+                            return <div key={dIdx}></div>;
+                          }
+                          const isToday = day.isToday;
+                          const count = day.count || 0;
+                          return (
+                            <div
+                              key={dIdx}
+                              onClick={() => showDayDetail(day)}
+                              className={`h-9 flex items-center justify-center rounded-xl cursor-pointer transition-transform active:scale-95 ${
+                                isToday
+                                  ? 'border-2 border-blue-600 font-black text-blue-700 bg-blue-50/50 shadow-xs'
+                                  : count > 0
+                                  ? 'bg-[#fae3d5] text-[#b4482b] font-black border border-orange-300'
+                                  : 'bg-gray-50 text-gray-400'
+                              }`}
+                            >
+                              {day.day}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Streak Legend */}
+                  <div className="pt-2 border-t border-gray-100 space-y-2.5">
+                    <div className="flex items-center justify-between text-[11px] text-softMuted">
+                      <span>Mức độ:</span>
+                      <div className="flex items-center gap-2">
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>0</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#fae3d5]"></span>1-9</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span>10-24</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-terracotta"></span>25+ 🔥</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 pt-1">
+                      <div className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-bold text-crayonText">
+                        Đã học: <span className="text-terracotta font-black">{calendar.activeDaysCount || 0} ngày</span>
+                      </div>
+                      <div className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-bold text-crayonText">
+                        Tổng: <span className="text-terracotta font-black">{calendar.totalWordsLearned || 0} từ</span>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Target Goal Card (Desktop) */}
+                <section className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-[11px] font-black uppercase text-terracotta tracking-wider">
+                        Lộ trình rèn luyện
+                      </span>
+                      <h3 className="text-lg font-black text-crayonText font-quicksand mt-0.5">
+                        {ieltsGoal?.targetOverall ? `Mục tiêu IELTS ${ieltsGoal.targetOverall}` : 'Mục tiêu IELTS 7.0'}
+                      </h3>
+                    </div>
+                    <div className="w-10 h-10 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center text-lg crayon-border">
+                      🚩
+                    </div>
+                  </div>
+
+                  <div className="mt-4 space-y-2">
+                    <div className="flex justify-between text-xs font-bold text-crayonText">
+                      <span>Tiến độ từ vựng cốt lõi</span>
+                      <span>{ieltsGoal?.progressPercent || 38}%</span>
+                    </div>
+                    <div className="w-full bg-[#f1ebd9] rounded-full h-3.5 p-0.5 border border-crayonText">
+                      <div
+                        className="bg-terracotta h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.min(100, ieltsGoal?.progressPercent || 38)}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[11px] text-softMuted pt-1">
+                      <span>Đã đạt {ieltsGoal?.progressPercent || 38}% mục tiêu</span>
+                      <span className="font-bold text-terracotta">
+                        {ieltsGoal?.daysRemaining ? `Còn ${ieltsGoal.daysRemaining} ngày` : 'Chưa chọn ngày thi'}
+                      </span>
+                    </div>
+                  </div>
+
                   <button
                     onClick={handleOpenIELTSModal}
-                    className="mt-2 w-full sm:w-auto bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-xs shadow-md hover:bg-surface-tint transition-all flex items-center justify-center gap-1.5 active:scale-95 touch-manipulation cursor-pointer"
+                    className="mt-4 w-full py-2.5 text-center text-xs font-black rounded-xl bg-cream hover:bg-[#eadecb] text-crayonText crayon-border transition-all cursor-pointer"
                   >
-                    <span className="material-symbols-outlined text-[18px]">add_task</span>
-                    <span>Đặt mục tiêu IELTS ngay</span>
+                    + Tinh chỉnh band điểm mục tiêu
                   </button>
-                </div>
-              )}
-            </section>
-          </div>
+                </section>
+
+                {/* Daily Flashcard Peek (Desktop) */}
+                <section className="bg-[#fef9ef] rounded-3xl p-6 crayon-border relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-black text-warmAmber uppercase tracking-wider flex items-center gap-1.5">
+                      💡 Từ vựng ngẫu nhiên hôm nay
+                    </span>
+                    <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-white border border-gray-300">
+                      {dailyWord.level}
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="flex items-baseline justify-between">
+                      <h4 className="text-xl font-black text-crayonText font-quicksand">{dailyWord.word}</h4>
+                      <button
+                        onClick={() => handlePlayAudio(dailyWord.word)}
+                        className="w-8 h-8 rounded-full bg-white hover:bg-amber-100 crayon-border flex items-center justify-center text-crayonText transition-all cursor-pointer"
+                        title="Nghe phát âm"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">volume_up</span>
+                      </button>
+                    </div>
+                    <p className="text-xs font-bold text-softMuted">
+                      {dailyWord.ipa} • <span className="italic font-normal">{dailyWord.pos}</span>
+                    </p>
+                    <p className="text-sm font-bold text-crayonText pt-1">{dailyWord.meaning}</p>
+                    <div className="p-2.5 rounded-xl bg-white/70 border border-dashed border-amber-300 text-xs italic text-softMuted mt-2">
+                      {dailyWord.example}
+                    </div>
+                  </div>
+                </section>
+              </div>
+            </div>
+          </main>
+
+          {/* Desktop Footer */}
+          <footer className="px-8 py-4 border-t-2 border-[#e6dcce] text-center text-xs text-softMuted bg-[#faf5eb] flex flex-wrap items-center justify-between gap-3">
+            <p>© 2026 HiVocab! - Ứng dụng ghi nhớ từ vựng thông minh cho học sinh Việt Nam.</p>
+            <div className="flex items-center gap-4 font-bold text-crayonText">
+              <a href="/terms.html" className="hover:underline">Điều khoản</a>
+              <a href="/privacy.html" className="hover:underline">Chính sách bảo mật</a>
+              <span className="cursor-default select-none">Học cùng bé Hổ 🐯</span>
+            </div>
+          </footer>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

@@ -254,5 +254,45 @@
   .dark .dock-nav-item.active .dock-icon {
     filter: drop-shadow(0 2px 6px rgba(56, 189, 248, 0.35));
   }
+
+  /* ─── Crayon & Picture Book Cozy Styles (Google Stitch) ─────────────── */
+  .crayon-paper-bg {
+    background-color: #FAF5EB;
+    background-image: radial-gradient(#E8DFC8 1.2px, transparent 1.2px), radial-gradient(#EFE8D6 1.2px, #FAF5EB 1.2px);
+    background-size: 32px 32px;
+    background-position: 0 0, 16px 16px;
+  }
+  .crayon-paper-desktop {
+    background-color: #f7f3eb;
+    background-image: radial-gradient(#dfd5c4 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  .crayon-border {
+    border: 2px solid #3d352e;
+  }
+  .crayon-border-3 {
+    border: 3.5px solid #382E2B;
+  }
+  .crayon-border-dashed {
+    border: 2px dashed #998e7e;
+  }
+  .crayon-bubble {
+    border-radius: 24px 24px 24px 8px;
+  }
+  .shadow-crayon {
+    box-shadow: 0 4px 0 0 #3d352e;
+  }
+  .shadow-crayon-sm {
+    box-shadow: 0 2px 0 0 #3d352e;
+  }
+  .shadow-crayon-orange {
+    box-shadow: 0 4px 0 0 #b85135;
+  }
+  .shadow-crayon-btn {
+    box-shadow: 2px 3px 0px #382E2B;
+  }
+  .crayon-btn:active {
+    transform: scale(0.97);
+  }
 }
 

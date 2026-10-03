@@ -17,13 +17,50 @@ export default {
         'mono': ['SF Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
         'inter': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
         'hanken': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
+        'nunito': ['"Nunito"', 'sans-serif'],
+        'quicksand': ['"Quicksand"', 'sans-serif'],
+        'mali': ['"Mali"', 'cursive', 'sans-serif'],
+        'patrick': ['"Patrick Hand"', 'cursive', 'sans-serif'],
         'label-sm': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'sans-serif'],
         'body-lg': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'sans-serif'],
         'body-md': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'sans-serif'],
         'headline-md': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'sans-serif'],
         'headline-lg': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'sans-serif']
       },
+      boxShadow: {
+        crayon: '0 4px 0 0 #3d352e',
+        crayonSm: '0 2px 0 0 #3d352e',
+        crayonOrange: '0 4px 0 0 #b85135',
+        crayonBtn: '2px 3px 0px #382E2B',
+      },
       colors: {
+        // Crayon Cozy Study Room Palette (Google Stitch)
+        paper: '#FAF5EB',
+        cream: '#f4ede2',
+        crayonText: '#3d352e',
+        'crayon-dark': '#382E2B',
+        'crayon-orange': '#F0783C',
+        'crayon-amber': '#ECA43B',
+        'crayon-sage': '#7B9B69',
+        'crayon-blue': '#4CA9D6',
+        'crayon-purple': '#A682BD',
+        'crayon-red': '#DE5D53',
+        'crayon-badge': '#E5EFE2',
+        softMuted: '#7c7365',
+        sage: {
+          DEFAULT: '#5d8063',
+          light: '#e9efe9',
+          dark: '#47634c'
+        },
+        terracotta: {
+          DEFAULT: '#d96c4d',
+          light: '#fcebe6',
+          dark: '#b85135'
+        },
+        warmAmber: '#f3a638',
+        softPurple: '#9d8ec1',
+        softBlue: '#5e9ad6',
+
         // Canvas & Surfaces (Apple pure palette)
         background: '#FFFFFF',
         surface: '#FFFFFF',
