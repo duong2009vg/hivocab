@@ -2,6 +2,24 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 
+// LOẠI BỎ HOÀN TOÀN DARK MODE TRÊN TOÀN BỘ ỨNG DỤNG
+if (typeof document !== 'undefined') {
+  document.documentElement.classList.remove('dark');
+  document.documentElement.style.colorScheme = 'light';
+  try {
+    localStorage.removeItem('theme');
+    localStorage.removeItem('dark-mode');
+  } catch (_) {}
+
+  // Chặn mọi tác động add lại class 'dark' (kể cả từ extension hay script ngoài)
+  const darkObserver = new MutationObserver(() => {
+    if (document.documentElement.classList.contains('dark')) {
+      document.documentElement.classList.remove('dark');
+    }
+  });
+  darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+}
+
 // Tự động tải lại trang khi có bản build mới làm lỗi dynamic import chunk (Vite standard)
 if (typeof window !== 'undefined') {
   window.addEventListener('vite:preloadError', (event) => {

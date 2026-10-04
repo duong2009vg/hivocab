@@ -5,7 +5,8 @@
 <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
 <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
 <meta name="referrer" content="strict-origin-when-cross-origin"/>
-<meta name="theme-color" content="#0f172a"/>
+<meta name="theme-color" content="#FAF5EB"/>
+<meta name="color-scheme" content="light"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-title" content="Hi Vocabulary"/>
@@ -46,15 +47,18 @@
 <script>
 (function() {
     try {
+        // LOẠI BỎ HOÀN TOÀN LUỒNG DARK MODE: Xóa class dark và dọn dẹp localStorage
+        document.documentElement.classList.remove('dark');
+        try {
+            localStorage.removeItem('theme');
+            localStorage.removeItem('dark-mode');
+        } catch (_) {}
+
         var h = new Date().getHours();
         var autoTheme = (h >= 0 && h < 4) ? 'ocean' : (h >= 4 && h < 12) ? 'morning' : (h >= 12 && h < 18) ? 'afternoon' : 'night';
         var saved = localStorage.getItem('colour-theme');
         var theme = (saved && ['ocean', 'morning', 'afternoon', 'night'].indexOf(saved) !== -1) ? saved : autoTheme;
         document.documentElement.setAttribute('data-theme', theme);
-        var dark = localStorage.getItem('theme');
-        if (dark === 'dark' || (!dark && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
 
         // KIỂM TRA PHIÊN ĐĂNG NHẬP NHANH TỪ LOCALSTORAGE ĐỂ CHUYỂN THẲNG VÀO APP
         var hasAuth = false;

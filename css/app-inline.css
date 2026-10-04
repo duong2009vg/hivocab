@@ -1,4 +1,4 @@
-﻿@font-face {
+@font-face {
   font-family: 'Material Symbols Outlined';
   font-style: normal;
   font-weight: 100 700;
@@ -79,19 +79,6 @@ body:has(#page-landing.active) .mobile-floating-dock {
     z-index: 1;
 }
 
-html.dark .mobile-floating-dock {
-    background: rgba(22, 24, 30, 0.82) !important;
-    border: 1px solid rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.55) !important;
-}
-
-html.dark .mobile-floating-dock::after {
-    box-shadow:
-        inset 1.5px 1.5px 3px -1px rgba(255, 255, 255, 0.25),
-        inset -1.5px -1.5px 3px 1px rgba(0, 0, 0, 0.5),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.08);
-}
-
 .dock-nav-item {
     position: relative;
     z-index: 2;
@@ -143,13 +130,6 @@ html.dark .mobile-floating-dock::after {
     font-weight: 700 !important;
 }
 
-html.dark .dock-nav-item.active {
-    background: rgba(255, 255, 255, 0.14) !important;
-    box-shadow: inset 1.5px 1.5px 3px -1px rgba(255, 255, 255, 0.3), inset -1.5px -1px 3px 0 rgba(255, 255, 255, 0.15) !important;
-    color: var(--hi-p, #38BDF8) !important;
-    font-weight: 700 !important;
-}
-
 .dock-nav-item.active .dock-icon {
     transform: translateY(-1px) scale(1.08) !important;
 }
@@ -195,10 +175,6 @@ html.dark .dock-nav-item.active {
   overflow: hidden;
   line-height: 1.4;
 }
-html.dark .btn-wrapper .btn {
-  background: #13161a;
-  color: #f1f5f9;
-}
 .btn-wrapper .btn-svg {
   width: 16px;
   height: 16px;
@@ -207,9 +183,6 @@ html.dark .btn-wrapper .btn {
   stroke: #a855f7;
   stroke-width: 2;
   transition: transform 0.3s ease, filter 0.3s ease;
-}
-html.dark .btn-wrapper .btn-svg {
-  stroke: #c084fc;
 }
 .btn-wrapper .txt-wrapper {
   position: relative;
@@ -243,9 +216,6 @@ html.dark .btn-wrapper .btn-svg {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
   pointer-events: none;
   color: #9333ea;
-}
-html.dark .btn-wrapper .txt-2 {
-  color: #c084fc;
 }
 .btn-wrapper .btn-letter {
   display: inline-block;
@@ -571,31 +541,6 @@ u.thpt-underlined-sentence {
 .brand-logo-sm { display:block; width:auto; height:24px; }
 .brand-logo-hero { display:block; width:auto; height:32px; }
 
-/* TÙY CHỈNH DARK MODE TOÀN CẦU THEO CHUẨN APPLE SPACE GRAY & DEEP BLACK */
-html.dark body { background-color: #0A0F15; color: #F6FBFF; }
-html.dark .bg-surface { background-color: #0A0F15; }
-html.dark .bg-surface\/80, html.dark .bg-surface\/90 { background-color: rgba(25, 29, 35, 0.85); border-color: #31353A; }
-html.dark .glass-card { background-color: rgba(25, 29, 35, 0.75); border-color: rgba(255, 255, 255, 0.08); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); }
-html.dark .bg-surface-container-lowest,
-html.dark .bg-surface-container-lowest\/40,
-html.dark .bg-surface-container-lowest\/50,
-html.dark .bg-surface-container-lowest\/60,
-html.dark .bg-surface-container-lowest\/80,
-html.dark .bg-surface-container-lowest\/85,
-html.dark .bg-surface-container-lowest\/90,
-html.dark .bg-white {
-    background-color: #191D23;
-}
-html.dark .bg-surface-container-low, html.dark .bg-\[\#F5F5F5\] { background-color: #20242B; }
-html.dark .bg-surface-container, html.dark .bg-surface-container-high { background-color: #25292F; }
-html.dark .text-on-surface, html.dark .text-gray-900 { color: #F6FBFF; }
-html.dark .text-on-surface-variant, html.dark .text-gray-600 { color: #9CA1A6; }
-html.dark .border-outline-variant\/20, html.dark .border-outline-variant\/30, html.dark .border-outline-variant\/40 { border-color: #31353A; }
-html.dark .text-outline { color: #86868B; }
-html.dark .bg-surface-container-highest {
-    background-color: #31353A !important;
-}
-html.dark input.fill-input, html.dark input { background-color: #191D23; color: #F6FBFF; border-color: #31353A; }
 .fill-input {
     width: clamp(1.45rem, calc((100vw - 3.5rem) / var(--fill-max-word-len, 10)), 2rem) !important;
     height: 2.5rem !important;
@@ -607,31 +552,6 @@ html.dark input.fill-input, html.dark input { background-color: #191D23; color: 
         height: 3.5rem !important;
         font-size: 1.5rem !important;
     }
-}
-html.dark .bg-primary-container\/10 { background-color: rgba(41, 151, 255, 0.15); }
-html.dark .hover\:bg-surface-container-low:hover { background-color: #25292F; }
-html.dark .hover\:bg-primary-container\/10:hover { background-color: rgba(41, 151, 255, 0.12); }
-html.dark .topic-card-surface,
-html.dark .folder-card-surface {
-    background-color: #191D23 !important;
-    border-color: #31353A !important;
-}
-html.dark .topic-card-surface:hover,
-html.dark .folder-card-surface:hover {
-    background-color: #25292F !important;
-    border-color: var(--hi-p, #2997FF) !important;
-}
-html.dark .topic-card-surface .bg-surface-container-high,
-html.dark .folder-card-surface .bg-surface-container-high {
-    background-color: #25292F !important;
-}
-html.dark .topic-card-surface .text-on-surface-variant,
-html.dark .folder-card-surface .text-on-surface-variant {
-    color: #9CA1A6 !important;
-}
-html.dark .topic-card-surface .bg-surface-container-highest,
-html.dark .folder-card-surface .bg-surface-container-highest {
-    background-color: #31353A !important;
 }
 /* ── MOBILE TOUCH & PERFORMANCE OPTIMIZATIONS ──────────── */
 button, a, input, select, textarea, [role="button"], .cursor-pointer {
@@ -793,11 +713,6 @@ button, a, input, select, textarea, [role="button"], .cursor-pointer {
     border: 1px solid rgba(112, 120, 129, 0.22);
 }
 
-html.dark .flashcard-front {
-    background: rgba(30, 41, 59, 0.94);
-    border-color: rgba(255, 255, 255, 0.12);
-}
-
 .flashcard-front::after {
     content: '';
     position: absolute;
@@ -818,11 +733,6 @@ html.dark .flashcard-front {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     border: 1.5px solid rgba(0, 97, 146, 0.3);
-}
-
-html.dark .flashcard-back {
-    background: linear-gradient(155deg, #1e293b 0%, #172554 50%, #0c4a6e 100%);
-    border-color: rgba(56, 189, 248, 0.3);
 }
 
 /* Light reflection sheen */
@@ -873,23 +783,8 @@ html.dark .flashcard-back {
 .hover\:bg-primary-container\/10:hover { background-color: var(--hi-p-10) !important; }
 .hover\:bg-surface-tint:hover          { background-color: var(--hi-p-tint) !important; }
 .bg-surface-tint                       { background-color: var(--hi-p-tint) !important; }
-.bg-primary-fixed\/20                  { background-color: var(--hi-p-20) !important; }
+.bg-primary-fixed\/20                 { background-color: var(--hi-p-20) !important; }
 #learn-progress, #ex-progress-bar      { background-color: var(--hi-p) !important; }
-
-html.dark .bg-primary                  { background-color: var(--hi-p) !important; }
-html.dark .text-primary                { color: var(--hi-p) !important; }
-html.dark .border-primary              { border-color: var(--hi-p) !important; }
-html.dark .focus\:border-primary:focus { border-color: var(--hi-p) !important; }
-html.dark .hover\:text-primary:hover   { color: var(--hi-p-hover, var(--hi-p)) !important; }
-html.dark .text-on-primary             { color: var(--hi-text-on-p, #000000) !important; }
-html.dark .bg-primary\/10              { background-color: var(--hi-p-10) !important; }
-html.dark .bg-primary\/5               { background-color: var(--hi-p-10) !important; }
-html.dark .bg-primary\/8               { background-color: var(--hi-p-10) !important; }
-html.dark .hover\:bg-primary\/10:hover { background-color: var(--hi-p-20, var(--hi-p-10)) !important; }
-html.dark .bg-primary-container\/10   { background-color: var(--hi-p-10) !important; }
-html.dark .bg-primary-container        { background-color: var(--hi-p-fix) !important; }
-html.dark .hover\:bg-primary-container\/10:hover { background-color: var(--hi-p-10) !important; }
-html.dark #learn-progress, html.dark #ex-progress-bar { background-color: var(--hi-p) !important; }
 
 /* KHI ĐÃ ĐĂNG NHẬP: Ẩn landing page và hiện thẳng app học từ frame đầu tiên (chỉ trước khi Router sẵn sàng) */
 html.user-logged-in:not(.router-ready) #page-landing { display: none !important; }

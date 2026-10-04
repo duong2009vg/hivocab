@@ -3,6 +3,10 @@
    Traditional Aesthetics: Blue Hour, Asagiri, Yuugiri, Sumiyama
    ========================================================================== */
 
+:root {
+  color-scheme: light;
+}
+
 /* ── 1. GRADIENT BACKDROPS & NOISE OVERLAYS ── */
 
 /* Ocean / Blue Hour (00:00 - 03:00) */
@@ -91,7 +95,7 @@
 /* ── 2. COLOR THEME VARIABLES ── */
 
 /* 1. Ocean / Blue Hour (00:00 - 03:00) */
-html[data-theme="ocean"]:not(.dark) {
+html[data-theme="ocean"] {
   --hi-bg: #EEF4FA;
   --hi-surface: #FFFFFF;
   --hi-surface-container: #DDEAF5;
@@ -109,27 +113,10 @@ html[data-theme="ocean"]:not(.dark) {
   --hi-text-on-p: #FFFFFF;
 }
 
-html.dark[data-theme="ocean"] {
-  --hi-bg: #000000;
-  --hi-surface: #121214;
-  --hi-surface-container: #18181B;
-  --hi-surface-container-low: #0A0A0A;
-  --hi-surface-container-high: #222226;
-  --hi-border: rgba(56, 189, 248, 0.28);
-  --hi-p: #38BDF8;
-  --hi-p-hover: #7DD3FC;
-  --hi-p-tint: #0284C7;
-  --hi-p-fix: rgba(56, 189, 248, 0.15);
-  --hi-p-10: rgba(56, 189, 248, 0.12);
-  --hi-p-20: rgba(56, 189, 248, 0.22);
-  --hi-text: #F0F9FF;
-  --hi-text-muted: #94A3B8;
-  --hi-text-on-p: #000000;
-}
-
 /* 2. Morning Mist (Asagiri - 04:00 - 11:59) */
 :root,
-html[data-theme="morning"]:not(.dark) {
+html[data-theme="morning"],
+html:not([data-theme]) {
   --hi-bg: #FAF5ED;
   --hi-surface: #FFFFFF;
   --hi-surface-container: #F3EAE0;
@@ -147,27 +134,8 @@ html[data-theme="morning"]:not(.dark) {
   --hi-text-on-p: #FFFFFF;
 }
 
-html.dark[data-theme="morning"],
-html.dark:not([data-theme]) {
-  --hi-bg: #000000;
-  --hi-surface: #121214;
-  --hi-surface-container: #18181B;
-  --hi-surface-container-low: #0A0A0A;
-  --hi-surface-container-high: #222226;
-  --hi-border: rgba(192, 132, 252, 0.28);
-  --hi-p: #C084FC;
-  --hi-p-hover: #D8B4FE;
-  --hi-p-tint: #A855F7;
-  --hi-p-fix: rgba(192, 132, 252, 0.15);
-  --hi-p-10: rgba(192, 132, 252, 0.12);
-  --hi-p-20: rgba(192, 132, 252, 0.22);
-  --hi-text: #FDF8F0;
-  --hi-text-muted: #A19BAA;
-  --hi-text-on-p: #000000;
-}
-
 /* 3. Afternoon / Dusk Ember (Yuugiri - 12:00 - 17:59) */
-html[data-theme="afternoon"]:not(.dark) {
+html[data-theme="afternoon"] {
   --hi-bg: #FAF1E5;
   --hi-surface: #FFFFFF;
   --hi-surface-container: #F6E2D0;
@@ -185,26 +153,8 @@ html[data-theme="afternoon"]:not(.dark) {
   --hi-text-on-p: #FFFFFF;
 }
 
-html.dark[data-theme="afternoon"] {
-  --hi-bg: #000000;
-  --hi-surface: #121214;
-  --hi-surface-container: #18181B;
-  --hi-surface-container-low: #0A0A0A;
-  --hi-surface-container-high: #222226;
-  --hi-border: rgba(251, 146, 60, 0.28);
-  --hi-p: #FB923C;
-  --hi-p-hover: #FDBA74;
-  --hi-p-tint: #EA580C;
-  --hi-p-fix: rgba(251, 146, 60, 0.15);
-  --hi-p-10: rgba(251, 146, 60, 0.12);
-  --hi-p-20: rgba(251, 146, 60, 0.22);
-  --hi-text: #FFF5EB;
-  --hi-text-muted: #A89C94;
-  --hi-text-on-p: #000000;
-}
-
 /* 4. Night / Ink Wash (Sumiyama - 18:00 - 23:59) */
-html[data-theme="night"]:not(.dark) {
+html[data-theme="night"] {
   --hi-bg: #F5F3EB;
   --hi-surface: #FFFFFF;
   --hi-surface-container: #EAE5D9;
@@ -220,24 +170,6 @@ html[data-theme="night"]:not(.dark) {
   --hi-text: #1E1B17;
   --hi-text-muted: #645F54;
   --hi-text-on-p: #FFFFFF;
-}
-
-html.dark[data-theme="night"] {
-  --hi-bg: #000000;
-  --hi-surface: #121214;
-  --hi-surface-container: #18181B;
-  --hi-surface-container-low: #0A0A0A;
-  --hi-surface-container-high: #222226;
-  --hi-border: rgba(45, 212, 191, 0.28);
-  --hi-p: #2DD4BF;
-  --hi-p-hover: #5EEAD4;
-  --hi-p-tint: #14B8A6;
-  --hi-p-fix: rgba(45, 212, 191, 0.15);
-  --hi-p-10: rgba(45, 212, 191, 0.12);
-  --hi-p-20: rgba(45, 212, 191, 0.22);
-  --hi-text: #F8FAFC;
-  --hi-text-muted: #94A3B8;
-  --hi-text-on-p: #000000;
 }
 
 
@@ -396,7 +328,7 @@ body, .bg-primary, .text-primary, .bg-surface, .bg-background {
   max-width: 420px !important;
   height: 54px !important;
   border-radius: 9999px !important;
-  display: flex;
+  display: flex !important;
   align-items: center !important;
   justify-content: space-around !important;
   padding: 4px 6px !important;
@@ -414,31 +346,6 @@ body, .bg-primary, .text-primary, .bg-surface, .bg-background {
     inset 1px 1px 2px rgba(255, 255, 255, 0.65),
     inset -1px -1px 2px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@media (min-width: 1024px) {
-  .mobile-floating-dock,
-  #mobile-bottom-nav {
-    display: none !important;
-  }
-}
-
-.mobile-floating-dock.hidden,
-#mobile-bottom-nav.hidden,
-body:has(#page-landing.active) #mobile-bottom-nav,
-body:has(#page-landing.active) .mobile-floating-dock {
-  display: none !important;
-}
-
-/* Dark mode adjustment */
-html.dark .mobile-floating-dock {
-  background: color-mix(in srgb, var(--hi-surface) 85%, transparent);
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 
-    0 16px 36px -4px rgba(0, 0, 0, 0.55),
-    0 6px 16px -2px rgba(0, 0, 0, 0.35),
-    inset 1px 1px 2px rgba(255, 255, 255, 0.15),
-    inset -1px -1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Tab Item */
