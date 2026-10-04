@@ -62,7 +62,8 @@ export async function onRequestOptions() {
 export async function onRequestPost(context) {
     const { request, env } = context;
 
-    const clientIp = request.headers.get('cf-connecting-ip') ||
+    try {
+        const clientIp = request.headers.get('cf-connecting-ip') ||
                      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
                      'unknown-ip';
 
