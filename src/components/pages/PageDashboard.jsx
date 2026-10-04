@@ -3,6 +3,7 @@ import { useDashboardStats } from '../../hooks/useDashboardStats.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { getWordsDueForReview } from '../../services/db.js';
+import { IeltsGoalModal, getIeltsVocabStandard } from '../modals/IeltsGoalModal.jsx';
 
 export function PageDashboard() {
   const { navigateTo } = useRoute();
@@ -17,9 +18,11 @@ export function PageDashboard() {
     prevMonth,
     nextMonth,
     showDayDetail,
+    refresh,
   } = useDashboardStats();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [isIeltsModalOpen, setIsIeltsModalOpen] = useState(false);
 
   // Random word of the day
   const dailyWord = {
@@ -97,12 +100,15 @@ export function PageDashboard() {
   };
 
   const handleOpenIELTSModal = () => {
-    if (typeof window !== 'undefined' && window.HiDashboard && typeof window.HiDashboard.openIELTSGoalModal === 'function') {
-      window.HiDashboard.openIELTSGoalModal();
-    } else if (typeof window !== 'undefined' && typeof window.openIELTSGoalModal === 'function') {
-      window.openIELTSGoalModal();
-    }
+    setIsIeltsModalOpen(true);
   };
+
+  useEffect(() => {
+    window.openIELTSGoalModal = handleOpenIELTSModal;
+    return () => {
+      delete window.openIELTSGoalModal;
+    };
+  }, []);
 
   const handleOpenAddWord = () => {
     if (typeof window !== 'undefined' && typeof window.openAddWordModal === 'function') {
@@ -129,7 +135,12 @@ export function PageDashboard() {
       ? '/mascot/mascot_cozy.png'
       : '/mascot/mascot_waving.png';
 
-  const ieltsPercent = Math.min(100, ieltsGoal?.progressPercent || 38);
+  // Chuẩn từ vựng cốt lõi theo Band IELTS
+  const currentBand = ieltsGoal?.overall || '7.0';
+  const vocabStandard = getIeltsVocabStandard(currentBand);
+  const targetWords = vocabStandard.target;
+  const currentWordsLearned = stats.totalWordsCount || stats.totalWordsLearned || total || 0;
+  const ieltsPercent = Math.min(100, Math.round((currentWordsLearned / targetWords) * 100));
 
   return (
     <div id="page-dashboard" className="page active min-h-screen text-[#3d352e] font-nunito antialiased bg-[#f7f3eb]" style={{ backgroundImage: 'radial-gradient(#dfd5c4 1px, transparent 1px)', backgroundSize: '20px 20px' }}>
@@ -328,16 +339,39 @@ export function PageDashboard() {
           </section>
 
           {/* IELTS Goal Card */}
-          <section className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-6 text-center">
+          <section 
+            onClick={handleOpenIELTSModal}
+            className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-6 text-center cursor-pointer active:scale-[0.99] transition-transform"
+          >
             <div className="w-11 h-11 mx-auto rounded-2xl bg-[#FDF0EE] border-2 border-[#382E2B] flex items-center justify-center text-xl mb-2 shadow-sm">🚩</div>
             <h3 className="text-base font-bold text-[#382E2B]">
-              {ieltsGoal?.targetOverall ? `Mục tiêu IELTS ${ieltsGoal.targetOverall}` : 'Bạn chưa đặt mục tiêu IELTS'}
+              Mục tiêu IELTS {ieltsGoal?.overall || '7.0'}
             </h3>
             <p className="text-xs text-[#6B5A4E] mt-1 max-w-xs mx-auto leading-relaxed">
-              Thiết lập band điểm 4 kỹ năng và chọn ngày thi để đồng hồ đếm ngược tạo động lực học tập mỗi ngày.
+              {vocabStandard.description}
             </p>
-            <button onClick={handleOpenIELTSModal} className="mt-3.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#382E2B] py-2 px-4 rounded-2xl text-xs font-bold border-2 border-[#382E2B] inline-flex items-center space-x-1.5 shadow-sm">
-              <span>🎯 Thiết lập mục tiêu ngay</span>
+            {/* Tiến độ từ vựng cốt lõi */}
+            <div className="mt-3 px-1 space-y-1.5 text-left">
+              <div className="flex justify-between text-xs font-bold text-[#382E2B]">
+                <span>Từ vựng cốt lõi</span>
+                <span className="text-[#DE5D53] font-black">{ieltsPercent}%</span>
+              </div>
+              <div className="w-full bg-[#f1ebd9] rounded-full h-3 p-0.5 border border-[#382E2B]">
+                <div className="bg-[#DE5D53] h-full rounded-full transition-all duration-500" style={{ width: `${ieltsPercent}%` }}></div>
+              </div>
+              <div className="flex justify-between text-[11px] text-[#7C6C62] font-semibold">
+                <span>{currentWordsLearned} / ~{targetWords.toLocaleString()} từ</span>
+                <span className="text-[#DE5D53] font-bold">
+                  {ieltsGoal?.daysLeft > 0 ? `Còn ${ieltsGoal.daysLeft} ngày` : (ieltsGoal?.examDateText ? `Ngày thi: ${ieltsGoal.examDateText}` : 'Chưa chọn ngày thi')}
+                </span>
+              </div>
+            </div>
+            <button 
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleOpenIELTSModal(); }}
+              className="mt-3.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#382E2B] py-2 px-4 rounded-2xl text-xs font-bold border-2 border-[#382E2B] inline-flex items-center space-x-1.5 shadow-sm cursor-pointer"
+            >
+              <span>🎯 Tinh chỉnh band điểm mục tiêu</span>
             </button>
           </section>
 
@@ -553,30 +587,44 @@ export function PageDashboard() {
                   </div>
                 </section>
 
-                <section className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden">
+                <section 
+                  onClick={handleOpenIELTSModal}
+                  className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden cursor-pointer hover:shadow-crayon transition-all group"
+                >
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="text-[11px] font-black uppercase text-terracotta tracking-wider">Lộ trình rèn luyện</span>
-                      <h3 className="text-lg font-black text-crayonText font-quicksand mt-0.5">{ieltsGoal?.targetOverall ? `Mục tiêu IELTS ${ieltsGoal.targetOverall}` : 'Mục tiêu IELTS 7.0'}</h3>
+                      <h3 className="text-lg font-black text-crayonText font-quicksand mt-0.5">
+                        Mục tiêu IELTS {ieltsGoal?.overall || '7.0'}
+                      </h3>
+                      <p className="text-[11px] text-softMuted mt-0.5 font-medium">
+                        {vocabStandard.description}
+                      </p>
                     </div>
-                    <div className="w-10 h-10 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center text-lg crayon-border">
+                    <div className="w-10 h-10 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center text-lg crayon-border group-hover:scale-105 transition-transform shrink-0">
                       <i className="fa-solid fa-flag"></i>
                     </div>
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between text-xs font-bold text-crayonText">
                       <span>Tiến độ từ vựng cốt lõi</span>
-                      <span>{ieltsPercent}%</span>
+                      <span className="font-black text-terracotta">{ieltsPercent}%</span>
                     </div>
                     <div className="w-full bg-[#f1ebd9] rounded-full h-3.5 p-0.5 border border-crayonText">
-                      <div className="bg-terracotta h-2 rounded-full" style={{width: `${ieltsPercent}%`}}></div>
+                      <div className="bg-terracotta h-2 rounded-full transition-all duration-500" style={{width: `${ieltsPercent}%`}}></div>
                     </div>
                     <div className="flex items-center justify-between text-[11px] text-softMuted pt-1">
-                      <span>Đã đạt {ieltsPercent}% mục tiêu</span>
-                      <span className="font-bold text-terracotta">{ieltsGoal?.daysRemaining ? `Còn ${ieltsGoal.daysRemaining} ngày` : 'Chưa chọn ngày thi'}</span>
+                      <span>Đã đạt <strong>{currentWordsLearned}</strong> / ~{targetWords.toLocaleString()} từ ({ieltsPercent}%)</span>
+                      <span className="font-bold text-terracotta">
+                        {ieltsGoal?.daysLeft > 0 ? `Còn ${ieltsGoal.daysLeft} ngày` : (ieltsGoal?.examDateText ? `Ngày thi: ${ieltsGoal.examDateText}` : 'Chưa chọn ngày thi')}
+                      </span>
                     </div>
                   </div>
-                  <button onClick={handleOpenIELTSModal} className="mt-4 w-full py-2.5 text-center text-xs font-black rounded-xl bg-cream hover:bg-[#eadecb] text-crayonText crayon-border transition-all">
+                  <button 
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleOpenIELTSModal(); }}
+                    className="mt-4 w-full py-2.5 text-center text-xs font-black rounded-xl bg-cream hover:bg-[#eadecb] text-crayonText crayon-border transition-all cursor-pointer"
+                  >
                     + Tinh chỉnh band điểm mục tiêu
                   </button>
                 </section>
@@ -616,6 +664,18 @@ export function PageDashboard() {
           </footer>
         </div>
       </div>
+      {/* Pop-up Lộ trình rèn luyện IELTS */}
+      <IeltsGoalModal
+        isOpen={isIeltsModalOpen}
+        onClose={() => setIsIeltsModalOpen(false)}
+        currentGoal={ieltsGoal}
+        currentWords={currentWordsLearned}
+        onSaveSuccess={() => {
+          if (typeof refresh === 'function') {
+            refresh();
+          }
+        }}
+      />
     </div>
   );
 }

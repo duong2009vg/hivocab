@@ -110,17 +110,22 @@ export function useDashboardStats() {
     try {
       const goal = await apiGetIELTSGoal();
 
-      if (goal && goal.examDate) {
-        const examDateObj = new Date(goal.examDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        examDateObj.setHours(0, 0, 0, 0);
+      if (goal) {
+        let days = 0;
+        let dateFormatted = '';
 
-        const diffTime = examDateObj - today;
-        const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (goal.examDate) {
+          const examDateObj = new Date(goal.examDate);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          examDateObj.setHours(0, 0, 0, 0);
 
-        const [y, m, d] = goal.examDate.split('-');
-        const dateFormatted = d && m && y ? `${d}/${m}/${y}` : goal.examDate;
+          const diffTime = examDateObj - today;
+          days = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+          const [y, m, d] = goal.examDate.split('-');
+          dateFormatted = d && m && y ? `${d}/${m}/${y}` : goal.examDate;
+        }
 
         setIeltsGoal({
           isSet: true,
@@ -129,7 +134,8 @@ export function useDashboardStats() {
           reading: goal.reading || '7.0',
           writing: goal.writing || '6.5',
           speaking: goal.speaking || '6.5',
-          daysLeft: Math.max(0, days),
+          examDate: goal.examDate || '',
+          daysLeft: days,
           examDateText: dateFormatted,
           motto: goal.motto || '“Học tập kiên trì, tự tin chinh phục mục tiêu IELTS!”',
         });

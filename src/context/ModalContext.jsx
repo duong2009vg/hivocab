@@ -14,6 +14,7 @@ export function ModalProvider({ children }) {
     srsExplainer:   { open: false },
     forgotPassword: { open: false },
     authError:      { open: false, desc: '' },
+    ieltsGoal:      { open: false },
   });
 
   const openModal = useCallback((modalName, data = {}) => {
@@ -43,6 +44,8 @@ export function ModalProvider({ children }) {
     window.closeVocabBulkAddModal = () => closeModal('bulkAdd');
     window.openForgotPasswordModal = () => openModal('forgotPassword');
     window.openAuthErrorModal = (desc) => openModal('authError', { desc });
+    window.openIELTSGoalModal = () => openModal('ieltsGoal');
+    window.closeIELTSGoalModal = () => closeModal('ieltsGoal');
 
     return () => {
       delete window.__modalContext;
