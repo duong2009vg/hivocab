@@ -105,16 +105,18 @@ export function MainSidebar({ wordCount, streak }) {
     >
       {/* Top Section: Brand & Nav Links */}
       <div className="space-y-6">
-        {/* Logo HiVocab */}
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-12 h-12 bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl font-bold">
-            📖
-          </div>
-          <div>
-            <h1 className="text-2xl font-heading font-bold text-[#302A24] tracking-tight">HiVocab!</h1>
-            <span className="inline-block px-2 py-0.5 text-xs font-semibold text-[#4D6B53] bg-[#E3EDE2] rounded-md border border-[#4D6B53]/40">
-              BÀN HỌC TẬP
-            </span>
+        {/* Brand Logo - HI Crayon Cream Paper */}
+        <div
+          onClick={() => navigateTo('dashboard')}
+          className="px-2 cursor-pointer group select-none flex items-center"
+          title="Trang chủ HiVocab"
+        >
+          <div className="w-16 h-16 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] overflow-hidden bg-[#F7F0DE] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
+            <img
+              src="/logo-hi-cream.png"
+              alt="Logo HiVocab"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
 
