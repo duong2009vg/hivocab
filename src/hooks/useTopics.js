@@ -30,6 +30,16 @@ export function getCategoryIcon(category) {
   return 'folder';
 }
 
+function getDeletedFolders() {
+  if (typeof window === 'undefined') return [];
+  try {
+    const list = JSON.parse(localStorage.getItem('hivocab_deleted_folders') || '[]');
+    return Array.isArray(list) ? list.map(s => String(s).toLowerCase()) : [];
+  } catch {
+    return [];
+  }
+}
+
 function getSavedUserFolders() {
   if (typeof window === 'undefined') return [];
   try {
@@ -105,12 +115,14 @@ export function useTopics() {
 
   // Build categories list
   const categories = useMemo(() => {
+    const deletedFolders = getDeletedFolders();
     const seen = new Set();
     const result = [{ id: 'all', label: 'Tất cả', icon: 'apps' }];
 
     topics.forEach(topic => {
       const val = String(topic.category || 'general').trim() || 'general';
       const key = val.toLowerCase();
+      if (deletedFolders.includes(key)) return;
       if (!seen.has(key)) {
         seen.add(key);
         result.push({ id: val, label: val, icon: getCategoryIcon(val) });
@@ -120,6 +132,7 @@ export function useTopics() {
     getSavedUserFolders().forEach(f => {
       if (!f?.name) return;
       const key = f.name.trim().toLowerCase();
+      if (deletedFolders.includes(key)) return;
       if (!seen.has(key)) {
         seen.add(key);
         result.push({ id: f.name, label: f.name, icon: f.isExam ? 'menu_book' : 'folder' });
@@ -217,6 +230,75 @@ export function useTopics() {
     }
   }, []);
 
+  const handleDeleteFolder = useCallback(async (folderId, folderName) => {
+    const name = folderName || folderId;
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa thư mục "${name}" không?\nTất cả các chủ đề bên trong thư mục này cũng sẽ bị xóa.`)) {
+      return;
+    }
+
+    try {
+      const folderKey = String(folderId || '').trim().toLowerCase();
+
+      // 1. Remove from saved user folders in localStorage
+      let savedFolders = [];
+      try {
+        savedFolders = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+      } catch (_) {}
+      savedFolders = savedFolders.filter(
+        f => (f?.name || '').trim().toLowerCase() !== folderKey
+      );
+      localStorage.setItem('hivocab_user_folders', JSON.stringify(savedFolders));
+
+      // 2. Mark as deleted in localStorage so it does not reappear
+      try {
+        let deletedFolders = JSON.parse(localStorage.getItem('hivocab_deleted_folders') || '[]');
+        if (!Array.isArray(deletedFolders)) deletedFolders = [];
+        if (!deletedFolders.includes(folderKey)) {
+          deletedFolders.push(folderKey);
+          localStorage.setItem('hivocab_deleted_folders', JSON.stringify(deletedFolders));
+        }
+      } catch (_) {}
+
+      // 3. Find and delete all topics belonging to this category/folder
+      const topicsInFolder = topics.filter(
+        t => String(t.category || '').trim().toLowerCase() === folderKey
+      );
+
+      for (const t of topicsInFolder) {
+        try {
+          await apiDeleteTopic(t.id);
+        } catch (err) {
+          console.warn(`[handleDeleteFolder] Could not delete topic ${t.id}:`, err);
+        }
+      }
+
+      // 4. Update local state
+      const nextTopics = topics.filter(
+        t => String(t.category || '').trim().toLowerCase() !== folderKey
+      );
+      setTopics(nextTopics);
+      if (typeof window !== 'undefined') {
+        window._allTopics = nextTopics;
+      }
+
+      // 5. If currently inside this folder, go back to 'all'
+      if (activeCategory.toLowerCase() === folderKey) {
+        setActiveCategory('all');
+      }
+
+      // 6. Trigger update & toast
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: nextTopics }));
+        if (typeof window.showHiToast === 'function') {
+          window.showHiToast(`Đã xóa thư mục "${name}" thành công!`, 'success');
+        }
+      }
+    } catch (err) {
+      console.error('[useTopics] Error deleting folder:', err);
+      alert('Không thể xóa thư mục: ' + (err?.message || err));
+    }
+  }, [topics, activeCategory]);
+
   return {
     topics,
     loading,
@@ -231,6 +313,7 @@ export function useTopics() {
     setSearchQuery,
     openTopic,
     handleDeleteTopic,
+    handleDeleteFolder,
     refresh: () => fetchTopics(true),
   };
 }

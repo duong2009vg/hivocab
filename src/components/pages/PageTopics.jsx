@@ -74,6 +74,7 @@ export function PageTopics() {
     setSearchQuery,
     openTopic,
     handleDeleteTopic,
+    handleDeleteFolder,
   } = useTopics();
 
   const { openModal } = useModal();
@@ -195,9 +196,24 @@ export function PageTopics() {
                         <div className="w-9 h-9 rounded-full bg-[#f4ede6] border border-[#3d352e] flex items-center justify-center text-lg">
                           {emoji}
                         </div>
-                        <span className="px-2 py-0.5 rounded-full bg-[#eee7e1] text-[#1e1b17] text-[10px] font-bold border border-[#3d352e]/40">
-                          {folder.count} chủ đề
-                        </span>
+                        <div className="flex items-center gap-1">
+                          <span className="px-2 py-0.5 rounded-full bg-[#eee7e1] text-[#1e1b17] text-[10px] font-bold border border-[#3d352e]/40">
+                            {folder.count} chủ đề
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteFolder(folder.id, folderName);
+                            }}
+                            className="w-6 h-6 rounded-lg bg-white hover:bg-rose-50 text-rose-500 border border-[#3d352e] flex items-center justify-center transition active:scale-90 cursor-pointer shrink-0"
+                            title={`Xóa thư mục "${folderName}"`}
+                          >
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                       <h3 className="font-bold text-sm text-[#1e1b17] leading-snug line-clamp-2">
                         {folderName}
@@ -247,11 +263,26 @@ export function PageTopics() {
                           <div className="w-9 h-9 rounded-full bg-[#f4ede6] border border-[#3d352e] flex items-center justify-center text-lg">
                             {emoji}
                           </div>
-                          {topic.is_pro && !isUserPro && (
-                            <span className="px-1.5 py-0.5 rounded-full bg-amber-200 text-[#3d352e] text-[9px] font-black border border-[#3d352e]">
-                              PRO
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {topic.is_pro && !isUserPro && (
+                              <span className="px-1.5 py-0.5 rounded-full bg-amber-200 text-[#3d352e] text-[9px] font-black border border-[#3d352e]">
+                                PRO
+                              </span>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTopic(topic.id, topic.name);
+                              }}
+                              className="w-6 h-6 rounded-lg bg-white hover:bg-rose-50 text-rose-500 border border-[#3d352e] flex items-center justify-center transition active:scale-90 cursor-pointer shrink-0"
+                              title={`Xóa chủ đề "${topic.name}"`}
+                            >
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                         <h3 className="font-bold text-sm text-[#1e1b17] leading-snug line-clamp-2">
                           {topic.name}
@@ -390,6 +421,17 @@ export function PageTopics() {
                   <span className="mx-1.5 text-gray-300">|</span>
                   Thư mục hiện tại: <b className="text-[#D96B43]">{activeLabel}</b>
                 </span>
+                {activeCategory !== 'all' && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteFolder(activeCategory, activeLabel)}
+                    className="ml-2 px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[11px] font-bold inline-flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
+                    title="Xóa toàn bộ thư mục này"
+                  >
+                    <span>🗑️</span>
+                    <span>Xóa thư mục</span>
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-2 font-bold text-xs text-[#5F7C66]">
                 <span>Mục tiêu học tuần: 5 chủ đề</span>
@@ -496,6 +538,19 @@ export function PageTopics() {
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h7"></path>
+                          </svg>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteFolder(folder.id, folderName);
+                          }}
+                          className="p-2.5 rounded-xl bg-white hover:bg-rose-50 text-rose-500 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-y-0.5 cursor-pointer shrink-0"
+                          title={`Xóa thư mục "${folderName}"`}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
                       </div>
