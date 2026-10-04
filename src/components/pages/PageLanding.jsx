@@ -76,7 +76,7 @@ export function PageLanding() {
             </div>
             <div className="flex flex-col">
               <span className="font-quicksand font-black text-lg sm:text-xl tracking-tight text-[#3D352E] leading-none">
-                HiVocab<span className="text-[#DE5D53]">!</span>
+                HiVocab
               </span>
               <span className="text-[9px] font-bold text-[#86756C] tracking-wider uppercase mt-0.5 hidden sm:block">
                 Vườn tranh từ vựng 🌿
@@ -297,7 +297,7 @@ export function PageLanding() {
                 onClick={() => navigateTo('dashboard')}
                 className="mt-4 w-full py-2.5 px-4 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm font-black rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-1.5"
               >
-                <span>Mở tập vẽ từ vựng ngay</span>
+                <span>Mở app học ngay</span>
                 <span>📖</span>
               </button>
             </div>
