@@ -145,7 +145,11 @@ export function AuthProvider({ children }) {
       }
       return res;
     }
-    const { data, error: e } = await supabase.auth.signInWithPassword({ email, password });
+    const authParams = { email, password };
+    if (captchaToken) {
+      authParams.options = { captchaToken };
+    }
+    const { data, error: e } = await supabase.auth.signInWithPassword(authParams);
     if (e) throw e;
     if (data?.user) {
       setUser(data.user);
@@ -160,7 +164,11 @@ export function AuthProvider({ children }) {
     if (typeof window !== 'undefined' && window.HiDB?.signUpWithPassword) {
       return window.HiDB.signUpWithPassword(email, password, captchaToken);
     }
-    const { data, error: e } = await supabase.auth.signUp({ email, password });
+    const signUpOptions = { emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined };
+    if (captchaToken) {
+      signUpOptions.captchaToken = captchaToken;
+    }
+    const { data, error: e } = await supabase.auth.signUp({ email, password, options: signUpOptions });
     if (e) throw e;
     return data;
   }, []);

@@ -54,8 +54,14 @@ export function PageLogin() {
     let captchaToken = '';
     if (typeof window !== 'undefined' && typeof window.turnstile !== 'undefined') {
       try {
-        captchaToken = window.turnstile.getResponse();
+        captchaToken = window.turnstile.getResponse() || window.turnstile.getResponse('#turnstile-user');
       } catch (_) {}
+    }
+    if (!captchaToken && typeof document !== 'undefined') {
+      const hiddenInput = document.querySelector('#turnstile-user [name="cf-turnstile-response"]') || document.querySelector('[name="cf-turnstile-response"]');
+      if (hiddenInput && hiddenInput.value) {
+        captchaToken = hiddenInput.value;
+      }
     }
 
     try {
@@ -83,7 +89,9 @@ export function PageLogin() {
       }
     } catch (err) {
       if (typeof window !== 'undefined' && typeof window.turnstile !== 'undefined') {
-        try { window.turnstile.reset(); } catch (_) {}
+        try { window.turnstile.reset('#turnstile-user'); } catch (_) {
+          try { window.turnstile.reset(); } catch (__) {}
+        }
       }
       setErrorMessage(err.message || 'Thao tác không thành công. Vui lòng thử lại.');
     } finally {
@@ -116,6 +124,21 @@ export function PageLogin() {
       window.toggleDevMode();
     }
   };
+
+  // Tự động kích hoạt / render widget Cloudflare Turnstile khi đổi tab hoặc mount
+  React.useEffect(() => {
+    if (typeof window !== 'undefined' && window.turnstile && typeof window.turnstile.render === 'function') {
+      const el = document.getElementById('turnstile-user');
+      if (el && !el.hasChildNodes()) {
+        try {
+          window.turnstile.render('#turnstile-user', {
+            sitekey: '0x4AAAAAAE9CY0FtESpbO_Cj',
+            theme: 'auto',
+          });
+        } catch (_) {}
+      }
+    }
+  }, [authMode]);
 
   return (
     <div 
@@ -330,6 +353,14 @@ export function PageLogin() {
                 <p className="text-[11px] font-medium leading-relaxed">{successMessage}</p>
               </div>
             )}
+
+            {/* Cloudflare Turnstile CAPTCHA */}
+            <div 
+              id="turnstile-user" 
+              className="cf-turnstile my-2.5 flex justify-center min-h-[65px]" 
+              data-sitekey="0x4AAAAAAE9CY0FtESpbO_Cj" 
+              data-theme="auto"
+            ></div>
 
             {/* Submit Button */}
             <button
