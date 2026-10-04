@@ -19,6 +19,8 @@ export default {
         'hanken': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
         'nunito': ['"Nunito"', 'sans-serif'],
         'quicksand': ['"Quicksand"', 'sans-serif'],
+        'heading': ['Comfortaa', 'Quicksand', 'sans-serif'],
+        'body': ['Quicksand', 'sans-serif'],
         'mali': ['"Mali"', 'cursive', 'sans-serif'],
         'patrick': ['"Patrick Hand"', 'cursive', 'sans-serif'],
         'label-sm': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'sans-serif'],
@@ -28,17 +30,25 @@ export default {
         'headline-lg': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', 'sans-serif']
       },
       boxShadow: {
-        crayon: '0 4px 0 0 #3d352e',
-        crayonSm: '0 2px 0 0 #3d352e',
+        crayon: '3px 4px 0px #3D352E',
+        crayonSm: '2px 2px 0px #3D352E',
+        crayonLg: '4px 6px 0px #3D352E',
         crayonOrange: '0 4px 0 0 #b85135',
         crayonBtn: '2px 3px 0px #382E2B',
       },
       colors: {
-        // Crayon Cozy Study Room Palette (Google Stitch)
+        // Crayon Cozy Study Room Palette (Google Stitch & taskbar fix)
+        'crayon-green': '#4D6B53',
+        'crayon-greenLight': '#E3EDE2',
+        'crayon-terracotta': '#C85A3F',
+        'crayon-terracottaLight': '#FBECE7',
+        'crayon-charcoal': '#3D352E',
+        'crayon-sand': '#EFE7DA',
+        'crayon-gray': '#786F66',
         paper: '#FAF5EB',
         cream: '#f4ede2',
         crayonText: '#3d352e',
-        'crayon-dark': '#382E2B',
+        'crayon-dark': '#302A24',
         'crayon-orange': '#F0783C',
         'crayon-amber': '#ECA43B',
         'crayon-sage': '#7B9B69',

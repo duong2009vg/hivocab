@@ -10,7 +10,7 @@ const RouteContext = createContext({
   isExerciseDetail: false,
 });
 
-export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'dictionary', 'settings'];
+export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'dictionary', 'settings', 'profile'];
 
 function normalizeRoute(raw) {
   if (!raw) return 'landing';
@@ -20,6 +20,7 @@ function normalizeRoute(raw) {
   }
   if (clean === 'thpt') return 'exercises';
   if (clean === 'game') return 'dashboard';
+  if (clean === 'settings') return 'profile';
   return clean || 'landing';
 }
 

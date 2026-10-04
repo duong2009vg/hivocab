@@ -1,17 +1,19 @@
 // src/components/layout/MobileBottomNav.jsx
-// Pixel-perfect match to Stitch design (mobile_dashboard.html lines 317-365)
+// Pixel-perfect match to Stitch design with 6th Profile tab on the right
 import React from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function MobileBottomNav() {
   const { currentRoute, navigateTo } = useRoute();
 
-  // topic-detail / lesson-detail → highlight 'topics'; thpt-room → 'exercises' (not in nav, handled gracefully)
+  // topic-detail / lesson-detail → highlight 'topics'; settings → highlight 'profile'
   const activeTab =
     currentRoute === 'topic-detail' || currentRoute === 'lesson-detail'
       ? 'topics'
       : currentRoute === 'thpt-room'
       ? 'exercises'
+      : currentRoute === 'settings'
+      ? 'profile'
       : currentRoute;
 
   const tabs = [
@@ -65,11 +67,20 @@ export function MobileBottomNav() {
         </svg>
       ),
     },
+    {
+      id: 'profile',
+      label: 'Hồ sơ',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      ),
+    },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-[#FAF5EB]/95 backdrop-blur-md border-t-[3.5px] border-[#382E2B] lg:hidden">
-      <div className="w-full max-w-[430px] flex justify-around items-center py-2 px-2">
+      <div className="w-full max-w-[430px] flex justify-around items-center py-2 px-1">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
@@ -77,18 +88,18 @@ export function MobileBottomNav() {
               key={tab.id}
               onClick={() => navigateTo(tab.id)}
               onTouchStart={tab.onTouchPrefetch}
-              className={`flex flex-col items-center group cursor-pointer px-2 py-0.5${isActive ? ' relative' : ' text-[#736359] hover:text-[#382E2B]'}`}
+              className={`flex flex-col items-center group cursor-pointer px-1.5 py-0.5${isActive ? ' relative' : ' text-[#736359] hover:text-[#382E2B]'}`}
             >
               {isActive ? (
-                <div className="w-11 h-8 rounded-full border-2 border-[#577B4A] bg-[#EAF3E7] flex items-center justify-center text-[#3D5A32] shadow-sm">
+                <div className="w-10 h-8 rounded-full border-2 border-[#577B4A] bg-[#EAF3E7] flex items-center justify-center text-[#3D5A32] shadow-sm">
                   {tab.icon}
                 </div>
               ) : (
-                <div className="w-11 h-8 flex items-center justify-center">
+                <div className="w-10 h-8 flex items-center justify-center">
                   {tab.icon}
                 </div>
               )}
-              <span className={`text-[11px] font-bold mt-0.5${isActive ? ' text-[#3D5A32]' : ''}`}>
+              <span className={`text-[10px] sm:text-[11px] font-bold mt-0.5${isActive ? ' text-[#3D5A32]' : ''}`}>
                 {tab.label}
               </span>
             </a>

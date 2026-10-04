@@ -1,37 +1,53 @@
 // src/components/layout/MainSidebar.jsx
-// Cozy Study Room Crayon Redesign - Desktop Left Sidebar (100% Stitch Pixel-Perfect Fidelity)
+// 100% Pixel-Perfect match to taskbar fix design (code.html & screen.png)
 import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 
 export function MainSidebar({ wordCount, streak }) {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
+  const { openModal } = useModal ? useModal() : { openModal: () => {} };
 
   const activeTab =
     currentRoute === 'topic-detail' || currentRoute === 'lesson-detail'
       ? 'topics'
+      : currentRoute === 'settings'
+      ? 'profile'
       : currentRoute;
 
   const userName =
     user?.user_metadata?.full_name ||
     user?.user_metadata?.name ||
-    (user?.email ? user.email.split('@')[0] : 'Bạn học');
+    (user?.email ? user.email.split('@')[0] : 'Minh Trang');
 
-  const userEmail = user?.email || 'Huy hiệu: Bé Siêng Năng';
+  const userRank = 'Huy hiệu: Bé Siêng Năng';
+  const displayStreak = streak != null ? streak : 2;
+  const displayWordCount = wordCount != null ? wordCount : 81;
+
+  const handleLogout = async (e) => {
+    e.stopPropagation();
+    if (window.confirm('Bạn có muốn đăng xuất khỏi HiVocab không?')) {
+      await signOut();
+      navigateTo('landing');
+    }
+  };
 
   const navItems = [
     {
       id: 'dashboard',
       label: 'Trang chủ',
-      faIcon: 'fa-solid fa-house',
-      iconColor: null, // white when active, per Stitch active=text-white
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+        </svg>
+      ),
     },
     {
       id: 'topics',
       label: 'Chủ đề & Khóa học',
-      faIcon: 'fa-solid fa-shapes',
-      iconColor: 'text-warmAmber',
+      emoji: '🏔️',
       onMouseEnter: () => {
         import('../../services/db.js')
           .then(({ getTopics }) => getTopics().catch(() => {}))
@@ -41,46 +57,55 @@ export function MainSidebar({ wordCount, streak }) {
     {
       id: 'vocabulary',
       label: 'Sổ từ cá nhân',
-      faIcon: 'fa-solid fa-book-sparkles',
-      iconColor: 'text-softBlue',
-      badge: wordCount != null ? wordCount : null,
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+        </svg>
+      ),
+      badge: displayWordCount,
     },
     {
       id: 'library',
       label: 'Thư viện cộng đồng',
-      faIcon: 'fa-solid fa-compass',
-      iconColor: 'text-softPurple',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+        </svg>
+      ),
     },
     {
       id: 'dictionary',
       label: 'Tra cứu từ điển',
-      faIcon: 'fa-solid fa-magnifying-glass',
-      iconColor: 'text-terracotta',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+        </svg>
+      ),
     },
   ];
 
   return (
-    <aside className="hidden lg:flex w-64 xl:w-72 bg-[#fdfbf7]/90 border-r-2 border-[#e6dcce] flex-col justify-between p-5 fixed left-0 top-0 h-screen z-20 backdrop-blur-sm select-none">
+    <aside
+      className="hidden lg:flex w-72 shrink-0 p-6 flex-col justify-between border-r border-[#E8DEC8]/80 min-h-screen fixed left-0 top-0 h-screen z-20 bg-[#FBF8F1]/95 backdrop-blur-sm select-none"
+      data-purpose="desktop-sidebar"
+    >
+      {/* Top Section: Brand & Nav Links */}
       <div className="space-y-6">
-        {/* Logo and App Badge */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-amber-100 crayon-border flex items-center justify-center text-amber-800 shadow-crayonSm text-xl">
-              <i className="fa-solid fa-book-bookmark"></i>
-            </div>
-            <div>
-              <span className="text-2xl font-black tracking-tight text-crayonText font-quicksand block leading-none">
-                HiVocab!
-              </span>
-              <span className="inline-block text-[11px] font-extrabold uppercase px-2 py-0.5 mt-1 rounded-full bg-sage-light text-sage border border-sage/40 tracking-wider">
-                Bản Học Tập
-              </span>
-            </div>
+        {/* Logo HiVocab */}
+        <div className="flex items-center gap-3 px-2">
+          <div className="w-12 h-12 bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl font-bold">
+            📖
+          </div>
+          <div>
+            <h1 className="text-2xl font-heading font-bold text-[#302A24] tracking-tight">HiVocab!</h1>
+            <span className="inline-block px-2 py-0.5 text-xs font-semibold text-[#4D6B53] bg-[#E3EDE2] rounded-md border border-[#4D6B53]/40">
+              BÀN HỌC TẬP
+            </span>
           </div>
         </div>
 
-        {/* Navigation Links */}
-        <nav aria-label="Main Navigation" className="space-y-1.5">
+        {/* Navigation Menu */}
+        <nav className="space-y-2 pt-2">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -88,23 +113,26 @@ export function MainSidebar({ wordCount, streak }) {
                 key={item.id}
                 onClick={() => navigateTo(item.id)}
                 onMouseEnter={item.onMouseEnter}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl font-bold cursor-pointer transition-all ${
+                className={`flex items-center justify-between px-4 py-3 rounded-2xl cursor-pointer transition-all ${
                   isActive
-                    ? 'bg-sage text-white shadow-crayon active:translate-y-0.5'
-                    : 'text-crayonText/80 hover:bg-cream hover:text-crayonText'
+                    ? 'font-bold text-white bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                    : 'font-semibold text-[#786F66] hover:bg-white/80 hover:text-[#302A24] border border-transparent'
                 }`}
               >
-                <i
-                  className={`${item.faIcon} text-lg w-5 text-center ${
-                    isActive ? '' : item.iconColor ?? ''
-                  }`}
-                ></i>
-                <span className="font-quicksand text-base">{item.label}</span>
+                <div className="flex items-center gap-3.5">
+                  {item.emoji ? (
+                    <span className="text-xl">{item.emoji}</span>
+                  ) : (
+                    item.icon
+                  )}
+                  <span className={isActive ? 'font-heading text-sm' : ''}>{item.label}</span>
+                </div>
+
                 {isActive && (
-                  <span className="ml-auto w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-300 ring-2 ring-white"></span>
                 )}
                 {!isActive && item.badge != null && (
-                  <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold border border-amber-300">
+                  <span className="px-2 py-0.5 text-xs font-bold bg-[#F4E3B4] text-[#3D352E] rounded-full border border-[#3D352E]">
                     {item.badge}
                   </span>
                 )}
@@ -114,63 +142,83 @@ export function MainSidebar({ wordCount, streak }) {
         </nav>
       </div>
 
-      {/* Sidebar Bottom: Mascot Buddy Card + User Profile Card */}
-      <div className="space-y-4 pt-4">
-        {/* Mascot Helper Pill */}
+      {/* Bottom Section: Helper Mascot & Profile Card */}
+      <div className="space-y-4 pt-6 border-t border-[#E8DEC8]/80">
+        {/* Bé Hổ Companion Widget */}
         <div
           onClick={() => navigateTo('dashboard')}
-          className="bg-[#faf3e7] rounded-2xl p-3.5 crayon-border relative overflow-hidden group hover:scale-[1.02] transition-transform cursor-pointer"
+          className="p-3.5 rounded-2xl bg-[#FFFBF3] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-orange-100 flex-shrink-0 overflow-hidden crayon-border">
-              <img
-                alt="Bé hổ Churbito"
-                className="w-full h-full object-cover mix-blend-multiply"
-                src="/mascot/mascot_cozy.png"
-              />
-            </div>
-            <div>
-              <p className="text-xs font-bold text-terracotta uppercase tracking-wide">
-                Trợ thủ học tập
-              </p>
-              <h4 className="text-sm font-black text-crayonText font-quicksand">
-                Học cùng bé Hổ 🐾
-              </h4>
-              <p className="text-[11px] text-softMuted">"Chỉ 15 phút mỗi ngày nhé!"</p>
-            </div>
+          <div className="w-11 h-11 rounded-xl bg-[#FEE8D6] border-2 border-[#3D352E] flex items-center justify-center text-xl shrink-0">
+            🐯
+          </div>
+          <div className="overflow-hidden">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#C85A3F]">Trợ thủ học tập</div>
+            <div className="text-xs font-bold text-[#302A24] truncate">Học cùng bé Hổ 🐾</div>
+            <div className="text-[11px] text-[#786F66] truncate">"Chỉ 15 phút mỗi ngày nhé!"</div>
           </div>
         </div>
 
-        {/* User Profile Card */}
+        {/* User Profile Pill */}
         <div
-          onClick={() => navigateTo('settings')}
-          className="bg-white/80 rounded-2xl p-3 crayon-border flex items-center gap-3 cursor-pointer"
+          onClick={() => navigateTo('profile')}
+          className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-between cursor-pointer transition-all ${
+            activeTab === 'profile' ? 'bg-[#EFF6EE] border-[#4D6B53]' : 'bg-white hover:bg-[#FFFBF3]'
+          }`}
+          title="Xem thông tin và quản lý hồ sơ học viên"
         >
-          <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-amber-200 border-2 border-crayonText overflow-hidden flex items-center justify-center font-black text-crayonText">
-              {user?.user_metadata?.avatar_url ? (
-                <img
-                  src={user.user_metadata.avatar_url}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                '🐯'
-              )}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              <div className="w-10 h-10 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-base font-bold overflow-hidden">
+                {user?.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  '🐱'
+                )}
+              </div>
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></span>
             </div>
-            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-bold truncate text-crayonText">{userName}</h4>
-              {streak != null && (
-                <span className="text-xs font-black text-terracotta flex items-center gap-0.5">
-                  🔥 {streak}
-                </span>
-              )}
+            <div className="min-w-0">
+              <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
+              <div className="text-[10px] text-[#786F66] truncate">{userRank}</div>
             </div>
-            <p className="text-xs text-softMuted truncate">{userEmail}</p>
           </div>
+
+          <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-1 rounded-full border border-[#C85A3F]/40 shrink-0">
+            <span>🔥</span>
+            <span>{displayStreak}</span>
+          </div>
+        </div>
+
+        {/* Sub-actions */}
+        <div className="flex items-center justify-between text-[11px] font-semibold text-[#786F66] px-1 pt-1">
+          <a
+            onClick={() => navigateTo('profile')}
+            className="hover:text-[#302A24] transition cursor-pointer"
+          >
+            Cài đặt
+          </a>
+          <span>•</span>
+          <a
+            onClick={() => {
+              if (openModal) openModal('bugReport');
+              else window.openBugReportModal?.();
+            }}
+            className="hover:text-[#302A24] transition cursor-pointer"
+          >
+            Góp ý
+          </a>
+          <span>•</span>
+          <a
+            onClick={handleLogout}
+            className="hover:text-[#C85A3F] transition cursor-pointer"
+          >
+            Đăng xuất
+          </a>
         </div>
       </div>
     </aside>

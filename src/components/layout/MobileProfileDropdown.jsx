@@ -42,6 +42,8 @@ export function MobileProfileDropdown() {
     closeDropdown();
     if (!user) {
       navigateTo('login');
+    } else {
+      navigateTo('profile');
     }
   };
 
@@ -52,7 +54,7 @@ export function MobileProfileDropdown() {
 
   const handleSettings = () => {
     closeDropdown();
-    navigateTo('settings');
+    navigateTo('profile');
   };
 
   const handleAuth = async () => {

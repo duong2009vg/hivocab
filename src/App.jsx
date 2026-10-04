@@ -39,6 +39,7 @@ const PageThptRoom = lazy(() => import('./components/pages/PageThptRoom.jsx'));
 const PageVocabulary = lazy(() => import('./components/pages/PageVocabulary.jsx'));
 const PageDictionary = lazy(() => import('./components/pages/PageDictionary.jsx'));
 const PageSettings = lazy(() => import('./components/pages/PageSettings.jsx'));
+const PageProfile = lazy(() => import('./components/pages/PageProfile.jsx'));
 const PageBilingualReading = lazy(() => import('./components/pages/PageBilingualReading.jsx'));
 const PageLearning = lazy(() => import('./components/pages/PageLearning.jsx'));
 const PageAdmin = lazy(() => import('./components/admin/PageAdmin.jsx'));
@@ -94,7 +95,8 @@ function AppRoutes() {
       case 'dictionary':
         return <ProtectedRoute><PageDictionary /></ProtectedRoute>;
       case 'settings':
-        return <ProtectedRoute><PageSettings /></ProtectedRoute>;
+      case 'profile':
+        return <ProtectedRoute><PageProfile /></ProtectedRoute>;
       case 'bilingual-reading':
         return <PageBilingualReading />;
       case 'learning':
