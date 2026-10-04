@@ -170,7 +170,9 @@ export function PageLearning() {
     return (
       <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center p-6 crayon-paper-pattern font-comfortaa text-center">
         <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-4 text-emerald-700 border-2 border-[#2B2523] shadow-[3px_4px_0px_#2B2523]">
-          <i className="fa-solid fa-check text-3xl font-black"></i>
+          <svg className="w-10 h-10 text-emerald-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2">Chưa có từ vựng cần ôn tập!</h2>
         <p className="text-sm sm:text-base text-stone-600 max-w-md mb-6 leading-relaxed font-quicksand font-semibold">
@@ -182,16 +184,14 @@ export function PageLearning() {
             onClick={() => navigateTo('topics')}
             className="px-6 py-3 bg-[#D36135] text-white rounded-2xl font-bold text-sm flex items-center gap-2 border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <i className="fa-solid fa-compass"></i>
-            <span>Khám phá chủ đề</span>
+            <span>Khám phá chủ đề 🧭</span>
           </button>
           <button
             type="button"
             onClick={() => navigateTo('dashboard')}
             className="px-6 py-3 bg-white text-stone-800 rounded-2xl font-bold text-sm border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center gap-2 active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <i className="fa-solid fa-house"></i>
-            <span>Về trang chủ</span>
+            <span>Về trang chủ 🏠</span>
           </button>
         </div>
       </div>
@@ -200,17 +200,19 @@ export function PageLearning() {
 
   return (
     <div id="page-learning" className="page active min-h-screen flex flex-col justify-between crayon-paper-pattern selection:bg-orange-200 selection:text-stone-900 font-comfortaa">
-      {/* ── Top Navigation Bar with Progress, Exit, Audio & Flag ── */}
-      <header className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-2 z-30" data-purpose="quiz-top-bar">
+      {/* ── Top Navigation Bar with Progress, Exit, Audio & Flag (Full Reliable SVG Icons) ── */}
+      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 z-30" data-purpose="quiz-top-bar">
         <div className="flex items-center justify-between gap-3 sm:gap-4">
           {/* Close / Exit Exercise Button */}
           <button
             type="button"
             onClick={handleClose}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-800 hover:bg-stone-50 hover:translate-y-0.5 active:translate-y-1 transition-all cursor-pointer text-lg font-black shrink-0"
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-800 hover:bg-stone-50 hover:translate-y-0.5 active:translate-y-1 transition-all cursor-pointer shrink-0"
             title="Quay lại"
           >
-            <i className="fa-solid fa-xmark text-lg sm:text-xl"></i>
+            <svg className="w-5 h-5 text-stone-800" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
 
           {/* Center Progress Track with Crayon Aesthetic */}
@@ -237,32 +239,43 @@ export function PageLearning() {
             </div>
           </div>
 
-          {/* Action Utilities: Sound & Report */}
+          {/* Action Utilities: Sound & Report (Full SVG) */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={handleToggleSound}
-              className="w-11 h-11 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-700 hover:bg-amber-50 hover:text-amber-800 active:translate-y-0.5 transition cursor-pointer"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center hover:bg-amber-50 active:translate-y-0.5 transition cursor-pointer"
               title={soundMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
             >
-              <i className={`fa-solid ${soundMuted ? 'fa-volume-xmark text-stone-400' : 'fa-volume-high text-stone-700'} text-base sm:text-lg`}></i>
+              {soundMuted ? (
+                <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                  <path d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              ) : (
+                <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                  <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              )}
             </button>
             <button
               type="button"
               onClick={handleReport}
-              className="w-11 h-11 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-700 hover:bg-red-50 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
+              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center hover:bg-red-50 text-stone-700 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
               title="Báo cáo lỗi từ này"
             >
-              <i className="fa-regular fa-flag text-base sm:text-lg"></i>
+              <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── Main Exercise Area ── */}
+      {/* ── Main Exercise Area (Full Width max-w-7xl for Balanced Layout) ── */}
       <main
         id="learning-main"
-        className="flex-1 w-full max-w-5xl mx-auto px-4 py-3 sm:py-6 flex flex-col justify-center items-center relative"
+        className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6 flex flex-col justify-center items-center relative"
       >
         {isComplete ? (
           /* ── Completion screen ── */
@@ -327,7 +340,7 @@ export function PageLearning() {
       </main>
 
       {/* ── Subtitle / Footer notes ── */}
-      <footer className="w-full max-w-5xl mx-auto px-6 py-3 flex items-center justify-between text-stone-600 font-crayon text-base sm:text-lg">
+      <footer className="w-full max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-stone-600 font-crayon text-base sm:text-lg">
         <div className="flex items-center gap-2">
           <span className="text-stone-500">Từ</span>
           <span className="font-bold text-stone-800 text-lg sm:text-xl">{currentNum}</span>

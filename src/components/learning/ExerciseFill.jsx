@@ -1,12 +1,12 @@
 // src/components/learning/ExerciseFill.jsx
 // 100% Pixel-Perfect match to Google Stitch design (both Desktop & Mobile)
-// Fill-in-the-blank letter boxes — Pure React with keyboard navigation.
+// Fill-in-the-blank letter boxes — Pure React with Pop-up Result Notification.
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 function renderSentence(sentence, targetWord) {
   if (!sentence) return null;
-  // If sentence contains ___ or similar placeholder
   if (sentence.includes('___') || sentence.includes('---')) {
     const parts = sentence.split(/_{2,}|-{2,}/);
     return (
@@ -38,6 +38,7 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
   const [values, setValues] = useState(() => boxes.map(() => ''));
   const [hintLevel, setHintLevel] = useState(0);
   const [submitted, setSubmitted] = useState(null); // { correct, correctAnswer }
+  const [showResultModal, setShowResultModal] = useState(false);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const inputRefs = useRef([]);
 
@@ -49,6 +50,7 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
     setValues(boxes.map(() => ''));
     setHintLevel(0);
     setSubmitted(null);
+    setShowResultModal(false);
     setFocusedIdx(0);
     setTimeout(() => {
       inputRefs.current[0]?.focus();
@@ -111,6 +113,7 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
 
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
+      if (showResultModal) return;
       if (e.key === 'Backspace') {
         if (!values[flatIdx] && flatIdx > 0) {
           e.preventDefault();
@@ -146,7 +149,7 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [values, boxes.length]
+    [values, boxes.length, showResultModal]
   );
 
   const handleRevealHint = useCallback(() => {
@@ -189,15 +192,15 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
 
     const r = onSubmit(typed);
     setSubmitted(r);
+    setShowResultModal(true);
+  }, [submitted, d.answer, values, onSubmit]);
 
-    if (!r.skipped) {
-      setTimeout(() => {
-        setValues(boxes.map(() => ''));
-        setSubmitted(null);
-        setHintLevel(0);
-      }, 1800);
-    }
-  }, [submitted, d.answer, values, onSubmit, boxes]);
+  const handleModalContinue = useCallback(() => {
+    setShowResultModal(false);
+    setValues(boxes.map(() => ''));
+    setSubmitted(null);
+    setHintLevel(0);
+  }, [boxes]);
 
   const playAudio = useCallback(() => {
     const word = d.answer || '';
@@ -213,15 +216,16 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
 
   let partOffset = 0;
   const firstLetter = (d.answer || '').trim()[0]?.toUpperCase() || 'A';
+  const userTyped = values.join('');
 
   return (
     <div className="w-full flex flex-col items-center select-none font-comfortaa">
       {/* ── Main Big Crayon Card ── */}
       <div className="w-full max-w-3xl bg-white rounded-[2.5rem] md:rounded-[36px] border-[3px] border-[#342e2b] p-6 sm:p-8 md:p-10 shadow-[6px_8px_0px_#2c2523] relative transition-all">
-        {/* Subtle decorative crayon tape on top-right corner */}
+        {/* Subtle decorative washi tape on top-right corner */}
         <div className="absolute -top-4 -right-4 w-16 h-8 bg-amber-200/80 border-2 border-[#342e2b] rotate-12 pointer-events-none rounded-sm shadow-xs hidden sm:block"></div>
 
-        {/* Sub-header with Audio Trigger */}
+        {/* Sub-header with Audio Trigger (Reliable SVG) */}
         <div className="flex items-center justify-center gap-2.5 mb-5 sm:mb-6">
           <span className="text-stone-700 font-semibold text-base sm:text-lg md:text-xl">
             Điền từ tiếng Anh có nghĩa:
@@ -233,7 +237,9 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
             className="w-10 h-10 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-stone-800 text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
             title="Nghe phát âm từ cần điền"
           >
-            <i className="fa-solid fa-volume-high text-sm sm:text-base"></i>
+            <svg className="w-5 h-5 text-sky-800" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
 
@@ -270,11 +276,13 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
           >
             <span className="text-amber-600">💡</span>
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
-            <i className="fa-solid fa-angle-right text-xs text-stone-400"></i>
+            <svg className="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
 
-        {/* Letter Input Slots Container */}
+        {/* ── Letter Input Slots Container (Harmonious Rounded Corners) ── */}
         <div
           className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-3.5 mb-6 overflow-x-auto py-2 no-scrollbar"
           onClick={(e) => {
@@ -297,19 +305,20 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
                   const isFilled = !!values[flatIdx];
                   const isActive = focusedIdx === flatIdx && !submitted;
 
+                  // Harmonious symmetrical rounded-2xl
                   let slotClass =
-                    'w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 rounded-2xl flex items-center justify-center font-crayon text-2xl md:text-3xl font-bold transition-all ';
+                    'w-11 h-14 sm:w-13 sm:h-16 md:w-14 md:h-18 rounded-2xl flex items-center justify-center font-mono text-2xl md:text-3xl font-bold transition-all ';
 
                   if (!submitted) {
                     if (isActive) {
                       slotClass +=
-                        'bg-sky-50 border-[3px] border-blue-600 ring-4 ring-sky-200/80 shadow-[3px_4px_0px_#2c2523] text-blue-700 animate-pulse';
+                        'bg-sky-50 border-[3px] border-blue-600 ring-4 ring-sky-200/80 shadow-[3px_4px_0px_#2c2523] text-blue-700';
                     } else if (isFilled) {
                       slotClass +=
                         'bg-white border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] text-stone-800';
                     } else {
                       slotClass +=
-                        'bg-white border-2 border-stone-400/80 border-dashed text-stone-400';
+                        'bg-stone-50/50 border-2 border-stone-300 border-dashed text-stone-400';
                     }
                   } else {
                     if (submitted.correct) {
@@ -382,7 +391,7 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
           </span>
         </div>
 
-        {/* Primary Action Button: Kiểm tra đáp án */}
+        {/* Primary Action Button: Kiểm tra đáp án (Reliable SVG) */}
         <div className="flex justify-center">
           <button
             type="button"
@@ -390,7 +399,9 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
             disabled={!!submitted}
             className="w-full max-w-md py-3.5 sm:py-4 px-8 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-lg sm:text-xl font-bold rounded-2xl border-[3px] border-stone-800 shadow-[4px_6px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
           >
-            <i className="fa-regular fa-circle-check text-xl"></i>
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span>Kiểm tra đáp án</span>
           </button>
         </div>
@@ -419,24 +430,21 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
           className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center text-stone-600 hover:text-red-500 hover:bg-red-50 shrink-0 cursor-pointer"
           title="Báo lỗi bài tập này"
         >
-          <i className="fa-regular fa-flag text-sm sm:text-base"></i>
+          <svg className="w-4 h-4 text-stone-600" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
 
-      {/* ── Result Feedback Toast ── */}
-      {submitted && (
-        <div
-          className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-2.5 rounded-full text-white text-base font-bold shadow-lg flex items-center gap-2 border-2 border-[#292524] ${
-            submitted.correct ? 'bg-[#588157]' : 'bg-[#D36135]'
-          } animate-bounce-in`}
-        >
-          <span>
-            {submitted.correct
-              ? `✓ Tuyệt vời! "${d.answer}" chính là đáp án chính xác 🎉`
-              : `✗ Đáp án đúng: "${submitted.correctAnswer || d.answer}"`}
-          </span>
-        </div>
-      )}
+      {/* ── Pop-up Result Notification Modal ── */}
+      <ExerciseResultModal
+        isOpen={showResultModal}
+        isCorrect={!!submitted?.correct}
+        word={d.answer}
+        meaning={d.meaning || d.meaningHint}
+        userAnswer={userTyped}
+        onContinue={handleModalContinue}
+      />
     </div>
   );
 }

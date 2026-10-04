@@ -1,8 +1,9 @@
 // src/components/learning/ExerciseListen.jsx
 // 100% Pixel-Perfect match to Google Stitch design (both Desktop & Mobile)
-// Listen & type exercise — Pure React with keyboard navigation and TTS.
+// Listen & type exercise — Pure React with Pop-up Result Notification and Full SVG Icons.
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 export default function ExerciseListen({ item, onSubmit, speakWord, onReport, sessionInfo }) {
   const d = item?.exerciseData || {};
@@ -19,6 +20,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
   const [values, setValues] = useState(() => boxes.map(() => ''));
   const [hintLevel, setHintLevel] = useState(0);
   const [submitted, setSubmitted] = useState(null);
+  const [showResultModal, setShowResultModal] = useState(false);
   const [showMeaning, setShowMeaning] = useState(false);
   const [currentSpeed, setCurrentSpeed] = useState(1.0);
   const [focusedIdx, setFocusedIdx] = useState(0);
@@ -33,6 +35,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
     setValues(boxes.map(() => ''));
     setHintLevel(0);
     setSubmitted(null);
+    setShowResultModal(false);
     setShowMeaning(false);
     setFocusedIdx(0);
     const t = setTimeout(() => handlePlay(1.0), 350);
@@ -119,6 +122,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
 
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
+      if (showResultModal) return;
       if (e.key === 'Backspace') {
         if (!values[flatIdx] && flatIdx > 0) {
           e.preventDefault();
@@ -153,12 +157,13 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [values, boxes.length]
+    [values, boxes.length, showResultModal]
   );
 
   // Space on non-input = replay sound
   useEffect(() => {
     function onKey(e) {
+      if (showResultModal) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
@@ -171,7 +176,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitted, currentSpeed, values]);
+  }, [submitted, currentSpeed, values, showResultModal]);
 
   const handleRevealHint = useCallback(() => {
     if (submitted) return;
@@ -213,18 +218,18 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
 
     const r = onSubmit(typed);
     setSubmitted(r);
+    setShowResultModal(true);
+  }, [submitted, d.answer, values, onSubmit]);
 
-    if (!r.skipped) {
-      setTimeout(() => {
-        setValues(boxes.map(() => ''));
-        setSubmitted(null);
-        setHintLevel(0);
-      }, 1800);
-    }
-  }, [submitted, d.answer, values, onSubmit, boxes]);
+  const handleModalContinue = useCallback(() => {
+    setShowResultModal(false);
+    setValues(boxes.map(() => ''));
+    setSubmitted(null);
+    setHintLevel(0);
+  }, [boxes]);
 
   let partOffset = 0;
-  const lastChar = (d.answer || '').slice(-1).toLowerCase();
+  const userTyped = values.join('');
 
   return (
     <div className="w-full flex flex-col items-center select-none font-comfortaa">
@@ -232,7 +237,9 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
       <div className="w-full max-w-3xl bg-white border-[3px] border-[#2B2523] rounded-[32px] sm:rounded-[36px] shadow-[5px_7px_0px_#2B2523] px-6 sm:px-10 md:px-14 py-8 sm:py-10 flex flex-col items-center relative overflow-hidden">
         {/* Top Badge: Practice Mode Tag */}
         <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-1.5 rounded-full border-2 border-blue-400 bg-blue-50/80 text-blue-700 font-bold text-xs sm:text-sm tracking-wider uppercase mb-2 sm:mb-3 shadow-2xs">
-          <i className="fa-solid fa-ear-listen text-xs sm:text-sm"></i>
+          <svg className="w-4 h-4 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
           <span>LUYỆN PHẢN XẠ NGHE</span>
         </div>
 
@@ -244,7 +251,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
           Lắng nghe phát âm chuẩn và gõ từng ký tự vào ô chữ
         </p>
 
-        {/* Center Big Audio Play Button with Crayon Notes */}
+        {/* Center Big Audio Play Button with Crayon Notes (Reliable SVG) */}
         <div className="relative my-2 sm:my-3 flex items-center justify-center">
           {/* Floating Doodled Musical Notes */}
           <span
@@ -260,7 +267,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
             ♫
           </span>
 
-          {/* Big Round Speaker Button */}
+          {/* Big Round Speaker Button with Crisp Inline SVG Icon */}
           <button
             type="button"
             onClick={() => handlePlay(currentSpeed)}
@@ -269,7 +276,13 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
             }`}
             title="Bấm hoặc nhấn Space để nghe"
           >
-            <i className="fa-solid fa-volume-high text-3xl sm:text-4xl md:text-5xl group-hover:scale-110 transition-transform drop-shadow-sm"></i>
+            <svg
+              className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4a2 2 0 00-2 2v5a2 2 0 002 2h2.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12A6.49 6.49 0 0017 7.75a1 1 0 10-1.414 1.414A4.49 4.49 0 0116.5 12c0 1.2-.47 2.29-1.236 3.107a1 1 0 101.442 1.386A6.49 6.49 0 0018.5 12zm3 0c0-3.32-1.72-6.24-4.32-7.9a1 1 0 10-1.08 1.68 7.48 7.48 0 013.4 6.22c0 2.54-1.26 4.79-3.18 6.13a1 1 0 101.16 1.63A9.48 9.48 0 0021.5 12z" />
+            </svg>
           </button>
         </div>
 
@@ -282,7 +295,9 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
               currentSpeed === 1.0 ? 'bg-blue-50 text-blue-700 border-blue-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
           >
-            <i className="fa-solid fa-play text-xs text-blue-600"></i>
+            <svg className="w-3.5 h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
             <span>Chuẩn (1.0x)</span>
           </button>
 
@@ -293,7 +308,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
               currentSpeed === 0.6 ? 'bg-amber-50 text-amber-800 border-amber-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
           >
-            <span>🐢</span>
+            <span className="text-sm">🐢</span>
             <span>Chậm (0.6x)</span>
           </button>
         </div>
@@ -313,7 +328,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
             disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
             className="px-4 py-1.5 bg-amber-50 border-2 border-stone-800 rounded-full flex items-center gap-1.5 font-bold text-xs sm:text-sm text-amber-900 shadow-[1.5px_2px_0px_#2B2523] hover:bg-amber-100 cursor-pointer active:translate-y-0.5 disabled:opacity-40"
           >
-            <i className="fa-regular fa-lightbulb text-amber-600"></i>
+            <span>💡</span>
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
           </button>
 
@@ -322,7 +337,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
             onClick={() => setShowMeaning((m) => !m)}
             className="px-4 py-1.5 bg-stone-50 border-2 border-stone-800 rounded-full flex items-center gap-1.5 font-bold text-xs sm:text-sm text-stone-700 shadow-[1.5px_2px_0px_#2B2523] hover:bg-stone-100 cursor-pointer active:translate-y-0.5"
           >
-            <i className="fa-regular fa-eye text-stone-500"></i>
+            <span>👁</span>
             <span>{showMeaning ? 'Ẩn nghĩa' : 'Xem nghĩa'}</span>
           </button>
         </div>
@@ -334,7 +349,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
           </div>
         )}
 
-        {/* Letters Input Box Row */}
+        {/* ── Letters Input Box Row (Harmonious Rounded Corners) ── */}
         <div
           className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-3.5 mb-5 overflow-x-auto py-2 no-scrollbar"
           onClick={(e) => {
@@ -357,22 +372,23 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
                   const isFilled = !!values[flatIdx];
                   const isActive = focusedIdx === flatIdx && !submitted;
 
+                  // Harmonious symmetrical rounded-2xl
                   let slotClass =
-                    'letter-slot w-11 h-14 sm:w-13 sm:h-16 md:w-16 md:h-20 flex items-center justify-center font-mono text-2xl md:text-3xl font-extrabold transition-all ';
+                    'w-11 h-14 sm:w-13 sm:h-16 md:w-14 md:h-18 rounded-2xl flex items-center justify-center font-mono text-2xl md:text-3xl font-extrabold transition-all ';
 
                   if (!submitted) {
                     if (isActive) {
-                      slotClass += 'active text-[#3884DD]';
+                      slotClass += 'border-[3px] border-[#3884DD] bg-[#F1F7FF] shadow-[3px_4px_0px_#2B2523] text-[#3884DD]';
                     } else if (isFilled) {
-                      slotClass += 'border-[#2B2523] text-stone-800 shadow-[2px_3px_0px_#2B2523]';
+                      slotClass += 'border-2 border-[#2B2523] bg-white text-stone-800 shadow-[2px_3px_0px_#2B2523]';
                     } else {
-                      slotClass += 'border-dashed border-stone-300 text-stone-400 bg-stone-50/50';
+                      slotClass += 'border-2 border-stone-300 border-dashed text-stone-400 bg-stone-50/50';
                     }
                   } else {
                     if (submitted.correct) {
-                      slotClass += 'border-green-600 bg-green-50 text-green-700 shadow-sm';
+                      slotClass += 'border-[3px] border-green-600 bg-green-50 text-green-700 shadow-sm';
                     } else {
-                      slotClass += 'border-red-500 bg-red-50 text-red-600 shadow-sm';
+                      slotClass += 'border-[3px] border-red-500 bg-red-50 text-red-600 shadow-sm';
                     }
                   }
 
@@ -438,7 +454,7 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
           </span>
         </p>
 
-        {/* Primary Action: Check Answer Button */}
+        {/* Primary Action: Check Answer Button (Reliable SVG) */}
         <div className="w-full max-w-md">
           <button
             type="button"
@@ -446,7 +462,9 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
             disabled={!!submitted}
             className="w-full py-3.5 sm:py-4 px-8 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-lg rounded-2xl border-2 border-[#2B2523] shadow-[4px_6px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
           >
-            <i className="fa-regular fa-circle-check text-xl"></i>
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span>Kiểm tra đáp án</span>
           </button>
         </div>
@@ -460,7 +478,6 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
           </div>
 
           <div className="relative bg-white border-2 border-[#2B2523] rounded-2xl px-4 sm:px-5 py-2.5 shadow-[2px_3px_0px_#2B2523] flex-1">
-            {/* Triangle pointer pointing to avatar */}
             <div className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[7px] border-t-transparent border-r-[10px] border-r-[#2B2523] border-b-[7px] border-b-transparent"></div>
             <div className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-r-[8px] border-r-white border-b-[6px] border-b-transparent"></div>
             <p className="font-quicksand font-bold text-stone-700 text-xs sm:text-sm md:text-base leading-relaxed">
@@ -476,24 +493,22 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
           className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-rose-500 hover:bg-rose-50 hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer"
           title="Báo cáo câu hỏi"
         >
-          <i className="fa-solid fa-flag text-sm sm:text-base"></i>
+          <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
       </div>
 
-      {/* ── Result Feedback Toast ── */}
-      {submitted && (
-        <div
-          className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-2.5 rounded-full text-white text-base font-bold shadow-lg flex items-center gap-2 border-2 border-[#292524] ${
-            submitted.correct ? 'bg-[#588157]' : 'bg-[#D36135]'
-          } animate-bounce-in`}
-        >
-          <span>
-            {submitted.correct
-              ? `✓ Tuyệt vời! "${d.answer}" chính là đáp án chính xác 🎉`
-              : `✗ Đáp án đúng: "${submitted.correctAnswer || d.answer}"`}
-          </span>
-        </div>
-      )}
+      {/* ── Pop-up Result Notification Modal ── */}
+      <ExerciseResultModal
+        isOpen={showResultModal}
+        isCorrect={!!submitted?.correct}
+        word={d.answer}
+        phonetic={d.phonetic}
+        meaning={d.meaning || d.meaningHint}
+        userAnswer={userTyped}
+        onContinue={handleModalContinue}
+      />
     </div>
   );
 }

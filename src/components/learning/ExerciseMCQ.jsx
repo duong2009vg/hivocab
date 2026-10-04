@@ -1,12 +1,14 @@
 // src/components/learning/ExerciseMCQ.jsx
 // 100% Pixel-Perfect match to Google Stitch design (both Desktop & Mobile)
-// Multiple choice question exercise — Pure React.
+// Multiple choice question exercise — Pure React with Pop-up Result Notification.
 
 import React, { useState, useEffect, useCallback } from 'react';
+import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [result, setResult] = useState(null); // { correct, correctIndex }
+  const [showResultModal, setShowResultModal] = useState(false);
   const d = item?.exerciseData || {};
 
   const currentNum = sessionInfo?.currentNum ?? 1;
@@ -16,26 +18,27 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
   useEffect(() => {
     setSelectedIdx(null);
     setResult(null);
+    setShowResultModal(false);
   }, [item]);
 
   // Keyboard: 1-4 select, Enter = check
   useEffect(() => {
     function handleKey(e) {
-      if (result) return;
+      if (showResultModal) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       const num = parseInt(e.key, 10);
       if (num >= 1 && num <= (d.options?.length || 4)) {
         e.preventDefault();
         setSelectedIdx(num - 1);
       }
-      if (e.key === 'Enter' && selectedIdx !== null) {
+      if (e.key === 'Enter' && selectedIdx !== null && !result) {
         e.preventDefault();
         handleCheck();
       }
     }
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [selectedIdx, result, d.options]);
+  }, [selectedIdx, result, d.options, showResultModal]);
 
   const handleSelect = useCallback(
     (idx) => {
@@ -50,14 +53,14 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
     const correctIndex = d.options?.findIndex((o) => o.isCorrect) ?? -1;
     const r = onSubmit(selectedIdx);
     setResult({ ...r, correctIndex });
-    // Auto-advance after delay
-    if (!r.skipped) {
-      setTimeout(() => {
-        setSelectedIdx(null);
-        setResult(null);
-      }, 1600);
-    }
+    setShowResultModal(true);
   }, [result, selectedIdx, d.options, onSubmit]);
+
+  const handleModalContinue = useCallback(() => {
+    setShowResultModal(false);
+    setSelectedIdx(null);
+    setResult(null);
+  }, []);
 
   const playAudio = useCallback(() => {
     const word = d.word || '';
@@ -70,6 +73,11 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
       window.speechSynthesis.speak(u);
     }
   }, [d.word]);
+
+  const chosenOption = selectedIdx !== null ? d.options?.[selectedIdx]?.text : '';
+  const correctOption = result?.correctIndex !== undefined && result.correctIndex >= 0
+    ? d.options?.[result.correctIndex]?.text
+    : '';
 
   return (
     <div className="w-full flex flex-col items-center select-none font-comfortaa">
@@ -113,7 +121,7 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
             )}
           </p>
 
-          {/* Vocabulary Word & Audio Speaker Button */}
+          {/* Vocabulary Word & Audio Speaker Button (Reliable SVG) */}
           <div className="flex items-center justify-center gap-3 mt-1">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-stone-900 font-rounded">
               "{d.word}"
@@ -124,7 +132,9 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
               className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-[#E4EFF5] hover:bg-[#D4E6F1] active:scale-95 border-2 border-[#292524] text-[#253E56] flex items-center justify-center transition shadow-sm cursor-pointer"
               title="Nghe phát âm chuẩn IPA"
             >
-              <i className="fa-solid fa-volume-high text-base sm:text-lg"></i>
+              <svg className="w-5 h-5 text-[#253E56]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
 
@@ -212,8 +222,16 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
                   {isSelected && !result && (
                     <div className="w-3.5 h-3.5 rounded-full bg-[#253E56]"></div>
                   )}
-                  {isCorrect && <i className="fa-solid fa-check text-xs font-black"></i>}
-                  {isWrong && <i className="fa-solid fa-xmark text-xs font-black"></i>}
+                  {isCorrect && (
+                    <svg className="w-4 h-4 text-[#2E7D32]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                  {isWrong && (
+                    <svg className="w-4 h-4 text-[#D32F2F]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                      <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
                   <input
                     type="radio"
                     name="vocab_answer"
@@ -229,7 +247,7 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
           })}
         </div>
 
-        {/* ── Action Button: Submit & Check ── */}
+        {/* ── Action Button: Submit & Check (Reliable SVG) ── */}
         <div className="mt-5 sm:mt-6 pt-1">
           <button
             type="button"
@@ -242,7 +260,9 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
             }`}
           >
             <span>Kiểm tra &amp; Tiếp tục</span>
-            <i className="fa-solid fa-arrow-right text-lg"></i>
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
         </div>
       </div>
@@ -262,7 +282,7 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
         </div>
 
         <div className="flex items-center gap-1.5 text-stone-600 mt-1 sm:mt-0">
-          <i className="fa-regular fa-lightbulb text-amber-500"></i>
+          <span>💡</span>
           <span>
             {d.rootHint || (
               <>
@@ -273,16 +293,16 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
         </div>
       </div>
 
-      {/* ── Result Feedback Toast ── */}
-      {result && (
-        <div
-          className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-2.5 rounded-full text-white text-base font-bold shadow-lg flex items-center gap-2 border-2 border-[#292524] ${
-            result.correct ? 'bg-[#588157]' : 'bg-[#D36135]'
-          } animate-bounce-in`}
-        >
-          <span>{result.correct ? '✓ Tuyệt vời! Chính xác rồi 🎉' : '✗ Chưa chính xác, cùng xem lại nhé!'}</span>
-        </div>
-      )}
+      {/* ── Pop-up Result Notification Modal ── */}
+      <ExerciseResultModal
+        isOpen={showResultModal}
+        isCorrect={!!result?.correct}
+        word={d.word}
+        phonetic={d.phonetic}
+        meaning={correctOption || d.meaning}
+        userAnswer={chosenOption}
+        onContinue={handleModalContinue}
+      />
     </div>
   );
 }
