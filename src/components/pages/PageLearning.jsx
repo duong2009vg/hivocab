@@ -199,15 +199,15 @@ export function PageLearning() {
   }
 
   return (
-    <div id="page-learning" className="page active min-h-screen flex flex-col justify-between crayon-paper-pattern selection:bg-orange-200 selection:text-stone-900 font-comfortaa">
+    <div id="page-learning" className="page active min-h-[100dvh] flex flex-col justify-between crayon-paper-pattern selection:bg-orange-200 selection:text-stone-900 font-comfortaa">
       {/* ── Top Navigation Bar with Progress, Exit, Audio & Flag (Full Reliable SVG Icons) ── */}
-      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2 z-30" data-purpose="quiz-top-bar">
-        <div className="flex items-center justify-between gap-3 sm:gap-4">
+      <header className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-2.5 sm:pt-6 pb-1 sm:pb-2 z-30 shrink-0" data-purpose="quiz-top-bar">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Close / Exit Exercise Button */}
           <button
             type="button"
             onClick={handleClose}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-800 hover:bg-stone-50 hover:translate-y-0.5 active:translate-y-1 transition-all cursor-pointer shrink-0"
+            className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center justify-center text-stone-800 hover:bg-stone-50 hover:translate-y-0.5 active:translate-y-1 transition-all cursor-pointer shrink-0"
             title="Quay lại"
           >
             <svg className="w-5 h-5 text-stone-800" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -216,19 +216,19 @@ export function PageLearning() {
           </button>
 
           {/* Center Progress Track with Crayon Aesthetic */}
-          <div className="flex-1 max-w-2xl px-2 sm:px-4 flex flex-col gap-1 sm:gap-1.5" data-purpose="learning-progress">
-            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-stone-700">
-              <span className="flex items-center gap-1.5 truncate">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#D36135] inline-block shrink-0"></span>
+          <div className="flex-1 max-w-2xl px-1 sm:px-4 flex flex-col gap-0.5 sm:gap-1.5" data-purpose="learning-progress">
+            <div className="flex items-center justify-between text-[11px] sm:text-sm font-bold text-stone-700">
+              <span className="flex items-center gap-1.5 truncate max-w-[170px] sm:max-w-none">
+                <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#D36135] inline-block shrink-0"></span>
                 <span className="truncate tracking-wide">{currentTitle}</span>
               </span>
-              <span className="bg-amber-100/90 text-stone-800 px-2.5 py-0.5 rounded-full border border-stone-300 font-bold shrink-0 ml-2">
+              <span className="bg-amber-100/90 text-stone-800 px-2 sm:px-2.5 py-0.5 rounded-full border border-stone-300 font-bold shrink-0 ml-1 sm:ml-2 text-[10px] sm:text-xs">
                 Từ {currentNum} / {totalNum}
               </span>
             </div>
 
             {/* Progress Bar Track */}
-            <div className="w-full h-3.5 sm:h-4 bg-[#EBDDCB] rounded-full p-0.5 border-2 border-[#2B2523] shadow-inner relative overflow-hidden">
+            <div className="w-full h-3 sm:h-4 bg-[#EBDDCB] rounded-full p-0.5 border-2 border-[#2B2523] shadow-inner relative overflow-hidden">
               <div
                 className="h-full crayon-stripe-bg rounded-full relative transition-all duration-500 ease-out border-r border-stone-800"
                 style={{ width: `${progressPct}%` }}
@@ -240,20 +240,20 @@ export function PageLearning() {
           </div>
 
           {/* Action Utilities: Sound & Report (Full SVG) */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={handleToggleSound}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center hover:bg-amber-50 active:translate-y-0.5 transition cursor-pointer"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center justify-center hover:bg-amber-50 active:translate-y-0.5 transition cursor-pointer"
               title={soundMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
             >
               {soundMuted ? (
-                <svg className="w-5 h-5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round"/>
                   <path d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               ) : (
-                <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                   <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               )}
@@ -261,10 +261,10 @@ export function PageLearning() {
             <button
               type="button"
               onClick={handleReport}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center hover:bg-red-50 text-stone-700 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center justify-center hover:bg-red-50 text-stone-700 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
               title="Báo cáo lỗi từ này"
             >
-              <svg className="w-5 h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                 <path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
@@ -272,10 +272,10 @@ export function PageLearning() {
         </div>
       </header>
 
-      {/* ── Main Exercise Area (Full Width max-w-7xl for Balanced Layout) ── */}
+      {/* ── Main Exercise Area ── */}
       <main
         id="learning-main"
-        className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-6 flex flex-col justify-center items-center relative"
+        className="flex-1 w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 py-1.5 sm:py-6 flex flex-col justify-center items-center relative overflow-x-hidden"
       >
         {isComplete ? (
           /* ── Completion screen ── */
@@ -340,19 +340,20 @@ export function PageLearning() {
       </main>
 
       {/* ── Subtitle / Footer notes ── */}
-      <footer className="w-full max-w-7xl mx-auto px-6 py-3 flex items-center justify-between text-stone-600 font-crayon text-base sm:text-lg">
-        <div className="flex items-center gap-2">
+      <footer className="w-full max-w-5xl mx-auto px-3 sm:px-6 py-1.5 sm:py-3 flex items-center justify-between text-stone-600 font-crayon text-xs sm:text-base shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           <span className="text-stone-500">Từ</span>
-          <span className="font-bold text-stone-800 text-lg sm:text-xl">{currentNum}</span>
+          <span className="font-bold text-stone-800 text-sm sm:text-xl">{currentNum}</span>
           <span className="text-stone-400">/</span>
           <span className="text-stone-600">{totalNum}</span>
-          <span className="text-xs font-sans bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full ml-2">
+          <span className="text-[10px] sm:text-xs font-sans bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full ml-1 sm:ml-2">
             Thuật toán SRS
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-stone-500 text-xs sm:text-sm font-sans font-semibold">
-          <span>HiVocab! Crayon Study Room</span>
+        <div className="flex items-center gap-1.5 text-stone-500 text-[10px] sm:text-sm font-sans font-semibold">
+          <span className="hidden xs:inline">HiVocab! Crayon Study Room</span>
+          <span className="xs:hidden">HiVocab!</span>
           <span>🐾</span>
         </div>
       </footer>

@@ -22,6 +22,49 @@ function renderSentence(sentence, targetWord) {
   return sentence;
 }
 
+function getSlotDimensions(maxPartLen) {
+  if (maxPartLen <= 4) {
+    return {
+      slot: 'w-10 sm:w-13 h-13 sm:h-16 text-xl sm:text-3xl rounded-xl sm:rounded-2xl',
+      gap: 'gap-1.5 sm:gap-3',
+      gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2.5 sm:gap-y-3',
+    };
+  }
+  if (maxPartLen <= 6) {
+    return {
+      slot: 'w-8.5 sm:w-12 h-11 sm:h-15 text-lg sm:text-2xl rounded-lg sm:rounded-2xl',
+      gap: 'gap-1 sm:gap-2.5',
+      gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2 sm:gap-y-2.5',
+    };
+  }
+  if (maxPartLen <= 8) {
+    return {
+      slot: 'w-7 sm:w-11 h-9.5 sm:h-14 text-base sm:text-xl rounded-lg sm:rounded-xl',
+      gap: 'gap-1 sm:gap-2',
+      gapBetweenWords: 'gap-x-2 sm:gap-x-3 gap-y-2',
+    };
+  }
+  if (maxPartLen <= 10) {
+    return {
+      slot: 'w-6 sm:w-10 h-8.5 sm:h-13 text-sm sm:text-lg rounded-md sm:rounded-xl',
+      gap: 'gap-0.5 sm:gap-1.5',
+      gapBetweenWords: 'gap-x-2 gap-y-1.5',
+    };
+  }
+  if (maxPartLen <= 12) {
+    return {
+      slot: 'w-[22px] sm:w-9 h-8 sm:h-12 text-xs sm:text-base rounded-md sm:rounded-lg',
+      gap: 'gap-0.5 sm:gap-1',
+      gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
+    };
+  }
+  return {
+    slot: 'w-5 sm:w-8 h-7.5 sm:h-11 text-xs sm:text-sm rounded-md sm:rounded-lg',
+    gap: 'gap-0.5 sm:gap-1',
+    gapBetweenWords: 'gap-x-1 gap-y-1',
+  };
+}
+
 export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) {
   const d = item?.exerciseData || {};
   const answer = (d.answer || '').trim();
@@ -202,6 +245,16 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
     setHintLevel(0);
   }, [boxes]);
 
+  const handleClearAll = useCallback(() => {
+    if (submitted) return;
+    setValues(boxes.map(() => ''));
+    setFocusedIdx(0);
+    setTimeout(() => {
+      inputRefs.current[0]?.focus();
+      inputRefs.current[0]?.select?.();
+    }, 50);
+  }, [submitted, boxes]);
+
   const playAudio = useCallback(() => {
     const word = d.answer || '';
     if (!word) return;
@@ -218,61 +271,73 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
   const firstLetter = (d.answer || '').trim()[0]?.toUpperCase() || 'A';
   const userTyped = values.join('');
 
+  // Calculate dynamic dimensions for mobile fit
+  const maxPartLetters = Math.max(...answerParts.map((p) => p.length), 1);
+  const dims = getSlotDimensions(maxPartLetters);
+
+  // Formatted preview of user typing with spaces between words
+  const userTypedPreview = answerParts
+    .map((part, pi) => {
+      const start = answerParts.slice(0, pi).reduce((acc, p) => acc + p.length, 0);
+      return [...part].map((_, li) => values[start + li] || '_').join('');
+    })
+    .join(' ');
+
   return (
     <div className="w-full flex flex-col items-center select-none font-comfortaa">
       {/* ── Main Big Crayon Card ── */}
-      <div className="w-full max-w-3xl bg-white rounded-[2.5rem] md:rounded-[36px] border-[3px] border-[#342e2b] p-6 sm:p-8 md:p-10 shadow-[6px_8px_0px_#2c2523] relative transition-all">
+      <div className="w-full max-w-2xl bg-white rounded-[28px] sm:rounded-[36px] border-[3px] border-[#342e2b] p-3.5 sm:p-8 md:p-10 shadow-[4px_6px_0px_#2c2523] relative transition-all">
         {/* Subtle decorative washi tape on top-right corner */}
-        <div className="absolute -top-4 -right-4 w-16 h-8 bg-amber-200/80 border-2 border-[#342e2b] rotate-12 pointer-events-none rounded-sm shadow-xs hidden sm:block"></div>
+        <div className="absolute -top-3 -right-3 w-14 h-7 bg-amber-200/80 border-2 border-[#342e2b] rotate-12 pointer-events-none rounded-sm shadow-xs hidden sm:block"></div>
 
         {/* Sub-header with Audio Trigger (Reliable SVG) */}
-        <div className="flex items-center justify-center gap-2.5 mb-5 sm:mb-6">
-          <span className="text-stone-700 font-semibold text-base sm:text-lg md:text-xl">
+        <div className="flex items-center justify-center gap-2 mb-3 sm:mb-5">
+          <span className="text-stone-700 font-semibold text-sm sm:text-lg md:text-xl">
             Điền từ tiếng Anh có nghĩa:
           </span>
           <button
             type="button"
             onClick={playAudio}
             aria-label="Phát âm từ vựng"
-            className="w-10 h-10 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-stone-800 text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-stone-800 text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-xs cursor-pointer"
             title="Nghe phát âm từ cần điền"
           >
-            <svg className="w-5 h-5 text-sky-800" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-sky-800" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
               <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         </div>
 
         {/* Passage Sentence with Highlighted Blank Word */}
-        <div className="text-center font-crayon leading-relaxed md:leading-[2.6rem] text-xl sm:text-2xl md:text-[1.85rem] text-stone-800 max-w-2xl mx-auto tracking-wide mb-6 sm:mb-8">
+        <div className="text-center font-crayon leading-relaxed sm:leading-[2.4rem] text-lg sm:text-2xl text-stone-800 max-w-2xl mx-auto tracking-wide mb-4 sm:mb-6 px-1">
           {d.sentence ? (
             renderSentence(d.sentence, submitted ? d.answer : values.join('') || '_____')
           ) : (
-            <p className="text-lg sm:text-xl font-bold text-stone-800">
+            <p className="text-base sm:text-xl font-bold text-stone-800">
               "{d.meaningHint || d.meaning || '...'}"
             </p>
           )}
         </div>
 
         {/* Mascot Churbito In-Context Hint Box */}
-        <div className="max-w-xl mx-auto bg-[#fff7ef] rounded-2xl border-2 border-stone-800/90 py-2.5 px-4 sm:px-5 mb-5 flex items-center justify-center gap-3 shadow-[3px_4px_0px_#2c2523]">
-          <span className="text-2xl filter drop-shadow-xs">🐯</span>
-          <p className="text-stone-700 text-xs sm:text-sm md:text-base font-quicksand font-semibold">
+        <div className="max-w-xl mx-auto bg-[#fff7ef] rounded-2xl border-2 border-stone-800/90 py-2 px-3 sm:px-5 mb-4 flex items-center justify-center gap-2 sm:gap-3 shadow-[2px_3px_0px_#2c2523]">
+          <span className="text-xl sm:text-2xl filter drop-shadow-xs">🐯</span>
+          <p className="text-stone-700 text-xs sm:text-sm font-quicksand font-semibold">
             <span className="font-crayon font-bold text-amber-900">Churbito gợi ý:</span> Từ gồm{' '}
             <span className="font-bold text-stone-900 underline decoration-amber-500">
               {totalLetters} ký tự
             </span>{' '}
-            bắt đầu bằng <span className="font-bold text-amber-800 font-crayon text-lg">'{firstLetter}'</span>
+            bắt đầu bằng <span className="font-bold text-amber-800 font-crayon text-base sm:text-lg">'{firstLetter}'</span>
           </p>
         </div>
 
         {/* Hint Expand Pill Toggle */}
-        <div className="flex justify-center mb-6 sm:mb-7">
+        <div className="flex justify-center mb-3 sm:mb-5">
           <button
             type="button"
             onClick={handleRevealHint}
             disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
-            className="crayon-dashed px-5 py-1.5 sm:py-2 rounded-full text-stone-700 hover:text-stone-900 font-semibold text-xs sm:text-sm flex items-center gap-2 transition hover:bg-stone-50 border-stone-400 cursor-pointer shadow-xs disabled:opacity-40"
+            className="crayon-dashed px-4 sm:px-5 py-1 sm:py-1.5 rounded-full text-stone-700 hover:text-stone-900 font-semibold text-xs sm:text-sm flex items-center gap-1.5 transition hover:bg-stone-50 border-stone-400 cursor-pointer shadow-xs disabled:opacity-40"
           >
             <span className="text-amber-600">💡</span>
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
@@ -282,97 +347,123 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
           </button>
         </div>
 
-        {/* ── Letter Input Slots Container (Harmonious Rounded Corners) ── */}
+        {/* ── Live Word Preview Bar (Always Fits & Crystal Clear on Mobile) ── */}
+        <div className="w-full max-w-md mx-auto mb-3 px-1">
+          <div className="bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl py-2 px-3 sm:px-4 shadow-[2px_2px_0px_#2B2523] flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-stone-500 shrink-0">
+              <span className="text-sm">✏️</span>
+              <span className="hidden xs:inline">Từ đang gõ:</span>
+            </div>
+            <div className="flex-1 text-center font-mono font-black text-sm sm:text-lg text-[#2B4566] tracking-wider truncate px-1">
+              {userTyped ? (
+                <span className="text-stone-900 font-extrabold">{userTypedPreview}</span>
+              ) : (
+                <span className="text-stone-400 font-medium italic text-xs">Chạm ô để gõ từng chữ cái...</span>
+              )}
+            </div>
+            {userTyped && !submitted && (
+              <button
+                type="button"
+                onClick={handleClearAll}
+                className="px-2 py-0.5 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold shrink-0 transition cursor-pointer"
+                title="Xóa hết để nhập lại"
+              >
+                Xóa
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* ── Letters Input Box Row (Responsive & Mobile-Fit with Word Wrapping) ── */}
         <div
-          className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-3.5 mb-6 overflow-x-auto py-2 no-scrollbar"
+          className="w-full max-w-full overflow-x-auto py-1.5 mb-3 sm:mb-5 no-scrollbar"
+          style={{ WebkitOverflowScrolling: 'touch' }}
           onClick={(e) => {
             if (e.target.tagName !== 'INPUT') {
               const firstEmpty = inputRefs.current.find((inp, i) => !values[i]);
               const target = firstEmpty || inputRefs.current[inputRefs.current.length - 1];
               target?.focus();
-              target?.select();
+              target?.select?.();
             }
           }}
         >
-          {answerParts.map((part, pi) => {
-            const startOffset = partOffset;
-            partOffset += part.length;
+          <div className={`flex flex-wrap items-center justify-center ${dims.gapBetweenWords} min-w-min mx-auto px-1`}>
+            {answerParts.map((part, pi) => {
+              const startOffset = partOffset;
+              partOffset += part.length;
 
-            return (
-              <span key={pi} className="inline-flex gap-2 sm:gap-2.5 md:gap-3 flex-nowrap justify-center">
-                {[...part].map((_, li) => {
-                  const flatIdx = startOffset + li;
-                  const isFilled = !!values[flatIdx];
-                  const isActive = focusedIdx === flatIdx && !submitted;
+              return (
+                <div key={pi} className={`inline-flex items-center ${dims.gap} flex-nowrap shrink-0`}>
+                  {[...part].map((_, li) => {
+                    const flatIdx = startOffset + li;
+                    const isFilled = !!values[flatIdx];
+                    const isActive = focusedIdx === flatIdx && !submitted;
 
-                  // Harmonious symmetrical rounded-2xl
-                  let slotClass =
-                    'w-11 h-14 sm:w-13 sm:h-16 md:w-14 md:h-18 rounded-2xl flex items-center justify-center font-mono text-2xl md:text-3xl font-bold transition-all ';
+                    let slotClass = `${dims.slot} flex items-center justify-center font-mono font-bold transition-all shrink-0 `;
 
-                  if (!submitted) {
-                    if (isActive) {
-                      slotClass +=
-                        'bg-sky-50 border-[3px] border-blue-600 ring-4 ring-sky-200/80 shadow-[3px_4px_0px_#2c2523] text-blue-700';
-                    } else if (isFilled) {
-                      slotClass +=
-                        'bg-white border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] text-stone-800';
+                    if (!submitted) {
+                      if (isActive) {
+                        slotClass +=
+                          'bg-sky-50 border-[3px] border-blue-600 ring-2 ring-sky-200 shadow-[2px_3px_0px_#2c2523] text-blue-700';
+                      } else if (isFilled) {
+                        slotClass +=
+                          'bg-white border-2 border-stone-800 shadow-[1.5px_2px_0px_#2c2523] text-stone-800';
+                      } else {
+                        slotClass +=
+                          'bg-stone-50/50 border-2 border-stone-300 border-dashed text-stone-400';
+                      }
                     } else {
-                      slotClass +=
-                        'bg-stone-50/50 border-2 border-stone-300 border-dashed text-stone-400';
+                      if (submitted.correct) {
+                        slotClass +=
+                          'bg-green-50 border-[2.5px] border-green-600 shadow-xs text-green-700';
+                      } else {
+                        slotClass +=
+                          'bg-red-50 border-[2.5px] border-red-500 shadow-xs text-red-600';
+                      }
                     }
-                  } else {
-                    if (submitted.correct) {
-                      slotClass +=
-                        'bg-green-50 border-[3px] border-green-600 shadow-[2px_3px_0px_#2c2523] text-green-700';
-                    } else {
-                      slotClass +=
-                        'bg-red-50 border-[3px] border-red-500 shadow-[2px_3px_0px_#2c2523] text-red-600';
-                    }
-                  }
 
-                  return (
-                    <div key={flatIdx} className={slotClass}>
-                      <input
-                        ref={(el) => (inputRefs.current[flatIdx] = el)}
-                        type="text"
-                        maxLength={2}
-                        value={values[flatIdx]}
-                        disabled={!!submitted}
-                        data-fill-index={flatIdx}
-                        className="w-full h-full text-center bg-transparent focus:outline-none uppercase caret-transparent p-0 font-bold"
-                        autoComplete="off"
-                        autoCorrect="off"
-                        autoCapitalize="characters"
-                        spellCheck={false}
-                        onFocus={(e) => {
-                          setFocusedIdx(flatIdx);
-                          e.target.select();
-                          e.target.scrollLeft = 0;
-                        }}
-                        onBlur={(e) => {
-                          e.target.scrollLeft = 0;
-                        }}
-                        onClick={(e) => {
-                          setFocusedIdx(flatIdx);
-                          e.target.select();
-                          e.target.scrollLeft = 0;
-                        }}
-                        onChange={(e) => handleInput(e, flatIdx)}
-                        onKeyDown={(e) => handleKeyDown(e, flatIdx)}
-                      />
-                    </div>
-                  );
-                })}
-                {pi < answerParts.length - 1 && (
-                  <span className="w-2 sm:w-3 shrink-0" aria-hidden="true" />
-                )}
-              </span>
-            );
-          })}
+                    return (
+                      <div key={flatIdx} className={slotClass}>
+                        <input
+                          ref={(el) => (inputRefs.current[flatIdx] = el)}
+                          type="text"
+                          maxLength={2}
+                          value={values[flatIdx]}
+                          disabled={!!submitted}
+                          data-fill-index={flatIdx}
+                          className="w-full h-full text-center bg-transparent focus:outline-none uppercase caret-transparent p-0 font-bold"
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="characters"
+                          spellCheck={false}
+                          onFocus={(e) => {
+                            setFocusedIdx(flatIdx);
+                            e.target.select?.();
+                            e.target.scrollLeft = 0;
+                            e.target.scrollIntoView?.({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                          }}
+                          onBlur={(e) => {
+                            e.target.scrollLeft = 0;
+                          }}
+                          onClick={(e) => {
+                            setFocusedIdx(flatIdx);
+                            e.target.select?.();
+                            e.target.scrollLeft = 0;
+                          }}
+                          onChange={(e) => handleInput(e, flatIdx)}
+                          onKeyDown={(e) => handleKeyDown(e, flatIdx)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Keyboard Navigation Instructions */}
-        <div className="text-center font-quicksand text-xs md:text-sm text-stone-500 font-medium mb-6 sm:mb-8 flex items-center justify-center gap-2 flex-wrap">
+        {/* Keyboard Navigation Instructions - Desktop Only */}
+        <div className="hidden sm:flex text-center font-quicksand text-xs md:text-sm text-stone-500 font-medium mb-5 sm:mb-6 items-center justify-center gap-2 flex-wrap">
           <span>Gõ ký tự trên bàn phím</span>
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-stone-300"></span>
           <span>
@@ -397,9 +488,9 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
             type="button"
             onClick={handleCheck}
             disabled={!!submitted}
-            className="w-full max-w-md py-3.5 sm:py-4 px-8 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-lg sm:text-xl font-bold rounded-2xl border-[3px] border-stone-800 shadow-[4px_6px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
+            className="w-full max-w-md py-3 sm:py-4 px-6 sm:px-8 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-base sm:text-xl font-bold rounded-2xl border-[3px] border-stone-800 shadow-[3px_5px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer disabled:opacity-60"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span>Kiểm tra đáp án</span>

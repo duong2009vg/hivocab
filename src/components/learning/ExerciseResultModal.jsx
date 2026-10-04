@@ -27,8 +27,8 @@ export default function ExerciseResultModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-[2px] animate-fade-in font-comfortaa">
-      <div className="w-full max-w-md bg-white border-[3.5px] border-[#2B2523] rounded-[32px] p-6 sm:p-7 shadow-[6px_8px_0px_#2B2523] text-center relative animate-bounce-in flex flex-col items-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/40 backdrop-blur-[2px] animate-fade-in font-comfortaa">
+      <div className="w-full max-w-md bg-white border-[3px] sm:border-[3.5px] border-[#2B2523] rounded-[28px] sm:rounded-[32px] p-5 sm:p-7 shadow-[5px_7px_0px_#2B2523] sm:shadow-[6px_8px_0px_#2B2523] text-center relative animate-bounce-in flex flex-col items-center">
         {/* Top Floating Badge */}
         {isCorrect ? (
           <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-100 border-2 border-emerald-600 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3 shadow-xs">
@@ -111,7 +111,7 @@ export default function ExerciseResultModal({
           </svg>
         </button>
 
-        <span className="text-[11px] text-stone-400 font-quicksand font-semibold mt-2.5">
+        <span className="hidden sm:inline-block text-[11px] text-stone-400 font-quicksand font-semibold mt-2.5">
           Nhấn <kbd className="px-1.5 py-0.5 bg-stone-100 border border-stone-300 rounded font-mono text-[10px]">Enter</kbd> hoặc <kbd className="px-1.5 py-0.5 bg-stone-100 border border-stone-300 rounded font-mono text-[10px]">Space</kbd> để tiếp tục nhanh
         </span>
       </div>
