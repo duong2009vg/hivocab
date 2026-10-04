@@ -6,7 +6,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useSound } from '../../hooks/useSound.js';
 import { addWord, getCachedTopics } from '../../services/db.js';
-import { lookupWord } from '../../services/dictionaryService.js';
+import { autofillWordWithAI } from '../../services/dictionaryService.js';
 
 export function AddWordModal() {
   const { modals, closeModal } = useModal();
@@ -64,7 +64,7 @@ export function AddWordModal() {
   const handleAiLookup = async () => {
     const clean = word.trim();
     if (!clean) {
-      setErrorMessage('Vui lòng nhập từ tiếng Anh trước khi tra AI!');
+      setErrorMessage('Vui lòng nhập từ tiếng Anh trước khi bấm AI Điền tự động!');
       return;
     }
 
@@ -72,39 +72,21 @@ export function AddWordModal() {
     setErrorMessage('');
 
     try {
-      const entry = await lookupWord(clean);
-      if (entry) {
-        if (entry.phonetic) setPhonetic(entry.phonetic);
-        if (entry.pos) setPos(entry.pos);
-        if (entry.meaning) setMeaning(entry.meaning);
-        if (entry.example && !exampleSentence) {
-          setExampleSentence(entry.example);
+      const data = await autofillWordWithAI(clean);
+      if (data && (data.meaning || data.phonetic || data.example)) {
+        if (data.phonetic) setPhonetic(data.phonetic);
+        if (data.pos) setPos(data.pos);
+        if (data.meaning) setMeaning(data.meaning);
+        if (data.example && !exampleSentence) {
+          setExampleSentence(data.example);
         }
-        success('✨ Bé Hổ và AI đã tự động điền gợi ý!');
+        success('✨ DeepSeek AI đã tự động điền gợi ý!');
       } else {
-        // Fallback: Thử gọi Free Dictionary API
-        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(clean)}`);
-        if (dictRes.ok) {
-          const dictData = await dictRes.json();
-          const first = dictData[0];
-          if (first) {
-            if (first.phonetic && !phonetic) setPhonetic(first.phonetic);
-            const firstMeaning = first.meanings?.[0];
-            if (firstMeaning) {
-              if (!pos) setPos(firstMeaning.partOfSpeech || '');
-              const def = firstMeaning.definitions?.[0];
-              if (def?.example && !exampleSentence) setExampleSentence(def.example);
-              if (def?.definition && !meaning) setMeaning(def.definition);
-            }
-            success('✨ Đã tìm thấy gợi ý từ vựng!');
-            return;
-          }
-        }
-        setErrorMessage(`Không tìm thấy dữ liệu tự động cho "${clean}". Bạn có thể tự điền thủ công nhé!`);
+        setErrorMessage(`Không tìm thấy gợi ý cho "${clean}". Bạn có thể tự điền thủ công nhé!`);
       }
     } catch (err) {
       console.warn('[AddWordModal] AI Lookup error:', err);
-      setErrorMessage('Không thể tra tự động lúc này. Bạn có thể tự điền thủ công nhé!');
+      setErrorMessage('Không thể tra tự động từ DeepSeek AI lúc này. Bạn có thể tự điền thủ công nhé!');
     } finally {
       setIsAiLoading(false);
     }

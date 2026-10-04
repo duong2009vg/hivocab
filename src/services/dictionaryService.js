@@ -1,9 +1,8 @@
 // src/services/dictionaryService.js
-// Dịch vụ tra cứu từ điển đa tầng - Pure React & Supabase + Free Dictionary API Fallback
+// Dịch vụ tra cứu từ điển: Tra cứu dữ liệu từ Supabase (70.000 từ) & Điền từ vựng tự động bằng DeepSeek AI API
 import { supabase } from '../lib/supabaseClient.js';
 
 const RECENT_KEY = 'hi_dict_recent_searches';
-const CACHE_KEY = 'hi_dict_cache_v2';
 const memoryCache = new Map();
 
 function cleanMeaning(raw) {
@@ -21,6 +20,8 @@ function extractPos(rawPos, rawMeaning) {
     if (tag === 'n') return 'noun';
     if (tag === 'adj') return 'adjective';
     if (tag === 'adv') return 'adverb';
+    if (tag === 'prep') return 'preposition';
+    if (tag === 'conj') return 'conjunction';
     return tag;
   }
   return 'từ vựng';
@@ -78,7 +79,8 @@ export function playWordAudio(word) {
 }
 
 /**
- * Tra cứu từ vựng đa tầng
+ * Tra cứu từ điển: Lấy dữ liệu trực tiếp từ Supabase Database (70.000 từ vựng tiếng Việt)
+ * Nếu từ không có trong DB thì fallback sang DeepSeek AI (/api/dictionary hoặc /api/ai-lookup)
  */
 export async function lookupWord(rawWord) {
   if (!rawWord || !rawWord.trim()) return null;
@@ -92,7 +94,7 @@ export async function lookupWord(rawWord) {
     return cached;
   }
 
-  // 2. Tra cứu trong Supabase Words Database (~70.000 từ có sẵn nghĩa tiếng Việt)
+  // 2. Tra cứu trực tiếp trong Supabase Database (~70.000 từ vựng có sẵn nghĩa tiếng Việt)
   try {
     const { data: dbWords, error: dbErr } = await supabase
       .from('words')
@@ -102,32 +104,12 @@ export async function lookupWord(rawWord) {
 
     if (!dbErr && Array.isArray(dbWords) && dbWords.length > 0) {
       const main = dbWords.find((w) => w.phonetic && w.example_sentence) || dbWords[0];
-      let phonetic = main.phonetic || dbWords.find((w) => w.phonetic)?.phonetic || '';
-      let pos = extractPos(main.pos, main.meaning);
+      const phonetic = main.phonetic || dbWords.find((w) => w.phonetic)?.phonetic || '';
+      const pos = extractPos(main.pos, main.meaning);
       const meaning = cleanMeaning(main.meaning);
-      let example = main.example_sentence || dbWords.find((w) => w.example_sentence)?.example_sentence || '';
+      const example = main.example_sentence || dbWords.find((w) => w.example_sentence)?.example_sentence || '';
 
-      // Nếu chưa có phiên âm IPA trong DB, thử lấy nhanh từ Free Dictionary API
-      if (!phonetic) {
-        try {
-          const apiRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
-          if (apiRes.ok) {
-            const apiData = await apiRes.json();
-            const first = apiData?.[0];
-            if (first) {
-              phonetic = first.phonetic || first.phonetics?.find((p) => p.text)?.text || '';
-              if (!pos && first.meanings?.[0]?.partOfSpeech) {
-                pos = first.meanings[0].partOfSpeech;
-              }
-              if (!example && first.meanings?.[0]?.definitions?.[0]?.example) {
-                example = first.meanings[0].definitions[0].example;
-              }
-            }
-          }
-        } catch (_) {}
-      }
-
-      // Xây dựng danh sách entries cho các nét nghĩa
+      // Xây dựng danh sách entries cho các nét nghĩa khác nhau trong DB
       const entries = [];
       const seen = new Set();
       for (const item of dbWords) {
@@ -152,6 +134,13 @@ export async function lookupWord(rawWord) {
         example_vi: '',
         entries: entries.length > 0 ? entries : [{ meaning, pos, example, example_vi: '' }],
         source: 'database',
+        viSummary: meaning,
+        senses: entries.map((e, idx) => ({
+          id: idx + 1,
+          grammar: e.pos ? `[ ${e.pos} ]` : '',
+          definition_vi: e.meaning,
+          examples: e.example ? [{ en: e.example, vi: '' }] : [],
+        })),
       };
 
       memoryCache.set(cacheKey, result);
@@ -162,67 +151,7 @@ export async function lookupWord(rawWord) {
     console.warn('[dictionaryService] Supabase lookup error:', err);
   }
 
-  // 3. Fallback: Free Dictionary API + Backend AI Dictionary API
-  try {
-    const apiRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(cleanWord)}`);
-    if (apiRes.ok) {
-      const apiData = await apiRes.json();
-      const first = apiData?.[0];
-      if (first) {
-        const phonetic = first.phonetic || first.phonetics?.find((p) => p.text)?.text || '';
-        const firstMeaning = first.meanings?.[0];
-        const pos = firstMeaning?.partOfSpeech || 'từ vựng';
-        const def = firstMeaning?.definitions?.[0];
-        const example = def?.example || '';
-        let meaningVi = '';
-
-        // Thử lấy bản dịch tiếng Việt từ backend /api/ai-lookup hoặc /api/dictionary
-        try {
-          const aiRes = await fetch('/api/ai-lookup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ word: cleanWord }),
-          });
-          if (aiRes.ok) {
-            const aiJson = await aiRes.json();
-            if (aiJson.ok && aiJson.meaning) {
-              meaningVi = aiJson.meaning;
-            }
-          }
-        } catch (_) {}
-
-        if (!meaningVi && def?.definition) {
-          meaningVi = def.definition;
-        }
-
-        const entries = (first.meanings || []).slice(0, 3).map((m) => ({
-          meaning: meaningVi || m.definitions?.[0]?.definition || '',
-          pos: m.partOfSpeech || pos,
-          example: m.definitions?.[0]?.example || '',
-          example_vi: '',
-        }));
-
-        const result = {
-          word: first.word || cleanWord,
-          phonetic,
-          pos,
-          meaning: meaningVi,
-          example,
-          example_vi: '',
-          entries: entries.length > 0 ? entries : [{ meaning: meaningVi, pos, example, example_vi: '' }],
-          source: 'api',
-        };
-
-        memoryCache.set(cacheKey, result);
-        addRecentSearch(result.word);
-        return result;
-      }
-    }
-  } catch (err) {
-    console.warn('[dictionaryService] External API lookup error:', err);
-  }
-
-  // 4. Thử tra trực tiếp qua /api/dictionary (Cloudflare Pages Functions)
+  // 3. Fallback: Nếu không có trong Supabase Database -> Tra qua DeepSeek AI (/api/dictionary hoặc /api/ai-lookup)
   try {
     const cfRes = await fetch('/api/dictionary', {
       method: 'POST',
@@ -241,7 +170,37 @@ export async function lookupWord(rawWord) {
           example: d.example || '',
           example_vi: d.example_vi || '',
           entries: d.entries || [{ meaning: d.meaning || '', pos: d.pos || 'từ vựng', example: d.example || '', example_vi: '' }],
-          source: 'cloudflare_api',
+          source: 'deepseek_ai',
+          viSummary: d.meaning || d.viSummary || '',
+          senses: d.senses || [],
+        };
+        memoryCache.set(cacheKey, result);
+        addRecentSearch(result.word);
+        return result;
+      }
+    }
+  } catch (_) {}
+
+  // 4. Dự phòng tiếp qua /api/ai-lookup (DeepSeek AI)
+  try {
+    const aiRes = await fetch('/api/ai-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word: cleanWord }),
+    });
+    if (aiRes.ok) {
+      const aiJson = await aiRes.json();
+      if (aiJson.ok && (aiJson.meaning || aiJson.phonetic)) {
+        const result = {
+          word: cleanWord,
+          phonetic: aiJson.phonetic || '',
+          pos: aiJson.pos || 'từ vựng',
+          meaning: aiJson.meaning || '',
+          example: aiJson.example || '',
+          example_vi: '',
+          entries: [{ meaning: aiJson.meaning || '', pos: aiJson.pos || 'từ vựng', example: aiJson.example || '', example_vi: '' }],
+          source: 'deepseek_ai',
+          viSummary: aiJson.meaning || '',
         };
         memoryCache.set(cacheKey, result);
         addRecentSearch(result.word);
@@ -253,10 +212,58 @@ export async function lookupWord(rawWord) {
   return null;
 }
 
+/**
+ * Điền tự động thông tin từ vựng bằng DeepSeek AI API (/api/ai-lookup)
+ */
+export async function autofillWordWithAI(rawWord) {
+  if (!rawWord || !rawWord.trim()) return null;
+  const cleanWord = rawWord.trim();
+
+  // 1. Gọi trực tiếp DeepSeek AI API (/api/ai-lookup)
+  try {
+    const res = await fetch('/api/ai-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word: cleanWord }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.ok) {
+        return {
+          word: cleanWord,
+          phonetic: data.phonetic || data.data?.phonetic || '',
+          meaning: data.meaning || data.data?.meaning || '',
+          example: data.example || data.data?.example || '',
+          pos: data.pos || data.data?.pos || 'từ vựng',
+          source: 'deepseek_ai',
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('[autofillWordWithAI] DeepSeek API error:', err);
+  }
+
+  // 2. Dự phòng: Lấy dữ liệu từ Supabase database nếu DeepSeek AI offline
+  const dbEntry = await lookupWord(cleanWord);
+  if (dbEntry) {
+    return {
+      word: dbEntry.word || cleanWord,
+      phonetic: dbEntry.phonetic || '',
+      meaning: dbEntry.meaning || '',
+      example: dbEntry.example || '',
+      pos: dbEntry.pos || 'từ vựng',
+      source: 'database',
+    };
+  }
+
+  return null;
+}
+
 // Gắn vào window.HiDict cho tương thích ngược
 if (typeof window !== 'undefined') {
   window.HiDict = {
     lookupWord,
+    autofillWordWithAI,
     getRecentSearches,
     addRecentSearch,
     removeRecentSearch,
@@ -267,6 +274,7 @@ if (typeof window !== 'undefined') {
 
 export default {
   lookupWord,
+  autofillWordWithAI,
   getRecentSearches,
   addRecentSearch,
   removeRecentSearch,

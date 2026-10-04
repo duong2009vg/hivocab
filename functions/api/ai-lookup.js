@@ -2,8 +2,12 @@
 // Cloudflare Pages Function: POST /api/ai-lookup
 // Tra cứu từ vựng và tự động sinh phiên âm IPA, nghĩa tiếng Việt, câu ví dụ qua CKEY AI
 
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-chat';
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
 const CKEY_MODEL = 'deepseek-v4-flash';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -91,9 +95,12 @@ export async function onRequestPost(context) {
         });
     }
 
-    const apiKey = env.CKEY_API_KEY || (typeof process !== 'undefined' ? process.env?.CKEY_API_KEY : '');
-    if (!apiKey) {
-        return new Response(JSON.stringify({ ok: false, error: 'CKEY_API_KEY chưa được cấu hình trên Cloudflare Pages.' }), {
+    const deepseekKey = env.DEEPSEEK_API_KEY || env.DEEPSEEK_KEY || (typeof process !== 'undefined' ? (process.env?.DEEPSEEK_API_KEY || process.env?.DEEPSEEK_KEY) : '');
+    const ckeyKey = env.CKEY_API_KEY || (typeof process !== 'undefined' ? process.env?.CKEY_API_KEY : '');
+    const groqKey = env.GROQ_API_KEY || (typeof process !== 'undefined' ? process.env?.GROQ_API_KEY : '');
+
+    if (!deepseekKey && !ckeyKey && !groqKey) {
+        return new Response(JSON.stringify({ ok: false, error: 'Chưa cấu hình API Key AI (DEEPSEEK_API_KEY hoặc CKEY_API_KEY) trên server.' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -135,50 +142,61 @@ Respond ONLY with a valid JSON object in this exact format:
 }`;
     }
 
-    try {
-        const ckeyRes = await fetch(CKEY_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: CKEY_MODEL,
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are an English dictionary assistant. Respond only with valid JSON.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                response_format: { type: 'json_object' },
-                max_tokens: isBatch ? 1800 : 350,
-                temperature: 0.3,
-            }),
+    // Thử DeepSeek official -> CKEY DeepSeek -> Groq
+    const providers = [];
+    if (deepseekKey) providers.push({ url: DEEPSEEK_URL, key: deepseekKey, model: DEEPSEEK_MODEL });
+    if (ckeyKey) providers.push({ url: CKEY_URL, key: ckeyKey, model: CKEY_MODEL });
+    if (groqKey) providers.push({ url: GROQ_URL, key: groqKey, model: GROQ_MODEL });
+
+    let parsed = null;
+    let lastError = null;
+
+    for (const p of providers) {
+        try {
+            const aiRes = await fetch(p.url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${p.key}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: p.model,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are an English dictionary assistant. Respond only with valid JSON.'
+                        },
+                        {
+                            role: 'user',
+                            content: prompt
+                        }
+                    ],
+                    response_format: { type: 'json_object' },
+                    max_tokens: isBatch ? 1800 : 350,
+                    temperature: 0.3,
+                }),
+            });
+
+            if (aiRes.ok) {
+                const data = await aiRes.json();
+                const msg = data.choices?.[0]?.message;
+                const rawContent = (msg?.content || msg?.reasoning || '').trim();
+                parsed = extractJson(rawContent);
+                if (parsed) break;
+            } else {
+                lastError = await aiRes.text();
+            }
+        } catch (err) {
+            lastError = err.message;
+        }
+    }
+
+    if (!parsed) {
+        return new Response(JSON.stringify({ ok: false, error: lastError || 'Không thể phân tích dữ liệu JSON từ AI.' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
-
-        if (!ckeyRes.ok) {
-            const errText = await ckeyRes.text();
-            return new Response(JSON.stringify({ ok: false, error: `Lỗi từ CKEY API: ${errText}` }), {
-                status: 500,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-        }
-
-        const data = await ckeyRes.json();
-        const msg = data.choices?.[0]?.message;
-        const rawContent = (msg?.content || msg?.reasoning || '').trim();
-        const parsed = extractJson(rawContent);
-
-        if (!parsed) {
-            return new Response(JSON.stringify({ ok: false, error: 'Không thể phân tích dữ liệu JSON từ AI.' }), {
-                status: 500,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-        }
+    }
 
         if (isBatch) {
             const results = Array.isArray(parsed.results) ? parsed.results : (Array.isArray(parsed) ? parsed : []);

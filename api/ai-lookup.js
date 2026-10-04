@@ -1,8 +1,13 @@
 // api/ai-lookup.js
 // Vercel Serverless Function: POST /api/ai-lookup
-// Tra cứu từ vựng và tự động sinh phiên âm IPA, nghĩa tiếng Việt, câu ví dụ qua Groq AI
+// Tra cứu từ vựng và tự động sinh phiên âm IPA, nghĩa tiếng Việt, câu ví dụ qua DeepSeek AI
 
+const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
+const DEEPSEEK_MODEL = 'deepseek-chat';
+const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
+const CKEY_MODEL = 'deepseek-v4-flash';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';
 
 import { setCors } from './_cors.js';
 
@@ -77,9 +82,12 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'Vui lòng cung cấp từ hoặc danh sách từ cần tra cứu.' });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
-    if (!apiKey) {
-        return res.status(500).json({ ok: false, error: 'GROQ_API_KEY chưa được cấu hình trên server.' });
+    const deepseekKey = process.env.DEEPSEEK_API_KEY || process.env.DEEPSEEK_KEY;
+    const ckeyKey = process.env.CKEY_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
+
+    if (!deepseekKey && !ckeyKey && !groqKey) {
+        return res.status(500).json({ ok: false, error: 'Chưa cấu hình API Key AI (DEEPSEEK_API_KEY hoặc CKEY_API_KEY) trên server.' });
     }
 
     let prompt = '';
@@ -118,41 +126,25 @@ Respond ONLY with a valid JSON object in this exact format:
 }`;
     }
 
-    try {
-        let groqRes = await fetch(GROQ_URL, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'openai/gpt-oss-20b',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are an English dictionary assistant. Respond only with valid JSON.'
-                    },
-                    {
-                        role: 'user',
-                        content: prompt
-                    }
-                ],
-                response_format: { type: 'json_object' },
-                max_tokens: isBatch ? 1800 : 350,
-                temperature: 0.3,
-            }),
-        });
+    // Ưu tiên DeepSeek -> CKEY DeepSeek -> Groq
+    const providers = [];
+    if (deepseekKey) providers.push({ url: DEEPSEEK_URL, key: deepseekKey, model: DEEPSEEK_MODEL });
+    if (ckeyKey) providers.push({ url: CKEY_URL, key: ckeyKey, model: CKEY_MODEL });
+    if (groqKey) providers.push({ url: GROQ_URL, key: groqKey, model: GROQ_MODEL });
 
-        // Fallback sang model openai/gpt-oss-120b nếu 20b có sự cố
-        if (!groqRes.ok) {
-            groqRes = await fetch(GROQ_URL, {
+    let parsed = null;
+    let lastError = null;
+
+    for (const p of providers) {
+        try {
+            const aiRes = await fetch(p.url, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${apiKey}`,
+                    'Authorization': `Bearer ${p.key}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'openai/gpt-oss-120b',
+                    model: p.model,
                     messages: [
                         {
                             role: 'system',
@@ -168,21 +160,24 @@ Respond ONLY with a valid JSON object in this exact format:
                     temperature: 0.3,
                 }),
             });
-        }
 
-        if (!groqRes.ok) {
-            const errText = await groqRes.text();
-            return res.status(500).json({ ok: false, error: `Lỗi từ Groq API: ${errText}` });
+            if (aiRes.ok) {
+                const data = await aiRes.json();
+                const msg = data.choices?.[0]?.message;
+                const rawContent = (msg?.content || msg?.reasoning || '').trim();
+                parsed = extractJson(rawContent);
+                if (parsed) break;
+            } else {
+                lastError = await aiRes.text();
+            }
+        } catch (err) {
+            lastError = err.message;
         }
+    }
 
-        const data = await groqRes.json();
-        const msg = data.choices?.[0]?.message;
-        const rawContent = (msg?.content || msg?.reasoning || '').trim();
-        const parsed = extractJson(rawContent);
-
-        if (!parsed) {
-            return res.status(500).json({ ok: false, error: 'Không thể phân tích dữ liệu JSON từ AI.' });
-        }
+    if (!parsed) {
+        return res.status(500).json({ ok: false, error: lastError || 'Không thể phân tích dữ liệu JSON từ AI.' });
+    }
 
         if (isBatch) {
             const results = Array.isArray(parsed.results) ? parsed.results : (Array.isArray(parsed) ? parsed : []);
