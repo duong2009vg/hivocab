@@ -95,16 +95,42 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
 
         {/* ── Center Flashcard Card (Well Proportioned) ── */}
         <section className="flex flex-col items-center w-full max-w-xl xl:max-w-2xl shrink-0">
+          {/* 3D Perspective Flip Container */}
           <div
             onClick={flip}
             tabIndex={0}
             role="button"
-            aria-label="Thẻ ghi nhớ - Chạm để lật thẻ"
-            className="w-full cursor-pointer focus:outline-none"
+            aria-label={`Thẻ ghi nhớ - ${flipped ? 'Mặt sau (Đáp án)' : 'Mặt trước (Câu hỏi)'} - Chạm hoặc bấm Space để lật`}
+            className="w-full card-flip-container cursor-pointer focus:outline-none select-none transition-transform hover:-translate-y-1 duration-200"
+            style={{
+              perspective: '1200px',
+              WebkitPerspective: '1200px',
+            }}
           >
-            {!flipped ? (
-              /* ── FRONT FACE ── */
-              <div className="relative w-full min-h-[460px] sm:min-h-[500px] bg-white rounded-[32px] sm:rounded-[36px] border-[3.5px] border-[#2D2825] shadow-[6px_8px_0px_#2D2825] sm:shadow-[8px_10px_0px_rgba(45,40,37,0.95)] p-6 sm:p-9 flex flex-col justify-between items-center text-center transition-transform hover:-translate-y-0.5 duration-200">
+            {/* Flipping 3D Inner Wrapper */}
+            <div
+              className={`w-full relative preserve-3d ${
+                flipped ? 'flipped-3d' : ''
+              }`}
+              style={{
+                transformStyle: 'preserve-3d',
+                WebkitTransformStyle: 'preserve-3d',
+                transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                transition: 'transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1)',
+              }}
+            >
+              {/* ── FRONT FACE ── */}
+              <div
+                className={`w-full min-h-[460px] sm:min-h-[500px] bg-white rounded-[32px] sm:rounded-[36px] border-[3.5px] border-[#2D2825] shadow-[6px_8px_0px_#2D2825] sm:shadow-[8px_10px_0px_rgba(45,40,37,0.95)] p-6 sm:p-9 flex flex-col justify-between items-center text-center backface-hidden ${
+                  flipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
+                }`}
+                style={{
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  transform: 'rotateY(0deg) translateZ(1px)',
+                  WebkitTransform: 'rotateY(0deg) translateZ(1px)',
+                }}
+              >
                 {/* Header ribbon inside card */}
                 <div className="w-full flex items-center justify-between pb-3.5 border-b-2 border-stone-200/70">
                   <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#EDF6F9] border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825]">
@@ -114,9 +140,24 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                     </span>
                   </div>
 
-                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs font-bold text-stone-700 transition-colors">
-                    <span className="text-base text-[#D36135]">↺</span>
-                    <span>Chạm để lật</span>
+                  <div className="flex items-center gap-2">
+                    {onReport && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReport();
+                        }}
+                        className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                        title="Báo lỗi từ này"
+                      >
+                        <span className="text-xs">⚠️</span>
+                      </button>
+                    )}
+                    <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs font-bold text-stone-700 transition-colors">
+                      <span className="text-base text-[#D36135]">↺</span>
+                      <span>Chạm để lật</span>
+                    </div>
                   </div>
                 </div>
 
@@ -172,9 +213,19 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                   </button>
                 </div>
               </div>
-            ) : (
-              /* ── BACK FACE ── */
-              <div className="relative w-full min-h-[460px] sm:min-h-[500px] bg-white rounded-[32px] sm:rounded-[36px] border-[3.5px] border-[#2D2825] shadow-[6px_8px_0px_#2D2825] sm:shadow-[8px_10px_0px_rgba(45,40,37,0.95)] p-6 sm:p-9 flex flex-col justify-between items-center text-center transition-transform hover:-translate-y-0.5 duration-200">
+
+              {/* ── BACK FACE ── */}
+              <div
+                className={`absolute inset-0 w-full h-full min-h-[460px] sm:min-h-[500px] bg-white rounded-[32px] sm:rounded-[36px] border-[3.5px] border-[#2D2825] shadow-[-6px_8px_0px_#2D2825] sm:shadow-[-8px_10px_0px_rgba(45,40,37,0.95)] p-6 sm:p-9 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 ${
+                  !flipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
+                }`}
+                style={{
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  transform: 'rotateY(180deg) translateZ(1px)',
+                  WebkitTransform: 'rotateY(180deg) translateZ(1px)',
+                }}
+              >
                 {/* Header ribbon inside card */}
                 <div className="w-full flex items-center justify-between pb-3.5 border-b-2 border-stone-200/70">
                   <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#EDF6F9] border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825]">
@@ -184,9 +235,31 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                     </span>
                   </div>
 
-                  <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs font-bold text-stone-700 transition-colors">
-                    <span className="text-base text-[#D36135]">↺</span>
-                    <span>Lật lại mặt trước</span>
+                  <div className="flex items-center gap-2">
+                    {onReport && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onReport();
+                        }}
+                        className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
+                        title="Báo lỗi từ này"
+                      >
+                        <span className="text-xs">⚠️</span>
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        flip();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs font-bold text-stone-700 transition-colors cursor-pointer"
+                    >
+                      <span className="text-base text-[#D36135]">↺</span>
+                      <span>Lật lại mặt trước</span>
+                    </button>
                   </div>
                 </div>
 
@@ -254,7 +327,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                   </button>
                 </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Keyboard Shortcuts Hint */}
