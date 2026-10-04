@@ -361,7 +361,7 @@ export function PageDashboard() {
       <div className="hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
         <div className="flex-1 flex flex-col min-w-0">
           {/* TopBar */}
-          <header className="px-8 py-5 border-b-2 border-[#e6dcce] bg-[#fbf8f2]/80 backdrop-blur-sm sticky top-0 z-10 flex flex-wrap items-center justify-between gap-4">
+          <header className="px-8 py-5 border-b-2 border-[#e6dcce] bg-[#FAF5EB] sticky top-0 z-40 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-black text-crayonText font-quicksand">Chào buổi sáng, {userName} ơi! 🌿</h1>
@@ -409,7 +409,7 @@ export function PageDashboard() {
               {/* Left column */}
               <div className="lg:col-span-7 xl:col-span-8 space-y-7">
                 <section className="bg-[#fffdf9] rounded-3xl p-6 lg:p-7 crayon-border shadow-crayon relative overflow-hidden border-2">
-                  <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 justify-between">
+                  <div className="relative z-1 flex flex-col md:flex-row items-center gap-6 justify-between">
                     <div className="space-y-4 max-w-md">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light text-sage border border-sage/30 text-xs font-bold">
                         <i className="fa-solid fa-sparkles"></i>
@@ -438,7 +438,7 @@ export function PageDashboard() {
                     </div>
                     <div className="flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center">
                       <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
-                      <img src={mascotImg} className="w-full h-full object-contain relative z-10 mix-blend-multiply drop-shadow-sm transition-transform hover:scale-105 duration-300" alt="Mascot"/>
+                      <img src={mascotImg} className="w-full h-full object-contain relative z-1 mix-blend-multiply drop-shadow-sm transition-transform hover:scale-105 duration-300" alt="Mascot"/>
                     </div>
                   </div>
                 </section>

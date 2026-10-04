@@ -156,22 +156,8 @@ export function MainSidebar({ wordCount, streak }) {
         </nav>
       </div>
 
-      {/* Bottom Section: Helper Mascot & Profile Card */}
-      <div className="space-y-4 pt-6 border-t border-[#E8DEC8]/80">
-        {/* Bé Hổ Companion Widget */}
-        <div
-          onClick={() => navigateTo('dashboard')}
-          className="p-3.5 rounded-2xl bg-[#FFFBF3] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center gap-3 cursor-pointer hover:scale-[1.02] transition-transform"
-        >
-          <div className="w-11 h-11 rounded-xl bg-[#FEE8D6] border-2 border-[#3D352E] flex items-center justify-center text-xl shrink-0">
-            🐯
-          </div>
-          <div className="overflow-hidden">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#C85A3F]">Trợ thủ học tập</div>
-            <div className="text-xs font-bold text-[#302A24] truncate">Học cùng bé Hổ 🐾</div>
-            <div className="text-[11px] text-[#786F66] truncate">"Chỉ 15 phút mỗi ngày nhé!"</div>
-          </div>
-        </div>
+      {/* Bottom Section: User Profile Card & Actions */}
+      <div className="space-y-3 pt-4 border-t border-[#E8DEC8]/80">
 
         {/* User Profile Pill */}
         <div

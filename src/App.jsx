@@ -9,7 +9,6 @@ import { ToastProvider } from './context/ToastContext.jsx';
 import MainSidebar from './components/layout/MainSidebar.jsx';
 import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx';
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
-import GlobalBugReportBtn from './components/common/GlobalBugReportBtn.jsx';
 import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
@@ -139,7 +138,6 @@ function AppRoutes() {
         </Suspense>
       </ErrorBoundary>
 
-      {currentRoute !== 'admin' && <GlobalBugReportBtn />}
       <Suspense fallback={null}>
         <BugReportModal />
         <SrsExplainerModal />

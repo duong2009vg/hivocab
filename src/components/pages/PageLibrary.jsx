@@ -26,6 +26,20 @@ function getInitials(name) {
   return name.substring(0, 2).toUpperCase();
 }
 
+function isMaterialIcon(val) {
+  if (!val || typeof val !== 'string') return false;
+  return /^[a-z0-9_-]+$/i.test(val.trim());
+}
+
+function renderTopicIcon(icon, className = '') {
+  if (!icon) return <span className={className}>📚</span>;
+  const trimmed = icon.trim();
+  if (isMaterialIcon(trimmed)) {
+    return <span className={`material-symbols-outlined select-none align-middle ${className}`}>{trimmed}</span>;
+  }
+  return <span className={`select-none ${className}`}>{trimmed}</span>;
+}
+
 function LoadingSpinner() {
   return (
     <div className="flex flex-col items-center justify-center p-12 gap-3">
@@ -336,7 +350,7 @@ function ThreadDetailModal({ lib }) {
                     <span className="text-[#68594D] text-xs font-semibold">{formatTimeAgo(detail.created_at)}</span>
                   </div>
                   <h3 className="font-black text-[#2D2824] text-xl sm:text-2xl mb-2 flex items-center gap-2">
-                    <span>{detail.icon || '📚'}</span>
+                    {renderTopicIcon(detail.icon, 'text-2xl')}
                     <span>{detail.name}</span>
                   </h3>
                   {detail.description && (
@@ -640,7 +654,7 @@ export function PageLibrary() {
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-2xl">{topic.icon || '📚'}</span>
+                          {renderTopicIcon(topic.icon, 'text-2xl')}
                           <h3 className="text-lg font-black text-[#2D2824] truncate">{topic.name}</h3>
                         </div>
                         {topic.description && (
@@ -761,7 +775,7 @@ export function PageLibrary() {
                       className="space-y-2 border-l-4 border-[#E66946] pl-3.5 my-2 cursor-pointer group"
                     >
                       <h4 className="text-lg font-black text-[#2D2824] group-hover:text-[#E66946] transition-colors leading-tight flex items-center gap-2">
-                        <span>{topic.icon || '📚'}</span>
+                        {renderTopicIcon(topic.icon, 'text-xl')}
                         <span className="truncate">{topic.name}</span>
                       </h4>
                       {topic.description && (
@@ -1090,7 +1104,7 @@ export function PageLibrary() {
             lib.topics.map(topic => (
               <article key={topic.id} className="bg-white rounded-[26px_22px_24px_28px] p-4 border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] relative">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">{topic.icon || '📚'}</span>
+                  {renderTopicIcon(topic.icon, 'text-xl')}
                   <h2 className="text-base font-black text-[#2D2824] truncate flex-1">{topic.name}</h2>
                 </div>
                 {topic.description && (
@@ -1177,7 +1191,7 @@ export function PageLibrary() {
                   className="mt-3 pl-3 border-l-2 border-[#D3CDC4] cursor-pointer"
                 >
                   <h3 className="font-black text-sm text-[#2D2824] flex items-center gap-1.5 leading-snug">
-                    <span>{topic.icon || '📚'}</span>
+                    {renderTopicIcon(topic.icon, 'text-base')}
                     <span className="truncate">{topic.name}</span>
                   </h3>
                   {topic.description && (

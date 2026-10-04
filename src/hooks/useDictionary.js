@@ -1,6 +1,14 @@
 // src/hooks/useDictionary.js
 // Reactive hook for Dictionary search, suggestions, recent lookups, and audio
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { supabase } from '../lib/supabaseClient.js';
+import {
+  lookupWord,
+  getRecentSearches,
+  removeRecentSearch,
+  clearRecentSearches,
+  playWordAudio,
+} from '../services/dictionaryService.js';
 
 const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
 const SB_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words';
@@ -19,18 +27,9 @@ export function useDictionary() {
 
   const debounceTimerRef = useRef(null);
 
-  // Sync recent searches from HiDict on mount
+  // Sync recent searches from dictionaryService on mount
   const refreshRecent = useCallback(() => {
-    if (typeof window !== 'undefined' && window.HiDict && typeof window.HiDict.getRecentSearches === 'function') {
-      setRecentSearches(window.HiDict.getRecentSearches());
-    } else if (typeof localStorage !== 'undefined') {
-      try {
-        const saved = JSON.parse(localStorage.getItem('hi_dict_recent_searches') || '[]');
-        setRecentSearches(saved);
-      } catch (_) {
-        setRecentSearches([]);
-      }
-    }
+    setRecentSearches(getRecentSearches());
   }, []);
 
   useEffect(() => {
@@ -55,19 +54,15 @@ export function useDictionary() {
 
     try {
       let list = [];
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB.getSupabase === 'function') {
-        const sb = window.HiDB.getSupabase();
-        if (sb) {
-          const { data, error } = await sb
-            .from('words')
-            .select('word, meaning, pos')
-            .ilike('word', `${cleanQ}%`)
-            .order('word')
-            .limit(8);
-          if (!error && Array.isArray(data)) {
-            list = data;
-          }
-        }
+      const { data, error } = await supabase
+        .from('words')
+        .select('word, meaning, pos')
+        .ilike('word', `${cleanQ}%`)
+        .order('word')
+        .limit(8);
+
+      if (!error && Array.isArray(data)) {
+        list = data;
       }
 
       if (list.length === 0) {
@@ -132,10 +127,7 @@ export function useDictionary() {
       setErrorMessage('');
 
       try {
-        let entry = null;
-        if (typeof window !== 'undefined' && window.HiDict && typeof window.HiDict.lookupWord === 'function') {
-          entry = await window.HiDict.lookupWord(term);
-        }
+        const entry = await lookupWord(term);
 
         if (entry && entry.word) {
           setResult(entry);
@@ -167,44 +159,19 @@ export function useDictionary() {
   }, []);
 
   const removeRecent = useCallback((w) => {
-    if (typeof window !== 'undefined' && window.HiDict && typeof window.HiDict.removeRecentSearch === 'function') {
-      window.HiDict.removeRecentSearch(w);
-      setRecentSearches(window.HiDict.getRecentSearches());
-    } else {
-      setRecentSearches((prev) => {
-        const next = prev.filter((item) => item.toLowerCase() !== w.toLowerCase());
-        try {
-          localStorage.setItem('hi_dict_recent_searches', JSON.stringify(next));
-        } catch (_) {}
-        return next;
-      });
-    }
+    removeRecentSearch(w);
+    setRecentSearches(getRecentSearches());
   }, []);
 
   const clearRecent = useCallback(() => {
-    if (typeof window !== 'undefined' && window.HiDict && typeof window.HiDict.clearRecentSearches === 'function') {
-      window.HiDict.clearRecentSearches();
-      setRecentSearches([]);
-    } else {
-      try {
-        localStorage.removeItem('hi_dict_recent_searches');
-      } catch (_) {}
-      setRecentSearches([]);
-    }
+    clearRecentSearches();
+    setRecentSearches([]);
   }, []);
 
   const playAudio = useCallback((w) => {
     const wordToPlay = w || (result && result.word);
     if (!wordToPlay) return;
-    if (typeof window !== 'undefined' && window.HiDict && typeof window.HiDict.playWordAudio === 'function') {
-      window.HiDict.playWordAudio(wordToPlay);
-    } else if (typeof window !== 'undefined' && window.HiAudio && typeof window.HiAudio.playWord === 'function') {
-      window.HiAudio.playWord(wordToPlay);
-    } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(wordToPlay);
-      u.lang = 'en-US';
-      window.speechSynthesis.speak(u);
-    }
+    playWordAudio(wordToPlay);
   }, [result]);
 
   const copyWord = useCallback(async (w) => {

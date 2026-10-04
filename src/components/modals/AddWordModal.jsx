@@ -6,6 +6,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useSound } from '../../hooks/useSound.js';
 import { addWord, getCachedTopics } from '../../services/db.js';
+import { lookupWord } from '../../services/dictionaryService.js';
 
 export function AddWordModal() {
   const { modals, closeModal } = useModal();
@@ -15,6 +16,8 @@ export function AddWordModal() {
   const isOpen = Boolean(modals?.addWord?.open);
   const initialTopicId = modals?.addWord?.topicId || null;
   const initialPassageId = modals?.addWord?.passageId || null;
+  const initialWord = modals?.addWord?.initialWord || modals?.addWord?.word || '';
+  const initialMeaning = modals?.addWord?.initialMeaning || modals?.addWord?.meaning || '';
 
   const [word, setWord] = useState('');
   const [phonetic, setPhonetic] = useState('');
@@ -41,15 +44,15 @@ export function AddWordModal() {
 
     setTopicId(targetTopicId);
     setPassageId(initialPassageId || (typeof window !== 'undefined' ? window._currentPassageId : null));
-    setWord('');
+    setWord(initialWord || '');
     setPhonetic('');
     setPos('');
-    setMeaning('');
+    setMeaning(initialMeaning || '');
     setExampleSentence('');
     setNotes('');
     setErrorMessage('');
     setIsSubmitting(false);
-  }, [isOpen, initialTopicId, initialPassageId]);
+  }, [isOpen, initialTopicId, initialPassageId, initialWord, initialMeaning]);
 
   if (!isOpen) return null;
 
@@ -69,35 +72,36 @@ export function AddWordModal() {
     setErrorMessage('');
 
     try {
-      // 1. Thử gọi Free Dictionary API trước để lấy phonetic và meaning cơ bản
-      const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(clean)}`);
-      if (dictRes.ok) {
-        const dictData = await dictRes.json();
-        const entry = dictData[0];
-        if (entry) {
-          if (entry.phonetic) setPhonetic(entry.phonetic);
-          const firstMeaning = entry.meanings?.[0];
-          if (firstMeaning) {
-            setPos(firstMeaning.partOfSpeech || '');
-            const def = firstMeaning.definitions?.[0];
-            if (def?.example && !exampleSentence) {
-              setExampleSentence(def.example);
+      const entry = await lookupWord(clean);
+      if (entry) {
+        if (entry.phonetic) setPhonetic(entry.phonetic);
+        if (entry.pos) setPos(entry.pos);
+        if (entry.meaning) setMeaning(entry.meaning);
+        if (entry.example && !exampleSentence) {
+          setExampleSentence(entry.example);
+        }
+        success('✨ Bé Hổ và AI đã tự động điền gợi ý!');
+      } else {
+        // Fallback: Thử gọi Free Dictionary API
+        const dictRes = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(clean)}`);
+        if (dictRes.ok) {
+          const dictData = await dictRes.json();
+          const first = dictData[0];
+          if (first) {
+            if (first.phonetic && !phonetic) setPhonetic(first.phonetic);
+            const firstMeaning = first.meanings?.[0];
+            if (firstMeaning) {
+              if (!pos) setPos(firstMeaning.partOfSpeech || '');
+              const def = firstMeaning.definitions?.[0];
+              if (def?.example && !exampleSentence) setExampleSentence(def.example);
+              if (def?.definition && !meaning) setMeaning(def.definition);
             }
+            success('✨ Đã tìm thấy gợi ý từ vựng!');
+            return;
           }
         }
+        setErrorMessage(`Không tìm thấy dữ liệu tự động cho "${clean}". Bạn có thể tự điền thủ công nhé!`);
       }
-
-      // 2. Thử gọi Google Translate để lấy nghĩa tiếng Việt chính xác
-      const transRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(clean)}`);
-      if (transRes.ok) {
-        const transData = await transRes.json();
-        const viText = transData?.[0]?.[0]?.[0];
-        if (viText && !meaning) {
-          setMeaning(viText);
-        }
-      }
-
-      success('✨ Bé Hổ và AI đã tự động điền gợi ý!');
     } catch (err) {
       console.warn('[AddWordModal] AI Lookup error:', err);
       setErrorMessage('Không thể tra tự động lúc này. Bạn có thể tự điền thủ công nhé!');
