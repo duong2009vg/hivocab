@@ -61,10 +61,10 @@ export function PageLanding() {
           {/* Logo app bản sáp màu đã tách nền ở góc trên cùng bên trái */}
           <div
             onClick={() => navigateTo('landing')}
-            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none group shrink-0"
+            className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group shrink-0"
             title="HiVocab – Trang chủ tranh sáp màu"
           >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
               <img
                 src="/logo-hi-transparent.png"
                 alt="HiVocab Logo Sáp Màu"
@@ -74,7 +74,7 @@ export function PageLanding() {
                 }}
               />
             </div>
-            <span className="font-quicksand font-black text-2xl sm:text-[26px] md:text-3xl tracking-tight text-[#3D352E] leading-none">
+            <span className="font-quicksand font-bold text-sm sm:text-base md:text-lg tracking-tight text-[#3D352E] leading-none">
               HiVocab
             </span>
           </div>
@@ -442,16 +442,16 @@ export function PageLanding() {
           
           {/* Logo & Thông tin giới thiệu */}
           <div className="md:col-span-2 space-y-3 pr-0 md:pr-8">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <img
                 src="/logo-hi-transparent.png"
                 alt="HiVocab Logo"
-                className="h-10 w-auto object-contain"
+                className="h-12 sm:h-14 w-auto object-contain"
                 onError={(e) => {
                   e.currentTarget.src = '/mascot/mascot_cozy.png';
                 }}
               />
-              <span className="font-quicksand font-black text-2xl text-[#3D352E] tracking-tight">
+              <span className="font-quicksand font-bold text-base sm:text-lg text-[#3D352E] tracking-tight">
                 HiVocab
               </span>
             </div>
