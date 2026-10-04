@@ -1,209 +1,469 @@
+// src/components/pages/PageLanding.jsx
+// Trang giới thiệu HiVocab mô phỏng một bức tranh sáp màu của trẻ con (Cozy Crayon Handcrafted Picture Book)
 import React from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageLanding() {
   const { navigateTo } = useRoute();
+
   return (
-    <div id="page-landing" className="page font-inter active">
-      <div id="landing-main-wrapper" className="relative overflow-hidden w-full">
-        <div id="landing-hero-backdrop" className="absolute inset-0 z-0 gradient-asagiri transition-all duration-700 pointer-events-none select-none">
-          <img id="landing-bg-svg" src="/bg-morning.svg" alt="" className="w-full h-full object-cover object-top pointer-events-none select-none" />
+    <div
+      id="page-landing"
+      className="page active min-h-screen font-nunito text-[#3D352E] bg-[#FAF5EB] relative flex flex-col justify-between selection:bg-[#EBDDC8] selection:text-[#3D352E]"
+      style={{
+        backgroundImage: 'radial-gradient(#E2D6C3 1.2px, transparent 1.2px)',
+        backgroundSize: '24px 24px',
+      }}
+    >
+      {/* ── TOP DECORATIVE CRAYON HEADER & NAVIGATION BAR ── */}
+      <header className="sticky top-0 z-40 px-4 sm:px-8 py-3.5 bg-[#FAF5EB]/90 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          
+          {/* Logo app bản sáp màu đã tách nền ở góc trên cùng bên trái */}
           <div
-            className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/45 to-black/85 w-full h-full pointer-events-none select-none"
-            style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.65) 0%, rgba(15,23,42,0.45) 50%, rgba(15,23,42,0.88) 100%)' }}
-          ></div>
+            onClick={() => navigateTo('landing')}
+            className="flex items-center gap-2.5 cursor-pointer select-none group"
+            title="HiVocab – Trang chủ tranh sáp màu"
+          >
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-transform group-hover:scale-105">
+              <img
+                src="/logo-hi-transparent.png"
+                alt="HiVocab Logo Sáp Màu"
+                className="w-full h-full object-contain filter drop-shadow-xs"
+                onError={(e) => {
+                  e.currentTarget.src = '/mascot/mascot_cozy.png';
+                }}
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-quicksand font-black text-2xl sm:text-[26px] tracking-tight text-[#3D352E] leading-none">
+                HiVocab<span className="text-[#DE5D53]">!</span>
+              </span>
+              <span className="text-[10px] font-bold text-[#86756C] tracking-wider uppercase mt-0.5">
+                Vườn tranh từ vựng 🌿
+              </span>
+            </div>
+          </div>
+
+          {/* Desktop Navigation Links (Pill viên con nhộng sáp màu) */}
+          <nav
+            aria-label="Điều hướng trang giới thiệu"
+            className="hidden md:flex items-center gap-1.5 bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] rounded-full px-3 py-1.5"
+          >
+            <button
+              type="button"
+              onClick={() => navigateTo('features')}
+              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+            >
+              🎨 Tính năng
+            </button>
+            <span className="text-[#DECDBB] select-none">•</span>
+            <button
+              type="button"
+              onClick={() => navigateTo('reviews')}
+              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+            >
+              💬 Đánh giá
+            </button>
+            <span className="text-[#DECDBB] select-none">•</span>
+            <button
+              type="button"
+              onClick={() => navigateTo('faq')}
+              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+            >
+              💡 FAQ
+            </button>
+            <span className="text-[#DECDBB] select-none">•</span>
+            <button
+              type="button"
+              onClick={() => navigateTo('support')}
+              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+            >
+              💌 Hỗ trợ
+            </button>
+          </nav>
+
+          {/* Action Buttons: Bắt đầu ngay & Đăng nhập */}
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => navigateTo('login')}
+              className="px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-black rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+            >
+              Đăng nhập
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateTo('dashboard')}
+              className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
+            >
+              <span>Bắt đầu ngay</span>
+              <span className="text-sm">✏️</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* ── HERO SECTION: BỨC TRANH SÁP MÀU VỚI BÉ MASCOT VẪY TAY CHÀO ── */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-14 flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          
+          {/* CỘT TRÁI: LỜI GIỚI THIỆU ẤM ÁP & HÀNH ĐỘNG HỌC TẬP */}
+          <div className="lg:col-span-7 flex flex-col items-start space-y-5 text-left">
+            
+            {/* Tag sáp màu xinh xắn */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5EFE2] border-2 border-[#8FB383] text-[#476739] text-xs font-black shadow-2xs rotate-[-1deg]">
+              <span>🖍️</span>
+              <span>Bức tranh học từ vựng thủ công mỗi ngày</span>
+              <span className="text-xs">🐾</span>
+            </div>
+
+            {/* Tiêu đề chính nét bút sáp đậm */}
+            <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[54px] text-[#3D352E] tracking-tight leading-[1.15]">
+              Cùng Bé Hổ vẽ nên{' '}
+              <span className="text-[#DE5D53] relative inline-block">
+                vốn từ vựng
+                <svg
+                  className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
+                  viewBox="0 0 100 20"
+                  preserveAspectRatio="none"
+                  fill="currentColor"
+                >
+                  <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
+                </svg>
+              </span>{' '}
+              vững chắc nhất! 🌿
+            </h1>
+
+            {/* Lời dẫn truyện ấm áp */}
+            <p className="text-sm sm:text-base lg:text-lg text-[#6E5D53] font-medium leading-relaxed max-w-xl">
+              Học tiếng Anh như lật từng trang tập vẽ màu sáp. Hơn <strong>66.000+ từ vựng học thuật Cambridge & IELTS</strong> được ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và đọc hiểu song ngữ tương tác.
+            </p>
+
+            {/* Các nút gọi hành động chính */}
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+              <button
+                type="button"
+                onClick={() => navigateTo('dashboard')}
+                className="px-7 py-3.5 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
+              >
+                <span>Vào phòng học ngay</span>
+                <span className="text-xl">🚀</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => navigateTo('features')}
+                className="px-6 py-3.5 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Khám phá tính năng</span>
+                <span>🎨</span>
+              </button>
+            </div>
+
+            {/* Sticker ghi chú nét sáp nhỏ phía dưới */}
+            <div className="pt-3 flex flex-wrap items-center gap-3 sm:gap-6 text-xs font-bold text-[#8A796F]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#F4B41A] text-sm">★</span>
+                <span>Thuật toán ngắt quãng SRS SM-2</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#DE5D53] text-sm">❤</span>
+                <span>Song ngữ Anh - Việt che dịch</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[#557A46] text-sm">✓</span>
+                <span>38+ Đề thi THPT Quốc Gia CBT</span>
+              </div>
+            </div>
+          </div>
+
+          {/* CỘT PHẢI: BỨC TRANH BÉ MASCOT ĐANG VẪY TAY CHÀO KÈM LỜI MỜI */}
+          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+            
+            {/* Khung tranh sáp màu lớn */}
+            <div className="w-full max-w-md bg-white border-[3.5px] border-[#3D352E] rounded-[36px] p-6 sm:p-8 shadow-[6px_8px_0px_#3D352E] relative flex flex-col items-center text-center rotate-1 hover:rotate-0 transition-transform duration-300">
+              
+              {/* Cúc ghim giấy sáp trang trí trên đầu khung */}
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#DE5D53] border-2 border-[#3D352E] flex items-center justify-center shadow-xs">
+                <div className="w-2.5 h-2.5 rounded-full bg-white border border-[#3D352E]"></div>
+              </div>
+
+              {/* Đám mây thoại hình bong bóng sáp màu */}
+              <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-4 py-2.5 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base flex items-center gap-2 mb-3 mt-1 transform -rotate-2">
+                <span>"Chào bạn học ơi! Cùng tớ vào học nhé! 🐾"</span>
+                {/* Mũi tên bong bóng chỉ xuống mascot */}
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#FFF9EE] border-r-2 border-b-2 border-[#3D352E] transform rotate-45"></div>
+              </div>
+
+              {/* Ảnh chú hổ Bé Mascot Churbito vẫy tay chào */}
+              <div className="relative w-52 h-52 sm:w-64 sm:h-64 my-1 flex items-center justify-center">
+                {/* Vùng tỏa màu sáp dịu nhẹ đằng sau */}
+                <div className="absolute inset-2 bg-[#FEEFEA] rounded-full filter blur-md -z-0"></div>
+                <img
+                  src="/mascot/mascot_cozy.png"
+                  alt="Bé Hổ Churbito vẫy tay chào bạn học"
+                  className="w-full h-full object-contain relative z-10 mix-blend-multiply drop-shadow-sm transition-transform duration-300 hover:scale-105 select-none"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+
+              {/* Thẻ tên bé Hổ bằng phong cách nét vẽ sáp */}
+              <div className="mt-1 space-y-1">
+                <h2 className="font-quicksand font-black text-xl text-[#3D352E]">
+                  Bé Hổ Churbito 🐯
+                </h2>
+                <p className="text-xs font-semibold text-[#86756C]">
+                  Người bạn nhỏ đồng hành cùng bạn ghi nhớ 15 phút mỗi ngày!
+                </p>
+              </div>
+
+              {/* Nút nhỏ mời học tương tác */}
+              <button
+                type="button"
+                onClick={() => navigateTo('dashboard')}
+                className="mt-4 w-full py-2.5 px-4 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm font-black rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <span>Mở tập vẽ từ vựng ngay</span>
+                <span>📖</span>
+              </button>
+            </div>
+
+            {/* Nhãn dán sticker bé bên cạnh trang trí */}
+            <div className="hidden sm:flex absolute -bottom-5 -left-4 bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] rounded-2xl px-3 py-1.5 text-xs font-bold text-[#DE5D53] rotate-[-6deg]">
+              ★ Giữ lửa mỗi ngày!
+            </div>
+            <div className="hidden sm:flex absolute -top-4 -right-3 bg-[#EAF3E7] border-2 border-[#557A46] shadow-[2px_3px_0px_#557A46] rounded-2xl px-3 py-1.5 text-xs font-bold text-[#557A46] rotate-[8deg]">
+              🌱 100% Không áp lực!
+            </div>
+          </div>
         </div>
 
-        <section className="relative z-10 min-h-screen flex flex-col pt-6 pb-20 px-6 sm:px-8">
-          <header className="relative z-20 flex items-center justify-between mx-auto w-full max-w-7xl">
-            <div className="flex-shrink-0 flex items-center">
-              <a className="cursor-pointer" onClick={() => navigateTo('landing')} aria-label="Hi - Trang chu">
-                <img className="brand-logo-hero" src="logo-mark-white.svg" alt="Hi" />
-              </a>
-            </div>
-            <nav className="hidden lg:flex items-center space-x-1 glass-nav rounded-full px-2 py-1.5">
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('features')}>
-                Tính năng
-              </a>
-              <div className="w-px h-4 bg-white/30 mx-1"></div>
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('reviews')}>
-                Đánh giá
-              </a>
-              <div className="w-px h-4 bg-white/30 mx-1"></div>
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('support')}>
-                Hỗ trợ
-              </a>
-              <div className="w-px h-4 bg-white/30 mx-1"></div>
-              <a className="text-white hover:bg-white/20 px-4 py-2 rounded-full text-sm font-medium transition-colors cursor-pointer" onClick={() => navigateTo('faq')}>
-                FAQ
-              </a>
-            </nav>
-            <div className="flex items-center space-x-3">
-              <a
-                className="inline-flex items-center justify-center px-4 py-2 rounded-lg text-white bg-white/20 hover:bg-white/30 border border-white/30 text-xs sm:text-sm font-semibold backdrop-blur-sm transition-colors cursor-pointer"
-                onClick={() => navigateTo('dashboard')}
-              >
-                Bắt đầu ngay
-              </a>
-              <a
-                className="inline-flex items-center justify-center px-5 py-2 rounded-lg text-gray-900 bg-white hover:bg-gray-100 text-xs sm:text-sm font-semibold shadow-sm transition-colors cursor-pointer"
-                onClick={() => navigateTo('login')}
-              >
-                Đăng nhập
-              </a>
-            </div>
-          </header>
+        {/* ── SECTION 2: 3 BỨC TRANH BƯU THIẾP TÍNH NĂNG CỐT LÕI ── */}
+        <section className="mt-16 sm:mt-24">
+          <div className="text-center space-y-2 mb-10">
+            <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider bg-[#FDEAE2] px-3 py-1 rounded-full border border-[#F8C8B8]">
+              Tranh ghép tính năng
+            </span>
+            <h2 className="font-quicksand font-black text-2xl sm:text-4xl text-[#3D352E]">
+              Vì sao bạn sẽ yêu thích HiVocab? 🎨
+            </h2>
+            <p className="text-xs sm:text-sm text-[#78685E] max-w-lg mx-auto">
+              Không còn học vẹt nhàm chán. Mỗi bài học là một trải nghiệm ghi nhớ ngập tràn sắc màu và khoa học.
+            </p>
+          </div>
 
-          <main className="relative z-10 flex-grow flex items-center max-w-7xl mx-auto w-full mt-16 sm:mt-20 lg:mt-28">
-            <div className="grid lg:grid-cols-12 gap-8 items-center w-full">
-              <div className="lg:col-span-7 max-w-xl text-left pr-0 lg:pr-4 fade-in">
-                <div id="hero-time-badge" className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold mb-3 border border-white/30">
-                  <span className="material-symbols-outlined text-sm">schedule</span>
-                  <span id="hero-time-label">Nền tảng học từ vựng & Luyện thi tiếng Anh</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            {/* Card 1: Kho 66.000+ từ vựng */}
+            <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#FEEFEA] border-2 border-[#3D352E] flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                  📚
                 </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight leading-snug mb-3">
-                  Làm chủ từ vựng tiếng Anh & Đọc hiểu IELTS
-                </h1>
-                <p className="text-xs sm:text-sm lg:text-base text-white/85 mb-6 max-w-md leading-relaxed">
-                  Ghi nhớ bền vững hơn 66.000 từ vựng học thuật chuẩn Cambridge với phương pháp Lặp lại ngắt quãng (Spaced Repetition) và Đọc hiểu chủ động.
+                <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
+                  Kho 66.000+ Từ Học Thuật
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
+                  Trọn bộ Cambridge 10–21, IELTS Actual Tests, Oxford 3000 và Destination C1-C2 chuẩn hóa phiên âm IPA, nghĩa tiếng Việt và câu ví dụ ngữ cảnh thật.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-start">
-                  <a
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent text-sm font-bold rounded-xl text-gray-900 bg-white hover:bg-gray-100 shadow-md hover:shadow-lg transition-all cursor-pointer"
-                    onClick={() => navigateTo('dashboard')}
-                  >
-                    <span>Bắt đầu ngay</span>
-                    <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                  </a>
-                </div>
               </div>
-              <div className="lg:col-span-5 hidden lg:flex flex-col gap-3.5 relative ml-auto w-full max-w-[360px] fade-in" style={{ animationDelay: '0.2s' }}>
-                <div
-                  onClick={() => navigateTo('dashboard')}
-                  className="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg"
-                >
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
-                  <span className="text-white/70 text-xs font-medium uppercase tracking-wider">Trải nghiệm</span>
-                  <span className="text-white text-sm font-semibold truncate">CAM 19 • Test 2 • Passage 1 →</span>
-                </div>
-                <div
+              <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
+                <button
+                  type="button"
                   onClick={() => navigateTo('features')}
-                  className="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg"
+                  className="text-xs font-black text-[#DE5D53] hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <div className="w-2.5 h-2.5 rounded-full bg-blue-400"></div>
-                  <span className="text-white/70 text-xs font-medium uppercase tracking-wider">Độc quyền</span>
-                  <span className="text-white text-sm font-semibold">Đọc Chủ Động & Che Dịch →</span>
-                </div>
-                <div
-                  onClick={() => navigateTo('dashboard')}
-                  className="glass-card-hero rounded-2xl p-4 flex items-center gap-3 backdrop-blur-md border border-white/25 hover:scale-105 transition-all cursor-pointer shadow-lg"
-                >
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-400"></div>
-                  <span className="text-white/70 text-xs font-medium uppercase tracking-wider">Kho từ</span>
-                  <span className="text-white text-sm font-semibold">66.000+ từ Cambridge & Vol →</span>
-                </div>
+                  <span>Xem chi tiết danh mục</span>
+                  <span>➔</span>
+                </button>
               </div>
             </div>
-          </main>
-        </section>
 
-        <section className="relative z-10 py-20 px-6 sm:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16 fade-in">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white drop-shadow-md">Tại sao nên chọn HiVocab?</h2>
-              <p className="mt-4 text-sm sm:text-base lg:text-lg text-white/85 max-w-2xl mx-auto drop-shadow-sm">
-                Hệ sinh thái học từ vựng học thuật toàn diện, biến việc luyện đề IELTS thành trải nghiệm ghi nhớ sâu sắc và bền vững.
-              </p>
+            {/* Card 2: Lặp lại ngắt quãng SRS */}
+            <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#EAF3E7] border-2 border-[#3D352E] flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                  🔄
+                </div>
+                <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
+                  Lặp Lại Ngắt Quãng SRS v4
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
+                  Thuật toán thông minh tính toán chu kỳ quên tự nhiên của não bộ, tự động nhắc nhở ôn tập đúng thời điểm vàng để biến từ mới thành phản xạ dài hạn.
+                </p>
+              </div>
+              <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('dashboard')}
+                  className="text-xs font-black text-[#557A46] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Khám phá thuật toán SRS</span>
+                  <span>➔</span>
+                </button>
+              </div>
             </div>
-            <div className="grid md:grid-cols-3 gap-6 md:gap-8 fade-in" style={{ animationDelay: '0.15s' }}>
-              <div className="text-left p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl hover:translate-y-[-4px] transition-all">
-                <div className="w-14 h-14 bg-blue-500/15 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-blue-500/20">
-                  <span className="material-symbols-outlined text-3xl">menu_book</span>
+
+            {/* Card 3: Đọc hiểu song ngữ che dịch */}
+            <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
+              <div>
+                <div className="w-12 h-12 rounded-2xl bg-[#E6F3FB] border-2 border-[#3D352E] flex items-center justify-center text-2xl mb-4 shadow-2xs">
+                  🔍
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2.5">Kho 66.000+ từ vựng Cam & Vol</h3>
-                <p className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">
-                  Trọn bộ Cambridge 10–21 và IELTS Actual Tests Vol 1–9 được chuẩn hóa từ loại (POS), phiên âm (IPA) và câu ví dụ thật trích từ chính bài đọc.
+                <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
+                  Đọc Song Ngữ & Che Dịch
+                </h3>
+                <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
+                  Chế độ rèm che Curtain Mode cho phép bạn đọc báo, đọc đề IELTS đối sánh câu thông minh, kích thích trí não tự đoán nghĩa trước khi bấm xem giải thích.
                 </p>
               </div>
-              <div className="text-left p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl hover:translate-y-[-4px] transition-all">
-                <div className="w-14 h-14 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-emerald-500/20">
-                  <span className="material-symbols-outlined text-3xl">vertical_split</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2.5">Chế độ Đọc Chủ Động (Curtain Mode)</h3>
-                <p className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">
-                  Đọc song ngữ Anh - Việt đối sánh với tính năng rèm che tương tác, kết hợp bài tập đục lỗ kích thích tư duy tự suy luận nghĩa trong ngữ cảnh.
-                </p>
-              </div>
-              <div className="text-left p-6 sm:p-8 rounded-3xl bg-white/90 dark:bg-black/60 backdrop-blur-xl border border-white/30 dark:border-white/10 shadow-2xl hover:translate-y-[-4px] transition-all">
-                <div className="w-14 h-14 bg-purple-500/15 text-purple-600 dark:text-purple-400 rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-purple-500/20">
-                  <span className="material-symbols-outlined text-3xl">bolt</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white mb-2.5">Lặp lại ngắt quãng (SRS SM-2)</h3>
-                <p className="text-gray-700 dark:text-gray-300 text-xs sm:text-sm md:text-base leading-relaxed">
-                  Thuật toán khoa học phân tầng 5 cấp độ trí nhớ, tự động nhắc nhở ôn tập vào đúng thời điểm bạn sắp quên để khắc sâu vĩnh viễn.
-                </p>
+              <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('features')}
+                  className="text-xs font-black text-[#2A7BA0] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Trải nghiệm phòng đọc</span>
+                  <span>➔</span>
+                </button>
               </div>
             </div>
           </div>
         </section>
-      </div>
 
-      {/* Footer ONLY for Landing Page */}
-      <footer className="border-t border-gray-200/80 dark:border-white/10 bg-white dark:bg-surface-container-low text-[#6E6E73] text-sm py-12 px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-          <div className="md:col-span-2 space-y-4 pr-0 md:pr-8">
-            <div className="flex items-center gap-2.5">
-              <img src="/logo-mark.svg" alt="HiVocab Logo" className="h-8 w-auto" />
-              <span className="font-bold text-xl text-gray-900 dark:text-white tracking-tight">HiVocab</span>
+        {/* ── SECTION 3: BỨC TRANH LỜI MỜI VÀO PHÒNG HỌC ── */}
+        <section className="mt-14 sm:mt-20">
+          <div className="w-full bg-[#FFFDF9] border-[3px] border-[#3D352E] rounded-[32px] p-6 sm:p-10 shadow-[5px_7px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="space-y-2 text-center md:text-left">
+              <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wide">
+                Bé Hổ đang đợi bạn 🐾
+              </span>
+              <h3 className="font-quicksand font-black text-2xl sm:text-3xl text-[#3D352E]">
+                Sẵn sàng nâng cao vốn từ vựng hôm nay?
+              </h3>
+              <p className="text-xs sm:text-sm text-[#78685E] max-w-lg">
+                Chỉ 15 phút ôn luyện cùng HiVocab mỗi ngày, bạn sẽ thấy sự khác biệt rõ rệt trong kỹ năng Đọc và Nghe IELTS!
+              </p>
             </div>
-            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-md">
-              Hệ sinh thái học từ vựng học thuật thông minh, phương pháp Đọc Chủ Động (Curtain Mode) và Lặp lại ngắt quãng (Spaced Repetition SM-2) chuẩn hóa Cambridge IELTS & THPT Quốc Gia.
+            
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => navigateTo('dashboard')}
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>Vào học cùng Bé Hổ</span>
+                <span>🚀</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigateTo('login')}
+                className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+              >
+                Đăng nhập tài khoản
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      {/* ── FOOTER: BỨC TRANH BÌA SAU TRANG NHÃ THEO PHONG CÁCH COZY CRAYON ── */}
+      <footer className="mt-16 border-t-2 border-dashed border-[#DECDBB] bg-[#FFFDF9]/80 text-[#6E5D53] text-xs sm:text-sm py-10 px-6 sm:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+          
+          {/* Logo & Thông tin giới thiệu */}
+          <div className="md:col-span-2 space-y-3 pr-0 md:pr-8">
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/logo-hi-transparent.png"
+                alt="HiVocab Logo"
+                className="h-8 w-auto object-contain"
+                onError={(e) => {
+                  e.currentTarget.src = '/mascot/mascot_cozy.png';
+                }}
+              />
+              <span className="font-quicksand font-black text-xl text-[#3D352E] tracking-tight">
+                HiVocab!
+              </span>
+            </div>
+            <p className="text-xs text-[#7A6A60] leading-relaxed max-w-md">
+              Hệ sinh thái học từ vựng tiếng Anh thông minh với phong cách tranh vẽ sáp màu ấm áp. Kết hợp Spaced Repetition (SRS) và phương pháp Đọc chủ động chuẩn hóa Cambridge IELTS & THPT Quốc Gia.
             </p>
-            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1">
+            <div className="text-[11px] text-[#86756C] space-y-1 pt-1">
               <p>📍 <strong>Đơn vị phát triển:</strong> HiVocab Education</p>
-              <p>✉️ <strong>Hỗ trợ:</strong> <a href="mailto:support@hivocab.site" className="text-blue-600 hover:underline">support@hivocab.site</a> · <a href="mailto:mitthoi60@gmail.com" className="text-blue-600 hover:underline">mitthoi60@gmail.com</a></p>
+              <p>✉️ <strong>Hỗ trợ:</strong> <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">support@hivocab.site</a></p>
               <p>📞 <strong>Hotline/Zalo:</strong> 0846 407 898</p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Điều hướng</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
-              <li><a onClick={() => navigateTo('features')} className="cursor-pointer hover:text-blue-600 transition-colors">Tính năng</a></li>
-              <li><a onClick={() => navigateTo('reviews')} className="cursor-pointer hover:text-blue-600 transition-colors">Đánh giá</a></li>
-              <li><a onClick={() => navigateTo('support')} className="cursor-pointer hover:text-blue-600 transition-colors">Hỗ trợ</a></li>
-              <li><a onClick={() => navigateTo('faq')} className="cursor-pointer hover:text-blue-600 transition-colors">Câu hỏi thường gặp (FAQ)</a></li>
-              <li><a onClick={() => navigateTo('login')} className="cursor-pointer hover:text-blue-600 transition-colors">Đăng nhập / Đăng ký</a></li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-gray-900 dark:text-white">Pháp lý & Chính sách</h4>
-            <ul className="space-y-2 text-xs sm:text-sm">
+          {/* Cột điều hướng chức năng */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-[#3D352E]">
+              Khám phá
+            </h4>
+            <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
               <li>
-                <a href="/privacy" className="text-blue-600 font-semibold hover:underline flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[15px]">verified_user</span>
-                  Chính sách quyền riêng tư
+                <a onClick={() => navigateTo('features')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
+                  🎨 Tính năng học tập
                 </a>
               </li>
               <li>
-                <a href="/terms" className="hover:text-blue-600 transition-colors flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[15px]">gavel</span>
-                  Điều khoản dịch vụ
+                <a onClick={() => navigateTo('reviews')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
+                  💬 Đánh giá từ bạn học
+                </a>
+              </li>
+              <li>
+                <a onClick={() => navigateTo('support')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
+                  💌 Hỗ trợ & Liên hệ
+                </a>
+              </li>
+              <li>
+                <a onClick={() => navigateTo('faq')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
+                  💡 Câu hỏi thường gặp (FAQ)
+                </a>
+              </li>
+              <li>
+                <a onClick={() => navigateTo('login')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
+                  🔑 Đăng nhập / Đăng ký
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Cột pháp lý & chính sách */}
+          <div className="space-y-2.5">
+            <h4 className="text-xs font-black uppercase tracking-wider text-[#3D352E]">
+              Pháp lý & Điều khoản
+            </h4>
+            <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
+              <li>
+                <a href="/privacy" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
+                  <span>🛡️</span>
+                  <span>Chính sách quyền riêng tư</span>
+                </a>
+              </li>
+              <li>
+                <a href="/terms" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
+                  <span>📜</span>
+                  <span>Điều khoản dịch vụ</span>
                 </a>
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto pt-6 border-t border-gray-200/60 dark:border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500 dark:text-gray-400">
-          <p>© 2026 HiVocab (hivocab.site). Bản quyền được bảo lưu.</p>
-          <div className="flex items-center gap-4">
-            <a href="/privacy" className="hover:underline text-gray-700 dark:text-gray-300">Privacy Policy</a>
+        {/* Dòng bản quyền cuối trang */}
+        <div className="max-w-7xl mx-auto pt-6 border-t border-[#DECDBB]/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#86756C] font-semibold">
+          <p>© 2026 HiVocab (hivocab.site). Bản quyền tập vẽ sáp màu được bảo lưu.</p>
+          <div className="flex items-center gap-3">
+            <a href="/privacy" className="hover:underline">Privacy Policy</a>
             <span>•</span>
-            <a href="/terms" className="hover:underline text-gray-700 dark:text-gray-300">Terms of Service</a>
+            <a href="/terms" className="hover:underline">Terms of Service</a>
             <span>•</span>
-            <a href="/" className="hover:underline text-blue-600">hivocab.site</a>
+            <a href="/" className="hover:underline text-[#DE5D53] font-bold">hivocab.site</a>
           </div>
         </div>
       </footer>
