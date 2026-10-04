@@ -55,16 +55,16 @@ export function PageLanding() {
       }}
     >
       {/* ── TOP DECORATIVE CRAYON HEADER & NAVIGATION BAR ── */}
-      <header className="sticky top-0 z-40 px-3.5 sm:px-8 py-2.5 sm:py-3 bg-[#FAF5EB]/90 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
+      <header className="sticky top-0 z-40 w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3 sm:py-3.5 bg-[#FAF5EB]/95 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
+        <div className="w-full flex items-center justify-between gap-3 sm:gap-6">
           
           {/* Logo app bản sáp màu đã tách nền ở góc trên cùng bên trái */}
           <div
             onClick={() => navigateTo('landing')}
-            className="flex items-center gap-2 cursor-pointer select-none group shrink-0"
+            className="flex items-center gap-2.5 sm:gap-3 cursor-pointer select-none group shrink-0"
             title="HiVocab – Trang chủ tranh sáp màu"
           >
-            <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 flex items-center justify-center transition-transform group-hover:scale-105">
               <img
                 src="/logo-hi-transparent.png"
                 alt="HiVocab Logo Sáp Màu"
@@ -74,25 +74,20 @@ export function PageLanding() {
                 }}
               />
             </div>
-            <div className="flex flex-col">
-              <span className="font-quicksand font-black text-lg sm:text-xl tracking-tight text-[#3D352E] leading-none">
-                HiVocab
-              </span>
-              <span className="text-[9px] font-bold text-[#86756C] tracking-wider uppercase mt-0.5 hidden sm:block">
-                Vườn tranh từ vựng 🌿
-              </span>
-            </div>
+            <span className="font-quicksand font-black text-2xl sm:text-[26px] md:text-3xl tracking-tight text-[#3D352E] leading-none">
+              HiVocab
+            </span>
           </div>
 
           {/* Desktop Navigation Links (Pill viên con nhộng sáp màu) */}
           <nav
             aria-label="Điều hướng trang giới thiệu"
-            className="hidden md:flex items-center gap-1.5 bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] rounded-full px-3 py-1.5"
+            className="hidden md:flex items-center gap-2 bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] rounded-full px-4 py-1.5"
           >
             <button
               type="button"
               onClick={() => navigateTo('features')}
-              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+              className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
               🎨 Tính năng
             </button>
@@ -100,7 +95,7 @@ export function PageLanding() {
             <button
               type="button"
               onClick={() => navigateTo('reviews')}
-              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+              className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
               💬 Đánh giá
             </button>
@@ -108,7 +103,7 @@ export function PageLanding() {
             <button
               type="button"
               onClick={() => navigateTo('faq')}
-              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+              className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
               💡 FAQ
             </button>
@@ -116,42 +111,42 @@ export function PageLanding() {
             <button
               type="button"
               onClick={() => navigateTo('support')}
-              className="px-3.5 py-1.5 text-xs font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
+              className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
               💌 Hỗ trợ
             </button>
           </nav>
 
           {/* Action Buttons: Bắt đầu ngay & Đăng nhập (thu gọn vừa vặn) */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => navigateTo('login')}
-              className="px-2.5 sm:px-3.5 py-1.5 text-xs font-black rounded-xl sm:rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
             >
               Đăng nhập
             </button>
             <button
               type="button"
               onClick={() => navigateTo('dashboard')}
-              className="px-3 sm:px-4 py-1.5 text-xs font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1"
+              className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>Bắt đầu ngay</span>
-              <span className="text-xs">✏️</span>
+              <span className="text-xs sm:text-sm">✏️</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* ── HERO SECTION: BỨC TRANH SÁP MÀU VỚI BÉ MASCOT VẪY TAY CHÀO ── */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-7 sm:py-12 flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <main className="flex-1 w-full max-w-[1560px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 sm:py-14 flex flex-col justify-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 2xl:gap-20 items-center w-full">
           
           {/* CỘT TRÁI: LỜI GIỚI THIỆU ẤM ÁP & HÀNH ĐỘNG HỌC TẬP */}
-          <div className="lg:col-span-7 flex flex-col items-start space-y-4 sm:space-y-5 text-left">
+          <div className="lg:col-span-7 flex flex-col items-start space-y-5 lg:space-y-6 text-left">
 
             {/* Tiêu đề chính nét bút sáp đậm */}
-            <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[54px] text-[#3D352E] tracking-tight leading-[1.15]">
+            <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[52px] xl:text-[58px] 2xl:text-[64px] text-[#3D352E] tracking-tight leading-[1.15]">
               Cùng Bé Hổ vẽ nên{' '}
               <span className="text-[#DE5D53] relative inline-block">
                 vốn từ vựng
@@ -168,38 +163,38 @@ export function PageLanding() {
             </h1>
 
             {/* Cụm điểm nhấn số liệu: Số từ vựng & Số đề thi THPT QG có hiệu ứng đếm số lần lượt */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
               {/* Thẻ 1: Số từ vựng học thuật (chạy trước: delay 150ms) */}
-              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                <div className="w-11 h-11 rounded-xl bg-[#FEEFEA] border-2 border-[#DE5D53] flex items-center justify-center text-xl shrink-0 shadow-2xs">
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-[#FEEFEA] border-2 border-[#DE5D53] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
                   📚
                 </div>
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-quicksand font-black text-2xl sm:text-3xl text-[#DE5D53] tracking-tight">
+                    <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#DE5D53] tracking-tight">
                       {formatNumber(vocabCount)}+
                     </span>
                     <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider">Từ vựng</span>
                   </div>
-                  <p className="text-xs font-bold text-[#6E5D53] truncate">
+                  <p className="text-xs sm:text-sm font-bold text-[#6E5D53] truncate">
                     Cambridge 10–21 & IELTS Academic
                   </p>
                 </div>
               </div>
 
               {/* Thẻ 2: Số đề thi THPT Quốc Gia (chạy tiếp sau: delay 800ms) */}
-              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                <div className="w-11 h-11 rounded-xl bg-[#EAF3E7] border-2 border-[#557A46] flex items-center justify-center text-xl shrink-0 shadow-2xs">
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                <div className="w-12 h-12 rounded-xl bg-[#EAF3E7] border-2 border-[#557A46] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
                   🎓
                 </div>
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-baseline gap-1.5">
-                    <span className="font-quicksand font-black text-2xl sm:text-3xl text-[#557A46] tracking-tight">
+                    <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#557A46] tracking-tight">
                       {examCount}+
                     </span>
                     <span className="text-xs font-black text-[#557A46] uppercase tracking-wider">Đề thi THPT</span>
                   </div>
-                  <p className="text-xs font-bold text-[#6E5D53] truncate">
+                  <p className="text-xs sm:text-sm font-bold text-[#6E5D53] truncate">
                     Chuẩn ma trận BGD & CBT
                   </p>
                 </div>
@@ -207,16 +202,16 @@ export function PageLanding() {
             </div>
 
             {/* Lời dẫn truyện ấm áp */}
-            <p className="text-sm sm:text-base lg:text-lg text-[#6E5D53] font-medium leading-relaxed max-w-xl">
+            <p className="text-base sm:text-lg lg:text-xl text-[#6E5D53] font-medium leading-relaxed max-w-2xl">
               Học tiếng Anh như lật từng trang tập vẽ màu sáp. Ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và hệ thống phòng luyện thi chuẩn cấu trúc đề thực tế.
             </p>
 
             {/* Các nút gọi hành động chính */}
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <button
                 type="button"
                 onClick={() => navigateTo('dashboard')}
-                className="px-7 py-3.5 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
+                className="px-8 py-4 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
               >
                 <span>Vào phòng học ngay</span>
                 <span className="text-xl">🚀</span>
@@ -225,7 +220,7 @@ export function PageLanding() {
               <button
                 type="button"
                 onClick={() => navigateTo('features')}
-                className="px-6 py-3.5 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="px-7 py-4 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-base sm:text-lg border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>Khám phá tính năng</span>
                 <span>🎨</span>
@@ -233,27 +228,27 @@ export function PageLanding() {
             </div>
 
             {/* Sticker ghi chú nét sáp nhỏ phía dưới */}
-            <div className="pt-3 flex flex-wrap items-center gap-3 sm:gap-6 text-xs font-bold text-[#8A796F]">
+            <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-7 text-xs sm:text-sm font-bold text-[#8A796F]">
               <div className="flex items-center gap-1.5">
-                <span className="text-[#F4B41A] text-sm">★</span>
+                <span className="text-[#F4B41A] text-base">★</span>
                 <span>Thuật toán ngắt quãng SRS SM-2</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[#DE5D53] text-sm">❤</span>
+                <span className="text-[#DE5D53] text-base">❤</span>
                 <span>Song ngữ Anh - Việt che dịch</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[#557A46] text-sm">✓</span>
+                <span className="text-[#557A46] text-base">✓</span>
                 <span>38+ Đề thi THPT Quốc Gia CBT</span>
               </div>
             </div>
           </div>
 
           {/* CỘT PHẢI: BỨC TRANH BÉ MASCOT ĐANG VẪY TAY CHÀO KÈM LỜI MỜI */}
-          <div className="lg:col-span-5 flex flex-col items-center justify-center relative">
+          <div className="lg:col-span-5 flex flex-col items-center justify-center relative w-full">
             
             {/* Khung tranh sáp màu lớn */}
-            <div className="w-full max-w-md bg-white border-[3.5px] border-[#3D352E] rounded-[36px] p-6 sm:p-8 shadow-[6px_8px_0px_#3D352E] relative flex flex-col items-center text-center rotate-1 hover:rotate-0 transition-transform duration-300">
+            <div className="w-full max-w-[480px] xl:max-w-[530px] bg-white border-[3.5px] border-[#3D352E] rounded-[38px] p-6 sm:p-9 shadow-[7px_9px_0px_#3D352E] relative flex flex-col items-center text-center rotate-1 hover:rotate-0 transition-transform duration-300">
               
               {/* Cúc ghim giấy sáp trang trí trên đầu khung */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#DE5D53] border-2 border-[#3D352E] flex items-center justify-center shadow-xs">
@@ -261,14 +256,14 @@ export function PageLanding() {
               </div>
 
               {/* Đám mây thoại hình bong bóng sáp màu */}
-              <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-4 py-2.5 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base flex items-center gap-2 mb-3 mt-1 transform -rotate-2">
+              <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-5 py-3 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base md:text-lg flex items-center gap-2 mb-3 mt-1 transform -rotate-2">
                 <span>"Chào bạn học ơi! Cùng tớ vào học nhé! 🐾"</span>
                 {/* Mũi tên bong bóng chỉ xuống mascot */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#FFF9EE] border-r-2 border-b-2 border-[#3D352E] transform rotate-45"></div>
               </div>
 
               {/* Ảnh chú hổ Bé Mascot Churbito vẫy tay chào */}
-              <div className="relative w-52 h-52 sm:w-64 sm:h-64 my-1 flex items-center justify-center">
+              <div className="relative w-60 h-60 sm:w-72 sm:h-72 xl:w-80 xl:h-80 my-2 flex items-center justify-center">
                 {/* Vùng tỏa màu sáp dịu nhẹ đằng sau */}
                 <div className="absolute inset-2 bg-[#FEEFEA] rounded-full filter blur-md -z-0"></div>
                 <img
@@ -283,10 +278,10 @@ export function PageLanding() {
 
               {/* Thẻ tên bé Hổ bằng phong cách nét vẽ sáp */}
               <div className="mt-1 space-y-1">
-                <h2 className="font-quicksand font-black text-xl text-[#3D352E]">
+                <h2 className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E]">
                   Bé Hổ Churbito 🐯
                 </h2>
-                <p className="text-xs font-semibold text-[#86756C]">
+                <p className="text-xs sm:text-sm font-semibold text-[#86756C]">
                   Người bạn nhỏ đồng hành cùng bạn ghi nhớ 15 phút mỗi ngày!
                 </p>
               </div>
@@ -295,7 +290,7 @@ export function PageLanding() {
               <button
                 type="button"
                 onClick={() => navigateTo('dashboard')}
-                className="mt-4 w-full py-2.5 px-4 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm font-black rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="mt-4 w-full py-3 px-5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm md:text-base font-black rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>Mở app học ngay</span>
                 <span>📖</span>
@@ -303,10 +298,10 @@ export function PageLanding() {
             </div>
 
             {/* Nhãn dán sticker bé bên cạnh trang trí */}
-            <div className="hidden sm:flex absolute -bottom-5 -left-4 bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] rounded-2xl px-3 py-1.5 text-xs font-bold text-[#DE5D53] rotate-[-6deg]">
+            <div className="hidden sm:flex absolute -bottom-5 -left-4 bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#DE5D53] rotate-[-6deg]">
               ★ Giữ lửa mỗi ngày!
             </div>
-            <div className="hidden sm:flex absolute -top-4 -right-3 bg-[#EAF3E7] border-2 border-[#557A46] shadow-[2px_3px_0px_#557A46] rounded-2xl px-3 py-1.5 text-xs font-bold text-[#557A46] rotate-[8deg]">
+            <div className="hidden sm:flex absolute -top-4 -right-3 bg-[#EAF3E7] border-2 border-[#557A46] shadow-[2px_3px_0px_#557A46] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#557A46] rotate-[8deg]">
               🌱 100% Không áp lực!
             </div>
           </div>
@@ -442,22 +437,22 @@ export function PageLanding() {
       </main>
 
       {/* ── FOOTER: BỨC TRANH BÌA SAU TRANG NHÃ THEO PHONG CÁCH COZY CRAYON ── */}
-      <footer className="mt-16 border-t-2 border-dashed border-[#DECDBB] bg-[#FFFDF9]/80 text-[#6E5D53] text-xs sm:text-sm py-10 px-6 sm:px-8">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+      <footer className="mt-16 border-t-2 border-dashed border-[#DECDBB] bg-[#FFFDF9]/80 text-[#6E5D53] text-xs sm:text-sm py-10 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
+        <div className="max-w-[1560px] 2xl:max-w-[1720px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           
           {/* Logo & Thông tin giới thiệu */}
           <div className="md:col-span-2 space-y-3 pr-0 md:pr-8">
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-3">
               <img
                 src="/logo-hi-transparent.png"
                 alt="HiVocab Logo"
-                className="h-8 w-auto object-contain"
+                className="h-10 w-auto object-contain"
                 onError={(e) => {
                   e.currentTarget.src = '/mascot/mascot_cozy.png';
                 }}
               />
-              <span className="font-quicksand font-black text-xl text-[#3D352E] tracking-tight">
-                HiVocab!
+              <span className="font-quicksand font-black text-2xl text-[#3D352E] tracking-tight">
+                HiVocab
               </span>
             </div>
             <p className="text-xs text-[#7A6A60] leading-relaxed max-w-md">
@@ -527,7 +522,7 @@ export function PageLanding() {
         </div>
 
         {/* Dòng bản quyền cuối trang */}
-        <div className="max-w-7xl mx-auto pt-6 border-t border-[#DECDBB]/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#86756C] font-semibold">
+        <div className="max-w-[1560px] 2xl:max-w-[1720px] mx-auto pt-6 border-t border-[#DECDBB]/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#86756C] font-semibold">
           <p>© 2026 HiVocab (hivocab.site). Bản quyền tập vẽ sáp màu được bảo lưu.</p>
           <div className="flex items-center gap-3">
             <a href="/privacy" className="hover:underline">Privacy Policy</a>
