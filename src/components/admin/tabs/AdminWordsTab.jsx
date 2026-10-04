@@ -6,6 +6,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
 import { playWordAudio } from '../../../services/audioService.js';
+import { deleteFolderCascade, deleteTopicCascade } from '../../../services/db.js';
 
 const POS_OPTIONS = [
   { value: 'noun', label: 'Danh từ (n)' },
@@ -450,6 +451,56 @@ export function AdminWordsTab() {
     }
   };
 
+  const handleDeleteCategory = async (catName) => {
+    if (!catName || catName === 'all') return;
+    const promptMsg =
+      `⚠️ CẢNH BÁO QUẢN TRỊ VIÊN:\n\n` +
+      `Bạn có chắc chắn muốn xóa TOÀN BỘ thư mục/danh mục public "${catName}" không?\n` +
+      `• Thư mục gồm ${topics.length} chủ đề.\n` +
+      `• Tất cả các chủ đề, bài đọc và từ vựng trong thư mục này sẽ bị XÓA VĨNH VIỄN khỏi Supabase!\n\n` +
+      `Nhấn OK để xác nhận xóa.`;
+
+    if (!window.confirm(promptMsg)) return;
+
+    try {
+      await deleteFolderCascade(catName);
+      showToast(`Đã xóa vĩnh viễn thư mục "${catName}" thành công! 🎉`, 'success');
+      const nextCats = categories.filter((c) => c !== catName);
+      setCategories(nextCats);
+      setSelectedCategory(nextCats[0] || 'all');
+    } catch (err) {
+      console.error('handleDeleteCategory error:', err);
+      showToast(`Lỗi khi xóa thư mục: ${err.message}`, 'error');
+    }
+  };
+
+  const handleDeleteCurrentTopic = async () => {
+    if (!currentTopic) return;
+    if (
+      !window.confirm(
+        `Bạn có chắc muốn xóa chủ đề "${currentTopic.name}" (${currentTopic.word_count || 0} từ vựng) khỏi cơ sở dữ liệu không?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await deleteTopicCascade(currentTopic.id);
+      showToast(`Đã xóa chủ đề "${currentTopic.name}" thành công!`, 'success');
+      const nextTopics = topics.filter((t) => t.id !== currentTopic.id);
+      setTopics(nextTopics);
+      if (nextTopics.length > 0) {
+        setSelectedTopicId(nextTopics[0].id);
+      } else {
+        setSelectedTopicId('');
+        setWords([]);
+      }
+    } catch (err) {
+      console.error('handleDeleteCurrentTopic error:', err);
+      showToast(`Lỗi khi xóa chủ đề: ${err.message}`, 'error');
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
       {/* ───────────────────────────────────────────────────────────── */}
@@ -458,9 +509,22 @@ export function AdminWordsTab() {
       <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-5">
         {/* Step 1: Category Selector Pills */}
         <div>
-          <label className="block text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-2.5">
-            1. Danh mục học tập (Category)
-          </label>
+          <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
+            <label className="block text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+              1. Thư mục / Danh mục học tập (Category)
+            </label>
+            {selectedCategory && selectedCategory !== 'all' && (
+              <button
+                type="button"
+                onClick={() => handleDeleteCategory(selectedCategory)}
+                className="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[11px] font-black flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
+                title={`Xóa vĩnh viễn thư mục "${selectedCategory}" và tất cả dữ liệu bên trong`}
+              >
+                <span className="material-symbols-outlined text-[14px]">delete</span>
+                <span>Xóa thư mục "{selectedCategory}"</span>
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setSelectedCategory('all')}
@@ -492,9 +556,22 @@ export function AdminWordsTab() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t-2 border-[#FAF5EB]">
           {/* Topic Dropdown */}
           <div>
-            <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
-              2. Chủ đề (Topic)
-            </label>
+            <div className="flex items-center justify-between gap-1 mb-1.5">
+              <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+                2. Chủ đề (Topic)
+              </label>
+              {currentTopic && (
+                <button
+                  type="button"
+                  onClick={handleDeleteCurrentTopic}
+                  className="text-rose-600 hover:text-rose-700 text-[11px] font-black inline-flex items-center gap-0.5 cursor-pointer"
+                  title={`Xóa chủ đề "${currentTopic.name}"`}
+                >
+                  <span className="material-symbols-outlined text-[13px]">delete</span>
+                  <span>Xóa chủ đề</span>
+                </button>
+              )}
+            </div>
             <select
               value={selectedTopicId}
               onChange={(e) => setSelectedTopicId(e.target.value)}

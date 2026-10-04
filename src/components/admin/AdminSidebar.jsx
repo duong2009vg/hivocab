@@ -22,6 +22,7 @@ export const ADMIN_GROUPS = [
   {
     title: 'HỌC LIỆU & NỘI DUNG',
     items: [
+      { id: 'folders', label: 'Thư mục & Khóa học', icon: 'folder_open' },
       { id: 'thpt', label: 'Đề thi THPT Quốc Gia', icon: 'school' },
       { id: 'reading', label: 'Đọc Song ngữ IELTS', icon: 'menu_book' },
       { id: 'words', label: 'Từ điển 66k Từ', icon: 'translate' },

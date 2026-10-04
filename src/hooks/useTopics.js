@@ -1,7 +1,7 @@
 // src/hooks/useTopics.js
 // Reactive Hook for Topics & Folders management in pure React
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getTopics, getCachedTopics, deleteTopic as apiDeleteTopic, isUserPro as checkPro } from '../services/db.js';
+import { getTopics, getCachedTopics, deleteTopic as apiDeleteTopic, deleteFolderCascade, isUserPro as checkPro } from '../services/db.js';
 import { useRoute } from '../router/RouteContext.jsx';
 
 export const DEFAULT_TOPIC_CATEGORIES = [
@@ -270,6 +270,13 @@ export function useTopics() {
         } catch (err) {
           console.warn(`[handleDeleteFolder] Could not delete topic ${t.id}:`, err);
         }
+      }
+
+      // Also call cascade helper on Supabase
+      try {
+        await deleteFolderCascade(name);
+      } catch (err) {
+        console.warn(`[handleDeleteFolder] deleteFolderCascade:`, err);
       }
 
       // 4. Update local state

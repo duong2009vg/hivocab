@@ -16,6 +16,7 @@ import AdminUsersTab from './tabs/AdminUsersTab.jsx';
 import AdminThptTab from './tabs/AdminThptTab.jsx';
 import AdminReadingTab from './tabs/AdminReadingTab.jsx';
 import AdminWordsTab from './tabs/AdminWordsTab.jsx';
+import AdminFoldersTab from './tabs/AdminFoldersTab.jsx';
 import AdminBulkImportTab from './tabs/AdminBulkImportTab.jsx';
 import AdminReportsTab from './tabs/AdminReportsTab.jsx';
 import AdminSystemTab from './tabs/AdminSystemTab.jsx';
@@ -25,6 +26,7 @@ const TAB_TITLES = {
   orders: 'Doanh thu & Đơn hàng PayOS',
   subscriptions: 'Hội viên & Cấp tặng Gói PRO',
   gating: 'Khóa Học liệu PRO / Miễn phí',
+  folders: 'Quản lý Thư mục & Khóa học Public',
   thpt: 'Ngân hàng Đề thi THPT Quốc Gia',
   reading: 'Bài đọc Song ngữ Cambridge IELTS',
   words: 'Cơ sở Dữ liệu 66k Từ vựng',
@@ -165,6 +167,8 @@ export function PageAdmin() {
         return <AdminSubscriptionsTab profiles={profiles} onRefresh={loadAllAdminData} />;
       case 'gating':
         return <AdminContentGatingTab />;
+      case 'folders':
+        return <AdminFoldersTab />;
       case 'thpt':
         return <AdminThptTab />;
       case 'reading':

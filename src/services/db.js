@@ -245,7 +245,33 @@ export async function createTopic(name, icon = 'folder', category = 'general') {
   return data;
 }
 
-export async function deleteTopic(topicId) {
+export async function deleteTopicCascade(topicId) {
+  if (!topicId) return false;
+  try {
+    await supabase.from('words').delete().eq('topic_id', topicId);
+  } catch (e) {
+    console.warn('[deleteTopicCascade] words cleanup:', e);
+  }
+  try {
+    await supabase.from('passages').delete().eq('topic_id', topicId);
+  } catch (e) {
+    console.warn('[deleteTopicCascade] passages cleanup:', e);
+  }
+  try {
+    await supabase.from('tests').delete().eq('topic_id', topicId);
+  } catch (e) {
+    console.warn('[deleteTopicCascade] tests cleanup:', e);
+  }
+  try {
+    await supabase.from('topic_likes').delete().eq('topic_id', topicId);
+  } catch (e) {
+    console.warn('[deleteTopicCascade] topic_likes cleanup:', e);
+  }
+  try {
+    await supabase.from('topic_comments').delete().eq('topic_id', topicId);
+  } catch (e) {
+    console.warn('[deleteTopicCascade] topic_comments cleanup:', e);
+  }
   const { error } = await supabase
     .from('topics')
     .delete()
@@ -253,6 +279,60 @@ export async function deleteTopic(topicId) {
 
   if (error) throw error;
   MEM.topics = null; // Invalidate cache
+  try {
+    localStorage.removeItem(LS_KEY);
+  } catch (_) {}
+  return true;
+}
+
+export async function deleteTopic(topicId) {
+  return deleteTopicCascade(topicId);
+}
+
+export async function deleteFolderCascade(categoryName) {
+  const cat = String(categoryName || '').trim();
+  if (!cat) return false;
+
+  // 1. Find all topics in this category
+  const { data: topics, error: fetchErr } = await supabase
+    .from('topics')
+    .select('id, category')
+    .ilike('category', cat);
+
+  if (fetchErr) throw fetchErr;
+
+  const topicIds = (topics || []).map(t => t.id);
+  for (const tId of topicIds) {
+    await deleteTopicCascade(tId);
+  }
+
+  // 2. Clear client caches
+  try {
+    if (typeof window !== 'undefined') {
+      const key = cat.toLowerCase();
+      let userFolders = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+      if (Array.isArray(userFolders)) {
+        userFolders = userFolders.filter(f => (f?.name || '').trim().toLowerCase() !== key);
+        localStorage.setItem('hivocab_user_folders', JSON.stringify(userFolders));
+      }
+
+      let deletedFolders = JSON.parse(localStorage.getItem('hivocab_deleted_folders') || '[]');
+      if (!Array.isArray(deletedFolders)) deletedFolders = [];
+      if (!deletedFolders.includes(key)) {
+        deletedFolders.push(key);
+        localStorage.setItem('hivocab_deleted_folders', JSON.stringify(deletedFolders));
+      }
+
+      window.dispatchEvent(new CustomEvent('hi:topics-updated'));
+    }
+  } catch (err) {
+    console.warn('[deleteFolderCascade] LocalStorage cleanup:', err);
+  }
+
+  MEM.topics = null;
+  try {
+    localStorage.removeItem(LS_KEY);
+  } catch (_) {}
   return true;
 }
 
@@ -1233,6 +1313,8 @@ export const db = {
   getTopics,
   createTopic,
   deleteTopic,
+  deleteTopicCascade,
+  deleteFolderCascade,
   getCamHierarchy,
   getLessonsInTopic,
   getWordsInLesson,
