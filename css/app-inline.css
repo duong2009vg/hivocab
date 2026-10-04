@@ -276,6 +276,30 @@ body:has(#page-landing.active) .mobile-floating-dock {
 }
 
 .page{display:none;min-height:100vh}.page.active{display:block}
+#page-learning.active {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+}
+#page-learning.active #learning-main {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 0 !important;
+}
+.pwa-safe-top {
+    padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
+}
+.pwa-safe-top-sticky {
+    padding-top: max(8px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
+}
+.pwa-safe-header {
+    padding-top: max(10px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
+}
 #page-thpt-room{display:none!important}
 #page-thpt-room.active{
     display:flex!important;

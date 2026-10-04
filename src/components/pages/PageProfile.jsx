@@ -131,7 +131,7 @@ export function PageProfile() {
 
   return (
     <div id="page-profile" className="page active min-h-screen bg-[#FBF8F1] text-[#302A24] selection:bg-[#C85A3F] selection:text-white">
-      <main className="lg:pl-72 min-h-screen pt-4 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-10 flex flex-col">
+      <main className="lg:pl-72 min-h-screen pt-4 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-10 flex flex-col pwa-safe-top">
         <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
           
           {/* Breadcrumbs & Header Bar */}

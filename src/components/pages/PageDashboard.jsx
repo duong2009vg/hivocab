@@ -147,7 +147,7 @@ export function PageDashboard() {
       
       {/* MOBILE LAYOUT */}
       <div className="block lg:hidden w-full">
-        <div className="w-full max-w-[430px] min-h-screen flex flex-col px-4 pt-3 pb-8 relative mx-auto bg-[#FAF5EB]">
+        <div className="w-full max-w-[430px] min-h-screen flex flex-col px-4 pt-3 pb-8 relative mx-auto bg-[#FAF5EB] pwa-safe-top">
           {/* Header Section: Tinh gọn chỉ icon chuỗi ngày giữ lửa bên trái và avatar bên phải */}
           <section className="mt-1 mb-4 flex items-center justify-between">
             <div className="inline-flex items-center space-x-1.5 bg-[#382E2B] text-[#FFF9F0] py-2 px-3.5 rounded-2xl shadow-sm">

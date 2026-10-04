@@ -97,7 +97,7 @@ export function PageTopics() {
       {/* ========================================================================= */}
       {/* MOBILE LAYOUT (block lg:hidden) - Verbatim Stitch Mobile Screen           */}
       {/* ========================================================================= */}
-      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col pb-28 px-4 pt-3">
+      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col pb-28 px-4 pt-3 pwa-safe-top">
         {/* Mobile Header */}
         <header className="flex items-center justify-between py-2">
           <div>

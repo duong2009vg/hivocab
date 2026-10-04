@@ -26,7 +26,7 @@ export function BilingualHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-[#FFFDF9]/95 backdrop-blur-md border-b-2 border-[#382E2B] px-3 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 shadow-[0_2px_0px_#382E2B] select-none">
+      <header className="sticky top-0 z-40 bg-[#FFFDF9]/95 backdrop-blur-md border-b-2 border-[#382E2B] px-3 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 shadow-[0_2px_0px_#382E2B] select-none pwa-safe-top-sticky">
         {/* Left: Back button & Breadcrumb Title with Quick Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button

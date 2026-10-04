@@ -124,7 +124,7 @@ export function PageTopicDetail() {
       {/* ========================================================================= */}
       <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen flex flex-col pb-28">
         {/* Mobile Top Bar */}
-        <header className="sticky top-0 z-40 bg-[#FBF8F1]/95 backdrop-blur-xs px-4 py-3 flex items-center justify-between border-b border-[#E8DEC8]">
+        <header className="sticky top-0 z-40 bg-[#FBF8F1]/95 backdrop-blur-xs px-4 py-3 flex items-center justify-between border-b border-[#E8DEC8] pwa-safe-top-sticky">
           <div className="flex items-center gap-2">
             <button
               onClick={() => navigateTo('topics')}

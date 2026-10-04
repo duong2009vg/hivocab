@@ -92,7 +92,7 @@ export function PageDictionary() {
       {/* ========================================================================= */}
       {/* MOBILE LAYOUT (block lg:hidden) - 100% Match to mobile_dictionary.html    */}
       {/* ========================================================================= */}
-      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen px-4 pt-3 pb-28">
+      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen px-4 pt-3 pb-28 pwa-safe-top">
         {/* Mobile Header Bar */}
         <header className="flex justify-between items-center w-full py-2 mb-3">
           <div className="flex items-center space-x-2">

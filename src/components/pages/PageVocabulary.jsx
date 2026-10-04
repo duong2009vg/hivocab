@@ -118,7 +118,7 @@ export function PageVocabulary() {
       {/* ========================================================================= */}
       {/* MOBILE LAYOUT (block lg:hidden) - 100% Match to mobile_vocabulary.html   */}
       {/* ========================================================================= */}
-      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-2">
+      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-2 pwa-safe-top">
         {/* Title & Header Section */}
         <section className="space-y-3 pt-2">
           <div className="flex items-center justify-between">

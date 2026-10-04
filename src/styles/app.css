@@ -339,5 +339,34 @@
     0%, 100% { transform: translateY(0px) rotate(0deg); }
     50% { transform: translateY(-4px) rotate(1deg); }
   }
+
+  /* ─── PWA & Mobile Safe Area Top Helpers ─── */
+  .pwa-safe-top {
+    padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
+  }
+  .pwa-safe-top-sticky {
+    padding-top: max(8px, calc(env(safe-area-inset-top, 0px) + 6px)) !important;
+  }
+  .pwa-safe-header {
+    padding-top: max(10px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
+  }
+
+  /* ─── Page Learning Active Layout Centering ─── */
+  #page-learning.active {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+    height: 100dvh !important;
+  }
+  #page-learning.active #learning-main {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 0% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    min-height: 0 !important;
+  }
 }
+
 

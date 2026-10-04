@@ -964,7 +964,7 @@ export function PageLibrary() {
       {/* ─────────────────────────────────────────────────────────────────
           MOBILE VIEW (block lg:hidden, max-w-[430px] mx-auto)
           ───────────────────────────────────────────────────────────────── */}
-      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen px-4 pt-3 pb-24 relative">
+      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen px-4 pt-3 pb-24 relative pwa-safe-top">
         
         {/* Mobile Header Bar */}
         <header className="flex justify-between items-center w-full py-2">

@@ -64,7 +64,7 @@ export function PageExercises() {
       {/* ========================================================================= */}
       {/* MOBILE LAYOUT (block lg:hidden) - Cozy Crayon Mobile                     */}
       {/* ========================================================================= */}
-      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-3">
+      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-3 pwa-safe-top">
         {/* Mobile Header */}
         <section className="space-y-3 pt-1">
           <div className="flex items-center justify-between">

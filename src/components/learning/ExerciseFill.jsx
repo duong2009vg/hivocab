@@ -25,41 +25,41 @@ function renderSentence(sentence, targetWord) {
 function getSlotDimensions(maxPartLen) {
   if (maxPartLen <= 4) {
     return {
-      slot: 'w-10 sm:w-13 h-13 sm:h-16 text-xl sm:text-3xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1.5 sm:gap-3',
+      slot: 'w-11 sm:w-14 h-13 sm:h-16 text-xl sm:text-3xl rounded-2xl sm:rounded-[22px]',
+      gap: 'gap-2 sm:gap-3',
       gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2.5 sm:gap-y-3',
     };
   }
   if (maxPartLen <= 6) {
     return {
-      slot: 'w-8.5 sm:w-12 h-11 sm:h-15 text-lg sm:text-2xl rounded-lg sm:rounded-2xl',
-      gap: 'gap-1 sm:gap-2.5',
+      slot: 'w-9 sm:w-12 h-11 sm:h-15 text-lg sm:text-2xl rounded-2xl sm:rounded-[20px]',
+      gap: 'gap-1.5 sm:gap-2.5',
       gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2 sm:gap-y-2.5',
     };
   }
   if (maxPartLen <= 8) {
     return {
-      slot: 'w-7 sm:w-11 h-9.5 sm:h-14 text-base sm:text-xl rounded-lg sm:rounded-xl',
+      slot: 'w-8 sm:w-11 h-10 sm:h-14 text-base sm:text-xl rounded-xl sm:rounded-2xl',
       gap: 'gap-1 sm:gap-2',
       gapBetweenWords: 'gap-x-2 sm:gap-x-3 gap-y-2',
     };
   }
   if (maxPartLen <= 10) {
     return {
-      slot: 'w-6 sm:w-10 h-8.5 sm:h-13 text-sm sm:text-lg rounded-md sm:rounded-xl',
-      gap: 'gap-0.5 sm:gap-1.5',
+      slot: 'w-7 sm:w-10 h-9 sm:h-13 text-sm sm:text-lg rounded-xl sm:rounded-2xl',
+      gap: 'gap-1 sm:gap-1.5',
       gapBetweenWords: 'gap-x-2 gap-y-1.5',
     };
   }
   if (maxPartLen <= 12) {
     return {
-      slot: 'w-[22px] sm:w-9 h-8 sm:h-12 text-xs sm:text-base rounded-md sm:rounded-lg',
+      slot: 'w-6 sm:w-9 h-8.5 sm:h-12 text-xs sm:text-base rounded-xl sm:rounded-2xl',
       gap: 'gap-0.5 sm:gap-1',
       gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
     };
   }
   return {
-    slot: 'w-5 sm:w-8 h-7.5 sm:h-11 text-xs sm:text-sm rounded-md sm:rounded-lg',
+    slot: 'w-5.5 sm:w-8 h-8 sm:h-11 text-xs sm:text-sm rounded-lg sm:rounded-xl',
     gap: 'gap-0.5 sm:gap-1',
     gapBetweenWords: 'gap-x-1 gap-y-1',
   };
@@ -348,24 +348,26 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
         </div>
 
         {/* ── Live Word Preview Bar (Always Fits & Crystal Clear on Mobile) ── */}
-        <div className="w-full max-w-md mx-auto mb-3 px-1">
-          <div className="bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl py-2 px-3 sm:px-4 shadow-[2px_2px_0px_#2B2523] flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-stone-500 shrink-0">
-              <span className="text-sm">✏️</span>
+        <div className="w-full max-w-md mx-auto mb-3.5 px-1">
+          <div className="bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl sm:rounded-full py-2 px-3.5 sm:px-5 shadow-[2px_2.5px_0px_#2B2523] flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-black text-[#6E5F52] shrink-0">
+              <span className="text-base">✏️</span>
               <span className="hidden xs:inline">Từ đang gõ:</span>
             </div>
             <div className="flex-1 text-center font-mono font-black text-sm sm:text-lg text-[#2B4566] tracking-wider truncate px-1">
               {userTyped ? (
-                <span className="text-stone-900 font-extrabold">{userTypedPreview}</span>
+                <span className="text-stone-900 font-black tracking-widest bg-white px-3.5 py-0.5 rounded-full border border-stone-200 shadow-2xs inline-block">
+                  {userTypedPreview}
+                </span>
               ) : (
-                <span className="text-stone-400 font-medium italic text-xs">Chạm ô để gõ từng chữ cái...</span>
+                <span className="text-stone-400 font-medium italic text-xs">Chạm ô bên dưới để gõ từng chữ cái...</span>
               )}
             </div>
             {userTyped && !submitted && (
               <button
                 type="button"
                 onClick={handleClearAll}
-                className="px-2 py-0.5 rounded-lg bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold shrink-0 transition cursor-pointer"
+                className="px-2.5 py-1 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
                 title="Xóa hết để nhập lại"
               >
                 Xóa
@@ -376,7 +378,7 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
 
         {/* ── Letters Input Box Row (Responsive & Mobile-Fit with Word Wrapping) ── */}
         <div
-          className="w-full max-w-full overflow-x-auto py-1.5 mb-3 sm:mb-5 no-scrollbar"
+          className="w-full max-w-full overflow-x-auto py-1.5 mb-3 sm:mb-4 no-scrollbar"
           style={{ WebkitOverflowScrolling: 'touch' }}
           onClick={(e) => {
             if (e.target.tagName !== 'INPUT') {
@@ -399,26 +401,26 @@ export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) 
                     const isFilled = !!values[flatIdx];
                     const isActive = focusedIdx === flatIdx && !submitted;
 
-                    let slotClass = `${dims.slot} flex items-center justify-center font-mono font-bold transition-all shrink-0 `;
+                    let slotClass = `${dims.slot} flex items-center justify-center font-mono font-black transition-all duration-150 shrink-0 select-none `;
 
                     if (!submitted) {
                       if (isActive) {
                         slotClass +=
-                          'bg-sky-50 border-[3px] border-blue-600 ring-2 ring-sky-200 shadow-[2px_3px_0px_#2c2523] text-blue-700';
+                          'border-[3px] border-[#2B4566] bg-[#F1F7FF] text-[#2B4566] shadow-[2.5px_3.5px_0px_#2B2523] ring-4 ring-sky-300/60 scale-105 z-10';
                       } else if (isFilled) {
                         slotClass +=
-                          'bg-white border-2 border-stone-800 shadow-[1.5px_2px_0px_#2c2523] text-stone-800';
+                          'border-2 border-[#2B2523] bg-white text-stone-900 shadow-[1.5px_2px_0px_#2B2523] hover:border-stone-800';
                       } else {
                         slotClass +=
-                          'bg-stone-50/50 border-2 border-stone-300 border-dashed text-stone-400';
+                          'border-2 border-stone-300 border-dashed text-stone-400 bg-white/70 shadow-2xs hover:bg-stone-50';
                       }
                     } else {
                       if (submitted.correct) {
                         slotClass +=
-                          'bg-green-50 border-[2.5px] border-green-600 shadow-xs text-green-700';
+                          'border-[2.5px] border-[#3D7A46] bg-[#EEF8EC] text-[#2B6135] shadow-[2px_2.5px_0px_#2B6135]';
                       } else {
                         slotClass +=
-                          'bg-red-50 border-[2.5px] border-red-500 shadow-xs text-red-600';
+                          'border-[2.5px] border-[#D34E36] bg-[#FDF0ED] text-[#B83822] shadow-[2px_2.5px_0px_#B83822]';
                       }
                     }
 

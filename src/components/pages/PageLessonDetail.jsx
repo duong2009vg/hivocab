@@ -45,7 +45,7 @@ export function PageLessonDetail() {
       {/* ========================================================================= */}
       {/* MOBILE LAYOUT (block lg:hidden) - Verbatim Stitch Mobile Screen           */}
       {/* ========================================================================= */}
-      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col px-4 pt-3 pb-28">
+      <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col px-4 pt-3 pb-28 pwa-safe-top">
         {/* Top Header */}
         <header className="flex items-center justify-between py-2 mb-2">
           <div className="flex items-center gap-2.5">
