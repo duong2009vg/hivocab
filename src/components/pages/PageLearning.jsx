@@ -1,8 +1,8 @@
 // src/components/pages/PageLearning.jsx
-// 100% Pure React implementation — no sessionEngine.js / sessionUI.js dependency.
+// 100% Pure React implementation with Stitch Crayon Picture Book aesthetic
 // Loads words from window globals or directly from db.js via getWordsInLesson / getWordsInPassage / getWordsDueForReview.
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useStudySession } from '../../hooks/useStudySession.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { getWordsInLesson, getWordsInPassage, getWordsDueForReview } from '../../services/db.js';
@@ -18,6 +18,14 @@ const MODE_TYPE_MAP = {
   1: 'mcq',
   2: 'fill',
   3: 'listen',
+};
+
+// Activity title mapping
+const ACTIVITY_TITLE_MAP = {
+  flashcard: 'BÀI TẬP: THẺ GHI NHỚ',
+  mcq: 'BÀI TẬP: TRẮC NGHIỆM TỪ VỰNG',
+  fill: 'BÀI TẬP: ĐIỀN VÀO CHỖ TRỐNG',
+  listen: 'BÀI TẬP: LUYỆN NGHE & ĐIỀN TỪ',
 };
 
 export function PageLearning() {
@@ -101,6 +109,8 @@ export function PageLearning() {
   const handleReport = useCallback(() => {
     if (typeof window !== 'undefined' && typeof window.reportCurrentLearningError === 'function') {
       window.reportCurrentLearningError();
+    } else {
+      alert('Đã ghi nhận báo cáo từ vựng. Đội ngũ HiVocab sẽ kiểm tra sớm nhất! 🐾');
     }
   }, []);
 
@@ -110,22 +120,46 @@ export function PageLearning() {
     navigateTo('dashboard');
   }, [endSession, navigateTo]);
 
-  // ── Back (to lesson detail) ──────────────────────────────────────────────────
+  // ── Back (to lesson detail or dashboard) ───────────────────────────────────
   const handleClose = useCallback(() => {
     endSession();
     const hasLessonContext = typeof window !== 'undefined' && (window._currentTopicId || window._currentPassageId);
     navigateTo(hasLessonContext ? 'lesson-detail' : 'dashboard');
   }, [endSession, navigateTo]);
 
+  // Total word counts
+  const totalNum = useMemo(() => {
+    const total = (session.queue?.length || 0) + (session.completed?.length || 0) + (currentItem ? 1 : 0);
+    return Math.max(total, 1);
+  }, [session.queue?.length, session.completed?.length, currentItem]);
+
+  const currentNum = useMemo(() => {
+    const completedCount = session.completed?.length || 0;
+    return isComplete ? totalNum : Math.min(completedCount + 1, totalNum);
+  }, [session.completed?.length, isComplete, totalNum]);
+
+  const progressPct = isComplete
+    ? 100
+    : Math.max(5, Math.round(((session.completed?.length || 0) / totalNum) * 100));
+
+  const currentTitle = ACTIVITY_TITLE_MAP[currentItem?.exerciseType] || 'BÀI TẬP TỪ VỰNG';
+
+  const sessionInfo = useMemo(
+    () => ({
+      currentNum,
+      totalNum,
+      lessonName: session.lessonName || '',
+    }),
+    [currentNum, totalNum, session.lessonName]
+  );
+
   // ── Loading state ────────────────────────────────────────────────────────────
   if (isLoadingWords || (!session.isActive && !isComplete && !noWordsToStudy)) {
     return (
-      <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center bg-surface">
-        <div className="flex flex-col items-center justify-center gap-4 text-on-surface-variant">
-          <span className="material-symbols-outlined text-[48px] animate-spin text-primary" style={{ animationDuration: '1.2s' }}>
-            autorenew
-          </span>
-          <p className="text-sm font-medium">Đang tải bài tập...</p>
+      <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center crayon-paper-pattern font-comfortaa">
+        <div className="flex flex-col items-center justify-center gap-4 text-stone-700">
+          <div className="w-16 h-16 rounded-full border-4 border-t-[#D36135] border-stone-300 animate-spin"></div>
+          <p className="text-base font-bold">Đang tải bài tập cùng Bé Hổ... 🐾</p>
         </div>
       </div>
     );
@@ -134,27 +168,29 @@ export function PageLearning() {
   // ── Empty state (No words found) ─────────────────────────────────────────────
   if (noWordsToStudy) {
     return (
-      <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center p-6 bg-surface text-center">
-        <div className="w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4 text-emerald-500 border border-emerald-500/20">
-          <span className="material-symbols-outlined text-[42px]">check_circle</span>
+      <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center p-6 crayon-paper-pattern font-comfortaa text-center">
+        <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-4 text-emerald-700 border-2 border-[#2B2523] shadow-[3px_4px_0px_#2B2523]">
+          <i className="fa-solid fa-check text-3xl font-black"></i>
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold text-on-surface mb-2">Chưa có từ vựng cần ôn tập!</h2>
-        <p className="text-sm text-on-surface-variant max-w-md mb-8 leading-relaxed">
+        <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mb-2">Chưa có từ vựng cần ôn tập!</h2>
+        <p className="text-sm sm:text-base text-stone-600 max-w-md mb-6 leading-relaxed font-quicksand font-semibold">
           Bạn đã hoàn thành xuất sắc các từ cần ôn hôm nay, hoặc chưa có từ nào trong danh sách. Hãy khám phá thêm các chủ đề mới để bắt đầu học nhé!
         </p>
         <div className="flex flex-wrap items-center justify-center gap-3">
           <button
+            type="button"
             onClick={() => navigateTo('topics')}
-            className="px-6 py-2.5 bg-primary text-on-primary rounded-xl font-bold text-sm flex items-center gap-2 hover:opacity-95 active:scale-95 transition-all shadow-sm cursor-pointer"
+            className="px-6 py-3 bg-[#D36135] text-white rounded-2xl font-bold text-sm flex items-center gap-2 border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">explore</span>
+            <i className="fa-solid fa-compass"></i>
             <span>Khám phá chủ đề</span>
           </button>
           <button
+            type="button"
             onClick={() => navigateTo('dashboard')}
-            className="px-6 py-2.5 bg-surface-container hover:bg-surface-container-high text-on-surface rounded-xl font-medium text-sm border border-outline-variant/30 flex items-center gap-2 active:scale-95 transition-all cursor-pointer"
+            className="px-6 py-3 bg-white text-stone-800 rounded-2xl font-bold text-sm border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center gap-2 active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[18px]">home</span>
+            <i className="fa-solid fa-house"></i>
             <span>Về trang chủ</span>
           </button>
         </div>
@@ -162,54 +198,71 @@ export function PageLearning() {
     );
   }
 
-  const progressPct = isComplete ? 100 : progress.percent;
-
   return (
-    <div id="page-learning" className="page active">
-      {/* Header */}
-      <header className="fixed top-0 w-full z-50 bg-surface/90 backdrop-blur-xl px-4 md:px-gutter pb-3 md:py-md flex items-center justify-between shadow-sm mobile-sticky-top lg:pt-3">
-        <button
-          onClick={handleClose}
-          className="text-on-surface-variant hover:text-on-surface transition-colors p-2 rounded-full cursor-pointer"
-        >
-          <span className="material-symbols-outlined text-[20px] md:text-[24px]">close</span>
-        </button>
+    <div id="page-learning" className="page active min-h-screen flex flex-col justify-between crayon-paper-pattern selection:bg-orange-200 selection:text-stone-900 font-comfortaa">
+      {/* ── Top Navigation Bar with Progress, Exit, Audio & Flag ── */}
+      <header className="w-full max-w-6xl mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-2 z-30" data-purpose="quiz-top-bar">
+        <div className="flex items-center justify-between gap-3 sm:gap-4">
+          {/* Close / Exit Exercise Button */}
+          <button
+            type="button"
+            onClick={handleClose}
+            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-800 hover:bg-stone-50 hover:translate-y-0.5 active:translate-y-1 transition-all cursor-pointer text-lg font-black shrink-0"
+            title="Quay lại"
+          >
+            <i className="fa-solid fa-xmark text-lg sm:text-xl"></i>
+          </button>
 
-        {/* Progress bar */}
-        <div id="learning-progress-container" className="flex-1 max-w-md mx-4 md:mx-md flex items-center gap-md">
-          <div className="w-full h-1.5 md:h-2 bg-surface-container-highest rounded-full overflow-hidden">
-            <div
-              id="learn-progress"
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
+          {/* Center Progress Track with Crayon Aesthetic */}
+          <div className="flex-1 max-w-2xl px-2 sm:px-4 flex flex-col gap-1 sm:gap-1.5" data-purpose="learning-progress">
+            <div className="flex items-center justify-between text-xs sm:text-sm font-bold text-stone-700">
+              <span className="flex items-center gap-1.5 truncate">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#D36135] inline-block shrink-0"></span>
+                <span className="truncate tracking-wide">{currentTitle}</span>
+              </span>
+              <span className="bg-amber-100/90 text-stone-800 px-2.5 py-0.5 rounded-full border border-stone-300 font-bold shrink-0 ml-2">
+                Từ {currentNum} / {totalNum}
+              </span>
+            </div>
+
+            {/* Progress Bar Track */}
+            <div className="w-full h-3.5 sm:h-4 bg-[#EBDDCB] rounded-full p-0.5 border-2 border-[#2B2523] shadow-inner relative overflow-hidden">
+              <div
+                className="h-full crayon-stripe-bg rounded-full relative transition-all duration-500 ease-out border-r border-stone-800"
+                style={{ width: `${progressPct}%` }}
+              >
+                {/* Crayon glossy reflection spot */}
+                <div className="absolute top-0.5 left-2 right-2 h-1 bg-white/40 rounded-full"></div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggleSound}
-            className="hi-sound-toggle-btn p-1.5 rounded-full hover:bg-surface-container text-primary transition-colors cursor-pointer"
-            title="Tắt/Bật âm thanh học tập"
-          >
-            <span className="material-symbols-outlined text-[20px] md:text-[22px]">
-              {soundMuted ? 'volume_off' : 'volume_up'}
-            </span>
-          </button>
-          <button
-            onClick={handleReport}
-            className="p-1.5 rounded-full hover:bg-red-50 text-on-surface-variant hover:text-red-600 transition-colors cursor-pointer"
-            title="Báo lỗi bài tập/từ vựng này"
-          >
-            <span className="material-symbols-outlined text-[20px] md:text-[22px]">flag</span>
-          </button>
+          {/* Action Utilities: Sound & Report */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <button
+              type="button"
+              onClick={handleToggleSound}
+              className="w-11 h-11 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-700 hover:bg-amber-50 hover:text-amber-800 active:translate-y-0.5 transition cursor-pointer"
+              title={soundMuted ? 'Bật âm thanh' : 'Tắt âm thanh'}
+            >
+              <i className={`fa-solid ${soundMuted ? 'fa-volume-xmark text-stone-400' : 'fa-volume-high text-stone-700'} text-base sm:text-lg`}></i>
+            </button>
+            <button
+              type="button"
+              onClick={handleReport}
+              className="w-11 h-11 rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-stone-700 hover:bg-red-50 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
+              title="Báo cáo lỗi từ này"
+            >
+              <i className="fa-regular fa-flag text-base sm:text-lg"></i>
+            </button>
+          </div>
         </div>
       </header>
 
-      {/* Main exercise area */}
+      {/* ── Main Exercise Area ── */}
       <main
         id="learning-main"
-        className="pt-28 md:pt-[100px] pb-12 md:pb-xl px-4 sm:px-6 lg:px-12 max-w-3xl mx-auto flex flex-col gap-6 md:gap-10 items-center min-h-[100dvh]"
+        className="flex-1 w-full max-w-5xl mx-auto px-4 py-3 sm:py-6 flex flex-col justify-center items-center relative"
       >
         {isComplete ? (
           /* ── Completion screen ── */
@@ -219,13 +272,14 @@ export function PageLearning() {
           />
         ) : currentItem ? (
           /* ── Active exercise ── */
-          <div id="exercise-container" className="w-full max-w-2xl mx-auto flex flex-col items-center">
+          <div id="exercise-container" className="w-full flex flex-col items-center">
             {currentItem.exerciseType === 'flashcard' && (
               <ExerciseFlashcard
                 key={`${currentItem.word?.wordId || currentItem.word?.id}-${session.queueIndex}`}
                 item={currentItem}
                 onRate={rateFlashcard}
                 onReport={handleReport}
+                sessionInfo={sessionInfo}
               />
             )}
             {currentItem.exerciseType === 'mcq' && (
@@ -234,6 +288,7 @@ export function PageLearning() {
                 item={currentItem}
                 onSubmit={submitAnswer}
                 onReport={handleReport}
+                sessionInfo={sessionInfo}
               />
             )}
             {currentItem.exerciseType === 'fill' && (
@@ -242,6 +297,7 @@ export function PageLearning() {
                 item={currentItem}
                 onSubmit={submitAnswer}
                 onReport={handleReport}
+                sessionInfo={sessionInfo}
               />
             )}
             {currentItem.exerciseType === 'listen' && (
@@ -251,20 +307,42 @@ export function PageLearning() {
                 onSubmit={submitAnswer}
                 speakWord={speakWord}
                 onReport={handleReport}
+                sessionInfo={sessionInfo}
               />
             )}
           </div>
         ) : (
-          /* ── Fallback: no words ── */
+          /* ── Fallback ── */
           <div className="flex flex-col items-center justify-center gap-4 text-center py-20">
-            <span className="material-symbols-outlined text-[48px] text-outline">sentiment_dissatisfied</span>
-            <p className="text-on-surface-variant">Không tìm thấy từ vựng nào để luyện tập.</p>
-            <button onClick={handleClose} className="bg-primary text-on-primary px-6 py-2.5 rounded-full font-bold text-sm">
+            <p className="text-stone-600 font-bold">Không tìm thấy từ vựng nào để luyện tập.</p>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="bg-[#2B4566] text-white px-6 py-2.5 rounded-2xl font-bold text-sm border-2 border-[#2B2523] shadow-sm"
+            >
               Quay lại
             </button>
           </div>
         )}
       </main>
+
+      {/* ── Subtitle / Footer notes ── */}
+      <footer className="w-full max-w-5xl mx-auto px-6 py-3 flex items-center justify-between text-stone-600 font-crayon text-base sm:text-lg">
+        <div className="flex items-center gap-2">
+          <span className="text-stone-500">Từ</span>
+          <span className="font-bold text-stone-800 text-lg sm:text-xl">{currentNum}</span>
+          <span className="text-stone-400">/</span>
+          <span className="text-stone-600">{totalNum}</span>
+          <span className="text-xs font-sans bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded-full ml-2">
+            Thuật toán SRS
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2 text-stone-500 text-xs sm:text-sm font-sans font-semibold">
+          <span>HiVocab! Crayon Study Room</span>
+          <span>🐾</span>
+        </div>
+      </footer>
     </div>
   );
 }

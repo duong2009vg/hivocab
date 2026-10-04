@@ -1,29 +1,36 @@
 // src/components/learning/ExerciseFlashcard.jsx
-// 3D flip flashcard — fully React, no DOM mutation.
+// 100% Pixel-Perfect match to Google Stitch design (both Desktop & Mobile)
+import React, { useState, useEffect, useCallback } from 'react';
 
-import { useState, useEffect, useCallback } from 'react';
-
-export default function ExerciseFlashcard({ item, onRate, onReport }) {
+export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo }) {
   const [flipped, setFlipped] = useState(false);
   const d = item?.exerciseData || {};
+
+  const currentNum = sessionInfo?.currentNum ?? 1;
+  const totalNum = sessionInfo?.totalNum ?? 10;
 
   // Reset flip state when new card appears
   useEffect(() => {
     setFlipped(false);
   }, [item]);
 
-  // Keyboard: Space/Enter = flip; 1/2/3 = rate (only when flipped)
+  // Keyboard: Space/Enter = flip; 1 = Hard/Cần ôn lại; 2 = Easy/Đã nhớ kỹ
   useEffect(() => {
     function handleKey(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        setFlipped(f => !f);
+        setFlipped((f) => !f);
       }
       if (flipped) {
-        if (e.key === '1') { e.preventDefault(); onRate('hard'); }
-        if (e.key === '2') { e.preventDefault(); onRate('good'); }
-        if (e.key === '3') { e.preventDefault(); onRate('easy'); }
+        if (e.key === '1') {
+          e.preventDefault();
+          onRate('hard');
+        }
+        if (e.key === '2') {
+          e.preventDefault();
+          onRate('easy');
+        }
       }
     }
     window.addEventListener('keydown', handleKey);
@@ -31,173 +38,298 @@ export default function ExerciseFlashcard({ item, onRate, onReport }) {
   }, [flipped, onRate]);
 
   const flip = useCallback(() => {
-    setFlipped(f => !f);
+    setFlipped((f) => !f);
   }, []);
 
+  const playAudio = useCallback(
+    (e) => {
+      if (e) e.stopPropagation();
+      const word = d.backWord || d.frontWord;
+      if (window.HiAudio?.playWord) {
+        window.HiAudio.playWord(word, 0.9);
+      } else if ('speechSynthesis' in window) {
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        window.speechSynthesis.speak(u);
+      }
+    },
+    [d.backWord, d.frontWord]
+  );
+
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 px-1 sm:px-3">
-      {/* Header */}
-      <div className="w-full max-w-xl flex items-center justify-between px-1">
-        <div className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-          Bài tập: Thẻ ghi nhớ
+    <div className="w-full flex flex-col items-center select-none font-comfortaa">
+      {/* Main Workspace (Row layout on desktop with Left Companion + Right Tips) */}
+      <div className="w-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 py-2">
+        {/* ── Left Companion Mascot Sidebar (Desktop xl:flex) ── */}
+        <aside className="hidden xl:flex flex-col items-center w-72 shrink-0">
+          <div className="relative bg-white border-2 border-[#2D2825] rounded-2xl p-4 shadow-[4px_4px_0px_#2D2825] text-xs font-semibold text-stone-700 leading-relaxed mb-4">
+            <p className="font-bold text-[#264653] text-sm mb-1 flex items-center gap-1.5">
+              <span>🐾</span> Bé Hổ Churbito
+            </p>
+            "Cố lên bạn nhé! Đã hoàn thành{' '}
+            <strong className="text-[#e89868]">
+              {currentNum}/{totalNum} từ
+            </strong>{' '}
+            rồi, lật thẻ và đọc to từ vựng là nhớ siêu lâu đó!"
+            <div className="absolute -bottom-2.5 left-12 w-4 h-4 bg-white border-b-2 border-r-2 border-[#2D2825] transform rotate-45"></div>
+          </div>
+
+          <div className="relative w-48 h-48 flex items-center justify-center">
+            <img
+              alt="Bé hổ Churbito đồng hành cùng bạn"
+              className="w-full h-full object-contain mix-blend-multiply drop-shadow-sm select-none pointer-events-none transform hover:scale-105 transition-transform"
+              src="/mascot/mascot_cozy.png"
+              onError={(e) => {
+                e.currentTarget.src =
+                  'https://lh3.googleusercontent.com/aida/AEtjO1WhLdB59cxwqOugmyuan_YP_-qByGV59-nTiw2fcRTppnlmKwFY8CyUY3A0FKztN21eVPSSgsRaLdVu6ad_QcR6Ev8llHmy6VYJY0Px6ys8ENmMB5wpcrhDcFXKQuRX5c79HZecsOmdanQxxLirnu3eZ2vuPAdsCSdyPCNgllA2TSndkn-YTmLyXgBT029ah-2pOgpwJe68c6qed5T5h4YeWIR1EOhKTzuxU_BZb13bVMKFicCPACxDy27z';
+              }}
+            />
+          </div>
+
+          <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-stone-100 rounded-full border border-[#2D2825]/30 text-[11px] font-bold text-stone-600 shadow-xs">
+            🌱 Người bạn học tập chăm chỉ
+          </div>
+        </aside>
+
+        {/* ── Center Flashcard Card ── */}
+        <section className="flex flex-col items-center w-full max-w-xl sm:max-w-2xl">
+          <div
+            onClick={flip}
+            tabIndex={0}
+            role="button"
+            aria-label="Thẻ ghi nhớ - Chạm để lật thẻ"
+            className="w-full cursor-pointer focus:outline-none"
+          >
+            {!flipped ? (
+              /* ── FRONT FACE ── */
+              <div className="relative w-full min-h-[460px] sm:min-h-[500px] bg-white rounded-[32px] sm:rounded-[36px] border-[3.5px] border-[#2D2825] shadow-[6px_8px_0px_#2D2825] sm:shadow-[8px_10px_0px_rgba(45,40,37,0.95)] p-6 sm:p-9 flex flex-col justify-between items-center text-center transition-transform hover:-translate-y-1 duration-200">
+                {/* Header ribbon inside card */}
+                <div className="w-full flex items-center justify-between pb-3 border-b-2 border-stone-200/70">
+                  <div className="flex items-center gap-2 px-3.5 py-1.5 bg-[#EDF6F9] border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825]">
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#264653]"></span>
+                    <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wide text-[#264653]">
+                      {d.frontLabel || 'DỊCH SANG TIẾNG ANH'}
+                    </span>
+                  </div>
+
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs font-bold text-stone-700 transition-colors">
+                    <span className="material-symbols-outlined text-[15px] text-[#e89868]">touch_app</span>
+                    <span>Chạm để lật</span>
+                  </div>
+                </div>
+
+                {/* Center Mascot / Word Art Illustration */}
+                <div className="my-3 sm:my-5 relative flex items-center justify-center w-40 h-40 sm:w-48 sm:h-48">
+                  <div className="absolute inset-0 bg-[#FFF5EB] rounded-full border-2 border-dashed border-[#E76F51]/30"></div>
+                  {d.imageUrl ? (
+                    <img
+                      alt={d.frontWord}
+                      className="relative z-10 w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-2xl select-none"
+                      src={d.imageUrl}
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <img
+                      alt="Bé hổ học tập"
+                      className="relative z-10 w-32 h-32 sm:w-40 sm:h-40 object-contain mix-blend-multiply select-none"
+                      src="/mascot/mascot_cozy.png"
+                    />
+                  )}
+                  <span className="absolute -top-1 -right-2 text-[#feab79] text-xl animate-bounce">✨</span>
+                </div>
+
+                {/* Word Prompt Content */}
+                <div className="space-y-2 max-w-lg my-auto">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2D2825] tracking-normal leading-snug">
+                    {d.frontWord}
+                  </h2>
+                  {(d.exampleSentence || d.hint) && (
+                    <p className="font-serif italic text-base sm:text-lg text-stone-600 px-4">
+                      "{d.exampleSentence || d.hint}"
+                    </p>
+                  )}
+                </div>
+
+                {/* Primary Action Button: Reveal Answer */}
+                <div className="w-full pt-4">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      flip();
+                    }}
+                    className="w-full sm:w-4/5 mx-auto py-3.5 sm:py-4 px-6 bg-[#214b60] hover:bg-[#1B353F] active:translate-y-1 text-white font-bold text-base sm:text-lg rounded-full border-2 border-[#2D2825] shadow-[4px_4px_0px_#2D2825] flex items-center justify-center gap-2.5 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      visibility
+                    </span>
+                    <span>Nhấn xem đáp án</span>
+                    <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-xs bg-white/20 rounded font-mono">
+                      Space
+                    </kbd>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* ── BACK FACE (Revealed English Answer) ── */
+              <div className="relative w-full min-h-[460px] sm:min-h-[500px] bg-[#f9fbf7] rounded-[32px] sm:rounded-[36px] border-[3.5px] border-[#4b6540] shadow-[6px_8px_0px_#2D2825] sm:shadow-[8px_10px_0px_rgba(45,40,37,0.95)] p-6 sm:p-9 flex flex-col justify-between items-center text-center transition-transform hover:-translate-y-1 duration-200">
+                {/* Header ribbon back */}
+                <div className="w-full flex items-center justify-between pb-3 border-b-2 border-[#4b6540]/20">
+                  <span className="px-3.5 py-1.5 bg-[#ffdbc9] border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs sm:text-sm font-extrabold uppercase text-[#8d4e24]">
+                    {d.backLabel || 'ĐÁP ÁN TIẾNG ANH'}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      flip();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white hover:bg-stone-100 border-2 border-[#2D2825] rounded-full shadow-[2px_2px_0px_#2D2825] text-xs font-bold text-stone-700 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[15px] text-[#4b6540]">sync</span>
+                    <span>Quay lại</span>
+                  </button>
+                </div>
+
+                {/* Revealed Word Content */}
+                <div className="flex flex-col items-center justify-center text-center my-auto py-2 w-full">
+                  <span className="text-xs sm:text-sm font-bold text-[#4b6540] tracking-widest uppercase mb-1">
+                    {d.pos ? `${d.pos.toUpperCase()}` : 'TỪ VỰNG TIẾNG ANH'}
+                  </span>
+
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#203918] tracking-tight mt-0 mb-2">
+                    {d.backWord}
+                  </h1>
+
+                  <div className="flex items-center gap-2 bg-[#eef4eb] px-4 py-1.5 rounded-full border-2 border-[#4b6540]/30 text-[#4b6540] font-bold text-sm sm:text-base mb-3">
+                    <span>/{d.phonetic || ''}/</span>
+                    <button
+                      type="button"
+                      aria-label="Nghe đọc từ"
+                      onClick={playAudio}
+                      className="p-1 rounded-full text-[#4b6540] hover:scale-110 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">volume_up</span>
+                    </button>
+                  </div>
+
+                  {/* Example sentence slip */}
+                  {(d.exampleSentence || d.frontWord) && (
+                    <div className="bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-[#2D2825]/20 text-left w-full max-w-md shadow-xs">
+                      <p className="font-bold text-stone-800 text-sm sm:text-base">
+                        🧸 {d.exampleSentence || d.backWord}
+                      </p>
+                      <p className="text-xs sm:text-sm text-stone-600 italic mt-0.5">
+                        {d.exampleMeaning || d.frontWord}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Evaluation Feedback */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full sm:w-5/6 pt-3">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRate('hard');
+                    }}
+                    className="h-12 sm:h-14 bg-white text-[#8d4e24] hover:bg-orange-50 rounded-full border-2 border-[#2D2825] shadow-[3px_3px_0px_#2D2825] flex items-center justify-center gap-1.5 sm:gap-2 font-bold text-xs sm:text-sm active:translate-y-1 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[19px]">sentiment_neutral</span>
+                    <span>Cần ôn lại</span>
+                    <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-stone-100 border border-stone-300 rounded font-mono">
+                      1
+                    </kbd>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRate('easy');
+                    }}
+                    className="h-12 sm:h-14 bg-[#86a378] hover:bg-[#739464] text-white rounded-full border-2 border-[#2D2825] shadow-[3px_3px_0px_#2D2825] flex items-center justify-center gap-1.5 sm:gap-2 font-bold text-xs sm:text-sm active:translate-y-1 transition-all cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[19px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      check_circle
+                    </span>
+                    <span>Đã nhớ kỹ</span>
+                    <kbd className="hidden sm:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono">
+                      2
+                    </kbd>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Desktop Keyboard Shortcuts Hint */}
+          <div className="mt-5 hidden sm:flex flex-wrap items-center justify-center gap-3 text-xs font-semibold text-stone-600">
+            <span className="inline-flex items-center gap-1.5 bg-white/80 px-2.5 py-1 rounded-lg border border-[#2D2825]/20 shadow-xs">
+              <kbd className="px-2 py-0.5 bg-stone-100 border border-[#2D2825]/40 rounded text-xs font-mono font-bold text-stone-800">
+                [Space]
+              </kbd>
+              Lật thẻ
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/80 px-2.5 py-1 rounded-lg border border-[#2D2825]/20 shadow-xs">
+              <kbd className="px-2 py-0.5 bg-stone-100 border border-[#2D2825]/40 rounded text-xs font-mono font-bold text-stone-800">
+                [1]
+              </kbd>
+              Chưa thuộc
+            </span>
+            <span className="inline-flex items-center gap-1.5 bg-white/80 px-2.5 py-1 rounded-lg border border-[#2D2825]/20 shadow-xs">
+              <kbd className="px-2 py-0.5 bg-stone-100 border border-[#2D2825]/40 rounded text-xs font-mono font-bold text-stone-800">
+                [2]
+              </kbd>
+              Đã nhớ từ này
+            </span>
+          </div>
+        </section>
+
+        {/* ── Right Companion Study Tips Panel (Desktop xl:flex) ── */}
+        <aside className="hidden xl:flex flex-col gap-4 w-72 shrink-0">
+          <div className="bg-white border-2 border-[#2D2825] rounded-3xl p-5 shadow-[4px_4px_0px_#2D2825]">
+            <div className="flex items-center gap-2 mb-2.5">
+              <span className="text-xl">💡</span>
+              <h3 className="font-extrabold text-sm text-[#2D2825]">Mẹo Ghi Nhớ Sáp Màu</h3>
+            </div>
+            <p className="text-xs text-stone-600 leading-relaxed font-semibold">
+              Hãy nhẩm to nghĩa tiếng Anh trước khi bấm lật thẻ. Việc kích hoạt phản xạ tự nhớ giúp não bộ lưu trữ từ mới sâu hơn 300% so với việc chỉ đọc lướt!
+            </p>
+          </div>
+
+          <div className="bg-[#FFF5EB] border-2 border-[#2D2825] rounded-3xl p-4 shadow-[2px_2px_0px_#2D2825] flex items-center justify-between">
+            <div>
+              <p className="text-[11px] font-bold text-[#E76F51] uppercase">Chu kỳ lặp lại SRS</p>
+              <p className="text-xs font-extrabold text-stone-700">Lần 2: Sau 12 giờ tới</p>
+            </div>
+            <div className="w-9 h-9 rounded-full bg-white border border-[#2D2825] flex items-center justify-center font-bold text-xs shadow-xs">
+              ⏳
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* Encouragement Hint Footer Note */}
+      <footer className="mt-4 flex items-center justify-between w-full max-w-xl px-2 text-xs font-bold text-stone-600">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white rounded-full border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825]">
+          <span className="text-sm">✏️</span>
+          <span>Lật thẻ để ghi nhớ từ vựng lâu hơn nha!</span>
         </div>
+
         <button
           type="button"
           onClick={onReport}
-          className="p-1 rounded-lg text-outline hover:text-red-500 hover:bg-red-50/50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
-          title="Báo lỗi bài tập này"
+          className="w-9 h-9 rounded-full bg-white border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] flex items-center justify-center text-red-500 hover:bg-red-50 active:translate-y-0.5 transition-all"
+          title="Báo cáo câu hỏi này"
         >
-          <span className="material-symbols-outlined text-[15px]">flag</span>
-          <span className="hidden sm:inline">Báo lỗi</span>
+          <span className="material-symbols-outlined text-[18px]">flag</span>
         </button>
-      </div>
-
-      {/* 3D Scene */}
-      <div className="flashcard-scene w-full max-w-xl mx-auto">
-        <div
-          id="flashcard-card"
-          className={`flashcard-3d-card${flipped ? ' is-flipped' : ''}`}
-          onClick={flip}
-          tabIndex={0}
-          role="button"
-          aria-label="Thẻ ghi nhớ - Nhấn hoặc bấm Space để lật thẻ"
-          onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flip(); } }}
-        >
-          <div className="flashcard-sheen" />
-
-          {/* Front face */}
-          <div id="card-front" className="flashcard-face flashcard-front">
-            <div className="flex items-center justify-between w-full">
-              <span className="text-on-surface-variant text-[11px] sm:text-xs font-semibold uppercase tracking-wider">
-                {d.frontLabel}
-              </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant bg-surface-container-high/80 px-2.5 py-0.5 rounded-full">
-                <span className="material-symbols-outlined text-[14px]">touch_app</span>
-                Chạm để lật
-              </span>
-            </div>
-
-            <div className="my-auto text-center py-2 flex flex-col items-center justify-center px-2 w-full">
-              {d.imageUrl && (
-                <div className="mb-3 flex justify-center w-full">
-                  <img
-                    src={d.imageUrl}
-                    alt={d.frontWord}
-                    className="max-h-36 sm:max-h-48 max-w-full rounded-2xl object-contain shadow-sm border border-outline-variant/20 hover:scale-[1.02] transition-transform"
-                    loading="lazy"
-                    onError={e => e.currentTarget.parentElement.style.display = 'none'}
-                  />
-                </div>
-              )}
-              <h2 className="font-bold text-on-surface text-2xl sm:text-3xl md:text-4xl text-center leading-snug break-words max-w-full">
-                {d.frontWord}
-              </h2>
-            </div>
-
-            <div className="flex justify-center w-full">
-              <button className="flashcard-flip-pill bg-primary text-on-primary px-5 py-2.5 sm:px-7 sm:py-3 rounded-full text-xs sm:text-sm font-bold tracking-wide flex items-center gap-2 shadow-sm pointer-events-none">
-                <span className="material-symbols-outlined text-[18px]">visibility</span>
-                <span>Nhấn xem đáp án</span>
-                <kbd className="hidden sm:inline-block ml-1 px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono">Space</kbd>
-              </button>
-            </div>
-          </div>
-
-          {/* Back face */}
-          <div id="card-back" className="flashcard-face flashcard-back">
-            <div className="flex items-center justify-between w-full">
-              <span className="text-primary font-bold text-xs uppercase tracking-wider flex items-center gap-1">
-                <span className="material-symbols-outlined text-[16px] text-primary">check_circle</span>
-                {d.backLabel}
-              </span>
-              <button
-                onClick={e => { e.stopPropagation(); flip(); }}
-                title="Lật lại mặt trước"
-                className="inline-flex items-center gap-1 text-[11px] font-medium text-on-surface-variant hover:text-primary transition-colors bg-surface-container-high/70 hover:bg-surface-container-high px-2.5 py-1 rounded-full active:scale-95 touch-manipulation"
-              >
-                <span className="material-symbols-outlined text-[14px]">undo</span>
-                <span>Lật lại</span>
-              </button>
-            </div>
-
-            <div className="my-auto text-center py-2 flex flex-col items-center justify-center px-2 w-full">
-              <div className="flex items-center justify-center gap-2 sm:gap-3 mb-1 max-w-full">
-                <h2 className="font-bold text-primary text-2xl sm:text-3xl md:text-4xl text-center break-words leading-tight">
-                  {d.backWord}
-                </h2>
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    if (window.HiAudio?.playWord) window.HiAudio.playWord(d.backWord, 0.9);
-                  }}
-                  title="Nghe phát âm"
-                  className="p-2 sm:p-2.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 active:scale-90 transition-all shrink-0 touch-manipulation"
-                >
-                  <span className="material-symbols-outlined text-[22px] sm:text-[24px]">volume_up</span>
-                </button>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 flex-wrap mt-0.5 mb-2">
-                {d.pos && (
-                  <span className="text-[11px] sm:text-xs font-semibold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                    {d.pos}
-                  </span>
-                )}
-                {d.phonetic && (
-                  <span className="text-on-surface-variant font-mono text-xs sm:text-sm">
-                    {d.phonetic}
-                  </span>
-                )}
-              </div>
-
-              {d.exampleSentence && (
-                <div className="w-full max-w-md mx-auto px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl bg-surface-container-lowest/70 border border-outline-variant/30 text-center mb-1">
-                  <p className="text-[11px] sm:text-xs md:text-sm text-on-surface/85 italic line-clamp-3 leading-relaxed">
-                    "{d.exampleSentence}"
-                  </p>
-                </div>
-              )}
-
-              {d.imageUrl && (
-                <div className="my-1 sm:my-1.5 flex justify-center w-full">
-                  <img
-                    src={d.imageUrl}
-                    alt={d.backWord}
-                    className="max-h-24 sm:max-h-32 max-w-full rounded-xl object-contain shadow-sm border border-outline-variant/20 hover:scale-[1.02] transition-transform"
-                    loading="lazy"
-                    onError={e => e.currentTarget.parentElement.style.display = 'none'}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Rating buttons */}
-            <div className="flex w-full flex-row justify-center gap-2 sm:gap-3">
-              <button
-                onClick={e => { e.stopPropagation(); onRate('hard'); }}
-                className="flex-1 min-h-[44px] py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm touch-manipulation"
-              >
-                <span>Khó</span>
-                <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">1</kbd>
-              </button>
-              <button
-                onClick={e => { e.stopPropagation(); onRate('good'); }}
-                className="flex-1 min-h-[44px] py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-secondary-container text-on-secondary-container hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm touch-manipulation"
-              >
-                <span>Tốt</span>
-                <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[10px] bg-black/10 rounded font-mono font-normal">2</kbd>
-              </button>
-              <button
-                onClick={e => { e.stopPropagation(); onRate('easy'); }}
-                className="flex-1 min-h-[44px] py-2.5 sm:py-3 px-2 sm:px-4 rounded-xl sm:rounded-full text-xs sm:text-sm font-bold bg-primary text-on-primary hover:bg-surface-tint active:scale-95 transition-all flex items-center justify-center gap-1 shadow-sm touch-manipulation"
-              >
-                <span>Dễ</span>
-                <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[10px] bg-white/20 rounded font-mono font-normal">3</kbd>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      </footer>
     </div>
   );
 }

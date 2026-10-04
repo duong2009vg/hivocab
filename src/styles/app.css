@@ -294,5 +294,102 @@
   .crayon-btn:active {
     transform: scale(0.97);
   }
+
+  /* ─── Stitch Learning Mode Utilities ─────────────────────────────── */
+  .card-flip-container {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+  .rotate-y-180 {
+    transform: rotateY(180deg);
+  }
+  .flipped-3d {
+    transform: rotateY(180deg);
+  }
+
+  .crayon-stripe-bg {
+    background: repeating-linear-gradient(
+      45deg,
+      #79AC78,
+      #79AC78 10px,
+      #609966 10px,
+      #609966 20px
+    );
+  }
+
+  .crayon-paper-pattern {
+    background-color: #FFF8F3;
+    background-image: radial-gradient(#d3c5b4 1.25px, transparent 1.25px);
+    background-size: 26px 26px;
+  }
+
+  .letter-egg {
+    border-radius: 48% 48% 46% 46% / 55% 55% 45% 45%;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .letter-slot-box {
+    border-radius: 24px 22px 26px 20px / 20px 25px 22px 24px;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .crayon-border-main {
+    border: 3.5px solid #2B2523;
+    box-shadow: 4px 6px 0px #2B2523;
+    border-radius: 32px 30px 34px 28px / 30px 34px 28px 32px;
+  }
+
+  .crayon-speaker-btn {
+    background: radial-gradient(circle at 35% 35%, #5EA1EE, #3B82D6);
+    border: 3.5px solid #233446;
+    box-shadow: 0 7px 0px #203140, 0 12px 20px rgba(59, 130, 216, 0.25);
+  }
+  .crayon-speaker-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 3px 0px #203140;
+  }
+
+  .crayon-btn-navy {
+    background-color: #243A5E;
+    border: 3px solid #1A2A44;
+    box-shadow: 0 5px 0px #131F33;
+    border-radius: 20px;
+  }
+  .crayon-btn-navy:active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 0px #131F33;
+  }
+
+  .letter-slot {
+    border: 2.5px solid #D5CEBE;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+    background: #FFFFFF;
+  }
+  .letter-slot.active {
+    border-color: #3884DD;
+    background-color: #F1F7FF;
+    box-shadow: 0 0 0 3.5px rgba(56, 132, 221, 0.25);
+  }
+
+  .crayon-blank-highlight {
+    border-bottom: 3.5px solid #3b6e8c;
+    border-radius: 4px;
+  }
+
+  .mascot-float-soft {
+    animation: floatSoft 4s ease-in-out infinite;
+  }
+  @keyframes floatSoft {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-4px) rotate(1deg); }
+  }
 }
 

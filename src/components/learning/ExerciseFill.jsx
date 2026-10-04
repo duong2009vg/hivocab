@@ -1,21 +1,33 @@
 // src/components/learning/ExerciseFill.jsx
-// Fill-in-the-blank letter boxes — pure React with keyboard navigation.
+// 100% Pixel-Perfect match to Google Stitch design (both Desktop & Mobile)
+// Fill-in-the-blank letter boxes — Pure React with keyboard navigation.
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
-function buildSentenceHTML(sentence) {
-  // Replace ___ with a styled blank span
-  return sentence.replace(/_{2,}(?:\s+_{2,})*/g, (placeholder) =>
-    placeholder.split(/\s+/).map(part => {
-      const width = Math.max(2.5, Math.min(part.length * 0.75, 7));
-      return `<span class="inline-block border-b-2 border-primary mx-1 align-bottom text-transparent font-bold" style="width:${width}em">${part}</span>`;
-    }).join(' ')
-  );
+function renderSentence(sentence, targetWord) {
+  if (!sentence) return null;
+  // If sentence contains ___ or similar placeholder
+  if (sentence.includes('___') || sentence.includes('---')) {
+    const parts = sentence.split(/_{2,}|-{2,}/);
+    return (
+      <>
+        {parts[0]}
+        <span className="inline-block px-3 sm:px-4 py-0.5 sm:py-1 mx-1.5 sm:mx-2 bg-sky-50 text-[#3b6e8c] font-bold rounded-xl border-2 border-[#3b6e8c] crayon-blank-highlight shadow-xs align-baseline">
+          {targetWord || '____'}
+        </span>
+        {parts[1] || ''}
+      </>
+    );
+  }
+  return sentence;
 }
 
-export default function ExerciseFill({ item, onSubmit, onReport }) {
+export default function ExerciseFill({ item, onSubmit, onReport, sessionInfo }) {
   const d = item?.exerciseData || {};
-  const answerParts = d.answerParts?.length ? d.answerParts : (d.answer || '').trim().split(/\s+/).filter(Boolean);
+  const answer = (d.answer || '').trim();
+  const answerParts = d.answerParts?.length
+    ? d.answerParts
+    : answer.split(/\s+/).filter(Boolean);
   const totalLetters = d.letters || answerParts.join('').length;
 
   // Build flat array of { partIdx, letterIdx } for each input box
@@ -26,250 +38,403 @@ export default function ExerciseFill({ item, onSubmit, onReport }) {
   const [values, setValues] = useState(() => boxes.map(() => ''));
   const [hintLevel, setHintLevel] = useState(0);
   const [submitted, setSubmitted] = useState(null); // { correct, correctAnswer }
+  const [focusedIdx, setFocusedIdx] = useState(0);
   const inputRefs = useRef([]);
+
+  const currentNum = sessionInfo?.currentNum ?? 1;
+  const totalNum = sessionInfo?.totalNum ?? 10;
 
   // Reset on new item
   useEffect(() => {
     setValues(boxes.map(() => ''));
     setHintLevel(0);
     setSubmitted(null);
-    setTimeout(() => inputRefs.current[0]?.focus(), 120);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    setFocusedIdx(0);
+    setTimeout(() => {
+      inputRefs.current[0]?.focus();
+    }, 120);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item]);
 
-  const handleInput = useCallback((e, flatIdx) => {
-    if (submitted) return;
-    const raw = e.target.value;
-    if (!raw) {
-      setValues(prev => { const n = [...prev]; n[flatIdx] = ''; return n; });
-      return;
-    }
-    // Paste handling
-    if (raw.length > 1) {
-      const chars = raw.toUpperCase().replace(/[^A-Z0-9\-']/g, '').split('');
-      setValues(prev => {
+  const handleInput = useCallback(
+    (e, flatIdx) => {
+      if (submitted) return;
+      const raw = e.target.value;
+      if (!raw) {
+        setValues((prev) => {
+          const n = [...prev];
+          n[flatIdx] = '';
+          return n;
+        });
+        return;
+      }
+      // Paste handling
+      if (raw.length > 1) {
+        const chars = raw
+          .toUpperCase()
+          .replace(/[^A-Z0-9\-']/g, '')
+          .split('');
+        setValues((prev) => {
+          const n = [...prev];
+          chars.forEach((c, i) => {
+            if (n[flatIdx + i] !== undefined) n[flatIdx + i] = c;
+          });
+          return n;
+        });
+        const nextIdx = Math.min(flatIdx + chars.length, boxes.length - 1);
+        setTimeout(() => {
+          inputRefs.current[nextIdx]?.focus();
+          inputRefs.current[nextIdx]?.select();
+        }, 10);
+        return;
+      }
+      const char = raw.slice(-1).toUpperCase();
+      setValues((prev) => {
         const n = [...prev];
-        chars.forEach((c, i) => { if (n[flatIdx + i] !== undefined) n[flatIdx + i] = c; });
+        n[flatIdx] = char;
         return n;
       });
-      const nextIdx = Math.min(flatIdx + chars.length, boxes.length - 1);
-      setTimeout(() => { inputRefs.current[nextIdx]?.focus(); inputRefs.current[nextIdx]?.select(); }, 10);
-      return;
-    }
-    const char = raw.slice(-1).toUpperCase();
-    setValues(prev => { const n = [...prev]; n[flatIdx] = char; return n; });
-    if (e.target) e.target.scrollLeft = 0;
-    if (flatIdx < boxes.length - 1) {
-      setTimeout(() => {
-        const next = inputRefs.current[flatIdx + 1];
-        if (next) {
-          next.focus();
-          next.select();
-          next.scrollLeft = 0;
-        }
-      }, 10);
-    }
-  }, [submitted, boxes.length]);
-
-  const handleKeyDown = useCallback((e, flatIdx) => {
-    if (e.key === 'Backspace') {
-      if (!values[flatIdx] && flatIdx > 0) {
-        e.preventDefault();
-        setValues(prev => { const n = [...prev]; n[flatIdx - 1] = ''; return n; });
-        inputRefs.current[flatIdx - 1]?.focus();
-      } else if (values[flatIdx]) {
-        e.preventDefault();
-        setValues(prev => { const n = [...prev]; n[flatIdx] = ''; return n; });
+      if (e.target) e.target.scrollLeft = 0;
+      if (flatIdx < boxes.length - 1) {
+        setTimeout(() => {
+          const next = inputRefs.current[flatIdx + 1];
+          if (next) {
+            next.focus();
+            next.select();
+            next.scrollLeft = 0;
+          }
+        }, 10);
       }
-    } else if (e.key === 'ArrowLeft' && flatIdx > 0) {
-      e.preventDefault(); inputRefs.current[flatIdx - 1]?.focus(); inputRefs.current[flatIdx - 1]?.select();
-    } else if (e.key === 'ArrowRight' && flatIdx < boxes.length - 1) {
-      e.preventDefault(); inputRefs.current[flatIdx + 1]?.focus(); inputRefs.current[flatIdx + 1]?.select();
-    } else if ((e.key === ' ' || e.code === 'Space') && flatIdx < boxes.length - 1) {
-      e.preventDefault(); inputRefs.current[flatIdx + 1]?.focus(); inputRefs.current[flatIdx + 1]?.select();
-    } else if (e.key === 'Enter') {
-      e.preventDefault(); handleCheck();
-    }
-  }, [values, boxes.length]);
+    },
+    [submitted, boxes.length]
+  );
+
+  const handleKeyDown = useCallback(
+    (e, flatIdx) => {
+      if (e.key === 'Backspace') {
+        if (!values[flatIdx] && flatIdx > 0) {
+          e.preventDefault();
+          setValues((prev) => {
+            const n = [...prev];
+            n[flatIdx - 1] = '';
+            return n;
+          });
+          inputRefs.current[flatIdx - 1]?.focus();
+        } else if (values[flatIdx]) {
+          e.preventDefault();
+          setValues((prev) => {
+            const n = [...prev];
+            n[flatIdx] = '';
+            return n;
+          });
+        }
+      } else if (e.key === 'ArrowLeft' && flatIdx > 0) {
+        e.preventDefault();
+        inputRefs.current[flatIdx - 1]?.focus();
+        inputRefs.current[flatIdx - 1]?.select();
+      } else if (e.key === 'ArrowRight' && flatIdx < boxes.length - 1) {
+        e.preventDefault();
+        inputRefs.current[flatIdx + 1]?.focus();
+        inputRefs.current[flatIdx + 1]?.select();
+      } else if ((e.key === ' ' || e.code === 'Space') && flatIdx < boxes.length - 1) {
+        e.preventDefault();
+        inputRefs.current[flatIdx + 1]?.focus();
+        inputRefs.current[flatIdx + 1]?.select();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        handleCheck();
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [values, boxes.length]
+  );
 
   const handleRevealHint = useCallback(() => {
     if (submitted) return;
     const answerChars = (d.answer || '').replace(/\s+/g, '').split('');
     const maxHint = Math.max(1, answerChars.length - 1);
     if (hintLevel >= maxHint) return;
-    // Find next empty input index (hintLevel is the next char to reveal)
-    setValues(prev => {
+
+    setValues((prev) => {
       const n = [...prev];
       n[hintLevel] = (answerChars[hintLevel] || '').toUpperCase();
       return n;
     });
-    // Animate revealed input
+
     const el = inputRefs.current[hintLevel];
     if (el) {
-      el.classList.add('border-primary', 'bg-primary/10', 'text-primary', 'scale-110');
-      setTimeout(() => el.classList.remove('scale-110'), 200);
+      el.classList.add('border-[#3b6e8c]', 'bg-sky-100', 'scale-110');
+      setTimeout(() => el.classList.remove('scale-110'), 250);
     }
-    setHintLevel(h => h + 1);
-    // Focus next empty
+    setHintLevel((h) => h + 1);
+
     setTimeout(() => {
-      const nextEmpty = inputRefs.current.find((inp, i) => i > hintLevel && !values[i]);
-      const nextInp = nextEmpty || inputRefs.current[Math.min(hintLevel + 1, boxes.length - 1)];
-      nextInp?.focus(); nextInp?.select();
+      const nextInp = inputRefs.current[Math.min(hintLevel + 1, boxes.length - 1)];
+      nextInp?.focus();
+      nextInp?.select();
     }, 60);
-  }, [submitted, d.answer, hintLevel, values, boxes.length]);
+  }, [submitted, d.answer, hintLevel, boxes.length]);
 
   const handleCheck = useCallback(() => {
     if (submitted) return;
-    // Reconstruct typed answer
-    const answer = d.answer || '';
+    const ans = d.answer || '';
     let letterIdx = 0;
-    const typed = answer.split('').map(char => {
-      if (char === ' ') return ' ';
-      return values[letterIdx++] || '_';
-    }).join('');
+    const typed = ans
+      .split('')
+      .map((char) => {
+        if (char === ' ') return ' ';
+        return values[letterIdx++] || '_';
+      })
+      .join('');
 
     const r = onSubmit(typed);
     setSubmitted(r);
 
     if (!r.skipped) {
-      setTimeout(() => { setValues(boxes.map(() => '')); setSubmitted(null); setHintLevel(0); }, 1800);
+      setTimeout(() => {
+        setValues(boxes.map(() => ''));
+        setSubmitted(null);
+        setHintLevel(0);
+      }, 1800);
     }
   }, [submitted, d.answer, values, onSubmit, boxes]);
 
-  // Determine input colour based on submission
-  function inputClass(flatIdx) {
-    const base = 'w-9 h-11 sm:w-11 sm:h-13 md:w-12 md:h-14 p-0 m-0 text-center text-base sm:text-xl font-bold uppercase border-2 rounded-xl bg-surface outline-none transition-all font-mono leading-none flex items-center justify-center shadow-2xs select-none';
-    if (!submitted) return `${base} border-outline-variant/40 focus:border-primary focus:bg-primary/5 text-on-surface focus:ring-2 focus:ring-primary/20`;
-    if (submitted.correct) return `${base} border-green-500 bg-green-50 text-green-700`;
-    return `${base} border-error bg-error-container/20 text-error`;
-  }
+  const playAudio = useCallback(() => {
+    const word = d.answer || '';
+    if (!word) return;
+    if (window.HiAudio?.playWord) {
+      window.HiAudio.playWord(word, 0.9);
+    } else if ('speechSynthesis' in window) {
+      const u = new SpeechSynthesisUtterance(word);
+      u.lang = 'en-US';
+      window.speechSynthesis.speak(u);
+    }
+  }, [d.answer]);
 
   let partOffset = 0;
+  const firstLetter = (d.answer || '').trim()[0]?.toUpperCase() || 'A';
 
   return (
-    <div className="w-full max-w-2xl mx-auto flex flex-col items-center gap-3 px-1 sm:px-3">
-      {/* Header */}
-      <div className="w-full max-w-xl flex items-center justify-between px-1">
-        <div className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
-          Bài tập: Điền vào chỗ trống
+    <div className="w-full flex flex-col items-center select-none font-comfortaa">
+      {/* ── Main Big Crayon Card ── */}
+      <div className="w-full max-w-3xl bg-white rounded-[2.5rem] md:rounded-[36px] border-[3px] border-[#342e2b] p-6 sm:p-8 md:p-10 shadow-[6px_8px_0px_#2c2523] relative transition-all">
+        {/* Subtle decorative crayon tape on top-right corner */}
+        <div className="absolute -top-4 -right-4 w-16 h-8 bg-amber-200/80 border-2 border-[#342e2b] rotate-12 pointer-events-none rounded-sm shadow-xs hidden sm:block"></div>
+
+        {/* Sub-header with Audio Trigger */}
+        <div className="flex items-center justify-center gap-2.5 mb-5 sm:mb-6">
+          <span className="text-stone-700 font-semibold text-base sm:text-lg md:text-xl">
+            Điền từ tiếng Anh có nghĩa:
+          </span>
+          <button
+            type="button"
+            onClick={playAudio}
+            aria-label="Phát âm từ vựng"
+            className="w-10 h-10 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-stone-800 text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-sm cursor-pointer"
+            title="Nghe phát âm từ cần điền"
+          >
+            <i className="fa-solid fa-volume-high text-sm sm:text-base"></i>
+          </button>
         </div>
-        <button type="button" onClick={onReport}
-          className="p-1 rounded-lg text-outline hover:text-red-500 hover:bg-red-50/50 transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
-          title="Báo lỗi bài tập này">
-          <span className="material-symbols-outlined text-[15px]">flag</span>
-          <span className="hidden sm:inline">Báo lỗi</span>
-        </button>
-      </div>
 
-      {/* Card */}
-      <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl shadow-sm w-full max-w-xl p-5 sm:p-7 md:p-8 flex flex-col items-center min-h-[300px] justify-between">
-
-        {/* Prompt */}
-        <div className="text-center mb-6 w-full">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <p className="text-xs sm:text-sm text-on-surface-variant font-medium">Điền từ tiếng Anh có nghĩa:</p>
-            <button
-              onClick={() => window.HiAudio?.playWord?.(d.answer, 0.9)}
-              title="Nghe phát âm từ cần điền"
-              className="p-1.5 rounded-full bg-surface-container-low text-primary hover:bg-primary/10 transition-colors active:scale-95 touch-manipulation">
-              <span className="material-symbols-outlined text-[18px]">volume_up</span>
-            </button>
-          </div>
-
+        {/* Passage Sentence with Highlighted Blank Word */}
+        <div className="text-center font-crayon leading-relaxed md:leading-[2.6rem] text-xl sm:text-2xl md:text-[1.85rem] text-stone-800 max-w-2xl mx-auto tracking-wide mb-6 sm:mb-8">
           {d.sentence ? (
-            <p
-              className="text-base sm:text-lg md:text-xl text-on-surface leading-relaxed mx-auto max-w-lg"
-              dangerouslySetInnerHTML={{ __html: buildSentenceHTML(d.sentence) }}
-            />
+            renderSentence(d.sentence, submitted ? d.answer : values.join('') || '_____')
           ) : (
-            <p className="text-base sm:text-lg md:text-xl text-on-surface-variant leading-relaxed mx-auto max-w-lg">
-              {d.meaningHint}
+            <p className="text-lg sm:text-xl font-bold text-stone-800">
+              "{d.meaningHint || d.meaning || '...'}"
             </p>
           )}
-
-          {/* Hint button */}
-          <div className="mt-3 flex items-center justify-center">
-            <button
-              onClick={handleRevealHint}
-              disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
-              className="text-primary font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 hover:bg-primary/10 border border-primary/25 bg-primary/5 px-3.5 py-1.5 rounded-xl transition-all active:scale-95 touch-manipulation shadow-sm disabled:opacity-40">
-              <span className="material-symbols-outlined text-[17px]">tips_and_updates</span>
-              <span>Gợi ý ({hintLevel}/{totalLetters})</span>
-            </button>
-          </div>
         </div>
 
-        {/* Letter boxes */}
+        {/* Mascot Churbito In-Context Hint Box */}
+        <div className="max-w-xl mx-auto bg-[#fff7ef] rounded-2xl border-2 border-stone-800/90 py-2.5 px-4 sm:px-5 mb-5 flex items-center justify-center gap-3 shadow-[3px_4px_0px_#2c2523]">
+          <span className="text-2xl filter drop-shadow-xs">🐯</span>
+          <p className="text-stone-700 text-xs sm:text-sm md:text-base font-quicksand font-semibold">
+            <span className="font-crayon font-bold text-amber-900">Churbito gợi ý:</span> Từ gồm{' '}
+            <span className="font-bold text-stone-900 underline decoration-amber-500">
+              {totalLetters} ký tự
+            </span>{' '}
+            bắt đầu bằng <span className="font-bold text-amber-800 font-crayon text-lg">'{firstLetter}'</span>
+          </p>
+        </div>
+
+        {/* Hint Expand Pill Toggle */}
+        <div className="flex justify-center mb-6 sm:mb-7">
+          <button
+            type="button"
+            onClick={handleRevealHint}
+            disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
+            className="crayon-dashed px-5 py-1.5 sm:py-2 rounded-full text-stone-700 hover:text-stone-900 font-semibold text-xs sm:text-sm flex items-center gap-2 transition hover:bg-stone-50 border-stone-400 cursor-pointer shadow-xs disabled:opacity-40"
+          >
+            <span className="text-amber-600">💡</span>
+            <span>Gợi ý ({hintLevel}/{totalLetters})</span>
+            <i className="fa-solid fa-angle-right text-xs text-stone-400"></i>
+          </button>
+        </div>
+
+        {/* Letter Input Slots Container */}
         <div
-          className="flex gap-y-3 gap-x-1.5 sm:gap-x-2 justify-center flex-wrap max-w-full items-center my-2 p-1 overflow-x-auto select-none"
-          onClick={e => {
+          className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 md:gap-3.5 mb-6 overflow-x-auto py-2 no-scrollbar"
+          onClick={(e) => {
             if (e.target.tagName !== 'INPUT') {
               const firstEmpty = inputRefs.current.find((inp, i) => !values[i]);
               const target = firstEmpty || inputRefs.current[inputRefs.current.length - 1];
-              target?.focus(); target?.select();
+              target?.focus();
+              target?.select();
             }
           }}
         >
           {answerParts.map((part, pi) => {
             const startOffset = partOffset;
             partOffset += part.length;
+
             return (
-              <span key={pi} className="inline-flex gap-1 sm:gap-1.5 md:gap-2 flex-nowrap justify-center max-w-full">
+              <span key={pi} className="inline-flex gap-2 sm:gap-2.5 md:gap-3 flex-nowrap justify-center">
                 {[...part].map((_, li) => {
                   const flatIdx = startOffset + li;
+                  const isFilled = !!values[flatIdx];
+                  const isActive = focusedIdx === flatIdx && !submitted;
+
+                  let slotClass =
+                    'w-11 h-14 sm:w-13 sm:h-16 md:w-15 md:h-18 rounded-2xl flex items-center justify-center font-crayon text-2xl md:text-3xl font-bold transition-all ';
+
+                  if (!submitted) {
+                    if (isActive) {
+                      slotClass +=
+                        'bg-sky-50 border-[3px] border-blue-600 ring-4 ring-sky-200/80 shadow-[3px_4px_0px_#2c2523] text-blue-700 animate-pulse';
+                    } else if (isFilled) {
+                      slotClass +=
+                        'bg-white border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] text-stone-800';
+                    } else {
+                      slotClass +=
+                        'bg-white border-2 border-stone-400/80 border-dashed text-stone-400';
+                    }
+                  } else {
+                    if (submitted.correct) {
+                      slotClass +=
+                        'bg-green-50 border-[3px] border-green-600 shadow-[2px_3px_0px_#2c2523] text-green-700';
+                    } else {
+                      slotClass +=
+                        'bg-red-50 border-[3px] border-red-500 shadow-[2px_3px_0px_#2c2523] text-red-600';
+                    }
+                  }
+
                   return (
-                    <input
-                      key={flatIdx}
-                      ref={el => inputRefs.current[flatIdx] = el}
-                      type="text"
-                      maxLength={2}
-                      value={values[flatIdx]}
-                      disabled={!!submitted}
-                      data-fill-index={flatIdx}
-                      className={inputClass(flatIdx)}
-                      style={{ caretColor: 'transparent', textAlign: 'center' }}
-                      autoComplete="off"
-                      autoCorrect="off"
-                      autoCapitalize="characters"
-                      spellCheck={false}
-                      onFocus={e => { e.target.select(); e.target.scrollLeft = 0; }}
-                      onBlur={e => { e.target.scrollLeft = 0; }}
-                      onClick={e => { e.target.select(); e.target.scrollLeft = 0; }}
-                      onChange={e => handleInput(e, flatIdx)}
-                      onKeyDown={e => handleKeyDown(e, flatIdx)}
-                    />
+                    <div key={flatIdx} className={slotClass}>
+                      <input
+                        ref={(el) => (inputRefs.current[flatIdx] = el)}
+                        type="text"
+                        maxLength={2}
+                        value={values[flatIdx]}
+                        disabled={!!submitted}
+                        data-fill-index={flatIdx}
+                        className="w-full h-full text-center bg-transparent focus:outline-none uppercase caret-transparent p-0 font-bold"
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="characters"
+                        spellCheck={false}
+                        onFocus={(e) => {
+                          setFocusedIdx(flatIdx);
+                          e.target.select();
+                          e.target.scrollLeft = 0;
+                        }}
+                        onBlur={(e) => {
+                          e.target.scrollLeft = 0;
+                        }}
+                        onClick={(e) => {
+                          setFocusedIdx(flatIdx);
+                          e.target.select();
+                          e.target.scrollLeft = 0;
+                        }}
+                        onChange={(e) => handleInput(e, flatIdx)}
+                        onKeyDown={(e) => handleKeyDown(e, flatIdx)}
+                      />
+                    </div>
                   );
                 })}
                 {pi < answerParts.length - 1 && (
-                  <span className="w-2.5 sm:w-4 md:w-5 shrink-0" aria-hidden="true" />
+                  <span className="w-2 sm:w-3 shrink-0" aria-hidden="true" />
                 )}
               </span>
             );
           })}
         </div>
 
-        <p className="text-[11px] text-outline text-center mt-2 mb-4">
-          Gõ ký tự sẽ tự chuyển ô • Nhấn{' '}
-          <kbd className="px-1.5 py-0.5 rounded bg-surface-container-low font-mono text-[10px]">Backspace</kbd>{' '}
-          để lùi
-        </p>
+        {/* Keyboard Navigation Instructions */}
+        <div className="text-center font-quicksand text-xs md:text-sm text-stone-500 font-medium mb-6 sm:mb-8 flex items-center justify-center gap-2 flex-wrap">
+          <span>Gõ ký tự trên bàn phím</span>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-stone-300"></span>
+          <span>
+            Nhấn{' '}
+            <kbd className="px-2 py-0.5 bg-stone-100 border border-stone-400/70 rounded-md font-mono text-xs text-stone-700 font-semibold shadow-2xs">
+              Backspace
+            </kbd>{' '}
+            để lùi ô
+          </span>
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-stone-300"></span>
+          <span>
+            <kbd className="px-2 py-0.5 bg-stone-100 border border-stone-400/70 rounded-md font-mono text-xs text-stone-700 font-semibold shadow-2xs">
+              Enter
+            </kbd>{' '}
+            để kiểm tra
+          </span>
+        </div>
 
-        {/* Check button */}
-        <div className="w-full max-w-md">
+        {/* Primary Action Button: Kiểm tra đáp án */}
+        <div className="flex justify-center">
           <button
+            type="button"
             onClick={handleCheck}
             disabled={!!submitted}
-            className="w-full py-3.5 rounded-xl text-sm font-bold bg-primary text-on-primary hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-60">
-            <span className="material-symbols-outlined text-[18px]">check_circle</span>
-            <span>Kiểm tra</span>
+            className="w-full max-w-md py-3.5 sm:py-4 px-8 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-lg sm:text-xl font-bold rounded-2xl border-[3px] border-stone-800 shadow-[4px_6px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
+          >
+            <i className="fa-regular fa-circle-check text-xl"></i>
+            <span>Kiểm tra đáp án</span>
           </button>
         </div>
       </div>
 
-      {/* Toast */}
+      {/* ── Companion Mascot Encouragement Bar ── */}
+      <div className="w-full max-w-3xl mt-4 sm:mt-5 flex items-center justify-between gap-3 px-2">
+        <div className="flex items-center gap-3 bg-white/90 py-2 px-4 rounded-3xl border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523]">
+          <div className="w-10 h-10 rounded-full border-2 border-stone-800 overflow-hidden bg-amber-100 flex items-center justify-center text-xl shrink-0">
+            🐯
+          </div>
+          <div>
+            <p className="text-xs sm:text-sm font-crayon font-bold text-stone-800">
+              Churbito đang cổ vũ bạn hoàn thành bài học! 🌿
+            </p>
+            <p className="text-[11px] font-quicksand text-stone-500 font-semibold">
+              Đang học từ {currentNum} / {totalNum} • Cố lên nào!
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={onReport}
+          aria-label="Báo lỗi nội dung"
+          className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center text-stone-600 hover:text-red-500 hover:bg-red-50 shrink-0 cursor-pointer"
+          title="Báo lỗi bài tập này"
+        >
+          <i className="fa-regular fa-flag text-sm sm:text-base"></i>
+        </button>
+      </div>
+
+      {/* ── Result Feedback Toast ── */}
       {submitted && (
-        <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-5 py-2.5 rounded-full text-white text-sm font-bold shadow-lg ${submitted.correct ? 'bg-green-500' : 'bg-error'}`}>
-          {submitted.correct ? '✓ Chính xác!' : `✗ Đáp án: ${submitted.correctAnswer}`}
+        <div
+          className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-50 px-6 py-2.5 rounded-full text-white text-base font-bold shadow-lg flex items-center gap-2 border-2 border-[#292524] ${
+            submitted.correct ? 'bg-[#588157]' : 'bg-[#D36135]'
+          } animate-bounce-in`}
+        >
+          <span>
+            {submitted.correct
+              ? `✓ Tuyệt vời! "${d.answer}" chính là đáp án chính xác 🎉`
+              : `✗ Đáp án đúng: "${submitted.correctAnswer || d.answer}"`}
+          </span>
         </div>
       )}
     </div>
