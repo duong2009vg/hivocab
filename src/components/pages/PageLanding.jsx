@@ -1,10 +1,49 @@
 // src/components/pages/PageLanding.jsx
 // Trang giới thiệu HiVocab mô phỏng một bức tranh sáp màu của trẻ con (Cozy Crayon Handcrafted Picture Book)
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
+
+function useCountUp(end, duration = 1600, delay = 0) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let animationFrameId = null;
+    let startTime = null;
+
+    const timer = setTimeout(() => {
+      const step = (timestamp) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 1 - Math.pow(1 - progress, 4);
+        setCount(Math.floor(ease * end));
+
+        if (progress < 1) {
+          animationFrameId = requestAnimationFrame(step);
+        } else {
+          setCount(end);
+        }
+      };
+      animationFrameId = requestAnimationFrame(step);
+    }, delay);
+
+    return () => {
+      clearTimeout(timer);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [end, duration, delay]);
+
+  return count;
+}
+
+const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 export function PageLanding() {
   const { navigateTo } = useRoute();
+
+  // Hiệu ứng hiện số lần lượt: Số từ vựng đếm trước (delay 150ms), số đề thi THPT đếm sau (delay 800ms)
+  const vocabCount = useCountUp(66000, 1600, 150);
+  const examCount = useCountUp(38, 1200, 800);
 
   return (
     <div
@@ -16,16 +55,16 @@ export function PageLanding() {
       }}
     >
       {/* ── TOP DECORATIVE CRAYON HEADER & NAVIGATION BAR ── */}
-      <header className="sticky top-0 z-40 px-4 sm:px-8 py-3.5 bg-[#FAF5EB]/90 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 px-3.5 sm:px-8 py-2.5 sm:py-3 bg-[#FAF5EB]/90 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-3 sm:gap-4">
           
           {/* Logo app bản sáp màu đã tách nền ở góc trên cùng bên trái */}
           <div
             onClick={() => navigateTo('landing')}
-            className="flex items-center gap-2.5 cursor-pointer select-none group"
+            className="flex items-center gap-2 cursor-pointer select-none group shrink-0"
             title="HiVocab – Trang chủ tranh sáp màu"
           >
-            <div className="relative w-10 h-10 sm:w-11 sm:h-11 flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="relative w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center transition-transform group-hover:scale-105">
               <img
                 src="/logo-hi-transparent.png"
                 alt="HiVocab Logo Sáp Màu"
@@ -36,10 +75,10 @@ export function PageLanding() {
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-quicksand font-black text-2xl sm:text-[26px] tracking-tight text-[#3D352E] leading-none">
+              <span className="font-quicksand font-black text-lg sm:text-xl tracking-tight text-[#3D352E] leading-none">
                 HiVocab<span className="text-[#DE5D53]">!</span>
               </span>
-              <span className="text-[10px] font-bold text-[#86756C] tracking-wider uppercase mt-0.5">
+              <span className="text-[9px] font-bold text-[#86756C] tracking-wider uppercase mt-0.5 hidden sm:block">
                 Vườn tranh từ vựng 🌿
               </span>
             </div>
@@ -83,40 +122,33 @@ export function PageLanding() {
             </button>
           </nav>
 
-          {/* Action Buttons: Bắt đầu ngay & Đăng nhập */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Action Buttons: Bắt đầu ngay & Đăng nhập (thu gọn vừa vặn) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <button
               type="button"
               onClick={() => navigateTo('login')}
-              className="px-3.5 sm:px-4 py-2 text-xs sm:text-sm font-black rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+              className="px-2.5 sm:px-3.5 py-1.5 text-xs font-black rounded-xl sm:rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
             >
               Đăng nhập
             </button>
             <button
               type="button"
               onClick={() => navigateTo('dashboard')}
-              className="px-4 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3 sm:px-4 py-1.5 text-xs font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1"
             >
               <span>Bắt đầu ngay</span>
-              <span className="text-sm">✏️</span>
+              <span className="text-xs">✏️</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* ── HERO SECTION: BỨC TRANH SÁP MÀU VỚI BÉ MASCOT VẪY TAY CHÀO ── */}
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-14 flex flex-col justify-center">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-8 py-7 sm:py-12 flex flex-col justify-center">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           {/* CỘT TRÁI: LỜI GIỚI THIỆU ẤM ÁP & HÀNH ĐỘNG HỌC TẬP */}
-          <div className="lg:col-span-7 flex flex-col items-start space-y-5 text-left">
-            
-            {/* Tag sáp màu xinh xắn */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#E5EFE2] border-2 border-[#8FB383] text-[#476739] text-xs font-black shadow-2xs rotate-[-1deg]">
-              <span>🖍️</span>
-              <span>Bức tranh học từ vựng thủ công mỗi ngày</span>
-              <span className="text-xs">🐾</span>
-            </div>
+          <div className="lg:col-span-7 flex flex-col items-start space-y-4 sm:space-y-5 text-left">
 
             {/* Tiêu đề chính nét bút sáp đậm */}
             <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[54px] text-[#3D352E] tracking-tight leading-[1.15]">
@@ -135,9 +167,48 @@ export function PageLanding() {
               vững chắc nhất! 🌿
             </h1>
 
+            {/* Cụm điểm nhấn số liệu: Số từ vựng & Số đề thi THPT QG có hiệu ứng đếm số lần lượt */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              {/* Thẻ 1: Số từ vựng học thuật (chạy trước: delay 150ms) */}
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                <div className="w-11 h-11 rounded-xl bg-[#FEEFEA] border-2 border-[#DE5D53] flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                  📚
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-quicksand font-black text-2xl sm:text-3xl text-[#DE5D53] tracking-tight">
+                      {formatNumber(vocabCount)}+
+                    </span>
+                    <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider">Từ vựng</span>
+                  </div>
+                  <p className="text-xs font-bold text-[#6E5D53] truncate">
+                    Cambridge 10–21 & IELTS Academic
+                  </p>
+                </div>
+              </div>
+
+              {/* Thẻ 2: Số đề thi THPT Quốc Gia (chạy tiếp sau: delay 800ms) */}
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                <div className="w-11 h-11 rounded-xl bg-[#EAF3E7] border-2 border-[#557A46] flex items-center justify-center text-xl shrink-0 shadow-2xs">
+                  🎓
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <div className="flex items-baseline gap-1.5">
+                    <span className="font-quicksand font-black text-2xl sm:text-3xl text-[#557A46] tracking-tight">
+                      {examCount}+
+                    </span>
+                    <span className="text-xs font-black text-[#557A46] uppercase tracking-wider">Đề thi THPT</span>
+                  </div>
+                  <p className="text-xs font-bold text-[#6E5D53] truncate">
+                    Chuẩn ma trận BGD & CBT
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Lời dẫn truyện ấm áp */}
             <p className="text-sm sm:text-base lg:text-lg text-[#6E5D53] font-medium leading-relaxed max-w-xl">
-              Học tiếng Anh như lật từng trang tập vẽ màu sáp. Hơn <strong>66.000+ từ vựng học thuật Cambridge & IELTS</strong> được ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và đọc hiểu song ngữ tương tác.
+              Học tiếng Anh như lật từng trang tập vẽ màu sáp. Ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và hệ thống phòng luyện thi chuẩn cấu trúc đề thực tế.
             </p>
 
             {/* Các nút gọi hành động chính */}
