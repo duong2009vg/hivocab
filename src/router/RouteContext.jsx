@@ -29,6 +29,13 @@ function getInitialRoute() {
   const path = (window.location.pathname || '').replace(/^\/+/, '').replace(/\/+$/, '');
   const hash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '').trim();
 
+  // If redirecting from OAuth callback with access_token or code
+  const rawHash = window.location.hash || '';
+  const rawSearch = window.location.search || '';
+  if (rawHash.includes('access_token=') || rawSearch.includes('code=')) {
+    return 'dashboard';
+  }
+
   // Hash takes precedence when navigating to a specific sub-feature (e.g. /app#topics or /#topics)
   if (hash) {
     const clean = normalizeRoute(hash);
@@ -39,9 +46,14 @@ function getInitialRoute() {
   if (path === 'app') return 'dashboard';
   if (path === 'admin') return 'admin';
 
-  const isLoggedIn = (typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function')
+  let hasSbSession = false;
+  try {
+    hasSbSession = Object.keys(localStorage).some((k) => k.startsWith('sb-') && k.endsWith('-auth-token'));
+  } catch (_) {}
+
+  const isLoggedIn = hasSbSession || ((typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function')
     ? window._hasLocalAuthToken()
-    : (typeof document !== 'undefined' && (document.documentElement.classList.contains('user-logged-in') || !!window._isPreAuthenticated));
+    : (typeof document !== 'undefined' && (document.documentElement.classList.contains('user-logged-in') || !!window._isPreAuthenticated)));
 
   return isLoggedIn ? 'dashboard' : 'landing';
 }

@@ -44,7 +44,23 @@ const PageLearning = lazy(() => import('./components/pages/PageLearning.jsx'));
 const PageAdmin = lazy(() => import('./components/admin/PageAdmin.jsx'));
 
 function AppRoutes() {
-  const { currentRoute, isMainTab, isTopicDetail } = useRoute();
+  const { currentRoute, isMainTab, isTopicDetail, navigateTo } = useRoute();
+  const { user, loading } = useAuth();
+
+  // Auto-redirect to dashboard if user is authenticated and lands on login or from OAuth callback
+  React.useEffect(() => {
+    if (!loading && user) {
+      if (currentRoute === 'login') {
+        navigateTo('dashboard');
+      } else if (currentRoute === 'landing') {
+        const rawHash = typeof window !== 'undefined' ? window.location.hash || '' : '';
+        const rawSearch = typeof window !== 'undefined' ? window.location.search || '' : '';
+        if (rawHash.includes('access_token=') || rawSearch.includes('code=')) {
+          navigateTo('dashboard');
+        }
+      }
+    }
+  }, [user, loading, currentRoute, navigateTo]);
 
   // Prefetch topics in background idle time so opening "Chủ đề" is always instantaneous
   React.useEffect(() => {

@@ -1,10 +1,10 @@
-// src/components/pages/PageLogin.jsx
-// Trang Đăng nhập & Đăng ký - Phong cách Cozy Crayon ấm áp của HiVocab
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function PageLogin() {
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { user, signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { navigateTo } = useRoute();
 
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
   const [email, setEmail] = useState('');
@@ -14,6 +14,13 @@ export function PageLogin() {
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [isExistingAccount, setIsExistingAccount] = useState(false);
+
+  // Auto-redirect to dashboard when authenticated
+  useEffect(() => {
+    if (user) {
+      navigateTo('dashboard');
+    }
+  }, [user, navigateTo]);
 
   const handleModeSwitch = (mode) => {
     setAuthMode(mode);
@@ -67,6 +74,7 @@ export function PageLogin() {
     try {
       if (authMode === 'login') {
         await signInWithEmail(cleanEmail, password, captchaToken);
+        navigateTo('dashboard');
         if (typeof window !== 'undefined' && typeof window.navigateTo === 'function') {
           window.navigateTo('dashboard');
         }
@@ -80,6 +88,7 @@ export function PageLogin() {
         }
 
         if (res?.session) {
+          navigateTo('dashboard');
           if (typeof window !== 'undefined' && typeof window.navigateTo === 'function') {
             window.navigateTo('dashboard');
           }
@@ -114,6 +123,7 @@ export function PageLogin() {
   };
 
   const handleNavigateHome = () => {
+    navigateTo('landing');
     if (typeof window !== 'undefined' && typeof window.navigateTo === 'function') {
       window.navigateTo('landing');
     }

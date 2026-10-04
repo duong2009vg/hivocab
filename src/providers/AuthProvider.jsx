@@ -125,6 +125,16 @@ export function AuthProvider({ children }) {
         }
       }
 
+      if (event === 'SIGNED_IN' && newUser) {
+        if (typeof window !== 'undefined' && typeof window.navigateTo === 'function') {
+          const hash = (window.location.hash || '').replace(/^#/, '');
+          const path = (window.location.pathname || '').replace(/^\/+/, '');
+          if (!hash || hash === 'landing' || hash === 'login' || path === 'login' || path === '') {
+            window.navigateTo('dashboard');
+          }
+        }
+      }
+
       // Also notify legacy dataLayer if it's ready (keeps HiDB auth state in sync)
       if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB._onAuthChange === 'function') {
         window.HiDB._onAuthChange(event, newSession);

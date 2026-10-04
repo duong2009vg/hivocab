@@ -298,51 +298,47 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
     .join(' ');
 
   return (
-    <div className="w-full flex flex-col items-center select-none font-comfortaa">
+    <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa my-auto px-2">
       {/* ── Main Exercise Card ── */}
-      <div className="w-full max-w-2xl bg-white border-[3px] border-[#2B2523] rounded-[28px] sm:rounded-[36px] shadow-[4px_6px_0px_#2B2523] px-3.5 sm:px-8 md:px-12 py-5 sm:py-8 flex flex-col items-center relative overflow-hidden">
-        {/* Top Badge: Practice Mode Tag */}
-        <div className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full border-2 border-blue-400 bg-blue-50/80 text-blue-700 font-bold text-xs sm:text-sm tracking-wider uppercase mb-1.5 sm:mb-2 shadow-2xs">
-          <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-700" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          <span>LUYỆN PHẢN XẠ NGHE</span>
+      <div className="w-full max-w-xl bg-white border-[3px] border-[#2B2523] rounded-[24px] sm:rounded-[30px] shadow-[4px_6px_0px_#2B2523] px-3.5 sm:px-6 py-4 sm:py-5 flex flex-col items-center relative my-auto">
+        {/* Top Tiger Encouragement & Report Header */}
+        <div className="w-full flex items-center justify-between pb-2 mb-2 border-b-2 border-stone-100">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-400/50 text-blue-700 text-[11px] sm:text-xs font-bold">
+            <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center">
+              <img
+                src="/mascot/mascot_cozy.png"
+                alt="Bé hổ"
+                className="w-full h-full object-contain mix-blend-multiply"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </span>
+            <span>Churbito: Lắng nghe kỹ & điền từng chữ cái nhé! 🐾</span>
+          </div>
+
+          {onReport && (
+            <button
+              type="button"
+              onClick={onReport}
+              className="text-stone-400 hover:text-stone-700 text-xs transition cursor-pointer p-1"
+              title="Báo cáo câu hỏi"
+            >
+              ⚠️ Báo lỗi
+            </button>
+          )}
         </div>
 
-        {/* Question Prompt & Subtitle */}
-        <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-stone-800 text-center tracking-tight mb-0.5">
-          Nghe và điền từng chữ cái
-        </h1>
-        <p className="text-stone-500 font-medium text-xs sm:text-sm text-center mb-3 sm:mb-5 font-quicksand">
-          Lắng nghe phát âm chuẩn và gõ từng ký tự vào ô chữ
-        </p>
-
-        {/* Center Audio Play Button with Crayon Notes */}
-        <div className="relative my-1 sm:my-2 flex items-center justify-center">
-          <span
-            className="absolute -top-2 -right-6 text-xl font-crayon text-sky-400 select-none animate-bounce"
-            style={{ animationDuration: '2.2s' }}
-          >
-            ♪
-          </span>
-          <span
-            className="absolute bottom-1 -left-6 text-lg font-crayon text-emerald-400 select-none animate-bounce"
-            style={{ animationDuration: '1.8s', animationDelay: '0.4s' }}
-          >
-            ♫
-          </span>
-
-          {/* Big Round Speaker Button */}
+        {/* Center Audio Play Button */}
+        <div className="relative my-1 flex items-center justify-center">
           <button
             type="button"
             onClick={() => handlePlay(currentSpeed)}
-            className={`w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-[3px] sm:border-[3.5px] border-[#2B2523] shadow-[3px_5px_0px_#2B2523] flex items-center justify-center text-white hover:scale-105 active:scale-95 active:shadow-[1px_2px_0px_#2B2523] transition-all cursor-pointer group ${
-              isPlayingAudio ? 'scale-105 ring-6 sm:ring-8 ring-sky-100' : ''
+            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-[2.5px] border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all cursor-pointer group ${
+              isPlayingAudio ? 'scale-105 ring-4 ring-sky-200' : ''
             }`}
             title="Bấm hoặc nhấn Space để nghe"
           >
             <svg
-              className="w-10 h-10 sm:w-14 sm:h-14 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
+              className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
               fill="currentColor"
               viewBox="0 0 24 24"
             >
@@ -352,29 +348,25 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
         </div>
 
         {/* Playback Speed Controls */}
-        <div className="flex items-center gap-2.5 sm:gap-4 my-2.5 sm:my-3">
+        <div className="flex items-center gap-2 my-1.5">
           <button
             type="button"
             onClick={() => handlePlay(1.0)}
-            className={`px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1.5 font-bold text-xs sm:text-sm transition-all shadow-[1.5px_2px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
+            className={`px-3 py-0.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1 font-bold text-[11px] sm:text-xs transition-all shadow-[1px_1.5px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
               currentSpeed === 1.0 ? 'bg-blue-50 text-blue-700 border-blue-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
           >
-            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            <span>Chuẩn (1.0x)</span>
+            <span>1.0x</span>
           </button>
 
           <button
             type="button"
             onClick={() => handlePlay(0.6)}
-            className={`px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1.5 font-bold text-xs sm:text-sm transition-all shadow-[1.5px_2px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
+            className={`px-3 py-0.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1 font-bold text-[11px] sm:text-xs transition-all shadow-[1px_1.5px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
               currentSpeed === 0.6 ? 'bg-amber-50 text-amber-800 border-amber-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
           >
-            <span className="text-xs sm:text-sm">🐢</span>
-            <span>Chậm (0.6x)</span>
+            <span>🐢 0.6x</span>
           </button>
         </div>
 
@@ -547,49 +539,20 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
           </span>
         </p>
 
-        {/* Primary Action: Check Answer Button (Reliable SVG) */}
-        <div className="w-full max-w-md">
+        {/* Primary Action: Check Answer Button */}
+        <div className="w-full max-w-sm">
           <button
             type="button"
             onClick={handleCheck}
             disabled={!!submitted}
-            className="w-full py-3 sm:py-4 px-6 sm:px-8 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-base sm:text-lg rounded-2xl border-2 border-[#2B2523] shadow-[3px_5px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 sm:gap-3 cursor-pointer disabled:opacity-60"
+            className="w-full py-2.5 sm:py-3 px-6 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
           >
-            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <span>Kiểm tra đáp án</span>
           </button>
         </div>
-      </div>
-
-      {/* ── Companion Mascot Encouragement Bar ── */}
-      <div className="w-full max-w-2xl mt-3 sm:mt-5 flex items-center justify-between gap-2 sm:gap-3 px-1 sm:px-2">
-        <div className="flex items-center gap-2.5 sm:gap-4 flex-1">
-          <div className="w-10 h-10 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-amber-200 border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center justify-center text-xl sm:text-3xl relative overflow-hidden">
-            <span>🐯</span>
-          </div>
-
-          <div className="relative bg-white border-2 border-[#2B2523] rounded-2xl px-3 sm:px-5 py-2 sm:py-2.5 shadow-[2px_2px_0px_#2B2523] flex-1">
-            <div className="absolute -left-2.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[7px] border-t-transparent border-r-[10px] border-r-[#2B2523] border-b-[7px] border-b-transparent"></div>
-            <div className="absolute -left-[7px] top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-r-[8px] border-r-white border-b-[6px] border-b-transparent"></div>
-            <p className="font-quicksand font-bold text-stone-700 text-xs sm:text-sm md:text-base leading-relaxed">
-              <span className="text-amber-800 font-extrabold font-crayon">Churbito:</span> "Lắng nghe thật kỹ và gõ từng chữ cái nhé! 🐾"
-            </p>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          onClick={onReport}
-          aria-label="Đánh dấu câu hỏi cần xem lại"
-          className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center justify-center text-rose-500 hover:bg-rose-50 hover:scale-105 active:scale-95 transition-all shrink-0 cursor-pointer"
-          title="Báo cáo câu hỏi"
-        >
-          <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-            <path d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </button>
       </div>
 
       {/* ── Pop-up Result Notification Modal ── */}

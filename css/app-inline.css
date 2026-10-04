@@ -281,15 +281,16 @@ body:has(#page-landing.active) .mobile-floating-dock {
     flex-direction: column !important;
     min-height: 100vh !important;
     min-height: 100dvh !important;
-    height: 100dvh !important;
 }
 #page-learning.active #learning-main {
     display: flex !important;
     flex-direction: column !important;
-    flex: 1 1 0% !important;
+    flex: 1 1 auto !important;
     justify-content: center !important;
     align-items: center !important;
     min-height: 0 !important;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
 }
 .pwa-safe-top {
     padding-top: max(12px, calc(env(safe-area-inset-top, 0px) + 8px)) !important;
