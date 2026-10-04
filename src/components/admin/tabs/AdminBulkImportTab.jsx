@@ -1,5 +1,6 @@
 // src/components/admin/tabs/AdminBulkImportTab.jsx
 // Bulk Vocabulary Importer via CSV / JSON with Live Preview & Validation
+// Cozy Crayon Handcrafted Design System
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
@@ -129,26 +130,31 @@ export function AdminBulkImportTab() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="p-5 rounded-2xl bg-surface border border-outline-variant/20 space-y-4">
+    <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
+      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-4">
         <div>
-          <h3 className="font-bold text-sm text-on-surface">Nhập Từ vựng Hàng loạt (Bulk CSV/JSON)</h3>
-          <p className="text-xs text-on-surface-variant mt-0.5">
-            Dán danh sách từ theo định dạng CSV (<code className="font-mono bg-surface-container px-1 py-0.5 rounded">word,phonetic,pos,meaning,example</code>) hoặc JSON
+          <h3 className="font-black text-lg font-quicksand text-[#3D352E] flex items-center gap-2">
+            <span>📥</span>
+            <span>Nhập Từ Vựng Hàng Loạt (Bulk CSV / JSON)</span>
+          </h3>
+          <p className="text-xs font-semibold text-[#6E5D53] mt-1">
+            Dán danh sách từ theo định dạng CSV (<code className="font-mono bg-[#FAF5EB] px-2 py-0.5 rounded-lg border border-[#3D352E]/30 text-[#DE5D53] font-bold">word,phonetic,pos,meaning,example</code>) hoặc JSON mảng đối tượng.
           </p>
         </div>
 
         {/* Target Topic Selector */}
         <div className="max-w-md">
-          <label className="block text-xs font-bold text-on-surface mb-1">Chủ đề đích (Target Topic)</label>
+          <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+            Chủ đề Đích (Target Topic)
+          </label>
           <select
             value={selectedTopicId}
             onChange={(e) => setSelectedTopicId(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl bg-surface-container border border-outline-variant/20 text-xs font-semibold text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
           >
             {topics.map((t) => (
               <option key={t.id} value={t.id}>
-                {t.name} ({t.word_count || 0} từ)
+                {t.name} ({t.word_count || 0} từ hiện có)
               </option>
             ))}
           </select>
@@ -156,36 +162,38 @@ export function AdminBulkImportTab() {
 
         {/* Text Input Area */}
         <div>
-          <label className="block text-xs font-bold text-on-surface mb-1">Dữ liệu từ vựng</label>
+          <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+            Dữ liệu Từ Vựng (Paste văn bản vào đây)
+          </label>
           <textarea
-            rows={6}
+            rows={7}
             placeholder={`abandon, /ə'bændən/, verb, từ bỏ/ruồng bỏ, He abandoned his car.\nbenefit, /'benifit/, noun, lợi ích, For the benefit of all.`}
             value={rawText}
             onChange={(e) => handleParse(e.target.value)}
-            className="w-full p-3 rounded-xl bg-surface-container/50 border border-outline-variant/20 font-mono text-xs text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="w-full p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] font-mono text-xs text-[#3D352E] leading-relaxed focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/50"
           />
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center justify-between pt-2">
-          <div className="text-xs font-semibold text-on-surface-variant">
-            Đã nhận diện: <span className="font-bold text-on-surface">{parsedWords.filter((w) => w.isValid).length}</span> từ hợp lệ
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+          <div className="text-xs font-bold text-[#6E5D53]">
+            Đã nhận diện: <strong className="font-black text-[#557A46] font-mono text-sm">{parsedWords.filter((w) => w.isValid).length}</strong> từ vựng hợp lệ
           </div>
 
           <button
             onClick={handleExecuteImport}
             disabled={isImporting || parsedWords.filter((w) => w.isValid).length === 0}
-            className="px-5 py-2 rounded-xl bg-primary text-white font-bold text-xs hover:opacity-90 active:scale-95 disabled:opacity-50 transition-all shadow-xs flex items-center gap-1.5"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isImporting ? (
               <>
                 <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
-                <span>Đang nạp vào DB...</span>
+                <span>Đang nạp vào CSDL...</span>
               </>
             ) : (
               <>
                 <span className="material-symbols-outlined text-[16px]">upload</span>
-                <span>Nạp vào Chủ đề</span>
+                <span>Nạp Từ Vựng Vào Chủ Đề 🚀</span>
               </>
             )}
           </button>
@@ -194,14 +202,16 @@ export function AdminBulkImportTab() {
 
       {/* Preview Table */}
       {parsedWords.length > 0 && (
-        <div className="bg-surface rounded-2xl border border-outline-variant/20 overflow-hidden shadow-2xs">
-          <div className="px-4 py-3 border-b border-outline-variant/15 flex items-center justify-between bg-surface-container/30">
-            <h4 className="text-xs font-bold text-on-surface">Xem trước dữ liệu ({parsedWords.length} dòng)</h4>
+        <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
+          <div className="px-5 py-3.5 border-b-2 border-[#3D352E] flex items-center justify-between bg-[#FAF5EB]">
+            <h4 className="text-xs font-black font-quicksand uppercase tracking-wider text-[#3D352E]">
+              Xem trước dữ liệu ({parsedWords.length} dòng đã phân tích)
+            </h4>
           </div>
 
           <div className="overflow-x-auto max-h-80">
             <table className="w-full text-left text-xs">
-              <thead className="bg-surface-container/50 sticky top-0 border-b border-outline-variant/15 text-on-surface-variant font-bold text-[11px]">
+              <thead className="bg-[#FAF5EB] sticky top-0 border-b-2 border-[#3D352E] text-[#6E5D53] font-black font-quicksand uppercase text-[11px]">
                 <tr>
                   <th className="py-2.5 px-4">TỪ VỰNG</th>
                   <th className="py-2.5 px-4">PHIÊN ÂM</th>
@@ -210,18 +220,22 @@ export function AdminBulkImportTab() {
                   <th className="py-2.5 px-4">TRẠNG THÁI</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/10">
+              <tbody className="divide-y divide-[#EADDC7]">
                 {parsedWords.map((row, idx) => (
-                  <tr key={idx} className="hover:bg-surface-container/30 transition-colors">
-                    <td className="py-2 px-4 font-bold text-on-surface">{row.word}</td>
-                    <td className="py-2 px-4 font-mono text-on-surface-variant">{row.phonetic || '—'}</td>
-                    <td className="py-2 px-4 text-on-surface-variant">{row.pos || '—'}</td>
-                    <td className="py-2 px-4 text-on-surface">{row.meaning || '—'}</td>
-                    <td className="py-2 px-4">
+                  <tr key={idx} className="hover:bg-[#FFF9EE] transition-colors">
+                    <td className="py-2.5 px-4 font-bold text-[#3D352E]">{row.word}</td>
+                    <td className="py-2.5 px-4 font-mono text-[#6E5D53]">{row.phonetic || '—'}</td>
+                    <td className="py-2.5 px-4 font-semibold text-[#6E5D53]">{row.pos || '—'}</td>
+                    <td className="py-2.5 px-4 font-semibold text-[#3D352E]">{row.meaning || '—'}</td>
+                    <td className="py-2.5 px-4">
                       {row.isValid ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">Hợp lệ</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#557A46]">
+                          ✓ Hợp lệ
+                        </span>
                       ) : (
-                        <span className="text-rose-500 font-bold text-[10px]">Thiếu nghĩa</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#FFF0E6] text-[#DE5D53] border border-[#DE5D53]">
+                          ✕ Thiếu nghĩa
+                        </span>
                       )}
                     </td>
                   </tr>

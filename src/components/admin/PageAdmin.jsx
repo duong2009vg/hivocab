@@ -192,7 +192,13 @@ export function PageAdmin() {
 
   return (
     <AdminProtectedRoute>
-      <div className="min-h-screen bg-surface-container/20 text-on-surface flex font-sans">
+      <div
+        className="min-h-screen bg-[#FAF5EB] text-[#3D352E] flex font-nunito relative selection:bg-[#EBDDC8] selection:text-[#3D352E]"
+        style={{
+          backgroundImage: 'radial-gradient(#E2D6C3 1.2px, transparent 1.2px)',
+          backgroundSize: '24px 24px',
+        }}
+      >
         {/* Sidebar */}
         <AdminSidebar
           activeTab={activeTab}
@@ -212,7 +218,7 @@ export function PageAdmin() {
             activeProCount={stats.activePro}
           />
 
-          <main className="flex-1 p-4 lg:p-6 lg:p-8 max-w-[1560px] w-full mx-auto">
+          <main className="flex-1 p-4 lg:p-7 max-w-[1560px] w-full mx-auto animate-fade-in">
             {renderActiveTabContent()}
           </main>
         </div>

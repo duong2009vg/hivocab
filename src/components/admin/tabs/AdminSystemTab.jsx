@@ -1,5 +1,6 @@
 // src/components/admin/tabs/AdminSystemTab.jsx
 // System Health, Supabase Ping, Cache Invalidation & Environment Audit
+// Cozy Crayon Handcrafted Design System
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
@@ -51,13 +52,13 @@ export function AdminSystemTab() {
     }
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
-      const k = localStorage.key(i);
+      const key = localStorage.key(i);
       if (k && !k.startsWith('sb-') && k !== 'theme') {
         keysToRemove.push(k);
       }
     }
     keysToRemove.forEach((k) => localStorage.removeItem(k));
-    showToast('Đã xóa bộ nhớ đệm cache ứng dụng thành công!', 'success');
+    showToast('Đã dọn dẹp bộ nhớ đệm cache ứng dụng! 🧹', 'success');
     setStorageUsage({
       itemsCount: localStorage.length,
       approxSizeKb: '0.0',
@@ -65,106 +66,125 @@ export function AdminSystemTab() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl">
+    <div className="space-y-6 animate-fade-in max-w-5xl font-nunito text-[#3D352E]">
       {/* Infrastructure Health Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
         {/* Supabase Status */}
-        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col justify-between">
+        <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold text-on-surface-variant uppercase">Cơ sở Dữ liệu</span>
-              <span className="material-symbols-outlined text-primary text-[20px]">database</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+                Cơ sở Dữ liệu
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-[#EAF3E7] border-2 border-[#3D352E] flex items-center justify-center text-[#557A46]">
+                <span className="material-symbols-outlined text-[18px]">database</span>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <span
-                className={`w-2.5 h-2.5 rounded-full ${
-                  dbStatus === 'connected' ? 'bg-emerald-500' : 'bg-rose-500'
+                className={`w-3 h-3 rounded-full border-2 border-[#3D352E] ${
+                  dbStatus === 'connected' ? 'bg-[#557A46] animate-pulse' : 'bg-[#DE5D53]'
                 }`}
               ></span>
-              <span className="text-sm font-bold text-on-surface">
-                {dbStatus === 'connected' ? 'Supabase Trực tuyến' : 'Mất kết nối'}
+              <span className="text-base font-black font-quicksand text-[#3D352E]">
+                {dbStatus === 'connected' ? 'Supabase Trực tuyến ⚡' : 'Mất kết nối ⚠️'}
               </span>
             </div>
-            <p className="text-xs text-on-surface-variant mt-1 font-mono">
-              {latency ? `Độ trễ API: ${latency}ms` : 'Đang kiểm tra...'}
+            <p className="text-xs text-[#6E5D53] mt-1.5 font-mono font-bold">
+              {latency ? `Độ trễ API: ${latency}ms` : 'Đang kiểm tra kết nối...'}
             </p>
           </div>
 
           <button
             onClick={checkPing}
             disabled={isPinging}
-            className="mt-4 px-3 py-1.5 rounded-xl border border-outline-variant/20 hover:bg-surface-container text-xs font-semibold text-on-surface flex items-center justify-center gap-1 transition-all"
+            className="mt-5 w-full py-2.5 px-3 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#3D352E] flex items-center justify-center gap-1.5 active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
           >
-            <span className={`material-symbols-outlined text-[15px] ${isPinging ? 'animate-spin' : ''}`}>
+            <span className={`material-symbols-outlined text-[16px] ${isPinging ? 'animate-spin' : ''}`}>
               refresh
             </span>
-            <span>Đo lại Ping</span>
+            <span>{isPinging ? 'Đang đo...' : 'Đo lại Ping 🔄'}</span>
           </button>
         </div>
 
         {/* Local Storage Cache */}
-        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col justify-between">
+        <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold text-on-surface-variant uppercase">Bộ nhớ Trình duyệt</span>
-              <span className="material-symbols-outlined text-amber-500 text-[20px]">memory</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+                Bộ nhớ Trình duyệt
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-[#FFF9EE] border-2 border-[#3D352E] flex items-center justify-center text-[#F4B41A]">
+                <span className="material-symbols-outlined text-[18px]">memory</span>
+              </div>
             </div>
-            <p className="text-sm font-bold text-on-surface">
+            <p className="text-base font-black font-quicksand text-[#3D352E]">
               {storageUsage.itemsCount} Mục lưu trữ
             </p>
-            <p className="text-xs text-on-surface-variant mt-1 font-mono">
-              ~{storageUsage.approxSizeKb} KB đã dùng
+            <p className="text-xs text-[#6E5D53] mt-1.5 font-mono font-bold">
+              ~{storageUsage.approxSizeKb} KB đã ghi bộ nhớ
             </p>
           </div>
 
           <button
             onClick={handleClearClientCache}
-            className="mt-4 px-3 py-1.5 rounded-xl border border-outline-variant/20 hover:bg-surface-container text-xs font-semibold text-rose-600 dark:text-rose-400 flex items-center justify-center gap-1 transition-all"
+            className="mt-5 w-full py-2.5 px-3 rounded-2xl bg-[#FFF0E6] hover:bg-[#FFE3D4] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#DE5D53] flex items-center justify-center gap-1.5 active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[15px]">delete_sweep</span>
-            <span>Dọn dẹp Cache</span>
+            <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+            <span>Dọn dẹp Cache 🧹</span>
           </button>
         </div>
 
         {/* Environment */}
-        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col justify-between">
+        <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[11px] font-bold text-on-surface-variant uppercase">Môi trường</span>
-              <span className="material-symbols-outlined text-purple-500 text-[20px]">cloud</span>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+                Môi trường Máy chủ
+              </span>
+              <div className="w-8 h-8 rounded-xl bg-[#F0F5FF] border-2 border-[#3D352E] flex items-center justify-center text-[#4A72B2]">
+                <span className="material-symbols-outlined text-[18px]">cloud</span>
+              </div>
             </div>
-            <p className="text-sm font-bold text-on-surface">Cloudflare Pages</p>
-            <p className="text-xs text-on-surface-variant mt-1">
+            <p className="text-base font-black font-quicksand text-[#3D352E]">Cloudflare Pages</p>
+            <p className="text-xs text-[#6E5D53] mt-1.5 font-bold">
               Vite 4.3 + React 19.3 SPA
             </p>
           </div>
 
-          <div className="mt-4 px-3 py-1.5 rounded-xl bg-surface-container/60 text-center text-[11px] font-mono font-semibold text-on-surface">
-            v2.4-production
+          <div className="mt-5 py-2.5 px-3 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] text-center text-xs font-mono font-black text-[#557A46]">
+            🌱 v2.4-production
           </div>
         </div>
       </div>
 
       {/* Architecture System Information Card */}
-      <div className="p-5 rounded-2xl bg-surface border border-outline-variant/20 space-y-3">
-        <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">Thông số Kỹ thuật Hệ thống</h4>
-        <div className="divide-y divide-outline-variant/10 text-xs">
-          <div className="py-2.5 flex items-center justify-between">
-            <span className="text-on-surface-variant">Kiến trúc Ứng dụng</span>
-            <span className="font-semibold text-on-surface">React 19 Pure SPA (Zero DOM mutation)</span>
+      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-4">
+        <div className="flex items-center gap-2 pb-2 border-b-2 border-[#EADDC7]">
+          <span className="text-xl">🛠️</span>
+          <h4 className="text-sm font-black font-quicksand uppercase tracking-wider text-[#3D352E]">
+            Thông số Kỹ thuật & Cấu hình Cốt lõi
+          </h4>
+        </div>
+        <div className="divide-y-2 divide-[#FAF5EB] text-xs font-bold">
+          <div className="py-3 flex items-center justify-between">
+            <span className="text-[#6E5D53]">Kiến trúc Ứng dụng</span>
+            <span className="font-black text-[#3D352E]">React 19 Pure SPA (Zero DOM mutation) ⚡</span>
           </div>
-          <div className="py-2.5 flex items-center justify-between">
-            <span className="text-on-surface-variant">Cổng Thanh toán</span>
-            <span className="font-semibold text-on-surface">PayOS VietQR HMAC-SHA256</span>
+          <div className="py-3 flex items-center justify-between">
+            <span className="text-[#6E5D53]">Cổng Thanh toán Tự động</span>
+            <span className="font-black text-[#3D352E]">PayOS VietQR HMAC-SHA256 💳</span>
           </div>
-          <div className="py-2.5 flex items-center justify-between">
-            <span className="text-on-surface-variant">Cơ chế Bảo mật Tuyến đường</span>
-            <span className="font-semibold text-on-surface">AdminProtectedRoute (Role: admin)</span>
+          <div className="py-3 flex items-center justify-between">
+            <span className="text-[#6E5D53]">Cơ chế Bảo mật Tuyến đường</span>
+            <span className="font-black text-[#DE5D53] bg-[#FFF0E6] px-2.5 py-0.5 rounded-full border-2 border-[#DE5D53]">
+              AdminProtectedRoute (Role: admin) 🛡️
+            </span>
           </div>
-          <div className="py-2.5 flex items-center justify-between">
-            <span className="text-on-surface-variant">Đồng bộ Gói PRO</span>
-            <span className="font-semibold text-emerald-600 dark:text-emerald-400 font-mono">
-              profiles.tier + profiles.subscription_expires_at + profiles.is_pro
+          <div className="py-3 flex items-center justify-between">
+            <span className="text-[#6E5D53]">Đồng bộ Trạng thái PRO</span>
+            <span className="font-mono text-[#557A46] bg-[#EAF3E7] px-2.5 py-0.5 rounded-full border-2 border-[#557A46]">
+              profiles.tier + subscription_expires_at + is_pro
             </span>
           </div>
         </div>

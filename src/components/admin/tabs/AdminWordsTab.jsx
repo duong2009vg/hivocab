@@ -1,6 +1,7 @@
 // src/components/admin/tabs/AdminWordsTab.jsx
 // Quản lý từ vựng phân cấp theo đúng cấu trúc học tập của App:
 // Cấp 1: Danh mục (Category) -> Cấp 2: Chủ đề (Topic) -> Cấp 3: Bài học (Lesson / Test & Passage) -> Cấp 4: Danh sách từ vựng
+// Cozy Crayon Handcrafted Design System
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
@@ -274,7 +275,6 @@ export function AdminWordsTab() {
 
     try {
       if (isCambridge) {
-        // If passage is selected, load words of that passage
         let query = supabase
           .from('words')
           .select('id, word, pos, phonetic, meaning, example_sentence, passage_id, word_order, created_at')
@@ -289,14 +289,12 @@ export function AdminWordsTab() {
         if (error) throw error;
         setWords(data || []);
       } else {
-        // Non-CAM topic
         let query = supabase
           .from('words')
           .select('id, word, pos, phonetic, meaning, example_sentence, lesson_name, lesson_order, word_order, created_at')
           .eq('topic_id', selectedTopicId);
 
         if (selectedLessonIndex !== 'all') {
-          // If specific lesson selected
           const idx = Number(selectedLessonIndex);
           const { data: checkData } = await supabase
             .from('words')
@@ -308,12 +306,10 @@ export function AdminWordsTab() {
           if (checkData && checkData.length > 0) {
             query = query.eq('lesson_order', idx);
           } else {
-            // Range chunk of 50
             const LESSON_SIZE = 50;
             query = query.range(idx * LESSON_SIZE, (idx + 1) * LESSON_SIZE - 1);
           }
         } else {
-          // All words in topic, capped at 150 for performance
           query = query.limit(150);
         }
 
@@ -389,7 +385,6 @@ export function AdminWordsTab() {
     setIsSubmitting(true);
     try {
       if (editingWord) {
-        // UPDATE existing word
         const { error } = await supabase
           .from('words')
           .update({
@@ -408,7 +403,6 @@ export function AdminWordsTab() {
         );
         setEditingWord(null);
       } else {
-        // INSERT new word
         const newPayload = {
           topic_id: selectedTopicId,
           word: wordForm.word.trim(),
@@ -457,23 +451,23 @@ export function AdminWordsTab() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
       {/* ───────────────────────────────────────────────────────────── */}
       {/* HIERARCHY SELECTOR PANEL (DANH MỤC -> CHỦ ĐỀ -> BÀI HỌC)     */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-5 rounded-2xl bg-surface border border-outline-variant/20 shadow-2xs space-y-4">
+      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-5">
         {/* Step 1: Category Selector Pills */}
         <div>
-          <label className="block text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">
+          <label className="block text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-2.5">
             1. Danh mục học tập (Category)
           </label>
-          <div className="flex flex-wrap items-center gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-black font-quicksand transition-all cursor-pointer ${
                 selectedCategory === 'all'
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'bg-surface-container/50 border border-outline-variant/20 text-on-surface hover:bg-surface-container'
+                  ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                  : 'bg-[#FAF5EB] text-[#6E5D53] border-2 border-[#3D352E] hover:bg-[#F2ECE0]'
               }`}
             >
               Tất cả danh mục
@@ -482,10 +476,10 @@ export function AdminWordsTab() {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                className={`px-3.5 py-1.5 rounded-full text-xs font-black font-quicksand transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-primary text-white shadow-xs'
-                    : 'bg-surface-container/50 border border-outline-variant/20 text-on-surface hover:bg-surface-container'
+                    ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                    : 'bg-[#FAF5EB] text-[#6E5D53] border-2 border-[#3D352E] hover:bg-[#F2ECE0]'
                 }`}
               >
                 {cat}
@@ -495,16 +489,16 @@ export function AdminWordsTab() {
         </div>
 
         {/* Step 2: Topic Selector & Sub-units */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3 border-t border-outline-variant/15">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t-2 border-[#FAF5EB]">
           {/* Topic Dropdown */}
           <div>
-            <label className="block text-xs font-bold text-on-surface mb-1">
+            <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
               2. Chủ đề (Topic)
             </label>
             <select
               value={selectedTopicId}
               onChange={(e) => setSelectedTopicId(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+              className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
             >
               {topics.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -519,13 +513,13 @@ export function AdminWordsTab() {
             <>
               {/* Cambridge Test Selector */}
               <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">
+                <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
                   3. Bài Test (Cambridge)
                 </label>
                 <select
                   value={selectedTestId}
                   onChange={(e) => setSelectedTestId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs font-semibold text-on-surface"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
                 >
                   {camTests.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -537,13 +531,13 @@ export function AdminWordsTab() {
 
               {/* Cambridge Passage Selector */}
               <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">
+                <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
                   4. Bài đọc (Passage)
                 </label>
                 <select
                   value={selectedPassageId}
                   onChange={(e) => setSelectedPassageId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs font-semibold text-on-surface"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
                 >
                   {camPassages.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -556,13 +550,13 @@ export function AdminWordsTab() {
           ) : (
             /* Non-CAM: Standard Lesson Selector */
             <div className="sm:col-span-1 lg:col-span-2">
-              <label className="block text-xs font-bold text-on-surface mb-1">
+              <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
                 3. Bài học (Lesson)
               </label>
               <select
                 value={selectedLessonIndex}
                 onChange={(e) => setSelectedLessonIndex(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs font-semibold text-on-surface"
+                className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
               >
                 <option value="all">
                   Tất cả bài học ({totalTopicWords} từ trong chủ đề)
@@ -581,10 +575,10 @@ export function AdminWordsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* TOOLBAR: SEARCH & ADD NEW WORD BUTTON                        */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+      <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
           <div className="relative w-full">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">
+            <span className="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-[#6E5D53]">
               search
             </span>
             <input
@@ -592,23 +586,23 @@ export function AdminWordsTab() {
               placeholder="Tìm từ vựng, phiên âm, nghĩa tiếng Việt..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface focus:ring-1 focus:ring-primary"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-          <span className="text-xs font-semibold text-on-surface-variant">
-            Hiển thị <strong className="text-primary font-mono">{filteredWords.length}</strong> từ
+          <span className="text-xs font-bold text-[#6E5D53]">
+            Hiển thị <strong className="text-[#557A46] font-mono font-black text-sm">{filteredWords.length}</strong> từ
           </span>
 
           <button
             onClick={handleOpenAdd}
             disabled={!selectedTopicId}
-            className="px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs flex items-center gap-1.5 hover:opacity-90 active:scale-95 transition-all shadow-xs disabled:opacity-50"
+            className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
-            <span>Thêm từ mới</span>
+            <span>Thêm từ mới ✨</span>
           </button>
         </div>
       </div>
@@ -616,32 +610,32 @@ export function AdminWordsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* WORDS LIST TABLE                                             */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="bg-surface rounded-2xl border border-outline-variant/20 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
         {loading ? (
-          <div className="py-16 text-center text-on-surface-variant flex flex-col items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[28px] animate-spin">
+          <div className="py-16 text-center text-[#6E5D53] flex flex-col items-center gap-2">
+            <span className="material-symbols-outlined text-[#557A46] text-[32px] animate-spin">
               refresh
             </span>
-            <span className="text-xs">Đang tải danh sách từ vựng theo bài học...</span>
+            <span className="text-xs font-bold">Đang tải danh sách từ vựng theo bài học...</span>
           </div>
         ) : filteredWords.length === 0 ? (
-          <div className="py-16 text-center text-on-surface-variant">
-            <span className="material-symbols-outlined text-[36px] text-outline mb-1">
-              menu_book
-            </span>
-            <p className="text-xs font-semibold">Chưa có từ vựng nào trong bài học này.</p>
+          <div className="py-16 text-center text-[#6E5D53] space-y-2">
+            <div className="text-4xl mb-1">📖</div>
+            <p className="text-sm font-black font-quicksand text-[#3D352E]">
+              Chưa có từ vựng nào trong bài học này.
+            </p>
             <button
               onClick={handleOpenAdd}
-              className="mt-3 px-3.5 py-1.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 inline-flex items-center gap-1"
+              className="mt-3 px-5 py-2.5 rounded-2xl bg-[#557A46] text-white text-xs font-black inline-flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">add</span>
-              <span>Thêm từ đầu tiên</span>
+              <span>Thêm từ đầu tiên 🚀</span>
             </button>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-surface-container/40 border-b border-outline-variant/15 text-on-surface-variant font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black font-quicksand uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="py-3 px-4 w-12 text-center">#</th>
                   <th className="py-3 px-4">TỪ VỰNG & PHÁT ÂM</th>
@@ -651,26 +645,26 @@ export function AdminWordsTab() {
                   <th className="py-3 px-4 text-right">THAO TÁC</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/10">
+              <tbody className="divide-y divide-[#EADDC7]">
                 {filteredWords.map((w, idx) => (
-                  <tr key={w.id} className="hover:bg-surface-container/20 transition-colors">
-                    <td className="py-3.5 px-4 text-center font-mono text-on-surface-variant">
+                  <tr key={w.id} className="hover:bg-[#FFF9EE] transition-colors">
+                    <td className="py-3.5 px-4 text-center font-mono font-bold text-[#6E5D53]">
                       {idx + 1}
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2.5">
                         <button
                           onClick={() => playWordAudio(w.word)}
-                          className="w-7 h-7 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 flex items-center justify-center shrink-0 cursor-pointer"
+                          className="w-8 h-8 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-[#557A46] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center justify-center shrink-0 cursor-pointer active:translate-y-0.5 transition-all"
                           title="Nghe phát âm chuẩn"
                         >
                           <span className="material-symbols-outlined text-[16px]">volume_up</span>
                         </button>
                         <div>
-                          <div className="font-bold text-sm text-on-surface">{w.word}</div>
+                          <div className="font-black text-sm text-[#3D352E] font-quicksand">{w.word}</div>
                           {w.phonetic && (
-                            <div className="text-[11px] font-mono text-on-surface-variant">
+                            <div className="text-[11px] font-mono font-bold text-[#6E5D53]">
                               {w.phonetic}
                             </div>
                           )}
@@ -680,43 +674,43 @@ export function AdminWordsTab() {
 
                     <td className="py-3.5 px-4">
                       {w.pos ? (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-surface-container text-on-surface-variant uppercase">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FAF5EB] text-[#3D352E] border border-[#3D352E] uppercase">
                           {w.pos}
                         </span>
                       ) : (
-                        <span className="text-on-surface-variant">—</span>
+                        <span className="text-[#6E5D53]">—</span>
                       )}
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <span className="font-semibold text-on-surface">{w.meaning}</span>
+                      <span className="font-bold text-[#3D352E] text-xs">{w.meaning}</span>
                     </td>
 
                     <td className="py-3.5 px-4 max-w-xs">
                       {w.example_sentence ? (
-                        <p className="text-on-surface-variant italic text-[11px] line-clamp-2">
+                        <p className="text-[#6E5D53] italic text-[11px] line-clamp-2">
                           "{w.example_sentence}"
                         </p>
                       ) : (
-                        <span className="text-on-surface-variant/40">—</span>
+                        <span className="text-[#6E5D53]/40">—</span>
                       )}
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleOpenEdit(w)}
-                          className="p-1.5 rounded-lg text-primary hover:bg-primary/10 transition-colors"
+                          className="p-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] text-[#557A46] transition-all cursor-pointer"
                           title="Chỉnh sửa từ này"
                         >
-                          <span className="material-symbols-outlined text-[17px]">edit</span>
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
                         </button>
                         <button
                           onClick={() => handleDeleteWord(w)}
-                          className="p-1.5 rounded-lg text-on-surface-variant hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                          className="p-1.5 rounded-xl text-[#DE5D53] hover:bg-[#FFF0E6] border border-transparent hover:border-[#DE5D53] transition-colors cursor-pointer"
                           title="Xóa từ"
                         >
-                          <span className="material-symbols-outlined text-[17px]">delete</span>
+                          <span className="material-symbols-outlined text-[16px]">delete</span>
                         </button>
                       </div>
                     </td>
@@ -732,30 +726,30 @@ export function AdminWordsTab() {
       {/* ADD / EDIT WORD MODAL                                         */}
       {/* ───────────────────────────────────────────────────────────── */}
       {(isAddOpen || editingWord) && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-surface border border-outline-variant/30 rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden">
-            <div className="p-4 sm:p-5 border-b border-outline-variant/15 flex items-center justify-between">
-              <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-[18px]">
+        <div className="fixed inset-0 z-50 bg-[#3D352E]/60 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in font-nunito text-[#3D352E]">
+          <div className="bg-[#FAF5EB] border-2 border-[#3D352E] rounded-3xl w-full max-w-lg shadow-[5px_6px_0px_#3D352E] overflow-hidden">
+            <div className="p-5 border-b-2 border-[#3D352E] flex items-center justify-between bg-white">
+              <h3 className="font-black text-base font-quicksand text-[#3D352E] flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#557A46] text-[20px]">
                   {editingWord ? 'edit' : 'add_circle'}
                 </span>
-                <span>{editingWord ? `Sửa từ "${editingWord.word}"` : 'Thêm Từ Vựng Mới Vào Bài'}</span>
+                <span>{editingWord ? `Sửa từ "${editingWord.word}"` : 'Thêm Từ Vựng Mới Vào Bài ✏️'}</span>
               </h3>
               <button
                 onClick={() => {
                   setIsAddOpen(false);
                   setEditingWord(null);
                 }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container text-sm"
+                className="w-8 h-8 rounded-full border-2 border-[#3D352E] bg-white hover:bg-[#FAF5EB] flex items-center justify-center text-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
             </div>
 
-            <form onSubmit={handleSaveWord} className="p-4 sm:p-6 space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <form onSubmit={handleSaveWord} className="p-5 sm:p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="sm:col-span-2">
-                  <label className="block text-xs font-bold text-on-surface mb-1">
+                  <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                     Từ tiếng Anh (Word) *
                   </label>
                   <input
@@ -764,12 +758,12 @@ export function AdminWordsTab() {
                     placeholder="VD: resilient"
                     value={wordForm.word}
                     onChange={(e) => setWordForm({ ...wordForm, word: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs font-bold text-on-surface focus:ring-1 focus:ring-primary"
+                    className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-black text-[#3D352E] focus:ring-2 focus:ring-[#557A46]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-on-surface mb-1">
+                  <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                     Phiên âm (Phonetic)
                   </label>
                   <input
@@ -777,18 +771,18 @@ export function AdminWordsTab() {
                     placeholder="VD: /rɪˈzɪl.jənt/"
                     value={wordForm.phonetic}
                     onChange={(e) => setWordForm({ ...wordForm, phonetic: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs font-mono text-on-surface"
+                    className="w-full px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-mono font-bold text-[#3D352E]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-on-surface mb-1">
+                  <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                     Từ loại (POS)
                   </label>
                   <select
                     value={wordForm.pos}
                     onChange={(e) => setWordForm({ ...wordForm, pos: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs font-semibold text-on-surface"
+                    className="w-full px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E]"
                   >
                     {POS_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
@@ -800,7 +794,7 @@ export function AdminWordsTab() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">
+                <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                   Nghĩa tiếng Việt (Meaning) *
                 </label>
                 <input
@@ -809,12 +803,12 @@ export function AdminWordsTab() {
                   placeholder="VD: kiên cường, mau phục hồi"
                   value={wordForm.meaning}
                   onChange={(e) => setWordForm({ ...wordForm, meaning: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46]"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-on-surface mb-1">
+                <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                   Câu ví dụ minh họa (Example sentence)
                 </label>
                 <textarea
@@ -822,28 +816,28 @@ export function AdminWordsTab() {
                   placeholder="VD: The local economy is remarkably resilient despite global challenges."
                   value={wordForm.example_sentence}
                   onChange={(e) => setWordForm({ ...wordForm, example_sentence: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface leading-relaxed"
+                  className="w-full px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs text-[#3D352E] leading-relaxed"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t-2 border-[#3D352E]/10 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => {
                     setIsAddOpen(false);
                     setEditingWord(null);
                   }}
-                  className="px-4 py-2 rounded-xl border border-outline-variant/20 text-xs font-bold text-on-surface hover:bg-surface-container"
+                  className="px-5 py-2.5 rounded-2xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#3D352E] cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-xl bg-primary text-white text-xs font-bold flex items-center gap-1.5 hover:opacity-90 shadow-xs disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[16px]">save</span>
-                  <span>{isSubmitting ? 'Đang lưu...' : 'Lưu Từ Vựng'}</span>
+                  <span>{isSubmitting ? 'Đang lưu...' : 'Lưu Từ Vựng ✨'}</span>
                 </button>
               </div>
             </form>

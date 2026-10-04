@@ -160,69 +160,69 @@ export function AdminSubscriptionsTab({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <div
           onClick={() => setTierFilter('PRO')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
-            tierFilter === 'PRO' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
+          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+            tierFilter === 'PRO' ? 'bg-[#EAF3E7] ring-2 ring-[#557A46]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Hội viên PRO</span>
-            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'PRO' ? 'text-primary' : 'text-on-surface-variant/70'}`}>verified</span>
+            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Hội viên PRO 👑</span>
+            <span className="material-symbols-outlined text-[18px] text-[#557A46]">verified</span>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.activePro}</p>
+          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.activePro}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('LIFETIME')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
-            tierFilter === 'LIFETIME' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
+          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+            tierFilter === 'LIFETIME' ? 'bg-[#F3E8FF] ring-2 ring-[#7E22CE]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Trọn đời</span>
-            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'LIFETIME' ? 'text-primary' : 'text-on-surface-variant/70'}`}>all_inclusive</span>
+            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Trọn đời ✨</span>
+            <span className="material-symbols-outlined text-[18px] text-[#7E22CE]">all_inclusive</span>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.lifetime}</p>
+          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.lifetime}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('EXPIRING')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
-            tierFilter === 'EXPIRING' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
+          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+            tierFilter === 'EXPIRING' ? 'bg-[#FEEFEA] ring-2 ring-[#DE5D53]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Sắp hết hạn (&le;7d)</span>
-            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'EXPIRING' ? 'text-primary' : 'text-on-surface-variant/70'}`}>alarm</span>
+            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Sắp hết hạn (&le;7d) ⏳</span>
+            <span className="material-symbols-outlined text-[18px] text-[#DE5D53]">alarm</span>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.expiring}</p>
+          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#DE5D53] tabular-nums">{stats.expiring}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('FREE')}
-          className={`p-4 rounded-2xl border transition-all cursor-pointer shadow-2xs ${
-            tierFilter === 'FREE' ? 'bg-primary/10 border-primary ring-1 ring-primary/30' : 'bg-surface border-outline-variant/15 hover:border-outline-variant/40'
+          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+            tierFilter === 'FREE' ? 'bg-[#FAF5EB] ring-2 ring-[#3D352E]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Miễn phí</span>
-            <span className={`material-symbols-outlined text-[18px] ${tierFilter === 'FREE' ? 'text-primary' : 'text-on-surface-variant/70'}`}>person</span>
+            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Miễn phí 🌱</span>
+            <span className="material-symbols-outlined text-[18px] text-[#86756C]">person</span>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-on-surface tabular-nums">{stats.free}</p>
+          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.free}</p>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#86756C]">search</span>
             <input
               type="text"
               placeholder="Tìm theo email, tên, id học viên..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
           </div>
 
@@ -230,7 +230,7 @@ export function AdminSubscriptionsTab({
           <select
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface border border-outline-variant/20 text-xs font-semibold text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
           >
             <option value="ALL">Tất cả hội viên</option>
             <option value="PRO">Đang dùng PRO</option>
@@ -245,9 +245,9 @@ export function AdminSubscriptionsTab({
           {selectedUserIds.size > 0 && (
             <button
               onClick={() => setIsBulkModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs"
+              className="px-4 py-2 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">card_giftcard</span>
+              <span>🎁</span>
               <span>Tặng PRO {selectedUserIds.size} người</span>
             </button>
           )}
@@ -256,24 +256,24 @@ export function AdminSubscriptionsTab({
 
       {/* Floating Bulk Action Bar */}
       {selectedUserIds.size > 0 && (
-        <div className="sticky top-20 z-20 p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/80 border border-amber-300 dark:border-amber-700/60 shadow-lg flex items-center justify-between gap-4 animate-fade-in">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-900 dark:text-amber-200">
-            <span className="material-symbols-outlined text-amber-600 text-[18px]">check_box</span>
+        <div className="sticky top-20 z-20 p-3 rounded-2xl bg-[#FFF9EE] border-2 border-[#3D352E] shadow-[4px_5px_0px_#3D352E] flex items-center justify-between gap-4 animate-fade-in">
+          <div className="flex items-center gap-2 text-xs font-black text-[#3D352E]">
+            <span className="material-symbols-outlined text-[#DE5D53] text-[18px]">check_box</span>
             <span>Đã chọn {selectedUserIds.size} học viên</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSelectedUserIds(new Set())}
-              className="px-3 py-1.5 rounded-xl border border-amber-300 dark:border-amber-700 text-xs font-semibold text-amber-800 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/40 transition-colors"
+              className="px-3 py-1.5 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#3D352E] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
             >
               Bỏ chọn
             </button>
             <button
               onClick={() => setIsBulkModalOpen(true)}
-              className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1"
+              className="px-4 py-1.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white text-xs font-black border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[15px]">card_giftcard</span>
+              <span>🎁</span>
               <span>Cấp PRO Hàng Loạt</span>
             </button>
           </div>
@@ -281,17 +281,17 @@ export function AdminSubscriptionsTab({
       )}
 
       {/* Subscribers Table */}
-      <div className="bg-surface rounded-2xl border border-outline-variant/20 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-surface-container/40 border-b border-outline-variant/15 text-on-surface-variant font-bold uppercase tracking-wider text-[11px]">
+            <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-4 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={filteredProfiles.length > 0 && selectedUserIds.size === filteredProfiles.length}
                     onChange={(e) => handleSelectAll(e.target.checked)}
-                    className="w-4 h-4 rounded text-primary focus:ring-primary"
+                    className="w-4 h-4 rounded text-[#557A46] focus:ring-[#557A46]"
                   />
                 </th>
                 <th className="py-3 px-4">HỌC VIÊN</th>
@@ -301,10 +301,10 @@ export function AdminSubscriptionsTab({
                 <th className="py-3 px-4 text-right">THAO TÁC</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-outline-variant/10">
+            <tbody className="divide-y divide-[#DECDBB]">
               {filteredProfiles.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="py-12 text-center text-on-surface-variant">
+                  <td colSpan="6" className="py-12 text-center text-[#86756C] font-bold">
                     Không tìm thấy học viên nào phù hợp.
                   </td>
                 </tr>
@@ -317,8 +317,8 @@ export function AdminSubscriptionsTab({
                   return (
                     <tr
                       key={p.id}
-                      className={`hover:bg-surface-container/30 transition-colors ${
-                        isSelected ? 'bg-amber-50/50 dark:bg-amber-950/20' : ''
+                      className={`hover:bg-[#FAF5EB]/50 transition-colors ${
+                        isSelected ? 'bg-[#FEF3D6]/40' : ''
                       }`}
                     >
                       <td className="py-3.5 px-4 text-center">
@@ -326,27 +326,27 @@ export function AdminSubscriptionsTab({
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleToggleSelectUser(p.id)}
-                          className="w-4 h-4 rounded text-amber-500 focus:ring-amber-500"
+                          className="w-4 h-4 rounded text-[#557A46] focus:ring-[#557A46]"
                         />
                       </td>
 
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2.5">
                           <div
-                            className={`w-8 h-8 rounded-xl font-bold text-xs flex items-center justify-center shrink-0 ${
+                            className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 border border-[#3D352E]/30 ${
                               isActivePro
-                                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                                : 'bg-surface-container text-on-surface-variant'
+                                ? 'bg-[#FFE8C2] text-[#B45309]'
+                                : 'bg-[#FAF5EB] text-[#86756C]'
                             }`}
                           >
                             {initial}
                           </div>
                           <div className="min-w-0">
-                            <p className="font-bold text-on-surface truncate max-w-[200px]" title={p.email}>
+                            <p className="font-bold text-[#3D352E] truncate max-w-[200px]" title={p.email}>
                               {p.email || 'Chưa có email'}
                             </p>
                             {p.full_name && (
-                              <p className="text-[10px] text-on-surface-variant truncate max-w-[200px]">
+                              <p className="text-[10px] text-[#86756C] truncate max-w-[200px]">
                                 {p.full_name}
                               </p>
                             )}
@@ -356,36 +356,36 @@ export function AdminSubscriptionsTab({
 
                       <td className="py-3.5 px-4">
                         <span
-                          className={`px-2 py-0.5 rounded-md font-semibold text-[11px] ${
+                          className={`px-2.5 py-0.5 rounded-full font-black text-[10px] border ${
                             isLifetime
-                              ? 'bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300'
+                              ? 'bg-[#F3E8FF] text-[#7E22CE] border-[#C084FC]'
                               : isActivePro
-                              ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300'
-                              : 'bg-surface-container text-on-surface-variant'
+                              ? 'bg-[#EAF3E7] text-[#557A46] border-[#8FB383]'
+                              : 'bg-[#FAF5EB] text-[#86756C] border-[#3D352E]/20'
                           }`}
                         >
-                          {isLifetime ? 'PRO Trọn đời' : isActivePro ? p.subscription_plan || 'PRO' : 'Miễn phí'}
+                          {isLifetime ? 'PRO Trọn đời ✨' : isActivePro ? p.subscription_plan || 'PRO 👑' : 'Miễn phí 🌱'}
                         </span>
                       </td>
 
                       <td className="py-3.5 px-4">
                         {isActivePro ? (
                           <span
-                            className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black border ${
                               isExpiringSoon
-                                ? 'bg-rose-100 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300'
-                                : 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300'
+                                ? 'bg-[#FEEFEA] text-[#DE5D53] border-[#DE5D53]'
+                                : 'bg-[#EAF3E7] text-[#557A46] border-[#8FB383]'
                             }`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${isExpiringSoon ? 'bg-rose-500 animate-pulse' : 'bg-emerald-500'}`}></span>
+                            <span className={`w-1.5 h-1.5 rounded-full ${isExpiringSoon ? 'bg-[#DE5D53] animate-pulse' : 'bg-[#557A46]'}`}></span>
                             <span>{isExpiringSoon ? 'SẮP HẾT HẠN' : 'ĐANG ACTIVE'}</span>
                           </span>
                         ) : (
-                          <span className="text-on-surface-variant text-[11px]">Free</span>
+                          <span className="text-[#86756C] font-bold text-[11px]">Free</span>
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-on-surface">
+                      <td className="py-3.5 px-4 font-mono font-bold text-[11px] text-[#3D352E]">
                         {isLifetime ? 'Vĩnh viễn' : formatDate(expiresAt)}
                       </td>
 
@@ -399,10 +399,10 @@ export function AdminSubscriptionsTab({
                                 expiresAt: p.subscription_expires_at,
                               })
                             }
-                            className="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-400 font-bold text-[11px] flex items-center gap-1 transition-colors"
+                            className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#DE5D53] border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 font-black text-[11px] flex items-center gap-1 transition-all cursor-pointer"
                             title="Tặng hoặc gia hạn PRO"
                           >
-                            <span className="material-symbols-outlined text-[15px]">card_giftcard</span>
+                            <span>🎁</span>
                             <span>Tặng PRO</span>
                           </button>
 
@@ -410,7 +410,7 @@ export function AdminSubscriptionsTab({
                             <button
                               onClick={() => handleRevokePro(p)}
                               disabled={isRevokingId === p.id}
-                              className="p-1 rounded-lg text-on-surface-variant hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors disabled:opacity-50"
+                              className="p-1 rounded-xl border border-transparent hover:border-[#DE5D53] text-[#DE5D53] hover:bg-[#FEEFEA] transition-colors disabled:opacity-50 cursor-pointer"
                               title="Thu hồi gói PRO"
                             >
                               <span className="material-symbols-outlined text-[17px]">cancel</span>

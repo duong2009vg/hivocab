@@ -1,6 +1,7 @@
 // src/components/admin/tabs/AdminReportsTab.jsx
 // Trung tâm Đọc log lỗi hệ thống, Phản ánh học viên & Báo sai đáp án
 // Cơ chế: Hiển thị chi tiết + Nút "Đã giải quyết" xóa trực tiếp bản ghi khỏi Supabase để tiết kiệm dung lượng
+// Cozy Crayon Handcrafted Design System
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
@@ -90,7 +91,6 @@ export function AdminReportsTab() {
 
       showToast(`Đã giải quyết và xóa ${itemLabel} khỏi database! 🎉`, 'success');
 
-      // Update local state
       if (tableName === 'system_error_logs') {
         setErrorLogs((prev) => prev.filter((item) => item.id !== id));
       } else if (tableName === 'user_bug_reports') {
@@ -105,19 +105,19 @@ export function AdminReportsTab() {
         return next;
       });
     } catch (err) {
-      console.error('Delete error:', err);
-      showToast(`Lỗi khi xóa: ${err.message}`, 'error');
+      console.error('Error resolving report:', err);
+      showToast(`Lỗi khi xử lý: ${err.message}`, 'error');
     } finally {
       setIsDeleting(false);
     }
   };
 
   // ──────────────────────────────────────────────
-  // 3. Action: Batch Resolve & DELETE selected items
+  // 3. Batch Action: Resolve & DELETE selected
   // ──────────────────────────────────────────────
   const handleBatchResolveAndDelete = async () => {
-    const ids = Array.from(selectedIds);
-    if (ids.length === 0) return;
+    const count = selectedIds.size;
+    if (count === 0) return;
 
     const tableName =
       activeTab === 'system_errors'
@@ -130,86 +130,74 @@ export function AdminReportsTab() {
       activeTab === 'system_errors'
         ? 'log lỗi'
         : activeTab === 'user_bugs'
-        ? 'phản ánh'
+        ? 'phản ánh học viên'
         : 'báo sai đáp án';
 
-    if (
-      !window.confirm(
-        `Xác nhận ĐÃ GIẢI QUYẾT ${ids.length} ${tabLabel} đã chọn? Toàn bộ sẽ bị xóa vĩnh viễn khỏi database để tiết kiệm dung lượng.`
-      )
-    ) {
+    if (!window.confirm(`Xác nhận đã giải quyết và XÓA VĨNH VIỄN ${count} ${tabLabel} đã chọn khỏi database?`)) {
       return;
     }
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase.from(tableName).delete().in('id', ids);
+      const idsArray = Array.from(selectedIds);
+      const { error } = await supabase.from(tableName).delete().in('id', idsArray);
       if (error) throw error;
 
-      showToast(`Đã giải quyết và xóa thành công ${ids.length} ${tabLabel}! 🎉`, 'success');
+      showToast(`Đã giải quyết và dọn dẹp ${count} ${tabLabel} thành công! 🎉`, 'success');
 
-      if (activeTab === 'system_errors') {
+      if (tableName === 'system_error_logs') {
         setErrorLogs((prev) => prev.filter((item) => !selectedIds.has(item.id)));
-      } else if (activeTab === 'user_bugs') {
+      } else if (tableName === 'user_bug_reports') {
         setBugReports((prev) => prev.filter((item) => !selectedIds.has(item.id)));
-      } else if (activeTab === 'answer_reports') {
+      } else if (tableName === 'answer_reports') {
         setAnswerReports((prev) => prev.filter((item) => !selectedIds.has(item.id)));
       }
 
       setSelectedIds(new Set());
     } catch (err) {
-      console.error('Batch delete error:', err);
-      showToast(`Lỗi xóa hàng loạt: ${err.message}`, 'error');
+      console.error('Batch resolve error:', err);
+      showToast(`Lỗi khi xử lý hàng loạt: ${err.message}`, 'error');
     } finally {
       setIsDeleting(false);
     }
   };
 
   // ──────────────────────────────────────────────
-  // 4. Action: Purge ALL error logs in database
+  // 4. Global Purge: Clear ALL system_error_logs
   // ──────────────────────────────────────────────
   const handlePurgeAllLogs = async () => {
-    if (
-      !window.confirm(
-        `CẢNH BÁO: Bạn có chắc muốn DỌN DẸP SẠCH TOÀN BỘ ${errorLogs.length} log lỗi trong database? Hành động này sẽ giải phóng dung lượng tối đa.`
-      )
-    ) {
+    if (!window.confirm('CẢNH BÁO: Bạn có chắc muốn DỌN SẠCH TOÀN BỘ log lỗi hệ thống trong CSDL?')) {
       return;
     }
 
     setIsDeleting(true);
     try {
-      // Delete all where id is not null
       const { error } = await supabase
         .from('system_error_logs')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000');
-
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
       if (error) throw error;
 
-      showToast('Đã dọn dẹp sạch toàn bộ log lỗi hệ thống! Database đã được giải phóng dung lượng. 🧹', 'success');
+      showToast('Đã dọn sạch toàn bộ log lỗi hệ thống! 🧹', 'success');
       setErrorLogs([]);
       setSelectedIds(new Set());
     } catch (err) {
       console.error('Purge error:', err);
-      showToast(`Lỗi dọn dẹp: ${err.message}`, 'error');
+      showToast(`Lỗi dọn sạch log: ${err.message}`, 'error');
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Toggle stack trace view
   const toggleStack = (id) => {
     setExpandedStacks((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // Copy stack trace to clipboard
   const handleCopyStack = (text) => {
     navigator.clipboard?.writeText(text);
     showToast('Đã sao chép Stack trace vào clipboard!', 'info');
   };
 
-  // Checkbox helpers
   const handleToggleSelect = (id) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
@@ -219,7 +207,6 @@ export function AdminReportsTab() {
     });
   };
 
-  // Filter items based on current tab & search
   const currentList = useMemo(() => {
     if (activeTab === 'system_errors') return errorLogs;
     if (activeTab === 'user_bugs') return bugReports;
@@ -272,18 +259,18 @@ export function AdminReportsTab() {
   const selectedCount = selectedIds.size;
 
   return (
-    <div className="space-y-6 animate-fade-in relative">
+    <div className="space-y-6 animate-fade-in relative font-nunito text-[#3D352E]">
       {/* ───────────────────────────────────────────────────────────── */}
       {/* TOP SUB-TABS & STATS BAR                                      */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-outline-variant/15">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-container/60 border border-outline-variant/20">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-[#EADDC7]">
+        <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-full bg-[#FAF5EB] border-2 border-[#3D352E]">
           <button
             onClick={() => setActiveTab('system_errors')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-full text-xs font-black font-quicksand transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'system_errors'
-                ? 'bg-surface text-rose-600 dark:text-rose-400 shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-[#DE5D53] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">error</span>
@@ -292,10 +279,10 @@ export function AdminReportsTab() {
 
           <button
             onClick={() => setActiveTab('user_bugs')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-full text-xs font-black font-quicksand transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'user_bugs'
-                ? 'bg-surface text-amber-600 dark:text-amber-400 shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-[#F4B41A] text-[#3D352E] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">bug_report</span>
@@ -304,10 +291,10 @@ export function AdminReportsTab() {
 
           <button
             onClick={() => setActiveTab('answer_reports')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-full text-xs font-black font-quicksand transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'answer_reports'
-                ? 'bg-surface text-primary shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">rule</span>
@@ -320,11 +307,11 @@ export function AdminReportsTab() {
           <button
             onClick={handlePurgeAllLogs}
             disabled={isDeleting}
-            className="px-3.5 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer border border-rose-500/20"
+            className="px-4 py-2 rounded-2xl bg-[#FFF0E6] hover:bg-[#FFE3D4] text-[#DE5D53] text-xs font-black font-quicksand flex items-center gap-1.5 transition-all cursor-pointer border-2 border-[#DE5D53] shadow-[2px_2.5px_0px_#DE5D53] active:translate-y-0.5"
             title="Xóa toàn bộ log lỗi trong database để giải phóng dung lượng"
           >
             <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
-            <span>Dọn sạch toàn bộ log ({errorLogs.length})</span>
+            <span>Dọn sạch toàn bộ log ({errorLogs.length}) 🧹</span>
           </button>
         )}
       </div>
@@ -332,9 +319,9 @@ export function AdminReportsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SEARCH TOOLBAR & QUICK ACTIONS                                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shadow-2xs">
+      <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
-          <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">
+          <span className="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-[#6E5D53]">
             search
           </span>
           <input
@@ -342,19 +329,19 @@ export function AdminReportsTab() {
             placeholder="Tìm theo nội dung lỗi, URL, email học viên, component..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
           />
         </div>
 
         <div className="flex items-center gap-3 justify-between sm:justify-end text-xs">
-          <span className="text-on-surface-variant font-medium">
-            Hiển thị <strong className="text-on-surface font-mono">{filteredItems.length}</strong> / {currentList.length} bản ghi
+          <span className="text-[#6E5D53] font-bold">
+            Hiển thị <strong className="text-[#3D352E] font-black font-mono">{filteredItems.length}</strong> / {currentList.length} bản ghi
           </span>
 
           <button
             onClick={fetchAllData}
             disabled={loading}
-            className="p-2 rounded-xl border border-outline-variant/20 text-on-surface hover:bg-surface-container transition-all flex items-center justify-center"
+            className="p-2.5 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[#3D352E] transition-all flex items-center justify-center cursor-pointer"
             title="Làm mới dữ liệu"
           >
             <span className={`material-symbols-outlined text-[16px] ${loading ? 'animate-spin' : ''}`}>
@@ -368,16 +355,16 @@ export function AdminReportsTab() {
       {/* STICKY BATCH RESOLVE BAR (HIỂN THỊ KHI TÍCH CHỌN)            */}
       {/* ───────────────────────────────────────────────────────────── */}
       {selectedCount > 0 && (
-        <div className="sticky top-4 z-30 p-3.5 rounded-2xl bg-neutral-900 dark:bg-neutral-800 text-white shadow-xl border border-white/10 flex flex-wrap items-center justify-between gap-3 animate-fade-in">
-          <div className="flex items-center gap-2.5">
-            <span className="w-7 h-7 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center">
+        <div className="sticky top-4 z-30 p-4 rounded-3xl bg-[#FFF9EE] text-[#3D352E] shadow-[4px_5px_0px_#3D352E] border-2 border-[#3D352E] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-3">
+            <span className="w-8 h-8 rounded-xl bg-[#557A46] text-white border-2 border-[#3D352E] font-black text-xs flex items-center justify-center shadow-[1.5px_2px_0px_#3D352E]">
               {selectedCount}
             </span>
             <div>
-              <div className="text-xs font-bold">
-                Đã chọn <span className="text-emerald-400 font-black">{selectedCount}</span> bản ghi
+              <div className="text-xs font-black font-quicksand text-[#3D352E]">
+                Đã chọn <span className="text-[#557A46] font-black">{selectedCount}</span> bản ghi
               </div>
-              <div className="text-[11px] text-neutral-400">
+              <div className="text-[11px] font-bold text-[#6E5D53]">
                 Nhấn giải quyết để xóa vĩnh viễn khỏi database và giải phóng dung lượng
               </div>
             </div>
@@ -387,16 +374,16 @@ export function AdminReportsTab() {
             <button
               onClick={handleBatchResolveAndDelete}
               disabled={isDeleting}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">check_circle</span>
-              <span>Đã giải quyết & Xóa ({selectedCount})</span>
+              <span>Đã giải quyết & Xóa ({selectedCount}) 🎉</span>
             </button>
 
             <button
               onClick={() => setSelectedIds(new Set())}
               disabled={isDeleting}
-              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-[#3D352E] text-xs font-bold transition-all cursor-pointer"
             >
               Hủy chọn
             </button>
@@ -407,23 +394,23 @@ export function AdminReportsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* DATA CONTENT VIEW                                             */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {loading && currentList.length === 0 ? (
-          <div className="py-16 text-center text-on-surface-variant flex flex-col items-center gap-2 bg-surface rounded-2xl border border-outline-variant/20">
-            <span className="material-symbols-outlined text-primary text-[28px] animate-spin">
+          <div className="py-16 text-center text-[#6E5D53] flex flex-col items-center gap-2 bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
+            <span className="material-symbols-outlined text-[#557A46] text-[32px] animate-spin">
               refresh
             </span>
-            <span className="text-xs">Đang tải dữ liệu từ database...</span>
+            <span className="text-xs font-bold">Đang tải dữ liệu từ CSDL...</span>
           </div>
         ) : filteredItems.length === 0 ? (
-          <div className="p-16 text-center text-on-surface-variant bg-surface rounded-2xl border border-outline-variant/20 space-y-2">
-            <span className="material-symbols-outlined text-emerald-500 text-[40px]">
-              task_alt
-            </span>
-            <h4 className="font-bold text-sm text-on-surface">Không có bản ghi nào cần xử lý!</h4>
-            <p className="text-xs text-on-surface-variant max-w-md mx-auto">
+          <div className="p-16 text-center text-[#6E5D53] bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-2">
+            <div className="text-4xl mb-2">🎉</div>
+            <h4 className="font-black text-base font-quicksand text-[#3D352E]">
+              Không có bản ghi nào cần xử lý!
+            </h4>
+            <p className="text-xs font-bold text-[#6E5D53] max-w-md mx-auto">
               {activeTab === 'system_errors'
-                ? 'Hệ thống đang hoạt động ổn định, không có log lỗi runtime nào tồn đọng.'
+                ? 'Hệ thống đang hoạt động hoàn toàn ổn định, không có log lỗi runtime nào tồn đọng.'
                 : activeTab === 'user_bugs'
                 ? 'Tất cả phản ánh từ học viên đã được giải quyết và dọn dẹp sạch sẽ.'
                 : 'Không có báo sai đáp án nào từ phòng thi THPT.'}
@@ -432,7 +419,7 @@ export function AdminReportsTab() {
         ) : (
           <>
             {/* Header with Master Select All */}
-            <div className="px-4 py-2 bg-surface-container/30 rounded-xl border border-outline-variant/15 flex items-center justify-between text-xs text-on-surface-variant font-semibold">
+            <div className="px-5 py-3 bg-[#FAF5EB] rounded-2xl border-2 border-[#3D352E] flex items-center justify-between text-xs text-[#6E5D53] font-bold">
               <label className="inline-flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
@@ -441,17 +428,17 @@ export function AdminReportsTab() {
                     filteredItems.every((i) => selectedIds.has(i.id))
                   }
                   onChange={handleToggleSelectAll}
-                  className="w-4 h-4 rounded border-outline-variant/40 text-primary focus:ring-primary cursor-pointer"
+                  className="w-4 h-4 rounded border-2 border-[#3D352E] accent-[#557A46] cursor-pointer"
                 />
-                <span>Chọn tất cả ({filteredItems.length} mục)</span>
+                <span className="text-[#3D352E] font-black">Chọn tất cả ({filteredItems.length} mục)</span>
               </label>
 
-              <span className="text-[11px] text-on-surface-variant font-mono">
+              <span className="text-[11px] text-[#6E5D53] font-mono font-bold">
                 Bấm "Đã giải quyết" trên từng dòng để xóa khỏi database
               </span>
             </div>
 
-            {/* List Cards */}
+            {/* List Cards for system_errors */}
             {activeTab === 'system_errors' && (
               <div className="space-y-3">
                 {filteredItems.map((log) => {
@@ -461,49 +448,47 @@ export function AdminReportsTab() {
                   return (
                     <div
                       key={log.id}
-                      className={`p-4 rounded-2xl border transition-all ${
+                      className={`p-5 rounded-3xl border-2 border-[#3D352E] transition-all ${
                         isSelected
-                          ? 'bg-rose-50/20 dark:bg-rose-950/10 border-rose-300 dark:border-rose-900 shadow-2xs'
-                          : 'bg-surface border-outline-variant/20 hover:border-outline-variant/40'
+                          ? 'bg-[#FFF0E6] shadow-[4px_5px_0px_#DE5D53]'
+                          : 'bg-white shadow-[3px_3.5px_0px_#3D352E] hover:bg-[#FFFDF9]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
-                          {/* Row Checkbox */}
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleSelect(log.id)}
-                            className="w-4 h-4 mt-1 rounded border-outline-variant/40 text-primary focus:ring-primary cursor-pointer shrink-0"
+                            className="w-4 h-4 mt-1 rounded border-2 border-[#3D352E] accent-[#DE5D53] cursor-pointer shrink-0"
                           />
 
-                          {/* Error Meta */}
                           <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-1">
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400">
+                            <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FFF0E6] text-[#DE5D53] border-2 border-[#DE5D53]">
                                 {log.component || 'App Runtime'}
                               </span>
 
                               {log.user_email && (
-                                <span className="text-xs font-semibold text-on-surface flex items-center gap-1">
-                                  <span className="material-symbols-outlined text-[14px] text-on-surface-variant">person</span>
+                                <span className="text-xs font-bold text-[#3D352E] flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[14px] text-[#6E5D53]">person</span>
                                   <span>{log.user_email}</span>
                                 </span>
                               )}
 
-                              <span className="text-[11px] text-on-surface-variant font-mono">
+                              <span className="text-[11px] text-[#6E5D53] font-mono font-bold">
                                 • {formatDate(log.created_at)}
                               </span>
                             </div>
 
                             {/* Error Message */}
-                            <p className="font-mono text-xs font-bold text-rose-600 dark:text-rose-400 break-words leading-relaxed">
+                            <p className="font-mono text-xs font-bold text-[#DE5D53] break-words leading-relaxed">
                               {log.error_message}
                             </p>
 
                             {/* URL if any */}
                             {log.url && (
-                              <p className="text-[11px] font-mono text-on-surface-variant/80 truncate mt-0.5">
+                              <p className="text-[11px] font-mono text-[#6E5D53] truncate mt-1">
                                 URL: {log.url}
                               </p>
                             )}
@@ -515,7 +500,7 @@ export function AdminReportsTab() {
                           {log.error_stack && (
                             <button
                               onClick={() => toggleStack(log.id)}
-                              className="px-2.5 py-1.5 rounded-xl border border-outline-variant/20 hover:bg-surface-container text-xs font-semibold text-on-surface transition-all flex items-center gap-1"
+                              className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] transition-all flex items-center gap-1 cursor-pointer"
                               title="Xem Stack Trace chi tiết"
                             >
                               <span className="material-symbols-outlined text-[15px]">
@@ -532,7 +517,7 @@ export function AdminReportsTab() {
                               handleResolveAndDelete(log.id, 'system_error_logs', 'log lỗi')
                             }
                             disabled={isDeleting}
-                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                            className="px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                             title="Xác nhận đã giải quyết và xóa log khỏi database để tiết kiệm dung lượng"
                           >
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>
@@ -543,10 +528,10 @@ export function AdminReportsTab() {
 
                       {/* Stack Trace Box */}
                       {isExpanded && log.error_stack && (
-                        <div className="mt-3 p-3 rounded-xl bg-neutral-950 text-neutral-200 text-[11px] font-mono leading-relaxed overflow-x-auto relative animate-fade-in border border-neutral-800">
+                        <div className="mt-3 p-3.5 rounded-2xl bg-[#2D2620] text-[#FAF5EB] text-[11px] font-mono leading-relaxed overflow-x-auto relative animate-fade-in border-2 border-[#3D352E]">
                           <button
                             onClick={() => handleCopyStack(log.error_stack)}
-                            className="absolute top-2 right-2 px-2 py-1 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-sans font-bold flex items-center gap-1"
+                            className="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
                           >
                             <span className="material-symbols-outlined text-[12px]">content_copy</span>
                             <span>Copy</span>
@@ -565,56 +550,55 @@ export function AdminReportsTab() {
               <div className="space-y-3">
                 {filteredItems.map((report) => {
                   const isSelected = selectedIds.has(report.id);
-                  const isResolved = report.status === 'resolved';
 
                   return (
                     <div
                       key={report.id}
-                      className={`p-4 rounded-2xl border transition-all ${
+                      className={`p-5 rounded-3xl border-2 border-[#3D352E] transition-all ${
                         isSelected
-                          ? 'bg-amber-50/20 dark:bg-amber-950/10 border-amber-300 dark:border-amber-900 shadow-2xs'
-                          : 'bg-surface border-outline-variant/20 hover:border-outline-variant/40'
+                          ? 'bg-[#FFF9EE] shadow-[4px_5px_0px_#F4B41A]'
+                          : 'bg-white shadow-[3px_3.5px_0px_#3D352E] hover:bg-[#FFFDF9]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleSelect(report.id)}
-                            className="w-4 h-4 mt-1 rounded border-outline-variant/40 text-primary focus:ring-primary cursor-pointer shrink-0"
+                            className="w-4 h-4 mt-1 rounded border-2 border-[#3D352E] accent-[#F4B41A] cursor-pointer shrink-0"
                           />
 
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FFF9EE] text-[#D9822B] border-2 border-[#D9822B]">
                                 {report.report_type || 'Phản ánh'}
                               </span>
 
                               {report.feature_context && (
-                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-surface-container text-on-surface-variant">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FAF5EB] text-[#3D352E] border border-[#3D352E]">
                                   {report.feature_context}
                                 </span>
                               )}
 
-                              <span className="text-xs font-semibold text-on-surface flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[14px] text-on-surface-variant">person</span>
+                              <span className="text-xs font-bold text-[#3D352E] flex items-center gap-1">
+                                <span className="material-symbols-outlined text-[14px] text-[#6E5D53]">person</span>
                                 <span>{report.user_email || 'Khách vãng lai'}</span>
                               </span>
 
-                              <span className="text-[11px] text-on-surface-variant font-mono">
+                              <span className="text-[11px] text-[#6E5D53] font-mono font-bold">
                                 • {formatDate(report.created_at)}
                               </span>
                             </div>
 
                             {/* Problem description */}
-                            <p className="text-xs text-on-surface font-semibold leading-relaxed mb-2 whitespace-pre-wrap">
+                            <p className="text-xs text-[#3D352E] font-bold leading-relaxed mb-2 whitespace-pre-wrap">
                               {report.description}
                             </p>
 
                             {/* Device & Context Info */}
                             {report.device_info && (
-                              <div className="text-[11px] text-on-surface-variant font-mono flex flex-wrap gap-2">
+                              <div className="text-[11px] text-[#6E5D53] font-mono flex flex-wrap gap-2">
                                 <span>Thiết bị: {JSON.stringify(report.device_info)}</span>
                               </div>
                             )}
@@ -632,7 +616,7 @@ export function AdminReportsTab() {
                               )
                             }
                             disabled={isDeleting}
-                            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                            className="px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                             title="Xác nhận đã xử lý và xóa khỏi database để tiết kiệm dung lượng"
                           >
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>
@@ -655,48 +639,48 @@ export function AdminReportsTab() {
                   return (
                     <div
                       key={r.id}
-                      className={`p-4 rounded-2xl border transition-all ${
+                      className={`p-5 rounded-3xl border-2 border-[#3D352E] transition-all ${
                         isSelected
-                          ? 'bg-primary/10 border-primary shadow-2xs'
-                          : 'bg-surface border-outline-variant/20 hover:border-outline-variant/40'
+                          ? 'bg-[#EAF3E7] shadow-[4px_5px_0px_#557A46]'
+                          : 'bg-white shadow-[3px_3.5px_0px_#3D352E] hover:bg-[#FFFDF9]'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3 flex-1 min-w-0">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleSelect(r.id)}
-                            className="w-4 h-4 mt-1 rounded border-outline-variant/40 text-primary focus:ring-primary cursor-pointer shrink-0"
+                            className="w-4 h-4 mt-1 rounded border-2 border-[#3D352E] accent-[#557A46] cursor-pointer shrink-0"
                           />
 
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                              <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400">
+                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E]">
                                 Đề thi: {r.exam_id}
                               </span>
 
-                              <span className="text-xs font-bold text-on-surface">
+                              <span className="text-xs font-black font-quicksand text-[#3D352E]">
                                 Câu {r.question_number}
                               </span>
 
-                              <span className="text-[11px] text-on-surface-variant font-mono">
+                              <span className="text-[11px] text-[#6E5D53] font-mono font-bold">
                                 • {formatDate(r.created_at)}
                               </span>
                             </div>
 
-                            <div className="flex items-center gap-3 text-xs mb-1.5">
+                            <div className="flex items-center gap-3 text-xs mb-1.5 font-bold">
                               <span>
-                                Đáp án hệ thống: <strong className="font-mono text-rose-600">{r.system_answer || '?'}</strong>
+                                Đáp án hệ thống: <strong className="font-mono text-[#DE5D53]">{r.system_answer || '?'}</strong>
                               </span>
                               <span>➔</span>
                               <span>
-                                Học sinh phản ánh: <strong className="font-mono text-emerald-600">{r.reported_answer}</strong>
+                                Học sinh phản ánh: <strong className="font-mono text-[#557A46]">{r.reported_answer}</strong>
                               </span>
                             </div>
 
                             {r.note && (
-                              <p className="text-xs text-on-surface-variant italic">
+                              <p className="text-xs text-[#6E5D53] italic">
                                 Ghi chú: "{r.note}"
                               </p>
                             )}
@@ -708,7 +692,7 @@ export function AdminReportsTab() {
                             handleResolveAndDelete(r.id, 'answer_reports', 'báo sai đáp án')
                           }
                           disabled={isDeleting}
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-2xs active:scale-95 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                          className="px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 shrink-0"
                           title="Xác nhận đã xử lý đáp án và xóa báo cáo khỏi database"
                         >
                           <span className="material-symbols-outlined text-[16px]">check_circle</span>

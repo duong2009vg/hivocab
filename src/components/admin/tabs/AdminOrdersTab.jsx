@@ -148,42 +148,42 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
     <div className="space-y-6 animate-fade-in">
       {/* Top Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/15 shadow-2xs">
-          <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Doanh thu Thực nhận</p>
-          <p className="text-2xl lg:text-3xl font-extrabold text-on-surface mt-1 tabular-nums">{formatCurrency(totalRevenue)}</p>
-          <p className="text-xs text-on-surface-variant/80 mt-1 font-medium">{paidCount} đơn thanh toán thành công</p>
+        <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
+          <p className="text-[11px] font-black text-[#86756C] uppercase tracking-wider">Doanh thu Thực nhận 💰</p>
+          <p className="font-quicksand font-black text-2xl lg:text-3xl text-[#557A46] mt-1 tabular-nums">{formatCurrency(totalRevenue)}</p>
+          <p className="text-xs font-bold text-[#6E5D53] mt-1">{paidCount} đơn thanh toán thành công</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/15 shadow-2xs">
-          <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Đơn Chờ Xử lý</p>
-          <p className="text-2xl lg:text-3xl font-extrabold text-on-surface mt-1 tabular-nums">{pendingCount}</p>
-          <p className="text-xs text-on-surface-variant/80 mt-1 font-medium">Khách đã mở mã QR PayOS</p>
+        <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
+          <p className="text-[11px] font-black text-[#86756C] uppercase tracking-wider">Đơn Chờ Xử lý ⏳</p>
+          <p className="font-quicksand font-black text-2xl lg:text-3xl text-[#DE5D53] mt-1 tabular-nums">{pendingCount}</p>
+          <p className="text-xs font-bold text-[#6E5D53] mt-1">Khách đã mở mã QR PayOS</p>
         </div>
 
-        <div className="p-5 rounded-2xl bg-surface border border-outline-variant/15 shadow-2xs">
-          <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Tổng Đơn Hệ thống</p>
-          <p className="text-2xl lg:text-3xl font-extrabold text-on-surface mt-1 tabular-nums">{orders.length}</p>
-          <p className="text-xs text-on-surface-variant/80 mt-1 font-medium">Bao gồm PayOS và Tặng quà</p>
+        <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
+          <p className="text-[11px] font-black text-[#86756C] uppercase tracking-wider">Tổng Đơn Hệ thống 📦</p>
+          <p className="font-quicksand font-black text-2xl lg:text-3xl text-[#3D352E] mt-1 tabular-nums">{orders.length}</p>
+          <p className="text-xs font-bold text-[#6E5D53] mt-1">Bao gồm PayOS và Tặng quà</p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
           {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#86756C]">search</span>
             <input
               type="text"
               placeholder="Tìm mã đơn, email học viên..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface placeholder:text-on-surface-variant/60 focus:outline-hidden focus:ring-1 focus:ring-primary"
+              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
             {searchTerm && (
               <button
                 onClick={() => setSearchTerm('')}
-                className="absolute right-2.5 top-2.5 text-on-surface-variant hover:text-on-surface"
+                className="absolute right-2.5 top-2.5 text-[#86756C] hover:text-[#3D352E]"
               >
                 <span className="material-symbols-outlined text-[16px]">close</span>
               </button>
@@ -194,7 +194,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl bg-surface border border-outline-variant/20 text-xs font-semibold text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
           >
             <option value="ALL">Tất cả trạng thái</option>
             <option value="PAID">Đã thanh toán (PAID)</option>
@@ -206,18 +206,18 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
         {/* Export Button */}
         <button
           onClick={handleExportCSV}
-          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-surface border border-outline-variant/20 hover:bg-surface-container text-xs font-bold text-on-surface flex items-center justify-center gap-1.5 transition-all shadow-2xs"
+          className="w-full sm:w-auto px-4 py-2 rounded-2xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-black text-[#3D352E] flex items-center justify-center gap-1.5 transition-all active:translate-y-0.5 cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[16px] text-primary">download</span>
-          <span>Xuất CSV</span>
+          <span className="material-symbols-outlined text-[16px] text-[#557A46]">download</span>
+          <span>Xuất CSV 📑</span>
         </button>
       </div>
 
       {/* Orders Table */}
-      <div className="bg-surface rounded-2xl border border-outline-variant/20 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-surface-container/40 border-b border-outline-variant/15 text-on-surface-variant font-bold uppercase tracking-wider text-[11px]">
+            <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
               <tr>
                 <th className="py-3 px-4">MÃ ĐƠN</th>
                 <th className="py-3 px-4">HỌC VIÊN</th>
@@ -228,10 +228,10 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                 <th className="py-3 px-4 text-right">THAO TÁC</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-outline-variant/10">
+            <tbody className="divide-y divide-[#DECDBB]">
               {filteredOrders.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="py-12 text-center text-on-surface-variant">
+                  <td colSpan="7" className="py-12 text-center text-[#86756C] font-bold">
                     Không tìm thấy đơn hàng nào phù hợp với bộ lọc.
                   </td>
                 </tr>
@@ -241,31 +241,31 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                   const isGift = order.payment_method === 'MANUAL_GIFT';
 
                   return (
-                    <tr key={order.id} className="hover:bg-surface-container/30 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-bold text-on-surface">
+                    <tr key={order.id} className="hover:bg-[#FAF5EB]/50 transition-colors">
+                      <td className="py-3.5 px-4 font-mono font-black text-[#3D352E]">
                         #{order.order_code}
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <p className="font-bold text-on-surface max-w-[200px] truncate" title={order.user_email}>
+                        <p className="font-bold text-[#3D352E] max-w-[200px] truncate" title={order.user_email}>
                           {order.user_email || '—'}
                         </p>
                         {order.user_id && (
-                          <p className="text-[10px] font-mono text-on-surface-variant/70 truncate max-w-[200px]">
+                          <p className="text-[10px] font-mono text-[#86756C] truncate max-w-[200px]">
                             {order.user_id}
                           </p>
                         )}
                       </td>
 
                       <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded-md font-semibold text-[11px] bg-primary/10 text-primary">
+                        <span className="px-2 py-0.5 rounded-lg font-black text-[11px] bg-[#FAF5EB] border border-[#3D352E]/20 text-[#3D352E]">
                           {order.plan_id || 'pro'}
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 font-bold text-on-surface">
+                      <td className="py-3.5 px-4 font-black text-[#3D352E] tabular-nums">
                         {isGift ? (
-                          <span className="text-amber-600 dark:text-amber-400">0đ (Quà tặng)</span>
+                          <span className="text-[#DE5D53]">0đ (Quà tặng)</span>
                         ) : (
                           formatCurrency(order.amount)
                         )}
@@ -273,19 +273,19 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
 
                       <td className="py-3.5 px-4">
                         {isPaid ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#557A46]"></span>
                             <span>{isGift ? 'TẶNG PRO' : 'ĐÃ THANH TOÁN'}</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FEF3D6] text-[#B45309] border border-[#ECA43B]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#B45309] animate-pulse"></span>
                             <span>CHỜ THANH TOÁN</span>
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 font-mono text-on-surface-variant text-[11px]">
+                      <td className="py-3.5 px-4 font-mono text-[#86756C] font-bold text-[11px]">
                         {formatDate(order.created_at)}
                       </td>
 
@@ -294,13 +294,13 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                           <button
                             onClick={() => handleApprovePending(order)}
                             disabled={processingOrderId === order.id}
-                            className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[11px] transition-all disabled:opacity-50 inline-flex items-center gap-1"
+                            className="px-3 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-xs border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
                             title="Xác nhận khách đã chuyển khoản thành công"
                           >
                             {processingOrderId === order.id ? (
                               <span className="material-symbols-outlined text-[14px] animate-spin">refresh</span>
                             ) : (
-                              <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                              <span>✓</span>
                             )}
                             <span>Duyệt Đơn</span>
                           </button>

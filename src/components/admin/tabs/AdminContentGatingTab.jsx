@@ -241,34 +241,34 @@ export function AdminContentGatingTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SUB TABS & COUNTS SUMMARY                                     */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-outline-variant/15">
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-container/60 border border-outline-variant/20">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-dashed border-[#DECDBB]">
+        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-2xs">
           <button
             onClick={() => setSubTab('topics')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
               subTab === 'topics'
-                ? 'bg-surface text-primary shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             Chủ đề Từ vựng ({items && subTab === 'topics' ? items.length : '110'})
           </button>
           <button
             onClick={() => setSubTab('thpt')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
               subTab === 'thpt'
-                ? 'bg-surface text-primary shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             Đề thi THPT Quốc Gia ({items && subTab === 'thpt' ? items.length : '38'})
           </button>
           <button
             onClick={() => setSubTab('passages')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
               subTab === 'passages'
-                ? 'bg-surface text-primary shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface'
+                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             Bài đọc IELTS Cambridge ({items && subTab === 'passages' ? items.length : '444'})
@@ -276,14 +276,14 @@ export function AdminContentGatingTab() {
         </div>
 
         {/* Counts summary */}
-        <div className="flex items-center gap-3 text-xs font-semibold text-on-surface-variant">
-          <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
-            <span className="material-symbols-outlined text-[16px]">lock</span>
+        <div className="flex items-center gap-3 text-xs font-black">
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53]">
+            <span>🔒</span>
             <span>{proCount} Khóa PRO</span>
           </span>
           <span>•</span>
-          <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-            <span className="material-symbols-outlined text-[16px]">lock_open</span>
+          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
+            <span>🌐</span>
             <span>{freeCount} Miễn phí</span>
           </span>
         </div>
@@ -292,11 +292,11 @@ export function AdminContentGatingTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SEARCH, STATUS FILTER & QUICK SELECTION TOOLS                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 shadow-2xs">
+      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#86756C]">
               search
             </span>
             <input
@@ -304,42 +304,42 @@ export function AdminContentGatingTab() {
               placeholder={`Tìm theo tên ${subTab === 'topics' ? 'chủ đề' : subTab === 'thpt' ? 'đề thi' : 'bài đọc'}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
           </div>
 
           {/* Status Filter Buttons */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-2xl bg-white border-2 border-[#3D352E] text-xs">
             <button
               onClick={() => setStatusFilter('all')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+              className={`px-3 py-1 rounded-xl font-black transition-all cursor-pointer ${
                 statusFilter === 'all'
-                  ? 'bg-surface text-primary shadow-2xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-[#3D352E] text-white shadow-2xs'
+                  : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
               Tất cả ({items.length})
             </button>
             <button
               onClick={() => setStatusFilter('pro')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-black transition-all flex items-center gap-1 cursor-pointer ${
                 statusFilter === 'pro'
-                  ? 'bg-surface text-amber-600 shadow-2xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-[#DE5D53] text-white shadow-2xs'
+                  : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
-              <span className="material-symbols-outlined text-[14px]">lock</span>
+              <span>🔒</span>
               <span>PRO ({proCount})</span>
             </button>
             <button
               onClick={() => setStatusFilter('free')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              className={`px-3 py-1 rounded-xl font-black transition-all flex items-center gap-1 cursor-pointer ${
                 statusFilter === 'free'
-                  ? 'bg-surface text-emerald-600 shadow-2xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-[#557A46] text-white shadow-2xs'
+                  : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
-              <span className="material-symbols-outlined text-[14px]">public</span>
+              <span>🌐</span>
               <span>Free ({freeCount})</span>
             </button>
           </div>
@@ -347,27 +347,25 @@ export function AdminContentGatingTab() {
 
         {/* Quick Selection Helpers */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[11px] font-bold text-on-surface-variant mr-1">Tích chọn nhanh:</span>
+          <span className="text-[11px] font-black text-[#86756C] mr-1">Tích chọn nhanh:</span>
           <button
             onClick={handleSelectAllFree}
-            className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-[11px] font-bold text-emerald-700 dark:text-emerald-400 border border-outline-variant/20 transition-all flex items-center gap-1"
+            className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#EAF3E7] text-[11px] font-black text-[#557A46] border-2 border-[#3D352E] shadow-2xs active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             title="Chọn toàn bộ các mục đang Miễn phí để chuẩn bị khóa PRO"
           >
-            <span className="material-symbols-outlined text-[14px]">checklist</span>
             <span>Tất cả Miễn phí ({freeCount})</span>
           </button>
           <button
             onClick={handleSelectAllPro}
-            className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-outline-variant/20 transition-all flex items-center gap-1"
+            className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#FEEFEA] text-[11px] font-black text-[#DE5D53] border-2 border-[#3D352E] shadow-2xs active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             title="Chọn toàn bộ các mục đang khóa PRO để chuẩn bị mở Miễn phí"
           >
-            <span className="material-symbols-outlined text-[14px]">checklist</span>
             <span>Tất cả PRO ({proCount})</span>
           </button>
           {selectedCount > 0 && (
             <button
               onClick={handleClearSelection}
-              className="px-2 py-1 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-[11px] font-bold transition-all"
+              className="px-2 py-1 rounded-xl text-[#DE5D53] hover:bg-[#FEEFEA] text-[11px] font-black transition-all cursor-pointer"
             >
               Bỏ chọn
             </button>
@@ -379,17 +377,17 @@ export function AdminContentGatingTab() {
       {/* FLOATING BATCH ACTION BAR (HIỂN THỊ KHI CÓ MỤC ĐƯỢC CHỌN)     */}
       {/* ───────────────────────────────────────────────────────────── */}
       {selectedCount > 0 && (
-        <div className="sticky top-4 z-30 p-3.5 rounded-2xl bg-neutral-900 dark:bg-neutral-800 text-white shadow-xl border border-white/10 flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+        <div className="sticky top-4 z-30 p-3.5 rounded-3xl bg-[#FFF9EE] text-[#3D352E] shadow-[4px_6px_0px_#3D352E] border-2 border-[#3D352E] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
           <div className="flex items-center gap-2.5">
-            <span className="w-7 h-7 rounded-lg bg-primary text-white font-black text-xs flex items-center justify-center">
+            <span className="w-8 h-8 rounded-xl bg-[#DE5D53] text-white font-black text-xs flex items-center justify-center border border-[#3D352E] shadow-2xs">
               {selectedCount}
             </span>
             <div>
-              <div className="text-xs font-bold">
-                Đã tích chọn <span className="text-primary-cont font-black">{selectedCount}</span> / {items.length} {subTab === 'topics' ? 'chủ đề' : subTab === 'thpt' ? 'đề thi' : 'bài đọc'}
+              <div className="text-xs font-black text-[#3D352E]">
+                Đã tích chọn <span className="text-[#DE5D53] font-black">{selectedCount}</span> / {items.length} {subTab === 'topics' ? 'chủ đề' : subTab === 'thpt' ? 'đề thi' : 'bài đọc'}
               </div>
-              <div className="text-[11px] text-neutral-400">
-                Thực hiện hành động khóa hoặc mở gói PRO cho toàn bộ mục đã chọn
+              <div className="text-[11px] font-semibold text-[#86756C]">
+                Khóa hoặc mở gói PRO cho toàn bộ mục đã chọn
               </div>
             </div>
           </div>
@@ -399,9 +397,9 @@ export function AdminContentGatingTab() {
             <button
               onClick={() => handleBatchSetPro(true)}
               disabled={isBatchUpdating}
-              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-neutral-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">lock</span>
+              <span>🔒</span>
               <span>Khóa PRO hàng loạt ({selectedCount})</span>
             </button>
 
@@ -409,9 +407,9 @@ export function AdminContentGatingTab() {
             <button
               onClick={() => handleBatchSetPro(false)}
               disabled={isBatchUpdating}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+              className="px-4 py-2 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[16px]">lock_open</span>
+              <span>🌐</span>
               <span>Mở Miễn Phí ({selectedCount})</span>
             </button>
 
@@ -419,7 +417,7 @@ export function AdminContentGatingTab() {
             <button
               onClick={handleClearSelection}
               disabled={isBatchUpdating}
-              className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all"
+              className="px-3 py-2 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] text-xs font-black transition-all cursor-pointer"
             >
               Hủy chọn
             </button>
@@ -430,18 +428,18 @@ export function AdminContentGatingTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* CONTENT LIST TABLE WITH CHECKBOXES                            */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="bg-surface rounded-2xl border border-outline-variant/20 overflow-hidden shadow-2xs">
+      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
         {loading ? (
-          <div className="py-16 text-center text-on-surface-variant flex flex-col items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[28px] animate-spin">
+          <div className="py-16 text-center text-[#86756C] flex flex-col items-center gap-2">
+            <span className="material-symbols-outlined text-[#DE5D53] text-[28px] animate-spin">
               refresh
             </span>
-            <span className="text-xs">Đang tải danh sách học liệu...</span>
+            <span className="text-xs font-bold">Đang tải danh sách học liệu...</span>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-surface-container/40 border-b border-outline-variant/15 text-on-surface-variant font-bold uppercase tracking-wider text-[11px]">
+              <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
                 <tr>
                   {/* Master Checkbox */}
                   <th className="py-3 px-4 w-12 text-center">
@@ -450,7 +448,7 @@ export function AdminContentGatingTab() {
                       type="checkbox"
                       onChange={handleToggleSelectAll}
                       title="Chọn / Bỏ chọn tất cả trong danh sách hiện tại"
-                      className="w-4 h-4 rounded border-outline-variant/40 text-primary focus:ring-primary cursor-pointer"
+                      className="w-4 h-4 rounded text-[#557A46] focus:ring-[#557A46] cursor-pointer"
                     />
                   </th>
                   <th className="py-3 px-4">TÊN HỌC LIỆU</th>
@@ -459,10 +457,10 @@ export function AdminContentGatingTab() {
                   <th className="py-3 px-4 text-right">CHUYỂN ĐỔI (KHÓA PRO)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/10">
+              <tbody className="divide-y divide-[#DECDBB]">
                 {filteredItems.length === 0 ? (
                   <tr>
-                    <td colSpan="5" className="py-12 text-center text-on-surface-variant">
+                    <td colSpan="5" className="py-12 text-center text-[#86756C] font-bold">
                       Không tìm thấy nội dung nào phù hợp.
                     </td>
                   </tr>
@@ -471,15 +469,15 @@ export function AdminContentGatingTab() {
                     const isPro = Boolean(item.is_pro);
                     const isSelected = selectedIds.has(item.id);
                     const title = item.name || item.title || 'Không có tên';
-                    const icon = item.icon || (subTab === 'thpt' ? 'school' : 'menu_book');
+                    const icon = item.icon || (subTab === 'thpt' ? '🎓' : '📖');
 
                     return (
                       <tr
                         key={item.id}
                         className={`transition-colors ${
                           isSelected
-                            ? 'bg-primary/5 hover:bg-primary/10'
-                            : 'hover:bg-surface-container/30'
+                            ? 'bg-[#FEF3D6]/40 hover:bg-[#FEF3D6]/60'
+                            : 'hover:bg-[#FAF5EB]/50'
                         }`}
                       >
                         {/* Row Checkbox */}
@@ -488,7 +486,7 @@ export function AdminContentGatingTab() {
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleSelect(item.id)}
-                            className="w-4 h-4 rounded border-outline-variant/40 text-primary focus:ring-primary cursor-pointer"
+                            className="w-4 h-4 rounded text-[#557A46] focus:ring-[#557A46] cursor-pointer"
                           />
                         </td>
 
@@ -497,7 +495,7 @@ export function AdminContentGatingTab() {
                           <div className="flex items-center gap-2.5">
                             <span className="text-lg shrink-0">{icon}</span>
                             <span
-                              className="font-bold text-on-surface max-w-[340px] truncate cursor-pointer hover:text-primary transition-colors"
+                              className="font-black text-[#3D352E] max-w-[340px] truncate cursor-pointer hover:text-[#DE5D53] transition-colors"
                               title={title}
                               onClick={() => handleToggleSelect(item.id)}
                             >
@@ -507,7 +505,7 @@ export function AdminContentGatingTab() {
                         </td>
 
                         {/* Scale / Word count / Questions */}
-                        <td className="py-3.5 px-4 text-on-surface-variant font-mono">
+                        <td className="py-3.5 px-4 text-[#6E5D53] font-bold">
                           {subTab === 'topics' && `${item.word_count || 0} từ vựng`}
                           {subTab === 'thpt' &&
                             `${item.total_questions || 40} câu hỏi (${item.year || '2026'})`}
@@ -517,13 +515,13 @@ export function AdminContentGatingTab() {
                         {/* Current Status Badge */}
                         <td className="py-3.5 px-4">
                           {isPro ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                              <span className="material-symbols-outlined text-[13px]">lock</span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53]">
+                              <span>🔒</span>
                               <span>DÀNH CHO PRO</span>
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-                              <span className="material-symbols-outlined text-[13px]">public</span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
+                              <span>🌐</span>
                               <span>MIỄN PHÍ</span>
                             </span>
                           )}
@@ -539,7 +537,7 @@ export function AdminContentGatingTab() {
                               onChange={() => handleTogglePro(item)}
                               className="sr-only peer"
                             />
-                            <div className="relative w-11 h-6 bg-slate-200 peer-focus:outline-hidden rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                            <div className="relative w-11 h-6 bg-[#E8DEC8] peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-[#3D352E]/30 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#DE5D53] border-2 border-[#3D352E]"></div>
                           </label>
                         </td>
                       </tr>

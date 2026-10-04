@@ -1,5 +1,6 @@
 // src/components/admin/tabs/AdminThptTab.jsx
 // Management for THPT National Exams, Question Content & Answer Key Studio Editor
+// Cozy Crayon Handcrafted Design System
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
@@ -61,10 +62,8 @@ export function AdminThptTab() {
       if (error) throw error;
       if (!data) throw new Error('Không tìm thấy dữ liệu đề thi');
 
-      // Ensure questions is an array of 40 questions
       let questions = Array.isArray(data.questions) ? [...data.questions] : [];
       if (questions.length === 0) {
-        // Generate default 40 questions template if empty
         questions = Array.from({ length: 40 }, (_, idx) => ({
           number: idx + 1,
           part: Math.ceil((idx + 1) / 8),
@@ -205,7 +204,6 @@ export function AdminThptTab() {
       if (error) throw error;
       showToast(`Đã lưu thay đổi cho đề thi "${editingExam.title}"! 🎉`, 'success');
 
-      // Update in local exams list
       setExams((prev) =>
         prev.map((e) =>
           e.id === editingExam.id
@@ -277,12 +275,12 @@ export function AdminThptTab() {
   const currentQ = editingExam?.questions?.[activeQIndex] || null;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
       {/* Top Header & Search Bar */}
-      <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
-        <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
+      <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="flex flex-1 w-full sm:w-auto items-center gap-3">
           <div className="relative flex-1 max-w-sm">
-            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-on-surface-variant">
+            <span className="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-[#6E5D53]">
               search
             </span>
             <input
@@ -290,28 +288,28 @@ export function AdminThptTab() {
               placeholder="Tìm theo tên đề, năm thi, mã đề..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-surface-container/60 border border-outline-variant/20 text-xs text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
             />
           </div>
 
           {/* PRO filter pills */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs">
+          <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#FAF5EB] border-2 border-[#3D352E] text-xs">
             <button
               onClick={() => setProFilter('all')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all ${
+              className={`px-3 py-1.5 rounded-full font-black font-quicksand transition-all cursor-pointer ${
                 proFilter === 'all'
-                  ? 'bg-surface text-primary shadow-2xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-[#3D352E] text-white shadow-[1.5px_2px_0px_#3D352E]'
+                  : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
               Tất cả ({exams.length})
             </button>
             <button
               onClick={() => setProFilter('pro')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-full font-black font-quicksand transition-all flex items-center gap-1 cursor-pointer ${
                 proFilter === 'pro'
-                  ? 'bg-surface text-amber-600 shadow-2xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-[#DE5D53] text-white shadow-[1.5px_2px_0px_#3D352E]'
+                  : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
               <span className="material-symbols-outlined text-[14px]">lock</span>
@@ -319,10 +317,10 @@ export function AdminThptTab() {
             </button>
             <button
               onClick={() => setProFilter('free')}
-              className={`px-2.5 py-1 rounded-lg font-bold transition-all flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-full font-black font-quicksand transition-all flex items-center gap-1 cursor-pointer ${
                 proFilter === 'free'
-                  ? 'bg-surface text-emerald-600 shadow-2xs'
-                  : 'text-on-surface-variant hover:text-on-surface'
+                  ? 'bg-[#557A46] text-white shadow-[1.5px_2px_0px_#3D352E]'
+                  : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
               <span className="material-symbols-outlined text-[14px]">public</span>
@@ -333,87 +331,99 @@ export function AdminThptTab() {
 
         <button
           onClick={() => setIsCreateOpen(true)}
-          className="w-full sm:w-auto px-4 py-2 rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center gap-1.5 hover:opacity-90 active:scale-95 transition-all shadow-xs"
+          className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center justify-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
-          <span>Thêm Đề Thi Mới</span>
+          <span>Thêm Đề Thi Mới 📝</span>
         </button>
       </div>
 
-      {/* Create Exam Inline Modal */}
+      {/* Create Exam Inline Form */}
       {isCreateOpen && (
-        <div className="p-5 rounded-2xl bg-surface border border-primary/30 shadow-md space-y-4 animate-fade-in">
-          <div className="flex items-center justify-between pb-2 border-b border-outline-variant/15">
-            <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[18px]">school</span>
+        <div className="p-6 rounded-3xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-4 animate-fade-in">
+          <div className="flex items-center justify-between pb-3 border-b-2 border-[#3D352E]">
+            <h3 className="text-base font-black font-quicksand text-[#3D352E] flex items-center gap-2">
+              <span>🎓</span>
               <span>Tạo Đề Thi THPT Quốc Gia Mới</span>
             </h3>
             <button
               onClick={() => setIsCreateOpen(false)}
-              className="text-on-surface-variant hover:text-on-surface"
+              className="w-8 h-8 rounded-full border-2 border-[#3D352E] bg-white hover:bg-[#F2ECE0] flex items-center justify-center text-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <span className="material-symbols-outlined text-[16px]">close</span>
             </button>
           </div>
 
-          <form onSubmit={handleCreateExam} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <div className="sm:col-span-2">
-              <label className="block text-xs font-bold text-on-surface mb-1">Tên đề thi</label>
-              <input
-                type="text"
-                placeholder="VD: THPT Chuyên Hà Nội - Amsterdam (Lần 1)"
-                value={newExamTitle}
-                onChange={(e) => setNewExamTitle(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs text-on-surface focus:outline-hidden focus:ring-1 focus:ring-primary"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1">Năm thi</label>
-              <input
-                type="number"
-                value={newExamYear}
-                onChange={(e) => setNewExamYear(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs font-mono text-on-surface"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-on-surface mb-1">Thời gian (phút)</label>
-              <input
-                type="number"
-                value={newExamDuration}
-                onChange={(e) => setNewExamDuration(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl bg-surface-container/50 border border-outline-variant/20 text-xs font-mono text-on-surface"
-              />
-            </div>
-
-            <div className="sm:col-span-4 flex items-center justify-between pt-2">
-              <label className="flex items-center gap-2 text-xs font-semibold text-on-surface cursor-pointer">
+          <form onSubmit={handleCreateExam} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+                  Tên đề thi *
+                </label>
                 <input
-                  type="checkbox"
-                  checked={newExamPro}
-                  onChange={(e) => setNewExamPro(e.target.checked)}
-                  className="rounded text-amber-500 focus:ring-amber-500"
+                  type="text"
+                  required
+                  placeholder="VD: Đề thi thử THPT Quốc Gia 2026 - Chuyên Sư Phạm (Lần 1)"
+                  value={newExamTitle}
+                  onChange={(e) => setNewExamTitle(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
                 />
-                <span>Khóa PRO (Chỉ dành cho tài khoản PRO)</span>
-              </label>
+              </div>
 
-              <div className="flex items-center gap-2">
+              <div>
+                <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+                  Năm thi
+                </label>
+                <input
+                  type="number"
+                  value={newExamYear}
+                  onChange={(e) => setNewExamYear(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-mono font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
+              <div className="flex items-center gap-6">
+                <div>
+                  <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+                    Thời gian làm bài (phút)
+                  </label>
+                  <input
+                    type="number"
+                    value={newExamDuration}
+                    onChange={(e) => setNewExamDuration(e.target.value)}
+                    className="w-32 px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-mono font-bold text-[#3D352E]"
+                  />
+                </div>
+
+                <div className="pt-5">
+                  <label className="inline-flex items-center gap-2 text-xs font-black text-[#3D352E] cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={newExamPro}
+                      onChange={(e) => setNewExamPro(e.target.checked)}
+                      className="w-4 h-4 rounded border-2 border-[#3D352E] accent-[#DE5D53] cursor-pointer"
+                    />
+                    <span>Khóa gói PRO (Chỉ hội viên) 🔒</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-5">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-3 py-1.5 rounded-xl border border-outline-variant/20 text-xs font-semibold text-on-surface hover:bg-surface-container"
+                  className="px-5 py-2.5 rounded-2xl bg-white hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-4 py-1.5 rounded-xl bg-primary text-white text-xs font-bold hover:opacity-90 disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] text-xs font-black active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Đang tạo...' : 'Tạo Đề Thi'}
+                  {isSubmitting ? 'Đang tạo...' : 'Tạo Đề Thi 🚀'}
                 </button>
               </div>
             </div>
@@ -423,24 +433,26 @@ export function AdminThptTab() {
 
       {/* Exams Grid */}
       {loading && exams.length === 0 ? (
-        <div className="py-16 text-center text-on-surface-variant flex flex-col items-center gap-2">
-          <span className="material-symbols-outlined text-primary text-[28px] animate-spin">refresh</span>
-          <span className="text-xs">Đang tải danh sách đề thi THPT...</span>
+        <div className="py-16 text-center text-[#6E5D53] flex flex-col items-center gap-2 bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
+          <span className="material-symbols-outlined text-[#557A46] text-[32px] animate-spin">
+            refresh
+          </span>
+          <span className="text-xs font-bold">Đang tải danh sách đề thi THPT...</span>
         </div>
       ) : filteredExams.length === 0 ? (
-        <div className="p-12 text-center text-on-surface-variant bg-surface rounded-2xl border border-outline-variant/20">
+        <div className="p-12 text-center text-[#6E5D53] bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] font-bold">
           Không tìm thấy đề thi nào phù hợp.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredExams.map((exam) => (
             <div
               key={exam.id}
-              className="p-4 rounded-2xl bg-surface border border-outline-variant/20 hover:border-primary/40 hover:shadow-xs transition-all flex flex-col justify-between"
+              className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] hover:translate-y-[-2px] transition-all flex flex-col justify-between"
             >
               <div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E]">
                     Năm {exam.year || '2026'}
                   </span>
                   <button
@@ -449,12 +461,12 @@ export function AdminThptTab() {
                     title="Bấm để bật/tắt quyền PRO"
                   >
                     {exam.is_pro ? (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-800">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FFF0E6] text-[#DE5D53] border-2 border-[#DE5D53]">
                         <span className="material-symbols-outlined text-[12px]">lock</span>
                         <span>PRO</span>
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-800">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border-2 border-[#557A46]">
                         <span className="material-symbols-outlined text-[12px]">public</span>
                         <span>Free</span>
                       </span>
@@ -462,11 +474,11 @@ export function AdminThptTab() {
                   </button>
                 </div>
 
-                <h4 className="font-bold text-sm text-on-surface line-clamp-2 mb-1.5" title={exam.title}>
+                <h4 className="font-black text-sm text-[#3D352E] font-quicksand line-clamp-2 mb-2" title={exam.title}>
                   {exam.title}
                 </h4>
 
-                <p className="text-xs text-on-surface-variant flex items-center gap-2 font-mono">
+                <p className="text-xs text-[#6E5D53] font-bold flex items-center gap-2 font-mono">
                   <span>{exam.total_questions || 40} câu hỏi</span>
                   <span>•</span>
                   <span>{exam.duration_minutes || 50} phút</span>
@@ -474,29 +486,29 @@ export function AdminThptTab() {
               </div>
 
               {/* Action Buttons: Sửa đề bài & Sửa đáp án */}
-              <div className="pt-3 mt-3 border-t border-outline-variant/15 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5">
+              <div className="pt-4 mt-4 border-t-2 border-[#FAF5EB] flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
                   <button
                     onClick={() => handleOpenEdit(exam.id, 'prompt')}
-                    className="px-2.5 py-1.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 text-xs font-bold flex items-center gap-1 transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] flex items-center gap-1 active:translate-y-0.5 transition-all cursor-pointer"
                     title="Chỉnh sửa nội dung đề bài và bài đọc"
                   >
                     <span className="material-symbols-outlined text-[15px]">edit_note</span>
-                    <span>Sửa đề bài</span>
+                    <span>Sửa đề</span>
                   </button>
                   <button
                     onClick={() => handleOpenEdit(exam.id, 'answer')}
-                    className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold flex items-center gap-1 transition-colors"
+                    className="px-3 py-1.5 rounded-xl bg-[#EAF3E7] hover:bg-[#DDF0D8] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#557A46] flex items-center gap-1 active:translate-y-0.5 transition-all cursor-pointer"
                     title="Chỉnh sửa 4 lựa chọn, đáp án đúng và lời giải chi tiết"
                   >
                     <span className="material-symbols-outlined text-[15px]">task_alt</span>
-                    <span>Sửa đáp án</span>
+                    <span>Đáp án</span>
                   </button>
                 </div>
 
                 <button
                   onClick={() => handleDeleteExam(exam.id, exam.title)}
-                  className="p-1.5 rounded-lg text-on-surface-variant hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                  className="p-1.5 rounded-xl text-[#DE5D53] hover:bg-[#FFF0E6] border border-transparent hover:border-[#DE5D53] transition-colors cursor-pointer"
                   title="Xóa đề thi"
                 >
                   <span className="material-symbols-outlined text-[17px]">delete</span>
@@ -511,20 +523,20 @@ export function AdminThptTab() {
       {/* EXAM STUDIO MODAL (CHỈNH SỬA ĐỀ BÀI & ĐÁP ÁN) */}
       {/* ───────────────────────────────────────────────────────────── */}
       {editingExam && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in">
-          <div className="bg-surface border border-outline-variant/30 rounded-3xl w-full max-w-5xl shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+        <div className="fixed inset-0 z-50 bg-[#3D352E]/60 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-fade-in font-nunito text-[#3D352E]">
+          <div className="bg-[#FAF5EB] border-2 border-[#3D352E] rounded-3xl w-full max-w-5xl shadow-[6px_7px_0px_#3D352E] flex flex-col max-h-[92vh] overflow-hidden">
             {/* Modal Header */}
-            <div className="p-4 sm:p-5 border-b border-outline-variant/15 flex items-center justify-between gap-3 bg-surface-container/30">
+            <div className="p-4 sm:p-5 border-b-2 border-[#3D352E] flex items-center justify-between gap-3 bg-white">
               <div className="min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded-md text-[11px] font-bold bg-primary/10 text-primary">
-                    THPT Studio Editor
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#EAF3E7] text-[#557A46] border border-[#557A46]">
+                    THPT Studio Editor 🛠️
                   </span>
-                  <span className="text-xs text-on-surface-variant font-mono">
+                  <span className="text-xs text-[#6E5D53] font-mono font-bold">
                     ID: {editingExam.id}
                   </span>
                 </div>
-                <h3 className="font-bold text-base sm:text-lg text-on-surface truncate">
+                <h3 className="font-black text-base sm:text-lg font-quicksand text-[#3D352E] truncate">
                   {editingExam.title}
                 </h3>
               </div>
@@ -533,30 +545,30 @@ export function AdminThptTab() {
                 <button
                   onClick={handleSaveExamEdits}
                   disabled={isSavingExam}
-                  className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-bold flex items-center gap-1.5 hover:opacity-90 active:scale-95 shadow-xs disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[16px]">save</span>
-                  <span>{isSavingExam ? 'Đang lưu...' : 'Lưu Thay Đổi'}</span>
+                  <span>{isSavingExam ? 'Đang lưu...' : 'Lưu Thay Đổi ✨'}</span>
                 </button>
                 <button
                   onClick={() => setEditingExam(null)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container text-sm"
+                  className="w-8 h-8 rounded-full border-2 border-[#3D352E] bg-white hover:bg-[#F2ECE0] flex items-center justify-center text-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-[20px]">close</span>
+                  <span className="material-symbols-outlined text-[18px]">close</span>
                 </button>
               </div>
             </div>
 
             {/* Modal Subtabs & Question Navigator */}
-            <div className="px-4 sm:px-5 pt-3 border-b border-outline-variant/15 bg-surface-container/10 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="px-4 sm:px-5 py-3 border-b-2 border-[#3D352E] bg-[#FAF5EB] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* 2 Main Functions: Sửa đề bài / Sửa đáp án */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setEditActiveTab('prompt')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  className={`px-4 py-2 rounded-2xl text-xs font-black font-quicksand flex items-center gap-1.5 transition-all cursor-pointer ${
                     editActiveTab === 'prompt'
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'bg-surface border border-outline-variant/20 text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                      : 'bg-white border-2 border-[#3D352E] text-[#6E5D53] hover:text-[#3D352E]'
                   }`}
                 >
                   <span className="material-symbols-outlined text-[16px]">edit_note</span>
@@ -564,10 +576,10 @@ export function AdminThptTab() {
                 </button>
                 <button
                   onClick={() => setEditActiveTab('answer')}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  className={`px-4 py-2 rounded-2xl text-xs font-black font-quicksand flex items-center gap-1.5 transition-all cursor-pointer ${
                     editActiveTab === 'answer'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'bg-surface border border-outline-variant/20 text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                      : 'bg-white border-2 border-[#3D352E] text-[#6E5D53] hover:text-[#3D352E]'
                   }`}
                 >
                   <span className="material-symbols-outlined text-[16px]">task_alt</span>
@@ -576,15 +588,15 @@ export function AdminThptTab() {
               </div>
 
               {/* Prev / Next Question controls */}
-              <div className="flex items-center gap-1.5 text-xs font-bold">
+              <div className="flex items-center gap-2 text-xs font-black">
                 <button
                   onClick={() => setActiveQIndex((prev) => Math.max(0, prev - 1))}
                   disabled={activeQIndex === 0}
-                  className="px-2.5 py-1 rounded-lg border border-outline-variant/20 disabled:opacity-30 hover:bg-surface-container"
+                  className="px-3 py-1.5 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] disabled:opacity-30 hover:bg-[#FAF5EB] cursor-pointer"
                 >
                   ◀ Câu trước
                 </button>
-                <span className="px-2 font-mono text-primary font-bold">
+                <span className="px-3 py-1 rounded-full bg-white border-2 border-[#3D352E] font-mono text-[#557A46] font-black">
                   Câu {activeQIndex + 1} / {editingExam.questions.length}
                 </span>
                 <button
@@ -594,7 +606,7 @@ export function AdminThptTab() {
                     )
                   }
                   disabled={activeQIndex === editingExam.questions.length - 1}
-                  className="px-2.5 py-1 rounded-lg border border-outline-variant/20 disabled:opacity-30 hover:bg-surface-container"
+                  className="px-3 py-1.5 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] disabled:opacity-30 hover:bg-[#FAF5EB] cursor-pointer"
                 >
                   Câu sau ▶
                 </button>
@@ -602,7 +614,7 @@ export function AdminThptTab() {
             </div>
 
             {/* Question Quick Jump Pills (1 -> 40) */}
-            <div className="px-4 py-2 bg-surface-container/20 border-b border-outline-variant/15 flex items-center gap-1 overflow-x-auto scrollbar-hide">
+            <div className="px-4 py-2.5 bg-white border-b-2 border-[#3D352E] flex items-center gap-1.5 overflow-x-auto">
               {editingExam.questions.map((q, idx) => {
                 const isActive = idx === activeQIndex;
                 const correct = q.correct_answer || '?';
@@ -610,10 +622,10 @@ export function AdminThptTab() {
                   <button
                     key={idx}
                     onClick={() => setActiveQIndex(idx)}
-                    className={`shrink-0 w-8 h-8 rounded-lg text-xs font-bold flex flex-col items-center justify-center transition-all ${
+                    className={`shrink-0 w-8 h-8 rounded-xl text-xs font-black flex flex-col items-center justify-center transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-primary text-white shadow-xs scale-105 ring-2 ring-primary/40'
-                        : 'bg-surface border border-outline-variant/20 text-on-surface hover:bg-surface-container'
+                        ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] scale-105'
+                        : 'bg-[#FAF5EB] border border-[#3D352E]/30 text-[#3D352E] hover:border-[#3D352E]'
                     }`}
                   >
                     <span className="text-[10px] leading-none">{idx + 1}</span>
@@ -626,15 +638,15 @@ export function AdminThptTab() {
             </div>
 
             {/* Modal Body: Active Tab Content */}
-            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5">
+            <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5 bg-[#FAF5EB]">
               {currentQ ? (
                 editActiveTab === 'prompt' ? (
                   /* ─── TAB 1: CHỈNH SỬA ĐỀ BÀI & BÀI ĐỌC ─── */
                   <div className="space-y-4 animate-fade-in">
                     {/* Exam metadata quick inputs */}
-                    <div className="p-3.5 rounded-2xl bg-surface-container/30 border border-outline-variant/15 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="p-4 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <label className="block text-[11px] font-bold text-on-surface mb-1">
+                        <label className="block text-[11px] font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                           Tiêu đề đề thi
                         </label>
                         <input
@@ -643,11 +655,11 @@ export function AdminThptTab() {
                           onChange={(e) =>
                             setEditingExam({ ...editingExam, title: e.target.value })
                           }
-                          className="w-full px-3 py-1.5 rounded-xl bg-surface border border-outline-variant/20 text-xs font-semibold text-on-surface"
+                          className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E]"
                         />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-bold text-on-surface mb-1">
+                        <label className="block text-[11px] font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                           Thời gian làm bài (phút)
                         </label>
                         <input
@@ -659,11 +671,11 @@ export function AdminThptTab() {
                               duration_minutes: parseInt(e.target.value, 10) || 50,
                             })
                           }
-                          className="w-full px-3 py-1.5 rounded-xl bg-surface border border-outline-variant/20 text-xs font-mono text-on-surface"
+                          className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-mono font-bold text-[#3D352E]"
                         />
                       </div>
-                      <div className="flex items-center pt-4">
-                        <label className="flex items-center gap-2 text-xs font-bold text-on-surface cursor-pointer">
+                      <div className="flex items-center pt-5">
+                        <label className="flex items-center gap-2 text-xs font-black text-[#3D352E] cursor-pointer">
                           <input
                             type="checkbox"
                             checked={Boolean(editingExam.is_pro)}
@@ -673,17 +685,17 @@ export function AdminThptTab() {
                                 is_pro: e.target.checked,
                               })
                             }
-                            className="rounded text-amber-500 focus:ring-amber-500"
+                            className="w-4 h-4 rounded border-2 border-[#3D352E] accent-[#DE5D53]"
                           />
-                          <span>Khóa gói PRO 🔒</span>
+                          <span>Khóa gói PRO (Hội viên) 🔒</span>
                         </label>
                       </div>
                     </div>
 
                     {/* Question Prompt Editor */}
-                    <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 space-y-3">
-                      <div className="flex items-center justify-between pb-2 border-b border-outline-variant/10">
-                        <span className="text-xs font-bold text-primary flex items-center gap-1.5">
+                    <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] space-y-3">
+                      <div className="flex items-center justify-between pb-3 border-b-2 border-[#FAF5EB]">
+                        <span className="text-xs font-black font-quicksand text-[#557A46] flex items-center gap-1.5">
                           <span className="material-symbols-outlined text-[16px]">help_outline</span>
                           <span>Đề bài / Câu hỏi {activeQIndex + 1}</span>
                         </span>
@@ -692,12 +704,12 @@ export function AdminThptTab() {
                           placeholder="Tên nhóm / Phần thi..."
                           value={currentQ.group || ''}
                           onChange={(e) => updateCurrentQuestion('group', e.target.value)}
-                          className="px-2.5 py-1 rounded-lg bg-surface-container/50 border border-outline-variant/20 text-[11px] text-on-surface font-semibold max-w-xs"
+                          className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] border-2 border-[#3D352E] text-[11px] text-[#3D352E] font-bold max-w-xs"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-on-surface mb-1">
+                        <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
                           Lời dẫn câu hỏi (Prompt)
                         </label>
                         <textarea
@@ -705,18 +717,18 @@ export function AdminThptTab() {
                           value={currentQ.prompt || ''}
                           onChange={(e) => updateCurrentQuestion('prompt', e.target.value)}
                           placeholder="VD: Chọn đáp án đúng nhất điền vào chỗ trống (1):"
-                          className="w-full px-3 py-2 rounded-xl bg-surface-container/40 border border-outline-variant/20 text-xs text-on-surface font-medium focus:ring-1 focus:ring-primary leading-relaxed"
+                          className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs text-[#3D352E] font-bold focus:ring-2 focus:ring-[#557A46] leading-relaxed"
                         />
                       </div>
 
                       {/* Passage / Reading context if any */}
-                      <div className="pt-2 border-t border-outline-variant/10 space-y-2">
+                      <div className="pt-3 border-t-2 border-[#FAF5EB] space-y-2">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-                            <span className="material-symbols-outlined text-[16px] text-on-surface-variant">article</span>
+                          <label className="text-xs font-black font-quicksand uppercase text-[#6E5D53] flex items-center gap-1.5">
+                            <span className="material-symbols-outlined text-[16px] text-[#557A46]">article</span>
                             <span>Đoạn văn / Bài đọc liên kết (Passage)</span>
                           </label>
-                          <span className="text-[11px] text-on-surface-variant font-mono">
+                          <span className="text-[11px] text-[#6E5D53] font-mono font-bold">
                             {currentQ.passage ? `${currentQ.passage.length} ký tự` : 'Không có bài đọc'}
                           </span>
                         </div>
@@ -726,7 +738,7 @@ export function AdminThptTab() {
                           placeholder="Tiêu đề bài đọc (nếu có, VD: Say No To Body Shaming)"
                           value={currentQ.passage_title || ''}
                           onChange={(e) => updateCurrentQuestion('passage_title', e.target.value)}
-                          className="w-full px-3 py-1.5 rounded-xl bg-surface-container/40 border border-outline-variant/20 text-xs text-on-surface"
+                          className="w-full px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E]"
                         />
 
                         <textarea
@@ -734,7 +746,7 @@ export function AdminThptTab() {
                           value={currentQ.passage || ''}
                           onChange={(e) => updateCurrentQuestion('passage', e.target.value)}
                           placeholder="Dán toàn bộ nội dung đoạn văn bài đọc tại đây..."
-                          className="w-full px-3 py-2 rounded-xl bg-surface-container/40 border border-outline-variant/20 text-xs text-on-surface font-mono leading-relaxed"
+                          className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs text-[#3D352E] font-mono leading-relaxed"
                         />
                       </div>
                     </div>
@@ -742,15 +754,15 @@ export function AdminThptTab() {
                 ) : (
                   /* ─── TAB 2: CHỈNH SỬA ĐÁP ÁN & LỜI GIẢI ─── */
                   <div className="space-y-4 animate-fade-in">
-                    <div className="p-4 rounded-2xl bg-surface border border-outline-variant/20 space-y-4">
+                    <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] space-y-4">
                       {/* Header with Correct Answer Key Picker */}
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-outline-variant/15">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b-2 border-[#FAF5EB]">
                         <div>
-                          <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                          <span className="text-xs font-black font-quicksand text-[#557A46] flex items-center gap-1.5">
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>
                             <span>Thiết lập Đáp án chuẩn cho Câu {activeQIndex + 1}</span>
                           </span>
-                          <p className="text-[11px] text-on-surface-variant mt-0.5">
+                          <p className="text-[11px] text-[#6E5D53] font-bold mt-0.5">
                             Bấm vào phương án đúng A, B, C hoặc D bên dưới
                           </p>
                         </div>
@@ -764,10 +776,10 @@ export function AdminThptTab() {
                                 key={letter}
                                 type="button"
                                 onClick={() => updateCurrentQuestion('correct_answer', letter)}
-                                className={`w-10 h-10 rounded-xl text-sm font-black flex items-center justify-center transition-all ${
+                                className={`w-10 h-10 rounded-2xl text-sm font-black flex items-center justify-center transition-all cursor-pointer ${
                                   isCorrect
-                                    ? 'bg-emerald-600 text-white shadow-md scale-110 ring-2 ring-emerald-400'
-                                    : 'bg-surface-container/60 border border-outline-variant/20 text-on-surface hover:bg-surface-container'
+                                    ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] scale-110'
+                                    : 'bg-white border-2 border-[#3D352E] text-[#3D352E] hover:bg-[#FAF5EB]'
                                 }`}
                               >
                                 {letter}
@@ -784,24 +796,24 @@ export function AdminThptTab() {
                           return (
                             <div
                               key={letter}
-                              className={`p-3 rounded-xl border transition-all ${
+                              className={`p-3.5 rounded-2xl border-2 transition-all ${
                                 isCorrect
-                                  ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-400'
-                                  : 'bg-surface-container/30 border-outline-variant/15'
+                                  ? 'bg-[#EAF3E7] border-[#557A46] shadow-[2px_2px_0px_#557A46]'
+                                  : 'bg-[#FFFDF9] border-[#3D352E]/30'
                               }`}
                             >
-                              <div className="flex items-center justify-between mb-1.5">
+                              <div className="flex items-center justify-between mb-2">
                                 <span
-                                  className={`w-5 h-5 rounded-md text-xs font-black flex items-center justify-center ${
+                                  className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center border ${
                                     isCorrect
-                                      ? 'bg-emerald-600 text-white'
-                                      : 'bg-surface-container text-on-surface'
+                                      ? 'bg-[#557A46] text-white border-[#3D352E]'
+                                      : 'bg-white text-[#3D352E] border-[#3D352E]'
                                   }`}
                                 >
                                   {letter}
                                 </span>
                                 {isCorrect && (
-                                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
+                                  <span className="text-[10px] font-black text-[#557A46] flex items-center gap-0.5">
                                     <span className="material-symbols-outlined text-[13px]">check</span>
                                     <span>Đáp án chuẩn</span>
                                   </span>
@@ -812,7 +824,7 @@ export function AdminThptTab() {
                                 value={currentQ.options?.[letter] || ''}
                                 onChange={(e) => updateCurrentOption(letter, e.target.value)}
                                 placeholder={`Nội dung lựa chọn ${letter}...`}
-                                className="w-full px-2.5 py-1.5 rounded-lg bg-surface border border-outline-variant/20 text-xs font-semibold text-on-surface focus:ring-1 focus:ring-primary"
+                                className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] focus:ring-1 focus:ring-[#557A46]"
                               />
                             </div>
                           );
@@ -820,51 +832,48 @@ export function AdminThptTab() {
                       </div>
 
                       {/* Detailed Explanation Textarea */}
-                      <div className="pt-2 border-t border-outline-variant/10 space-y-1.5">
-                        <label className="block text-xs font-bold text-on-surface flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-[16px] text-amber-500">lightbulb</span>
+                      <div className="pt-3 border-t-2 border-[#FAF5EB] space-y-2">
+                        <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] flex items-center gap-1.5">
+                          <span className="material-symbols-outlined text-[16px] text-[#F4B41A]">lightbulb</span>
                           <span>Lời giải chi tiết & Tạm dịch (Explanation)</span>
                         </label>
-                        <p className="text-[11px] text-on-surface-variant">
-                          Hiển thị cho học sinh khi kết thúc bài thi hoặc xem lại lời giải.
-                        </p>
                         <textarea
                           rows={5}
                           value={currentQ.explanation || ''}
                           onChange={(e) => updateCurrentQuestion('explanation', e.target.value)}
                           placeholder="Nhập giải thích ngữ pháp, từ vựng và tạm dịch câu..."
-                          className="w-full px-3 py-2 rounded-xl bg-surface-container/40 border border-outline-variant/20 text-xs text-on-surface font-sans leading-relaxed focus:ring-1 focus:ring-primary"
+                          className="w-full px-3.5 py-2.5 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs text-[#3D352E] font-medium leading-relaxed focus:ring-2 focus:ring-[#557A46]"
                         />
                       </div>
                     </div>
                   </div>
                 )
               ) : (
-                <div className="p-8 text-center text-xs text-on-surface-variant">
+                <div className="p-8 text-center text-xs text-[#6E5D53] font-bold">
                   Không tìm thấy câu hỏi này.
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 border-t border-outline-variant/15 flex items-center justify-between bg-surface-container/20">
-              <span className="text-xs text-on-surface-variant">
-                Lưu ý: Mọi thay đổi sẽ được cập nhật trực tiếp vào hệ thống phòng thi.
+            <div className="p-4 border-t-2 border-[#3D352E] flex items-center justify-between bg-white">
+              <span className="text-xs text-[#6E5D53] font-bold">
+                Mọi thay đổi sẽ được lưu đồng bộ trực tiếp vào hệ thống phòng thi THPT.
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => setEditingExam(null)}
-                  className="px-4 py-2 rounded-xl border border-outline-variant/20 text-xs font-bold text-on-surface hover:bg-surface-container"
+                  className="px-5 py-2.5 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#3D352E] cursor-pointer"
                 >
                   Đóng
                 </button>
                 <button
                   onClick={handleSaveExamEdits}
                   disabled={isSavingExam}
-                  className="px-5 py-2 rounded-xl bg-primary text-white text-xs font-bold flex items-center gap-1.5 hover:opacity-90 shadow-xs disabled:opacity-50"
+                  className="px-6 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-[16px]">save</span>
-                  <span>{isSavingExam ? 'Đang lưu...' : 'Lưu Tất Cả Thay Đổi'}</span>
+                  <span>{isSavingExam ? 'Đang lưu...' : 'Lưu Tất Cả Thay Đổi ✨'}</span>
                 </button>
               </div>
             </div>
