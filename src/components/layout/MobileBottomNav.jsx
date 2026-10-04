@@ -1,39 +1,36 @@
 // src/components/layout/MobileBottomNav.jsx
-// Pixel-perfect match to Stitch design with 6th Profile tab on the right
+// 100% Pixel-Perfect match to fix taskbar 2 design (Deep Olive Frosted Pill capsule)
 import React from 'react';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function MobileBottomNav() {
+  const { user } = useAuth ? useAuth() : { user: null };
   const { currentRoute, navigateTo } = useRoute();
 
-  // topic-detail / lesson-detail → highlight 'topics'; settings → highlight 'profile'
+  // topic-detail / lesson-detail → highlight 'topics'; settings / profile → highlight 'profile'
   const activeTab =
     currentRoute === 'topic-detail' || currentRoute === 'lesson-detail'
       ? 'topics'
-      : currentRoute === 'thpt-room'
-      ? 'exercises'
-      : currentRoute === 'settings'
+      : currentRoute === 'settings' || currentRoute === 'profile'
       ? 'profile'
       : currentRoute;
 
-  const tabs = [
+  const avatarUrl =
+    user?.user_metadata?.avatar_url ||
+    user?.user_metadata?.picture ||
+    '/mascot/mascot_cozy.png';
+
+  const regularTabs = [
     {
       id: 'dashboard',
       label: 'Trang chủ',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      icon: 'home',
     },
     {
       id: 'topics',
       label: 'Chủ đề',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-          <path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      icon: 'category',
       onTouchPrefetch: () => {
         import('../../services/db.js')
           .then(({ getTopics }) => getTopics().catch(() => {}))
@@ -41,71 +38,103 @@ export function MobileBottomNav() {
       },
     },
     {
-      id: 'library',
-      label: 'Thư viện',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-          <path d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-.778.099-1.533.284-2.253" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
-    },
-    {
       id: 'vocabulary',
       label: 'Sổ từ',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-          <path d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      icon: 'menu_book',
     },
     {
       id: 'dictionary',
       label: 'Tra từ',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
-    },
-    {
-      id: 'profile',
-      label: 'Hồ sơ',
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-          <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      ),
+      icon: 'search',
     },
   ];
 
+  const isProfileActive = activeTab === 'profile';
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center bg-[#FAF5EB]/95 backdrop-blur-md border-t-[3.5px] border-[#382E2B] lg:hidden">
-      <div className="w-full max-w-[430px] flex justify-around items-center py-2 px-1">
-        {tabs.map((tab) => {
-          const isActive = activeTab === tab.id;
+    <nav
+      aria-label="Mobile Navigation"
+      className="fixed bottom-5 left-4 right-4 max-w-[390px] mx-auto z-50 flex items-center justify-between px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)] lg:hidden select-none"
+    >
+      {regularTabs.map((tab) => {
+        const isActive = activeTab === tab.id;
+        if (isActive) {
           return (
             <a
               key={tab.id}
+              aria-label={tab.label}
               onClick={() => navigateTo(tab.id)}
               onTouchStart={tab.onTouchPrefetch}
-              className={`flex flex-col items-center group cursor-pointer px-1.5 py-0.5${isActive ? ' relative' : ' text-[#736359] hover:text-[#382E2B]'}`}
+              className="flex flex-col items-center justify-center py-1 px-3.5 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
             >
-              {isActive ? (
-                <div className="w-10 h-8 rounded-full border-2 border-[#577B4A] bg-[#EAF3E7] flex items-center justify-center text-[#3D5A32] shadow-sm">
-                  {tab.icon}
-                </div>
-              ) : (
-                <div className="w-10 h-8 flex items-center justify-center">
-                  {tab.icon}
-                </div>
-              )}
-              <span className={`text-[10px] sm:text-[11px] font-bold mt-0.5${isActive ? ' text-[#3D5A32]' : ''}`}>
+              <span
+                className="material-symbols-outlined text-[19px] leading-none mb-0.5"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                {tab.icon}
+              </span>
+              <span className="text-[10px] font-bold leading-none tracking-tight">
                 {tab.label}
               </span>
             </a>
           );
-        })}
-      </div>
+        }
+
+        return (
+          <a
+            key={tab.id}
+            aria-label={tab.label}
+            onClick={() => navigateTo(tab.id)}
+            onTouchStart={tab.onTouchPrefetch}
+            className="w-11 h-11 flex items-center justify-center text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-[23px]">
+              {tab.icon}
+            </span>
+          </a>
+        );
+      })}
+
+      {/* 5: Profile Mascot Bé Hổ Churbito */}
+      {isProfileActive ? (
+        <a
+          aria-label="Hồ sơ cá nhân"
+          onClick={() => navigateTo('profile')}
+          className="flex flex-col items-center justify-center py-1 px-3 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
+        >
+          <div className="w-5 h-5 rounded-full overflow-hidden border border-white shadow-xs flex items-center justify-center mb-0.5">
+            <img
+              alt="Avatar"
+              className="w-full h-full object-cover object-top scale-110"
+              src={avatarUrl}
+              onError={(e) => {
+                e.currentTarget.src = '/mascot/mascot_cozy.png';
+              }}
+            />
+          </div>
+          <span className="text-[10px] font-bold leading-none tracking-tight">
+            Hồ sơ
+          </span>
+        </a>
+      ) : (
+        <a
+          aria-label="Tài khoản Bé Hổ Churbito"
+          onClick={() => navigateTo('profile')}
+          className="relative w-11 h-11 flex items-center justify-center active:scale-90 transition-all duration-150 cursor-pointer"
+        >
+          <div className="w-8 h-8 rounded-full overflow-hidden bg-[#faf2ec] border-2 border-white/80 shadow-sm flex items-center justify-center">
+            <img
+              alt="Churbito Avatar"
+              className="w-full h-full object-cover object-top scale-110"
+              src={avatarUrl}
+              onError={(e) => {
+                e.currentTarget.src = '/mascot/mascot_cozy.png';
+              }}
+            />
+          </div>
+          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#5a7d4d] ring-2 ring-white"></span>
+        </a>
+      )}
     </nav>
   );
 }

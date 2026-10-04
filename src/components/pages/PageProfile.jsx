@@ -1,23 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-
-const THEMES = {
-  ocean:     { '--hi-p': '#2563EB', '--hi-p-cont': '#93C5FD', '--hi-on-p': '#FFFFFF', '--hi-s': '#0891B2', '--hi-t': '#0E7490' },
-  morning:   { '--hi-p': '#7C3AED', '--hi-p-cont': '#DDD6FE', '--hi-on-p': '#FFFFFF', '--hi-s': '#9333EA', '--hi-t': '#7E22CE' },
-  afternoon: { '--hi-p': '#BE185D', '--hi-p-cont': '#FBCFE8', '--hi-on-p': '#FFFFFF', '--hi-s': '#DB2777', '--hi-t': '#9D174D' },
-  night:     { '--hi-p': '#D97706', '--hi-p-cont': '#FDE68A', '--hi-on-p': '#1C1917', '--hi-s': '#B45309', '--hi-t': '#92400E' },
-  auto:      null,
-};
-
-function applyThemeVars(theme) {
-  const vars = THEMES[theme];
-  if (!vars) return;
-  const root = document.documentElement;
-  Object.entries(vars).forEach(([key, val]) => root.style.setProperty(key, val));
-}
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
@@ -37,10 +22,6 @@ export function PageProfile() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pwMsg, setPwMsg] = useState({ text: '', isError: false });
   const [isSubmittingPw, setIsSubmittingPw] = useState(false);
-
-  // Theme & Dark mode
-  const [currentTheme, setCurrentTheme] = useState('auto');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Load user data
@@ -56,39 +37,14 @@ export function PageProfile() {
     }
   }, [user]);
 
-  // Load theme preferences
+  // Load stats preferences
   useEffect(() => {
-    const saved = localStorage.getItem('colour-theme');
-    const dark = document.documentElement.classList.contains('dark');
-    if (saved) setCurrentTheme(saved);
-    setIsDarkMode(dark);
-
-    // Try reading local streak & vocab count if available
     try {
       const localStreak = localStorage.getItem('hivocab_streak');
       if (localStreak) setStreakCount(parseInt(localStreak, 10));
       const localVocab = localStorage.getItem('hivocab_total_words');
       if (localVocab) setVocabCount(parseInt(localVocab, 10));
     } catch (_) {}
-  }, []);
-
-  const handleToggleDarkMode = useCallback(() => {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('dark-mode', isDark ? '1' : '0');
-    setIsDarkMode(isDark);
-  }, []);
-
-  const handleApplyTheme = useCallback((theme) => {
-    setCurrentTheme(theme);
-    localStorage.setItem('colour-theme', theme);
-
-    if (theme === 'auto') {
-      const h = new Date().getHours();
-      const autoTheme = h < 4 ? 'ocean' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : 'night';
-      applyThemeVars(autoTheme);
-      return;
-    }
-    applyThemeVars(theme);
   }, []);
 
   // Update Name
@@ -175,7 +131,7 @@ export function PageProfile() {
 
   return (
     <div id="page-profile" className="page active min-h-screen bg-[#FBF8F1] text-[#302A24] selection:bg-[#C85A3F] selection:text-white">
-      <main className="lg:pl-72 min-h-screen pt-4 pb-24 lg:pb-12 px-4 sm:px-6 lg:px-10 flex flex-col">
+      <main className="lg:pl-72 min-h-screen pt-4 pb-28 lg:pb-12 px-4 sm:px-6 lg:px-10 flex flex-col">
         <div className="max-w-4xl mx-auto w-full flex-1 flex flex-col gap-6 fade-in">
           
           {/* Breadcrumbs & Header Bar */}
@@ -430,103 +386,7 @@ export function PageProfile() {
               </div>
             </section>
 
-            {/* Card 3: Theme Preferences */}
-            <section className="bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 md:col-span-2">
-              <div className="flex items-center justify-between pb-4 border-b-2 border-dashed border-[#E2D9CC] mb-4">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xl">🎨</span>
-                  <h3 className="font-bold text-base text-[#302A24] font-heading">
-                    Giao diện &amp; Bàn học tập
-                  </h3>
-                </div>
-
-                {/* Dark Mode Switch */}
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-bold text-[#302A24]">
-                    {isDarkMode ? '🌙 Chế độ tối' : '☀️ Chế độ sáng'}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleToggleDarkMode}
-                    className={`w-12 h-6 rounded-full border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center p-0.5 transition-colors ${
-                      isDarkMode ? 'bg-[#3D352E] justify-end' : 'bg-[#EFE7DA] justify-start'
-                    }`}
-                  >
-                    <div className="w-4 h-4 rounded-full bg-white border border-[#3D352E]" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <p className="text-xs font-semibold text-[#786F66]">
-                  Hệ màu tranh sáp ấm áp tự động điều chỉnh theo nhịp thời gian trong ngày:
-                </p>
-
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleApplyTheme('auto')}
-                    className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex flex-col items-center gap-1.5 transition-all active:translate-y-0.5 ${
-                      currentTheme === 'auto' ? 'bg-[#E3EDE2] text-[#4D6B53]' : 'bg-[#FAF7F0] text-[#302A24]'
-                    }`}
-                  >
-                    <span className="text-xl">⏰</span>
-                    <span className="text-xs font-black">Tự động</span>
-                    <span className="text-[10px] text-[#786F66]">Theo giờ máy</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleApplyTheme('morning')}
-                    className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex flex-col items-center gap-1.5 transition-all active:translate-y-0.5 ${
-                      currentTheme === 'morning' ? 'bg-[#E3EDE2] text-[#4D6B53]' : 'bg-[#FAF7F0] text-[#302A24]'
-                    }`}
-                  >
-                    <span className="text-xl">🌅</span>
-                    <span className="text-xs font-black">Ban mai</span>
-                    <span className="text-[10px] text-[#786F66]">Tím tử đằng</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleApplyTheme('afternoon')}
-                    className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex flex-col items-center gap-1.5 transition-all active:translate-y-0.5 ${
-                      currentTheme === 'afternoon' ? 'bg-[#E3EDE2] text-[#4D6B53]' : 'bg-[#FAF7F0] text-[#302A24]'
-                    }`}
-                  >
-                    <span className="text-xl">🌇</span>
-                    <span className="text-xs font-black">Hoàng hôn</span>
-                    <span className="text-[10px] text-[#786F66]">Hồng đất</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleApplyTheme('night')}
-                    className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex flex-col items-center gap-1.5 transition-all active:translate-y-0.5 ${
-                      currentTheme === 'night' ? 'bg-[#E3EDE2] text-[#4D6B53]' : 'bg-[#FAF7F0] text-[#302A24]'
-                    }`}
-                  >
-                    <span className="text-xl">🌌</span>
-                    <span className="text-xs font-black">Màn đêm</span>
-                    <span className="text-[10px] text-[#786F66]">Hổ phách</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleApplyTheme('ocean')}
-                    className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex flex-col items-center gap-1.5 transition-all active:translate-y-0.5 ${
-                      currentTheme === 'ocean' ? 'bg-[#E3EDE2] text-[#4D6B53]' : 'bg-[#FAF7F0] text-[#302A24]'
-                    }`}
-                  >
-                    <span className="text-xl">🌊</span>
-                    <span className="text-xs font-black">Đại dương</span>
-                    <span className="text-[10px] text-[#786F66]">Xanh biển</span>
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* Card 4: Danger Zone / Log out */}
+            {/* Card 3: Danger Zone / Log out */}
             <section className="bg-[#FFF9F7] border-2 border-[#C85A3F] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3.5 text-center sm:text-left">
                 <div className="w-12 h-12 rounded-2xl bg-[#FBECE7] border-2 border-[#C85A3F] text-[#C85A3F] flex items-center justify-center text-2xl font-bold shrink-0 shadow-xs">

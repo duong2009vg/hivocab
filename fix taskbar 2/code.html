@@ -1,0 +1,495 @@
+<!DOCTYPE html><html lang="vi" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>HiVocab - Chủ đề</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts: Comfortaa & Plus Jakarta Sans -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "tertiary-fixed-dim": "#a4cce5",
+            "surface-container-highest": "#e8e1db",
+            "on-surface-variant": "#43483f",
+            "outline": "#74796f",
+            "primary-fixed-dim": "#b1cfa1",
+            "on-error": "#ffffff",
+            "surface-container-low": "#faf2ec",
+            "on-surface": "#1e1b17",
+            "surface-tint": "#4b6540",
+            "primary-fixed": "#ccecbc",
+            "on-secondary-container": "#783d14",
+            "surface-dim": "#e0d9d3",
+            "secondary": "#8d4e24",
+            "primary": "#4b6540",
+            "on-secondary": "#ffffff",
+            "tertiary-container": "#78a0b8",
+            "error": "#ba1a1a",
+            "on-primary-fixed": "#092104",
+            "on-primary": "#ffffff",
+            "inverse-on-surface": "#f7efe9",
+            "outline-variant": "#c4c8bc",
+            "inverse-surface": "#33302c",
+            "surface-container-high": "#eee7e1",
+            "on-secondary-fixed": "#321200",
+            "surface-bright": "#fff8f3",
+            "inverse-primary": "#b1cfa1",
+            "surface": "#fff8f3",
+            "primary-container": "#86a378",
+            "surface-container-lowest": "#ffffff",
+            "on-background": "#1e1b17",
+            "on-primary-fixed-variant": "#344d2a",
+            "on-primary-container": "#203918",
+            "tertiary": "#3b6379",
+            "secondary-container": "#feab79",
+            "on-tertiary-fixed-variant": "#214b60",
+            "on-secondary-fixed-variant": "#70370f",
+            "secondary-fixed-dim": "#ffb68c",
+            "on-tertiary-container": "#05374b",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed": "#001e2c",
+            "surface-variant": "#e8e1db",
+            "on-tertiary": "#ffffff",
+            "secondary-fixed": "#ffdbc9",
+            "on-error-container": "#93000a",
+            "background": "#fff8f3",
+            "tertiary-fixed": "#c3e8ff",
+            "surface-container": "#f4ede6"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-lg": "1.5rem",
+            "margin": "1.25rem",
+            "space-md": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2.25rem",
+            "space-sm": "0.5rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "label-lg": ["Comfortaa"],
+            "label-md": ["Comfortaa"],
+            "body-sm": ["Plus Jakarta Sans"],
+            "headline-lg": ["Comfortaa"],
+            "display-lg-mobile": ["Comfortaa"],
+            "label-sm": ["Comfortaa"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-sm": ["Comfortaa"],
+            "headline-md": ["Comfortaa"],
+            "body-md": ["Plus Jakarta Sans"],
+            "display-lg": ["Comfortaa"]
+          },
+          "fontSize": {
+            "label-lg": ["15px", { "lineHeight": "20px", "fontWeight": "700" }],
+            "label-md": ["13px", { "lineHeight": "18px", "fontWeight": "600" }],
+            "body-sm": ["12px", { "lineHeight": "18px", "fontWeight": "400" }],
+            "headline-lg": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+            "display-lg-mobile": ["38px", { "lineHeight": "46px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "600" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "500" }],
+            "headline-sm": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "headline-md": ["22px", { "lineHeight": "30px", "fontWeight": "700" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    /* Crayon stroke paper simulation */
+    .crayon-border {
+      border: 3px solid #3d352e;
+    }
+    .crayon-border-thin {
+      border: 1.5px solid #3d352e;
+    }
+    .washi-shadow {
+      box-shadow: 3px 4px 0px #3d352e;
+    }
+    .washi-shadow-sm {
+      box-shadow: 2px 2px 0px #3d352e;
+    }
+    .paper-pattern {
+      background-image: radial-gradient(#d3cbbd 0.75px, transparent 0.75px);
+      background-size: 16px 16px;
+    }
+    .speech-tail {
+      clip-path: polygon(0 0, 100% 0, 80% 100%);
+    }
+    /* Hide scrollbar for category pills horizontal scroll */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Deep Olive Frosted Pill */
+    .deep-olive-capsule {
+      background: rgba(55, 68, 49, 0.92);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 14px 36px rgba(40, 50, 35, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background paper-pattern min-h-screen flex justify-center selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- Mobile Screen Container -->
+<div class="w-full max-w-md min-h-screen bg-background relative flex flex-col pb-32">
+<!-- Top Status & Device Header Bar -->
+<header class="w-full px-margin pt-4 pb-2 flex justify-between items-center bg-surface">
+<div class="flex items-center gap-1.5">
+<span class="font-headline-sm text-headline-sm text-on-surface">21:32</span>
+<span class="text-xs text-primary font-bold">★</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-[18px]">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-[18px]">wifi</span>
+<div class="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-surface-container-high border border-outline-variant text-[11px] font-bold">
+<span class="">204</span>
+<span class="material-symbols-outlined text-[14px]">sim_card_download</span>
+</div>
+</div>
+</header>
+<!-- TopAppBar -->
+<div class="flex justify-between items-center w-full px-margin py-space-sm bg-surface shadow-sm">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container-low active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">menu_book</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary font-bold tracking-tight">HiVocab</h1>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container-low active:scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+<!-- Page Title & Header Actions Area -->
+<div class="px-margin pt-3 pb-3">
+<div class="flex items-center justify-between">
+<div>
+<div class="flex items-center gap-1.5">
+<h2 class="font-headline-md text-headline-md text-on-surface flex items-center gap-1">
+              Chủ đề
+              <span class="text-xl">🎨</span>
+</h2>
+<span class="text-sm">🌿</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 max-w-[210px] leading-tight">
+            Khám phá và lựa chọn thư mục từ vựng để bắt đầu học nhé!
+          </p>
+</div>
+<!-- Crayon "+ Tạo chủ đề" Button -->
+<button class="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-primary-container text-on-primary-container crayon-border washi-shadow-sm font-label-md text-label-md active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span class="">Tạo chủ đề</span>
+</button>
+</div>
+<!-- Category Filter Pills Bar (Horizontal Scroll) -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-4 pb-1">
+<!-- Tab: Tất cả (Active) -->
+<button class="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-inverse-surface text-surface-bright font-label-md text-label-md shrink-0 washi-shadow-sm crayon-border active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[17px]">apps</span>
+<span class="">Tất cả</span>
+</button>
+<!-- Tab: THPT/ĐGNL -->
+<button class="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shrink-0 crayon-border hover:bg-surface-container active:scale-95 transition-transform">
+<span class="">🎓</span>
+<span class="">THPT/ĐGNL</span>
+</button>
+<!-- Tab: IELTS -->
+<button class="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shrink-0 crayon-border hover:bg-surface-container active:scale-95 transition-transform">
+<span class="">🏆</span>
+<span class="">IELTS</span>
+</button>
+<!-- Tab: Tiếng Anh Giao Tiếp -->
+<button class="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shrink-0 crayon-border hover:bg-surface-container active:scale-95 transition-transform">
+<span class="">📚</span>
+<span class="">Giao tiếp</span>
+</button>
+<!-- Tab: Từ vựng của tôi -->
+<button class="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md shrink-0 crayon-border hover:bg-surface-container active:scale-95 transition-transform">
+<span class="">⭐</span>
+<span class="">Của tôi</span>
+</button>
+</div>
+</div>
+<!-- Topic Cards Grid (2-column tactile crayon notebook tiles) -->
+<main class="px-margin flex-1">
+<div class="grid grid-cols-2 gap-3.5">
+<!-- Card 1: CAM -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">menu_book</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                12 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              CAM
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-primary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 2: Destination C1-C2 -->
+<div class="bg-surface-container-low rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">school</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                12 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-snug">
+              Destination C1-C2
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-secondary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 3: IELTS Actual Tests -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">article</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                9 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              IELTS Actual Tests
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-primary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 4: IELTS (Core Vocab) -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">military_tech</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                6 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              IELTS
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-primary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 5: oxford3000 -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">folder</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                60 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              oxford3000
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-primary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 6: SAT -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">school</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                1 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              SAT
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-primary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 7: THPT/ĐGNL -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">school</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                5 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              THPT/ĐGNL
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-primary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+<!-- Card 8: Từ vựng của tôi -->
+<div class="bg-surface-container-lowest rounded-2xl p-3.5 crayon-border washi-shadow flex flex-col justify-between h-[168px] relative group hover:-translate-y-0.5 transition-transform cursor-pointer">
+<div>
+<div class="flex items-center justify-between mb-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface crayon-border-thin">
+<span class="material-symbols-outlined text-[20px]">folder</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface font-label-sm text-label-sm crayon-border-thin">
+                2 chủ đề
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface font-bold leading-tight">
+              Từ vựng của tôi
+            </h3>
+</div>
+<div>
+<div class="flex items-center justify-between text-body-sm text-on-surface-variant mb-1 font-body-sm">
+<span class="">Tiến độ</span>
+<span class="font-bold text-on-surface">0%</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden crayon-border-thin">
+<div class="h-full bg-secondary-container rounded-full" style="width: 0%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Companion Mascot Vignette & Crayon Speech Bubble -->
+<section class="mt-6 mb-4 p-4 rounded-3xl bg-surface-container-low crayon-border washi-shadow relative flex items-center gap-3 overflow-hidden">
+<!-- Floating Doodles -->
+<span class="absolute top-2 right-3 text-secondary text-sm">★</span>
+<span class="absolute bottom-2 left-2 text-primary text-xs">🌿</span>
+<!-- Baby Tiger Mascot -->
+<div class="w-20 h-20 shrink-0 relative flex items-center justify-center">
+<img alt="Bé Hổ Mascot Churbito vẫy tay chào" class="w-full h-full object-contain mix-blend-multiply drop-shadow-sm select-none" src="https://lh3.googleusercontent.com/aida/AEtjO1UaJiv5oonRW-mFKCLhHhjpxWcR6VjlG6KBMtGrK4ZshkchqPgq1YQvE2LkDx_3-Gg-kX-C0zbjVRPXrJg9DpFyXZyhwuhVqdCUAtg7BTE6ppht38gxYN_HVOHQmg-gGu2eUTjvQ54onjTvjvFgxtGmezCSTsTxk1YJazWlalXyy6bDOBe2k9KZIxX-2PP7o28p3shsO6YEW-aHarr7W5bCXCjFP4_QF-OuXJ8oNjss8DoJ2nxxJG0obOo">
+</div>
+<!-- Mascot Speech Prompt -->
+<div class="flex-1">
+<div class="bg-surface-container-lowest p-3 rounded-2xl crayon-border-thin washi-shadow-sm relative">
+<p class="font-body-md text-body-md text-on-surface font-medium leading-snug">
+              "Cậu ơi, chọn một chủ đề để cùng tớ mở tập vở ghi nhớ hôm nay nhé!"
+            </p>
+<div class="flex items-center gap-1 mt-1 text-[11px] text-primary font-bold">
+<span class="">🐾 Churbito đồng hành</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Page Sub-footer note -->
+<div class="text-center font-label-sm text-label-sm text-on-surface-variant pb-6 opacity-75">
+        Trang 2 / Khám phá các chủ đề từ vựng cùng Bé Hổ 🐾
+      </div>
+</main>
+<!-- Floating Action Button: Red Flag icon from original screenshot -->
+<div class="fixed right-5 bottom-24 z-40">
+<button class="w-12 h-12 rounded-full bg-surface-container-lowest text-error crayon-border washi-shadow flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-md">
+<span class="material-symbols-outlined text-[24px]">flag</span>
+</button>
+</div>
+<!-- Bottom Navigation: Biến thể 3 Deep Olive Frosted Pill (4 Trang Cốt Lõi + Profile Mascot) -->
+<nav class="fixed bottom-5 left-4 right-4 max-w-[390px] mx-auto z-50 flex items-center justify-between px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)]">
+<!-- 1: Trang chủ (Home) - Icon Only -->
+<a aria-label="Trang chủ" class="w-11 h-11 flex items-center justify-center text-[#554d42] hover:text-on-surface active:scale-90 transition-all duration-150" href="#home">
+<span class="material-symbols-outlined text-[23px]">home</span>
+</a>
+<!-- 2: Chủ đề (Active Pill) - Icon trên, chữ Chủ đề dưới -->
+<a aria-label="Chủ đề" class="flex flex-col items-center justify-center py-1 px-3.5 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150" href="#topics">
+<span class="material-symbols-outlined text-[19px] leading-none mb-0.5" style="font-variation-settings: 'FILL' 1;">category</span>
+<span class="font-label-sm text-[10px] font-bold leading-none tracking-tight">Chủ đề</span>
+</a>
+<!-- 3: Sổ từ (Menu Book) - Icon Only -->
+<a aria-label="Sổ từ" class="w-11 h-11 flex items-center justify-center text-[#554d42] hover:text-on-surface active:scale-90 transition-all duration-150" href="#notebook">
+<span class="material-symbols-outlined text-[23px]">menu_book</span>
+</a>
+<!-- 4: Tra từ (Search) - Icon Only -->
+<a aria-label="Tra từ" class="w-11 h-11 flex items-center justify-center text-[#554d42] hover:text-on-surface active:scale-90 transition-all duration-150" href="#search">
+<span class="material-symbols-outlined text-[23px]">search</span>
+</a>
+<!-- 5: Profile Mascot Bé Hổ Churbito -->
+<a aria-label="Tài khoản Bé Hổ Churbito" class="relative w-11 h-11 flex items-center justify-center active:scale-90 transition-all duration-150" href="#profile">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-[#faf2ec] border-2 border-white/80 shadow-sm flex items-center justify-center">
+<img alt="Churbito Avatar" class="w-full h-full object-cover object-top scale-110" src="https://lh3.googleusercontent.com/aida/AEtjO1UaJiv5oonRW-mFKCLhHhjpxWcR6VjlG6KBMtGrK4ZshkchqPgq1YQvE2LkDx_3-Gg-kX-C0zbjVRPXrJg9DpFyXZyhwuhVqdCUAtg7BTE6ppht38gxYN_HVOHQmg-gGu2eUTjvQ54onjTvjvFgxtGmezCSTsTxk1YJazWlalXyy6bDOBe2k9KZIxX-2PP7o28p3shsO6YEW-aHarr7W5bCXCjFP4_QF-OuXJ8oNjss8DoJ2nxxJG0obOo">
+</div>
+<span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#5a7d4d] ring-2 ring-white"></span>
+</a>
+</nav>
+</div>
+
+
+</body></html>
