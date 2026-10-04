@@ -159,59 +159,61 @@ export function ExamResultsModal({ results, onReview, onRetake, onExit }) {
 }
 
 // ============================================
-// Modal tùy chỉnh thời gian thi
+// Modal tùy chỉnh thời gian thi - Cozy Crayon
 // ============================================
 export function ExamCustomTimeModal({ examId, examTitle, onStart, onCancel }) {
   const [selectedMinutes, setSelectedMinutes] = useState(50);
   const timeOptions = [20, 30, 40, 50, 60, 90, 0]; // 0 = không giới hạn
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-surface rounded-3xl border border-outline-variant/20 shadow-2xl w-full max-w-sm p-6 space-y-5 font-sans animate-scale-up">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+      <div className="bg-[#FFFDF9] rounded-3xl border-[3px] border-[#382E2B] shadow-[6px_8px_0px_#382E2B] w-full max-w-sm p-6 sm:p-7 space-y-5 font-sans select-none">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-[24px]">timer</span>
+          <div className="w-12 h-12 rounded-2xl bg-[#FFF3D6] text-[#D36135] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-xl shrink-0">
+            ⏱️
           </div>
           <div className="min-w-0">
-            <h3 className="font-bold text-on-surface text-base sm:text-lg">Chọn thời gian thi</h3>
-            <p className="text-xs text-on-surface-variant truncate">{examTitle}</p>
+            <h3 className="font-heading font-black text-[#382E2B] text-lg">Chọn thời gian làm bài</h3>
+            <p className="text-xs font-semibold text-[#786F66] truncate">{examTitle}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
-          {timeOptions.map(mins => (
+          {timeOptions.map((mins) => (
             <button
               key={mins}
               type="button"
               onClick={() => setSelectedMinutes(mins)}
-              className={`py-3 px-3.5 rounded-2xl border-2 text-xs sm:text-sm font-bold transition-all ${
+              className={`py-3 px-3.5 rounded-2xl border-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
                 selectedMinutes === mins
-                  ? 'border-primary bg-primary text-on-primary shadow-xs'
-                  : 'border-outline-variant/20 bg-surface-container-lowest text-on-surface hover:border-primary/40'
+                  ? 'border-[#382E2B] bg-[#5a7d4d] text-white shadow-[2px_3px_0px_#382E2B]'
+                  : 'border-[#382E2B]/30 bg-white text-[#382E2B] hover:border-[#382E2B] hover:bg-[#FAF5EB]'
               }`}
             >
               {mins === 0 ? 'Không giới hạn' : `${mins} phút`}
-              {mins === 50 && selectedMinutes !== mins && (
-                <span className="block text-[10px] text-primary font-normal mt-0.5">(chuẩn Bộ GD)</span>
+              {mins === 50 && (
+                <span className={`block text-[10px] font-bold mt-0.5 ${selectedMinutes === mins ? 'text-amber-200' : 'text-[#D36135]'}`}>
+                  (chuẩn Bộ GD)
+                </span>
               )}
             </button>
           ))}
         </div>
 
-        <div className="flex gap-2.5 justify-end pt-2">
+        <div className="flex gap-2.5 justify-end pt-2 border-t-2 border-dashed border-[#EFE8D6]">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2.5 rounded-xl text-xs sm:text-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container border border-outline-variant/30 transition-colors font-semibold"
+            className="px-4 py-2.5 rounded-2xl text-xs sm:text-sm text-[#786F66] hover:text-[#382E2B] hover:bg-[#FAF5EB] border-2 border-transparent transition-colors font-bold cursor-pointer"
           >
             Huỷ
           </button>
           <button
             type="button"
             onClick={() => onStart(examId, selectedMinutes)}
-            className="px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs sm:text-sm font-bold hover:bg-primary/90 transition-all shadow-xs active:scale-95"
+            className="px-5 py-2.5 rounded-2xl bg-[#D36135] text-white text-xs sm:text-sm font-black hover:bg-[#c2542a] transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
           >
-            Bắt đầu thi
+            Bắt đầu thi ➔
           </button>
         </div>
       </div>

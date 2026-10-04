@@ -1,5 +1,6 @@
 // src/components/modals/BulkAddWordModal.jsx
-// 100% Pure React Modal for Bulk Importing Vocabulary Words
+// Modal thêm từ vựng hàng loạt - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
+
 import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -98,18 +99,18 @@ export function BulkAddWordModal() {
           review_count: 0,
           created_at: now,
         }));
-        await supabase.from('word_progress').upsert(progRows, { onConflict: 'user_id,word_id' }).catch(() => {});
+        await supabase.from('word_progress').insert(progRows).catch(() => {});
       }
 
-      success(`Đã thêm thành công ${wordsToInsert.length} từ vựng! 🎉`);
+      success(`Đã thêm thành công ${wordsToInsert.length} từ vào chủ đề! 🎉`);
       handleClose();
 
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('hi:word-added', { detail: { topicId } }));
+        window.dispatchEvent(new CustomEvent('hivocab:words-bulk-added', { detail: { count: wordsToInsert.length } }));
       }
     } catch (err) {
-      setErrorMessage(err?.message || 'Có lỗi xảy ra khi nhập từ hàng loạt.');
-      toastError(err?.message || 'Lỗi nhập hàng loạt.');
+      setErrorMessage(err?.message || 'Có lỗi xảy ra khi nhập từ.');
+      toastError(err?.message || 'Lỗi thêm từ hàng loạt.');
     } finally {
       setIsSubmitting(false);
     }
@@ -117,40 +118,40 @@ export function BulkAddWordModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 select-none"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="w-full max-w-xl bg-surface rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/30 flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-xl bg-[#FFFDF9] rounded-3xl shadow-[6px_8px_0px_#382E2B] overflow-hidden border-[3px] border-[#382E2B] flex flex-col max-h-[90vh] font-sans">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-outline-variant/15 flex items-center justify-between shrink-0 bg-surface-container-lowest/50">
+        <div className="px-6 py-4.5 border-b-2 border-[#382E2B] flex items-center justify-between shrink-0 bg-[#FFF8EE]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center shadow-xs">
-              <span className="material-symbols-outlined text-[22px]">playlist_add</span>
+            <div className="w-11 h-11 rounded-2xl bg-[#E1EDDB] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-xl shrink-0">
+              📋
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-on-surface">Thêm từ vựng hàng loạt</h2>
-              <p className="text-xs text-on-surface-variant">Dán từ bảng tính Excel hoặc văn bản</p>
+              <h2 className="text-base sm:text-lg font-heading font-black text-[#382E2B]">Thêm từ vựng hàng loạt</h2>
+              <p className="text-xs font-semibold text-[#766C5F]">Dán từ bảng tính Excel hoặc văn bản 🐾</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="w-9 h-9 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-high transition-colors cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            ✕
           </button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleBulkSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
           <div>
-            <label className="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
-              Chủ đề lưu trữ <span className="text-rose-500">*</span>
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+              Chủ đề lưu trữ <span className="text-[#D36135]">*</span>
             </label>
             <select
               value={topicId}
               onChange={(e) => setTopicId(e.target.value)}
-              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-secondary px-4 py-2.5 rounded-xl outline-none text-on-surface text-sm transition-colors cursor-pointer font-medium"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2.5 rounded-2xl outline-none text-[#382E2B] text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors cursor-pointer"
             >
               {topicsList.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -161,8 +162,8 @@ export function BulkAddWordModal() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
-              Dán danh sách từ (Mỗi từ 1 dòng) <span className="text-rose-500">*</span>
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+              Dán danh sách từ (Mỗi từ 1 dòng) <span className="text-[#D36135]">*</span>
             </label>
             <textarea
               required
@@ -170,42 +171,45 @@ export function BulkAddWordModal() {
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
               placeholder={`resilient - kiên cường, bền bỉ\nbreakthrough - bước đột phá\npersist - kiên trì, dai dẳng`}
-              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-secondary px-4 py-3 rounded-2xl outline-none text-on-surface text-xs sm:text-sm font-mono transition-colors resize-none leading-relaxed"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-3 rounded-2xl outline-none text-[#382E2B] text-xs sm:text-sm font-mono shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none leading-relaxed"
             />
-            <p className="text-[11px] text-on-surface-variant mt-1.5 leading-snug">
-              💡 Hỗ trợ copy 2 cột từ Excel, hoặc phân cách bằng dấu gạch ngang ( - ), hai chấm ( : ) hoặc Tab.
-            </p>
+            <div className="mt-2.5 p-3.5 bg-[#FFF8EE] rounded-2xl border-2 border-dashed border-[#E5A13C] text-[11px] font-bold text-[#766C5F] flex items-start gap-2">
+              <span className="text-base shrink-0 select-none">💡</span>
+              <span>
+                Hỗ trợ copy 2 cột từ Excel, hoặc phân cách bằng dấu gạch ngang ( - ), hai chấm ( : ) hoặc Tab.
+              </span>
+            </div>
           </div>
 
           {errorMessage && (
-            <div className="p-3 rounded-xl bg-error-container text-error text-xs font-semibold flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px]">error</span>
+            <div className="p-3.5 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
+              <span>⚠️</span>
               <span>{errorMessage}</span>
             </div>
           )}
 
-          <div className="pt-2 flex items-center justify-end gap-3">
+          <div className="pt-2 flex items-center justify-end gap-3 border-t-2 border-dashed border-[#EFE8D6]">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-2xl text-xs font-bold text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-secondary text-on-secondary font-bold text-xs hover:opacity-90 active:scale-95 transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
               {isSubmitting ? (
                 <>
-                  <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
+                  <span className="animate-spin">🔄</span>
                   <span>Đang nhập...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[16px]">upload_file</span>
-                  <span>Nhập từ vựng</span>
+                  <span>📥</span>
+                  <span>Nhập từ vựng ➔</span>
                 </>
               )}
             </button>

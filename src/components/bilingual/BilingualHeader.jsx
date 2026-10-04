@@ -1,5 +1,5 @@
 // src/components/bilingual/BilingualHeader.jsx
-// Sticky Header & Navigation for Bilingual Reading
+// Header & Navigation cho bài đọc song ngữ - Phong cách Cozy Crayon ấm áp
 
 import React, { useState } from 'react';
 import { BilingualPassageSwitcher } from './BilingualPassageSwitcher.jsx';
@@ -26,33 +26,35 @@ export function BilingualHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-40 bg-surface/90 dark:bg-neutral-900/90 backdrop-blur-xl border-b border-outline-variant/20 px-3 sm:px-6 md:px-8 pb-2.5 sm:pb-3 flex items-center justify-between gap-2 sm:gap-3 shadow-xs mobile-sticky-top lg:pt-3 select-none">
+      <header className="sticky top-0 z-40 bg-[#FFFDF9]/95 backdrop-blur-md border-b-2 border-[#382E2B] px-3 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-3 shadow-[0_2px_0px_#382E2B] select-none">
         {/* Left: Back button & Breadcrumb Title with Quick Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={onClose}
-            className="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container active:scale-90 transition-all shrink-0 cursor-pointer"
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all shrink-0 cursor-pointer"
             title="Quay lại"
           >
-            <span className="material-symbols-outlined text-[24px]">arrow_back</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
           </button>
 
           <div className="min-w-0 relative">
             <div className="flex items-center gap-1.5">
-              <h1 className="font-bold text-sm sm:text-base md:text-lg text-on-surface truncate leading-tight">
+              <h1 className="font-heading font-black text-sm sm:text-base md:text-lg text-[#382E2B] truncate leading-tight">
                 {title}
               </h1>
               <button
                 type="button"
                 onClick={() => setIsSwitcherOpen((prev) => !prev)}
-                className="p-1 rounded-md text-outline hover:text-primary hover:bg-primary/10 transition-colors shrink-0 cursor-pointer"
+                className="w-6 h-6 rounded-lg bg-[#FAF5EB] border border-[#382E2B]/40 hover:border-[#382E2B] text-[#382E2B] flex items-center justify-center transition-colors shrink-0 cursor-pointer text-xs font-bold"
                 title="Đổi bài đọc khác trong bộ đề"
               >
-                <span className="material-symbols-outlined text-[18px]">expand_more</span>
+                ▼
               </button>
             </div>
-            <p className="text-[11px] sm:text-xs text-on-surface-variant truncate mt-0.5">
+            <p className="text-[11px] sm:text-xs font-semibold text-[#766C5F] truncate mt-0.5">
               {metaText}
             </p>
 
@@ -67,30 +69,30 @@ export function BilingualHeader({
         </div>
 
         {/* Center: Tab Switcher (Đọc chủ động vs Đục lỗ) */}
-        <div className="flex bg-surface-container rounded-2xl p-1 border border-outline-variant/20 shrink-0">
+        <div className="flex bg-[#F4EFE6] rounded-2xl p-1 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] shrink-0">
           <button
             type="button"
             onClick={() => onTabChange('reading')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
               activeTab === 'reading'
-                ? 'bg-primary text-on-primary font-bold shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-semibold'
+                ? 'bg-[#5a7d4d] text-white font-black shadow-xs'
+                : 'text-[#766C5F] hover:text-[#382E2B] font-bold'
             }`}
           >
-            <span className="material-symbols-outlined text-[17px]">menu_book</span>
+            <span>📖</span>
             <span className="hidden sm:inline">Đọc chủ động</span>
           </button>
 
           <button
             type="button"
             onClick={() => onTabChange('gap-fill')}
-            className={`flex items-center gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
+            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
               activeTab === 'gap-fill'
-                ? 'bg-primary text-on-primary font-bold shadow-xs'
-                : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high font-semibold'
+                ? 'bg-[#5a7d4d] text-white font-black shadow-xs'
+                : 'text-[#766C5F] hover:text-[#382E2B] font-bold'
             }`}
           >
-            <span className="material-symbols-outlined text-[17px]">edit_note</span>
+            <span>✏️</span>
             <span className="hidden sm:inline">Đục lỗ song ngữ</span>
           </button>
         </div>
@@ -101,11 +103,11 @@ export function BilingualHeader({
           {activeTab === 'reading' && (
             <div className="hidden md:flex items-center gap-2">
               {/* Font size adjustment */}
-              <div className="flex items-center bg-surface-container rounded-xl p-1 border border-outline-variant/20 text-xs font-bold text-on-surface-variant">
+              <div className="flex items-center bg-[#F4EFE6] rounded-2xl p-1 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-xs font-black text-[#382E2B]">
                 <button
                   type="button"
                   onClick={() => onChangeFontSize(-1)}
-                  className="px-2 py-1 hover:text-primary rounded cursor-pointer"
+                  className="px-2.5 py-1 hover:bg-white rounded-lg transition-colors cursor-pointer"
                   title="Giảm cỡ chữ"
                 >
                   A-
@@ -113,7 +115,7 @@ export function BilingualHeader({
                 <button
                   type="button"
                   onClick={() => onChangeFontSize(1)}
-                  className="px-2 py-1 hover:text-primary rounded cursor-pointer"
+                  className="px-2.5 py-1 hover:bg-white rounded-lg transition-colors cursor-pointer"
                   title="Tăng cỡ chữ"
                 >
                   A+
@@ -121,14 +123,14 @@ export function BilingualHeader({
               </div>
 
               {/* View mode filter */}
-              <div className="flex bg-surface-container rounded-xl p-1 border border-outline-variant/20 text-xs font-semibold">
+              <div className="flex bg-[#F4EFE6] rounded-2xl p-1 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-xs font-black">
                 <button
                   type="button"
                   onClick={() => onViewModeChange('bilingual')}
-                  className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                     viewMode === 'bilingual'
-                      ? 'bg-primary text-on-primary font-bold shadow-xs'
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-[#382E2B] text-white'
+                      : 'text-[#766C5F] hover:text-[#382E2B]'
                   }`}
                 >
                   Song ngữ
@@ -136,10 +138,10 @@ export function BilingualHeader({
                 <button
                   type="button"
                   onClick={() => onViewModeChange('en')}
-                  className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                     viewMode === 'en'
-                      ? 'bg-primary text-on-primary font-bold shadow-xs'
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-[#382E2B] text-white'
+                      : 'text-[#766C5F] hover:text-[#382E2B]'
                   }`}
                 >
                   English
@@ -147,10 +149,10 @@ export function BilingualHeader({
                 <button
                   type="button"
                   onClick={() => onViewModeChange('vi')}
-                  className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
                     viewMode === 'vi'
-                      ? 'bg-primary text-on-primary font-bold shadow-xs'
-                      : 'text-on-surface-variant hover:text-on-surface'
+                      ? 'bg-[#382E2B] text-white'
+                      : 'text-[#766C5F] hover:text-[#382E2B]'
                   }`}
                 >
                   Tiếng Việt
@@ -161,10 +163,10 @@ export function BilingualHeader({
               <button
                 type="button"
                 onClick={onReportError}
-                className="p-2 rounded-xl text-on-surface-variant hover:text-red-600 hover:bg-surface-container transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#C85A3F] flex items-center justify-center hover:bg-[#FFF3E8] active:translate-y-0.5 transition-all cursor-pointer"
                 title="Báo lỗi bài đọc này"
               >
-                <span className="material-symbols-outlined text-[20px]">flag</span>
+                🚩
               </button>
             </div>
           )}
@@ -173,10 +175,10 @@ export function BilingualHeader({
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-1 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-error/10 hover:bg-error/20 active:bg-error/30 text-error font-bold text-xs sm:text-sm shrink-0 transition-all cursor-pointer active:scale-95"
+            className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-[#D36135] hover:bg-[#c2542a] text-white font-black text-xs sm:text-sm shrink-0 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
             title="Thoát bài đọc"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <span>✕</span>
             <span>Thoát</span>
           </button>
         </div>
@@ -184,16 +186,16 @@ export function BilingualHeader({
 
       {/* Mobile Secondary Toolbar (shown in Reading tab) */}
       {activeTab === 'reading' && (
-        <div className="md:hidden flex items-center justify-between px-4 py-2 bg-surface-container-low/70 border-b border-outline-variant/15 text-xs font-semibold select-none">
+        <div className="md:hidden flex items-center justify-between px-3 py-2 bg-[#FFFDF9] border-b-2 border-[#382E2B] text-xs font-bold select-none">
           <div className="flex items-center gap-1">
-            <span className="text-[11px] text-outline uppercase font-bold mr-1">Chế độ:</span>
+            <span className="text-[10px] text-[#766C5F] uppercase font-black mr-0.5">Chế độ:</span>
             <button
               type="button"
               onClick={() => onViewModeChange('bilingual')}
-              className={`px-2 py-1 rounded transition-colors ${
+              className={`px-2.5 py-1 rounded-xl transition-colors font-black ${
                 viewMode === 'bilingual'
-                  ? 'bg-primary/10 text-primary font-bold'
-                  : 'text-on-surface-variant'
+                  ? 'bg-[#382E2B] text-white'
+                  : 'text-[#766C5F]'
               }`}
             >
               Song ngữ
@@ -201,10 +203,10 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onViewModeChange('en')}
-              className={`px-2 py-1 rounded transition-colors ${
+              className={`px-2.5 py-1 rounded-xl transition-colors font-black ${
                 viewMode === 'en'
-                  ? 'bg-primary/10 text-primary font-bold'
-                  : 'text-on-surface-variant'
+                  ? 'bg-[#382E2B] text-white'
+                  : 'text-[#766C5F]'
               }`}
             >
               Anh
@@ -212,21 +214,21 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onViewModeChange('vi')}
-              className={`px-2 py-1 rounded transition-colors ${
+              className={`px-2.5 py-1 rounded-xl transition-colors font-black ${
                 viewMode === 'vi'
-                  ? 'bg-primary/10 text-primary font-bold'
-                  : 'text-on-surface-variant'
+                  ? 'bg-[#382E2B] text-white'
+                  : 'text-[#766C5F]'
               }`}
             >
               Việt
             </button>
           </div>
 
-          <div className="flex items-center gap-1.5 font-bold text-on-surface-variant">
+          <div className="flex items-center gap-1.5 font-black text-[#382E2B]">
             <button
               type="button"
               onClick={() => onChangeFontSize(-1)}
-              className="p-1 px-2 hover:bg-surface-container rounded cursor-pointer"
+              className="p-1 px-2 bg-[#F4EFE6] border border-[#382E2B]/40 rounded-lg cursor-pointer"
               title="Giảm cỡ chữ"
             >
               A-
@@ -234,7 +236,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onChangeFontSize(1)}
-              className="p-1 px-2 hover:bg-surface-container rounded cursor-pointer"
+              className="p-1 px-2 bg-[#F4EFE6] border border-[#382E2B]/40 rounded-lg cursor-pointer"
               title="Tăng cỡ chữ"
             >
               A+
@@ -242,10 +244,10 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={onReportError}
-              className="p-1 px-1.5 hover:bg-surface-container text-outline hover:text-red-600 rounded cursor-pointer"
+              className="p-1 px-2 text-[#C85A3F] cursor-pointer"
               title="Báo lỗi bài đọc"
             >
-              <span className="material-symbols-outlined text-[18px]">flag</span>
+              🚩
             </button>
           </div>
         </div>

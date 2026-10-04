@@ -268,7 +268,7 @@ export function PageDashboard() {
               </div>
             </div>
             <div className="mt-3.5">
-              <button onClick={() => navigateTo('thpt-room')} className="w-full bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2">
+              <button onClick={() => navigateTo('exercises')} className="w-full bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2">
                 <span>Vào phòng thi ngay</span>
                 <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">38 đề ➔</span>
               </button>
@@ -494,7 +494,7 @@ export function PageDashboard() {
                       <span className="flex items-center gap-1.5"><i className="fa-solid fa-user-group text-softBlue"></i> 1,420 bạn đang luyện</span>
                     </div>
                   </div>
-                  <button onClick={() => navigateTo('thpt-room')} className="flex-shrink-0 bg-sage hover:bg-sage-dark text-white font-black text-sm px-5 py-3 rounded-2xl crayon-border shadow-crayon active:translate-y-0.5 transition-all flex items-center gap-2">
+                  <button onClick={() => navigateTo('exercises')} className="flex-shrink-0 bg-sage hover:bg-sage-dark text-white font-black text-sm px-5 py-3 rounded-2xl crayon-border shadow-crayon active:translate-y-0.5 transition-all flex items-center gap-2">
                     <span>Vào phòng thi ngay</span>
                     <i className="fa-solid fa-arrow-right text-xs"></i>
                   </button>

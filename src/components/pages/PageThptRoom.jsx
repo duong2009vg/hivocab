@@ -42,7 +42,10 @@ export function PageThptRoom() {
   // ──────────────────────────────────────────────
   useEffect(() => {
     const config = window._thptStartConfig;
-    if (!config) return;
+    if (!config) {
+      navigateTo('exercises');
+      return;
+    }
 
     const { examId, minutes } = config;
 

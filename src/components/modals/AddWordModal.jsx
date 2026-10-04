@@ -1,5 +1,6 @@
 // src/components/modals/AddWordModal.jsx
-// 100% Pure React Modal for Adding Vocabulary Words with Audio Preview & Auto AI Fill
+// Modal thêm từ vựng mới - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
+
 import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
@@ -86,7 +87,7 @@ export function AddWordModal() {
         }
       }
 
-      // 2. Thử gọi AI hint hoặc Google Translate để lấy nghĩa tiếng Việt chính xác
+      // 2. Thử gọi Google Translate để lấy nghĩa tiếng Việt chính xác
       const transRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(clean)}`);
       if (transRes.ok) {
         const transData = await transRes.json();
@@ -96,9 +97,10 @@ export function AddWordModal() {
         }
       }
 
-      success('✨ AI đã tự động điền gợi ý!');
+      success('✨ Bé Hổ và AI đã tự động điền gợi ý!');
     } catch (err) {
       console.warn('[AddWordModal] AI Lookup error:', err);
+      setErrorMessage('Không thể tra tự động lúc này. Bạn có thể tự điền thủ công nhé!');
     } finally {
       setIsAiLoading(false);
     }
@@ -106,16 +108,19 @@ export function AddWordModal() {
 
   const handleSubmit = async (e) => {
     e?.preventDefault();
-    if (!word.trim()) {
-      setErrorMessage('Vui lòng nhập từ vựng!');
+    const cleanWord = word.trim();
+    const cleanMeaning = meaning.trim();
+
+    if (!cleanWord) {
+      setErrorMessage('Vui lòng nhập từ vựng tiếng Anh!');
       return;
     }
-    if (!meaning.trim()) {
+    if (!cleanMeaning) {
       setErrorMessage('Vui lòng nhập nghĩa tiếng Việt!');
       return;
     }
     if (!topicId) {
-      setErrorMessage('Vui lòng chọn chủ đề để lưu từ!');
+      setErrorMessage('Vui lòng chọn chủ đề lưu trữ!');
       return;
     }
 
@@ -123,20 +128,23 @@ export function AddWordModal() {
     setErrorMessage('');
 
     try {
-      await addWord(topicId, {
-        word: word.trim(),
+      const newWord = await addWord({
+        topic_id: topicId,
+        word: cleanWord,
         phonetic: phonetic.trim(),
-        meaning: meaning.trim(),
-        exampleSentence: exampleSentence.trim(),
+        pos: pos.trim(),
+        meaning: cleanMeaning,
+        example_sentence: exampleSentence.trim(),
         notes: notes.trim(),
-        passageId: passageId || null,
+        passage_id: passageId,
       });
 
-      success(`Đã thêm từ "${word.trim()}" thành công! 🎉`);
+      success(`Đã thêm từ "${cleanWord}" vào sổ từ! 🎉`);
       handleClose();
 
+      // Trigger custom event so page lists can reload
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('hi:word-added', { detail: { topicId, word: word.trim() } }));
+        window.dispatchEvent(new CustomEvent('hivocab:word-added', { detail: { word: newWord } }));
       }
     } catch (err) {
       setErrorMessage(err?.message || 'Không thể lưu từ vựng.');
@@ -148,27 +156,27 @@ export function AddWordModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 select-none"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="w-full max-w-lg bg-surface rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/30 flex flex-col max-h-[90vh]">
+      <div className="w-full max-w-lg bg-[#FFFDF9] rounded-3xl shadow-[6px_8px_0px_#382E2B] overflow-hidden border-[3px] border-[#382E2B] flex flex-col max-h-[90vh] font-sans">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-outline-variant/15 flex items-center justify-between shrink-0 bg-surface-container-lowest/50">
+        <div className="px-6 py-4.5 border-b-2 border-[#382E2B] flex items-center justify-between shrink-0 bg-[#FFF8EE]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-xs">
-              <span className="material-symbols-outlined text-[22px]">post_add</span>
+            <div className="w-11 h-11 rounded-2xl bg-[#FFE8C2] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-xl shrink-0">
+              📝
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-bold text-on-surface">Thêm từ vựng mới</h2>
-              <p className="text-xs text-on-surface-variant">Lưu vào kho từ cá nhân với SM-2</p>
+              <h2 className="text-base sm:text-lg font-heading font-black text-[#382E2B]">Thêm từ vựng mới</h2>
+              <p className="text-xs font-semibold text-[#766C5F]">Lưu vào kho từ cá nhân với Spaced Repetition 🐾</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="w-9 h-9 flex items-center justify-center rounded-full text-outline hover:bg-surface-container-high transition-colors cursor-pointer"
+            className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            ✕
           </button>
         </div>
 
@@ -176,13 +184,13 @@ export function AddWordModal() {
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
           {/* Target Topic Selection */}
           <div>
-            <label className="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
-              Chủ đề lưu trữ <span className="text-rose-500">*</span>
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+              Chủ đề lưu trữ <span className="text-[#D36135]">*</span>
             </label>
             <select
               value={topicId}
               onChange={(e) => setTopicId(e.target.value)}
-              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-2.5 rounded-xl outline-none text-on-surface text-sm transition-colors cursor-pointer font-medium"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2.5 rounded-2xl outline-none text-[#382E2B] text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors cursor-pointer"
             >
               {topicsList.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -195,18 +203,16 @@ export function AddWordModal() {
           {/* Word English Input with AI Button */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold text-outline uppercase tracking-wider">
-                Từ tiếng Anh / Cụm từ <span className="text-rose-500">*</span>
+              <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
+                Từ tiếng Anh / Cụm từ <span className="text-[#D36135]">*</span>
               </label>
               <button
                 type="button"
                 onClick={handleAiLookup}
                 disabled={isAiLoading}
-                className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary hover:bg-primary/20 flex items-center gap-1 transition-all cursor-pointer active:scale-95 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-xl text-xs font-black bg-[#FFF3D6] hover:bg-[#FFE5B4] text-[#B87C24] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center gap-1.5 transition-all cursor-pointer active:translate-y-0.5 disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[15px]">
-                  {isAiLoading ? 'sync' : 'auto_awesome'}
-                </span>
+                <span>{isAiLoading ? '🔄' : '✨'}</span>
                 <span>{isAiLoading ? 'Đang điền...' : 'AI Điền tự động'}</span>
               </button>
             </div>
@@ -216,13 +222,13 @@ export function AddWordModal() {
               value={word}
               onChange={(e) => setWord(e.target.value)}
               placeholder="Ví dụ: resilient, breakthrough..."
-              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-2.5 rounded-xl outline-none text-on-surface text-sm font-bold transition-colors"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2.5 rounded-2xl outline-none text-[#382E2B] text-sm font-black shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors"
             />
           </div>
 
           {/* Phonetic IPA + Audio Preview */}
           <div>
-            <label className="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
               Phiên âm IPA
             </label>
             <div className="relative flex items-center">
@@ -231,16 +237,16 @@ export function AddWordModal() {
                 value={phonetic}
                 onChange={(e) => setPhonetic(e.target.value)}
                 placeholder="/rɪˈzɪl.jənt/"
-                className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 pr-11 py-2 rounded-xl outline-none text-on-surface text-sm transition-colors font-mono"
+                className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 pr-12 py-2 rounded-2xl outline-none text-[#382E2B] text-sm font-mono font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors"
               />
               {word && (
                 <button
                   type="button"
                   onClick={() => playWord(word)}
-                  className="absolute right-2 p-1.5 rounded-lg text-outline hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
+                  className="absolute right-2.5 p-1.5 rounded-xl text-[#382E2B] hover:bg-[#FAF5EB] border border-[#382E2B]/40 transition-colors cursor-pointer text-sm"
                   title="Nghe phát âm"
                 >
-                  <span className="material-symbols-outlined text-[18px]">volume_up</span>
+                  🔊
                 </button>
               )}
             </div>
@@ -248,8 +254,8 @@ export function AddWordModal() {
 
           {/* Meaning Vietnamese */}
           <div>
-            <label className="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
-              Nghĩa tiếng Việt <span className="text-rose-500">*</span>
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+              Nghĩa tiếng Việt <span className="text-[#D36135]">*</span>
             </label>
             <textarea
               required
@@ -257,13 +263,13 @@ export function AddWordModal() {
               value={meaning}
               onChange={(e) => setMeaning(e.target.value)}
               placeholder="Ví dụ: kiên cường, phục hồi nhanh sau khó khăn..."
-              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-2 rounded-xl outline-none text-on-surface text-sm transition-colors resize-none font-medium"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2 rounded-2xl outline-none text-[#382E2B] text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none"
             />
           </div>
 
           {/* Example Sentence */}
           <div>
-            <label className="block text-xs font-bold text-outline uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
               Câu ví dụ (tiếng Anh)
             </label>
             <textarea
@@ -271,40 +277,40 @@ export function AddWordModal() {
               value={exampleSentence}
               onChange={(e) => setExampleSentence(e.target.value)}
               placeholder="Ví dụ: She showed a resilient attitude in the face of difficulties."
-              className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-2 rounded-xl outline-none text-on-surface text-sm transition-colors resize-none"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2 rounded-2xl outline-none text-[#382E2B] text-sm font-medium shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none"
             />
           </div>
 
           {errorMessage && (
-            <div className="p-3 rounded-xl bg-error-container text-error text-xs font-semibold flex items-center gap-1.5">
-              <span className="material-symbols-outlined text-[16px]">error</span>
+            <div className="p-3.5 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
+              <span>⚠️</span>
               <span>{errorMessage}</span>
             </div>
           )}
 
           {/* Footer Action Buttons */}
-          <div className="pt-2 flex items-center justify-end gap-3">
+          <div className="pt-2 flex items-center justify-end gap-3 border-t-2 border-dashed border-[#EFE8D6]">
             <button
               type="button"
               onClick={handleClose}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer"
+              className="px-5 py-2.5 rounded-2xl text-xs font-bold text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs hover:opacity-95 active:scale-95 transition-all shadow-sm cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+              className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
               {isSubmitting ? (
                 <>
-                  <span className="material-symbols-outlined text-[16px] animate-spin">refresh</span>
+                  <span className="animate-spin">🔄</span>
                   <span>Đang lưu...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[16px]">check</span>
-                  <span>Lưu từ vựng</span>
+                  <span>✓</span>
+                  <span>Lưu từ vựng ➔</span>
                 </>
               )}
             </button>

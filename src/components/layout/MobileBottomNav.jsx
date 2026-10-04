@@ -12,6 +12,8 @@ export function MobileBottomNav() {
   const activeTab =
     currentRoute === 'topic-detail' || currentRoute === 'lesson-detail'
       ? 'topics'
+      : currentRoute === 'exercises' || currentRoute === 'thpt-room'
+      ? 'exercises'
       : currentRoute === 'settings' || currentRoute === 'profile'
       ? 'profile'
       : currentRoute;
@@ -36,6 +38,11 @@ export function MobileBottomNav() {
           .then(({ getTopics }) => getTopics().catch(() => {}))
           .catch(() => {});
       },
+    },
+    {
+      id: 'exercises',
+      label: 'Luyện đề',
+      icon: 'school',
     },
     {
       id: 'vocabulary',

@@ -1,5 +1,5 @@
 // src/components/pages/PageBilingualReading.jsx
-// 100% Pure React Bilingual Reading & Interactive Context Gap-Fill Page
+// Trang Đọc Song Ngữ & Đục Lỗ Ngữ Cảnh - Phong cách Cozy Crayon ấm áp
 
 import React, { useCallback } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
@@ -77,10 +77,10 @@ export function PageBilingualReading() {
         active_tab: activeTab,
       },
     });
-  }, [passage, activeTab]);
+  }, [passage, activeTab, openModal]);
 
   return (
-    <div id="page-bilingual-reading" className="page active bg-background min-h-screen">
+    <div id="page-bilingual-reading" className="page active bg-[#FAF5EB] min-h-screen text-[#382E2B] font-sans antialiased">
       {/* Sticky Header & Toolbar */}
       <BilingualHeader
         passage={passage}
@@ -99,26 +99,22 @@ export function PageBilingualReading() {
       <main id="bilingual-reading-body" className="px-4 sm:px-6 lg:px-12 py-6 md:py-8 min-h-[calc(100vh-64px)]">
         {loading && (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
-            <span className="material-symbols-outlined text-primary text-[48px] animate-spin">
-              refresh
-            </span>
-            <p className="text-on-surface-variant text-sm font-medium animate-pulse">
-              Đang chuẩn bị nội dung bài đọc song ngữ...
+            <div className="w-12 h-12 border-4 border-[#5a7d4d]/30 border-t-[#5a7d4d] rounded-full animate-spin" />
+            <p className="text-[#766C5F] text-xs sm:text-sm font-bold animate-pulse">
+              Đang chuẩn bị nội dung bài đọc song ngữ... 🐾
             </p>
           </div>
         )}
 
         {error && !loading && (
-          <div className="max-w-md mx-auto text-center py-20 px-4">
-            <span className="material-symbols-outlined text-error text-[48px] mb-3">
-              error_outline
-            </span>
-            <h3 className="font-bold text-lg text-on-surface mb-2">Không thể tải bài đọc</h3>
-            <p className="text-sm text-on-surface-variant mb-6">{error}</p>
+          <div className="max-w-md mx-auto text-center py-16 px-6 bg-white rounded-3xl border-2 border-[#382E2B] shadow-[3px_4px_0px_#382E2B]">
+            <span className="text-4xl mb-3 block">⚠️</span>
+            <h3 className="font-heading font-black text-lg text-[#382E2B] mb-2">Không thể tải bài đọc</h3>
+            <p className="text-xs font-semibold text-[#766C5F] mb-6">{error}</p>
             <button
               type="button"
               onClick={handleClose}
-              className="px-6 py-2.5 rounded-xl bg-primary text-on-primary font-bold text-sm cursor-pointer"
+              className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] text-white font-black text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
             >
               Quay lại
             </button>
@@ -169,9 +165,9 @@ export function PageBilingualReading() {
         <button
           type="button"
           onClick={handleClose}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-surface-container-highest/95 text-error border border-error/30 shadow-2xl backdrop-blur-md active:scale-95 transition-all text-xs font-bold cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#D36135] text-white border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all text-xs font-black cursor-pointer"
         >
-          <span className="material-symbols-outlined text-[18px]">close</span>
+          <span>✕</span>
           <span>Thoát bài đọc</span>
         </button>
       </div>
