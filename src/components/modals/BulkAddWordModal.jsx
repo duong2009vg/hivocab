@@ -276,78 +276,7 @@ export function BulkAddWordModal() {
     }
   };
 
-  // 2. Tải file Excel mẫu (.xlsx)
-  const handleDownloadExcelTemplate = async () => {
-    try {
-      const XLSX = await import('xlsx');
-      const sample = [
-        {
-          word: 'resilient',
-          phonetic: '/rɪˈzɪl.jənt/',
-          pos: 'adj',
-          meaning: 'kiên cường, có khả năng phục hồi nhanh sau khó khăn',
-          example_sentence: 'She remained remarkably resilient throughout all the challenges.',
-        },
-        {
-          word: 'breakthrough',
-          phonetic: '/ˈbreɪk.θruː/',
-          pos: 'noun',
-          meaning: 'bước đột phá mang tính cách mạng',
-          example_sentence: 'Scientists have made a major breakthrough in cancer treatment.',
-        },
-        {
-          word: 'persist',
-          phonetic: '/pəˈsɪst/',
-          pos: 'verb',
-          meaning: 'kiên trì, bền bỉ theo đuổi mục tiêu',
-          example_sentence: 'If you persist with your daily practice, your vocabulary will expand rapidly.',
-        },
-      ];
-      const ws = XLSX.utils.json_to_sheet(sample);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'HiVocab_Template');
-      XLSX.writeFile(wb, 'hivocab_words_template.xlsx');
-      success('Đã tải xuống file Excel mẫu (.xlsx) thành công!');
-    } catch (err) {
-      toastError('Không thể tạo file Excel mẫu lúc này: ' + err.message);
-    }
-  };
-
-  // 3. Tải file JSON mẫu (.json)
-  const handleDownloadJsonTemplate = () => {
-    try {
-      const sample = [
-        {
-          word: 'resilient',
-          phonetic: '/rɪˈzɪl.jənt/',
-          pos: 'adj',
-          meaning: 'kiên cường, có khả năng phục hồi nhanh sau khó khăn',
-          example_sentence: 'She remained remarkably resilient throughout all the challenges.',
-        },
-        {
-          word: 'breakthrough',
-          phonetic: '/ˈbreɪk.θruː/',
-          pos: 'noun',
-          meaning: 'bước đột phá mang tính cách mạng',
-          example_sentence: 'Scientists have made a major breakthrough in cancer treatment.',
-        },
-      ];
-      const blob = new Blob([JSON.stringify(sample, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'hivocab_words_template.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      success('Đã tải xuống file JSON mẫu thành công!');
-    } catch (err) {
-      toastError('Lỗi tạo file mẫu: ' + err.message);
-    }
-  };
-
-  // 4. Phân tích văn bản khi người dùng dán hoặc nhập
+  // 2. Phân tích văn bản khi người dùng dán hoặc nhập
   const handleParseText = () => {
     if (!rawText.trim()) {
       setErrorMessage('Vui lòng dán nội dung từ vựng hoặc JSON từ AI!');
@@ -638,7 +567,7 @@ export function BulkAddWordModal() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-[#5C5248]">
                   <div className="bg-white p-3 rounded-xl border border-[#DECDBB] space-y-1">
                     <div className="font-black text-[#D36135]">Bước 1.1:</div>
-                    <p>Bấm nút <strong>"Sao chép Prompt AI"</strong> màu cam ở dưới.</p>
+                    <p>Bấm nút <strong>"Sao chép prompt"</strong> màu cam bên dưới.</p>
                   </div>
                   <div className="bg-white p-3 rounded-xl border border-[#DECDBB] space-y-1">
                     <div className="font-black text-[#D36135]">Bước 1.2:</div>
@@ -651,45 +580,20 @@ export function BulkAddWordModal() {
                 </div>
               </div>
 
-              {/* Hộp hành động chính: Nút Copy Prompt */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={handleCopyPrompt}
-                  className="flex-1 sm:flex-none px-6 py-3 rounded-2xl bg-[#EA7349] hover:bg-[#d86238] text-white font-black text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2.5"
-                >
-                  <span className="text-base">{isPromptCopied ? '✅' : '📋'}</span>
-                  <span>{isPromptCopied ? 'Đã sao chép vào Clipboard!' : 'Sao chép Prompt cho AI (ChatGPT/Gemini)'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDownloadExcelTemplate}
-                  className="px-4 py-3 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] font-bold text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
-                  title="Tải file mẫu Excel nếu bạn thích nhập bằng Excel"
-                >
-                  <span>📊</span>
-                  <span>Tải Excel mẫu (.xlsx)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleDownloadJsonTemplate}
-                  className="px-4 py-3 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] font-bold text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
-                  title="Tải file mẫu JSON"
-                >
-                  <span>📄</span>
-                  <span>Tải JSON mẫu (.json)</span>
-                </button>
-              </div>
-
-              {/* Khung xem trước Prompt */}
-              <div className="space-y-1.5">
+              {/* Khung xem trước Prompt với nút Sao chép Prompt gọn gàng vừa vặn */}
+              <div className="space-y-1.5 pt-1">
                 <div className="flex items-center justify-between text-xs font-bold text-[#766C5F]">
-                  <span>Xem trước nội dung Prompt:</span>
-                  <span className="text-[11px] text-[#A2978A]">Chuẩn 5 trường database</span>
+                  <span>Xem trước nội dung Prompt (Chuẩn 5 trường):</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyPrompt}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#EA7349] hover:bg-[#d86238] text-white font-black text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>{isPromptCopied ? '✅' : '📋'}</span>
+                    <span>{isPromptCopied ? 'Đã sao chép!' : 'Sao chép prompt'}</span>
+                  </button>
                 </div>
-                <div className="p-3.5 bg-white rounded-2xl border-2 border-[#382E2B]/30 max-h-48 overflow-y-auto text-xs font-mono text-[#4A4036] leading-relaxed whitespace-pre-wrap select-all">
+                <div className="p-3.5 bg-white rounded-2xl border-2 border-[#382E2B]/30 max-h-52 overflow-y-auto text-xs font-mono text-[#4A4036] leading-relaxed whitespace-pre-wrap select-all">
                   {AI_PROMPT_TEMPLATE}
                 </div>
               </div>
