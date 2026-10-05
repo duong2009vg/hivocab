@@ -42,7 +42,7 @@ export function CreateTopicModal() {
   // Load user folders from localStorage & cached topics
   useEffect(() => {
     if (!isOpen) return;
-    setStep('select');
+    setStep(modals?.createTopic?.initialStep || 'select');
     setTopicName('');
     setSelectedIcon('folder');
     setFolderName('');
@@ -52,18 +52,18 @@ export function CreateTopicModal() {
     try {
       const savedFolders = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
       const cached = getCachedTopics();
-      const catSet = new Set(['general', 'personal', 'IELTS Actual Tests', 'Destination C1-C2', 'Oxford 3000', 'TOEIC', 'CAM']);
+      const catSet = new Set(['Từ vựng của tôi', 'Cá nhân', 'IELTS', 'THPT-QG', 'Giao tiếp', 'general']);
       
       savedFolders.forEach((f) => f?.name && catSet.add(f.name));
       cached.forEach((t) => t?.category && catSet.add(t.category));
 
       const list = Array.from(catSet);
       setUserFolders(list);
-      setSelectedCategory(list[0] || 'general');
+      setSelectedCategory(list[0] || 'Từ vựng của tôi');
     } catch (_) {
-      setUserFolders(['general', 'personal']);
+      setUserFolders(['Từ vựng của tôi', 'Cá nhân']);
     }
-  }, [isOpen]);
+  }, [isOpen, modals?.createTopic?.initialStep]);
 
   if (!isOpen) return null;
 
@@ -83,13 +83,13 @@ export function CreateTopicModal() {
     setErrorMessage('');
 
     try {
-      await createTopic(topicName.trim(), selectedIcon, selectedCategory);
+      const newTopic = await createTopic(topicName.trim(), selectedIcon, selectedCategory);
       success('Tạo chủ đề mới thành công! 🎉');
       handleClose();
 
-      // Trigger refresh
+      // Trigger refresh with created topic in detail
       if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('hi:topics-updated'));
+        window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: { topic: newTopic } }));
       }
     } catch (err) {
       setErrorMessage(err?.message || 'Có lỗi xảy ra khi tạo chủ đề.');
@@ -134,7 +134,7 @@ export function CreateTopicModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#382E2B]/60 backdrop-blur-xs animate-in fade-in duration-200 select-none font-nunito"
+      className="fixed inset-0 z-[10001] flex items-center justify-center p-4 bg-[#382E2B]/60 backdrop-blur-xs animate-in fade-in duration-200 select-none font-nunito"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
       <div className="w-full max-w-md bg-[#FFFDF9] rounded-[32px] shadow-[5px_6px_0px_#382E2B] overflow-hidden border-[3px] border-[#382E2B] flex flex-col max-h-[92vh] text-[#382E2B]">
@@ -259,9 +259,19 @@ export function CreateTopicModal() {
 
             {/* Folder Dropdown */}
             <div>
-              <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
-                THƯ MỤC LƯU TRỮ
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+                  THƯ MỤC LƯU TRỮ
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setStep('folder')}
+                  className="text-xs font-extrabold text-[#D9822B] hover:underline cursor-pointer flex items-center gap-1"
+                >
+                  <span className="material-symbols-outlined text-[14px]">create_new_folder</span>
+                  <span>+ Tạo thư mục mới</span>
+                </button>
+              </div>
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
@@ -269,7 +279,7 @@ export function CreateTopicModal() {
               >
                 {userFolders.map((cat) => (
                   <option key={cat} value={cat}>
-                    {cat}
+                    📁 {cat}
                   </option>
                 ))}
               </select>
