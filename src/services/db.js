@@ -621,15 +621,15 @@ export async function getPassage(passageId) {
   }
 }
 
-export async function addWord(topicId, { word, phonetic = '', meaning, exampleSentence = '', notes = '', passageId = null }) {
+export async function addWord(topicId, { word, phonetic = '', pos = '', meaning, exampleSentence = '', passageId = null }) {
   const { data: { user } } = await supabase.auth.getUser();
   const payload = {
     topic_id: topicId,
     word: String(word || '').trim(),
     phonetic: String(phonetic || '').trim(),
+    pos: String(pos || '').trim(),
     meaning: String(meaning || '').trim(),
     example_sentence: String(exampleSentence || '').trim(),
-    notes: String(notes || '').trim(),
   };
   if (passageId) payload.passage_id = passageId;
 
