@@ -621,16 +621,23 @@ export async function getPassage(passageId) {
   }
 }
 
-export async function addWord(topicId, { word, phonetic = '', pos = '', meaning, exampleSentence = '', passageId = null }) {
+export async function addWord(topicIdOrObj, options = {}) {
+  let topicId = topicIdOrObj;
+  let opts = options || {};
+  if (typeof topicIdOrObj === 'object' && topicIdOrObj !== null) {
+    topicId = topicIdOrObj.topic_id || topicIdOrObj.topicId;
+    opts = topicIdOrObj;
+  }
   const { data: { user } } = await supabase.auth.getUser();
   const payload = {
     topic_id: topicId,
-    word: String(word || '').trim(),
-    phonetic: String(phonetic || '').trim(),
-    pos: String(pos || '').trim(),
-    meaning: String(meaning || '').trim(),
-    example_sentence: String(exampleSentence || '').trim(),
+    word: String(opts.word || '').trim(),
+    phonetic: String(opts.phonetic || '').trim(),
+    pos: String(opts.pos || '').trim(),
+    meaning: String(opts.meaning || '').trim(),
+    example_sentence: String(opts.exampleSentence || opts.example_sentence || '').trim(),
   };
+  const passageId = opts.passageId || opts.passage_id;
   if (passageId) payload.passage_id = passageId;
 
   const { data, error } = await supabase

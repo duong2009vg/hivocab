@@ -201,37 +201,40 @@ export function BulkAddWordModal() {
     setIsCreatingTopic(false);
     setNewTopicName('');
 
-    // Tải danh sách chủ đề ưu tiên của người dùng
+    // Tải danh sách chủ đề do người dùng tự tạo
     async function loadTopics() {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        const { data, error } = await supabase
-          .from('topics')
-          .select('id, name, category, user_id')
-          .order('name', { ascending: true });
-
-        if (error || !data) {
-          const cached = getCachedTopics() || [];
-          setTopicsList(cached);
-          setTopicId(cached[0]?.id || '');
+        if (!user) {
+          setTopicsList([]);
+          setTopicId('');
+          setIsCreatingTopic(true);
           return;
         }
 
-        // Ưu tiên chủ đề của người dùng lên đầu
-        const userTopics = user ? data.filter((t) => t.user_id === user.id) : [];
-        const systemTopics = data.filter((t) => !user || t.user_id !== user.id);
-        const combined = [...userTopics, ...systemTopics];
+        const { data, error } = await supabase
+          .from('topics')
+          .select('id, name, category, user_id')
+          .eq('user_id', user.id)
+          .order('name', { ascending: true });
 
-        setTopicsList(combined);
+        if (error || !data || data.length === 0) {
+          setTopicsList([]);
+          setTopicId('');
+          setIsCreatingTopic(true);
+          return;
+        }
 
-        // Mặc định chọn chủ đề của user nếu có, hoặc chủ đề hiện tại
+        setTopicsList(data);
+
+        // Mặc định chọn chủ đề của user nếu trùng activeTopic hoặc chủ đề đầu tiên
         const currentActiveTopic = typeof window !== 'undefined' ? window._currentTopicId : null;
-        if (currentActiveTopic && combined.some((t) => t.id === currentActiveTopic)) {
+        if (currentActiveTopic && data.some((t) => t.id === currentActiveTopic)) {
           setTopicId(currentActiveTopic);
-        } else if (userTopics.length > 0) {
-          setTopicId(userTopics[0].id);
-        } else if (combined.length > 0) {
-          setTopicId(combined[0].id);
+          setIsCreatingTopic(false);
+        } else {
+          setTopicId(data[0].id);
+          setIsCreatingTopic(false);
         }
       } catch (err) {
         console.warn('[BulkAddWordModal] loadTopics error:', err);
@@ -496,7 +499,7 @@ export function BulkAddWordModal() {
   // 8. Lưu tất cả từ vào CSDL Supabase
   const handleSaveAll = async () => {
     if (!topicId) {
-      setErrorMessage('Vui lòng chọn chủ đề để lưu từ vựng!');
+      setErrorMessage('Bạn chưa có chủ đề cá nhân để lưu từ vựng! Vui lòng quay lại Bước 2 để chọn hoặc tạo chủ đề mới nhé.');
       return;
     }
 
@@ -735,36 +738,49 @@ export function BulkAddWordModal() {
           {/* ════════════ BƯỚC 2: NẠP DỮ LIỆU / FILE ════════════ */}
           {activeStep === 'input' && (
             <div className="space-y-4 animate-in fade-in duration-150">
+              {/* Thông báo nếu chưa có chủ đề cá nhân */}
+              {topicsList.length === 0 && (
+                <div className="p-3.5 rounded-2xl bg-[#FFF3D6] border-2 border-[#D97706]/40 text-[#92400E] text-xs font-semibold flex items-start gap-2.5">
+                  <span className="text-base shrink-0">⚠️</span>
+                  <div>
+                    <p className="font-bold text-[#B45309]">Bạn chưa có chủ đề cá nhân nào!</p>
+                    <p className="text-[11px] mt-0.5">Vui lòng nhập tên và bấm <strong>"Tạo"</strong> bên dưới để tạo chủ đề riêng của bạn trước khi nạp từ nhé.</p>
+                  </div>
+                </div>
+              )}
+
               {/* Cấu hình Chủ đề & Bài học con */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4 rounded-2xl bg-[#FAF5EB] border-2 border-[#382E2B]/20">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
-                      Chủ đề lưu trữ <span className="text-[#D36135]">*</span>
+                      Chủ đề cá nhân <span className="text-[#D36135]">*</span>
                     </label>
-                    <button
-                      type="button"
-                      onClick={() => setIsCreatingTopic(!isCreatingTopic)}
-                      className="text-xs font-extrabold text-[#D36135] hover:underline cursor-pointer"
-                    >
-                      {isCreatingTopic ? '‹ Chọn từ danh sách' : '+ Tạo chủ đề mới'}
-                    </button>
+                    {topicsList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setIsCreatingTopic(!isCreatingTopic)}
+                        className="text-xs font-extrabold text-[#D36135] hover:underline cursor-pointer"
+                      >
+                        {isCreatingTopic ? '‹ Chọn từ danh sách' : '+ Tạo chủ đề mới'}
+                      </button>
+                    )}
                   </div>
 
-                  {isCreatingTopic ? (
+                  {isCreatingTopic || topicsList.length === 0 ? (
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={newTopicName}
                         onChange={(e) => setNewTopicName(e.target.value)}
-                        placeholder="VD: Từ vựng IELTS Tuần 1..."
+                        placeholder="VD: Từ vựng IELTS Tuần 1, C1..."
                         className="flex-1 bg-white border-2 border-[#382E2B] px-3.5 py-2 rounded-xl text-sm font-bold outline-none text-[#382E2B]"
                         autoFocus
                       />
                       <button
                         type="button"
                         onClick={handleCreateNewTopic}
-                        className="px-3.5 py-2 bg-[#5a7d4d] text-white font-bold text-xs rounded-xl border border-[#382E2B] shadow-sm cursor-pointer"
+                        className="px-4 py-2 bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs rounded-xl border-2 border-[#382E2B] shadow-sm cursor-pointer active:translate-y-0.5 transition-all"
                       >
                         Tạo
                       </button>
@@ -777,7 +793,7 @@ export function BulkAddWordModal() {
                     >
                       {topicsList.map((t) => (
                         <option key={t.id} value={t.id}>
-                          {t.name} {t.category ? `(${t.category})` : ''}
+                          📂 {t.name}
                         </option>
                       ))}
                     </select>

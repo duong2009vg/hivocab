@@ -5,7 +5,8 @@ import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useSound } from '../../hooks/useSound.js';
-import { addWord, getCachedTopics } from '../../services/db.js';
+import { supabase } from '../../lib/supabaseClient.js';
+import { addWord } from '../../services/db.js';
 import { autofillWordWithAI } from '../../services/dictionaryService.js';
 
 export function AddWordModal() {
@@ -24,34 +25,74 @@ export function AddWordModal() {
   const [pos, setPos] = useState('');
   const [meaning, setMeaning] = useState('');
   const [exampleSentence, setExampleSentence] = useState('');
-  const [notes, setNotes] = useState('');
   const [topicId, setTopicId] = useState('');
   const [passageId, setPassageId] = useState(null);
   const [topicsList, setTopicsList] = useState([]);
+  const [isLoadingTopics, setIsLoadingTopics] = useState(false);
+  const [isCreatingTopic, setIsCreatingTopic] = useState(false);
+  const [newTopicName, setNewTopicName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (!isOpen) return;
-    const cached = getCachedTopics();
-    setTopicsList(cached || []);
 
-    const targetTopicId =
-      initialTopicId ||
-      (typeof window !== 'undefined' ? window._currentTopicId : null) ||
-      (cached[0]?.id || '');
-
-    setTopicId(targetTopicId);
-    setPassageId(initialPassageId || (typeof window !== 'undefined' ? window._currentPassageId : null));
     setWord(initialWord || '');
     setPhonetic('');
     setPos('');
     setMeaning(initialMeaning || '');
     setExampleSentence('');
-    setNotes('');
     setErrorMessage('');
     setIsSubmitting(false);
+    setIsCreatingTopic(false);
+    setNewTopicName('');
+    setPassageId(initialPassageId || (typeof window !== 'undefined' ? window._currentPassageId : null));
+
+    // Chỉ tải danh sách các chủ đề do chính người dùng tạo
+    async function loadUserTopics() {
+      setIsLoadingTopics(true);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          setTopicsList([]);
+          setTopicId('');
+          setIsCreatingTopic(true);
+          return;
+        }
+
+        const { data, error } = await supabase
+          .from('topics')
+          .select('id, name, category, user_id')
+          .eq('user_id', user.id)
+          .order('name', { ascending: true });
+
+        if (error || !data || data.length === 0) {
+          setTopicsList([]);
+          setTopicId('');
+          setIsCreatingTopic(true);
+        } else {
+          setTopicsList(data);
+          const currentActiveTopic = typeof window !== 'undefined' ? window._currentTopicId : null;
+          if (initialTopicId && data.some((t) => t.id === initialTopicId)) {
+            setTopicId(initialTopicId);
+            setIsCreatingTopic(false);
+          } else if (currentActiveTopic && data.some((t) => t.id === currentActiveTopic)) {
+            setTopicId(currentActiveTopic);
+            setIsCreatingTopic(false);
+          } else {
+            setTopicId(data[0].id);
+            setIsCreatingTopic(false);
+          }
+        }
+      } catch (err) {
+        console.warn('[AddWordModal] loadUserTopics error:', err);
+      } finally {
+        setIsLoadingTopics(false);
+      }
+    }
+
+    loadUserTopics();
   }, [isOpen, initialTopicId, initialPassageId, initialWord, initialMeaning]);
 
   if (!isOpen) return null;
@@ -59,6 +100,43 @@ export function AddWordModal() {
   const handleClose = () => {
     setErrorMessage('');
     closeModal('addWord');
+  };
+
+  const handleCreateNewTopic = async () => {
+    const trimmed = newTopicName.trim();
+    if (!trimmed) {
+      setErrorMessage('Vui lòng nhập tên chủ đề mới!');
+      return;
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setErrorMessage('Vui lòng đăng nhập để tạo chủ đề riêng!');
+        return;
+      }
+      const { data, error } = await supabase
+        .from('topics')
+        .insert({
+          name: trimmed,
+          user_id: user.id,
+          category: 'Từ vựng của tôi',
+          icon: 'folder',
+          is_public: false,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTopicsList((prev) => [data, ...prev]);
+      setTopicId(data.id);
+      setIsCreatingTopic(false);
+      setNewTopicName('');
+      setErrorMessage('');
+      success(`Đã tạo chủ đề "${data.name}" thành công! 🎉`);
+    } catch (err) {
+      setErrorMessage('Lỗi tạo chủ đề: ' + (err?.message || 'Không xác định'));
+    }
   };
 
   const handleAiLookup = async () => {
@@ -106,7 +184,7 @@ export function AddWordModal() {
       return;
     }
     if (!topicId) {
-      setErrorMessage('Vui lòng chọn chủ đề lưu trữ!');
+      setErrorMessage('Bạn chưa có chủ đề cá nhân để lưu từ! Vui lòng tạo một chủ đề mới bên trên.');
       return;
     }
 
@@ -114,15 +192,13 @@ export function AddWordModal() {
     setErrorMessage('');
 
     try {
-      const newWord = await addWord({
-        topic_id: topicId,
+      const newWord = await addWord(topicId, {
         word: cleanWord,
         phonetic: phonetic.trim(),
         pos: pos.trim(),
         meaning: cleanMeaning,
-        example_sentence: exampleSentence.trim(),
-        notes: notes.trim(),
-        passage_id: passageId,
+        exampleSentence: exampleSentence.trim(),
+        passageId: passageId,
       });
 
       success(`Đã thêm từ "${cleanWord}" vào sổ từ! 🎉`);
@@ -161,6 +237,7 @@ export function AddWordModal() {
             type="button"
             onClick={handleClose}
             className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
+            aria-label="Đóng"
           >
             ✕
           </button>
@@ -170,20 +247,63 @@ export function AddWordModal() {
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
           {/* Target Topic Selection */}
           <div>
-            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
-              Chủ đề lưu trữ <span className="text-[#D36135]">*</span>
-            </label>
-            <select
-              value={topicId}
-              onChange={(e) => setTopicId(e.target.value)}
-              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2.5 rounded-2xl outline-none text-[#382E2B] text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors cursor-pointer"
-            >
-              {topicsList.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name} ({t.category || 'general'})
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
+                Chủ đề cá nhân <span className="text-[#D36135]">*</span>
+              </label>
+              {topicsList.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingTopic(!isCreatingTopic)}
+                  className="text-xs font-extrabold text-[#D36135] hover:underline cursor-pointer"
+                >
+                  {isCreatingTopic ? '‹ Chọn từ danh sách' : '+ Tạo chủ đề mới'}
+                </button>
+              )}
+            </div>
+
+            {/* Thông báo nếu chưa có chủ đề cá nhân */}
+            {topicsList.length === 0 && !isLoadingTopics && (
+              <div className="p-3.5 rounded-2xl bg-[#FFF3D6] border-2 border-[#D97706]/40 text-[#92400E] text-xs font-semibold flex items-start gap-2.5 mb-2.5">
+                <span className="text-base shrink-0">⚠️</span>
+                <div>
+                  <p className="font-bold text-[#B45309]">Bạn chưa có chủ đề cá nhân nào!</p>
+                  <p className="text-[11px] mt-0.5">Vui lòng nhập tên và bấm <strong>"Tạo"</strong> để tạo chủ đề riêng của bạn trước khi thêm từ nhé.</p>
+                </div>
+              </div>
+            )}
+
+            {isCreatingTopic || topicsList.length === 0 ? (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newTopicName}
+                  onChange={(e) => setNewTopicName(e.target.value)}
+                  placeholder="VD: Từ vựng IELTS Tuần 1, C1 Essential..."
+                  className="flex-1 bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-3.5 py-2 rounded-xl text-sm font-bold outline-none text-[#382E2B]"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={handleCreateNewTopic}
+                  className="px-4 py-2 bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs rounded-xl border-2 border-[#382E2B] shadow-sm cursor-pointer active:translate-y-0.5 transition-all"
+                >
+                  Tạo
+                </button>
+              </div>
+            ) : (
+              <select
+                value={topicId}
+                onChange={(e) => setTopicId(e.target.value)}
+                className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2.5 rounded-2xl outline-none text-[#382E2B] text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors cursor-pointer"
+              >
+                {topicsList.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    📂 {t.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Word English Input with AI Button */}
@@ -212,29 +332,44 @@ export function AddWordModal() {
             />
           </div>
 
-          {/* Phonetic IPA + Audio Preview */}
-          <div>
-            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
-              Phiên âm IPA
-            </label>
-            <div className="relative flex items-center">
+          {/* Phonetic IPA & Part of Speech (POS) */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+                Phiên âm IPA
+              </label>
+              <div className="relative flex items-center">
+                <input
+                  type="text"
+                  value={phonetic}
+                  onChange={(e) => setPhonetic(e.target.value)}
+                  placeholder="/rɪˈzɪl.jənt/"
+                  className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-3.5 pr-10 py-2 rounded-2xl outline-none text-[#382E2B] text-xs sm:text-sm font-mono font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors"
+                />
+                {word && (
+                  <button
+                    type="button"
+                    onClick={() => playWord(word)}
+                    className="absolute right-2 p-1 rounded-xl text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer text-xs"
+                    title="Nghe phát âm"
+                  >
+                    🔊
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+                Từ loại (POS)
+              </label>
               <input
                 type="text"
-                value={phonetic}
-                onChange={(e) => setPhonetic(e.target.value)}
-                placeholder="/rɪˈzɪl.jənt/"
-                className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 pr-12 py-2 rounded-2xl outline-none text-[#382E2B] text-sm font-mono font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors"
+                value={pos}
+                onChange={(e) => setPos(e.target.value)}
+                placeholder="noun, verb, adj..."
+                className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-3.5 py-2 rounded-2xl outline-none text-[#382E2B] text-xs sm:text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors"
               />
-              {word && (
-                <button
-                  type="button"
-                  onClick={() => playWord(word)}
-                  className="absolute right-2.5 p-1.5 rounded-xl text-[#382E2B] hover:bg-[#FAF5EB] border border-[#382E2B]/40 transition-colors cursor-pointer text-sm"
-                  title="Nghe phát âm"
-                >
-                  🔊
-                </button>
-              )}
             </div>
           </div>
 
@@ -285,7 +420,7 @@ export function AddWordModal() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (!topicId && !isCreatingTopic)}
               className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
               {isSubmitting ? (
