@@ -121,12 +121,12 @@ export function PricingModal() {
         if (pollingRef.current) clearInterval(pollingRef.current);
         pollingRef.current = setInterval(async () => {
           try {
-            const checkRes = await fetch(`/api/payment/check-order?orderCode=${data.orderCode}`, {
+            const checkRes = await fetch(`/api/payment/check-status?orderCode=${data.orderCode}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             if (checkRes.ok) {
               const statusData = await checkRes.json();
-              if (statusData.paid) {
+              if (statusData.paid || statusData.status === 'PAID') {
                 clearInterval(pollingRef.current);
                 setView('success');
                 success('Nâng cấp PRO thành công! Cảm ơn bạn 🎉');

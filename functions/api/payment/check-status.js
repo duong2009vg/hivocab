@@ -53,6 +53,7 @@ export async function onRequestGet(context) {
                 ok: true,
                 orderCode: Number(orderCode),
                 status: 'PENDING',
+                paid: false,
                 message: 'Đang chờ thanh toán...'
             }), {
                 status: 200,
@@ -116,6 +117,7 @@ export async function onRequestGet(context) {
             ok: true,
             orderCode: order.order_code,
             status: order.status,
+            paid: order.status === 'PAID',
             amount: order.amount,
             planName: order.plan_name,
             paymentTime: order.payment_time,

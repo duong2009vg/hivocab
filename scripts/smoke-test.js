@@ -55,7 +55,7 @@ const requiredSourceFiles = [
   'functions/app.js',
   'functions/login.js',
   'public/_redirects',
-  'vercel.json',
+  'public/_headers',
   'vite.config.js',
 ];
 

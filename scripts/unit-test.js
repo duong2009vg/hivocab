@@ -29,13 +29,9 @@ console.log('=======================================================\n');
 // 1. Content Security Policy (CSP) Hardening Validation
 console.log('1. Checking CSP Security Hardening:');
 const headersPath = path.resolve(rootDir, 'public/_headers');
-const vercelPath = path.resolve(rootDir, 'vercel.json');
-
 const headersContent = fs.readFileSync(headersPath, 'utf8');
-const vercelContent = fs.readFileSync(vercelPath, 'utf8');
 
 assert(!headersContent.includes("'unsafe-eval'"), 'public/_headers strictly excludes unsafe-eval');
-assert(!vercelContent.includes("'unsafe-eval'"), 'vercel.json strictly excludes unsafe-eval');
 assert(headersContent.includes('challenges.cloudflare.com'), 'public/_headers permits Cloudflare Turnstile');
 assert(headersContent.includes('https://*.supabase.co'), 'public/_headers permits Supabase backend');
 assert(headersContent.includes("X-Frame-Options: DENY"), 'Anti-Clickjacking: X-Frame-Options is DENY');
