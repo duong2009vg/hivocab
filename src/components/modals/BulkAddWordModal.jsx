@@ -2,7 +2,7 @@
 // Modal thêm từ vựng hàng loạt đa năng - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
 // Hỗ trợ: Dán JSON từ AI (ChatGPT/Gemini), Dán bảng Excel, Tải file .xlsx / .csv / .json
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
