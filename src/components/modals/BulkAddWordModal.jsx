@@ -10,10 +10,10 @@ import { getCachedTopics } from '../../services/db.js';
 
 // Mẫu Prompt chuẩn hóa để người dùng sao chép gửi cho ChatGPT / Gemini / Claude
 const AI_PROMPT_TEMPLATE = `Bạn là trợ lý học thuật tiếng Anh chuyên nghiệp cho nền tảng học từ vựng HiVocab.
-Nhiệm vụ của bạn: Tiếp nhận danh sách từ vựng thô bên dưới và chuyển đổi thành một mảng JSON chuẩn (JSON Array) đầy đủ 5 trường dữ liệu để nạp trực tiếp vào hệ thống HiVocab.
+Nhiệm vụ của bạn: Tiếp nhận danh sách từ vựng thô bên dưới và chuyển đổi thành một dãy ký tự JSON (JSON Array) chuẩn đầy đủ 5 trường dữ liệu để nạp trực tiếp vào hệ thống HiVocab.
 
 YÊU CẦU ĐỊNH DẠNG ĐẦU RA:
-Trả về duy nhất 1 mảng JSON (Array of Objects) hợp lệ, mỗi phần tử gồm đúng 5 thuộc tính:
+Trả về DUY NHẤT một dãy ký tự JSON hợp lệ (bắt đầu bằng [ và kết thúc bằng ]), mỗi phần tử là 1 object có đúng 5 trường:
 - "word": từ vựng hoặc cụm từ tiếng Anh gốc (dạng chữ thường, trừ danh từ riêng).
 - "phonetic": phiên âm quốc tế IPA chính xác, đặt trong cặp dấu gạch chéo /.../ (ví dụ: "/rɪˈzɪl.jənt/").
 - "pos": từ loại viết tắt tiếng Anh (noun, verb, adj, adv, phrase, idiom).
@@ -31,10 +31,10 @@ CẤU TRÚC MẪU BẮT BUỘC:
   }
 ]
 
-QUY TẮC BẮT BUỘC:
-1. Đảm bảo đúng chuẩn JSON (không thừa dấu phẩy ở cuối, bao bọc bởi [ ]).
-2. KHÔNG thêm bất kỳ văn bản giải thích, lời chào hay định dạng phụ nào trước và sau khối JSON.
-3. CHỈ trả về duy nhất khối JSON để tôi sao chép trực tiếp vào HiVocab.
+QUY TẮC BẮT BUỘC (QUAN TRỌNG NHẤT):
+1. CHỈ TRẢ VỀ DUY NHẤT DÃY KÝ TỰ JSON (bắt đầu bằng [ và kết thúc bằng ]).
+2. TUYỆT ĐỐI KHÔNG thêm bất kỳ lời chào, lời dẫn (như "Dưới đây là..."), lời giải thích hay định dạng văn bản thừa nào trước và sau khối JSON.
+3. Người dùng sẽ sao chép trực tiếp kết quả này để dán vào ứng dụng HiVocab, nên mọi ký tự ngoài JSON đều sẽ gây lỗi.
 
 DANH SÁCH TỪ VỰNG THÔ CỦA TÔI:
 [DÁN DANH SÁCH TỪ VỰNG CỦA BẠN VÀO ĐÂY]`;
@@ -578,7 +578,7 @@ export function BulkAddWordModal() {
                   </div>
                   <div className="bg-white p-3 rounded-xl border border-[#DECDBB] space-y-1">
                     <div className="font-black text-[#D36135]">Bước 1.3:</div>
-                    <p>Copy kết quả JSON do AI tạo ra và dán vào Bước 2 của HiVocab để nạp tự động!</p>
+                    <p>AI sẽ xuất thẳng dãy ký tự JSON. Bạn chỉ cần ấn <strong>Copy</strong> rồi dán vào Bước 2 để nạp tự động!</p>
                   </div>
                 </div>
               </div>
@@ -692,18 +692,27 @@ export function BulkAddWordModal() {
               </div>
 
               {/* Ô dán văn bản / JSON trực tiếp */}
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
                     Cách 1: Dán JSON từ AI hoặc Bảng Excel vào đây <span className="text-[#D36135]">*</span>
                   </label>
                   <span className="text-xs font-bold text-[#5a7d4d]">Tự động nhận diện 5 cột</span>
                 </div>
+
+                {/* Note gợi ý tải file nếu từ 100 từ trở lên */}
+                <div className="p-3 rounded-xl bg-[#FFF8EE] border-2 border-dashed border-[#E5A13C]/80 text-[#8C5E28] text-xs flex items-start sm:items-center gap-2.5">
+                  <span className="text-base shrink-0 mt-0.5 sm:mt-0">💡</span>
+                  <p className="leading-relaxed">
+                    <strong>Gợi ý:</strong> Nếu bạn muốn thêm từ <strong>100 từ vựng trở lên</strong>, bạn nên <strong>tải lên file</strong> (file Excel <code>.xlsx</code> hoặc file <code>.json</code> ở <em>Cách 2</em> bên dưới) để thao tác nhanh hơn và không bị giới hạn bộ nhớ tạm khi dán nhé!
+                  </p>
+                </div>
+
                 <textarea
                   rows={7}
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
-                  placeholder={`Dán kết quả JSON từ ChatGPT vào đây, ví dụ:\n[\n  {\n    "word": "resilient",\n    "phonetic": "/rɪˈzɪl.jənt/",\n    "pos": "adj",\n    "meaning": "kiên cường, bền bỉ",\n    "example_sentence": "She remained resilient despite difficulties."\n  }\n]\n\nHoặc dán trực tiếp bảng từ Excel copy sang.`}
+                  placeholder={`Dán dãy ký tự JSON nhận được từ AI vào đây, ví dụ:\n[\n  {\n    "word": "resilient",\n    "phonetic": "/rɪˈzɪl.jənt/",\n    "pos": "adj",\n    "meaning": "kiên cường, bền bỉ",\n    "example_sentence": "She remained resilient despite difficulties."\n  }\n]\n\nHoặc dán trực tiếp bảng từ Excel copy sang.`}
                   className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] p-3.5 rounded-2xl outline-none text-[#382E2B] text-xs font-mono shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none leading-relaxed"
                 />
               </div>
