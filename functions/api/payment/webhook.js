@@ -143,30 +143,34 @@ export async function onRequestPost(context) {
                           String(data.description).includes('VQRIO') ||
                           String(data.description).toLowerCase().includes('test');
 
-    // 3. Xác thực chữ ký điện tử
-    if (PAYOS_CHECKSUM_KEY) {
-        const isValid = await verifySignature(data, signature, PAYOS_CHECKSUM_KEY);
-        if (!isValid) {
-            console.error('[PayOS Webhook] Invalid signature!', {
-                data,
-                signature,
-                signData: convertObjToQueryStr(data),
-            });
-            // Nếu là test request từ PayOS mà chữ ký lệch do dev key khác prod key, vẫn chấp nhận để lưu URL thành công
-            if (isTestWebhook) {
-                console.log('[PayOS Webhook] Accepting test webhook despite signature mismatch');
-                return new Response(JSON.stringify({ success: true, message: 'Test webhook verified' }), {
-                    status: 200,
-                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-                });
-            }
-            return new Response(JSON.stringify({ success: false, error: 'Invalid signature' }), {
-                status: 400,
+    // 3. Xác thực chữ ký điện tử (Fail-Closed: Bắt buộc có CHECKSUM_KEY)
+    if (!PAYOS_CHECKSUM_KEY) {
+        console.error('[PayOS Webhook] CRITICAL: PAYOS_CHECKSUM_KEY is not configured in Cloudflare environment!');
+        return new Response(JSON.stringify({ success: false, error: 'Webhook server misconfiguration: missing checksum key' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
+    const isValid = await verifySignature(data, signature, PAYOS_CHECKSUM_KEY);
+    if (!isValid) {
+        console.error('[PayOS Webhook] Invalid signature!', {
+            data,
+            signature,
+            signData: convertObjToQueryStr(data),
+        });
+        // Nếu là test request từ PayOS mà chữ ký lệch do dev key khác prod key, vẫn chấp nhận để lưu URL thành công
+        if (isTestWebhook) {
+            console.log('[PayOS Webhook] Accepting test webhook despite signature mismatch');
+            return new Response(JSON.stringify({ success: true, message: 'Test webhook verified' }), {
+                status: 200,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
-    } else {
-        console.warn('[PayOS Webhook] PAYOS_CHECKSUM_KEY not set! Skipping signature check.');
+        return new Response(JSON.stringify({ success: false, error: 'Invalid signature' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
     }
 
     // Nếu là test webhook và chữ ký hợp lệ -> hoàn tất ngay

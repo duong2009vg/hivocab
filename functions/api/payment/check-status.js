@@ -31,6 +31,38 @@ export async function onRequestGet(context) {
         });
     }
 
+    // 1. Xác thực danh tính người dùng (chống IDOR tra cứu đơn hàng của người khác)
+    const authHeader = request.headers.get('authorization') || '';
+    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
+    if (!token) {
+        return new Response(JSON.stringify({ ok: false, error: 'Vui lòng cung cấp token xác thực' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
+    const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'apikey': SUPABASE_ANON_KEY,
+        },
+    });
+
+    if (!userRes.ok) {
+        return new Response(JSON.stringify({ ok: false, error: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
+    const authUser = await userRes.json();
+    if (!authUser?.id) {
+        return new Response(JSON.stringify({ ok: false, error: 'Không thể xác thực người dùng' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
     try {
         const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?order_code=eq.${orderCode}&select=*`, {
             headers: {
@@ -62,6 +94,30 @@ export async function onRequestGet(context) {
         }
 
         const order = orders[0];
+
+        // 2. Kiểm tra quyền sở hữu đơn hàng (chỉ chủ đơn hàng hoặc admin mới được xem)
+        if (order.user_id !== authUser.id) {
+            let isAdmin = false;
+            try {
+                const adminCheckRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${authUser.id}&select=role`, {
+                    headers: {
+                        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                        'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                    },
+                });
+                if (adminCheckRes.ok) {
+                    const adminData = await adminCheckRes.json();
+                    if (adminData?.[0]?.role === 'admin') isAdmin = true;
+                }
+            } catch (_) {}
+
+            if (!isAdmin) {
+                return new Response(JSON.stringify({ ok: false, error: 'Bạn không có quyền truy cập thông tin đơn hàng này' }), {
+                    status: 403,
+                    headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                });
+            }
+        }
 
         // Lấy trạng thái profile của user
         let profile = null;
