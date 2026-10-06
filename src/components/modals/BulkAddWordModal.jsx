@@ -414,8 +414,6 @@ export function BulkAddWordModal() {
     setErrorMessage('');
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
       const wordsPayload = validWords.map((item, idx) => ({
         topic_id: topicId,
         word: item.word.trim(),
@@ -427,37 +425,16 @@ export function BulkAddWordModal() {
         word_order: idx + 1,
       }));
 
-      // Chèn hàng loạt vào bảng words
-      const { data: inserted, error: insertErr } = await supabase
+      // Chèn hàng loạt vào bảng words (chỉ lưu từ vào chủ đề, không tự gán level SRS)
+      const { error: insertErr } = await supabase
         .from('words')
-        .insert(wordsPayload)
-        .select('id');
+        .insert(wordsPayload);
 
       if (insertErr) {
         if (insertErr.message?.includes('violates row-level security policy')) {
           throw new Error('Chủ đề này thuộc hệ thống hoặc của người dùng khác. Bạn hãy bấm "+ Tạo chủ đề mới" để lưu vào kho từ của riêng bạn nhé!');
         }
         throw insertErr;
-      }
-
-      // Khởi tạo word_progress (level = 1) cho người dùng để đưa vào chu kỳ Spaced Repetition (SRS)
-      if (user?.id && inserted?.length > 0) {
-        const now = new Date().toISOString();
-        const progRows = inserted.map((w) => ({
-          user_id: user.id,
-          word_id: w.id,
-          level: 1,
-          next_review_at: now,
-          review_count: 0,
-          created_at: now,
-        }));
-        try {
-          await supabase
-            .from('word_progress')
-            .upsert(progRows, { onConflict: 'user_id,word_id' });
-        } catch (progErr) {
-          console.warn('[BulkAddWordModal] word_progress init error:', progErr);
-        }
       }
 
       success(`Đã nạp thành công ${validWords.length} từ vựng vào chủ đề! 🎉🐾`);

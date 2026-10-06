@@ -628,7 +628,6 @@ export async function addWord(topicIdOrObj, options = {}) {
     topicId = topicIdOrObj.topic_id || topicIdOrObj.topicId;
     opts = topicIdOrObj;
   }
-  const { data: { user } } = await supabase.auth.getUser();
   const payload = {
     topic_id: topicId,
     word: String(opts.word || '').trim(),
@@ -647,20 +646,6 @@ export async function addWord(topicIdOrObj, options = {}) {
     .single();
   if (error) throw error;
 
-  if (user?.id && data?.id) {
-    try {
-      await supabase.from('word_progress').upsert({
-        user_id: user.id,
-        word_id: data.id,
-        level: 1,
-        next_review_at: new Date().toISOString(),
-        review_count: 0,
-        created_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,word_id' });
-    } catch (progErr) {
-      console.warn('[addWord] word_progress init error:', progErr);
-    }
-  }
   return data;
 }
 
