@@ -113,10 +113,12 @@ export function AdminBulkImportTab() {
       if (error) throw error;
 
       // Update topic word count
-      await supabase.rpc('increment_topic_word_count', {
-        p_topic_id: selectedTopicId,
-        p_count: payload.length,
-      }).catch(() => {});
+      try {
+        await supabase.rpc('increment_topic_word_count', {
+          p_topic_id: selectedTopicId,
+          p_count: payload.length,
+        });
+      } catch (_) {}
 
       showToast(`Đã nạp thành công ${payload.length} từ vựng vào chủ đề! 🎉`, 'success');
       setRawText('');

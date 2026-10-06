@@ -66,12 +66,12 @@ export function PageProfile() {
 
       // Also try updating profiles table if available
       if (user?.id) {
-        supabase
-          .from('profiles')
-          .update({ full_name: fullName.trim() })
-          .eq('id', user.id)
-          .then(() => {})
-          .catch(() => {});
+        try {
+          await supabase
+            .from('profiles')
+            .update({ full_name: fullName.trim() })
+            .eq('id', user.id);
+        } catch (_) {}
       }
 
       setNameMsg({ text: 'Cập nhật họ tên thành công! 🌿', isError: false });

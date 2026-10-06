@@ -69,19 +69,22 @@ export function GrantProModal({
         }
 
         // 2. Insert gift order record for accounting & auditing
-        await supabase
-          .from('orders')
-          .insert({
-            order_code: Math.floor(100000000 + Math.random() * 900000000),
-            user_id: target.id,
-            user_email: target.email || '',
-            amount: 0,
-            plan_id: planCode,
-            status: 'PAID',
-            payment_method: 'MANUAL_GIFT',
-            payment_time: now.toISOString(),
-          })
-          .catch((err) => console.warn('Record gift order failed (non-critical):', err));
+        try {
+          await supabase
+            .from('orders')
+            .insert({
+              order_code: Math.floor(100000000 + Math.random() * 900000000),
+              user_id: target.id,
+              user_email: target.email || '',
+              amount: 0,
+              plan_id: planCode,
+              status: 'PAID',
+              payment_method: 'MANUAL_GIFT',
+              payment_time: now.toISOString(),
+            });
+        } catch (err) {
+          console.warn('Record gift order failed (non-critical):', err);
+        }
       }
 
       showToast(`Đã tặng gói PRO thành công cho ${userCount} học viên! 🎉`, 'success');

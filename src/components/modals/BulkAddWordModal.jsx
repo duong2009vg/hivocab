@@ -451,10 +451,13 @@ export function BulkAddWordModal() {
           review_count: 0,
           created_at: now,
         }));
-        await supabase
-          .from('word_progress')
-          .upsert(progRows, { onConflict: 'user_id,word_id' })
-          .catch(() => {});
+        try {
+          await supabase
+            .from('word_progress')
+            .upsert(progRows, { onConflict: 'user_id,word_id' });
+        } catch (progErr) {
+          console.warn('[BulkAddWordModal] word_progress init error:', progErr);
+        }
       }
 
       success(`Đã nạp thành công ${validWords.length} từ vựng vào chủ đề! 🎉🐾`);
