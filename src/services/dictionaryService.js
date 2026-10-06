@@ -1,6 +1,7 @@
 // src/services/dictionaryService.js
 // Dịch vụ tra cứu từ điển: Tra cứu dữ liệu từ Supabase (70.000 từ) & Điền từ vựng tự động bằng DeepSeek AI API
 import { supabase } from '../lib/supabaseClient.js';
+import { HiAudio } from './audioService.js';
 
 const RECENT_KEY = 'hi_dict_recent_searches';
 const memoryCache = new Map();
@@ -62,17 +63,10 @@ export function clearRecentSearches() {
   } catch (_) {}
 }
 
-export function playWordAudio(word) {
+export function playWordAudio(word, rate = 0.9, lang = 'en') {
   if (!word || typeof window === 'undefined') return;
   try {
-    if (window.speechSynthesis) {
-      if (window.speechSynthesis.paused) window.speechSynthesis.resume();
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(word);
-      utter.lang = 'en-US';
-      utter.rate = 0.9;
-      window.speechSynthesis.speak(utter);
-    }
+    return HiAudio.playWord(word, rate, lang);
   } catch (err) {
     console.warn('[dictionaryService] Audio error:', err);
   }

@@ -965,37 +965,6 @@ export function PageLibrary() {
           MOBILE VIEW (block lg:hidden, max-w-[430px] mx-auto)
           ───────────────────────────────────────────────────────────────── */}
       <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen px-4 pt-3 pb-24 relative pwa-safe-top">
-        
-        {/* Mobile Header Bar */}
-        <header className="flex justify-between items-center w-full py-2">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">📖</span>
-            <span className="font-black text-xl text-[#5A7E56] tracking-tight font-quicksand">HiVocab</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <button 
-              type="button"
-              onClick={() => setIsSearchOpen(true)}
-              className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-[#2D2824] border-2 border-[#2D2824] shadow-[1.5px_2px_0px_rgba(51,48,44,0.85)] active:scale-95 transition-transform"
-            >
-              🔍
-            </button>
-          </div>
-        </header>
-
-        {/* Main Title & Narrative Section */}
-        <section className="pt-2 pb-3 relative">
-          <div className="flex items-center gap-2.5 mb-1.5">
-            <div className="w-8 h-8 rounded-full bg-[#FEAB79] text-[#783D14] flex items-center justify-center border-2 border-[#2D2824] shadow-[1.5px_2px_0px_rgba(51,48,44,0.85)] rotate-[-4deg]">
-              🎒
-            </div>
-            <h1 className="text-2xl font-black text-[#2D2824] tracking-tight font-quicksand">Thư viện cộng đồng</h1>
-          </div>
-          <p className="text-xs text-[#68594D] max-w-[94%] leading-relaxed font-semibold">
-            Khám phá, chia sẻ và lưu trữ hàng ngàn bộ từ vựng phong phú từ cộng đồng học viên HiVocab.
-          </p>
-        </section>
-
         {/* Storybook Tabs */}
         <div className="my-2">
           <div className="bg-white rounded-[26px_22px_24px_28px] p-1.5 flex items-center justify-between border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] gap-1">

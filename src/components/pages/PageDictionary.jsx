@@ -211,23 +211,25 @@ export function PageDictionary() {
                     </span>
                   )}
                 </div>
-                {formattedPhonetic && (
-                  <div className="flex items-center space-x-2 mt-1 text-xs font-mono text-[#74796f]">
-                    <span>{formattedPhonetic}</span>
-                    <button
-                      onClick={() => playAudio(result.word)}
-                      className="px-2 py-0.5 rounded-md bg-[#FAF5EB] border border-[#3d352e] text-[10px] font-bold active:scale-95"
-                    >
-                      🔊 Nghe
-                    </button>
-                  </div>
-                )}
+                <div className="flex items-center space-x-2 mt-1 text-xs font-mono text-[#74796f]">
+                  {formattedPhonetic && <span>{formattedPhonetic}</span>}
+                  <button
+                    type="button"
+                    onClick={() => playAudio(result.word)}
+                    className="px-2.5 py-1 rounded-lg bg-[#FAF5EB] hover:bg-[#F0E6D2] border border-[#3d352e] text-xs font-bold active:scale-95 transition-transform flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>🔊</span>
+                    <span>Nghe</span>
+                  </button>
+                </div>
               </div>
               <button
-                onClick={openSaveModal}
-                className="bg-[#e87248] text-white text-xs font-bold px-3 py-1.5 rounded-xl border border-[#3d352e] shadow-xs active:scale-95"
+                type="button"
+                onClick={() => openSaveModal()}
+                className="bg-[#e87248] hover:bg-[#d96339] text-white text-xs font-bold px-3.5 py-2 rounded-xl border-2 border-[#3d352e] shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1"
               >
-                + Thêm
+                <span>+</span>
+                <span>Thêm</span>
               </button>
             </div>
 

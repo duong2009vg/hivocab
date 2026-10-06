@@ -18,6 +18,7 @@ const BugReportModal = lazy(() => import('./components/modals/BugReportModal.jsx
 const SrsExplainerModal = lazy(() => import('./components/modals/SrsExplainerModal.jsx'));
 const CreateTopicModal = lazy(() => import('./components/modals/CreateTopicModal.jsx'));
 const AddWordModal = lazy(() => import('./components/modals/AddWordModal.jsx'));
+const SaveWordToTopicModal = lazy(() => import('./components/modals/SaveWordToTopicModal.jsx'));
 const BulkAddWordModal = lazy(() => import('./components/modals/BulkAddWordModal.jsx'));
 const PricingModal = lazy(() => import('./components/modals/PricingModal.jsx'));
 const ForgotPasswordModal = lazy(() => import('./components/modals/ForgotPasswordModal.jsx'));
@@ -159,6 +160,7 @@ function AppRoutes() {
         <SrsExplainerModal />
         <CreateTopicModal />
         <AddWordModal />
+        <SaveWordToTopicModal />
         <BulkAddWordModal />
         <PricingModal />
         <ForgotPasswordModal />

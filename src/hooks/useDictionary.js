@@ -2,13 +2,14 @@
 // Reactive hook for Dictionary search, suggestions, recent lookups, and audio
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
+import { useModal } from '../context/ModalContext.jsx';
 import {
   lookupWord,
   getRecentSearches,
   removeRecentSearch,
   clearRecentSearches,
-  playWordAudio,
 } from '../services/dictionaryService.js';
+import { playWordAudio } from '../services/audioService.js';
 
 const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
 const SB_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words';
@@ -16,6 +17,7 @@ const SB_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words';
 const suggestCache = new Map();
 
 export function useDictionary() {
+  const { openModal } = useModal();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('empty'); // 'empty' | 'loading' | 'result' | 'error'
   const [result, setResult] = useState(null);
@@ -168,10 +170,10 @@ export function useDictionary() {
     setRecentSearches([]);
   }, []);
 
-  const playAudio = useCallback((w) => {
+  const playAudio = useCallback((w, lang = 'en') => {
     const wordToPlay = w || (result && result.word);
     if (!wordToPlay) return;
-    playWordAudio(wordToPlay);
+    playWordAudio(wordToPlay, 0.9, lang);
   }, [result]);
 
   const copyWord = useCallback(async (w) => {
@@ -187,13 +189,18 @@ export function useDictionary() {
     }
   }, [result]);
 
-  const openSaveModal = useCallback(() => {
-    if (typeof window !== 'undefined' && typeof window.dictOpenSaveModal === 'function') {
-      window.dictOpenSaveModal();
-    } else if (typeof window !== 'undefined' && typeof window.openAddWordModal === 'function' && result) {
-      window.openAddWordModal(result.word, result.viSummary || result.meaning);
+  const openSaveModal = useCallback((senseIdx = null) => {
+    if (!result || !result.word) return;
+    let wordPayload = { ...result };
+    if (typeof senseIdx === 'number' && result.entries?.[senseIdx]) {
+      wordPayload = {
+        ...result,
+        meaning: result.entries[senseIdx].meaning,
+        example: result.entries[senseIdx].example,
+      };
     }
-  }, [result]);
+    openModal('saveWordToTopic', { wordData: wordPayload });
+  }, [result, openModal]);
 
   return {
     query,

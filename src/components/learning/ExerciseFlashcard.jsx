@@ -126,27 +126,31 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                 </div>
               </div>
 
-              {/* Center Mascot / Word Art Illustration (Compact & Aesthetic) */}
-              <div className="my-2 sm:my-3 relative flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32">
-                <div className="absolute inset-0 bg-[#FFF5EB] rounded-full border-2 border-dashed border-[#E76F51]/30"></div>
-                {d.imageUrl ? (
+              {/* Center Mascot / Word Art Illustration (Prominent & Aesthetic) */}
+              {d.imageUrl ? (
+                <div className="my-2 sm:my-3 relative flex items-center justify-center w-40 h-40 sm:w-52 sm:h-52 md:w-60 md:h-60 max-w-full">
+                  <div className="absolute inset-0 bg-[#FFF5EB] rounded-3xl border-2 border-dashed border-[#E76F51]/40 shadow-xs"></div>
                   <img
                     alt={d.frontWord}
-                    className="relative z-10 w-20 h-20 sm:w-28 sm:h-28 object-contain rounded-2xl select-none"
+                    className="relative z-10 w-36 h-36 sm:w-48 sm:h-48 md:w-56 md:h-56 object-contain rounded-2xl select-none transition-transform hover:scale-105 duration-200"
                     src={d.imageUrl}
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
                     }}
                   />
-                ) : (
+                  <span className="absolute -top-1.5 -right-1.5 text-[#feab79] text-lg sm:text-xl animate-bounce">✨</span>
+                </div>
+              ) : (
+                <div className="my-2 sm:my-3 relative flex items-center justify-center w-28 h-28 sm:w-36 sm:h-36">
+                  <div className="absolute inset-0 bg-[#FFF5EB] rounded-full border-2 border-dashed border-[#E76F51]/30"></div>
                   <img
                     alt="Bé hổ học tập"
-                    className="relative z-10 w-20 h-20 sm:w-28 sm:h-28 object-contain mix-blend-multiply select-none"
+                    className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 object-contain mix-blend-multiply select-none"
                     src="/mascot/mascot_cozy.png"
                   />
-                )}
-                <span className="absolute -top-1 -right-1 text-[#feab79] text-base sm:text-lg animate-bounce">✨</span>
-              </div>
+                  <span className="absolute -top-1 -right-1 text-[#feab79] text-base sm:text-lg animate-bounce">✨</span>
+                </div>
+              )}
 
               {/* Word Prompt Content */}
               <div className="space-y-1.5 max-w-lg my-auto px-2">

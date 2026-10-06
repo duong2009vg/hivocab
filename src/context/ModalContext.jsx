@@ -10,6 +10,7 @@ export function ModalProvider({ children }) {
     pricingModal:   { open: false },
     createTopic:    { open: false },
     addWord:        { open: false, topicId: null, passageId: null },
+    saveWordToTopic:{ open: false, wordData: null },
     bulkAdd:        { open: false },
     srsExplainer:   { open: false },
     forgotPassword: { open: false },
@@ -40,6 +41,8 @@ export function ModalProvider({ children }) {
     window.closeCreateTopicModal = () => closeModal('createTopic');
     window.openAddWordModal = (topicId, passageId) => openModal('addWord', { topicId, passageId });
     window.closeAddWordModal = () => closeModal('addWord');
+    window.openSaveWordToTopicModal = (wordData) => openModal('saveWordToTopic', { wordData });
+    window.dictOpenSaveModal = (wordData) => openModal('saveWordToTopic', { wordData });
     window.openVocabBulkAddModal = () => openModal('bulkAdd');
     window.closeVocabBulkAddModal = () => closeModal('bulkAdd');
     window.openForgotPasswordModal = () => openModal('forgotPassword');
