@@ -39,6 +39,14 @@ export function PageLessonDetail() {
     openModal('addWord', { topicId, passageId: isPassage ? passageId : null });
   };
 
+  const handleOpenFlashcard = () => {
+    openModal('flashcardMode', {
+      onSelect: (mode) => {
+        startPractice(0, mode);
+      },
+    });
+  };
+
   return (
     <div id="page-lesson-detail" className="page active min-h-screen text-[#322e2b] font-['Quicksand',sans-serif] bg-[#faf7f2]" style={{ backgroundImage: 'radial-gradient(#e2d9cd 1px, transparent 1px), radial-gradient(#eedecb 0.7px, transparent 0.7px)', backgroundSize: '24px 24px, 12px 12px', backgroundPosition: '0 0, 6px 6px' }}>
 
@@ -109,7 +117,7 @@ export function PageLessonDetail() {
           </div>
           <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
             <button
-              onClick={() => startPractice(0)}
+              onClick={handleOpenFlashcard}
               className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#feab79]/30 flex items-center justify-center text-sm">
@@ -336,7 +344,7 @@ export function PageLessonDetail() {
                 <span>Thêm từ vào bài</span>
               </button>
               <button
-                onClick={() => startPractice(0)}
+                onClick={handleOpenFlashcard}
                 className="px-5 py-2.5 bg-[#799b6e] hover:bg-[#688a5d] text-white font-bold text-sm rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] flex items-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
               >
                 <span>🚀</span>
@@ -378,7 +386,7 @@ export function PageLessonDetail() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* Flashcard */}
             <button
-              onClick={() => startPractice(0)}
+              onClick={handleOpenFlashcard}
               className="group p-4 bg-white hover:bg-[#fff2ec] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-2">

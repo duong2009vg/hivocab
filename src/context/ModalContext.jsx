@@ -16,6 +16,7 @@ export function ModalProvider({ children }) {
     forgotPassword: { open: false },
     authError:      { open: false, desc: '' },
     ieltsGoal:      { open: false },
+    flashcardMode:  { open: false, onSelect: null },
   });
 
   const openModal = useCallback((modalName, data = {}) => {
@@ -49,6 +50,8 @@ export function ModalProvider({ children }) {
     window.openAuthErrorModal = (desc) => openModal('authError', { desc });
     window.openIELTSGoalModal = () => openModal('ieltsGoal');
     window.closeIELTSGoalModal = () => closeModal('ieltsGoal');
+    window.openFlashcardModeModal = (onSelect) => openModal('flashcardMode', { onSelect });
+    window.closeFlashcardModeModal = () => closeModal('flashcardMode');
 
     return () => {
       delete window.__modalContext;

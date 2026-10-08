@@ -35,6 +35,8 @@ export function PageLearning() {
     isComplete,
     progress,
     session,
+    flashcardMode,
+    setFlashcardMode,
     startSession,
     rateFlashcard,
     submitAnswer,
@@ -58,6 +60,12 @@ export function PageLearning() {
 
       const modeIndex = typeof window !== 'undefined' ? (window._practiceMode ?? null) : null;
       const allowedType = modeIndex !== null ? (MODE_TYPE_MAP[modeIndex] || null) : null;
+
+      let mode = typeof window !== 'undefined' ? window._flashcardMode : null;
+      if (!mode) {
+        try { mode = localStorage.getItem('hivocab_flashcard_mode'); } catch (_) {}
+      }
+      mode = (mode === 'vi_en' || mode === 'en_vi') ? mode : 'en_vi';
 
       let words = typeof window !== 'undefined'
         ? (window._currentLessonWords || window._currentSessionWords || [])
@@ -83,7 +91,7 @@ export function PageLearning() {
       }
 
       if (words && words.length > 0) {
-        startSession(words, allowedType);
+        startSession(words, allowedType, mode);
         setIsLoadingWords(false);
       } else {
         setIsLoadingWords(false);
@@ -239,8 +247,23 @@ export function PageLearning() {
             </div>
           </div>
 
-          {/* Action Utilities: Sound & Report (Full SVG) */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          {/* Action Utilities: Flashcard Mode Toggle, Sound & Report */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {currentItem?.exerciseType === 'flashcard' && (
+              <button
+                type="button"
+                onClick={() => setFlashcardMode(flashcardMode === 'en_vi' ? 'vi_en' : 'en_vi')}
+                className="h-10 sm:h-12 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center gap-1.5 hover:bg-amber-50/70 active:translate-y-0.5 transition cursor-pointer text-stone-800 text-xs sm:text-sm font-bold"
+                title={`Đang học: ${flashcardMode === 'en_vi' ? 'Anh - Việt' : 'Việt - Anh'}. Nhấp để đổi chiều.`}
+              >
+                <span className="text-sm">{flashcardMode === 'en_vi' ? '🇬🇧➔🇻🇳' : '🇻🇳➔🇬🇧'}</span>
+                <span className="hidden sm:inline font-extrabold text-[11px] uppercase tracking-wider text-stone-700">
+                  {flashcardMode === 'en_vi' ? 'Anh - Việt' : 'Việt - Anh'}
+                </span>
+                <span className="text-xs text-[#D36135]">⇄</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={handleToggleSound}

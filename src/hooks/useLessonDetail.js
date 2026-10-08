@@ -171,15 +171,21 @@ export function useLessonDetail() {
     playWordAudio(wordText);
   }, []);
 
-  const startPractice = useCallback((modeIndex) => {
+  const startPractice = useCallback((modeIndex, flashcardMode) => {
     if (typeof window === 'undefined') return;
     // Pass current words & mode to PageLearning via window globals
     if (words && words.length > 0) {
       window._currentLessonWords = words;
       window._practiceMode = modeIndex ?? null;
+      if (flashcardMode) {
+        window._flashcardMode = flashcardMode;
+      }
       navigateTo('learning');
     } else if (typeof window.startSinglePractice === 'function') {
       // Fallback to legacy bridge if words not yet loaded
+      if (flashcardMode) {
+        window._flashcardMode = flashcardMode;
+      }
       window.startSinglePractice(modeIndex);
     }
   }, [words, navigateTo]);

@@ -23,6 +23,7 @@ const BulkAddWordModal = lazy(() => import('./components/modals/BulkAddWordModal
 const PricingModal = lazy(() => import('./components/modals/PricingModal.jsx'));
 const ForgotPasswordModal = lazy(() => import('./components/modals/ForgotPasswordModal.jsx'));
 const AuthErrorModal = lazy(() => import('./components/modals/AuthErrorModal.jsx'));
+const FlashcardModeModal = lazy(() => import('./components/modals/FlashcardModeModal.jsx'));
 const PageLanding = lazy(() => import('./components/pages/PageLanding.jsx'));
 const PageFeatures = lazy(() => import('./components/pages/PageFeatures.jsx'));
 const PageReviews = lazy(() => import('./components/pages/PageReviews.jsx'));
@@ -165,6 +166,7 @@ function AppRoutes() {
         <PricingModal />
         <ForgotPasswordModal />
         <AuthErrorModal />
+        <FlashcardModeModal />
       </Suspense>
     </div>
   );

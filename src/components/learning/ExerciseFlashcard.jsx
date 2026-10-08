@@ -44,16 +44,24 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
   const playAudio = useCallback(
     (e) => {
       if (e) e.stopPropagation();
-      const word = d.backWord || d.frontWord;
-      if (window.HiAudio?.playWord) {
+      const word = d.englishWord || (d.mode === 'en_vi' ? d.frontWord : d.backWord);
+      if (!word) return;
+      if (typeof window !== 'undefined' && window.HiAudio?.playWord) {
         window.HiAudio.playWord(word, 0.9);
-      } else if ('speechSynthesis' in window) {
-        const u = new SpeechSynthesisUtterance(word);
-        u.lang = 'en-US';
-        window.speechSynthesis.speak(u);
+      } else if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+          if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+          setTimeout(() => {
+            const u = new SpeechSynthesisUtterance(word);
+            u.lang = 'en-US';
+            u.rate = 0.9;
+            window.speechSynthesis.speak(u);
+          }, 30);
+        } catch (_) {}
       }
     },
-    [d.backWord, d.frontWord]
+    [d.englishWord, d.mode, d.frontWord, d.backWord]
   );
 
   return (
@@ -99,9 +107,9 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
               {/* Header ribbon inside card */}
               <div className="w-full flex items-center justify-between pb-2.5 border-b-2 border-stone-200/70">
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-[#EDF6F9] border-2 border-[#2D2825] rounded-full shadow-[1.5px_1.5px_0px_#2D2825]">
-                  <span className="w-2 h-2 rounded-full bg-[#264653]"></span>
-                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-[#264653]">
-                    {d.frontLabel || 'DỊCH SANG TIẾNG ANH'}
+                  <span className={`w-2 h-2 rounded-full ${d.mode === 'en_vi' ? 'bg-[#2A7BA0]' : 'bg-[#264653]'}`}></span>
+                  <span className={`text-[11px] sm:text-xs font-extrabold uppercase tracking-wide ${d.mode === 'en_vi' ? 'text-[#2A7BA0]' : 'text-[#264653]'}`}>
+                    {d.frontLabel || (d.mode === 'en_vi' ? 'TỪ TIẾNG ANH' : 'DỊCH SANG TIẾNG ANH')}
                   </span>
                 </div>
 
@@ -154,9 +162,43 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
 
               {/* Word Prompt Content */}
               <div className="space-y-1.5 max-w-lg my-auto px-2">
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#2D2825] tracking-normal leading-snug">
-                  {d.frontWord}
-                </h2>
+                {d.mode === 'en_vi' ? (
+                  <>
+                    <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#2D2825] tracking-tight leading-snug">
+                        {d.frontWord}
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={playAudio}
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EBF2F7] hover:bg-[#D8E6F0] active:scale-95 border-2 border-[#2D2825] shadow-[1.5px_1.5px_0px_#2D2825] flex items-center justify-center transition-all cursor-pointer"
+                        title="Nghe phát âm chuẩn"
+                      >
+                        <svg className="w-4 h-4 text-[#264653]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
+                    {(d.phonetic || d.pos) && (
+                      <div className="flex items-center justify-center gap-2 text-xs sm:text-sm">
+                        {d.phonetic && (
+                          <span className="font-mono text-stone-600 font-semibold tracking-wider">
+                            /{d.phonetic}/
+                          </span>
+                        )}
+                        {d.pos && (
+                          <span className="px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 border border-stone-300 font-bold text-[11px]">
+                            {d.pos}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#2D2825] tracking-normal leading-snug">
+                    {d.frontWord}
+                  </h2>
+                )}
                 {(d.exampleSentence || d.hint) && (
                   <p className="font-serif italic text-xs sm:text-sm text-stone-600 px-2 leading-relaxed">
                     "{d.exampleSentence || d.hint}"
@@ -198,9 +240,9 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
               {/* Header ribbon inside card */}
               <div className="w-full flex items-center justify-between pb-2.5 border-b-2 border-stone-200/70">
                 <div className="flex items-center gap-1.5 px-3 py-1 bg-[#EDF6F9] border-2 border-[#2D2825] rounded-full shadow-[1.5px_1.5px_0px_#2D2825]">
-                  <span className="w-2 h-2 rounded-full bg-[#609966]"></span>
-                  <span className="text-[11px] sm:text-xs font-extrabold uppercase tracking-wide text-[#609966]">
-                    {d.backLabel || 'ĐÁP ÁN TIẾNG ANH'}
+                  <span className={`w-2 h-2 rounded-full ${d.mode === 'en_vi' ? 'bg-[#2A7BA0]' : 'bg-[#609966]'}`}></span>
+                  <span className={`text-[11px] sm:text-xs font-extrabold uppercase tracking-wide ${d.mode === 'en_vi' ? 'text-[#2A7BA0]' : 'text-[#609966]'}`}>
+                    {d.backLabel || (d.mode === 'en_vi' ? 'ĐÁP ÁN TIẾNG VIỆT' : 'ĐÁP ÁN TIẾNG ANH')}
                   </span>
                 </div>
 
@@ -233,33 +275,68 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
               </div>
 
               {/* Back content */}
-              <div className="space-y-2 max-w-lg my-auto pt-1 px-2">
-                <div className="flex items-center justify-center gap-2 sm:gap-2.5">
-                  <h2 className="text-2xl sm:text-3xl font-black text-[#2D2825] tracking-tight">
-                    {d.backWord || d.frontWord}
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={playAudio}
-                    className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EBF2F7] hover:bg-[#D8E6F0] active:scale-95 border-2 border-[#2D2825] shadow-[1.5px_1.5px_0px_#2D2825] flex items-center justify-center transition-all cursor-pointer"
-                    title="Nghe phát âm chuẩn"
-                  >
-                    <svg className="w-4 h-4 text-[#264653]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                      <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
-                </div>
+              <div className="space-y-2.5 max-w-lg my-auto pt-1 px-2 w-full">
+                {d.mode === 'en_vi' ? (
+                  <>
+                    <h2 className="text-2xl sm:text-3xl font-black text-[#2D2825] tracking-tight">
+                      {d.meaning || d.backWord}
+                    </h2>
 
-                {d.phonetic && (
-                  <p className="text-xs sm:text-sm font-mono text-stone-600 font-semibold tracking-wider">
-                    /{d.phonetic}/
-                  </p>
-                )}
+                    {/* English reference banner */}
+                    <div className="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-2xl bg-[#F5EFE6] border-2 border-[#2D2825] shadow-xs flex-wrap">
+                      <span className="font-bold text-sm sm:text-base text-[#264653]">
+                        {d.englishWord || d.frontWord}
+                      </span>
+                      {d.phonetic && (
+                        <span className="text-xs font-mono text-stone-600 font-semibold">/{d.phonetic}/</span>
+                      )}
+                      {d.pos && (
+                        <span className="px-1.5 py-0.2 rounded-full bg-white text-stone-600 border border-stone-300 font-bold text-[10px]">
+                          {d.pos}
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={playAudio}
+                        className="w-7 h-7 rounded-full bg-white hover:bg-stone-100 active:scale-95 border border-[#2D2825] flex items-center justify-center transition-all cursor-pointer"
+                        title="Nghe phát âm chuẩn"
+                      >
+                        <svg className="w-3.5 h-3.5 text-[#264653]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center gap-2 sm:gap-2.5">
+                      <h2 className="text-2xl sm:text-3xl font-black text-[#2D2825] tracking-tight">
+                        {d.backWord || d.englishWord}
+                      </h2>
+                      <button
+                        type="button"
+                        onClick={playAudio}
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#EBF2F7] hover:bg-[#D8E6F0] active:scale-95 border-2 border-[#2D2825] shadow-[1.5px_1.5px_0px_#2D2825] flex items-center justify-center transition-all cursor-pointer"
+                        title="Nghe phát âm chuẩn"
+                      >
+                        <svg className="w-4 h-4 text-[#264653]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                          <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
 
-                {d.meaning && (
-                  <div className="bg-[#FAF5EB] border-2 border-[#2D2825] rounded-xl sm:rounded-2xl p-2 sm:p-3 text-xs sm:text-sm font-bold text-stone-800 shadow-2xs">
-                    {d.meaning}
-                  </div>
+                    {d.phonetic && (
+                      <p className="text-xs sm:text-sm font-mono text-stone-600 font-semibold tracking-wider">
+                        /{d.phonetic}/
+                      </p>
+                    )}
+
+                    {d.meaning && (
+                      <div className="bg-[#FAF5EB] border-2 border-[#2D2825] rounded-xl sm:rounded-2xl p-2 sm:p-3 text-xs sm:text-sm font-bold text-stone-800 shadow-2xs">
+                        {d.meaning}
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {d.exampleSentence && (

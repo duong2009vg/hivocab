@@ -113,19 +113,39 @@ function blankAnswerInSentence(sentence, answer) {
 
 // ─── Exercise Data Generation ─────────────────────────────────────────────────
 
-function generateExerciseData(word, type, allWords) {
+function generateExerciseData(word, type, allWords, flashcardMode = 'en_vi') {
   switch (type) {
-    case 'flashcard':
+    case 'flashcard': {
+      const isEnVi = (flashcardMode || 'en_vi') === 'en_vi';
+      if (isEnVi) {
+        return {
+          mode: 'en_vi',
+          frontLabel: 'TỪ TIẾNG ANH',
+          frontWord: word.word,
+          pos: word.pos || '',
+          phonetic: word.phonetic || '',
+          exampleSentence: word.example_sentence || word.exampleSentence || '',
+          imageUrl: word.image_url || word.imageUrl || '',
+          backLabel: 'ĐÁP ÁN TIẾNG VIỆT',
+          backWord: word.meaning,
+          meaning: word.meaning || '',
+          englishWord: word.word,
+        };
+      }
       return {
-        frontLabel: 'Dịch sang tiếng Anh',
+        mode: 'vi_en',
+        frontLabel: 'DỊCH SANG TIẾNG ANH',
         frontWord: word.meaning,
-        backLabel: 'Đáp án',
-        backWord: word.word,
         pos: word.pos || '',
         phonetic: word.phonetic || '',
         exampleSentence: word.example_sentence || word.exampleSentence || '',
         imageUrl: word.image_url || word.imageUrl || '',
+        backLabel: 'ĐÁP ÁN TIẾNG ANH',
+        backWord: word.word,
+        meaning: word.meaning || '',
+        englishWord: word.word,
       };
+    }
 
     case 'mcq': {
       const correctOption = { text: word.meaning, isCorrect: true };
@@ -211,15 +231,16 @@ function createInitialState() {
     completed: [],
     isActive: false,
     allowedType: null,
+    flashcardMode: 'en_vi',
   };
 }
 
-function createQueueItem(word, forcedType = null, allWords = []) {
+function createQueueItem(word, forcedType = null, allWords = [], flashcardMode = 'en_vi') {
   const exerciseType = forcedType || randomFrom(EXERCISE_TYPES);
   return {
     word,
     exerciseType,
-    exerciseData: generateExerciseData(word, exerciseType, allWords),
+    exerciseData: generateExerciseData(word, exerciseType, allWords, flashcardMode),
     usedTypes: [exerciseType],
     attempts: 0,
     failCount: 0,
@@ -249,10 +270,19 @@ export function useStudySession() {
   };
 
   // ── startSession ────────────────────────────────────────────────────────────
-  const startSession = useCallback((words, allowedType = null) => {
+  const startSession = useCallback((words, allowedType = null, flashcardMode = null) => {
     if (!words || words.length === 0) return;
+    let mode = flashcardMode;
+    if (!mode && typeof window !== 'undefined') {
+      mode = window._flashcardMode || null;
+    }
+    if (!mode) {
+      try { mode = localStorage.getItem('hivocab_flashcard_mode'); } catch (_) {}
+    }
+    mode = (mode === 'vi_en' || mode === 'en_vi') ? mode : 'en_vi';
+
     const shuffled = shuffle(words);
-    const queue = shuffled.map(w => createQueueItem(w, allowedType, words));
+    const queue = shuffled.map(w => createQueueItem(w, allowedType, words, mode));
     setSession({
       allWords: words,
       queue,
@@ -260,6 +290,7 @@ export function useStudySession() {
       completed: [],
       isActive: true,
       allowedType,
+      flashcardMode: mode,
     });
   }, []);
 
@@ -296,7 +327,7 @@ export function useStudySession() {
       newItem.failCount = (newItem.failCount || 0) + 1;
       const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
       newItem.exerciseType = nextType;
-      newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords);
+      newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
       if (!newItem.usedTypes.includes(nextType)) newItem.usedTypes = [...newItem.usedTypes, nextType];
 
       reviewWordInDB(item.word.wordId || item.word.id, 'hard');
@@ -358,7 +389,7 @@ export function useStudySession() {
           newItem.failCount = (newItem.failCount || 0) + 1;
           const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
           newItem.exerciseType = nextType;
-          newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords);
+          newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
           if (!newItem.usedTypes.includes(nextType)) newItem.usedTypes = [...newItem.usedTypes, nextType];
           return {
             ...prev,
@@ -393,7 +424,7 @@ export function useStudySession() {
         // Change exercise type, push to end
         const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
         newItem.exerciseType = nextType;
-        newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords);
+        newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
         if (!newItem.usedTypes.includes(nextType)) newItem.usedTypes = [...newItem.usedTypes, nextType];
 
         result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: newItem.failCount };
@@ -448,6 +479,32 @@ export function useStudySession() {
     } catch {}
   }, []);
 
+  // ── setFlashcardMode ────────────────────────────────────────────────────────
+  const setFlashcardMode = useCallback((newMode) => {
+    const validMode = (newMode === 'vi_en' || newMode === 'en_vi') ? newMode : 'en_vi';
+    if (typeof window !== 'undefined') {
+      window._flashcardMode = validMode;
+    }
+    try { localStorage.setItem('hivocab_flashcard_mode', validMode); } catch (_) {}
+    setSession(prev => {
+      if (!prev.isActive) return prev;
+      const updatedQueue = prev.queue.map(item => {
+        if (item.exerciseType === 'flashcard') {
+          return {
+            ...item,
+            exerciseData: generateExerciseData(item.word, 'flashcard', prev.allWords, validMode),
+          };
+        }
+        return item;
+      });
+      return {
+        ...prev,
+        flashcardMode: validMode,
+        queue: updatedQueue,
+      };
+    });
+  }, []);
+
   // ── endSession ──────────────────────────────────────────────────────────────
   const endSession = useCallback(() => {
     setSession(prev => ({ ...prev, isActive: false }));
@@ -457,6 +514,7 @@ export function useStudySession() {
   return {
     // State
     session,
+    flashcardMode: session.flashcardMode,
     currentItem,
     isComplete,
     progress,
@@ -466,6 +524,7 @@ export function useStudySession() {
     submitAnswer,
     speakWord,
     endSession,
+    setFlashcardMode,
     // Expose for components
     EXERCISE_TYPES,
   };
