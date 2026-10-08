@@ -311,9 +311,11 @@ export function PageLessonDetail() {
                 <span className="px-3 py-0.5 text-xs font-bold bg-[#f4ede4] text-[#322e2b] border border-[#322e2b] rounded-full">
                   {isPassage ? 'Reading Passage' : 'Lesson'}
                 </span>
-                <span className="px-2.5 py-0.5 text-xs font-bold bg-[#fff9e6] text-[#322e2b] border border-[#322e2b] rounded-full">
-                  IELTS Academic Reading
-                </span>
+                {isPassage && (
+                  <span className="px-2.5 py-0.5 text-xs font-bold bg-[#fff9e6] text-[#322e2b] border border-[#322e2b] rounded-full">
+                    IELTS Academic Reading
+                  </span>
+                )}
                 <span className="text-xs text-[#78726b] font-medium">Ước tính học: ~25 phút</span>
               </div>
               <h1 className="text-3xl font-bold text-[#322e2b] tracking-tight mb-2">

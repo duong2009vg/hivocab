@@ -9,6 +9,7 @@ export function PageTopicDetail() {
   const {
     topicId,
     topicName,
+    category,
     loading,
     error,
     isUserPro,
@@ -84,6 +85,43 @@ export function PageTopicDetail() {
     return Math.max(0, totalWords - learnedCount);
   }, [totalWords, learnedCount]);
 
+  // Only topics in CAM and IELTS Actual Tests are IELTS Reading topics
+  const isIeltsReadingTopic = useMemo(() => {
+    const cat = String(category || '').trim().toLowerCase();
+    const isCamOrActual = (
+      cat === 'cam' ||
+      cat === 'cambridge' ||
+      cat === 'ielts actual tests' ||
+      cat === 'ielts actual test' ||
+      cat.includes('actual test')
+    );
+    return isCamOrActual || (isCambridge && (cat === 'cam' || cat.includes('actual') || /^cam\b/i.test(topicName) || /^ielts\s*vol\b/i.test(topicName)));
+  }, [category, isCambridge, topicName]);
+
+  const topicCategoryLabel = useMemo(() => {
+    const cat = String(category || '').trim().toLowerCase();
+    if (cat === 'cam' || cat === 'cambridge') return 'Bộ đề Cambridge Official';
+    if (cat.includes('actual')) return 'Bộ đề IELTS Actual Tests';
+    if (cat.includes('dest')) return 'Destination C1-C2';
+    if (cat.includes('oxford')) return 'Oxford 3000';
+    if (cat.includes('tuvungcuatoi') || cat.includes('cuatoi') || cat === 'personal') return 'Từ vựng của tôi';
+    if (cat.includes('thpt') || cat.includes('dgnl')) return 'THPT/ĐGNL';
+    if (cat.includes('sat')) return 'SAT 3500';
+    if (category && category !== 'general') return category;
+    return 'Chủ đề từ vựng';
+  }, [category]);
+
+  const currentTest = isCambridge && camHierarchy?.tests ? camHierarchy.tests[currentTestIndex] : null;
+  const firstPassage = currentPassages?.[0];
+
+  const passage1Suggestion = useMemo(() => {
+    if (!firstPassage) return 'Passage 1';
+    const rawTitle = (firstPassage.title || '').trim();
+    if (!rawTitle) return 'Passage 1';
+    if (/^passage\s*1\b/i.test(rawTitle)) return rawTitle;
+    return `Passage 1: ${rawTitle}`;
+  }, [firstPassage]);
+
   const handleAddWord = () => {
     openModal('addWord', { topicId });
   };
@@ -102,9 +140,6 @@ export function PageTopicDetail() {
       }
     } catch (_) {}
   };
-
-  const currentTest = isCambridge && camHierarchy?.tests ? camHierarchy.tests[currentTestIndex] : null;
-  const firstPassage = currentPassages?.[0];
 
   // Colors for passage badges
   const passageBadgeColors = [
@@ -138,7 +173,9 @@ export function PageTopicDetail() {
             </button>
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-base text-[#302A24] truncate font-['Comfortaa',sans-serif]">{topicName || 'Chi tiết'}</span>
-              <span className="text-[11px] text-[#786F66]">Luyện đọc &amp; Từ vựng</span>
+              <span className="text-[11px] text-[#786F66]">
+                {isIeltsReadingTopic ? 'Luyện đọc & Từ vựng' : 'Chủ đề từ vựng'}
+              </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -160,32 +197,41 @@ export function PageTopicDetail() {
           </div>
         </header>
 
-        {/* Mascot Encouragement Strip */}
-        <section className="px-4 mt-3">
-          <div className="bg-[#EFF6EE] rounded-2xl p-3.5 flex items-center gap-3 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
-            <div className="relative w-11 h-11 shrink-0 bg-[#FFF7E8] rounded-xl border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center justify-center text-xl">
-              🐾
-              <span className="absolute -top-1 -right-1 text-xs">✨</span>
+        {/* Mascot Encouragement Strip - Only for CAM and IELTS Actual Tests */}
+        {isIeltsReadingTopic && (
+          <section className="px-4 mt-3">
+            <div
+              onClick={() => {
+                if (firstPassage) openPassage(firstPassage, currentTest?.name);
+              }}
+              className="bg-[#EFF6EE] rounded-2xl p-3.5 flex items-center gap-3 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer active:scale-[0.98] transition-transform"
+            >
+              <div className="relative w-11 h-11 shrink-0 bg-[#FFF7E8] rounded-xl border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center justify-center text-xl">
+                🐾
+                <span className="absolute -top-1 -right-1 text-xs">✨</span>
+              </div>
+              <div className="flex-1 text-xs text-[#302A24]">
+                <span className="font-bold text-[#4D6B53]">Bé Hổ HiVocab nhắn nhủ: </span>
+                <p className="font-medium inline">
+                  "Hôm nay mình đọc thử <strong>{passage1Suggestion}</strong> nhé! Bám sát từ vựng thực chiến sẽ nâng band điểm rất nhanh đấy!"
+                </p>
+              </div>
             </div>
-            <div className="flex-1 text-xs text-[#302A24]">
-              <span className="font-bold text-[#4D6B53]">Bé Hổ HiVocab nhắn nhủ: </span>
-              <p className="font-medium inline">
-                "Hôm nay mình đọc thử <strong>{firstPassage?.title || 'Passage 1'}</strong> nhé! Bám sát từ vựng thực chiến sẽ nâng band điểm rất nhanh đấy!"
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Course Overview Card */}
         <main className="px-4 mt-3 flex flex-col gap-4">
           <div className="bg-white rounded-[20px] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] p-4 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-0.5 text-[11px] font-bold text-[#302A24] bg-[#EFE7DA] rounded-full border border-[#3D352E]">
-                📖 {isCambridge ? 'Bộ đề Cambridge Official' : 'Chủ đề từ vựng'}
+                📖 {topicCategoryLabel}
               </span>
-              <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-300">
-                IELTS Academic Reading
-              </span>
+              {isIeltsReadingTopic && (
+                <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-300">
+                  IELTS Academic Reading
+                </span>
+              )}
             </div>
             <h1 className="text-2xl font-bold text-[#3D352E] tracking-tight font-['Comfortaa',sans-serif]">{topicName}</h1>
             <div className="mt-3 p-3 rounded-xl bg-[#FFFDF9] border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]">
@@ -385,8 +431,8 @@ export function PageTopicDetail() {
                 Chủ đề &amp; Khóa học
               </span>
               <span className="text-[#786F66]">/</span>
-              <span className="text-[#786F66] hover:text-[#302A24] cursor-pointer">
-                {isCambridge ? 'Bộ đề Cambridge' : 'Chủ đề từ vựng'}
+              <span className="text-[#786F66]">
+                {topicCategoryLabel}
               </span>
               <span className="text-[#786F66]">/</span>
               <span className="text-[#C85A3F] font-bold font-['Comfortaa',sans-serif]">{topicName}</span>
@@ -431,34 +477,35 @@ export function PageTopicDetail() {
           </div>
         </header>
 
-        {/* BEGIN: MascotSpeechBanner */}
-        <section className="mb-6" data-purpose="mascot-coach-tip">
-          <div className="p-4 rounded-2xl bg-[#EFF6EE] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] flex items-center gap-4">
-            {/* Mascot Avatar with cute badge */}
-            <div className="relative w-12 h-12 shrink-0 bg-[#FFF7E8] rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl">
-              🐾
-              <span className="absolute -top-1 -right-1 text-xs">✨</span>
+        {/* BEGIN: MascotSpeechBanner - Only for CAM and IELTS Actual Tests */}
+        {isIeltsReadingTopic && (
+          <section className="mb-6" data-purpose="mascot-coach-tip">
+            <div className="p-4 rounded-2xl bg-[#EFF6EE] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] flex items-center gap-4">
+              {/* Mascot Avatar with cute badge */}
+              <div className="relative w-12 h-12 shrink-0 bg-[#FFF7E8] rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl">
+                🐾
+                <span className="absolute -top-1 -right-1 text-xs">✨</span>
+              </div>
+              {/* Speech Text */}
+              <div className="flex-1 text-xs md:text-sm text-[#302A24]">
+                <span className="font-['Comfortaa',sans-serif] font-bold text-[#4D6B53]">Bé Hổ HiVocab nhắn nhủ:</span>
+                <p className="font-medium inline ml-1">
+                  "Hôm nay mình đọc thử <strong>{passage1Suggestion}</strong> nhé! Các cấu trúc câu học thuật và từ vựng xuất hiện liên tục trong đề thi thật đấy!"
+                </p>
+              </div>
+              {/* Quick motivate button */}
+              <button
+                onClick={() => {
+                  if (firstPassage) openPassage(firstPassage, currentTest?.name);
+                }}
+                className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl bg-[#4D6B53] text-white border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-emerald-800 transition cursor-pointer"
+                type="button"
+              >
+                Vào học ngay →
+              </button>
             </div>
-            {/* Speech Text */}
-            <div className="flex-1 text-xs md:text-sm text-[#302A24]">
-              <span className="font-['Comfortaa',sans-serif] font-bold text-[#4D6B53]">Bé Hổ HiVocab nhắn nhủ:</span>
-              <p className="font-medium inline ml-1">
-                "Hôm nay mình đọc thử <strong>{firstPassage?.title ? `Passage 1: ${firstPassage.title}` : 'Passage 1'}</strong> nhé! Các cấu trúc câu học thuật và từ vựng xuất hiện liên tục trong đề thi thật đấy!"
-              </p>
-            </div>
-            {/* Quick motivate button */}
-            <button
-              onClick={() => {
-                if (firstPassage) openPassage(firstPassage, currentTest?.name);
-                else if (lessons[0]) openLesson(lessons[0].id);
-              }}
-              className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl bg-[#4D6B53] text-white border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-emerald-800 transition cursor-pointer"
-              type="button"
-            >
-              Vào học ngay →
-            </button>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* BEGIN: CourseOverviewCard */}
         <section className="mb-6" data-purpose="course-hero-overview">
@@ -470,11 +517,13 @@ export function PageTopicDetail() {
               <div className="space-y-3 max-w-2xl">
                 <div className="flex items-center gap-2">
                   <span className="px-3 py-1 text-xs font-bold text-[#302A24] bg-[#EFE7DA] rounded-full border border-[#3D352E] flex items-center gap-1.5">
-                    📖 {isCambridge ? 'Bộ đề Cambridge Official' : 'Chủ đề từ vựng'}
+                    📖 {topicCategoryLabel}
                   </span>
-                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-300">
-                    IELTS Academic Reading
-                  </span>
+                  {isIeltsReadingTopic && (
+                    <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-300">
+                      IELTS Academic Reading
+                    </span>
+                  )}
                 </div>
                 <div>
                   <h2 className="text-3xl font-['Comfortaa',sans-serif] font-bold text-[#3D352E] tracking-tight flex items-center gap-3">
@@ -583,9 +632,11 @@ export function PageTopicDetail() {
                   : 'Danh Sách Bài Học'}
               </h4>
             </div>
-            <span className="text-xs font-semibold text-[#786F66]">
-              Tip: Click vào thẻ để đọc bài song ngữ và tra từ bấm chọn trực tiếp
-            </span>
+            {isIeltsReadingTopic && (
+              <span className="text-xs font-semibold text-[#786F66]">
+                Tip: Click vào thẻ để đọc bài song ngữ và tra từ bấm chọn trực tiếp
+              </span>
+            )}
           </div>
 
           {/* 3-Column Passage Cards Grid */}

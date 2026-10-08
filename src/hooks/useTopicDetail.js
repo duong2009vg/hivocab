@@ -1,7 +1,8 @@
 // src/hooks/useTopicDetail.js
 // Reactive Hook for Topic Detail & Lessons/Passages Management in pure React
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getCamHierarchy, getLessonsInTopic, isUserPro as checkPro, checkProAccess } from '../services/db.js';
+import { getCamHierarchy, getLessonsInTopic, isUserPro as checkPro, checkProAccess, getCachedTopics } from '../services/db.js';
+import { supabase } from '../lib/supabaseClient.js';
 import { useRoute } from '../router/RouteContext.jsx';
 
 export function useTopicDetail() {
@@ -32,16 +33,21 @@ export function useTopicDetail() {
 
   const { navigateTo } = useRoute();
 
-  // Restore topicId from sessionStorage if refreshed
+  // Restore topicId and category from sessionStorage if refreshed
   useEffect(() => {
-    if (!topicId && typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       try {
         const saved = JSON.parse(sessionStorage.getItem('hi_current_lesson_state') || '{}');
-        if (saved.topicId) {
+        if (!topicId && saved.topicId) {
           setTopicId(saved.topicId);
           setTopicName(saved.topicName || '—');
+          if (saved.category) setCategory(saved.category);
           window._currentTopicId = saved.topicId;
           window._currentTopicName = saved.topicName;
+          if (saved.category) window._currentCategory = saved.category;
+        } else if (topicId && saved.topicId === topicId && saved.category) {
+          setCategory(saved.category);
+          window._currentCategory = saved.category;
         }
       } catch (_) {}
     }
@@ -56,6 +62,31 @@ export function useTopicDetail() {
       setLoading(true);
     }
     setError(null);
+
+    // Sync topic category & name from cache or DB if available
+    try {
+      let resolvedCat = typeof window !== 'undefined' ? window._currentCategory : null;
+      let resolvedName = typeof window !== 'undefined' ? window._currentTopicName : null;
+      const cachedTopic = getCachedTopics()?.find((t) => t.id === topicId);
+      if (cachedTopic) {
+        if (cachedTopic.category) resolvedCat = cachedTopic.category;
+        if (cachedTopic.name) resolvedName = cachedTopic.name;
+      } else {
+        const { data: tRow } = await supabase.from('topics').select('name, category').eq('id', topicId).maybeSingle();
+        if (tRow) {
+          if (tRow.category) resolvedCat = tRow.category;
+          if (tRow.name) resolvedName = tRow.name;
+        }
+      }
+      if (resolvedCat) {
+        setCategory(resolvedCat);
+        if (typeof window !== 'undefined') window._currentCategory = resolvedCat;
+      }
+      if (resolvedName && resolvedName !== '—') {
+        setTopicName(resolvedName);
+        if (typeof window !== 'undefined') window._currentTopicName = resolvedName;
+      }
+    } catch (_) {}
 
     try {
       const [proStatus, hier] = await Promise.all([

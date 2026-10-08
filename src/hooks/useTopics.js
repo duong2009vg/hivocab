@@ -204,6 +204,13 @@ export function useTopics() {
       window._currentLessonIndex = null;
       window._currentLessonWords = [];
       window._currentLessonWordsKey = null;
+      try {
+        sessionStorage.setItem('hi_current_lesson_state', JSON.stringify({
+          topicId,
+          topicName: finalName,
+          category: finalCat,
+        }));
+      } catch (_) {}
     }
 
     navigateTo('topic-detail');
