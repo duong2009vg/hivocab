@@ -4,6 +4,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useVocabulary } from '../../hooks/useVocabulary.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 
 const LEVEL_INTERVALS = {
   0: 'Mới thêm',
@@ -26,6 +27,7 @@ const LEVEL_COLORS = {
 export function PageVocabulary() {
   const { openModal } = useModal();
   const { navigateTo } = useRoute();
+  const { user } = useAuth();
   const {
     words,
     total,
@@ -47,6 +49,42 @@ export function PageVocabulary() {
     playWord,
     refresh,
   } = useVocabulary();
+
+  const handleOpenAddWord = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để thêm từ vựng 📖',
+        message: 'Bạn cần đăng nhập tài khoản để thêm và lưu từ vựng vào sổ từ cá nhân nhé!',
+        actionName: 'thêm từ vựng',
+      });
+      return;
+    }
+    openModal('addWord');
+  };
+
+  const handleOpenBulkAdd = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để thêm từ hàng loạt 📑',
+        message: 'Bạn cần đăng nhập tài khoản để nhập danh sách nhiều từ vựng cùng lúc nhé!',
+        actionName: 'thêm từ hàng loạt',
+      });
+      return;
+    }
+    openModal('bulkAdd');
+  };
+
+  const handleStartReview = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để ôn tập SRS ⚡',
+        message: 'Bạn cần đăng nhập tài khoản để ôn tập từ vựng theo chu kỳ ngắt quãng và ghi nhận điểm số nhé!',
+        actionName: 'ôn tập SRS',
+      });
+      return;
+    }
+    navigateTo('learning');
+  };
 
   const [selectedWordId, setSelectedWordId] = useState(null);
 
@@ -140,7 +178,7 @@ export function PageVocabulary() {
           {/* Action Buttons */}
           <div className="flex items-center gap-2 pt-1">
             <button
-              onClick={() => openModal('addWord')}
+              onClick={handleOpenAddWord}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#443833] text-[#FAF5EB] rounded-2xl shadow-md active:scale-95 transition-transform text-sm font-bold cursor-pointer"
               type="button"
             >
@@ -148,7 +186,7 @@ export function PageVocabulary() {
               <span>Thêm từ vựng</span>
             </button>
             <button
-              onClick={() => openModal('bulkAdd')}
+              onClick={handleOpenBulkAdd}
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#EFE8D6] text-[#4A3E39] border-2 border-dashed border-[#8A796F] rounded-2xl shadow-xs active:scale-95 transition-transform text-sm font-bold cursor-pointer"
               type="button"
             >
@@ -344,6 +382,33 @@ export function PageVocabulary() {
             <div className="p-4 bg-red-50 border-2 border-red-300 rounded-2xl text-center text-red-700 text-xs font-bold">
               {error}
             </div>
+          ) : !user && words.length === 0 ? (
+            <div className="bg-white rounded-3xl border-2 border-[#4A3E39] p-6 text-center shadow-xs space-y-3">
+              <span className="text-4xl block">🐯</span>
+              <h3 className="font-bold text-base text-[#4A3E39]">Chào mừng bạn đến với Sổ từ cá nhân!</h3>
+              <p className="text-xs text-[#7D716A] leading-relaxed">
+                Bạn đang xem ở chế độ Khách. Hãy đăng nhập hoặc tạo tài khoản miễn phí để bắt đầu lưu từ, theo dõi các cấp độ ghi nhớ SRS và không bao giờ quên từ vựng!
+              </p>
+              <div className="flex flex-col gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => navigateTo('login')}
+                  className="w-full py-2.5 px-4 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
+                >
+                  🔑 Đăng nhập ngay
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== 'undefined') window._initialAuthMode = 'signup';
+                    navigateTo('login');
+                  }}
+                  className="w-full py-2.5 px-4 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
+                >
+                  ✨ Đăng ký tài khoản (Miễn phí)
+                </button>
+              </div>
+            </div>
           ) : words.length === 0 ? (
             <div className="bg-white rounded-3xl border-2 border-[#4A3E39] p-8 text-center shadow-xs">
               <span className="text-4xl block mb-2">📖</span>
@@ -352,8 +417,8 @@ export function PageVocabulary() {
                 Hãy thêm từ vựng mới hoặc chuyển sang chủ đề khác để học.
               </p>
               <button
-                onClick={() => openModal('addWord')}
-                className="px-4 py-2 bg-[#F07D43] text-white font-bold text-xs rounded-xl border border-[#4A3E39] shadow-xs active:scale-95"
+                onClick={handleOpenAddWord}
+                className="px-4 py-2 bg-[#F07D43] text-white font-bold text-xs rounded-xl border border-[#4A3E39] shadow-xs active:scale-95 cursor-pointer"
               >
                 + Thêm từ mới ngay
               </button>
@@ -488,14 +553,14 @@ export function PageVocabulary() {
               <span>Quản lý chủ đề</span>
             </button>
             <button
-              onClick={() => openModal('bulkAdd')}
+              onClick={handleOpenBulkAdd}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:scale-95 transition-all cursor-pointer"
             >
               <span>📋</span>
               <span>Thêm hàng loạt</span>
             </button>
             <button
-              onClick={() => openModal('addWord')}
+              onClick={handleOpenAddWord}
               className="flex items-center gap-2 px-4 py-2.5 bg-[#ea7349] hover:bg-[#d96237] text-white text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
             >
               <span className="text-lg leading-none">+</span>
@@ -604,7 +669,7 @@ export function PageVocabulary() {
                 <div className="mt-3 pt-3 border-t border-[#e2d5c3] flex items-center justify-between">
                   <span className="text-xs font-bold text-[#857766]">Ước tính: ~5 phút</span>
                   <button
-                    onClick={() => navigateTo('learning')}
+                    onClick={handleStartReview}
                     className="px-4 py-2 bg-[#6e9b6a] hover:bg-[#5f875b] text-white text-xs font-black rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
                   >
                     Ôn tập ngay ⚡
@@ -717,6 +782,33 @@ export function PageVocabulary() {
                   <span className="inline-block text-3xl animate-spin mb-2">🔄</span>
                   <p className="text-sm font-bold">Đang tải danh sách từ vựng...</p>
                 </div>
+              ) : !user && words.length === 0 ? (
+                <div className="p-12 text-center bg-white rounded-3xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] max-w-lg mx-auto space-y-4">
+                  <span className="text-5xl block">🐯</span>
+                  <h4 className="text-xl font-black text-[#37322f]">Sổ từ vựng thông minh cho riêng bạn</h4>
+                  <p className="text-xs text-[#766c5f] leading-relaxed">
+                    Bạn đang trải nghiệm HiVocab ở chế độ Khách. Đăng nhập hoặc tạo tài khoản miễn phí để lưu trữ không giới hạn từ vựng, kích hoạt thuật toán lặp lại ngắt quãng SRS và theo dõi chuỗi ngày giữ lửa!
+                  </p>
+                  <div className="flex items-center justify-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => navigateTo('login')}
+                      className="px-5 py-2.5 bg-[#382E2B] text-white font-bold text-xs rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-y-0.5 transition-all cursor-pointer"
+                    >
+                      🔑 Đăng nhập ngay
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (typeof window !== 'undefined') window._initialAuthMode = 'signup';
+                        navigateTo('login');
+                      }}
+                      className="px-5 py-2.5 bg-[#D36135] text-white font-bold text-xs rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-y-0.5 transition-all cursor-pointer"
+                    >
+                      ✨ Tạo tài khoản miễn phí
+                    </button>
+                  </div>
+                </div>
               ) : words.length === 0 ? (
                 <div className="p-12 text-center bg-white rounded-3xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35]">
                   <span className="text-5xl block mb-3">📖</span>
@@ -725,8 +817,8 @@ export function PageVocabulary() {
                     Thử thay đổi từ khóa tìm kiếm hoặc lọc theo cấp độ khác nhé.
                   </p>
                   <button
-                    onClick={() => openModal('addWord')}
-                    className="px-5 py-2.5 bg-[#ea7349] text-white font-bold text-sm rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35]"
+                    onClick={handleOpenAddWord}
+                    className="px-5 py-2.5 bg-[#ea7349] text-white font-bold text-sm rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] cursor-pointer"
                   >
                     + Thêm từ mới ngay
                   </button>

@@ -1,7 +1,10 @@
 // src/components/pages/PageLanding.jsx
 // Trang giới thiệu HiVocab mô phỏng một bức tranh sáp màu của trẻ con (Cozy Crayon Handcrafted Picture Book)
+// Hỗ trợ song ngữ Tiếng Anh (Mặc định) và Tiếng Việt với LanguageSwitcher
 import React, { useState, useEffect } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { useLandingLang } from '../../context/LandingLangContext.jsx';
+import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
 function useCountUp(end, duration = 1600, delay = 0) {
   const [count, setCount] = useState(0);
@@ -40,8 +43,9 @@ const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.
 
 export function PageLanding() {
   const { navigateTo } = useRoute();
+  const { isEn } = useLandingLang();
 
-  // Hiệu ứng hiện số lần lượt: Số từ vựng đếm trước (delay 150ms), số đề thi THPT đếm sau (delay 800ms)
+  // Hiệu ứng hiện số lần lượt: Số từ vựng đếm trước (delay 150ms), số đề thi đếm sau (delay 800ms)
   const vocabCount = useCountUp(66000, 1600, 150);
   const examCount = useCountUp(38, 1200, 800);
 
@@ -62,12 +66,12 @@ export function PageLanding() {
           <div
             onClick={() => navigateTo('landing')}
             className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group shrink-0"
-            title="HiVocab – Trang chủ tranh sáp màu"
+            title={isEn ? "HiVocab – Crayon Picture Book Home" : "HiVocab – Trang chủ tranh sáp màu"}
           >
             <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
               <img
                 src="/logo-hi-transparent.png"
-                alt="HiVocab Logo Sáp Màu"
+                alt="HiVocab Logo"
                 className="w-full h-full object-contain filter drop-shadow-xs"
                 onError={(e) => {
                   e.currentTarget.src = '/mascot/mascot_cozy.png';
@@ -89,7 +93,7 @@ export function PageLanding() {
               onClick={() => navigateTo('features')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              🎨 Tính năng
+              {isEn ? '🎨 Features' : '🎨 Tính năng'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -97,7 +101,7 @@ export function PageLanding() {
               onClick={() => navigateTo('reviews')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              💬 Đánh giá
+              {isEn ? '💬 Reviews' : '💬 Đánh giá'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -105,7 +109,7 @@ export function PageLanding() {
               onClick={() => navigateTo('faq')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              💡 FAQ
+              {isEn ? '💡 FAQ' : '💡 FAQ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -113,25 +117,28 @@ export function PageLanding() {
               onClick={() => navigateTo('support')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              💌 Hỗ trợ
+              {isEn ? '💌 Support' : '💌 Hỗ trợ'}
             </button>
           </nav>
 
-          {/* Action Buttons: Bắt đầu ngay & Đăng nhập (thu gọn vừa vặn) */}
+          {/* Right Area: Language Switcher + Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Language Switcher */}
+            <LanguageSwitcher />
+
             <button
               type="button"
               onClick={() => navigateTo('login')}
               className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
             >
-              Đăng nhập
+              {isEn ? 'Log in' : 'Đăng nhập'}
             </button>
             <button
               type="button"
               onClick={() => navigateTo('dashboard')}
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
-              <span>Bắt đầu ngay</span>
+              <span>{isEn ? 'Get Started' : 'Bắt đầu ngay'}</span>
               <span className="text-xs sm:text-sm">✏️</span>
             </button>
           </div>
@@ -147,19 +154,39 @@ export function PageLanding() {
 
             {/* Tiêu đề chính nét bút sáp đậm */}
             <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[52px] xl:text-[58px] 2xl:text-[64px] text-[#3D352E] tracking-tight leading-[1.15]">
-              Cùng Bé Hổ vẽ nên{' '}
-              <span className="text-[#DE5D53] relative inline-block">
-                vốn từ vựng
-                <svg
-                  className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
-                  viewBox="0 0 100 20"
-                  preserveAspectRatio="none"
-                  fill="currentColor"
-                >
-                  <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
-                </svg>
-              </span>{' '}
-              vững chắc nhất! 🌿
+              {isEn ? (
+                <>
+                  Sketch your ultimate{' '}
+                  <span className="text-[#DE5D53] relative inline-block">
+                    vocabulary
+                    <svg
+                      className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
+                      viewBox="0 0 100 20"
+                      preserveAspectRatio="none"
+                      fill="currentColor"
+                    >
+                      <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
+                    </svg>
+                  </span>{' '}
+                  mastery with Little Tiger! 🌿
+                </>
+              ) : (
+                <>
+                  Cùng Bé Hổ vẽ nên{' '}
+                  <span className="text-[#DE5D53] relative inline-block">
+                    vốn từ vựng
+                    <svg
+                      className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
+                      viewBox="0 0 100 20"
+                      preserveAspectRatio="none"
+                      fill="currentColor"
+                    >
+                      <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
+                    </svg>
+                  </span>{' '}
+                  vững chắc nhất! 🌿
+                </>
+              )}
             </h1>
 
             {/* Cụm điểm nhấn số liệu: Số từ vựng & Số đề thi THPT QG có hiệu ứng đếm số lần lượt */}
@@ -174,15 +201,17 @@ export function PageLanding() {
                     <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#DE5D53] tracking-tight">
                       {formatNumber(vocabCount)}+
                     </span>
-                    <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider">Từ vựng</span>
+                    <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider">
+                      {isEn ? 'Words' : 'Từ vựng'}
+                    </span>
                   </div>
                   <p className="text-xs sm:text-sm font-bold text-[#6E5D53] truncate">
-                    Cambridge 10–21 & IELTS Academic
+                    {isEn ? 'Cambridge 10–21 & IELTS Academic' : 'Cambridge 10–21 & IELTS Academic'}
                   </p>
                 </div>
               </div>
 
-              {/* Thẻ 2: Số đề thi THPT Quốc Gia (chạy tiếp sau: delay 800ms) */}
+              {/* Thẻ 2: Số đề thi (chạy tiếp sau: delay 800ms) */}
               <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
                 <div className="w-12 h-12 rounded-xl bg-[#EAF3E7] border-2 border-[#557A46] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
                   🎓
@@ -192,10 +221,12 @@ export function PageLanding() {
                     <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#557A46] tracking-tight">
                       {examCount}+
                     </span>
-                    <span className="text-xs font-black text-[#557A46] uppercase tracking-wider">Đề thi THPT</span>
+                    <span className="text-xs font-black text-[#557A46] uppercase tracking-wider">
+                      {isEn ? 'Mock Exams' : 'Đề thi THPT'}
+                    </span>
                   </div>
                   <p className="text-xs sm:text-sm font-bold text-[#6E5D53] truncate">
-                    Chuẩn ma trận BGD & CBT
+                    {isEn ? 'Standard Matrix & CBT Format' : 'Chuẩn ma trận BGD & CBT'}
                   </p>
                 </div>
               </div>
@@ -203,7 +234,9 @@ export function PageLanding() {
 
             {/* Lời dẫn truyện ấm áp */}
             <p className="text-base sm:text-lg lg:text-xl text-[#6E5D53] font-medium leading-relaxed max-w-2xl">
-              Học tiếng Anh như lật từng trang tập vẽ màu sáp. Ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và hệ thống phòng luyện thi chuẩn cấu trúc đề thực tế.
+              {isEn
+                ? 'Learning English is as delightful as flipping through pages of a colorful crayon sketchbook. Lock words into long-term memory with Spaced Repetition (SRS) and authentic exam room simulations.'
+                : 'Học tiếng Anh như lật từng trang tập vẽ màu sáp. Ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và hệ thống phòng luyện thi chuẩn cấu trúc đề thực tế.'}
             </p>
 
             {/* Các nút gọi hành động chính */}
@@ -213,7 +246,7 @@ export function PageLanding() {
                 onClick={() => navigateTo('dashboard')}
                 className="px-8 py-4 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
               >
-                <span>Vào phòng học ngay</span>
+                <span>{isEn ? 'Enter Study Room' : 'Vào phòng học ngay'}</span>
                 <span className="text-xl">🚀</span>
               </button>
 
@@ -222,7 +255,7 @@ export function PageLanding() {
                 onClick={() => navigateTo('features')}
                 className="px-7 py-4 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-base sm:text-lg border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Khám phá tính năng</span>
+                <span>{isEn ? 'Explore Features' : 'Khám phá tính năng'}</span>
                 <span>🎨</span>
               </button>
             </div>
@@ -231,15 +264,15 @@ export function PageLanding() {
             <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-7 text-xs sm:text-sm font-bold text-[#8A796F]">
               <div className="flex items-center gap-1.5">
                 <span className="text-[#F4B41A] text-base">★</span>
-                <span>Thuật toán ngắt quãng SRS SM-2</span>
+                <span>{isEn ? 'Spaced Repetition (SRS SM-2)' : 'Thuật toán ngắt quãng SRS SM-2'}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[#DE5D53] text-base">❤</span>
-                <span>Song ngữ Anh - Việt che dịch</span>
+                <span>{isEn ? 'Bilingual Curtain Reading Mode' : 'Song ngữ Anh - Việt che dịch'}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-[#557A46] text-base">✓</span>
-                <span>38+ Đề thi THPT Quốc Gia CBT</span>
+                <span>{isEn ? '38+ Real CBT Practice Tests' : '38+ Đề thi THPT Quốc Gia CBT'}</span>
               </div>
             </div>
           </div>
@@ -257,7 +290,7 @@ export function PageLanding() {
 
               {/* Đám mây thoại hình bong bóng sáp màu */}
               <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-5 py-3 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base md:text-lg flex items-center gap-2 mb-3 mt-1 transform -rotate-2">
-                <span>"Chào bạn học ơi! Cùng tớ vào học nhé! 🐾"</span>
+                <span>{isEn ? '"Hello learner! Let\'s study together! 🐾"' : '"Chào bạn học ơi! Cùng tớ vào học nhé! 🐾"'}</span>
                 {/* Mũi tên bong bóng chỉ xuống mascot */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#FFF9EE] border-r-2 border-b-2 border-[#3D352E] transform rotate-45"></div>
               </div>
@@ -268,7 +301,7 @@ export function PageLanding() {
                 <div className="absolute inset-2 bg-[#FEEFEA] rounded-full filter blur-md -z-0"></div>
                 <img
                   src="/mascot/mascot_cozy.png"
-                  alt="Bé Hổ Churbito vẫy tay chào bạn học"
+                  alt="Bé Hổ Churbito"
                   className="w-full h-full object-contain relative z-10 mix-blend-multiply drop-shadow-sm transition-transform duration-300 hover:scale-105 select-none"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
@@ -279,10 +312,12 @@ export function PageLanding() {
               {/* Thẻ tên bé Hổ bằng phong cách nét vẽ sáp */}
               <div className="mt-1 space-y-1">
                 <h2 className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E]">
-                  Bé Hổ Churbito 🐯
+                  {isEn ? 'Churbito the Tiger 🐯' : 'Bé Hổ Churbito 🐯'}
                 </h2>
                 <p className="text-xs sm:text-sm font-semibold text-[#86756C]">
-                  Người bạn nhỏ đồng hành cùng bạn ghi nhớ 15 phút mỗi ngày!
+                  {isEn
+                    ? 'Your cheerful buddy for 15 minutes of joyful daily practice!'
+                    : 'Người bạn nhỏ đồng hành cùng bạn ghi nhớ 15 phút mỗi ngày!'}
                 </p>
               </div>
 
@@ -292,17 +327,17 @@ export function PageLanding() {
                 onClick={() => navigateTo('dashboard')}
                 className="mt-4 w-full py-3 px-5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm md:text-base font-black rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Mở app học ngay</span>
+                <span>{isEn ? 'Open App & Learn Now' : 'Mở app học ngay'}</span>
                 <span>📖</span>
               </button>
             </div>
 
             {/* Nhãn dán sticker bé bên cạnh trang trí */}
             <div className="hidden sm:flex absolute -bottom-5 -left-4 bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#DE5D53] rotate-[-6deg]">
-              ★ Giữ lửa mỗi ngày!
+              {isEn ? '★ Keep your daily streak!' : '★ Giữ lửa mỗi ngày!'}
             </div>
             <div className="hidden sm:flex absolute -top-4 -right-3 bg-[#EAF3E7] border-2 border-[#557A46] shadow-[2px_3px_0px_#557A46] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#557A46] rotate-[8deg]">
-              🌱 100% Không áp lực!
+              {isEn ? '🌱 100% Stress-free!' : '🌱 100% Không áp lực!'}
             </div>
           </div>
         </div>
@@ -311,13 +346,15 @@ export function PageLanding() {
         <section className="mt-16 sm:mt-24">
           <div className="text-center space-y-2 mb-10">
             <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider bg-[#FDEAE2] px-3 py-1 rounded-full border border-[#F8C8B8]">
-              Tranh ghép tính năng
+              {isEn ? 'Feature Postcards' : 'Tranh ghép tính năng'}
             </span>
             <h2 className="font-quicksand font-black text-2xl sm:text-4xl text-[#3D352E]">
-              Vì sao bạn sẽ yêu thích HiVocab? 🎨
+              {isEn ? 'Why You\'ll Love HiVocab? 🎨' : 'Vì sao bạn sẽ yêu thích HiVocab? 🎨'}
             </h2>
             <p className="text-xs sm:text-sm text-[#78685E] max-w-lg mx-auto">
-              Không còn học vẹt nhàm chán. Mỗi bài học là một trải nghiệm ghi nhớ ngập tràn sắc màu và khoa học.
+              {isEn
+                ? 'No more tedious rote learning. Every lesson is an engaging, colorful, and scientifically backed memory adventure.'
+                : 'Không còn học vẹt nhàm chán. Mỗi bài học là một trải nghiệm ghi nhớ ngập tràn sắc màu và khoa học.'}
             </p>
           </div>
 
@@ -330,10 +367,12 @@ export function PageLanding() {
                   📚
                 </div>
                 <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
-                  Kho 66.000+ Từ Học Thuật
+                  {isEn ? '66,000+ Academic Words Vault' : 'Kho 66.000+ Từ Học Thuật'}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
-                  Trọn bộ Cambridge 10–21, IELTS Actual Tests, Oxford 3000 và Destination C1-C2 chuẩn hóa phiên âm IPA, nghĩa tiếng Việt và câu ví dụ ngữ cảnh thật.
+                  {isEn
+                    ? 'Complete collections from Cambridge IELTS 10–21, IELTS Actual Tests, Oxford 3000, and Destination C1-C2 with standardized IPA phonetics, clear meanings, and authentic passage contexts.'
+                    : 'Trọn bộ Cambridge 10–21, IELTS Actual Tests, Oxford 3000 và Destination C1-C2 chuẩn hóa phiên âm IPA, nghĩa tiếng Việt và câu ví dụ ngữ cảnh thật.'}
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
@@ -342,7 +381,7 @@ export function PageLanding() {
                   onClick={() => navigateTo('features')}
                   className="text-xs font-black text-[#DE5D53] hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Xem chi tiết danh mục</span>
+                  <span>{isEn ? 'Explore word vault' : 'Xem chi tiết danh mục'}</span>
                   <span>➔</span>
                 </button>
               </div>
@@ -355,10 +394,12 @@ export function PageLanding() {
                   🔄
                 </div>
                 <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
-                  Lặp Lại Ngắt Quãng SRS v4
+                  {isEn ? 'Spaced Repetition SRS v4' : 'Lặp Lại Ngắt Quãng SRS v4'}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
-                  Thuật toán thông minh tính toán chu kỳ quên tự nhiên của não bộ, tự động nhắc nhở ôn tập đúng thời điểm vàng để biến từ mới thành phản xạ dài hạn.
+                  {isEn
+                    ? 'An intelligent algorithm that computes your natural forgetting curve, reminding you to review right at the golden moment to turn new words into permanent memory.'
+                    : 'Thuật toán thông minh tính toán chu kỳ quên tự nhiên của não bộ, tự động nhắc nhở ôn tập đúng thời điểm vàng để biến từ mới thành phản xạ dài hạn.'}
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
@@ -367,7 +408,7 @@ export function PageLanding() {
                   onClick={() => navigateTo('dashboard')}
                   className="text-xs font-black text-[#557A46] hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Khám phá thuật toán SRS</span>
+                  <span>{isEn ? 'Discover SRS algorithm' : 'Khám phá thuật toán SRS'}</span>
                   <span>➔</span>
                 </button>
               </div>
@@ -380,10 +421,12 @@ export function PageLanding() {
                   🔍
                 </div>
                 <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
-                  Đọc Song Ngữ & Che Dịch
+                  {isEn ? 'Bilingual Reading & Curtain Mode' : 'Đọc Song Ngữ & Che Dịch'}
                 </h3>
                 <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
-                  Chế độ rèm che Curtain Mode cho phép bạn đọc báo, đọc đề IELTS đối sánh câu thông minh, kích thích trí não tự đoán nghĩa trước khi bấm xem giải thích.
+                  {isEn
+                    ? 'Our proprietary Curtain Mode lets you read aligned bilingual passages, stimulating your brain to deduce meanings in context before pulling the curtain for answers.'
+                    : 'Chế độ rèm che Curtain Mode cho phép bạn đọc báo, đọc đề IELTS đối sánh câu thông minh, kích thích trí não tự đoán nghĩa trước khi bấm xem giải thích.'}
                 </p>
               </div>
               <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
@@ -392,7 +435,7 @@ export function PageLanding() {
                   onClick={() => navigateTo('features')}
                   className="text-xs font-black text-[#2A7BA0] hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Trải nghiệm phòng đọc</span>
+                  <span>{isEn ? 'Experience reading room' : 'Trải nghiệm phòng đọc'}</span>
                   <span>➔</span>
                 </button>
               </div>
@@ -405,13 +448,15 @@ export function PageLanding() {
           <div className="w-full bg-[#FFFDF9] border-[3px] border-[#3D352E] rounded-[32px] p-6 sm:p-10 shadow-[5px_7px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center md:text-left">
               <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wide">
-                Bé Hổ đang đợi bạn 🐾
+                {isEn ? 'Little Tiger is waiting 🐾' : 'Bé Hổ đang đợi bạn 🐾'}
               </span>
               <h3 className="font-quicksand font-black text-2xl sm:text-3xl text-[#3D352E]">
-                Sẵn sàng nâng cao vốn từ vựng hôm nay?
+                {isEn ? 'Ready to expand your vocabulary today?' : 'Sẵn sàng nâng cao vốn từ vựng hôm nay?'}
               </h3>
               <p className="text-xs sm:text-sm text-[#78685E] max-w-lg">
-                Chỉ 15 phút ôn luyện cùng HiVocab mỗi ngày, bạn sẽ thấy sự khác biệt rõ rệt trong kỹ năng Đọc và Nghe IELTS!
+                {isEn
+                  ? 'With just 15 minutes of daily practice on HiVocab, you will experience remarkable breakthroughs in your IELTS Reading and Listening skills!'
+                  : 'Chỉ 15 phút ôn luyện cùng HiVocab mỗi ngày, bạn sẽ thấy sự khác biệt rõ rệt trong kỹ năng Đọc và Nghe IELTS!'}
               </p>
             </div>
             
@@ -421,7 +466,7 @@ export function PageLanding() {
                 onClick={() => navigateTo('dashboard')}
                 className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Vào học cùng Bé Hổ</span>
+                <span>{isEn ? 'Start Learning with Tiger' : 'Vào học cùng Bé Hổ'}</span>
                 <span>🚀</span>
               </button>
               <button
@@ -429,7 +474,7 @@ export function PageLanding() {
                 onClick={() => navigateTo('login')}
                 className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
               >
-                Đăng nhập tài khoản
+                {isEn ? 'Log in to account' : 'Đăng nhập tài khoản'}
               </button>
             </div>
           </div>
@@ -456,11 +501,13 @@ export function PageLanding() {
               </span>
             </div>
             <p className="text-xs text-[#7A6A60] leading-relaxed max-w-md">
-              Hệ sinh thái học từ vựng tiếng Anh thông minh với phong cách tranh vẽ sáp màu ấm áp. Kết hợp Spaced Repetition (SRS) và phương pháp Đọc chủ động chuẩn hóa Cambridge IELTS & THPT Quốc Gia.
+              {isEn
+                ? 'A delightful, crayon-crafted English vocabulary ecosystem. Blending Spaced Repetition (SRS) with Active Bilingual Reading tailored for Cambridge IELTS and CBT exams.'
+                : 'Hệ sinh thái học từ vựng tiếng Anh thông minh với phong cách tranh vẽ sáp màu ấm áp. Kết hợp Spaced Repetition (SRS) và phương pháp Đọc chủ động chuẩn hóa Cambridge IELTS & THPT Quốc Gia.'}
             </p>
             <div className="text-[11px] text-[#86756C] space-y-1 pt-1">
-              <p>📍 <strong>Đơn vị phát triển:</strong> HiVocab Education</p>
-              <p>✉️ <strong>Hỗ trợ:</strong> <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">support@hivocab.site</a></p>
+              <p>📍 <strong>{isEn ? 'Developer:' : 'Đơn vị phát triển:'}</strong> HiVocab Education</p>
+              <p>✉️ <strong>{isEn ? 'Support:' : 'Hỗ trợ:'}</strong> <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">support@hivocab.site</a></p>
               <p>📞 <strong>Hotline/Zalo:</strong> 0846 407 898</p>
             </div>
           </div>
@@ -468,32 +515,32 @@ export function PageLanding() {
           {/* Cột điều hướng chức năng */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-black uppercase tracking-wider text-[#3D352E]">
-              Khám phá
+              {isEn ? 'Explore' : 'Khám phá'}
             </h4>
             <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
               <li>
                 <a onClick={() => navigateTo('features')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  🎨 Tính năng học tập
+                  {isEn ? '🎨 Learning Features' : '🎨 Tính năng học tập'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('reviews')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  💬 Đánh giá từ bạn học
+                  {isEn ? '💬 Learner Reviews' : '💬 Đánh giá từ bạn học'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('support')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  💌 Hỗ trợ & Liên hệ
+                  {isEn ? '💌 Support & Contact' : '💌 Hỗ trợ & Liên hệ'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('faq')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  💡 Câu hỏi thường gặp (FAQ)
+                  {isEn ? '💡 Frequently Asked Questions (FAQ)' : '💡 Câu hỏi thường gặp (FAQ)'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('login')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  🔑 Đăng nhập / Đăng ký
+                  {isEn ? '🔑 Log in / Sign up' : '🔑 Đăng nhập / Đăng ký'}
                 </a>
               </li>
             </ul>
@@ -502,19 +549,19 @@ export function PageLanding() {
           {/* Cột pháp lý & chính sách */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-black uppercase tracking-wider text-[#3D352E]">
-              Pháp lý & Điều khoản
+              {isEn ? 'Legal & Policies' : 'Pháp lý & Điều khoản'}
             </h4>
             <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
               <li>
                 <a href="/privacy" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
                   <span>🛡️</span>
-                  <span>Chính sách quyền riêng tư</span>
+                  <span>{isEn ? 'Privacy Policy' : 'Chính sách quyền riêng tư'}</span>
                 </a>
               </li>
               <li>
                 <a href="/terms" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
                   <span>📜</span>
-                  <span>Điều khoản dịch vụ</span>
+                  <span>{isEn ? 'Terms of Service' : 'Điều khoản dịch vụ'}</span>
                 </a>
               </li>
             </ul>
@@ -523,7 +570,11 @@ export function PageLanding() {
 
         {/* Dòng bản quyền cuối trang */}
         <div className="max-w-[1560px] 2xl:max-w-[1720px] mx-auto pt-6 border-t border-[#DECDBB]/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#86756C] font-semibold">
-          <p>© 2026 HiVocab (hivocab.site). Bản quyền tập vẽ sáp màu được bảo lưu.</p>
+          <p>
+            {isEn
+              ? '© 2026 HiVocab (hivocab.site). All rights reserved.'
+              : '© 2026 HiVocab (hivocab.site). Bản quyền tập vẽ sáp màu được bảo lưu.'}
+          </p>
           <div className="flex items-center gap-3">
             <a href="/privacy" className="hover:underline">Privacy Policy</a>
             <span>•</span>

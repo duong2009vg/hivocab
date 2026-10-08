@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { useLessonDetail } from '../../hooks/useLessonDetail.js';
 import { useModal } from '../../context/ModalContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 
 export function PageLessonDetail() {
   const {
@@ -27,6 +28,7 @@ export function PageLessonDetail() {
   } = useLessonDetail();
 
   const { openModal } = useModal();
+  const { user } = useAuth();
 
   const isPassage = Boolean(passageId && passageId !== '__unlinked__');
 
@@ -36,15 +38,49 @@ export function PageLessonDetail() {
   const masteredCount = useMemo(() => words.filter((w) => (w.level || 0) >= 4).length, [words]);
 
   const handleAddWord = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để thêm từ mới ✏️',
+        message: 'Bạn cần đăng nhập tài khoản để lưu và bổ sung từ vựng mới vào bài học nhé!',
+        actionName: 'thêm từ vựng',
+      });
+      return;
+    }
     openModal('addWord', { topicId, passageId: isPassage ? passageId : null });
   };
 
   const handleOpenFlashcard = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để học Flashcard ⚡',
+        message: 'Đăng nhập tài khoản để lật thẻ Flashcard hai mặt và đồng bộ tiến độ ghi nhớ SRS nhé!',
+        actionName: 'học Flashcard',
+      });
+      return;
+    }
     openModal('flashcardMode', {
       onSelect: (mode) => {
         startPractice(0, mode);
       },
     });
+  };
+
+  const handleStartPractice = (modeIndex) => {
+    if (!user) {
+      const modeNames = {
+        1: 'Trắc nghiệm',
+        2: 'Điền từ',
+        3: 'Nghe chính tả',
+      };
+      const name = modeNames[modeIndex] || 'Luyện tập';
+      openModal('requireLogin', {
+        title: `Đăng nhập để luyện tập ${name} 🎯`,
+        message: `Đăng nhập tài khoản để làm bài ${name}, tích lũy điểm kinh nghiệm và tăng level từ vựng nhé!`,
+        actionName: `luyện tập ${name}`,
+      });
+      return;
+    }
+    startPractice(modeIndex);
   };
 
   return (
@@ -126,7 +162,7 @@ export function PageLessonDetail() {
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Flashcard</span>
             </button>
             <button
-              onClick={() => startPractice(1)}
+              onClick={() => handleStartPractice(1)}
               className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#c3e8ff] flex items-center justify-center text-sm">
@@ -135,7 +171,7 @@ export function PageLessonDetail() {
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Trắc nghiệm</span>
             </button>
             <button
-              onClick={() => startPractice(2)}
+              onClick={() => handleStartPractice(2)}
               className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#ccecbc] flex items-center justify-center text-sm">
@@ -144,7 +180,7 @@ export function PageLessonDetail() {
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Điền từ</span>
             </button>
             <button
-              onClick={() => startPractice(3)}
+              onClick={() => handleStartPractice(3)}
               className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
             >
               <div className="w-8 h-8 rounded-full bg-[#f3e8ff] flex items-center justify-center text-sm text-[#8b5cf6]">
@@ -405,7 +441,7 @@ export function PageLessonDetail() {
 
             {/* Trắc nghiệm */}
             <button
-              onClick={() => startPractice(1)}
+              onClick={() => handleStartPractice(1)}
               className="group p-4 bg-white hover:bg-[#fff9e6] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-2">
@@ -424,7 +460,7 @@ export function PageLessonDetail() {
 
             {/* Điền từ */}
             <button
-              onClick={() => startPractice(2)}
+              onClick={() => handleStartPractice(2)}
               className="group p-4 bg-white hover:bg-[#eef5ec] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-2">
@@ -443,7 +479,7 @@ export function PageLessonDetail() {
 
             {/* Nghe chép chính tả */}
             <button
-              onClick={() => startPractice(3)}
+              onClick={() => handleStartPractice(3)}
               className="group p-4 bg-white hover:bg-[#f3e8ff] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
               <div className="flex items-center justify-between mb-2">

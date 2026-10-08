@@ -4,8 +4,10 @@ import React, { useMemo } from 'react';
 import { useTopicDetail } from '../../hooks/useTopicDetail.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 
 export function PageTopicDetail() {
+  const { user } = useAuth();
   const {
     topicId,
     topicName,
@@ -123,6 +125,14 @@ export function PageTopicDetail() {
   }, [firstPassage]);
 
   const handleAddWord = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để thêm từ mới ✏️',
+        message: 'Bạn cần đăng nhập tài khoản để thêm và lưu từ vựng vào chủ đề nhé!',
+        actionName: 'thêm từ vựng',
+      });
+      return;
+    }
     openModal('addWord', { topicId });
   };
 

@@ -6,7 +6,21 @@ export function PageLogin() {
   const { user, signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
   const { navigateTo } = useRoute();
 
-  const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
+  const [authMode, setAuthMode] = useState(() => {
+    if (typeof window !== 'undefined' && window._initialAuthMode) {
+      const mode = window._initialAuthMode;
+      delete window._initialAuthMode;
+      return mode;
+    }
+    return 'login';
+  }); // 'login' | 'signup'
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window._initialAuthMode) {
+      setAuthMode(window._initialAuthMode);
+      delete window._initialAuthMode;
+    }
+  }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');

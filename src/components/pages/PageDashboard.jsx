@@ -2,12 +2,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDashboardStats } from '../../hooks/useDashboardStats.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 import { getWordsDueForReview } from '../../services/db.js';
 import { IeltsGoalModal, getIeltsVocabStandard } from '../modals/IeltsGoalModal.jsx';
 
 export function PageDashboard() {
   const { navigateTo } = useRoute();
   const { user, profile } = useAuth();
+  const { openModal } = useModal();
   const {
     stats,
     loading,
@@ -46,6 +48,14 @@ export function PageDashboard() {
   };
 
   const handleStartReview = useCallback(async () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để ôn tập 🐾',
+        message: 'Bạn cần đăng nhập để bắt đầu phiên học và kích hoạt thuật toán lặp lại ngắt quãng (SRS)!',
+        actionName: 'Luyện tập ngắt quãng SRS',
+      });
+      return;
+    }
     try {
       const dueWords = await getWordsDueForReview(20);
       if (dueWords && dueWords.length > 0) {
@@ -64,7 +74,7 @@ export function PageDashboard() {
       console.warn('[Dashboard] handleStartReview error:', err);
       navigateTo('learning');
     }
-  }, [navigateTo]);
+  }, [user, navigateTo, openModal]);
 
   useEffect(() => {
     window.startSession = handleStartReview;
@@ -100,6 +110,14 @@ export function PageDashboard() {
   };
 
   const handleOpenIELTSModal = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để đặt mục tiêu 🎯',
+        message: 'Bạn cần đăng nhập để thiết lập và lưu lộ trình mục tiêu IELTS cá nhân!',
+        actionName: 'Thiết lập mục tiêu IELTS',
+      });
+      return;
+    }
     setIsIeltsModalOpen(true);
   };
 
@@ -111,9 +129,15 @@ export function PageDashboard() {
   }, []);
 
   const handleOpenAddWord = () => {
-    if (typeof window !== 'undefined' && typeof window.openAddWordModal === 'function') {
-      window.openAddWordModal();
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để thêm từ 📝',
+        message: 'Bạn cần đăng nhập để thêm từ vựng mới vào sổ tay cá nhân của bạn!',
+        actionName: 'Thêm từ mới',
+      });
+      return;
     }
+    openModal('addWord');
   };
 
   const userName = profile?.full_name || user?.email?.split('@')[0] || 'bạn học';

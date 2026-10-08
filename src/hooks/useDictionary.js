@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 import { useModal } from '../context/ModalContext.jsx';
+import { useAuth } from '../providers/AuthProvider.jsx';
 import {
   lookupWord,
   getRecentSearches,
@@ -18,6 +19,7 @@ const suggestCache = new Map();
 
 export function useDictionary() {
   const { openModal } = useModal();
+  const { user } = useAuth();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('empty'); // 'empty' | 'loading' | 'result' | 'error'
   const [result, setResult] = useState(null);
@@ -190,6 +192,14 @@ export function useDictionary() {
   }, [result]);
 
   const openSaveModal = useCallback((senseIdx = null) => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để lưu từ vựng 🐾',
+        message: 'Bạn cần đăng nhập để lưu từ vựng vào sổ tay cá nhân và bắt đầu ôn tập theo phương pháp lặp lại ngắt quãng (SRS)!',
+        actionName: 'Lưu từ vào sổ tay',
+      });
+      return;
+    }
     if (!result || !result.word) return;
     let wordPayload = { ...result };
     if (typeof senseIdx === 'number' && result.entries?.[senseIdx]) {
@@ -200,7 +210,7 @@ export function useDictionary() {
       };
     }
     openModal('saveWordToTopic', { wordData: wordPayload });
-  }, [result, openModal]);
+  }, [user, result, openModal]);
 
   return {
     query,

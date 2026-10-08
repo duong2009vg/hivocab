@@ -5,12 +5,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useRoute } from '../../router/RouteContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import { addWord } from '../../services/db.js';
 
 export function SaveWordToTopicModal() {
   const { modals, openModal, closeModal } = useModal();
   const { success, error: toastError } = useToast();
+  const { navigateTo } = useRoute();
 
   const isOpen = Boolean(modals?.saveWordToTopic?.open);
   const wordData = modals?.saveWordToTopic?.wordData || null;
@@ -154,6 +156,14 @@ export function SaveWordToTopicModal() {
 
   const handleOpenCreateTopic = () => {
     closeModal('saveWordToTopic');
+    if (!isLoggedIn) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để tạo chủ đề 📁',
+        message: 'Đăng nhập tài khoản để tạo và sắp xếp các chủ đề từ vựng của riêng bạn nhé!',
+        actionName: 'tạo chủ đề',
+      });
+      return;
+    }
     openModal('createTopic');
   };
 
@@ -270,10 +280,33 @@ export function SaveWordToTopicModal() {
               <span className="text-xs font-bold">Đang tải danh sách chủ đề...</span>
             </div>
           ) : !isLoggedIn ? (
-            <div className="p-4 bg-[#FFF8EE] rounded-2xl border-2 border-dashed border-[#E5A13C] text-center space-y-2">
+            <div className="p-4 bg-[#FFF8EE] rounded-2xl border-2 border-dashed border-[#E5A13C] text-center space-y-3">
               <p className="text-xs font-bold text-[#92400E]">
                 Vui lòng đăng nhập để lưu từ vựng vào kho cá nhân của bạn!
               </p>
+              <div className="flex items-center justify-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeModal('saveWordToTopic');
+                    navigateTo('login');
+                  }}
+                  className="px-4 py-2 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
+                >
+                  🔑 Đăng nhập ngay
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeModal('saveWordToTopic');
+                    if (typeof window !== 'undefined') window._initialAuthMode = 'signup';
+                    navigateTo('login');
+                  }}
+                  className="px-4 py-2 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
+                >
+                  ✨ Tạo tài khoản mới
+                </button>
+              </div>
             </div>
           ) : topics.length === 0 ? (
             <div className="p-4 bg-[#FFF8EE] rounded-2xl border-2 border-dashed border-[#E5A13C] text-center space-y-2">

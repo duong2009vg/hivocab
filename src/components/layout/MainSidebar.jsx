@@ -19,14 +19,15 @@ export function MainSidebar({ wordCount, streak }) {
       ? 'profile'
       : currentRoute;
 
-  const userName =
-    user?.user_metadata?.full_name ||
-    user?.user_metadata?.name ||
-    (user?.email ? user.email.split('@')[0] : 'Minh Trang');
+  const userName = user
+    ? (user?.user_metadata?.full_name ||
+       user?.user_metadata?.name ||
+       (user?.email ? user.email.split('@')[0] : 'Bạn học'))
+    : 'Khách trải nghiệm';
 
-  const userRank = 'Huy hiệu: Bé Siêng Năng';
-  const displayStreak = streak != null ? streak : 2;
-  const displayWordCount = wordCount != null ? wordCount : 81;
+  const userRank = user ? 'Huy hiệu: Bé Siêng Năng' : 'Chưa đăng nhập';
+  const displayStreak = user ? (streak != null ? streak : 0) : 0;
+  const displayWordCount = user ? (wordCount != null ? wordCount : 0) : null;
 
   const handleLogout = async (e) => {
     e.stopPropagation();
@@ -161,67 +162,91 @@ export function MainSidebar({ wordCount, streak }) {
       {/* Bottom Section: User Profile Card & Actions */}
       <div className="space-y-3 pt-4 border-t border-[#E8DEC8]/80">
 
-        {/* User Profile Pill */}
-        <div
-          onClick={() => navigateTo('profile')}
-          className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-between cursor-pointer transition-all ${
-            activeTab === 'profile' ? 'bg-[#EFF6EE] border-[#4D6B53]' : 'bg-white hover:bg-[#FFFBF3]'
-          }`}
-          title="Xem thông tin và quản lý hồ sơ học viên"
-        >
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="relative shrink-0">
-              <div className="w-10 h-10 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-base font-bold overflow-hidden">
-                {user?.user_metadata?.avatar_url ? (
-                  <img
-                    src={user.user_metadata.avatar_url}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  '🐱'
-                )}
+        {/* User Profile Pill or Guest CTA */}
+        {!user ? (
+          <div className="bg-[#FAF3E7] rounded-2xl p-3 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2.5">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
+                🐯
               </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></span>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-black text-[#302A24] truncate">Khách trải nghiệm</div>
+                <div className="text-[10px] text-[#786F66] truncate">Chưa đăng nhập</div>
+              </div>
             </div>
-            <div className="min-w-0">
-              <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
-              <div className="text-[10px] text-[#786F66] truncate">{userRank}</div>
+            <button
+              type="button"
+              onClick={() => navigateTo('login')}
+              className="w-full py-2 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>Đăng nhập / Đăng ký</span>
+              <span>🔑</span>
+            </button>
+          </div>
+        ) : (
+          <>
+            <div
+              onClick={() => navigateTo('profile')}
+              className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-between cursor-pointer transition-all ${
+                activeTab === 'profile' ? 'bg-[#EFF6EE] border-[#4D6B53]' : 'bg-white hover:bg-[#FFFBF3]'
+              }`}
+              title="Xem thông tin và quản lý hồ sơ học viên"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="relative shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-base font-bold overflow-hidden">
+                    {user?.user_metadata?.avatar_url ? (
+                      <img
+                        src={user.user_metadata.avatar_url}
+                        alt="Avatar"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      '🐱'
+                    )}
+                  </div>
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></span>
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
+                  <div className="text-[10px] text-[#786F66] truncate">{userRank}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-1 rounded-full border border-[#C85A3F]/40 shrink-0">
+                <span>🔥</span>
+                <span>{displayStreak}</span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-1 rounded-full border border-[#C85A3F]/40 shrink-0">
-            <span>🔥</span>
-            <span>{displayStreak}</span>
-          </div>
-        </div>
-
-        {/* Sub-actions */}
-        <div className="flex items-center justify-between text-[11px] font-semibold text-[#786F66] px-1 pt-1">
-          <a
-            onClick={() => navigateTo('profile')}
-            className="hover:text-[#302A24] transition cursor-pointer"
-          >
-            Cài đặt
-          </a>
-          <span>•</span>
-          <a
-            onClick={() => {
-              if (openModal) openModal('bugReport');
-              else window.openBugReportModal?.();
-            }}
-            className="hover:text-[#302A24] transition cursor-pointer"
-          >
-            Góp ý
-          </a>
-          <span>•</span>
-          <a
-            onClick={handleLogout}
-            className="hover:text-[#C85A3F] transition cursor-pointer"
-          >
-            Đăng xuất
-          </a>
-        </div>
+            {/* Sub-actions */}
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[#786F66] px-1 pt-1">
+              <a
+                onClick={() => navigateTo('profile')}
+                className="hover:text-[#302A24] transition cursor-pointer"
+              >
+                Cài đặt
+              </a>
+              <span>•</span>
+              <a
+                onClick={() => {
+                  if (openModal) openModal('bugReport');
+                  else window.openBugReportModal?.();
+                }}
+                className="hover:text-[#302A24] transition cursor-pointer"
+              >
+                Góp ý
+              </a>
+              <span>•</span>
+              <a
+                onClick={handleLogout}
+                className="hover:text-[#C85A3F] transition cursor-pointer"
+              >
+                Đăng xuất
+              </a>
+            </div>
+          </>
+        )}
       </div>
     </aside>
   );

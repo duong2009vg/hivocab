@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from './providers/AuthProvider.jsx';
 import { RouteProvider, useRoute } from './router/RouteContext.jsx';
 import { ModalProvider } from './context/ModalContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
+import { LandingLangProvider } from './context/LandingLangContext.jsx';
 import MainSidebar from './components/layout/MainSidebar.jsx';
 import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx';
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
@@ -24,6 +25,7 @@ const PricingModal = lazy(() => import('./components/modals/PricingModal.jsx'));
 const ForgotPasswordModal = lazy(() => import('./components/modals/ForgotPasswordModal.jsx'));
 const AuthErrorModal = lazy(() => import('./components/modals/AuthErrorModal.jsx'));
 const FlashcardModeModal = lazy(() => import('./components/modals/FlashcardModeModal.jsx'));
+const RequireLoginModal = lazy(() => import('./components/modals/RequireLoginModal.jsx'));
 const PageLanding = lazy(() => import('./components/pages/PageLanding.jsx'));
 const PageFeatures = lazy(() => import('./components/pages/PageFeatures.jsx'));
 const PageReviews = lazy(() => import('./components/pages/PageReviews.jsx'));
@@ -94,7 +96,7 @@ function AppRoutes() {
       case 'login':
         return <PageLogin />;
       case 'dashboard':
-        return <ProtectedRoute><PageDashboard /></ProtectedRoute>;
+        return <PageDashboard />;
       case 'topics':
         return <PageTopics />;
       case 'library':
@@ -108,9 +110,9 @@ function AppRoutes() {
       case 'thpt-room':
         return <PageThptRoom />;
       case 'vocabulary':
-        return <ProtectedRoute><PageVocabulary /></ProtectedRoute>;
+        return <PageVocabulary />;
       case 'dictionary':
-        return <ProtectedRoute><PageDictionary /></ProtectedRoute>;
+        return <PageDictionary />;
       case 'settings':
       case 'profile':
         return <ProtectedRoute><PageProfile /></ProtectedRoute>;
@@ -167,6 +169,7 @@ function AppRoutes() {
         <ForgotPasswordModal />
         <AuthErrorModal />
         <FlashcardModeModal />
+        <RequireLoginModal />
       </Suspense>
     </div>
   );
@@ -178,9 +181,11 @@ export function App() {
       <AuthProvider>
         <ModalProvider>
           <ToastProvider>
-            <RouteProvider>
-              <AppRoutes />
-            </RouteProvider>
+            <LandingLangProvider>
+              <RouteProvider>
+                <AppRoutes />
+              </RouteProvider>
+            </LandingLangProvider>
           </ToastProvider>
         </ModalProvider>
       </AuthProvider>

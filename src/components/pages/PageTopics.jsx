@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useTopics } from '../../hooks/useTopics.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 
 function getCategoryEmoji(catId) {
   const c = String(catId || '').toLowerCase();
@@ -79,6 +80,19 @@ export function PageTopics() {
 
   const { openModal } = useModal();
   const { navigateTo } = useRoute();
+  const { user } = useAuth();
+
+  const handleOpenCreateTopic = () => {
+    if (!user) {
+      openModal('requireLogin', {
+        title: 'Đăng nhập để tạo chủ đề 📁',
+        message: 'Bạn cần đăng nhập tài khoản để tự tạo và quản lý bộ chủ đề từ vựng theo ý muốn nhé!',
+        actionName: 'tạo chủ đề',
+      });
+      return;
+    }
+    openModal('createTopic');
+  };
 
   // Active Category Label
   const activeLabel = useMemo(() => {
@@ -114,7 +128,7 @@ export function PageTopics() {
           </div>
           {/* Crayon "+ Tạo chủ đề" Button */}
           <button
-            onClick={() => openModal('createTopic')}
+            onClick={handleOpenCreateTopic}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#86a378] text-[#203918] font-bold text-xs border-[2.5px] border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-transform shrink-0"
           >
             <span className="text-sm font-bold">+</span>
@@ -348,7 +362,7 @@ export function PageTopics() {
 
               {/* Create Topic CTA */}
               <button
-                onClick={() => openModal('createTopic')}
+                onClick={handleOpenCreateTopic}
                 className="flex items-center gap-2 bg-[#D96B43] hover:bg-[#c85e37] text-white font-bold text-xs px-4 py-2.5 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

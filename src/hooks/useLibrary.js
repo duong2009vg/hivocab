@@ -168,7 +168,15 @@ export function useLibrary() {
   const handleLike = useCallback(async (topicId) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      window.showHiToast?.('Vui lòng đăng nhập để thích bộ từ!', 'error');
+      if (typeof window !== 'undefined' && window.openRequireLoginModal) {
+        window.openRequireLoginModal(
+          'Đăng nhập để thả tim và lưu bộ từ vào danh sách yêu thích nhé!',
+          'Đăng nhập để thích bộ từ 💖',
+          'thích bộ từ'
+        );
+      } else {
+        window.showHiToast?.('Vui lòng đăng nhập để thích bộ từ!', 'error');
+      }
       return;
     }
     
@@ -213,6 +221,19 @@ export function useLibrary() {
   }, [activeTopicDetail]);
 
   const handleClone = useCallback(async (topicId) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      if (typeof window !== 'undefined' && window.openRequireLoginModal) {
+        window.openRequireLoginModal(
+          'Đăng nhập để sao chép bộ từ vựng cộng đồng này về kho cá nhân của bạn!',
+          'Đăng nhập để lưu bộ từ 📚',
+          'sao chép bộ từ'
+        );
+      } else {
+        window.showHiToast?.('Vui lòng đăng nhập để lưu bộ từ!', 'error');
+      }
+      return;
+    }
     try {
       if (typeof window !== 'undefined' && window.HiDB?.clonePublicTopic) {
         const newId = await window.HiDB.clonePublicTopic(topicId);
@@ -294,7 +315,18 @@ export function useLibrary() {
     if (!commentInput.trim() || !activeCommentsTopicId) return;
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { window.showHiToast?.('Vui lòng đăng nhập để bình luận!', 'error'); return; }
+      if (!user) {
+        if (typeof window !== 'undefined' && window.openRequireLoginModal) {
+          window.openRequireLoginModal(
+            'Đăng nhập để gửi bình luận và trao đổi cùng cộng đồng nhé!',
+            'Đăng nhập để bình luận 💬',
+            'bình luận'
+          );
+        } else {
+          window.showHiToast?.('Vui lòng đăng nhập để bình luận!', 'error');
+        }
+        return;
+      }
       const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
       await supabase.from('topic_comments').insert({
         topic_id: activeCommentsTopicId,
@@ -312,6 +344,17 @@ export function useLibrary() {
   }, [commentInput, activeCommentsTopicId, activeCommentsTitle, openComments]);
 
   const handlePublicToggle = useCallback(async (topicId, isPublic) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      if (typeof window !== 'undefined' && window.openRequireLoginModal) {
+        window.openRequireLoginModal(
+          'Đăng nhập để quản lý quyền công khai bộ từ vựng nhé!',
+          'Đăng nhập tài khoản 🔒',
+          'công khai bộ từ'
+        );
+      }
+      return;
+    }
     if (isPublic) {
       setPublishTopicId(topicId);
       setSelectedTags([]);
