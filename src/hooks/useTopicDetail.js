@@ -94,7 +94,22 @@ export function useTopicDetail() {
 
   useEffect(() => {
     loadTopicData();
-  }, [loadTopicData]);
+
+    const handleRefresh = (e) => {
+      if (e?.detail?.topicId && String(e.detail.topicId) !== String(topicId)) return;
+      if (typeof window !== 'undefined' && window._lessonsCache && topicId) {
+        delete window._lessonsCache[topicId];
+      }
+      loadTopicData();
+    };
+
+    window.addEventListener('hi:topics-updated', handleRefresh);
+    window.addEventListener('hivocab:words-bulk-added', handleRefresh);
+    return () => {
+      window.removeEventListener('hi:topics-updated', handleRefresh);
+      window.removeEventListener('hivocab:words-bulk-added', handleRefresh);
+    };
+  }, [loadTopicData, topicId]);
 
   const isCambridge = Boolean(camHierarchy && camHierarchy.tests && camHierarchy.tests.length > 0);
 
@@ -193,9 +208,32 @@ export function useTopicDetail() {
     navigateTo('lesson-detail');
   }, [topicId, topicName, navigateTo]);
 
-  const openLesson = useCallback(async (lesson) => {
+  const openLesson = useCallback(async (lessonOrId) => {
     const hasAccess = await checkProAccess({ topicId });
     if (!hasAccess) return;
+
+    let lesson = null;
+    if (typeof lessonOrId === 'object' && lessonOrId !== null) {
+      lesson = lessonOrId;
+    } else if (typeof lessonOrId === 'string') {
+      lesson = lessons.find((l) => l.id === lessonOrId);
+      if (!lesson) {
+        const parts = lessonOrId.split('-');
+        const lastPart = parts[parts.length - 1];
+        const parsedIdx = parseInt(lastPart, 10);
+        if (!isNaN(parsedIdx)) {
+          lesson = { index: parsedIdx, name: `Lesson ${parsedIdx + 1}`, progress: 0 };
+        }
+      }
+    }
+
+    if (!lesson) {
+      lesson = { index: 0, name: 'Lesson 1', progress: 0 };
+    }
+
+    const idx = typeof lesson.index === 'number' ? lesson.index : 0;
+    const name = lesson.name || `Lesson ${idx + 1}`;
+    const prog = Math.round(lesson.progress || 0);
 
     if (typeof window !== 'undefined') {
       window._currentTopicId = topicId;
@@ -205,9 +243,9 @@ export function useTopicDetail() {
       window._currentPassageNumber = null;
       window._currentPassageTitle = null;
       window._currentTopicLabel = null;
-      window._currentLessonIndex = lesson.index;
-      window._currentLessonName = lesson.name;
-      window._currentLessonProgress = Math.round(lesson.progress || 0);
+      window._currentLessonIndex = idx;
+      window._currentLessonName = name;
+      window._currentLessonProgress = prog;
       window._currentLessonWords = [];
       window._currentLessonWordsKey = null;
 
@@ -221,15 +259,15 @@ export function useTopicDetail() {
           topicLabel: null,
           testName: null,
           topicName,
-          lessonName: lesson.name,
-          lessonIndex: lesson.index,
-          lessonProgress: lesson.progress,
+          lessonName: name,
+          lessonIndex: idx,
+          lessonProgress: prog,
         }));
       } catch (_) {}
     }
 
     navigateTo('lesson-detail');
-  }, [topicId, topicName, navigateTo]);
+  }, [topicId, topicName, lessons, navigateTo]);
 
   const startPractice = useCallback((modeIndex) => {
     if (typeof window !== 'undefined' && typeof window.startSinglePractice === 'function') {

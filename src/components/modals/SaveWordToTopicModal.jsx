@@ -40,10 +40,33 @@ export function SaveWordToTopicModal() {
         .eq('user_id', user.id)
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.warn('[SaveWordToTopicModal] loadTopics error, trying fallback:', error);
+        const { data: fallbackData } = await supabase
+          .from('topics')
+          .select('id, name, category, icon')
+          .eq('user_id', user.id)
+          .order('name', { ascending: true });
+        setTopics((fallbackData || []).map(t => ({ ...t, word_count: 0 })));
+        return;
+      }
       setTopics(data || []);
     } catch (err) {
       console.warn('[SaveWordToTopicModal] loadTopics error:', err);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: fb } = await supabase
+            .from('topics')
+            .select('id, name, category, icon')
+            .eq('user_id', user.id)
+            .order('name', { ascending: true });
+          if (fb && fb.length > 0) {
+            setTopics(fb.map(t => ({ ...t, word_count: 0 })));
+            return;
+          }
+        }
+      } catch (_) {}
       setTopics([]);
     } finally {
       setLoading(false);

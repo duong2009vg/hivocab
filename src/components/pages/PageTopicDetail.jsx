@@ -337,7 +337,7 @@ export function PageTopicDetail() {
                       </span>
                     </div>
                     <h3
-                      onClick={() => openLesson(lesson.id)}
+                      onClick={() => openLesson(lesson)}
                       className="font-bold text-lg text-[#302A24] cursor-pointer hover:text-[#C85A3F]"
                     >
                       {lesson.name || lesson.title}
@@ -345,7 +345,7 @@ export function PageTopicDetail() {
                   </div>
                   <div className="mt-4">
                     <button
-                      onClick={() => openLesson(lesson.id)}
+                      onClick={() => openLesson(lesson)}
                       className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                     >
                       <span>📖</span>
@@ -689,7 +689,7 @@ export function PageTopicDetail() {
                       </div>
 
                       <h5
-                        onClick={() => openLesson(lesson.id)}
+                        onClick={() => openLesson(lesson)}
                         className="font-bold text-xl text-[#302A24] tracking-tight leading-snug group-hover:text-[#C85A3F] transition-colors cursor-pointer"
                       >
                         {lesson.name || lesson.title}
@@ -707,7 +707,7 @@ export function PageTopicDetail() {
 
                     <div className="mt-5">
                       <button
-                        onClick={() => openLesson(lesson.id)}
+                        onClick={() => openLesson(lesson)}
                         className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all cursor-pointer"
                       >
                         <span>📖</span>

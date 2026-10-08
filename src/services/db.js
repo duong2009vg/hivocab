@@ -97,7 +97,7 @@ async function fetchTopicsFromSupabase() {
   // 2. Fast Fallback: Direct query on topics table (< 150ms, no 66,000 words loop)
   let query = supabase
     .from('topics')
-    .select('id, name, icon, category, is_pro, description, user_id, created_at')
+    .select('id, name, icon, category, is_pro, description, user_id, created_at, word_count')
     .order('category')
     .order('name');
 
@@ -118,7 +118,7 @@ async function fetchTopicsFromSupabase() {
     icon: t.icon || 'folder',
     category: t.category || 'general',
     is_pro: Boolean(t.is_pro),
-    totalWords: existingMap.get(t.id) || 0,
+    totalWords: t.word_count ?? existingMap.get(t.id) ?? 0,
     progress: 0,
   }));
 
@@ -459,15 +459,17 @@ export async function getLessonsInTopic(topicId) {
   try {
     const { data, error } = await supabase
       .from('words')
-      .select('id, word, lesson_name, lesson_order, word_order')
+      .select('id, word, lesson_name, lesson_order, word_order, created_at')
       .eq('topic_id', topicId)
       .order('lesson_order', { ascending: true, nullsFirst: false })
-      .order('word_order', { ascending: true, nullsFirst: false });
+      .order('word_order', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: true });
 
     if (error || !data || data.length === 0) return [];
 
     const LESSON_SIZE = 50;
     const namedLessons = data.filter((w) => w.lesson_name && w.lesson_order !== null);
+    const unassignedWords = data.filter((w) => !w.lesson_name || w.lesson_order === null);
 
     if (namedLessons.length > 0) {
       const groups = new Map();
@@ -476,7 +478,7 @@ export async function getLessonsInTopic(topicId) {
         if (!groups.has(order)) groups.set(order, { name: w.lesson_name, words: [] });
         groups.get(order).words.push(w);
       }
-      return Array.from(groups.entries())
+      const result = Array.from(groups.entries())
         .sort(([a], [b]) => a - b)
         .map(([order, g]) => ({
           id: `lesson-${topicId}-${order}`,
@@ -487,6 +489,22 @@ export async function getLessonsInTopic(topicId) {
           progress: 0,
           wordIds: g.words.map((w) => w.id),
         }));
+
+      // Nếu có thêm từ vựng không gắn bài học (ví dụ: tự thêm từ Từ điển vào topic có sẵn)
+      if (unassignedWords.length > 0) {
+        const nextOrder = result.length > 0 ? Math.max(...result.map((r) => r.index)) + 1 : 0;
+        result.push({
+          id: `lesson-${topicId}-${nextOrder}`,
+          topicId,
+          index: nextOrder,
+          name: 'Từ vựng tự thêm / Bổ sung',
+          totalWords: unassignedWords.length,
+          progress: 0,
+          wordIds: unassignedWords.map((w) => w.id),
+        });
+      }
+
+      return result;
     }
 
     const lessons = [];
@@ -513,22 +531,50 @@ export async function getLessonsInTopic(topicId) {
 export async function getWordsInLesson(topicId, lessonIndex) {
   try {
     const user = await getCurrentUser();
+    const safeIndex = typeof lessonIndex === 'number' ? lessonIndex : 0;
+
+    // 1. Thử lấy theo lesson_order được định nghĩa cụ thể
     const { data, error } = await supabase
       .from('words')
-      .select('id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_order, word_order')
+      .select('id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_order, word_order, created_at')
       .eq('topic_id', topicId)
-      .eq('lesson_order', lessonIndex)
-      .order('word_order', { ascending: true, nullsFirst: false });
+      .eq('lesson_order', safeIndex)
+      .order('word_order', { ascending: true, nullsFirst: false })
+      .order('created_at', { ascending: true });
 
     let wordsList = (!error && data && data.length > 0) ? data : [];
+
+    // 2. Nếu không có từ mang lesson_order này
     if (wordsList.length === 0) {
-      const LESSON_SIZE = 50;
-      const { data: fbData } = await supabase
+      // Kiểm tra xem topic có bài học đặt tên hay không
+      const { data: namedCheck } = await supabase
         .from('words')
-        .select('id, word, pos, phonetic, meaning, example_sentence, image_url')
+        .select('id')
         .eq('topic_id', topicId)
-        .range(lessonIndex * LESSON_SIZE, (lessonIndex + 1) * LESSON_SIZE - 1);
-      wordsList = fbData || [];
+        .not('lesson_name', 'is', null)
+        .not('lesson_order', 'is', null)
+        .limit(1);
+
+      if (namedCheck && namedCheck.length > 0) {
+        // Topic có bài học đặt tên, index này là nhóm từ vựng tự thêm (unassigned)
+        const { data: unassignedData } = await supabase
+          .from('words')
+          .select('id, word, pos, phonetic, meaning, example_sentence, image_url, created_at')
+          .eq('topic_id', topicId)
+          .or('lesson_name.is.null,lesson_order.is.null')
+          .order('created_at', { ascending: true });
+        wordsList = unassignedData || [];
+      } else {
+        // Chủ đề thông thường / cá nhân (chia theo từng trang 50 từ có order xác định)
+        const LESSON_SIZE = 50;
+        const { data: fbData } = await supabase
+          .from('words')
+          .select('id, word, pos, phonetic, meaning, example_sentence, image_url, created_at')
+          .eq('topic_id', topicId)
+          .order('created_at', { ascending: true })
+          .range(safeIndex * LESSON_SIZE, (safeIndex + 1) * LESSON_SIZE - 1);
+        wordsList = fbData || [];
+      }
     }
 
     let progressMap = {};
@@ -645,6 +691,18 @@ export async function addWord(topicIdOrObj, options = {}) {
     .select()
     .single();
   if (error) throw error;
+
+  // Xóa cache bài học và danh sách từ của topic để giao diện tải lại từ mới ngay lập tức
+  if (typeof window !== 'undefined') {
+    if (window._lessonsCache) {
+      delete window._lessonsCache[topicId];
+    }
+    window._currentLessonWords = [];
+    window._currentLessonWordsKey = null;
+    window._allTopics = null;
+  }
+  MEM.topics = null;
+  MEM.topicsAt = 0;
 
   return data;
 }

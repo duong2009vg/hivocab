@@ -105,7 +105,19 @@ export function useLessonDetail() {
 
   useEffect(() => {
     loadWords();
-  }, [loadWords]);
+
+    const handleRefresh = (e) => {
+      if (e?.detail?.topicId && String(e.detail.topicId) !== String(topicId)) return;
+      loadWords();
+    };
+
+    window.addEventListener('hi:topics-updated', handleRefresh);
+    window.addEventListener('hivocab:words-bulk-added', handleRefresh);
+    return () => {
+      window.removeEventListener('hi:topics-updated', handleRefresh);
+      window.removeEventListener('hivocab:words-bulk-added', handleRefresh);
+    };
+  }, [loadWords, topicId]);
 
   // Overall Progress
   const progressPercent = useMemo(() => {
