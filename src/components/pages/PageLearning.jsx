@@ -83,7 +83,7 @@ export function PageLearning() {
             words = await getWordsInLesson(topicId, lessonIdx);
           } else {
             // General SRS review session
-            words = await getWordsDueForReview(20);
+            words = await getWordsDueForReview(50);
           }
         } catch (err) {
           console.warn('[PageLearning] Failed to fetch fallback words:', err);

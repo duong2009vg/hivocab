@@ -197,6 +197,9 @@ export function AuthProvider({ children }) {
   const signOut = useCallback(async () => {
     setError(null);
     try {
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem('hivocab_guest_entered');
+      }
       await supabase.auth.signOut();
       if (typeof window !== 'undefined' && window.HiDB?.signOut) {
         await window.HiDB.signOut().catch(() => {});

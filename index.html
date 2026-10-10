@@ -80,6 +80,11 @@
         var isDeckRoute = curHash.indexOf('d=') === 0 || curHash.indexOf('deck=') === 0 || curHash.indexOf('topic=') === 0 || curHash.indexOf('library') === 0;
         var isLoginRoute = curHash === 'login' || curPath === 'login';
 
+        var guestEntered = false;
+        try {
+            guestEntered = sessionStorage.getItem('hivocab_guest_entered') === '1';
+        } catch(_) {}
+
         if (hasAuth) {
             window._isPreAuthenticated = true;
             document.documentElement.classList.add('user-logged-in');
@@ -87,8 +92,10 @@
             document.documentElement.setAttribute('data-initial-route', initialRoute);
         } else if (isLoginRoute) {
             document.documentElement.setAttribute('data-initial-route', 'login');
-        } else if (isDeckRoute) {
-            document.documentElement.setAttribute('data-initial-route', 'library');
+        } else if (guestEntered) {
+            document.documentElement.setAttribute('data-initial-route', curHash || curPath || 'dashboard');
+        } else {
+            document.documentElement.setAttribute('data-initial-route', 'landing');
         }
     } catch (e) {}
 })();

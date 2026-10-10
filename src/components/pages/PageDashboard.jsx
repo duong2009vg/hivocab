@@ -57,7 +57,7 @@ export function PageDashboard() {
       return;
     }
     try {
-      const dueWords = await getWordsDueForReview(20);
+      const dueWords = await getWordsDueForReview(50);
       if (dueWords && dueWords.length > 0) {
         if (typeof window !== 'undefined') {
           window._currentSessionWords = dueWords;

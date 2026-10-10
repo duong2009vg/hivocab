@@ -51,9 +51,11 @@ function AppRoutes() {
   const { currentRoute, isMainTab, isTopicDetail, navigateTo } = useRoute();
   const { user, loading } = useAuth();
 
-  // Auto-redirect to dashboard if user is authenticated and lands on login or from OAuth callback
+  // Auto-redirect handling
   React.useEffect(() => {
-    if (!loading && user) {
+    if (loading) return;
+
+    if (user) {
       if (currentRoute === 'login') {
         navigateTo('dashboard');
       } else if (currentRoute === 'landing') {
@@ -62,6 +64,14 @@ function AppRoutes() {
         if (rawHash.includes('access_token=') || rawSearch.includes('code=')) {
           navigateTo('dashboard');
         }
+      }
+    } else {
+      // Guest user: if on an in-app route without having clicked "Bắt đầu ngay" in this session, redirect to landing
+      const guestEntered = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('hivocab_guest_entered') === '1';
+      const isPublic = ['landing', 'features', 'reviews', 'faq', 'support', 'login'].includes(currentRoute) ||
+        currentRoute.startsWith('d=') || currentRoute.startsWith('deck=');
+      if (!guestEntered && !isPublic) {
+        navigateTo('landing');
       }
     }
   }, [user, loading, currentRoute, navigateTo]);

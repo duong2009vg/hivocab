@@ -1094,7 +1094,7 @@ export async function getLearnedVocabStats() {
   };
 }
 
-export async function getWordsDueForReview(limit = 20) {
+export async function getWordsDueForReview(limit = 50) {
   const user = await getCurrentUser();
   if (!user) return [];
 

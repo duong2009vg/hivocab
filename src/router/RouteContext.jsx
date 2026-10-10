@@ -24,6 +24,41 @@ function normalizeRoute(raw) {
   return clean || 'landing';
 }
 
+export const PUBLIC_ROUTES = ['landing', 'features', 'reviews', 'faq', 'support', 'login'];
+
+export function isPublicRoute(route) {
+  if (!route) return true;
+  return PUBLIC_ROUTES.includes(route) || route.startsWith('d=') || route.startsWith('deck=');
+}
+
+export function checkHasValidAuthToken() {
+  if (typeof window === 'undefined') return false;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('sb-') && k.endsWith('-auth-token')) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && (parsed.access_token || parsed.refresh_token || parsed.user)) {
+            return true;
+          }
+        }
+      }
+    }
+  } catch (_) {}
+  return false;
+}
+
+export function checkGuestEntered() {
+  if (typeof window === 'undefined' || typeof sessionStorage === 'undefined') return false;
+  try {
+    return sessionStorage.getItem('hivocab_guest_entered') === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
 function getInitialRoute() {
   if (typeof window === 'undefined') return 'landing';
   const path = (window.location.pathname || '').replace(/^\/+/, '').replace(/\/+$/, '');
@@ -36,24 +71,33 @@ function getInitialRoute() {
     return 'dashboard';
   }
 
-  // Hash takes precedence when navigating to a specific sub-feature (e.g. /app#topics or /#topics)
+  const isLoggedIn = checkHasValidAuthToken() ||
+    ((typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function') ? window._hasLocalAuthToken() : false) ||
+    ((typeof document !== 'undefined' && document.documentElement.classList.contains('user-logged-in')));
+
+  const guestEntered = checkGuestEntered();
+
+  // If user is a guest (not authenticated) and has NOT clicked "Bắt đầu ngay" in this session:
+  // MUST start on a public landing page!
+  if (!isLoggedIn && !guestEntered) {
+    if (path === 'login' || hash === 'login') return 'login';
+    if (hash) {
+      const clean = normalizeRoute(hash);
+      if (isPublicRoute(clean)) return clean;
+    }
+    if (path && isPublicRoute(path)) return path;
+    return 'landing';
+  }
+
+  // If logged in OR guest has already entered the app in this session:
   if (hash) {
     const clean = normalizeRoute(hash);
     if (clean && clean !== 'landing') return clean;
   }
 
-  if (path === 'login') return 'login';
+  if (path === 'login') return isLoggedIn ? 'dashboard' : 'login';
   if (path === 'app') return 'dashboard';
   if (path === 'admin') return 'admin';
-
-  let hasSbSession = false;
-  try {
-    hasSbSession = Object.keys(localStorage).some((k) => k.startsWith('sb-') && k.endsWith('-auth-token'));
-  } catch (_) {}
-
-  const isLoggedIn = hasSbSession || ((typeof window !== 'undefined' && typeof window._hasLocalAuthToken === 'function')
-    ? window._hasLocalAuthToken()
-    : (typeof document !== 'undefined' && (document.documentElement.classList.contains('user-logged-in') || !!window._isPreAuthenticated)));
 
   return isLoggedIn ? 'dashboard' : 'landing';
 }
@@ -128,6 +172,21 @@ export function RouteProvider({ children }) {
       return;
     }
 
+    // When navigating to an in-app page, mark that guest has entered the app
+    if (!isPublicRoute(target)) {
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.setItem('hivocab_guest_entered', '1');
+        }
+      } catch (_) {}
+    } else if (target === 'landing') {
+      try {
+        if (typeof sessionStorage !== 'undefined') {
+          sessionStorage.removeItem('hivocab_guest_entered');
+        }
+      } catch (_) {}
+    }
+
     activeRouteRef.current = target;
     setCurrentRoute(target);
     triggerLegacyPageLifecycle(target);
@@ -179,6 +238,13 @@ export function RouteProvider({ children }) {
       if (hash) {
         const clean = normalizeRoute(hash);
         if (clean !== activeRouteRef.current) {
+          if (!isPublicRoute(clean)) {
+            try {
+              if (typeof sessionStorage !== 'undefined') {
+                sessionStorage.setItem('hivocab_guest_entered', '1');
+              }
+            } catch (_) {}
+          }
           activeRouteRef.current = clean;
           setCurrentRoute(clean);
           triggerLegacyPageLifecycle(clean);
