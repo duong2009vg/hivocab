@@ -269,6 +269,12 @@ export function useStudySession() {
       : 0,
   };
 
+  useEffect(() => {
+    if (isComplete && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('hivocab:study-session-completed'));
+    }
+  }, [isComplete]);
+
   // ── startSession ────────────────────────────────────────────────────────────
   const startSession = useCallback((words, allowedType = null, flashcardMode = null) => {
     if (!words || words.length === 0) return;
@@ -508,7 +514,10 @@ export function useStudySession() {
   // ── endSession ──────────────────────────────────────────────────────────────
   const endSession = useCallback(() => {
     setSession(prev => ({ ...prev, isActive: false }));
-    if (typeof window !== 'undefined') window.HiSound?.playComplete?.();
+    if (typeof window !== 'undefined') {
+      window.HiSound?.playComplete?.();
+      window.dispatchEvent(new CustomEvent('hivocab:study-session-completed'));
+    }
   }, []);
 
   return {

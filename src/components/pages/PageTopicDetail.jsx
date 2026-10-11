@@ -378,38 +378,55 @@ export function PageTopicDetail() {
                 );
               })
             ) : (
-              lessons.map((lesson, lIdx) => (
-                <article
-                  key={lesson.id || lIdx}
-                  className="bg-white rounded-[20px] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] p-4 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="px-2.5 py-1 text-xs font-bold text-[#302A24] bg-[#FFF5E6] rounded-xl border border-[#3D352E]">
-                        Lesson {lIdx + 1}
-                      </span>
-                      <span className="px-2 py-0.5 text-xs font-bold rounded-full border bg-[#E0F2E9] text-emerald-800 border-emerald-400">
-                        {lesson.progress || 0}%
-                      </span>
+              lessons.map((lesson, lIdx) => {
+                const lWords = lesson.totalWords || lesson.wordsCount || 0;
+                const lProg = lesson.progress || 0;
+                const lMastered = typeof lesson.masteredCount === 'number' ? lesson.masteredCount : Math.round((lProg * lWords) / 100);
+
+                return (
+                  <article
+                    key={lesson.id || lIdx}
+                    className="bg-white rounded-[20px] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] p-4 flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="px-2.5 py-1 text-xs font-bold text-[#302A24] bg-[#FFF5E6] rounded-xl border border-[#3D352E]">
+                          Lesson {lIdx + 1}
+                        </span>
+                        <span className="px-2 py-0.5 text-xs font-bold rounded-full border bg-[#E0F2E9] text-emerald-800 border-emerald-400">
+                          {lProg}% hoàn thành
+                        </span>
+                      </div>
+                      <h3
+                        onClick={() => openLesson(lesson)}
+                        className="font-bold text-lg text-[#302A24] cursor-pointer hover:text-[#C85A3F]"
+                      >
+                        {lesson.name || lesson.title}
+                      </h3>
+
+                      <div className="mt-2.5 w-full h-2 bg-[#EFE8DD] rounded-full border border-[#3D352E] overflow-hidden">
+                        <div className="h-full bg-[#4D6B53] rounded-full transition-all duration-300" style={{ width: `${lProg}%` }}></div>
+                      </div>
+
+                      <div className="mt-3 flex items-center justify-between text-xs py-1.5 border-y border-[#EBE4D8]">
+                        <span className="font-bold text-[#3D352E]">📝 {lWords} từ vựng</span>
+                        <span className="text-[11px] text-[#786F66]">
+                          Đã thuộc: <strong className="text-[#4D6B53]">{lMastered}/{lWords}</strong>
+                        </span>
+                      </div>
                     </div>
-                    <h3
-                      onClick={() => openLesson(lesson)}
-                      className="font-bold text-lg text-[#302A24] cursor-pointer hover:text-[#C85A3F]"
-                    >
-                      {lesson.name || lesson.title}
-                    </h3>
-                  </div>
-                  <div className="mt-4">
-                    <button
-                      onClick={() => openLesson(lesson)}
-                      className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
-                    >
-                      <span>📖</span>
-                      <span>Học bài ngay</span>
-                    </button>
-                  </div>
-                </article>
-              ))
+                    <div className="mt-4">
+                      <button
+                        onClick={() => openLesson(lesson)}
+                        className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <span>📖</span>
+                        <span>Học bài ngay</span>
+                      </button>
+                    </div>
+                  </article>
+                );
+              })
             )}
           </div>
         </main>
@@ -732,7 +749,7 @@ export function PageTopicDetail() {
               lessons.map((lesson, lIdx) => {
                 const lWords = lesson.totalWords || lesson.wordsCount || 0;
                 const lProg = lesson.progress || 0;
-                const lLearned = Math.round((lProg * lWords) / 100);
+                const lLearned = typeof lesson.masteredCount === 'number' ? lesson.masteredCount : Math.round((lProg * lWords) / 100);
 
                 return (
                   <article

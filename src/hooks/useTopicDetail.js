@@ -134,11 +134,23 @@ export function useTopicDetail() {
       loadTopicData();
     };
 
+    // Invalidate cache & re-fetch progress when user completes a study session or word review
+    const handleProgressUpdate = () => {
+      if (typeof window !== 'undefined' && window._lessonsCache && topicId) {
+        delete window._lessonsCache[topicId];
+      }
+      loadTopicData();
+    };
+
     window.addEventListener('hi:topics-updated', handleRefresh);
     window.addEventListener('hivocab:words-bulk-added', handleRefresh);
+    window.addEventListener('hivocab:study-session-completed', handleProgressUpdate);
+    window.addEventListener('hivocab:word-reviewed', handleProgressUpdate);
     return () => {
       window.removeEventListener('hi:topics-updated', handleRefresh);
       window.removeEventListener('hivocab:words-bulk-added', handleRefresh);
+      window.removeEventListener('hivocab:study-session-completed', handleProgressUpdate);
+      window.removeEventListener('hivocab:word-reviewed', handleProgressUpdate);
     };
   }, [loadTopicData, topicId]);
 

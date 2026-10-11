@@ -113,14 +113,37 @@ async function fetchTopicsFromSupabase() {
   // Preserve any known word counts from existing cache
   const existingMap = new Map((MEM.topics || []).map(t => [t.id, t.totalWords]));
 
-  const topics = topicsRaw.map((t) => ({
-    ...t,
-    icon: t.icon || 'folder',
-    category: t.category || 'general',
-    is_pro: Boolean(t.is_pro),
-    totalWords: t.word_count ?? existingMap.get(t.id) ?? 0,
-    progress: 0,
-  }));
+  // Fetch user progress per topic if logged in
+  let progressMap = new Map();
+  if (uid) {
+    try {
+      const { data: userProgs } = await supabase
+        .from('word_progress')
+        .select('word_id, words!inner(topic_id)')
+        .eq('user_id', uid)
+        .gt('level', 0);
+      if (userProgs) {
+        userProgs.forEach((up) => {
+          const tid = up.words?.topic_id;
+          if (tid) progressMap.set(tid, (progressMap.get(tid) || 0) + 1);
+        });
+      }
+    } catch (_) {}
+  }
+
+  const topics = topicsRaw.map((t) => {
+    const total = t.word_count ?? existingMap.get(t.id) ?? 0;
+    const reviewed = progressMap.get(t.id) || 0;
+    const progress = total > 0 ? Math.min(100, Math.round((reviewed / total) * 100)) : 0;
+    return {
+      ...t,
+      icon: t.icon || 'folder',
+      category: t.category || 'general',
+      is_pro: Boolean(t.is_pro),
+      totalWords: total,
+      progress,
+    };
+  });
 
   topics.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }));
 
@@ -457,6 +480,7 @@ export async function getCamHierarchy(topicId) {
 
 export async function getLessonsInTopic(topicId) {
   try {
+    const user = await getCurrentUser();
     const { data, error } = await supabase
       .from('words')
       .select('id, word, lesson_name, lesson_order, word_order, created_at')
@@ -466,6 +490,29 @@ export async function getLessonsInTopic(topicId) {
       .order('created_at', { ascending: true });
 
     if (error || !data || data.length === 0) return [];
+
+    // Fetch all word_progress for this topic's words in one query
+    let progressMap = {};
+    if (user && data.length > 0) {
+      const allWordIds = data.map((w) => w.id);
+      const { data: progData } = await supabase
+        .from('word_progress')
+        .select('word_id, level')
+        .eq('user_id', user.id)
+        .in('word_id', allWordIds);
+      if (progData) {
+        progData.forEach((p) => { progressMap[p.word_id] = p.level ?? 0; });
+      }
+    }
+
+    const calcLessonProgress = (wordIds) => {
+      if (!wordIds || wordIds.length === 0) return { progress: 0, learnedWords: 0, masteredCount: 0 };
+      const totalLevel = wordIds.reduce((sum, id) => sum + (progressMap[id] || 0), 0);
+      const learnedWords = wordIds.filter((id) => (progressMap[id] || 0) > 0).length;
+      const masteredCount = wordIds.filter((id) => (progressMap[id] || 0) >= 4).length;
+      const progress = Math.round((totalLevel / (wordIds.length * 5)) * 100);
+      return { progress, learnedWords, masteredCount };
+    };
 
     const LESSON_SIZE = 50;
     const namedLessons = data.filter((w) => w.lesson_name && w.lesson_order !== null);
@@ -480,27 +527,36 @@ export async function getLessonsInTopic(topicId) {
       }
       const result = Array.from(groups.entries())
         .sort(([a], [b]) => a - b)
-        .map(([order, g]) => ({
-          id: `lesson-${topicId}-${order}`,
-          topicId,
-          index: order,
-          name: g.name,
-          totalWords: g.words.length,
-          progress: 0,
-          wordIds: g.words.map((w) => w.id),
-        }));
+        .map(([order, g]) => {
+          const wordIds = g.words.map((w) => w.id);
+          const { progress, learnedWords, masteredCount } = calcLessonProgress(wordIds);
+          return {
+            id: `lesson-${topicId}-${order}`,
+            topicId,
+            index: order,
+            name: g.name,
+            totalWords: g.words.length,
+            progress,
+            learnedWords,
+            masteredCount,
+            wordIds,
+          };
+        });
 
-      // Nếu có thêm từ vựng không gắn bài học (ví dụ: tự thêm từ Từ điển vào topic có sẵn)
       if (unassignedWords.length > 0) {
         const nextOrder = result.length > 0 ? Math.max(...result.map((r) => r.index)) + 1 : 0;
+        const wordIds = unassignedWords.map((w) => w.id);
+        const { progress, learnedWords, masteredCount } = calcLessonProgress(wordIds);
         result.push({
           id: `lesson-${topicId}-${nextOrder}`,
           topicId,
           index: nextOrder,
           name: 'Từ vựng tự thêm / Bổ sung',
           totalWords: unassignedWords.length,
-          progress: 0,
-          wordIds: unassignedWords.map((w) => w.id),
+          progress,
+          learnedWords,
+          masteredCount,
+          wordIds,
         });
       }
 
@@ -511,14 +567,18 @@ export async function getLessonsInTopic(topicId) {
     for (let i = 0; i < data.length; i += LESSON_SIZE) {
       const chunk = data.slice(i, i + LESSON_SIZE);
       const idx = Math.floor(i / LESSON_SIZE);
+      const wordIds = chunk.map((w) => w.id);
+      const { progress, learnedWords, masteredCount } = calcLessonProgress(wordIds);
       lessons.push({
         id: `lesson-${topicId}-${idx}`,
         topicId,
         index: idx,
         name: `Lesson ${idx + 1}`,
         totalWords: chunk.length,
-        progress: 0,
-        wordIds: chunk.map((w) => w.id),
+        progress,
+        learnedWords,
+        masteredCount,
+        wordIds,
       });
     }
     return lessons;
@@ -527,6 +587,7 @@ export async function getLessonsInTopic(topicId) {
     return [];
   }
 }
+
 
 export async function getWordsInLesson(topicId, lessonIndex) {
   try {
@@ -921,6 +982,10 @@ export async function reviewWord(wordId, rating) {
   if (error) throw error;
   await logStudySession();
 
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('hivocab:word-reviewed', { detail: { wordId, newLevel } }));
+  }
+
   return {
     newLevel,
     nextReviewAt,
@@ -959,6 +1024,10 @@ export async function reviewWordToLevel(wordId, targetLevel) {
 
   if (error) throw error;
   await logStudySession();
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('hivocab:word-reviewed', { detail: { wordId, newLevel } }));
+  }
 
   return {
     newLevel,
