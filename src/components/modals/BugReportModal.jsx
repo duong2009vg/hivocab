@@ -1,6 +1,6 @@
 // src/components/modals/BugReportModal.jsx
 // Cozy Crayon Handcrafted Bug Report & Feedback Modal with Hidden Diagnostic Browser Logs
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
@@ -24,15 +24,10 @@ const BUG_SUBTYPES = [
 export function BugReportModal() {
   const { modals, closeModal } = useModal();
   const { user } = useAuth();
-  const modalState = modals.bugReport;
+  const modalState = modals?.bugReport;
+  const isOpen = Boolean(modalState?.open);
 
-  const data = modalState?.data || {};
-  const initialType = data.initialType === 'feedback' || data.isFeedback ? 'feedback' : 'bug';
-  const feature = data.feature || data.featureContext || 'Chung';
-  const contextData = data.contextData || {};
-  const title = data.title || (initialType === 'feedback' ? 'Góp ý & Đóng góp ý kiến' : 'Báo cáo sự cố & Lỗi ứng dụng');
-
-  const [activeTab, setActiveTab] = useState(initialType); // 'feedback' | 'bug'
+  const [activeTab, setActiveTab] = useState('feedback'); // 'feedback' | 'bug'
   const [subType, setSubType] = useState('feature_request');
   const [description, setDescription] = useState('');
   const [userEmail, setUserEmail] = useState('');
@@ -40,18 +35,32 @@ export function BugReportModal() {
   const [showDiagnostics, setShowDiagnostics] = useState(false);
   const [diagnostics, setDiagnostics] = useState(null);
 
-  // Sync state when modal opens
+  // Sync state ONLY ONCE when modal is opened
   useEffect(() => {
-    if (modalState?.open) {
-      const mode = data.initialType === 'feedback' || data.isFeedback ? 'feedback' : 'bug';
-      setActiveTab(mode);
-      setSubType(mode === 'feedback' ? 'feature_request' : 'wrong_answer');
-      setDescription('');
-      setUserEmail(user?.email || '');
-      setShowDiagnostics(false);
+    if (!isOpen) return;
+
+    const data = modalState?.data || {};
+    const mode = data.initialType === 'feedback' || data.isFeedback ? 'feedback' : 'bug';
+    setActiveTab(mode);
+    setSubType(mode === 'feedback' ? 'feature_request' : 'wrong_answer');
+    setDescription('');
+    setUserEmail(user?.email || '');
+    setShowDiagnostics(false);
+    setIsSubmitting(false);
+
+    try {
       setDiagnostics(getBrowserDiagnosticLogs());
+    } catch (_) {
+      setDiagnostics(null);
     }
-  }, [modalState?.open, data, user]);
+  }, [isOpen]); // CRITICAL: only depends on isOpen, never on data object or form state!
+
+  if (!isOpen) return null;
+
+  const data = modalState?.data || {};
+  const feature = data.feature || data.featureContext || 'Chung';
+  const contextData = data.contextData || {};
+  const title = data.title || (activeTab === 'feedback' ? 'Góp ý phát triển HiVocab' : 'Báo cáo sự cố & Lỗi ứng dụng');
 
   // When switching between Feedback and Bug tab
   const handleTabChange = (tab) => {
@@ -125,8 +134,6 @@ export function BugReportModal() {
     }
   };
 
-  if (!modalState?.open) return null;
-
   return (
     <div
       id="modal-bug-report"
@@ -135,7 +142,10 @@ export function BugReportModal() {
       }}
       className="fixed inset-0 z-[10000] flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
     >
-      <div className="w-full max-w-lg bg-[#FAF5EB] rounded-[28px] border-3 border-[#3D352E] shadow-[6px_8px_0px_#3D352E] p-5 sm:p-7 text-[#302A24] space-y-4 max-h-[92vh] overflow-y-auto">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg bg-[#FAF5EB] rounded-[28px] border-3 border-[#3D352E] shadow-[6px_8px_0px_#3D352E] p-5 sm:p-7 text-[#302A24] space-y-4 max-h-[92vh] overflow-y-auto"
+      >
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-dashed border-[#D9CEBA] pb-3.5">
           <div className="flex items-center gap-3">
@@ -257,7 +267,7 @@ export function BugReportModal() {
               Mô tả chi tiết <span className="text-[#DE5D53]">*</span>:
             </label>
             <textarea
-              rows="3"
+              rows={3}
               required
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -274,7 +284,7 @@ export function BugReportModal() {
           <div className="rounded-2xl border-2 border-[#3D352E] bg-white overflow-hidden">
             <button
               type="button"
-              onClick={() => setShowDiagnostics(!showDiagnostics)}
+              onClick={() => setShowDiagnostics((prev) => !prev)}
               className="w-full px-3.5 py-2.5 flex items-center justify-between text-xs font-bold text-[#6E5D53] hover:text-[#302A24] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
             >
               <div className="flex items-center gap-2">
@@ -292,7 +302,6 @@ export function BugReportModal() {
             {showDiagnostics && (
               <div className="p-3 bg-[#2D2620] text-[#FAF5EB] text-[11px] font-mono border-t-2 border-[#3D352E] space-y-1.5 max-h-36 overflow-y-auto">
                 <div className="text-[#8FB383] font-bold pb-1 border-b border-white/10">
-                  {/* System Summary */}
                   Hệ thống: {diagnostics?.os} • {diagnostics?.browser} • Màn hình: {diagnostics?.screenResolution} (Viewport: {diagnostics?.viewport})
                 </div>
                 <div>URL: {diagnostics?.url}</div>
