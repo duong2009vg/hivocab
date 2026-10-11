@@ -230,8 +230,15 @@ export function MainSidebar({ wordCount, streak }) {
               <span>•</span>
               <a
                 onClick={() => {
-                  if (openModal) openModal('bugReport');
-                  else window.openBugReportModal?.();
+                  if (openModal) {
+                    openModal('bugReport', {
+                      initialType: 'feedback',
+                      feature: 'Sidebar Menu',
+                      title: 'Góp ý phát triển HiVocab',
+                    });
+                  } else if (window.openBugReportModal) {
+                    window.openBugReportModal({ initialType: 'feedback', feature: 'Sidebar Menu' });
+                  }
                 }}
                 className="hover:text-[#302A24] transition cursor-pointer"
               >

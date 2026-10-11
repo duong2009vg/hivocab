@@ -813,8 +813,16 @@ export function PageTopicDetail() {
             </div>
             <div className="shrink-0 flex items-center gap-2">
               <a className="text-xs font-bold text-[#4D6B53] hover:underline cursor-pointer">Xem cẩm nang đọc IELTS</a>
-              <span className="text-[#786F66]">•</span>
-              <a className="text-xs font-bold text-[#C85A3F] hover:underline cursor-pointer">Báo lỗi đề / từ vựng</a>
+              <a
+                onClick={() => openModal('bugReport', {
+                  initialType: 'bug',
+                  feature: 'Chi tiết chủ đề',
+                  title: `Báo lỗi chủ đề: ${topicName}`,
+                })}
+                className="text-xs font-bold text-[#C85A3F] hover:underline cursor-pointer"
+              >
+                Báo lỗi đề / từ vựng
+              </a>
             </div>
           </div>
         </section>

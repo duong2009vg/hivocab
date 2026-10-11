@@ -55,9 +55,15 @@ export function ModalProvider({ children }) {
     window.closeFlashcardModeModal = () => closeModal('flashcardMode');
     window.openRequireLoginModal = (message, title, actionName) => openModal('requireLogin', { message, title, actionName });
     window.closeRequireLoginModal = () => closeModal('requireLogin');
+    window.openBugReportModal = (data = {}) => openModal('bugReport', data);
+    window.closeBugReportModal = () => closeModal('bugReport');
+    window.openFeedbackModal = (data = {}) => openModal('bugReport', { initialType: 'feedback', ...data });
 
     return () => {
       delete window.__modalContext;
+      delete window.openBugReportModal;
+      delete window.closeBugReportModal;
+      delete window.openFeedbackModal;
     };
   }, [openModal, closeModal]);
 

@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useStudySession } from '../../hooks/useStudySession.js';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 import { getWordsInLesson, getWordsInPassage, getWordsDueForReview } from '../../services/db.js';
 import ExerciseFlashcard  from '../learning/ExerciseFlashcard.jsx';
 import ExerciseMCQ        from '../learning/ExerciseMCQ.jsx';
@@ -30,6 +31,7 @@ const ACTIVITY_TITLE_MAP = {
 
 export function PageLearning() {
   const { navigateTo } = useRoute();
+  const { openModal } = useModal();
   const {
     currentItem,
     isComplete,
@@ -115,12 +117,21 @@ export function PageLearning() {
 
   // ── Report error ────────────────────────────────────────────────────────────
   const handleReport = useCallback(() => {
-    if (typeof window !== 'undefined' && typeof window.reportCurrentLearningError === 'function') {
-      window.reportCurrentLearningError();
-    } else {
-      alert('Đã ghi nhận báo cáo từ vựng. Đội ngũ HiVocab sẽ kiểm tra sớm nhất! 🐾');
-    }
-  }, []);
+    const wordObj = currentItem?.word;
+    const wordText = wordObj?.word || '';
+    openModal('bugReport', {
+      initialType: 'bug',
+      feature: 'Luyện tập từ vựng',
+      title: wordText ? `Báo lỗi từ: "${wordText}"` : 'Báo lỗi câu hỏi từ vựng',
+      contextData: {
+        word: wordText,
+        meaning: wordObj?.meaning || '',
+        phonetic: wordObj?.phonetic || '',
+        exerciseType: currentItem?.exerciseType || '',
+        queueIndex: session?.queueIndex,
+      },
+    });
+  }, [currentItem, session?.queueIndex, openModal]);
 
   // ── Go home ─────────────────────────────────────────────────────────────────
   const goHome = useCallback(() => {

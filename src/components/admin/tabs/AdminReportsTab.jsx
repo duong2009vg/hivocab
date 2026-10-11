@@ -9,6 +9,7 @@ import { useToast } from '../../../context/ToastContext.jsx';
 export function AdminReportsTab() {
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState('system_errors'); // 'system_errors' | 'user_bugs' | 'answer_reports'
+  const [userBugFilter, setUserBugFilter] = useState('all'); // 'all' | 'feedback' | 'bug'
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -28,6 +29,7 @@ export function AdminReportsTab() {
   useEffect(() => {
     setSelectedIds(new Set());
     setSearchTerm('');
+    setUserBugFilter('all');
   }, [activeTab]);
 
   // ──────────────────────────────────────────────
@@ -207,11 +209,36 @@ export function AdminReportsTab() {
     });
   };
 
+  const feedbackCount = useMemo(() => {
+    return bugReports.filter((r) => {
+      const type = String(r.report_type || '').toLowerCase();
+      return type.includes('góp') || type.includes('feedback') || type.includes('đề xuất');
+    }).length;
+  }, [bugReports]);
+
+  const bugCount = useMemo(() => {
+    return Math.max(0, bugReports.length - feedbackCount);
+  }, [bugReports.length, feedbackCount]);
+
   const currentList = useMemo(() => {
     if (activeTab === 'system_errors') return errorLogs;
-    if (activeTab === 'user_bugs') return bugReports;
+    if (activeTab === 'user_bugs') {
+      if (userBugFilter === 'feedback') {
+        return bugReports.filter((r) => {
+          const type = String(r.report_type || '').toLowerCase();
+          return type.includes('góp') || type.includes('feedback') || type.includes('đề xuất');
+        });
+      }
+      if (userBugFilter === 'bug') {
+        return bugReports.filter((r) => {
+          const type = String(r.report_type || '').toLowerCase();
+          return !type.includes('góp') && !type.includes('feedback') && !type.includes('đề xuất');
+        });
+      }
+      return bugReports;
+    }
     return answerReports;
-  }, [activeTab, errorLogs, bugReports, answerReports]);
+  }, [activeTab, userBugFilter, errorLogs, bugReports, answerReports]);
 
   const filteredItems = useMemo(() => {
     if (!searchTerm.trim()) return currentList;
@@ -286,7 +313,7 @@ export function AdminReportsTab() {
             }`}
           >
             <span className="material-symbols-outlined text-[16px]">bug_report</span>
-            <span>Phản Ánh Học Viên ({bugReports.length})</span>
+            <span>Báo Lỗi &amp; Góp Ý ({bugReports.length})</span>
           </button>
 
           <button
@@ -548,8 +575,50 @@ export function AdminReportsTab() {
             {/* List for user_bugs */}
             {activeTab === 'user_bugs' && (
               <div className="space-y-3">
+                {/* Filter Pills for Feedback vs Bug */}
+                <div className="flex flex-wrap items-center gap-2 pb-1">
+                  <button
+                    type="button"
+                    onClick={() => setUserBugFilter('all')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                      userBugFilter === 'all'
+                        ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                        : 'bg-white text-[#6E5D53] border border-[#D9CEBA] hover:bg-[#FAF5EB]'
+                    }`}
+                  >
+                    Tất cả ({bugReports.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUserBugFilter('feedback')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                      userBugFilter === 'feedback'
+                        ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                        : 'bg-white text-[#557A46] border border-[#8DAA68] hover:bg-[#EAF3E7]'
+                    }`}
+                  >
+                    <span>⭐</span>
+                    <span>Góp ý ({feedbackCount})</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUserBugFilter('bug')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer ${
+                      userBugFilter === 'bug'
+                        ? 'bg-[#DE5D53] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                        : 'bg-white text-[#DE5D53] border border-[#F8C8B8] hover:bg-[#FEEFEA]'
+                    }`}
+                  >
+                    <span>🐞</span>
+                    <span>Báo lỗi ({bugCount})</span>
+                  </button>
+                </div>
+
                 {filteredItems.map((report) => {
                   const isSelected = selectedIds.has(report.id);
+                  const isExpanded = Boolean(expandedStacks[report.id]);
+                  const isFeedback = String(report.report_type || '').toLowerCase().includes('góp') || String(report.report_type || '').toLowerCase().includes('feedback');
+                  const dev = report.device_info;
 
                   return (
                     <div
@@ -571,8 +640,13 @@ export function AdminReportsTab() {
 
                           <div className="flex-1 min-w-0">
                             <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#FFF9EE] text-[#D9822B] border-2 border-[#D9822B]">
-                                {report.report_type || 'Phản ánh'}
+                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border-2 flex items-center gap-1 ${
+                                isFeedback
+                                  ? 'bg-[#EAF3E7] text-[#557A46] border-[#557A46]'
+                                  : 'bg-[#FFF0E6] text-[#DE5D53] border-[#DE5D53]'
+                              }`}>
+                                <span>{isFeedback ? '⭐' : '🐞'}</span>
+                                <span>{report.report_type || (isFeedback ? 'Góp ý' : 'Báo lỗi')}</span>
                               </span>
 
                               {report.feature_context && (
@@ -596,23 +670,53 @@ export function AdminReportsTab() {
                               {report.description}
                             </p>
 
-                            {/* Device & Context Info */}
-                            {report.device_info && (
-                              <div className="text-[11px] text-[#6E5D53] font-mono flex flex-wrap gap-2">
-                                <span>Thiết bị: {JSON.stringify(report.device_info)}</span>
+                            {/* Diagnostic badges */}
+                            {dev && (
+                              <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-mono text-[#6E5D53]">
+                                {dev.browser && (
+                                  <span className="px-2 py-0.5 bg-[#FAF5EB] rounded-lg border border-[#D9CEBA]">
+                                    🌐 {dev.browser} ({dev.os || 'OS'})
+                                  </span>
+                                )}
+                                {dev.viewport && (
+                                  <span className="px-2 py-0.5 bg-[#FAF5EB] rounded-lg border border-[#D9CEBA]">
+                                    📐 {dev.viewport}
+                                  </span>
+                                )}
+                                {dev.recentErrors && dev.recentErrors.length > 0 && (
+                                  <span className="px-2 py-0.5 bg-red-50 text-red-700 rounded-lg border border-red-200 font-bold">
+                                    ⚠️ {dev.recentErrors.length} lỗi JS runtime
+                                  </span>
+                                )}
                               </div>
                             )}
                           </div>
                         </div>
 
-                        {/* Action Button: Đã giải quyết & Xóa khỏi DB */}
+                        {/* Action Buttons */}
                         <div className="flex items-center gap-2 shrink-0">
+                          {dev && (
+                            <button
+                              type="button"
+                              onClick={() => toggleStack(report.id)}
+                              className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] transition-all flex items-center gap-1 cursor-pointer"
+                              title="Xem chi tiết log trình duyệt ẩn và môi trường máy khách"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">
+                                {isExpanded ? 'expand_less' : 'terminal'}
+                              </span>
+                              <span className="hidden sm:inline">
+                                {isExpanded ? 'Thu gọn' : 'Log ẩn'}
+                              </span>
+                            </button>
+                          )}
+
                           <button
                             onClick={() =>
                               handleResolveAndDelete(
                                 report.id,
                                 'user_bug_reports',
-                                'phản ánh học viên'
+                                isFeedback ? 'góp ý học viên' : 'báo lỗi học viên'
                               )
                             }
                             disabled={isDeleting}
@@ -624,6 +728,26 @@ export function AdminReportsTab() {
                           </button>
                         </div>
                       </div>
+
+                      {/* Diagnostic Log Detail Viewer */}
+                      {isExpanded && dev && (
+                        <div className="mt-3.5 p-3.5 rounded-2xl bg-[#2D2620] text-[#FAF5EB] text-[11px] font-mono leading-relaxed overflow-x-auto relative animate-fade-in border-2 border-[#3D352E]">
+                          <div className="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
+                            <span className="text-[#8FB383] font-bold">
+                              🖥️ Log chẩn đoán trình duyệt ẩn &amp; Môi trường học viên:
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleCopyStack(JSON.stringify(dev, null, 2))}
+                              className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                            >
+                              <span className="material-symbols-outlined text-[12px]">content_copy</span>
+                              <span>Copy Log</span>
+                            </button>
+                          </div>
+                          <pre className="whitespace-pre-wrap">{JSON.stringify(dev, null, 2)}</pre>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

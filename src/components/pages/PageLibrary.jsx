@@ -952,8 +952,8 @@ export function PageLibrary() {
         <div className="fixed bottom-6 right-8 z-40">
           <button 
             type="button"
-            onClick={() => window.openBugReportModal?.()}
-            className="w-13 h-13 p-3.5 bg-white hover:bg-[#FAF5ED] border-[2.5px] border-[#2D2824] rounded-full shadow-[3px_3px_0px_#2D2824] text-[#E66946] text-xl flex items-center justify-center active:translate-x-0.5 active:translate-y-0.5 transition-all"
+            onClick={() => window.openBugReportModal?.({ initialType: 'feedback', feature: 'Thư viện cộng đồng', title: 'Góp ý Thư viện' })}
+            className="w-13 h-13 p-3.5 bg-white hover:bg-[#FAF5ED] border-[2.5px] border-[#2D2824] rounded-full shadow-[3px_3px_0px_#2D2824] text-[#E66946] text-xl flex items-center justify-center active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer"
             title="Góp ý cho thư viện"
           >
             🚩
@@ -1240,8 +1240,8 @@ export function PageLibrary() {
         <div className="fixed bottom-20 right-5 z-40">
           <button 
             type="button"
-            onClick={() => window.openBugReportModal?.()}
-            className="w-12 h-12 bg-white text-[#E66946] rounded-full border-[2.5px] border-[#2D2824] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[2px_2px_0px_#2D2824] text-xl"
+            onClick={() => window.openBugReportModal?.({ initialType: 'feedback', feature: 'Thư viện cộng đồng', title: 'Góp ý Thư viện' })}
+            className="w-12 h-12 bg-white text-[#E66946] rounded-full border-[2.5px] border-[#2D2824] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[2px_2px_0px_#2D2824] text-xl cursor-pointer"
             title="Góp ý cho thư viện"
           >
             🚩

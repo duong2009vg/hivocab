@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
   const { navigateTo } = useRoute();
+  const { openModal } = useModal();
   const { showToast } = useToast ? useToast() : { showToast: (msg) => window.showHiToast?.(msg, 'info') };
 
   const [fullName, setFullName] = useState('');
@@ -157,8 +159,12 @@ export function PageProfile() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => window.openBugReportModal?.()}
-                  className="px-3.5 py-1.5 text-xs font-bold bg-white text-[#302A24] rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-[#EFE7DA] transition-all flex items-center gap-1.5"
+                  onClick={() => openModal('bugReport', {
+                    initialType: 'feedback',
+                    feature: 'Hồ sơ cá nhân',
+                    title: 'Góp ý phát triển HiVocab',
+                  })}
+                  className="px-3.5 py-1.5 text-xs font-bold bg-white text-[#302A24] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-[#EFE7DA] active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
                   <span>⭐</span>
                   <span>Góp ý</span>
