@@ -153,10 +153,11 @@ export function PageDashboard() {
 
   // Motion Mascot State
   // > 100 words due: Angry mascot; otherwise: Greeting mascot
-  // Plays animated WebP for 2 cycles (~4.0s), then settles on static resting frame
+  // Plays animated WebP for 1 loop (~2.0s), then settles on static resting frame
   const isAngry = wordsDueCount > 100;
   const [mascotPlaying, setMascotPlaying] = useState(true);
   const [mascotPlayKey, setMascotPlayKey] = useState(0);
+  const [mascotInteracted, setMascotInteracted] = useState(false);
 
   // Preload resting frames on mount for instantaneous transition
   useEffect(() => {
@@ -166,22 +167,30 @@ export function PageDashboard() {
     img2.src = '/mascot/mascot_angry_static.webp';
   }, []);
 
-  // Whenever isAngry status or replay trigger changes, play for 2 loops (4000ms), then freeze
+  // When isAngry status or replay trigger changes, play for 1 loop (~2.0s), then freeze
   useEffect(() => {
     setMascotPlaying(true);
     const timer = setTimeout(() => {
       setMascotPlaying(false);
-    }, 4000);
+      setMascotInteracted(false);
+    }, 2050); // 1 loop = 2.0s
     return () => clearTimeout(timer);
   }, [isAngry, mascotPlayKey]);
 
-  const handleMascotReplay = useCallback(() => {
+  // Click on mascot to interact and trigger animation loop (angry or waving)
+  const handleMascotClick = useCallback(() => {
+    // Haptic feedback if available (mobile iOS/Android webapp)
+    if (typeof window !== 'undefined' && window.navigator?.vibrate) {
+      try { window.navigator.vibrate(25); } catch { /* ignore */ }
+    }
+    setMascotInteracted(true);
+    setMascotPlaying(true);
     setMascotPlayKey((k) => k + 1);
   }, []);
 
-  const mascotSrc = isAngry
-    ? (mascotPlaying ? '/mascot/mascot_angry.webp' : '/mascot/mascot_angry_static.webp')
-    : (mascotPlaying ? '/mascot/mascot_waving.webp' : '/mascot/mascot_waving_static.webp');
+  const baseAnim = isAngry ? '/mascot/mascot_angry.webp' : '/mascot/mascot_waving.webp';
+  const baseStatic = isAngry ? '/mascot/mascot_angry_static.webp' : '/mascot/mascot_waving_static.webp';
+  const mascotSrc = mascotPlaying ? `${baseAnim}?k=${mascotPlayKey}` : baseStatic;
 
   // Chuẩn từ vựng cốt lõi theo Band IELTS
   const currentBand = ieltsGoal?.overall || '7.0';
@@ -238,21 +247,32 @@ export function PageDashboard() {
               <img
                 key={`mobile-mascot-${isAngry ? 'angry' : 'waving'}-${mascotPlaying ? `anim-${mascotPlayKey}` : 'static'}`}
                 src={mascotSrc}
-                onClick={handleMascotReplay}
-                className="w-56 h-56 object-contain select-none transition-transform duration-300 hover:scale-105 filter drop-shadow-sm cursor-pointer"
+                onClick={handleMascotClick}
+                className="w-56 h-56 object-contain select-none transition-transform duration-300 hover:scale-105 active:scale-95 filter drop-shadow-sm cursor-pointer"
+                title="Chạm vào bé hổ để tương tác!"
                 alt={isAngry ? "Bé Hổ tức giận" : "Bé Hổ xin chào"}
               />
             </div>
             <div className="max-w-xs mx-auto space-y-1">
               <h2 className="text-2xl font-bold text-[#382E2B] tracking-tight">
-                {heroState === 'countdown'
+                {mascotInteracted
+                  ? isAngry
+                    ? 'Bé Hổ đang giận dỗi đó! 😾'
+                    : 'Bé Hổ chào bạn nha! 🐯'
+                  : heroState === 'countdown'
                   ? 'Lần ôn tập kế tiếp'
                   : isAngry
                   ? 'Mau ôn tập thôi bạn ơi! 😾'
                   : 'Đến giờ ôn tập rồi bạn ơi!'}
               </h2>
               <p className="text-sm text-[#6A5A50] font-medium leading-relaxed">
-                {heroState === 'countdown' ? (
+                {mascotInteracted ? (
+                  isAngry ? (
+                    <>Mau củng cố <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ</strong> ngay để bé hổ hết giận nhé! 🐾</>
+                  ) : (
+                    <>Chúc bạn một ngày học từ vựng thật vui và hiệu quả nhé! ✨</>
+                  )
+                ) : heroState === 'countdown' ? (
                   <>Nghỉ ngơi chút nhé! Quay lại sau: <strong className="text-[#F0783C] font-bold text-base">{countdown?.hours || 0}g {countdown?.minutes || 0}p</strong></>
                 ) : isAngry ? (
                   <>Có tới <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ vựng</strong> đang bị dồn lại cần ôn ngay! 🔥</>
@@ -522,7 +542,11 @@ export function PageDashboard() {
                       </h2>
                       <div className="bg-cream/80 border-2 border-[#3d352e] rounded-2xl p-3.5 relative inline-block text-sm font-semibold text-crayonText">
                         <span className="font-bold text-terracotta">Bé Hổ nhắc:</span> {
-                          heroState === 'countdown'
+                          mascotInteracted
+                            ? isAngry
+                              ? '"Grừ! Mau ôn bài thôi, bé hổ đang giận vì còn nhiều từ chưa ôn đó! 😾🐾"'
+                              : '"Chào bạn nhé! Cùng bé hổ ôn tập từ vựng thật chăm chỉ nào! 🐯✨"'
+                            : heroState === 'countdown'
                             ? '"Tuyệt vời! Bạn đã hoàn thành nhiệm vụ hôm nay. ⭐"'
                             : isAngry
                             ? `"Hơn 100 từ tích lũy rồi (${wordsDueCount} từ), mau ôn tập cùng bé hổ ngay nhé! 😾🐾"`
@@ -542,13 +566,16 @@ export function PageDashboard() {
                         <span className="text-xs font-semibold text-softMuted">Mất tầm ~{Math.max(3, Math.round(wordsDueCount * 0.4))} phút</span>
                       </div>
                     </div>
-                    <div className="flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center">
-                      <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
+                    <div 
+                      className="flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center cursor-pointer group"
+                      onClick={handleMascotClick}
+                      title="Bấm vào bé hổ để tương tác!"
+                    >
+                      <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6 transition-all group-hover:scale-110"></div>
                       <img
                         key={`desktop-mascot-${isAngry ? 'angry' : 'waving'}-${mascotPlaying ? `anim-${mascotPlayKey}` : 'static'}`}
                         src={mascotSrc}
-                        onClick={handleMascotReplay}
-                        className="w-full h-full object-contain relative z-1 drop-shadow-sm transition-transform hover:scale-105 duration-300 cursor-pointer"
+                        className="w-full h-full object-contain relative z-1 drop-shadow-sm transition-transform group-hover:scale-105 active:scale-95 duration-300"
                         alt={isAngry ? "Bé Hổ tức giận" : "Bé Hổ xin chào"}
                       />
                     </div>
