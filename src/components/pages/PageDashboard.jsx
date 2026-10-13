@@ -151,13 +151,37 @@ export function PageDashboard() {
   const activeDaysCount = calendar.activeDaysCount || 0;
   const totalWords = calendar.totalWordsLearned || 0;
 
-  // Choose Mascot based on Hero state
-  const mascotImg =
-    heroState === 'countdown'
-      ? '/mascot/mascot_celebrating.png'
-      : wordsDueCount > 0
-      ? '/mascot/mascot_cozy.png'
-      : '/mascot/mascot_waving.png';
+  // Motion Mascot State
+  // > 100 words due: Angry mascot; otherwise: Greeting mascot
+  // Plays animated WebP for 2 cycles (~4.0s), then settles on static resting frame
+  const isAngry = wordsDueCount > 100;
+  const [mascotPlaying, setMascotPlaying] = useState(true);
+  const [mascotPlayKey, setMascotPlayKey] = useState(0);
+
+  // Preload resting frames on mount for instantaneous transition
+  useEffect(() => {
+    const img1 = new Image();
+    img1.src = '/mascot/mascot_waving_static.webp';
+    const img2 = new Image();
+    img2.src = '/mascot/mascot_angry_static.webp';
+  }, []);
+
+  // Whenever isAngry status or replay trigger changes, play for 2 loops (4000ms), then freeze
+  useEffect(() => {
+    setMascotPlaying(true);
+    const timer = setTimeout(() => {
+      setMascotPlaying(false);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [isAngry, mascotPlayKey]);
+
+  const handleMascotReplay = useCallback(() => {
+    setMascotPlayKey((k) => k + 1);
+  }, []);
+
+  const mascotSrc = isAngry
+    ? (mascotPlaying ? '/mascot/mascot_angry.webp' : '/mascot/mascot_angry_static.webp')
+    : (mascotPlaying ? '/mascot/mascot_waving.webp' : '/mascot/mascot_waving_static.webp');
 
   // Chuẩn từ vựng cốt lõi theo Band IELTS
   const currentBand = ieltsGoal?.overall || '7.0';
@@ -211,13 +235,27 @@ export function PageDashboard() {
               <span className="text-xs text-[#DE5D53] font-bold">{wordsDueCount} từ cần ôn</span>
             </div>
             <div className="my-2 relative flex justify-center items-center">
-              <img src={mascotImg} className="w-56 h-56 object-contain select-none transition-transform duration-300 hover:scale-105 filter drop-shadow-sm" style={{ mixBlendMode: 'multiply' }} alt="Mascot"/>
+              <img
+                key={`mobile-mascot-${isAngry ? 'angry' : 'waving'}-${mascotPlaying ? `anim-${mascotPlayKey}` : 'static'}`}
+                src={mascotSrc}
+                onClick={handleMascotReplay}
+                className="w-56 h-56 object-contain select-none transition-transform duration-300 hover:scale-105 filter drop-shadow-sm cursor-pointer"
+                alt={isAngry ? "Bé Hổ tức giận" : "Bé Hổ xin chào"}
+              />
             </div>
             <div className="max-w-xs mx-auto space-y-1">
-              <h2 className="text-2xl font-bold text-[#382E2B] tracking-tight">{heroState === 'countdown' ? 'Lần ôn tập kế tiếp' : 'Đến giờ ôn tập rồi bạn ơi!'}</h2>
+              <h2 className="text-2xl font-bold text-[#382E2B] tracking-tight">
+                {heroState === 'countdown'
+                  ? 'Lần ôn tập kế tiếp'
+                  : isAngry
+                  ? 'Mau ôn tập thôi bạn ơi! 😾'
+                  : 'Đến giờ ôn tập rồi bạn ơi!'}
+              </h2>
               <p className="text-sm text-[#6A5A50] font-medium leading-relaxed">
                 {heroState === 'countdown' ? (
                   <>Nghỉ ngơi chút nhé! Quay lại sau: <strong className="text-[#F0783C] font-bold text-base">{countdown?.hours || 0}g {countdown?.minutes || 0}p</strong></>
+                ) : isAngry ? (
+                  <>Có tới <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ vựng</strong> đang bị dồn lại cần ôn ngay! 🔥</>
                 ) : (
                   <>Bạn có <strong className="text-[#F0783C] font-bold text-base">{wordsDueCount} từ vựng</strong> đang chờ được củng cố ✨</>
                 )}
@@ -476,12 +514,22 @@ export function PageDashboard() {
                       <h2 className="text-2xl lg:text-3xl font-black text-crayonText font-quicksand leading-tight">
                         {heroState === 'countdown' ? (
                           <>Đã ôn xong hôm nay!<br/><span className="text-sage">Quay lại sau {countdown?.hours || 0}g {countdown?.minutes || 0}p.</span></>
+                        ) : isAngry ? (
+                          <>Mau ôn tập thôi bạn ơi!<br/><span className="text-terracotta">{wordsDueCount} từ vựng</span> đang bị dồn lại kìa! 😾</>
                         ) : (
                           <>Đến giờ ôn tập rồi!<br/><span className="text-terracotta">{wordsDueCount} từ vựng</span> đang chờ bạn.</>
                         )}
                       </h2>
                       <div className="bg-cream/80 border-2 border-[#3d352e] rounded-2xl p-3.5 relative inline-block text-sm font-semibold text-crayonText">
-                        <span className="font-bold text-terracotta">Bé Hổ nhắc:</span> {wordsDueCount > 0 ? `"Cùng bé hổ hoàn thành ${wordsDueCount} từ hôm nay nhé! 🐾"` : '"Tuyệt vời! Bạn đã hoàn thành nhiệm vụ hôm nay. ⭐"'}
+                        <span className="font-bold text-terracotta">Bé Hổ nhắc:</span> {
+                          heroState === 'countdown'
+                            ? '"Tuyệt vời! Bạn đã hoàn thành nhiệm vụ hôm nay. ⭐"'
+                            : isAngry
+                            ? `"Hơn 100 từ tích lũy rồi (${wordsDueCount} từ), mau ôn tập cùng bé hổ ngay nhé! 😾🐾"`
+                            : wordsDueCount > 0
+                            ? `"Cùng bé hổ hoàn thành ${wordsDueCount} từ hôm nay nhé! 🐾"`
+                            : '"Hôm nay chưa có từ nào đến hạn, tiếp tục phát huy nhé! ⭐"'
+                        }
                         <div className="absolute -left-2 top-4 w-3 h-3 bg-cream border-l-2 border-b-2 border-crayonText rotate-45"></div>
                       </div>
                       <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -496,7 +544,13 @@ export function PageDashboard() {
                     </div>
                     <div className="flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center">
                       <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
-                      <img src={mascotImg} className="w-full h-full object-contain relative z-1 mix-blend-multiply drop-shadow-sm transition-transform hover:scale-105 duration-300" alt="Mascot"/>
+                      <img
+                        key={`desktop-mascot-${isAngry ? 'angry' : 'waving'}-${mascotPlaying ? `anim-${mascotPlayKey}` : 'static'}`}
+                        src={mascotSrc}
+                        onClick={handleMascotReplay}
+                        className="w-full h-full object-contain relative z-1 drop-shadow-sm transition-transform hover:scale-105 duration-300 cursor-pointer"
+                        alt={isAngry ? "Bé Hổ tức giận" : "Bé Hổ xin chào"}
+                      />
                     </div>
                   </div>
                 </section>
