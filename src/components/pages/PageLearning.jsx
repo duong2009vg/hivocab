@@ -42,6 +42,7 @@ export function PageLearning() {
     startSession,
     rateFlashcard,
     submitAnswer,
+    nextQuestion,
     speakWord,
     endSession,
   } = useStudySession();
@@ -74,9 +75,18 @@ export function PageLearning() {
         : [];
 
       if (!words || words.length === 0) {
-        const topicId = typeof window !== 'undefined' ? window._currentTopicId : null;
-        const lessonIdx = typeof window !== 'undefined' ? (window._currentLessonIndex ?? 0) : 0;
-        const passageId = typeof window !== 'undefined' ? window._currentPassageId : null;
+        let topicId = typeof window !== 'undefined' ? window._currentTopicId : null;
+        let lessonIdx = typeof window !== 'undefined' ? (window._currentLessonIndex ?? 0) : 0;
+        let passageId = typeof window !== 'undefined' ? window._currentPassageId : null;
+
+        if (!topicId && !passageId && typeof window !== 'undefined') {
+          try {
+            const savedState = JSON.parse(sessionStorage.getItem('hi_current_lesson_state') || '{}');
+            if (savedState.passageId) passageId = savedState.passageId;
+            if (savedState.topicId) topicId = savedState.topicId;
+            if (typeof savedState.lessonIndex === 'number') lessonIdx = savedState.lessonIndex;
+          } catch (_) {}
+        }
 
         try {
           if (passageId) {
@@ -334,6 +344,7 @@ export function PageLearning() {
                 key={`${currentItem.word?.wordId || currentItem.word?.id}-${session.queueIndex}`}
                 item={currentItem}
                 onSubmit={submitAnswer}
+                onNext={nextQuestion}
                 onReport={handleReport}
                 sessionInfo={sessionInfo}
               />
@@ -343,6 +354,7 @@ export function PageLearning() {
                 key={`${currentItem.word?.wordId || currentItem.word?.id}-${session.queueIndex}`}
                 item={currentItem}
                 onSubmit={submitAnswer}
+                onNext={nextQuestion}
                 onReport={handleReport}
                 sessionInfo={sessionInfo}
               />
@@ -352,6 +364,7 @@ export function PageLearning() {
                 key={`${currentItem.word?.wordId || currentItem.word?.id}-${session.queueIndex}`}
                 item={currentItem}
                 onSubmit={submitAnswer}
+                onNext={nextQuestion}
                 speakWord={speakWord}
                 onReport={handleReport}
                 sessionInfo={sessionInfo}

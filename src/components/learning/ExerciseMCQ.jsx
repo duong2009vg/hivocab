@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
-export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
+export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionInfo }) {
   const [selectedIdx, setSelectedIdx] = useState(null);
   const [result, setResult] = useState(null); // { correct, correctIndex }
   const [showResultModal, setShowResultModal] = useState(false);
@@ -58,7 +58,8 @@ export default function ExerciseMCQ({ item, onSubmit, onReport, sessionInfo }) {
     setShowResultModal(false);
     setSelectedIdx(null);
     setResult(null);
-  }, []);
+    onNext?.();
+  }, [onNext]);
 
   const playAudio = useCallback(() => {
     const word = d.word || '';

@@ -2,8 +2,9 @@
 // Pure React port of sessionEngine.js + sessionUI.js logic.
 // No window.HiSession dependency — fully self-contained.
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
+import { reviewWord } from '../services/db.js';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -90,7 +91,11 @@ function buildAnswerPhraseRegex(answer) {
   try {
     return new RegExp(`(^|[^\\p{L}\\p{N}_])(${phrase})(?=$|[^\\p{L}\\p{N}_])`, 'giu');
   } catch {
-    return null;
+    try {
+      return new RegExp(`(^|[^a-zA-Z0-9_])(${phrase})(?=$|[^a-zA-Z0-9_])`, 'gi');
+    } catch {
+      return null;
+    }
   }
 }
 
@@ -113,7 +118,28 @@ function blankAnswerInSentence(sentence, answer) {
 
 // ─── Exercise Data Generation ─────────────────────────────────────────────────
 
-function generateExerciseData(word, type, allWords, flashcardMode = 'en_vi') {
+function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi') {
+  if (!word) {
+    return {
+      mode: 'en_vi',
+      frontLabel: 'TỪ TIẾNG ANH',
+      frontWord: '',
+      meaning: '',
+      backLabel: 'ĐÁP ÁN TIẾNG VIỆT',
+      backWord: '',
+      options: [],
+      answer: '',
+      word: '',
+    };
+  }
+
+  const safeWord = String(word.word || '').trim();
+  const safeMeaning = String(word.meaning || '').trim();
+  const safePhonetic = String(word.phonetic || '').trim();
+  const safePos = String(word.pos || '').trim();
+  const safeExample = String(word.example_sentence || word.exampleSentence || '').trim();
+  const safeImage = String(word.image_url || word.imageUrl || '').trim();
+
   switch (type) {
     case 'flashcard': {
       const isEnVi = (flashcardMode || 'en_vi') === 'en_vi';
@@ -121,57 +147,62 @@ function generateExerciseData(word, type, allWords, flashcardMode = 'en_vi') {
         return {
           mode: 'en_vi',
           frontLabel: 'TỪ TIẾNG ANH',
-          frontWord: word.word,
-          pos: word.pos || '',
-          phonetic: word.phonetic || '',
-          exampleSentence: word.example_sentence || word.exampleSentence || '',
-          imageUrl: word.image_url || word.imageUrl || '',
+          frontWord: safeWord,
+          pos: safePos,
+          phonetic: safePhonetic,
+          exampleSentence: safeExample,
+          imageUrl: safeImage,
           backLabel: 'ĐÁP ÁN TIẾNG VIỆT',
-          backWord: word.meaning,
-          meaning: word.meaning || '',
-          englishWord: word.word,
+          backWord: safeMeaning,
+          meaning: safeMeaning,
+          englishWord: safeWord,
         };
       }
       return {
         mode: 'vi_en',
         frontLabel: 'DỊCH SANG TIẾNG ANH',
-        frontWord: word.meaning,
-        pos: word.pos || '',
-        phonetic: word.phonetic || '',
-        exampleSentence: word.example_sentence || word.exampleSentence || '',
-        imageUrl: word.image_url || word.imageUrl || '',
+        frontWord: safeMeaning,
+        pos: safePos,
+        phonetic: safePhonetic,
+        exampleSentence: safeExample,
+        imageUrl: safeImage,
         backLabel: 'ĐÁP ÁN TIẾNG ANH',
-        backWord: word.word,
-        meaning: word.meaning || '',
-        englishWord: word.word,
+        backWord: safeWord,
+        meaning: safeMeaning,
+        englishWord: safeWord,
       };
     }
 
     case 'mcq': {
-      const correctOption = { text: word.meaning, isCorrect: true };
-      const others = allWords
-        .filter(w => w.wordId !== word.wordId)
-        .map(w => w.meaning);
-      const fallbackPool = FALLBACK_DISTRACTORS.filter(d => !others.includes(d));
+      const correctOption = { text: safeMeaning || 'Nghĩa chính xác', isCorrect: true };
+      const currentWordId = word.id || word.wordId;
+      const others = (allWords || [])
+        .filter(w => (w.id || w.wordId) !== currentWordId && w.meaning)
+        .map(w => String(w.meaning).trim())
+        .filter(m => m && m !== safeMeaning);
+      const fallbackPool = FALLBACK_DISTRACTORS.filter(d => !others.includes(d) && d !== safeMeaning);
       const padded = [...others];
-      while (padded.length < 3) padded.push(fallbackPool.shift() || 'Không xác định');
+      while (padded.length < 3) {
+        padded.push(fallbackPool.shift() || 'Không xác định');
+      }
       const distractors = shuffle(padded)
         .slice(0, 3)
         .map(text => ({ text, isCorrect: false }));
       return {
         question: 'Chọn nghĩa đúng của',
-        word: word.word,
+        word: safeWord,
+        phonetic: safePhonetic,
+        pos: safePos,
         options: shuffle([correctOption, ...distractors]),
       };
     }
 
     case 'fill': {
       let sentence = null;
-      let answerText = word.word;
+      let answerText = safeWord;
       let blankPlaceholder = buildBlankPlaceholder(answerText);
-      const exSentence = word.example_sentence || word.exampleSentence || '';
-      if (exSentence) {
-        const blanked = blankAnswerInSentence(exSentence, word.word);
+      if (safeExample) {
+        const blanked = blankAnswerInSentence(safeExample, safeWord);
         if (blanked) {
           sentence = blanked.sentence;
           answerText = blanked.answer;
@@ -181,9 +212,11 @@ function generateExerciseData(word, type, allWords, flashcardMode = 'en_vi') {
       return {
         sentence,
         blankPlaceholder,
-        meaningHint: `Điền từ tiếng Anh có nghĩa: "${word.meaning}"`,
+        meaningHint: `Điền từ tiếng Anh có nghĩa: "${safeMeaning}"`,
         answer: answerText,
-        baseAnswer: word.word,
+        baseAnswer: safeWord,
+        phonetic: safePhonetic,
+        pos: safePos,
         letters: countAnswerLetters(answerText),
         answerParts: splitAnswerParts(answerText),
         hasSpaces: /\s/.test(answerText.trim()),
@@ -191,12 +224,13 @@ function generateExerciseData(word, type, allWords, flashcardMode = 'en_vi') {
     }
 
     case 'listen': {
-      const answerText = word.word || '';
+      const answerText = safeWord;
       return {
         wordToSpeak: answerText,
         answer: answerText,
-        meaning: word.meaning || '',
-        phonetic: word.phonetic || '',
+        meaning: safeMeaning,
+        phonetic: safePhonetic,
+        pos: safePos,
         letters: countAnswerLetters(answerText),
         answerParts: splitAnswerParts(answerText),
         hasSpaces: /\s/.test(answerText.trim()),
@@ -204,11 +238,9 @@ function generateExerciseData(word, type, allWords, flashcardMode = 'en_vi') {
     }
 
     default:
-      throw new Error(`Unknown exercise type: ${type}`);
+      return generateExerciseData(word, 'flashcard', allWords, flashcardMode);
   }
 }
-
-import { reviewWord } from '../services/db.js';
 
 // ─── SRS: reviewWord via Supabase directly ────────────────────────────────────
 
@@ -259,7 +291,8 @@ export function useStudySession() {
 
   const isComplete = session.isActive &&
     session.allWords.length > 0 &&
-    session.completed.length >= session.allWords.length;
+    ((session.queueIndex >= session.queue.length && session.queue.length > 0) ||
+      session.completed.length >= session.allWords.length);
 
   const progress = {
     completed: session.completed.length,
@@ -278,6 +311,20 @@ export function useStudySession() {
   // ── startSession ────────────────────────────────────────────────────────────
   const startSession = useCallback((words, allowedType = null, flashcardMode = null) => {
     if (!words || words.length === 0) return;
+    const validWords = words
+      .filter(w => w && (w.word || w.meaning))
+      .map(w => ({
+        ...w,
+        id: w.id || w.wordId,
+        wordId: w.wordId || w.id,
+        word: String(w.word || '').trim(),
+        meaning: String(w.meaning || '').trim(),
+        phonetic: String(w.phonetic || '').trim(),
+        pos: String(w.pos || '').trim(),
+      }));
+
+    if (validWords.length === 0) return;
+
     let mode = flashcardMode;
     if (!mode && typeof window !== 'undefined') {
       mode = window._flashcardMode || null;
@@ -287,10 +334,10 @@ export function useStudySession() {
     }
     mode = (mode === 'vi_en' || mode === 'en_vi') ? mode : 'en_vi';
 
-    const shuffled = shuffle(words);
-    const queue = shuffled.map(w => createQueueItem(w, allowedType, words, mode));
+    const shuffled = shuffle(validWords);
+    const queue = shuffled.map(w => createQueueItem(w, allowedType, validWords, mode));
     setSession({
-      allWords: words,
+      allWords: validWords,
       queue,
       queueIndex: 0,
       completed: [],
@@ -357,109 +404,132 @@ export function useStudySession() {
   // ── submitAnswer (MCQ / Fill / Listen) ─────────────────────────────────────
   /**
    * Returns { correct, correctAnswer, skipped, wordCompleted, failCount }
-   * so exercise components can show feedback before the state updates.
+   * synchronously, records attempts and completes/requeues items in state.
    */
   const submitAnswer = useCallback((userAnswer) => {
     let result = { correct: false, correctAnswer: '', skipped: false, wordCompleted: false };
 
-    setSession(prev => {
-      if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
-      const item = prev.queue[prev.queueIndex];
-      const newItem = { ...item, attempts: item.attempts + 1 };
+    if (!session.isActive || session.queueIndex >= session.queue.length) return result;
+    const item = session.queue[session.queueIndex];
+    if (!item) return result;
 
-      let correct = false;
-      let correctAnswer = '';
+    const attempts = (item.attempts || 0) + 1;
+    let correct = false;
+    let correctAnswer = '';
 
-      // ── MCQ ──────────────────────────────────────────────────────────────
-      if (item.exerciseType === 'mcq') {
-        const selectedOption = item.exerciseData.options[userAnswer];
-        correct = selectedOption?.isCorrect === true;
-        correctAnswer = item.exerciseData.options.find(o => o.isCorrect)?.text || '';
+    // ── MCQ ──────────────────────────────────────────────────────────────
+    if (item.exerciseType === 'mcq') {
+      const selectedOption = item.exerciseData?.options?.[userAnswer];
+      correct = selectedOption?.isCorrect === true;
+      correctAnswer = item.exerciseData?.options?.find(o => o.isCorrect)?.text || '';
 
-      // ── Fill / Listen ─────────────────────────────────────────────────────
-      } else {
-        const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
-        correct = norm(userAnswer) === norm(item.exerciseData.answer);
-        correctAnswer = item.exerciseData.answer;
-      }
+    // ── Fill / Listen ─────────────────────────────────────────────────────
+    } else {
+      const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+      correct = norm(userAnswer) === norm(item.exerciseData?.answer);
+      correctAnswer = item.exerciseData?.answer || '';
+    }
 
-      const isNewWord = item.word.level === 0 || item.word.isNew === true;
-
-      // ── New word: always advance ──────────────────────────────────────────
-      if (isNewWord) {
-        reviewWordInDB(item.word.wordId || item.word.id, correct ? 'good' : 'hard');
-        result = { correct, correctAnswer, skipped: false, wordCompleted: true, isNewWord: true };
-
-        if (!correct) {
-          // Push back with new exercise type for learning reinforcement
-          newItem.failCount = (newItem.failCount || 0) + 1;
-          const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
-          newItem.exerciseType = nextType;
-          newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
-          if (!newItem.usedTypes.includes(nextType)) newItem.usedTypes = [...newItem.usedTypes, nextType];
-          return {
-            ...prev,
-            queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q), { ...newItem }],
-            queueIndex: prev.queueIndex + 1,
-            completed: [...prev.completed, { word: item.word, rating: 'hard', attempts: newItem.attempts, isNew: true }],
-          };
-        }
-
-        return {
-          ...prev,
-          queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
-          queueIndex: prev.queueIndex + 1,
-          completed: [...prev.completed, { word: item.word, rating: 'good', attempts: newItem.attempts, isNew: true }],
-        };
-      }
-
-      // ── Wrong ≥ 3 times: skip ─────────────────────────────────────────────
-      if (!correct) {
-        newItem.failCount = (newItem.failCount || 0) + 1;
-        if (newItem.failCount >= 3) {
-          reviewWordInDB(item.word.wordId || item.word.id, 'hard');
-          result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: newItem.failCount };
-          return {
-            ...prev,
-            queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
-            queueIndex: prev.queueIndex + 1,
-            completed: [...prev.completed, { word: item.word, rating: 'hard', attempts: newItem.attempts, skipped: true }],
-          };
-        }
-
-        // Change exercise type, push to end
-        const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
-        newItem.exerciseType = nextType;
-        newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
-        if (!newItem.usedTypes.includes(nextType)) newItem.usedTypes = [...newItem.usedTypes, nextType];
-
-        result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: newItem.failCount };
-        return {
-          ...prev,
-          queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q), { ...newItem }],
-          queueIndex: prev.queueIndex + 1,
-        };
-      }
-
-      // ── Correct ───────────────────────────────────────────────────────────
-      const rating = newItem.attempts === 1 ? 'easy' : newItem.attempts === 2 ? 'good' : 'hard';
-      reviewWordInDB(item.word.wordId || item.word.id, rating);
-      result = { correct: true, correctAnswer, skipped: false, wordCompleted: true, rating };
-      return {
-        ...prev,
-        queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
-        queueIndex: prev.queueIndex + 1,
-        completed: [...prev.completed, { word: item.word, rating, attempts: newItem.attempts }],
-      };
-    });
+    const isNewWord = item.word?.level === 0 || item.word?.isNew === true;
+    const wordId = item.word?.wordId || item.word?.id;
 
     // Play sound
     if (typeof window !== 'undefined') {
-      if (result.correct) window.HiSound?.playCorrect?.();
+      if (correct) window.HiSound?.playCorrect?.();
       else window.HiSound?.playIncorrect?.();
     }
 
+    // Determine result & rating
+    if (isNewWord) {
+      const effectiveRating = correct ? 'good' : 'hard';
+      reviewWordInDB(wordId, effectiveRating);
+      result = { correct, correctAnswer, skipped: false, wordCompleted: true, isNewWord: true, rating: effectiveRating };
+    } else if (!correct) {
+      const newFailCount = (item.failCount || 0) + 1;
+      if (newFailCount >= 3) {
+        reviewWordInDB(wordId, 'hard');
+        result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: newFailCount, rating: 'hard' };
+      } else {
+        result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: newFailCount };
+      }
+    } else {
+      const rating = attempts === 1 ? 'easy' : attempts === 2 ? 'good' : 'hard';
+      reviewWordInDB(wordId, rating);
+      result = { correct: true, correctAnswer, skipped: false, wordCompleted: true, rating };
+    }
+
+    // Update queue state (re-queue failed words, record completed)
+    setSession(prev => {
+      if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
+      const current = prev.queue[prev.queueIndex];
+      const updatedItem = { ...current, attempts };
+
+      if (isNewWord) {
+        if (!correct) {
+          updatedItem.failCount = (updatedItem.failCount || 0) + 1;
+          const nextType = prev.allowedType || pickNextType(updatedItem.usedTypes);
+          const requeuedItem = {
+            ...updatedItem,
+            exerciseType: nextType,
+            exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode),
+            usedTypes: updatedItem.usedTypes.includes(nextType) ? updatedItem.usedTypes : [...updatedItem.usedTypes, nextType],
+          };
+          return {
+            ...prev,
+            queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q), requeuedItem],
+            completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, isNew: true }],
+          };
+        }
+        return {
+          ...prev,
+          queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
+          completed: [...prev.completed, { word: updatedItem.word, rating: 'good', attempts, isNew: true }],
+        };
+      }
+
+      if (!correct) {
+        updatedItem.failCount = (updatedItem.failCount || 0) + 1;
+        if (updatedItem.failCount >= 3) {
+          return {
+            ...prev,
+            queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
+            completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, skipped: true }],
+          };
+        }
+        const nextType = prev.allowedType || pickNextType(updatedItem.usedTypes);
+        const requeuedItem = {
+          ...updatedItem,
+          exerciseType: nextType,
+          exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode),
+          usedTypes: updatedItem.usedTypes.includes(nextType) ? updatedItem.usedTypes : [...updatedItem.usedTypes, nextType],
+        };
+        return {
+          ...prev,
+          queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q), requeuedItem],
+        };
+      }
+
+      // Correct
+      const rating = attempts === 1 ? 'easy' : attempts === 2 ? 'good' : 'hard';
+      return {
+        ...prev,
+        queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
+        completed: [...prev.completed, { word: updatedItem.word, rating, attempts }],
+      };
+    });
+
     return result;
+  }, [session.isActive, session.queue, session.queueIndex]);
+
+  // ── nextQuestion ────────────────────────────────────────────────────────────
+  const nextQuestion = useCallback(() => {
+    setSession(prev => {
+      if (!prev.isActive) return prev;
+      return {
+        ...prev,
+        queueIndex: prev.queueIndex + 1,
+      };
+    });
   }, []);
 
   // ── TTS ─────────────────────────────────────────────────────────────────────
@@ -531,6 +601,7 @@ export function useStudySession() {
     startSession,
     rateFlashcard,
     submitAnswer,
+    nextQuestion,
     speakWord,
     endSession,
     setFlashcardMode,

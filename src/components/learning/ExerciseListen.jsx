@@ -49,7 +49,7 @@ function getSlotDimensions(maxPartLen) {
   };
 }
 
-export default function ExerciseListen({ item, onSubmit, speakWord, onReport, sessionInfo }) {
+export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onReport, sessionInfo }) {
   const d = item?.exerciseData || {};
   const answer = (d.answer || '').trim();
   const answerParts = d.answerParts?.length
@@ -270,7 +270,8 @@ export default function ExerciseListen({ item, onSubmit, speakWord, onReport, se
     setValues(boxes.map(() => ''));
     setSubmitted(null);
     setHintLevel(0);
-  }, [boxes]);
+    onNext?.();
+  }, [boxes, onNext]);
 
   const handleClearAll = useCallback(() => {
     if (submitted) return;
