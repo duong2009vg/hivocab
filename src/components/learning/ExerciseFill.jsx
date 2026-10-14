@@ -511,14 +511,19 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
         </div>
       </div>
 
-      {/* ── Pop-up Result Notification Modal ── */}
+      {/* ── Modern Bottom Sheet Result Notification Modal ── */}
       <ExerciseResultModal
         isOpen={showResultModal}
         isCorrect={!!submitted?.correct}
         word={d.answer}
+        phonetic={d.phonetic}
+        pos={item?.word?.pos || d.pos}
         meaning={d.meaning || d.meaningHint}
+        exampleSentence={item?.word?.example_sentence || item?.word?.exampleSentence || d.sentence}
+        notes={item?.word?.notes || d.notes}
         userAnswer={userTyped}
         onContinue={handleModalContinue}
+        onReport={onReport}
       />
     </div>
   );

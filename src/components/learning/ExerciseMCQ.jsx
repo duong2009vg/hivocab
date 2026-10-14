@@ -1,5 +1,7 @@
 // src/components/learning/ExerciseMCQ.jsx
-// Cozy Crayon Handcrafted Multiple Choice - Centered & Fit Screen Perfectly
+// Instant selection MCQ: Tap any option to immediately check & trigger modern Bottom Sheet result notification.
+// No extra "Kiểm tra & Tiếp tục" button needed for MCQ.
+
 import React, { useState, useEffect, useCallback } from 'react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
@@ -12,47 +14,40 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
   const currentNum = sessionInfo?.currentNum ?? 1;
   const totalNum = sessionInfo?.totalNum ?? 10;
 
-  // Reset when new item
+  // Reset when new item appears
   useEffect(() => {
     setSelectedIdx(null);
     setResult(null);
     setShowResultModal(false);
   }, [item?.word?.id || item?.word?.wordId, currentNum]);
 
-  // Keyboard: 1-4 select, Enter = check
+  // Instant Check on Option Click
+  const handleSelect = useCallback(
+    (idx) => {
+      if (result !== null) return; // Prevent double taps
+      setSelectedIdx(idx);
+      const correctIndex = d.options?.findIndex((o) => o.isCorrect) ?? -1;
+      const r = onSubmit(idx);
+      setResult({ ...r, correctIndex });
+      setShowResultModal(true);
+    },
+    [result, d.options, onSubmit]
+  );
+
+  // Keyboard shortcut: 1-4 immediately selects & checks that option
   useEffect(() => {
     function handleKey(e) {
-      if (showResultModal) return;
+      if (showResultModal || result !== null) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       const num = parseInt(e.key, 10);
       if (num >= 1 && num <= (d.options?.length || 4)) {
         e.preventDefault();
-        setSelectedIdx(num - 1);
-      }
-      if (e.key === 'Enter' && selectedIdx !== null && !result) {
-        e.preventDefault();
-        handleCheck();
+        handleSelect(num - 1);
       }
     }
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [selectedIdx, result, d.options, showResultModal]);
-
-  const handleSelect = useCallback(
-    (idx) => {
-      if (result) return;
-      setSelectedIdx(idx);
-    },
-    [result]
-  );
-
-  const handleCheck = useCallback(() => {
-    if (result || selectedIdx === null) return;
-    const correctIndex = d.options?.findIndex((o) => o.isCorrect) ?? -1;
-    const r = onSubmit(selectedIdx);
-    setResult({ ...r, correctIndex });
-    setShowResultModal(true);
-  }, [result, selectedIdx, d.options, onSubmit]);
+  }, [showResultModal, result, d.options, handleSelect]);
 
   const handleModalContinue = useCallback(() => {
     setShowResultModal(false);
@@ -74,14 +69,15 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
   }, [d.word]);
 
   const chosenOption = selectedIdx !== null ? d.options?.[selectedIdx]?.text : '';
-  const correctOption = result?.correctIndex !== undefined && result.correctIndex >= 0
-    ? d.options?.[result.correctIndex]?.text
-    : '';
+  const correctOption =
+    result?.correctIndex !== undefined && result.correctIndex >= 0
+      ? d.options?.[result.correctIndex]?.text
+      : '';
 
   return (
     <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa my-auto px-2">
-      {/* ── Main Question & Options Card (Compact, Centered & Fit Viewport) ── */}
-      <div className="w-full max-w-lg bg-white border-[3px] border-[#292524] rounded-[24px] sm:rounded-[30px] shadow-[4px_6px_0px_#292524] px-4 sm:px-6 pt-4 sm:pt-5 pb-4 sm:pb-6 relative my-auto">
+      {/* ── Main Question & Options Card ── */}
+      <div className="w-full max-w-lg bg-white border-[3px] border-[#292524] rounded-[24px] sm:rounded-[30px] shadow-[4px_6px_0px_#292524] px-4 sm:px-6 pt-4 sm:pt-5 pb-5 sm:pb-6 relative my-auto">
         {/* Top Little Tiger Badge Header */}
         <div className="flex items-center justify-between pb-2 mb-2 border-b-2 border-stone-100">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFF5EB] border border-[#E76F51]/40 text-[#D36135] text-[11px] sm:text-xs font-bold">
@@ -90,10 +86,12 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
                 src="/mascot/mascot_cozy.png"
                 alt="Bé hổ"
                 className="w-full h-full object-contain mix-blend-multiply"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </span>
-            <span>Bé Hổ nhắc: Chọn đáp án đúng nhé 🐾</span>
+            <span>Bé Hổ nhắc: Nhấn chọn đáp án đúng nhé 🐾</span>
           </div>
 
           {onReport && (
@@ -143,124 +141,91 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
           )}
         </div>
 
-        {/* ── Options Container (4 Answers - Compact & Clean) ── */}
-        <div className="flex flex-col gap-2 sm:gap-2.5 my-2" role="radiogroup" aria-label="Đáp án trắc nghiệm">
+        {/* ── Options Container (Instant Tap) ── */}
+        <div className="flex flex-col gap-2.5 sm:gap-3 my-2" role="radiogroup" aria-label="Đáp án trắc nghiệm">
           {(d.options || []).map((opt, idx) => {
             const isSelected = selectedIdx === idx;
             const isCorrect = idx === result?.correctIndex;
             const isWrong = isSelected && result && !result.correct;
 
-            // Class styling based on state
+            // Class styling based on state matching reference screenshots
             let cardClasses =
-              'group relative flex items-center justify-between px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border-2 transition-all cursor-pointer ';
+              'group relative flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border-2 transition-all cursor-pointer select-none ';
 
             if (!result) {
-              if (isSelected) {
-                cardClasses +=
-                  'border-[#253E56] bg-[#EBF2F7] shadow-[1.5px_2px_0px_#253E56] -translate-y-0.5 border-[2.5px]';
-              } else {
-                cardClasses += 'border-[#292524] bg-white hover:bg-[#FAF7EE] hover:-translate-y-0.5 shadow-2xs';
-              }
+              cardClasses +=
+                'border-[#292524] bg-white hover:bg-[#FAF7EE] hover:-translate-y-0.5 shadow-2xs active:scale-[0.99]';
             } else {
               if (isCorrect) {
+                // Green matching Screenshot 1
                 cardClasses +=
-                  'border-[#2E7D32] bg-[#E8F5E9] shadow-[1.5px_2px_0px_#2E7D32] text-[#1B5E20] font-bold border-[2.5px]';
+                  'border-[#16A34A] bg-[#DCFCE7] text-[#15803D] font-bold shadow-[2px_3px_0px_#16A34A] border-[2.5px] scale-[1.01]';
               } else if (isWrong) {
+                // Red matching Screenshot 2
                 cardClasses +=
-                  'border-[#D32F2F] bg-[#FFEBEE] shadow-[1.5px_2px_0px_#D32F2F] text-[#B71C1C] border-[2.5px]';
+                  'border-[#EF4444] bg-[#FEE2E2] text-[#B91C1C] font-bold shadow-[2px_3px_0px_#EF4444] border-[2.5px]';
               } else {
-                cardClasses += 'border-[#292524]/40 bg-stone-50 opacity-60';
+                cardClasses += 'border-stone-200 bg-stone-50 opacity-50';
               }
             }
 
             return (
-              <label
+              <div
                 key={idx}
                 onClick={() => handleSelect(idx)}
                 className={cardClasses}
+                role="button"
+                tabIndex={0}
               >
-                <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 pr-2">
-                  {/* Number pill */}
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 pr-2">
+                  {/* Number circular badge */}
                   <span
-                    className={`w-5 h-5 sm:w-6 sm:h-6 rounded-md border font-bold text-xs flex items-center justify-center shrink-0 ${
-                      isSelected && !result
-                        ? 'bg-[#253E56] text-white border-[#253E56]'
-                        : isCorrect
-                        ? 'bg-[#2E7D32] text-white border-[#2E7D32]'
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full border-2 font-black text-xs flex items-center justify-center shrink-0 transition-colors ${
+                      isCorrect
+                        ? 'bg-[#16A34A] text-white border-[#16A34A]'
                         : isWrong
-                        ? 'bg-[#D32F2F] text-white border-[#D32F2F]'
-                        : 'bg-stone-100 border-stone-300 text-stone-500 group-hover:border-stone-800'
+                        ? 'bg-[#EF4444] text-white border-[#EF4444]'
+                        : 'bg-stone-100 border-stone-300 text-stone-600 group-hover:border-stone-700'
                     }`}
                   >
                     {idx + 1}
                   </span>
+
                   {/* Option text */}
                   <span
-                    className={`text-xs sm:text-base font-quicksand truncate ${
-                      isSelected || isCorrect ? 'font-bold text-stone-900' : 'font-semibold text-stone-800'
+                    className={`text-sm sm:text-base font-quicksand truncate ${
+                      isCorrect || isWrong ? 'font-bold' : 'font-semibold text-stone-800'
                     }`}
                   >
                     {opt.text}
                   </span>
                 </div>
 
-                {/* Custom Radio Indicator */}
-                <div
-                  className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition ${
-                    isSelected && !result
-                      ? 'border-[#253E56] bg-white'
-                      : isCorrect
-                      ? 'border-[#2E7D32] bg-white text-[#2E7D32]'
-                      : isWrong
-                      ? 'border-[#D32F2F] bg-white text-[#D32F2F]'
-                      : 'border-stone-400 group-hover:border-stone-700'
-                  }`}
-                >
-                  {isSelected && !result && (
-                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-[#253E56]"></div>
-                  )}
+                {/* Status Indicator Icon */}
+                <div className="shrink-0 flex items-center justify-center pl-1">
                   {isCorrect && (
-                    <svg className="w-3 h-3 text-[#2E7D32]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                      <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <div className="w-6 h-6 rounded-full bg-[#16A34A] text-white flex items-center justify-center shadow-xs">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                   )}
                   {isWrong && (
-                    <svg className="w-3 h-3 text-[#D32F2F]" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-                      <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <div className="w-6 h-6 rounded-full bg-[#EF4444] text-white flex items-center justify-center shadow-xs">
+                      <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                        <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
                   )}
-                  <input
-                    type="radio"
-                    name="vocab_answer"
-                    value={idx}
-                    checked={isSelected}
-                    onChange={() => handleSelect(idx)}
-                    className="sr-only"
-                    disabled={!!result}
-                  />
                 </div>
-              </label>
+              </div>
             );
           })}
         </div>
 
-        {/* ── Action Button: Submit & Check ── */}
-        <div className="mt-3 pt-1">
-          <button
-            type="button"
-            onClick={handleCheck}
-            disabled={selectedIdx === null || !!result}
-            className={`w-full py-2.5 sm:py-3 px-5 font-bold rounded-xl sm:rounded-2xl border-2 border-[#292524] shadow-[0px_3px_0px_#1A2C3D] flex items-center justify-center gap-2 text-sm sm:text-base transition-all duration-150 ${
-              selectedIdx !== null && !result
-                ? 'bg-[#253E56] hover:bg-[#1B2F42] active:translate-y-0.5 text-white cursor-pointer'
-                : 'bg-stone-200 text-stone-400 border-stone-300 shadow-none cursor-not-allowed opacity-75'
-            }`}
-          >
-            <span>Kiểm tra &amp; Tiếp tục</span>
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
+        {/* Tip text */}
+        <div className="text-center pt-1 text-[11px] sm:text-xs text-stone-400 font-crayon font-medium">
+          Chạm vào đáp án để kiểm tra ngay lập tức
         </div>
       </div>
 
@@ -270,12 +235,7 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
           <span className="px-1.5 py-0.2 bg-white border border-stone-300 rounded text-[11px] font-sans text-stone-700 font-bold">
             1 - 4
           </span>
-          <span>chọn nhanh</span>
-          <span className="mx-1">•</span>
-          <span className="px-1.5 py-0.2 bg-white border border-stone-300 rounded text-[11px] font-sans text-stone-700 font-bold">
-            Enter ↵
-          </span>
-          <span>xác nhận</span>
+          <span>chọn &amp; kiểm tra tức thì</span>
         </div>
 
         <div className="flex items-center gap-1 text-stone-600 ml-auto">
@@ -286,15 +246,19 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
         </div>
       </div>
 
-      {/* ── Pop-up Result Notification Modal ── */}
+      {/* ── Modern Bottom Sheet Result Notification Modal ── */}
       <ExerciseResultModal
         isOpen={showResultModal}
         isCorrect={!!result?.correct}
         word={d.word}
         phonetic={d.phonetic}
+        pos={item?.word?.pos || d.pos}
         meaning={correctOption || d.meaning}
+        exampleSentence={item?.word?.example_sentence || item?.word?.exampleSentence || d.sentence}
+        notes={item?.word?.notes || d.notes}
         userAnswer={chosenOption}
         onContinue={handleModalContinue}
+        onReport={onReport}
       />
     </div>
   );
