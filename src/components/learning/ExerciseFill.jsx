@@ -99,7 +99,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
       inputRefs.current[0]?.focus();
     }, 120);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item]);
+  }, [item?.word?.id || item?.word?.wordId, currentNum]);
 
   const handleInput = useCallback(
     (e, flatIdx) => {

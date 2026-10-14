@@ -85,7 +85,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     const t = setTimeout(() => handlePlay(1.0), 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item]);
+  }, [item?.word?.id || item?.word?.wordId, currentNum]);
 
   function handlePlay(rate = 1.0) {
     setCurrentSpeed(rate);

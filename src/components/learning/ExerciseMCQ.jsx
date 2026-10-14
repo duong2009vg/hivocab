@@ -17,7 +17,7 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
     setSelectedIdx(null);
     setResult(null);
     setShowResultModal(false);
-  }, [item]);
+  }, [item?.word?.id || item?.word?.wordId, currentNum]);
 
   // Keyboard: 1-4 select, Enter = check
   useEffect(() => {

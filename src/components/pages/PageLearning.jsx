@@ -156,20 +156,23 @@ export function PageLearning() {
     navigateTo(hasLessonContext ? 'lesson-detail' : 'dashboard');
   }, [endSession, navigateTo]);
 
-  // Total word counts
+  // Total word counts & Progress
   const totalNum = useMemo(() => {
-    const total = (session.queue?.length || 0) + (session.completed?.length || 0) + (currentItem ? 1 : 0);
-    return Math.max(total, 1);
-  }, [session.queue?.length, session.completed?.length, currentItem]);
+    return Math.max(session.allWords?.length || session.queue?.length || 1, 1);
+  }, [session.allWords?.length, session.queue?.length]);
 
   const currentNum = useMemo(() => {
-    const completedCount = session.completed?.length || 0;
-    return isComplete ? totalNum : Math.min(completedCount + 1, totalNum);
-  }, [session.completed?.length, isComplete, totalNum]);
+    if (isComplete) return totalNum;
+    return Math.min((session.queueIndex || 0) + 1, totalNum);
+  }, [session.queueIndex, isComplete, totalNum]);
 
-  const progressPct = isComplete
-    ? 100
-    : Math.max(5, Math.round(((session.completed?.length || 0) / totalNum) * 100));
+  const progressPct = useMemo(() => {
+    if (isComplete) return 100;
+    const current = session.queueIndex || 0;
+    const total = session.queue?.length || totalNum || 1;
+    const pct = Math.round((current / total) * 100);
+    return Math.max(5, Math.min(pct, 95));
+  }, [session.queueIndex, session.queue?.length, totalNum, isComplete]);
 
   const currentTitle = ACTIVITY_TITLE_MAP[currentItem?.exerciseType] || 'BÀI TẬP TỪ VỰNG';
 

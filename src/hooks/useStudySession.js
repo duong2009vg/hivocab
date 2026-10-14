@@ -401,11 +401,13 @@ export function useStudySession() {
     }
   }, []);
 
+  // ── pendingResultRef — bridges submitAnswer → nextQuestion ──────────────────
+  // submitAnswer is pure computation: evaluates the answer, fires SRS DB update & sound.
+  // It does NOT mutate session state, so the exercise modal can stay open without re-render flicker.
+  // When the user clicks "Tiếp tục" in the modal, nextQuestion() applies all state changes atomically.
+  const pendingResultRef = useRef(null);
+
   // ── submitAnswer (MCQ / Fill / Listen) ─────────────────────────────────────
-  /**
-   * Returns { correct, correctAnswer, skipped, wordCompleted, failCount }
-   * synchronously, records attempts and completes/requeues items in state.
-   */
   const submitAnswer = useCallback((userAnswer) => {
     let result = { correct: false, correctAnswer: '', skipped: false, wordCompleted: false };
 
@@ -439,18 +441,18 @@ export function useStudySession() {
       else window.HiSound?.playIncorrect?.();
     }
 
-    // Determine result & rating
+    // Determine result & fire SRS update
     if (isNewWord) {
       const effectiveRating = correct ? 'good' : 'hard';
       reviewWordInDB(wordId, effectiveRating);
       result = { correct, correctAnswer, skipped: false, wordCompleted: true, isNewWord: true, rating: effectiveRating };
     } else if (!correct) {
-      const newFailCount = (item.failCount || 0) + 1;
-      if (newFailCount >= 3) {
+      const currentFailCount = (item.failCount || 0) + 1;
+      if (currentFailCount >= 3) {
         reviewWordInDB(wordId, 'hard');
-        result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: newFailCount, rating: 'hard' };
+        result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: currentFailCount, rating: 'hard' };
       } else {
-        result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: newFailCount };
+        result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: currentFailCount };
       }
     } else {
       const rating = attempts === 1 ? 'easy' : attempts === 2 ? 'good' : 'hard';
@@ -458,12 +460,46 @@ export function useStudySession() {
       result = { correct: true, correctAnswer, skipped: false, wordCompleted: true, rating };
     }
 
-    // Update queue state (re-queue failed words, record completed)
+    // Save for nextQuestion to apply atomically
+    pendingResultRef.current = { result, attempts };
+
+    return result;
+  }, [session.isActive, session.queue, session.queueIndex]);
+
+  // ── nextQuestion ────────────────────────────────────────────────────────────
+  /**
+   * Called when user acknowledges the result (clicks "Tiếp tục" in modal).
+   * Atomically applies the pending result AND advances queueIndex in ONE setSession call.
+   * This guarantees the user ALWAYS advances to the next question regardless of correct/wrong.
+   */
+  const nextQuestion = useCallback(() => {
     setSession(prev => {
       if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
-      const current = prev.queue[prev.queueIndex];
-      const updatedItem = { ...current, attempts };
 
+      const pending = pendingResultRef.current;
+
+      // If called without a pending result, simply advance queueIndex
+      if (!pending) {
+        return {
+          ...prev,
+          queueIndex: prev.queueIndex + 1,
+        };
+      }
+
+      // Clear pending
+      pendingResultRef.current = null;
+
+      const { result, attempts } = pending;
+      const current = prev.queue[prev.queueIndex];
+      if (!current) {
+        return { ...prev, queueIndex: prev.queueIndex + 1 };
+      }
+
+      const updatedItem = { ...current, attempts };
+      const isNewWord = current.word?.level === 0 || current.word?.isNew === true;
+      const correct = result.correct;
+
+      // ── Case 1: New Word (always completes) ──────────────────────────────
       if (isNewWord) {
         if (!correct) {
           updatedItem.failCount = (updatedItem.failCount || 0) + 1;
@@ -477,25 +513,32 @@ export function useStudySession() {
           return {
             ...prev,
             queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q), requeuedItem],
+            queueIndex: prev.queueIndex + 1,
             completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, isNew: true }],
           };
         }
         return {
           ...prev,
           queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
+          queueIndex: prev.queueIndex + 1,
           completed: [...prev.completed, { word: updatedItem.word, rating: 'good', attempts, isNew: true }],
         };
       }
 
+      // ── Case 2: Wrong Answer ─────────────────────────────────────────────
       if (!correct) {
         updatedItem.failCount = (updatedItem.failCount || 0) + 1;
         if (updatedItem.failCount >= 3) {
+          // Exceeded 3 attempts — skip word to complete session
           return {
             ...prev,
             queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
+            queueIndex: prev.queueIndex + 1,
             completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, skipped: true }],
           };
         }
+
+        // Requeue to end of queue with another exercise type
         const nextType = prev.allowedType || pickNextType(updatedItem.usedTypes);
         const requeuedItem = {
           ...updatedItem,
@@ -503,31 +546,21 @@ export function useStudySession() {
           exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode),
           usedTypes: updatedItem.usedTypes.includes(nextType) ? updatedItem.usedTypes : [...updatedItem.usedTypes, nextType],
         };
+
         return {
           ...prev,
           queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q), requeuedItem],
+          queueIndex: prev.queueIndex + 1,
         };
       }
 
-      // Correct
+      // ── Case 3: Correct Answer ───────────────────────────────────────────
       const rating = attempts === 1 ? 'easy' : attempts === 2 ? 'good' : 'hard';
       return {
         ...prev,
         queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
-        completed: [...prev.completed, { word: updatedItem.word, rating, attempts }],
-      };
-    });
-
-    return result;
-  }, [session.isActive, session.queue, session.queueIndex]);
-
-  // ── nextQuestion ────────────────────────────────────────────────────────────
-  const nextQuestion = useCallback(() => {
-    setSession(prev => {
-      if (!prev.isActive) return prev;
-      return {
-        ...prev,
         queueIndex: prev.queueIndex + 1,
+        completed: [...prev.completed, { word: updatedItem.word, rating, attempts }],
       };
     });
   }, []);
