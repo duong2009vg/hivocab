@@ -1243,6 +1243,23 @@ export async function getUserWordCount() {
   return error || count === null ? 0 : count;
 }
 
+export async function getAccountProgressStats() {
+  const user = await getCurrentUser();
+  if (!user) return { streak: 0, wordCount: 0, masteredCount: 0 };
+
+  const [dashboardStats, wordCount] = await Promise.all([
+    getDashboardStats(),
+    getUserWordCount(),
+  ]);
+  const memoryLevels = dashboardStats?.memoryLevels || {};
+
+  return {
+    streak: Number(dashboardStats?.streak) || 0,
+    wordCount: Number(wordCount) || 0,
+    masteredCount: (Number(memoryLevels.lv4) || 0) + (Number(memoryLevels.lv5) || 0),
+  };
+}
+
 export async function getWordsDueForReview(limit = 50) {
   const user = await getCurrentUser();
   if (!user) return [];
@@ -1533,6 +1550,7 @@ export const db = {
   getVocabularyPage,
   getLearnedVocabStats,
   getUserWordCount,
+  getAccountProgressStats,
   getWordsDueForReview,
   getDashboardStats,
   getNextReviewTime,

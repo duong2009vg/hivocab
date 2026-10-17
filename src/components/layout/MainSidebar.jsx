@@ -4,11 +4,14 @@ import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
+import { useProfileStats } from '../../hooks/useProfileStats.js';
+import { getMasteryBadge } from '../../utils/masteryBadge.js';
 
-export function MainSidebar({ wordCount, streak }) {
+export function MainSidebar() {
   const { user, signOut } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const { openModal } = useModal ? useModal() : { openModal: () => {} };
+  const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();
 
   const activeTab =
     currentRoute === 'topic-detail' || currentRoute === 'lesson-detail'
@@ -25,9 +28,12 @@ export function MainSidebar({ wordCount, streak }) {
        (user?.email ? user.email.split('@')[0] : 'Bạn học'))
     : 'Khách trải nghiệm';
 
-  const userRank = user ? 'Huy hiệu: Bé Siêng Năng' : 'Chưa đăng nhập';
-  const displayStreak = user ? (streak != null ? streak : 0) : 0;
-  const displayWordCount = user ? (wordCount != null ? wordCount : 0) : null;
+  const masteryBadge = getMasteryBadge(masteredCount);
+  const userRank = user
+    ? (statsLoading ? 'Đang cập nhật huy hiệu…' : `Huy hiệu: ${masteryBadge.name}`)
+    : 'Chưa đăng nhập';
+  const displayStreak = user ? (statsLoading ? '…' : streak) : 0;
+  const displayWordCount = user ? (statsLoading ? '…' : wordCount) : null;
 
   const handleLogout = async (e) => {
     e.stopPropagation();

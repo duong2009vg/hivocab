@@ -152,6 +152,16 @@ export function useDashboardStats() {
     fetchIeltsGoal();
   }, [fetchStats, fetchCalendarSessions, fetchIeltsGoal, calendarDate]);
 
+  // Keep dashboard streak and level distribution current after any learning mutation.
+  useEffect(() => {
+    const refreshStatsAfterMutation = () => fetchStats();
+    const events = ['hivocab:word-added', 'hivocab:words-bulk-added', 'hivocab:word-reviewed'];
+    events.forEach((eventName) => window.addEventListener(eventName, refreshStatsAfterMutation));
+    return () => {
+      events.forEach((eventName) => window.removeEventListener(eventName, refreshStatsAfterMutation));
+    };
+  }, [fetchStats]);
+
   // Countdown Timer Logic
   useEffect(() => {
     if (heroState !== 'countdown' || !nextReviewTime) {

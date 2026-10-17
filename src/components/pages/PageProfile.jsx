@@ -4,19 +4,18 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-import { getDashboardStats, getUserWordCount } from '../../services/db.js';
+import { useProfileStats } from '../../hooks/useProfileStats.js';
+import { getMasteryBadge } from '../../utils/masteryBadge.js';
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
   const { showToast } = useToast ? useToast() : { showToast: (msg) => window.showHiToast?.(msg, 'info') };
+  const { streak: streakCount, masteredCount, loading: statsLoading } = useProfileStats();
 
   const [fullName, setFullName] = useState('');
   const [userEmail, setUserEmail] = useState('');
-  const [createdAt, setCreatedAt] = useState('');
-  const [streakCount, setStreakCount] = useState(0);
-  const [vocabCount, setVocabCount] = useState(0);
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameMsg, setNameMsg] = useState({ text: '', isError: false });
 
@@ -33,37 +32,10 @@ export function PageProfile() {
       const name = user.user_metadata?.full_name || user.user_metadata?.name || '';
       setFullName(name);
       setUserEmail(user.email || '');
-      if (user.created_at) {
-        const d = new Date(user.created_at);
-        setCreatedAt(`Tháng ${d.getMonth() + 1}, ${d.getFullYear()}`);
-      }
     }
   }, [user]);
 
-  // Load live account statistics instead of placeholder values/local-only values.
-  useEffect(() => {
-    let cancelled = false;
-
-    if (!user) {
-      setStreakCount(0);
-      setVocabCount(0);
-      return () => { cancelled = true; };
-    }
-
-    Promise.all([getDashboardStats(), getUserWordCount()])
-      .then(([stats, wordCount]) => {
-        if (cancelled) return;
-        setStreakCount(Number(stats?.streak) || 0);
-        setVocabCount(Number(wordCount) || 0);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setStreakCount(0);
-        setVocabCount(0);
-      });
-
-    return () => { cancelled = true; };
-  }, [user]);
+  const masteryBadge = getMasteryBadge(masteredCount);
 
   // Update Name
   const handleSaveName = async (e) => {
@@ -246,37 +218,19 @@ export function PageProfile() {
                   <div className="flex items-center justify-center sm:justify-end gap-2">
                     <span className="flex items-center gap-1.5 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-3 py-1.5 rounded-full border border-[#C85A3F]/40 shadow-xs">
                       <span>🔥</span>
-                      <span>{streakCount} ngày giữ lửa</span>
+                      <span>{statsLoading ? '…' : `${streakCount} ngày giữ lửa`}</span>
                     </span>
                     <span className="px-2.5 py-1 text-xs font-bold bg-[#EFE7DA] text-[#302A24] rounded-full border border-[#3D352E]">
-                      Học viên cốt cán
+                      {statsLoading ? 'Đang cập nhật…' : masteryBadge.name}
                     </span>
-                  </div>
-                </div>
-
-                {/* Mascot Coach Note */}
-                <div className="p-3 bg-[#FFFBF3] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] rounded-2xl flex items-center gap-3 text-left mt-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#FEE8D6] border-2 border-[#3D352E] flex items-center justify-center text-lg shrink-0">
-                    🐯
-                  </div>
-                  <div className="text-xs text-[#302A24] leading-relaxed">
-                    <span className="font-bold text-[#C85A3F]">Bé Hổ đồng hành:</span> "Cố gắng duy trì việc ôn từ vựng 15 phút mỗi ngày cùng mình nhé! 🐾"
                   </div>
                 </div>
 
                 {/* Badges Strip */}
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-2 text-xs font-bold text-[#786F66]">
                   <span className="bg-[#FAF7F0] border border-[#3D352E] px-3 py-1 rounded-xl flex items-center gap-1.5">
-                    📖 {vocabCount} từ trong sổ
+                    {statsLoading ? '⏳ Đang cập nhật huy hiệu…' : `${masteryBadge.emoji} Huy hiệu: ${masteryBadge.name}`}
                   </span>
-                  <span className="bg-[#FAF7F0] border border-[#3D352E] px-3 py-1 rounded-xl flex items-center gap-1.5">
-                    🌟 Huy hiệu: Bé Siêng Năng
-                  </span>
-                  {createdAt && (
-                    <span className="bg-[#FAF7F0] border border-[#3D352E] px-3 py-1 rounded-xl flex items-center gap-1.5">
-                      🌿 Tham gia: {createdAt}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
