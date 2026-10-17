@@ -15,16 +15,20 @@ export async function onRequestOptions() {
 export async function onRequestGet(context) {
     const { request, env } = context;
 
-    const DEFAULT_SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
-    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+    const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim();
+    const SUPABASE_ANON_KEY         = String(env.SUPABASE_ANON_KEY || '').trim();
+    const SUPABASE_SERVICE_ROLE_KEY = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
-    const SUPABASE_URL              = env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
-    const SUPABASE_ANON_KEY         = env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
-    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY) {
+        return new Response(JSON.stringify({ ok: false, error: 'Máy chủ chưa được cấu hình đầy đủ cho thanh toán.' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
 
     const url = new URL(request.url);
-    const orderCode = url.searchParams.get('orderCode');
-    if (!orderCode) {
+    const orderCode = String(url.searchParams.get('orderCode') || '').trim();
+    if (!/^\d{1,20}$/.test(orderCode)) {
         return new Response(JSON.stringify({ ok: false, error: 'Thiếu mã đơn hàng orderCode' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -83,7 +87,7 @@ export async function onRequestGet(context) {
             // Đơn hàng đang chờ xử lý hoặc đang trong quá trình đồng bộ
             return new Response(JSON.stringify({
                 ok: true,
-                orderCode: Number(orderCode),
+                orderCode,
                 status: 'PENDING',
                 paid: false,
                 message: 'Đang chờ thanh toán...'
@@ -124,8 +128,8 @@ export async function onRequestGet(context) {
         try {
             const profRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${order.user_id}&select=*`, {
                 headers: {
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY}`,
-                    'apikey': SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
+                    'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                    'apikey': SUPABASE_SERVICE_ROLE_KEY,
                 },
             });
             if (profRes.ok) {
@@ -185,7 +189,8 @@ export async function onRequestGet(context) {
         });
 
     } catch (err) {
-        return new Response(JSON.stringify({ ok: false, error: err.message }), {
+        console.error('[Payment check-status]', err);
+        return new Response(JSON.stringify({ ok: false, error: 'Không thể kiểm tra trạng thái đơn hàng.' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

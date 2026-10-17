@@ -98,8 +98,8 @@ export async function onRequestPost(context) {
         });
 
         if (!insertRes.ok) {
-            const err = await insertRes.text();
-            return new Response(JSON.stringify({ ok: false, error: `Supabase error: ${err}` }), {
+            console.error('[Add word] Supabase insert failed:', insertRes.status);
+            return new Response(JSON.stringify({ ok: false, error: 'Không thể lưu từ vựng lúc này.' }), {
                 status: 502,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
@@ -110,7 +110,8 @@ export async function onRequestPost(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     } catch (err) {
-        return new Response(JSON.stringify({ ok: false, error: err.message }), {
+        console.error('[Add word]', err);
+        return new Response(JSON.stringify({ ok: false, error: 'Lỗi xử lý nội bộ' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

@@ -7,7 +7,7 @@ Extension Manifest V3 cho Chrome. Bôi đen một từ/cụm từ trên trang we
 1. Mở `chrome://extensions`.
 2. Bật `Developer mode`.
 3. Chọn `Load unpacked` và chọn thư mục `chrome-extension`.
-4. Đăng nhập app Hi - Master Vocabulary ít nhất một lần để Chrome còn session.
+4. Đăng nhập app Hi - Master Vocabulary; extension đồng bộ phiên trong thời gian trình duyệt đang mở.
 5. Tải lại trang sau khi cài extension.
 
 Extension tìm tab app theo title `Hi - Master Vocabulary`. Nếu app chưa mở, extension tự mở `https://hivocab.vercel.app` ở tab nền rồi gửi yêu cầu qua app, nên title trong `index.html` phải giữ nguyên và `APP_URL` trong `background.js` phải trỏ đúng domain deploy.
@@ -18,3 +18,4 @@ Extension tìm tab app theo title `Hi - Master Vocabulary`. Nếu app chưa mở
 - Groq proxy hiện tại của app tạo nghĩa Việt ngắn và ví dụ fallback. Code sẽ bỏ qua example nếu phát hiện tiếng Việt để đảm bảo ví dụ chỉ dùng tiếng Anh.
 - Khi bấm thêm, extension gửi yêu cầu sang tab app có sẵn hoặc tự mở tab app nền; app gọi `HiDB.addWord`, vì vậy Supabase RLS và session hiện tại vẫn được giữ nguyên.
 - Popup có nút mở app để đăng nhập khi session chưa sẵn sàng.
+- Token extension chỉ được giữ trong `chrome.storage.session` và tự mất khi kết thúc phiên trình duyệt; không dùng persistent storage cho refresh token.

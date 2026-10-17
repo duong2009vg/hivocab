@@ -37,7 +37,6 @@ export function AdminSystemTab() {
     let totalBytes = 0;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      const val = localStorage.getItem(key);
       totalBytes += (key?.length || 0) + (val?.length || 0);
     }
     setStorageUsage({
@@ -53,8 +52,8 @@ export function AdminSystemTab() {
     const keysToRemove = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (k && !k.startsWith('sb-') && k !== 'theme') {
-        keysToRemove.push(k);
+      if (key && !key.startsWith('sb-') && key !== 'theme') {
+        keysToRemove.push(key);
       }
     }
     keysToRemove.forEach((k) => localStorage.removeItem(k));
@@ -148,7 +147,7 @@ export function AdminSystemTab() {
             </div>
             <p className="text-base font-black font-quicksand text-[#3D352E]">Cloudflare Pages</p>
             <p className="text-xs text-[#6E5D53] mt-1.5 font-bold">
-              Vite 4.3 + React 19.3 SPA
+      Vite 6 + React 19 SPA
             </p>
           </div>
 

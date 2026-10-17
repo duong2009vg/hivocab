@@ -5,10 +5,10 @@ test.describe('Admin authentication shell', () => {
     const pageErrors = [];
     page.on('pageerror', (error) => pageErrors.push(error.message));
 
-    await page.goto('/admin.html', { waitUntil: 'domcontentloaded' });
-    await expect(page.locator('#view-login')).toBeVisible();
-    await expect(page.locator('#view-denied')).toBeHidden();
-    await expect(page.locator('#view-admin')).toBeHidden();
+    await page.goto('/admin', { waitUntil: 'domcontentloaded' });
+    await expect(page.getByRole('heading', { name: /HiVocab Studio Admin/i })).toBeVisible();
+    await expect(page.getByLabel(/Email Quản trị viên/i)).toBeVisible();
+    await expect(page.getByLabel(/Mật khẩu/i)).toBeVisible();
     expect(pageErrors).toEqual([]);
   });
 });

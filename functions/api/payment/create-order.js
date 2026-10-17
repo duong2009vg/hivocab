@@ -35,6 +35,31 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 3;
+
+function isRateLimited(key) {
+    const now = Date.now();
+    const current = rateLimitMap.get(key);
+    if (!current || now - current.startedAt >= RATE_LIMIT_WINDOW_MS) {
+        rateLimitMap.set(key, { startedAt: now, count: 1 });
+        return false;
+    }
+    current.count += 1;
+    return current.count > RATE_LIMIT_MAX;
+}
+
+function getAllowedOrigin(request, env) {
+    const fallback = String(env.APP_ORIGIN || 'https://hivocab.site').replace(/\/+$/, '');
+    const allowed = String(env.ALLOWED_APP_ORIGINS || fallback)
+        .split(',')
+        .map((origin) => origin.trim().replace(/\/+$/, ''))
+        .filter(Boolean);
+    const requested = String(request.headers.get('origin') || '').replace(/\/+$/, '');
+    return allowed.includes(requested) ? requested : fallback;
+}
+
 /**
  * Tính HMAC-SHA256 bằng Web Crypto API tiêu chuẩn (hoạt động 100% trên Cloudflare Workers/Pages không cần node:crypto)
  */
@@ -68,22 +93,19 @@ export async function onRequestOptions() {
 export async function onRequestPost(context) {
     const { request, env } = context;
 
-    const DEFAULT_SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
-    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
-
-    const SUPABASE_URL              = env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
-    const SUPABASE_ANON_KEY         = env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
-    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+    const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim();
+    const SUPABASE_ANON_KEY         = String(env.SUPABASE_ANON_KEY || '').trim();
+    const SUPABASE_SERVICE_ROLE_KEY = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
     const PAYOS_CLIENT_ID    = env.PAYOS_CLIENT_ID;
     const PAYOS_API_KEY      = env.PAYOS_API_KEY;
     const PAYOS_CHECKSUM_KEY = env.PAYOS_CHECKSUM_KEY;
 
     // 1. Kiểm tra cấu hình PayOS
-    if (!PAYOS_CLIENT_ID || !PAYOS_API_KEY || !PAYOS_CHECKSUM_KEY) {
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !SUPABASE_SERVICE_ROLE_KEY || !PAYOS_CLIENT_ID || !PAYOS_API_KEY || !PAYOS_CHECKSUM_KEY) {
         return new Response(JSON.stringify({
             ok: false,
-            error: 'PayOS chưa được cấu hình biến môi trường trên Cloudflare Pages (PAYOS_CLIENT_ID, PAYOS_API_KEY, PAYOS_CHECKSUM_KEY)',
+            error: 'Máy chủ chưa được cấu hình đầy đủ cho thanh toán.',
         }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -100,12 +122,19 @@ export async function onRequestPost(context) {
         });
     }
 
+    if (isRateLimited(`user:${token.slice(-24)}`)) {
+        return new Response(JSON.stringify({ ok: false, error: 'Bạn đã tạo quá nhiều đơn hàng. Vui lòng thử lại sau một phút.' }), {
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' }
+        });
+    }
+
     let user = null;
     try {
         const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
-                'apikey': SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY,
+                'apikey': SUPABASE_ANON_KEY,
             },
         });
         if (!userRes.ok) {
@@ -116,7 +145,8 @@ export async function onRequestPost(context) {
         }
         user = await userRes.json();
     } catch (err) {
-        return new Response(JSON.stringify({ ok: false, error: 'Lỗi xác thực người dùng: ' + err.message }), {
+        console.error('[create-order auth]', err);
+        return new Response(JSON.stringify({ ok: false, error: 'Không thể xác thực phiên đăng nhập.' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
@@ -149,7 +179,7 @@ export async function onRequestPost(context) {
         // Mô tả chuyển khoản (giới hạn tối đa 9 ký tự: HV + 7 số)
         const description = `HV${orderCode.toString().slice(-7)}`;
 
-        const origin = (request.headers.get('origin') || 'https://hivocab.site').replace(/\/+$/, '');
+        const origin = getAllowedOrigin(request, env);
         const returnUrl = `${origin}/`;
         const cancelUrl = `${origin}/`;
 
@@ -231,6 +261,10 @@ export async function onRequestPost(context) {
         if (!dbRes.ok) {
             const dbErr = await dbRes.text();
             console.warn('[Orders DB Insert Warn]', dbErr);
+            return new Response(JSON.stringify({ ok: false, error: 'Không thể lưu đơn hàng. Vui lòng thử lại, bạn chưa nên thanh toán với liên kết này.' }), {
+                status: 502,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
         }
 
         // 8. Trả về thông tin cho Frontend nhúng PayOS
@@ -251,7 +285,7 @@ export async function onRequestPost(context) {
 
     } catch (err) {
         console.error('[create-order Exception]', err);
-        return new Response(JSON.stringify({ ok: false, error: err.message }), {
+        return new Response(JSON.stringify({ ok: false, error: 'Không thể tạo đơn hàng lúc này.' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

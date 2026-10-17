@@ -65,7 +65,8 @@ export async function onRequestGet(context) {
             headers
         });
     } catch (err) {
-        return new Response(`TTS Fetch Exception: ${err.message}`, {
+        console.error('[TTS]', err);
+        return new Response('TTS service unavailable', {
             status: 502,
             headers: corsHeaders
         });

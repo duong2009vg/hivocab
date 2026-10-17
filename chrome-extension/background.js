@@ -6,15 +6,15 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 // ── Session storage helpers ───────────────────────────────────────────────
 
 function saveSession(session) {
-    return chrome.storage.local.set({ hivocab_session: session });
+    return chrome.storage.session.set({ hivocab_session: session });
 }
 
 function clearSession() {
-    return chrome.storage.local.remove('hivocab_session');
+    return chrome.storage.session.remove('hivocab_session');
 }
 
 async function getSession() {
-    const data = await chrome.storage.local.get('hivocab_session');
+    const data = await chrome.storage.session.get('hivocab_session');
     return data.hivocab_session || null;
 }
 

@@ -1,8 +1,10 @@
-# Hi - Master Vocabulary App
+# HiVocab — Current Engineering Notes
+
+> This document was retained from the legacy migration and has been updated to describe the current React/Vite app. The current source of truth is `src/`, `functions/`, `public/`, `chrome-extension/`, `package.json`, and the production tests.
 
 ## Tổng quan
 App học từ vựng tiếng Anh theo phương pháp lặp lại ngắt quãng (Spaced Repetition).
-Frontend hoàn chỉnh trong A7.html. Backend dùng Supabase.
+Frontend hiện tại là React 19/Vite SPA. Backend dùng Cloudflare Pages Functions và Supabase. Các file `A7.html`, `dataLayer.js`, `sessionEngine.js`, `sessionUI.js` trong phần ghi chú cũ không còn là entry point của production app.
 
 ---
 
@@ -10,12 +12,11 @@ Frontend hoàn chỉnh trong A7.html. Backend dùng Supabase.
 
 | File | Vai trò |
 |---|---|
-| `A7.html` | Toàn bộ UI, routing hash-based, KHÔNG tách file |
-| `dataLayer.js` | Module `HiDB` — mọi tương tác với Supabase |
-| `sessionEngine.js` | Module `HiSession` — thuật toán SM-2, quản lý phiên học |
-| `sessionUI.js` | Module `HiSessionUI` — render 4 dạng bài tập |
-| `dictionary.js` | Wrapper Free Dictionary API |
-| `supabase_schema.sql` | Schema DB — KHÔNG tự sửa, hỏi trước |
+| `src/` | UI React, hooks, providers, router và services |
+| `functions/` | Cloudflare Pages Functions: auth, dictionary, translation, TTS, payment |
+| `public/data/thpt_exams.json` | Dữ liệu đề thi tĩnh cho phòng luyện đề |
+| `chrome-extension/` | Chrome extension MV3 |
+| `supabaseClient.js` / `src/services/db.js` | Supabase client và data services |
 
 ---
 
@@ -108,7 +109,11 @@ study_sessions (id, user_id, session_date, words_reviewed, created_at)
 
 ---
 
-## HiDB API (dataLayer.js)
+## Legacy compatibility notes
+
+The following `HiDB` API is historical documentation for the migration layer and is not a requirement for new React code. New code should use the existing Supabase client/services and hooks already present in `src/`; do not add new legacy globals.
+
+### Historical HiDB API (dataLayer.js)
 
 ```js
 // Auth
@@ -155,7 +160,7 @@ hard → level - 1 (tối thiểu 1)
 
 ---
 
-## HiSession API (sessionEngine.js)
+### Historical HiSession API (sessionEngine.js)
 
 ```js
 HiSession.startSession(words)       // khởi tạo phiên với mảng words từ HiDB
@@ -214,7 +219,7 @@ Không cần API key, không giới hạn request.
 2. **KHÔNG dùng localStorage** để lưu data người dùng
 3. **KHÔNG viết lại cả file** — chỉ sửa đúng hàm/section được yêu cầu
 4. **KHÔNG tạo thêm file JS mới** nếu không được yêu cầu — thêm vào file có sẵn
-5. Mọi call Supabase phải qua **HiDB**, không query thẳng `_supabase`
+5. Mọi call Supabase trong React phải dùng `src/lib/supabaseClient.js` hoặc service/hook hiện có; không tạo thêm client riêng. Các endpoint server dùng biến môi trường và RLS/service-role đúng ngữ cảnh.
 6. Mọi exercise phải qua **HiSession + HiSessionUI**, không render thẳng HTML
 7. Khi thêm UI mới phải dùng đúng **class Tailwind** từ design system, không dùng inline style
 8. Responsive: luôn có cả class `md:` và mobile class

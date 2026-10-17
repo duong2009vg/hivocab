@@ -153,6 +153,8 @@ Respond ONLY with a valid JSON object in this exact format:
     let lastError = null;
 
     for (const p of providers) {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
         try {
             const aiRes = await fetch(p.url, {
                 method: 'POST',
@@ -176,6 +178,7 @@ Respond ONLY with a valid JSON object in this exact format:
                     max_tokens: isBatch ? 1800 : 350,
                     temperature: 0.3,
                 }),
+                signal: controller.signal,
             });
 
             if (aiRes.ok) {
@@ -185,10 +188,12 @@ Respond ONLY with a valid JSON object in this exact format:
                 parsed = extractJson(rawContent);
                 if (parsed) break;
             } else {
-                lastError = await aiRes.text();
+                lastError = `AI provider returned HTTP ${aiRes.status}`;
             }
         } catch (err) {
-            lastError = err.message;
+            lastError = err.name === 'AbortError' ? 'AI provider timeout' : 'AI provider request failed';
+        } finally {
+            clearTimeout(timeoutId);
         }
     }
 
@@ -234,7 +239,8 @@ Respond ONLY with a valid JSON object in this exact format:
         });
 
     } catch (err) {
-        return new Response(JSON.stringify({ ok: false, error: err.message || 'Lỗi xử lý nội bộ' }), {
+        console.error('[AI lookup]', err);
+        return new Response(JSON.stringify({ ok: false, error: 'Lỗi xử lý nội bộ' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

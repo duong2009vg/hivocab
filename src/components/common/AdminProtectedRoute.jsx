@@ -91,10 +91,11 @@ export function AdminProtectedRoute({ children }) {
 
           <form onSubmit={handleAdminLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1">
+              <label htmlFor="admin-email" className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1">
                 Email Quản trị viên
               </label>
               <input
+                id="admin-email"
                 type="email"
                 required
                 value={adminEmail}
@@ -105,10 +106,11 @@ export function AdminProtectedRoute({ children }) {
             </div>
 
             <div>
-              <label className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1">
+              <label htmlFor="admin-password" className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1">
                 Mật khẩu
               </label>
               <input
+                id="admin-password"
                 type="password"
                 required
                 value={adminPassword}

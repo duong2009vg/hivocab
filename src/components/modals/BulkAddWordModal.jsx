@@ -1,6 +1,6 @@
 // src/components/modals/BulkAddWordModal.jsx
 // Modal thêm từ vựng hàng loạt đa năng - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
-// Hỗ trợ: Dán JSON từ AI (ChatGPT/Gemini), Dán bảng Excel, Tải file .xlsx / .csv / .json
+// Hỗ trợ: Dán JSON từ AI (ChatGPT/Gemini), Dán bảng tính, Tải file .xlsx/.xls/.csv/.json
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
@@ -160,6 +160,57 @@ export function parseBulkInput(text) {
   return rows;
 }
 
+const MAX_SPREADSHEET_BYTES = 10 * 1024 * 1024;
+const MAX_SPREADSHEET_ROWS = 5000;
+const MAX_SPREADSHEET_CELL_CHARS = 2000;
+
+function normalizeHeader(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_|_$/g, '');
+}
+
+function spreadsheetRowsToText(rows) {
+  if (!Array.isArray(rows) || rows.length === 0) return '';
+  if (rows.length > MAX_SPREADSHEET_ROWS + 1) {
+    throw new Error(`File Excel vượt quá giới hạn ${MAX_SPREADSHEET_ROWS.toLocaleString('vi-VN')} dòng.`);
+  }
+
+  const firstRow = Array.isArray(rows[0]) ? rows[0] : [];
+  const headerNames = firstRow.map(normalizeHeader);
+  const findColumn = (names, fallback) => {
+    const index = headerNames.findIndex((header) => names.includes(header));
+    return index >= 0 ? index : fallback;
+  };
+  const columns = [
+    findColumn(['word', 'english', 'english_word', 'vocab', 'vocabulary', 'term', 'tu_vung', 'tu_tieng_anh', 'tu'], 0),
+    findColumn(['phonetic', 'ipa', 'pronunciation', 'phien_am'], 1),
+    findColumn(['pos', 'type', 'part_of_speech', 'tu_loai'], 2),
+    findColumn(['meaning', 'definition', 'vietnamese', 'vietnamese_meaning', 'meaning_vi', 'vi', 'nghia', 'nghia_tieng_viet'], 3),
+    findColumn(['example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du'], 4),
+  ];
+  const hasHeader = headerNames.some((header) => [
+    'word', 'english', 'english_word', 'vocab', 'vocabulary', 'term', 'tu_vung', 'tu_tieng_anh',
+    'phonetic', 'ipa', 'pronunciation', 'pos', 'type', 'part_of_speech', 'tu_loai',
+    'meaning', 'definition', 'vietnamese', 'vietnamese_meaning', 'meaning_vi', 'vi', 'nghia',
+    'nghia_tieng_viet', 'example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du'
+  ].includes(header));
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+  const cellToText = (value) => {
+    if (value === null || value === undefined) return '';
+    if (value instanceof Date) return value.toISOString().slice(0, 10);
+    return String(value).replace(/[\r\n]+/g, ' ').slice(0, MAX_SPREADSHEET_CELL_CHARS);
+  };
+
+  return dataRows
+    .map((row) => columns.map((column) => cellToText(Array.isArray(row) ? row[column] : '')).join('\t'))
+    .filter((row) => row.replace(/\t/g, '').trim())
+    .join('\n');
+}
+
 export function BulkAddWordModal() {
   const { modals, openModal, closeModal } = useModal();
   const { success, error: toastError } = useToast();
@@ -293,7 +344,7 @@ export function BulkAddWordModal() {
     success(`Đã phân tích thành công ${rows.length} từ vựng! Hãy xem lại bảng bên dưới nhé.`);
   };
 
-  // 5. Xử lý tải file lên (.xlsx, .csv, .json)
+  // 5. Xử lý tải file lên (.xlsx, .xls, .csv, .tsv, .json, .txt).
   const handleFileUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -303,6 +354,10 @@ export function BulkAddWordModal() {
 
     try {
       const fileName = file.name.toLowerCase();
+
+      if (file.size > MAX_SPREADSHEET_BYTES) {
+        throw new Error('File quá lớn. Vui lòng chọn file không quá 10 MB.');
+      }
 
       // Trường hợp 1: File JSON
       if (fileName.endsWith('.json')) {
@@ -316,32 +371,35 @@ export function BulkAddWordModal() {
           setErrorMessage('Không tìm thấy dữ liệu từ vựng hợp lệ trong file JSON.');
         }
       }
-      // Trường hợp 2: File Excel (.xlsx / .xls)
+      // Trường hợp 2: File Excel (.xlsx / .xls), chỉ đọc dữ liệu ô từ sheet đầu tiên.
       else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-        const XLSX = await import('xlsx');
-        const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
+        const { default: xlsxModule } = await import('@e965/xlsx/dist/xlsx.mini.min.js');
+        const XLSX = xlsxModule?.default || xlsxModule;
+        const workbook = XLSX.read(await file.arrayBuffer(), {
+          type: 'array',
+          dense: true,
+          cellFormula: false,
+          cellHTML: false,
+          cellStyles: false,
+          bookVBA: false,
+        });
+        const firstSheetName = workbook.SheetNames?.[0];
+        if (!firstSheetName) throw new Error('File Excel không có sheet dữ liệu.');
         const sheet = workbook.Sheets[firstSheetName];
-        const json = XLSX.utils.sheet_to_json(sheet);
-
-        const rows = json
-          .map((item, idx) => ({
-            id: `row-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
-            word: String(item.word || item.Word || item['Từ vựng'] || item['Từ'] || '').trim(),
-            phonetic: String(item.phonetic || item.Phonetic || item['Phiên âm'] || '').trim(),
-            pos: String(item.pos || item.POS || item['Loại từ'] || item['Từ loại'] || '').trim(),
-            meaning: String(item.meaning || item.Meaning || item['Nghĩa'] || item['Định nghĩa'] || '').trim(),
-            example_sentence: String(item.example_sentence || item.example || item.Example || item['Ví dụ'] || item['Câu ví dụ'] || '').trim(),
-          }))
-          .filter((r) => r.word || r.meaning);
-
-        if (rows.length > 0) {
-          setParsedWords(rows);
+        const rows = XLSX.utils.sheet_to_json(sheet, {
+          header: 1,
+          raw: false,
+          defval: '',
+          blankrows: false,
+        });
+        const rowsText = spreadsheetRowsToText(rows);
+        const parsedRows = parseBulkInput(rowsText);
+        if (parsedRows.length > 0) {
+          setParsedWords(parsedRows);
           setActiveStep('preview');
-          success(`Đã đọc ${rows.length} từ từ file Excel! 🎉`);
+          success(`Đã đọc ${parsedRows.length} từ từ sheet "${firstSheetName}"! 🎉`);
         } else {
-          setErrorMessage('File Excel không có dòng từ vựng nào hợp lệ. Vui lòng kiểm tra lại tiêu đề các cột.');
+          setErrorMessage('Không tìm thấy dữ liệu từ vựng hợp lệ trong file Excel.');
         }
       }
       // Trường hợp 3: File CSV / TSV / TXT
@@ -356,11 +414,11 @@ export function BulkAddWordModal() {
           setErrorMessage('Không phân tích được từ vựng từ file này.');
         }
       } else {
-        setErrorMessage('Định dạng file không được hỗ trợ. Vui lòng chọn .xlsx, .csv hoặc .json');
+        setErrorMessage('Định dạng file không được hỗ trợ. Vui lòng chọn .xlsx, .xls, .csv, .tsv, .txt hoặc .json');
       }
     } catch (err) {
       console.error('[BulkAddWordModal] file upload error:', err);
-      setErrorMessage('Lỗi đọc file: ' + err.message);
+      setErrorMessage(err?.message || 'Không thể đọc file Excel. Hãy kiểm tra lại định dạng file.');
     } finally {
       setIsFileLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -477,7 +535,7 @@ export function BulkAddWordModal() {
                   Tiết kiệm chi phí AI
                 </span>
               </h2>
-              <p className="text-xs font-semibold text-[#766C5F]">Dán JSON từ AI riêng (ChatGPT/Gemini) hoặc tải file Excel 🐾</p>
+              <p className="text-xs font-semibold text-[#766C5F]">Dán JSON từ AI riêng (ChatGPT/Gemini) hoặc tải file Excel/CSV/JSON 🐾</p>
             </div>
           </div>
           <button
@@ -672,7 +730,7 @@ export function BulkAddWordModal() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
-                    Cách 1: Dán JSON từ AI hoặc Bảng Excel vào đây <span className="text-[#D36135]">*</span>
+                    Cách 1: Dán JSON từ AI hoặc bảng tính vào đây <span className="text-[#D36135]">*</span>
                   </label>
                   <span className="text-xs font-bold text-[#5a7d4d]">Tự động nhận diện 5 cột</span>
                 </div>
@@ -681,7 +739,7 @@ export function BulkAddWordModal() {
                 <div className="p-3 rounded-xl bg-[#FFF8EE] border-2 border-dashed border-[#E5A13C]/80 text-[#8C5E28] text-xs flex items-start sm:items-center gap-2.5">
                   <span className="text-base shrink-0 mt-0.5 sm:mt-0">💡</span>
                   <p className="leading-relaxed">
-                    <strong>Gợi ý:</strong> Nếu bạn muốn thêm từ <strong>100 từ vựng trở lên</strong>, bạn nên <strong>tải lên file</strong> (file Excel <code>.xlsx</code> hoặc file <code>.json</code> ở <em>Cách 2</em> bên dưới) để thao tác nhanh hơn và không bị giới hạn bộ nhớ tạm khi dán nhé!
+                    <strong>Gợi ý:</strong> Nếu bạn muốn thêm từ <strong>100 từ vựng trở lên</strong>, bạn nên <strong>tải lên file</strong> (file <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code> hoặc <code>.json</code> ở <em>Cách 2</em> bên dưới) để thao tác nhanh hơn.
                   </p>
                 </div>
 
@@ -700,7 +758,7 @@ export function BulkAddWordModal() {
                   <span className="text-2xl">📁</span>
                   <div>
                     <h4 className="text-xs font-bold text-[#382E2B]">Cách 2: Hoặc tải file từ máy tính</h4>
-                    <p className="text-[11px] text-[#766C5F]">Hỗ trợ file bảng tính <strong>.xlsx</strong>, <strong>.csv</strong> hoặc file <strong>.json</strong></p>
+                    <p className="text-[11px] text-[#766C5F]">Hỗ trợ file <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.tsv</strong>, <strong>.txt</strong> hoặc <strong>.json</strong> (tối đa 10 MB)</p>
                   </div>
                 </div>
 

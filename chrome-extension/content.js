@@ -20,7 +20,6 @@
     const h = window.location.hostname.toLowerCase();
     return h === 'hivocab.site' || 
            h.endsWith('.hivocab.site') || 
-           h.includes('hivocab') || 
            h === 'localhost' || 
            h === '127.0.0.1';
   }

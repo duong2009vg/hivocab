@@ -77,6 +77,10 @@ function getInitialRoute() {
 
   const guestEntered = checkGuestEntered();
 
+  // Keep /admin reachable so unauthenticated visitors can see the dedicated
+  // admin login gate instead of being swallowed by the public landing guard.
+  if (path === 'admin' || hash === 'admin') return 'admin';
+
   // If user is a guest (not authenticated) and has NOT clicked "Bắt đầu ngay" in this session:
   // MUST start on a public landing page!
   if (!isLoggedIn && !guestEntered) {
@@ -169,6 +173,18 @@ export function RouteProvider({ children }) {
     const target = normalizeRoute(rawTarget);
 
     if (activeRouteRef.current === target) {
+      // The initial route can be normalized to the landing page while the
+      // browser is still on a guarded deep-link such as /app. Keep the URL in
+      // sync even when React is already rendering the target route.
+      if (!preserveHash && typeof window !== 'undefined') {
+        if (target === 'landing' && (window.location.pathname !== '/' || window.location.hash)) {
+          window.history.replaceState({ page: 'landing' }, '', '/');
+        } else if (target === 'login' && window.location.pathname !== '/login') {
+          window.history.replaceState({ page: 'login' }, '', '/login');
+        } else if (target === 'dashboard' && window.location.pathname !== '/app') {
+          window.history.replaceState({ page: 'dashboard' }, '', '/app');
+        }
+      }
       return;
     }
 
@@ -260,6 +276,13 @@ export function RouteProvider({ children }) {
       navigateTo(page, preserveHash);
     };
     window.navigateTo = window.__reactNavigateTo;
+
+    // Canonicalize a guarded /app deep link after the initial route has been
+    // normalized to landing. Without this, the page looks correct but the
+    // address bar still points at a route the guest cannot access.
+    if (activeRouteRef.current === 'landing' && window.location.pathname === '/app') {
+      window.history.replaceState({ page: 'landing' }, '', '/');
+    }
 
     // Initial trigger
     triggerLegacyPageLifecycle(activeRouteRef.current);

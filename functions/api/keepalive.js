@@ -64,20 +64,17 @@ async function handleKeepalive(context) {
             body: '{}',
         });
 
-        const text = await response.text();
-        let data = null;
-        try {
-            data = text ? JSON.parse(text) : null;
-        } catch {
-            data = text;
+        if (!response.ok) {
+            console.error('[Keepalive] Supabase RPC failed:', response.status);
         }
 
-        return new Response(JSON.stringify({ ok: response.ok, status: response.status, data }), {
+        return new Response(JSON.stringify({ ok: response.ok, status: response.status }), {
             status: response.ok ? 200 : response.status,
             headers: { 'Content-Type': 'application/json' }
         });
     } catch (error) {
-        return new Response(JSON.stringify({ ok: false, error: error.message || 'Keepalive failed' }), {
+        console.error('[Keepalive]', error);
+        return new Response(JSON.stringify({ ok: false, error: 'Keepalive failed' }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });

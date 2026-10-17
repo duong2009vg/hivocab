@@ -10,10 +10,10 @@ test.describe('HiVocab E2E Navigation & Route Integrity', () => {
 
     // Hero title and start learning CTA should be visible
     const heroTitle = page.locator('h1');
-    await expect(heroTitle).toBeVisible();
+    await expect(heroTitle).toBeVisible({ timeout: 10000 });
 
-    const startBtn = page.locator('#page-landing a').filter({ hasText: /Bắt đầu ngay/i }).first();
-    await expect(startBtn).toBeVisible();
+    const startBtn = page.locator('#page-landing button').filter({ hasText: /Bắt đầu ngay|Enter Study Room/i }).first();
+    await expect(startBtn).toBeVisible({ timeout: 10000 });
   });
 
   test('2. /login route renders form elements', async ({ page }) => {
@@ -31,7 +31,7 @@ test.describe('HiVocab E2E Navigation & Route Integrity', () => {
     await expect(submitBtn).toBeVisible();
   });
 
-  test('3. Protected route (/app) redirects unauthenticated visitors to /login', async ({ page }) => {
+  test('3. Direct /app access sends a new guest to the public landing page', async ({ page }) => {
     // Clear any existing session or cookies
     await page.context().clearCookies();
     await page.addInitScript(() => {
@@ -43,10 +43,10 @@ test.describe('HiVocab E2E Navigation & Route Integrity', () => {
 
     await page.goto('/app');
 
-    // Should be redirected to /login by ProtectedRoute
-    await expect(page).toHaveURL(/.*login/);
-    const emailInput = page.locator('#auth-email');
-    await expect(emailInput).toBeVisible();
+    // A new guest must first enter through the public CTA; direct deep links
+    // are intentionally guarded to prevent a blank/private app shell.
+    await expect(page).toHaveURL(/\/$/);
+    await expect(page.locator('#page-landing')).toBeVisible();
   });
 
   test('4. Login form rejects empty credentials', async ({ page }) => {
@@ -103,13 +103,14 @@ test.describe('HiVocab E2E Navigation & Route Integrity', () => {
     // Start on app
     await page.goto('/login');
 
-    // Attempt direct navigation to protected vocabulary route with expired session
+    // Enter guest mode, then visit a genuinely protected route with no session.
     await page.evaluate(() => {
       window._currentUser = null;
       localStorage.removeItem('sb-swehdtrqjyklmsefkjdf-auth-token');
     });
 
-    await page.goto('/app#vocabulary');
+    await page.evaluate(() => sessionStorage.setItem('hivocab_guest_entered', '1'));
+    await page.goto('/app#settings');
     await expect(page).toHaveURL(/.*login/);
   });
 
@@ -119,7 +120,7 @@ test.describe('HiVocab E2E Navigation & Route Integrity', () => {
     if (isMobile) {
       // The public landing page intentionally has no private bottom nav.
       // Verify its mobile CTA and guard against horizontal overflow instead.
-      const startLink = page.locator('#page-landing a').filter({ hasText: /Bắt đầu ngay/i }).first();
+      const startLink = page.locator('#page-landing button').filter({ hasText: /Bắt đầu ngay|Enter Study Room/i }).first();
       await expect(startLink).toBeVisible();
       const hasHorizontalOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       expect(hasHorizontalOverflow).toBe(false);

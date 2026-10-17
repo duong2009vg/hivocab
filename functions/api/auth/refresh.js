@@ -7,12 +7,34 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+const rateLimitMap = new Map();
+function isRateLimited(ip, maxRequests = 12, windowMs = 60_000) {
+    const now = Date.now();
+    const current = rateLimitMap.get(ip);
+    if (!current || now - current.startedAt >= windowMs) {
+        rateLimitMap.set(ip, { startedAt: now, count: 1 });
+        return false;
+    }
+    current.count += 1;
+    return current.count > maxRequests;
+}
+
 export async function onRequestOptions() {
     return new Response(null, { status: 204, headers: corsHeaders });
 }
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+
+    const clientIp = request.headers.get('cf-connecting-ip') ||
+        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+        'unknown-ip';
+    if (isRateLimited(clientIp)) {
+        return new Response(JSON.stringify({ ok: false, error: 'Quá nhiều yêu cầu. Vui lòng thử lại sau.' }), {
+            status: 429,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' }
+        });
+    }
 
     const supabaseUrl = env.SUPABASE_URL;
     const supabaseAnonKey = env.SUPABASE_ANON_KEY;
@@ -35,7 +57,7 @@ export async function onRequestPost(context) {
     }
 
     const { refresh_token } = body || {};
-    if (!refresh_token) {
+    if (!refresh_token || typeof refresh_token !== 'string' || refresh_token.length > 2048) {
         return new Response(JSON.stringify({ ok: false, error: 'Missing refresh_token' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -70,7 +92,8 @@ export async function onRequestPost(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     } catch (err) {
-        return new Response(JSON.stringify({ ok: false, error: err.message }), {
+        console.error('[Auth refresh]', err);
+        return new Response(JSON.stringify({ ok: false, error: 'Không thể làm mới phiên đăng nhập.' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

@@ -70,7 +70,9 @@ function AppRoutes() {
       const guestEntered = typeof sessionStorage !== 'undefined' && sessionStorage.getItem('hivocab_guest_entered') === '1';
       const isPublic = ['landing', 'features', 'reviews', 'faq', 'support', 'login'].includes(currentRoute) ||
         currentRoute.startsWith('d=') || currentRoute.startsWith('deck=');
-      if (!guestEntered && !isPublic) {
+      // Admin has its own authentication gate and must remain reachable even
+      // before a normal guest has entered the study room.
+      if (!guestEntered && !isPublic && currentRoute !== 'admin') {
         navigateTo('landing');
       }
     }

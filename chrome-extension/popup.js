@@ -728,7 +728,7 @@ checkAuthAgainBtn?.addEventListener('click', async () => {
 
 logoutButton?.addEventListener('click', async () => {
   await send('logout');
-  await chrome.storage.local.remove('hivocab_session');
+  await chrome.storage.session.remove('hivocab_session');
   currentResult   = null;
   currentAudioUrl = null;
   checkAndShowUI();

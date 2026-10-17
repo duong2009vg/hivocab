@@ -3,13 +3,6 @@
 // Nhận thông báo thanh toán thành công từ PayOS và kích hoạt PRO
 // Xác thực chữ ký số HMAC-SHA256 chuẩn PayOS bằng Web Crypto API
 
-const PLAN_DAYS = {
-    pro_1m: 30,
-    pro_6m: 180,
-    pro_1y: 365,
-    pro_lifetime: 36500,
-};
-
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -108,13 +101,17 @@ export async function onRequestGet() {
 export async function onRequestPost(context) {
     const { request, env } = context;
 
-    const DEFAULT_SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
-    const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
-
-    const SUPABASE_URL              = env.SUPABASE_URL || DEFAULT_SUPABASE_URL;
-    const SUPABASE_ANON_KEY         = env.SUPABASE_ANON_KEY || DEFAULT_SUPABASE_ANON_KEY;
-    const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY;
+    const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim();
+    const SUPABASE_SERVICE_ROLE_KEY = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
     const PAYOS_CHECKSUM_KEY        = String(env.PAYOS_CHECKSUM_KEY || '').trim();
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY || !PAYOS_CHECKSUM_KEY) {
+        console.error('[PayOS Webhook] Required server secrets are not configured.');
+        return new Response(JSON.stringify({ success: false, error: 'Webhook server misconfiguration' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
 
     let body = {};
     try {
@@ -137,21 +134,20 @@ export async function onRequestPost(context) {
         });
     }
 
-    // 2. Fast-path: Nhận diện test webhook khi bấm "Xác nhận" trên my.payos.vn (orderCode: 123 hoặc VQRIO123)
+    if (typeof data !== 'object' || Array.isArray(data)) {
+        return new Response(JSON.stringify({ success: false, error: 'Invalid webhook data' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+
+    // 2. Nhận diện test webhook khi bấm "Xác nhận" trên my.payos.vn.
     const isTestWebhook = data.orderCode === 123 ||
                           data.orderCode === 0 ||
                           String(data.description).includes('VQRIO') ||
                           String(data.description).toLowerCase().includes('test');
 
-    // 3. Xác thực chữ ký điện tử (Fail-Closed: Bắt buộc có CHECKSUM_KEY)
-    if (!PAYOS_CHECKSUM_KEY) {
-        console.error('[PayOS Webhook] CRITICAL: PAYOS_CHECKSUM_KEY is not configured in Cloudflare environment!');
-        return new Response(JSON.stringify({ success: false, error: 'Webhook server misconfiguration: missing checksum key' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-
+    // 3. Xác thực chữ ký điện tử, luôn fail-closed kể cả với payload test.
     const isValid = await verifySignature(data, signature, PAYOS_CHECKSUM_KEY);
     if (!isValid) {
         console.error('[PayOS Webhook] Invalid signature!', {
@@ -159,14 +155,6 @@ export async function onRequestPost(context) {
             signature,
             signData: convertObjToQueryStr(data),
         });
-        // Nếu là test request từ PayOS mà chữ ký lệch do dev key khác prod key, vẫn chấp nhận để lưu URL thành công
-        if (isTestWebhook) {
-            console.log('[PayOS Webhook] Accepting test webhook despite signature mismatch');
-            return new Response(JSON.stringify({ success: true, message: 'Test webhook verified' }), {
-                status: 200,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-        }
         return new Response(JSON.stringify({ success: false, error: 'Invalid signature' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -191,10 +179,10 @@ export async function onRequestPost(context) {
         });
     }
 
-    const orderCode = data.orderCode;
-    if (!orderCode) {
-        return new Response(JSON.stringify({ success: true, message: 'No orderCode provided' }), {
-            status: 200,
+    const orderCode = String(data.orderCode || '').trim();
+    if (!/^\d{1,20}$/.test(orderCode)) {
+        return new Response(JSON.stringify({ success: false, error: 'Invalid orderCode' }), {
+            status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
@@ -210,8 +198,8 @@ export async function onRequestPost(context) {
 
         if (!orderRes.ok) {
             console.error('[PayOS Webhook] DB error finding order:', await orderRes.text());
-            return new Response(JSON.stringify({ success: true, message: 'DB error, acknowledged' }), {
-                status: 200,
+            return new Response(JSON.stringify({ success: false, error: 'Temporary database error' }), {
+                status: 502,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
@@ -219,8 +207,8 @@ export async function onRequestPost(context) {
         const orders = await orderRes.json();
         if (!orders || orders.length === 0) {
             console.warn('[PayOS Webhook] Order not found in database:', orderCode);
-            return new Response(JSON.stringify({ success: true, message: 'Order not found in database' }), {
-                status: 200,
+            return new Response(JSON.stringify({ success: false, error: 'Order not found yet' }), {
+                status: 502,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
@@ -236,28 +224,37 @@ export async function onRequestPost(context) {
             });
         }
 
-        // 7. Gọi RPC activate_pro_order (SECURITY DEFINER, chạy 100% thành công không bị chặn bởi RLS)
-        try {
-            await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-                    'apikey': SUPABASE_SERVICE_ROLE_KEY,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    p_order_code: orderCode,
-                    p_payment_time: data.transactionDateTime ? new Date(data.transactionDateTime).toISOString() : new Date().toISOString(),
-                    p_webhook_data: data,
-                }),
+        // 7. Giao toàn bộ việc kích hoạt cho RPC transactionally/idempotently.
+        // Không PATCH profile thủ công ở đây vì có thể cộng hạn hai lần khi
+        // PayOS gửi webhook trùng hoặc hai request chạy đồng thời.
+        const paymentTime = data.transactionDateTime
+            ? new Date(data.transactionDateTime).toISOString()
+            : new Date().toISOString();
+        const activateRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                p_order_code: orderCode,
+                p_payment_time: paymentTime,
+                p_webhook_data: data,
+            }),
+        });
+
+        if (!activateRes.ok) {
+            console.error('[PayOS Webhook] activate_pro_order failed:', await activateRes.text());
+            return new Response(JSON.stringify({ success: false, error: 'Không thể kích hoạt đơn hàng' }), {
+                status: 502,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
-            console.log('[PayOS Webhook] Executed activate_pro_order RPC successfully for order:', orderCode);
-        } catch (e) {
-            console.warn('[activate_pro_order RPC Error]', e);
         }
 
-        // Cập nhật trạng thái đơn hàng thành PAID qua REST
-        const updateOrderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order.id}`, {
+        // Fallback metadata update only. The profile subscription must be
+        // changed by activate_pro_order, which is the idempotency boundary.
+        const updateOrderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?id=eq.${order.id}&status=eq.PENDING`, {
             method: 'PATCH',
             headers: {
                 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -267,7 +264,7 @@ export async function onRequestPost(context) {
             },
             body: JSON.stringify({
                 status: 'PAID',
-                payment_time: data.transactionDateTime ? new Date(data.transactionDateTime).toISOString() : new Date().toISOString(),
+                payment_time: paymentTime,
                 webhook_data: data,
                 updated_at: new Date().toISOString(),
             }),
@@ -275,60 +272,13 @@ export async function onRequestPost(context) {
 
         if (!updateOrderRes.ok) {
             console.error('[PayOS Webhook] Failed to update order status:', await updateOrderRes.text());
-        }
-
-        // 8. Tính toán ngày hết hạn gói Pro
-        const daysToAdd = PLAN_DAYS[order.plan_id] || 30;
-        const now = new Date();
-
-        // Lấy thông tin profile hiện tại để gia hạn (nếu đang còn hạn Pro thì cộng dồn)
-        let currentExpiresAt = null;
-        try {
-            const profRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${order.user_id}&select=subscription_expires_at,tier`, {
-                headers: {
-                    'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-                    'apikey': SUPABASE_SERVICE_ROLE_KEY,
-                },
+            return new Response(JSON.stringify({ success: false, error: 'Không thể cập nhật trạng thái đơn hàng' }), {
+                status: 502,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
-            if (profRes.ok) {
-                const profiles = await profRes.json();
-                if (profiles && profiles.length > 0) {
-                    currentExpiresAt = profiles[0].subscription_expires_at ? new Date(profiles[0].subscription_expires_at) : null;
-                }
-            }
-        } catch (_) {}
-
-        // Nếu gói cũ còn hạn > hiện tại thì cộng dồn từ ngày cũ, ngược lại cộng từ ngày hôm nay
-        const baseDate = (currentExpiresAt && currentExpiresAt > now) ? currentExpiresAt : now;
-        const newExpiresAt = new Date(baseDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000);
-
-        // 9. Cập nhật bảng profiles nâng cấp thành viên PRO
-        const updateProfilePayload = {
-            tier: 'pro',
-            subscription_plan: order.plan_id,
-            subscription_status: 'active',
-            subscription_started_at: now.toISOString(),
-            subscription_expires_at: newExpiresAt.toISOString(),
-        };
-
-        const updateProfRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${order.user_id}`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-                'apikey': SUPABASE_SERVICE_ROLE_KEY,
-                'Content-Type': 'application/json',
-                'Prefer': 'return=minimal',
-            },
-            body: JSON.stringify(updateProfilePayload),
-        });
-
-        if (!updateProfRes.ok) {
-            console.error('[PayOS Webhook] Failed to update user profile:', await updateProfRes.text());
-        } else {
-            console.log(`[PayOS Webhook] Successfully upgraded user ${order.user_email || order.user_id} to PRO until ${newExpiresAt.toISOString()}`);
         }
 
-        // 10. Phản hồi HTTP 200 thành công cho PayOS
+        // 8. Phản hồi HTTP 200 thành công cho PayOS
         return new Response(JSON.stringify({
             success: true,
             message: 'Payment processed and user upgraded successfully',
@@ -340,7 +290,7 @@ export async function onRequestPost(context) {
 
     } catch (err) {
         console.error('[PayOS Webhook Exception]', err);
-        return new Response(JSON.stringify({ success: false, error: err.message }), {
+        return new Response(JSON.stringify({ success: false, error: 'Lỗi xử lý webhook thanh toán' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

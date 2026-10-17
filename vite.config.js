@@ -141,9 +141,6 @@ export default defineConfig({
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
             }
-            if (id.includes('xlsx')) {
-              return 'vendor-xlsx';
-            }
             return 'vendor';
           }
         },
