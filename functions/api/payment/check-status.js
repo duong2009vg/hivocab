@@ -1,6 +1,7 @@
 // functions/api/payment/check-status.js
 // Cloudflare Pages Function: GET /api/payment/check-status?orderCode=123456
 // Kiểm tra trạng thái đơn hàng và gói cước của người dùng
+import { checkRateLimit, rateLimitResponse } from '../../_rateLimit.js';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -66,6 +67,14 @@ export async function onRequestGet(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
+
+    const rateLimit = await checkRateLimit({
+        request,
+        env,
+        ruleName: 'paymentStatus',
+        subject: authUser.id,
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     try {
         const orderRes = await fetch(`${SUPABASE_URL}/rest/v1/orders?order_code=eq.${orderCode}&select=*`, {

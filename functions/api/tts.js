@@ -1,6 +1,7 @@
 // functions/api/tts.js
 // Cloudflare Pages Function — High-performance Google TTS Proxy for English Collocations & Words
 // Supports Collocations, Phrasal Verbs, and Special Delimiters with Global Edge Caching
+import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -18,6 +19,8 @@ export async function onRequestHead(context) {
 
 export async function onRequestGet(context) {
     const { request } = context;
+    const rateLimit = await checkRateLimit({ request, env: context.env, ruleName: 'tts' });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
     const url = new URL(request.url);
     const text = (url.searchParams.get('text') || url.searchParams.get('q') || '').trim();
     const lang = (url.searchParams.get('tl') || url.searchParams.get('lang') || 'en').trim();

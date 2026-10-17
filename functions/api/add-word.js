@@ -1,5 +1,6 @@
 // functions/api/add-word.js
 // Cloudflare Pages Function — thêm từ vựng vào topic của user
+import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -73,6 +74,15 @@ export async function onRequestPost(context) {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
+
+        const authenticatedUser = await userRes.json();
+        const rateLimit = await checkRateLimit({
+            request,
+            env,
+            ruleName: 'public',
+            subject: authenticatedUser?.id || undefined,
+        });
+        if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
         const targetPassageId = passageId || passage_id || null;
         const insertPayload = {

@@ -2,6 +2,7 @@
 // POST /api/example — dùng CKEY tạo 1 câu ví dụ tiếng Anh tự nhiên
 // Body: { term: "break a leg", isPhrase: true }
 // Returns: { ok: true, sentence: "..." }
+import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
 const CKEY_MODEL = 'deepseek-v4-flash';
@@ -12,30 +13,6 @@ const corsHeaders = {
     'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-const rateLimitMap = new Map();
-const CLEANUP_INTERVAL = 60000;
-let lastCleanup = Date.now();
-
-function isRateLimited(ip, maxRequests = 25, windowMs = 60000) {
-    const now = Date.now();
-    if (now - lastCleanup > CLEANUP_INTERVAL) {
-        for (const [key, record] of rateLimitMap.entries()) {
-            if (now - record.resetTime > windowMs) rateLimitMap.delete(key);
-        }
-        lastCleanup = now;
-    }
-
-    const record = rateLimitMap.get(ip) || { count: 0, resetTime: now };
-    if (now - record.resetTime > windowMs) {
-        record.count = 1;
-        record.resetTime = now;
-    } else {
-        record.count += 1;
-    }
-    rateLimitMap.set(ip, record);
-    return record.count > maxRequests;
-}
-
 export async function onRequestOptions() {
     return new Response(null, { status: 204, headers: corsHeaders });
 }
@@ -43,16 +20,8 @@ export async function onRequestOptions() {
 export async function onRequestPost(context) {
     const { request, env } = context;
 
-    const clientIp = request.headers.get('cf-connecting-ip') ||
-                     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     'unknown-ip';
-
-    if (isRateLimited(clientIp, 25, 60000)) {
-        return new Response(JSON.stringify({ ok: false, error: 'Too many requests. Please wait a minute.' }), {
-            status: 429,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' }
-        });
-    }
+    const rateLimit = await checkRateLimit({ request, env, ruleName: 'ai' });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     const apiKey = env.CKEY_API_KEY;
     if (!apiKey) {

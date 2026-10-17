@@ -1,6 +1,7 @@
 // functions/api/dictionary.js
 // Cloudflare Pages Function: GET/POST /api/dictionary
 // Tra cứu từ điển kết hợp Cloudflare KV & Edge Cache
+import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 const DEEPSEEK_URL = 'https://api.deepseek.com/chat/completions';
 const DEEPSEEK_MODEL = 'deepseek-chat';
@@ -14,30 +15,6 @@ const corsHeaders = {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
-
-const rateLimitMap = new Map();
-const CLEANUP_INTERVAL = 60000;
-let lastCleanup = Date.now();
-
-function isRateLimited(ip, maxRequests = 45, windowMs = 60000) {
-    const now = Date.now();
-    if (now - lastCleanup > CLEANUP_INTERVAL) {
-        for (const [key, record] of rateLimitMap.entries()) {
-            if (now - record.resetTime > windowMs) rateLimitMap.delete(key);
-        }
-        lastCleanup = now;
-    }
-
-    const record = rateLimitMap.get(ip) || { count: 0, resetTime: now };
-    if (now - record.resetTime > windowMs) {
-        record.count = 1;
-        record.resetTime = now;
-    } else {
-        record.count += 1;
-    }
-    rateLimitMap.set(ip, record);
-    return record.count > maxRequests;
-}
 
 function extractJson(text) {
     if (!text) return null;
@@ -139,16 +116,8 @@ export async function onRequestPost(context) {
 async function handleDictionaryLookup(context, rawWord) {
     const { request, env } = context;
 
-    const clientIp = request.headers.get('cf-connecting-ip') ||
-                     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     'unknown-ip';
-
-    if (isRateLimited(clientIp, 45, 60000)) {
-        return new Response(JSON.stringify({ ok: false, error: 'Quá nhiều yêu cầu. Vui lòng chờ 1 phút.' }), {
-            status: 429,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' }
-        });
-    }
+    const rateLimit = await checkRateLimit({ request, env, ruleName: 'dictionary' });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     const word = String(rawWord || '').trim().slice(0, 100);
     if (!word) {

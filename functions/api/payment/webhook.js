@@ -2,6 +2,7 @@
 // Cloudflare Pages Function: POST /api/payment/webhook
 // Nhận thông báo thanh toán thành công từ PayOS và kích hoạt PRO
 // Xác thực chữ ký số HMAC-SHA256 chuẩn PayOS bằng Web Crypto API
+import { checkRateLimit, rateLimitResponse } from '../../_rateLimit.js';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -100,6 +101,9 @@ export async function onRequestGet() {
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+
+    const rateLimit = await checkRateLimit({ request, env, ruleName: 'webhook' });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim();
     const SUPABASE_SERVICE_ROLE_KEY = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();

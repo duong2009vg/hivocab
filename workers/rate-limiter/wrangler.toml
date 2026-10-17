@@ -1,0 +1,12 @@
+name = "hivocab-rate-limiter"
+main = "src/index.js"
+compatibility_date = "2026-10-17"
+
+[durable_objects]
+bindings = [
+  { name = "RATE_LIMITER", class_name = "RateLimiter" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = [ "RateLimiter" ]

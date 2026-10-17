@@ -1,6 +1,7 @@
 // functions/api/payment/create-order.js
 // Cloudflare Pages Function: POST /api/payment/create-order
 // Tạo đơn hàng PayOS và trả về checkoutUrl cho Embedded Form
+import { checkRateLimit, rateLimitResponse } from '../../_rateLimit.js';
 
 const PLANS = {
     pro_1m: {
@@ -34,21 +35,6 @@ const corsHeaders = {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
-
-const rateLimitMap = new Map();
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const RATE_LIMIT_MAX = 3;
-
-function isRateLimited(key) {
-    const now = Date.now();
-    const current = rateLimitMap.get(key);
-    if (!current || now - current.startedAt >= RATE_LIMIT_WINDOW_MS) {
-        rateLimitMap.set(key, { startedAt: now, count: 1 });
-        return false;
-    }
-    current.count += 1;
-    return current.count > RATE_LIMIT_MAX;
-}
 
 function getAllowedOrigin(request, env) {
     const fallback = String(env.APP_ORIGIN || 'https://hivocab.site').replace(/\/+$/, '');
@@ -122,13 +108,6 @@ export async function onRequestPost(context) {
         });
     }
 
-    if (isRateLimited(`user:${token.slice(-24)}`)) {
-        return new Response(JSON.stringify({ ok: false, error: 'Bạn đã tạo quá nhiều đơn hàng. Vui lòng thử lại sau một phút.' }), {
-            status: 429,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json', 'Retry-After': '60' }
-        });
-    }
-
     let user = null;
     try {
         const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
@@ -144,6 +123,14 @@ export async function onRequestPost(context) {
             });
         }
         user = await userRes.json();
+
+        const rateLimit = await checkRateLimit({
+            request,
+            env,
+            ruleName: 'payment',
+            subject: user?.id || undefined,
+        });
+        if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
     } catch (err) {
         console.error('[create-order auth]', err);
         return new Response(JSON.stringify({ ok: false, error: 'Không thể xác thực phiên đăng nhập.' }), {

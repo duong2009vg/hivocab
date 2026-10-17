@@ -1,33 +1,12 @@
 // functions/api/keepalive.js
 // Cloudflare Pages Function — keepalive ping Supabase RPC
-
-const rateLimitMap = new Map();
-function isRateLimited(ip, maxRequests = 10, windowMs = 60000) {
-    const now = Date.now();
-    const record = rateLimitMap.get(ip) || { count: 0, resetTime: now };
-    if (now - record.resetTime > windowMs) {
-        record.count = 1;
-        record.resetTime = now;
-    } else {
-        record.count += 1;
-    }
-    rateLimitMap.set(ip, record);
-    return record.count > maxRequests;
-}
+import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 async function handleKeepalive(context) {
     const { request, env } = context;
 
-    const clientIp = request.headers.get('cf-connecting-ip') ||
-                     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-                     'unknown-ip';
-
-    if (isRateLimited(clientIp, 10, 60000)) {
-        return new Response(JSON.stringify({ ok: false, error: 'Too many requests' }), {
-            status: 429,
-            headers: { 'Content-Type': 'application/json' }
-        });
-    }
+    const rateLimit = await checkRateLimit({ request, env, ruleName: 'keepalive' });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
 
     const cronSecret = env.CRON_SECRET;
     if (cronSecret) {

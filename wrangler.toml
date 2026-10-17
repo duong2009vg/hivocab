@@ -1,0 +1,10 @@
+name = "hivocab"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-17"
+
+# Pages Functions -> separate Durable Object rate-limiter Worker.
+# Deploy workers/rate-limiter first, then set the same secret in both
+# Cloudflare Pages and the rate-limiter Worker.
+[[services]]
+binding = "HIVOCAB_RATE_LIMIT_SERVICE"
+service = "hivocab-rate-limiter"

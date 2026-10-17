@@ -1,5 +1,6 @@
 // functions/api/topics.js
 // Cloudflare Pages Function — trả về danh sách topics của user
+import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
@@ -47,6 +48,15 @@ export async function onRequestGet(context) {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
         }
+
+        const authenticatedUser = await userRes.json();
+        const rateLimit = await checkRateLimit({
+            request,
+            env,
+            ruleName: 'public',
+            subject: authenticatedUser?.id || undefined,
+        });
+        if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
         const topicsRes = await fetch(
             `${supabaseUrl}/rest/v1/topics?select=id,name,icon,category,created_at&order=created_at.asc`,
