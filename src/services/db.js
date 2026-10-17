@@ -9,27 +9,65 @@ import { supabase } from '../lib/supabaseClient.js';
 const MEM = {
   topics: null,       // Array | null
   topicsAt: 0,        // timestamp ms of last successful fetch
+  topicsUid: null,    // uid (or null for guest) that owns the cached topics
   wordCounts: null,   // Map<topicId, count>
   progress: null,     // Map<topicId, pct>
   progressUid: null,  // uid that progress belongs to
 };
 const TOPICS_TTL_MS = 5 * 60 * 1000; // 5 min memory cache
-const LS_KEY = 'hi_topics_v2';
+const LS_KEY_PREFIX = 'hi_topics_v2';
+
+function getStoredAuthUid() {
+  if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
+  try {
+    for (let i = 0; i < localStorage.length; i += 1) {
+      const key = localStorage.key(i);
+      if (!key || !key.startsWith('sb-') || !key.endsWith('-auth-token')) continue;
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      const uid = parsed?.user?.id;
+      if (uid) return String(uid);
+    }
+  } catch (_) {}
+  return null;
+}
+
+function getTopicsStorageKey(uid = getStoredAuthUid()) {
+  return `${LS_KEY_PREFIX}:${uid || 'guest'}`;
+}
 
 // ─── localStorage helpers ───────────────────────────────────────────────────
-function lsGet() {
+function lsGet(uid = getStoredAuthUid()) {
   try {
-    const raw = localStorage.getItem(LS_KEY);
+    const raw = localStorage.getItem(getTopicsStorageKey(uid));
     if (!raw) return null;
     const { data, ts } = JSON.parse(raw);
     return { data, ts };
   } catch { return null; }
 }
 
-function lsSet(topics) {
+function lsSet(topics, uid = getStoredAuthUid()) {
   try {
-    localStorage.setItem(LS_KEY, JSON.stringify({ data: topics, ts: Date.now() }));
+    localStorage.setItem(getTopicsStorageKey(uid), JSON.stringify({ data: topics, ts: Date.now() }));
   } catch { /* quota full — ignore */ }
+}
+
+export function clearTopicCache(uid = getStoredAuthUid()) {
+  MEM.topics = null;
+  MEM.topicsAt = 0;
+  MEM.topicsUid = null;
+  MEM.progress = null;
+  MEM.progressUid = null;
+  if (typeof window !== 'undefined') {
+    window._allTopics = null;
+    window._topicsCacheUid = null;
+  }
+  try {
+    localStorage.removeItem(getTopicsStorageKey(uid));
+    // Remove the pre-user-scoped cache key from older builds.
+    localStorage.removeItem(LS_KEY_PREFIX);
+  } catch (_) {}
 }
 
 // ─── Core fast query ─────────────────────────────────────────────────────────
@@ -81,13 +119,17 @@ async function fetchTopicsFromSupabase() {
     // Cache to memory + localStorage
     MEM.topics = topics;
     MEM.topicsAt = Date.now();
+    MEM.topicsUid = uid;
     if (uid !== MEM.progressUid) {
       MEM.progress = null;
       MEM.progressUid = uid;
     }
     lsSet(topics);
 
-    if (typeof window !== 'undefined') window._allTopics = topics;
+    if (typeof window !== 'undefined') {
+      window._allTopics = topics;
+      window._topicsCacheUid = uid;
+    }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: topics }));
     }
@@ -150,13 +192,17 @@ async function fetchTopicsFromSupabase() {
   // Cache to memory + localStorage
   MEM.topics = topics;
   MEM.topicsAt = Date.now();
+  MEM.topicsUid = uid;
   if (uid !== MEM.progressUid) {
     MEM.progress = null;
     MEM.progressUid = uid;
   }
   lsSet(topics);
 
-  if (typeof window !== 'undefined') window._allTopics = topics;
+  if (typeof window !== 'undefined') {
+    window._allTopics = topics;
+    window._topicsCacheUid = uid;
+  }
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: topics }));
   }
@@ -168,17 +214,27 @@ async function fetchTopicsFromSupabase() {
 
 /** Synchronously return whatever is cached — never blocks. */
 export function getCachedTopics() {
+  const uid = getStoredAuthUid();
+  if (MEM.topicsUid !== uid) {
+    MEM.topics = null;
+    MEM.topicsAt = 0;
+    MEM.topicsUid = uid;
+  }
   if (MEM.topics && MEM.topics.length > 0) return MEM.topics;
   // Try window cache (set by dataLayer.js)
-  if (typeof window !== 'undefined' && Array.isArray(window._allTopics) && window._allTopics.length > 0) {
+  if (typeof window !== 'undefined' && window._topicsCacheUid === uid && Array.isArray(window._allTopics) && window._allTopics.length > 0) {
     MEM.topics = window._allTopics;
     return MEM.topics;
   }
   // Try localStorage
-  const cached = lsGet();
+  const cached = lsGet(uid);
   if (cached?.data?.length > 0) {
     MEM.topics = cached.data;
-    if (typeof window !== 'undefined') window._allTopics = cached.data;
+    MEM.topicsUid = uid;
+    if (typeof window !== 'undefined') {
+      window._allTopics = cached.data;
+      window._topicsCacheUid = uid;
+    }
     return MEM.topics;
   }
   return [];
@@ -186,6 +242,12 @@ export function getCachedTopics() {
 
 /** SWR-style: return cache immediately, revalidate in background. */
 export async function getTopics(force = false) {
+  const uid = getStoredAuthUid();
+  if (MEM.topicsUid !== uid) {
+    MEM.topics = null;
+    MEM.topicsAt = 0;
+    MEM.topicsUid = uid;
+  }
   const now = Date.now();
   const memFresh = MEM.topics && MEM.topics.length > 0 && (now - MEM.topicsAt) < TOPICS_TTL_MS;
 
@@ -196,13 +258,17 @@ export async function getTopics(force = false) {
   }
 
   // Try localStorage as instant response while fetching fresh data
-  const lsCached = lsGet();
+  const lsCached = lsGet(uid);
   const lsFresh = lsCached?.data?.length > 0;
 
   if (!force && lsFresh) {
     // Return stale-while-revalidate from localStorage
     MEM.topics = lsCached.data;
-    if (typeof window !== 'undefined') window._allTopics = lsCached.data;
+    MEM.topicsUid = uid;
+    if (typeof window !== 'undefined') {
+      window._allTopics = lsCached.data;
+      window._topicsCacheUid = uid;
+    }
     // Fetch fresh in background
     fetchTopicsFromSupabase().catch(() => {});
     return MEM.topics;
@@ -264,7 +330,7 @@ export async function createTopic(name, icon = 'folder', category = 'general') {
     .single();
 
   if (error) throw error;
-  MEM.topics = null; // Invalidate cache
+  clearTopicCache(user.id); // Invalidate cache after creating a topic
   return data;
 }
 
@@ -301,10 +367,7 @@ export async function deleteTopicCascade(topicId) {
     .eq('id', topicId);
 
   if (error) throw error;
-  MEM.topics = null; // Invalidate cache
-  try {
-    localStorage.removeItem(LS_KEY);
-  } catch (_) {}
+  clearTopicCache();
   return true;
 }
 
@@ -352,10 +415,7 @@ export async function deleteFolderCascade(categoryName) {
     console.warn('[deleteFolderCascade] LocalStorage cleanup:', err);
   }
 
-  MEM.topics = null;
-  try {
-    localStorage.removeItem(LS_KEY);
-  } catch (_) {}
+  clearTopicCache();
   return true;
 }
 
@@ -761,8 +821,9 @@ export async function addWord(topicIdOrObj, options = {}) {
     window._currentLessonWords = [];
     window._currentLessonWordsKey = null;
     window._allTopics = null;
+    window._topicsCacheUid = null;
   }
-  MEM.topics = null;
+  clearTopicCache();
   MEM.topicsAt = 0;
 
   return data;
@@ -829,7 +890,7 @@ export async function clonePublicTopic(topicId) {
     await supabase.from('words').insert(wordsToInsert);
   }
 
-  MEM.topics = null;
+  clearTopicCache();
   return newTopic.id;
 }
 
@@ -1163,6 +1224,25 @@ export async function getLearnedVocabStats() {
   };
 }
 
+export async function getUserWordCount() {
+  const user = await getCurrentUser();
+  if (!user) return 0;
+
+  const { data: topics, error: topicsError } = await supabase
+    .from('topics')
+    .select('id')
+    .eq('user_id', user.id);
+
+  if (topicsError || !topics?.length) return 0;
+
+  const { count, error } = await supabase
+    .from('words')
+    .select('id', { count: 'exact', head: true })
+    .in('topic_id', topics.map((topic) => topic.id));
+
+  return error || count === null ? 0 : count;
+}
+
 export async function getWordsDueForReview(limit = 50) {
   const user = await getCurrentUser();
   if (!user) return [];
@@ -1433,6 +1513,7 @@ export const db = {
   getCurrentUser,
   isUserPro,
   getCachedTopics,
+  clearTopicCache,
   getTopics,
   createTopic,
   deleteTopic,
@@ -1451,6 +1532,7 @@ export const db = {
   // Vocabulary & SM-2
   getVocabularyPage,
   getLearnedVocabStats,
+  getUserWordCount,
   getWordsDueForReview,
   getDashboardStats,
   getNextReviewTime,

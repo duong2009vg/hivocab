@@ -4,6 +4,7 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
+import { getDashboardStats, getUserWordCount } from '../../services/db.js';
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
@@ -14,8 +15,8 @@ export function PageProfile() {
   const [fullName, setFullName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [createdAt, setCreatedAt] = useState('');
-  const [streakCount, setStreakCount] = useState(2);
-  const [vocabCount, setVocabCount] = useState(81);
+  const [streakCount, setStreakCount] = useState(0);
+  const [vocabCount, setVocabCount] = useState(0);
   const [isSavingName, setIsSavingName] = useState(false);
   const [nameMsg, setNameMsg] = useState({ text: '', isError: false });
 
@@ -39,15 +40,30 @@ export function PageProfile() {
     }
   }, [user]);
 
-  // Load stats preferences
+  // Load live account statistics instead of placeholder values/local-only values.
   useEffect(() => {
-    try {
-      const localStreak = localStorage.getItem('hivocab_streak');
-      if (localStreak) setStreakCount(parseInt(localStreak, 10));
-      const localVocab = localStorage.getItem('hivocab_total_words');
-      if (localVocab) setVocabCount(parseInt(localVocab, 10));
-    } catch (_) {}
-  }, []);
+    let cancelled = false;
+
+    if (!user) {
+      setStreakCount(0);
+      setVocabCount(0);
+      return () => { cancelled = true; };
+    }
+
+    Promise.all([getDashboardStats(), getUserWordCount()])
+      .then(([stats, wordCount]) => {
+        if (cancelled) return;
+        setStreakCount(Number(stats?.streak) || 0);
+        setVocabCount(Number(wordCount) || 0);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setStreakCount(0);
+        setVocabCount(0);
+      });
+
+    return () => { cancelled = true; };
+  }, [user]);
 
   // Update Name
   const handleSaveName = async (e) => {

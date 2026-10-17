@@ -101,17 +101,26 @@ export function useTopics() {
     // Kick off initial fetch (returns cache instantly if available, fetches fresh in background)
     fetchTopics();
 
-    // Listen for background revalidation events from db.js
-    // When fetchTopicsFromSupabase() completes, it fires hi:topics-updated
+    // Listen for background revalidation and mutation events. Events emitted by
+    // create/add/bulk flows invalidate the topic cache, so force a fresh query.
     const onTopicsUpdated = (e) => {
       if (Array.isArray(e.detail) && e.detail.length > 0) {
         applyTopics(e.detail, undefined);
         setLoading(false);
+        return;
       }
+      fetchTopics(true);
     };
+    const onWordsUpdated = () => fetchTopics(true);
     window.addEventListener('hi:topics-updated', onTopicsUpdated);
-    return () => window.removeEventListener('hi:topics-updated', onTopicsUpdated);
-  }, []);
+    window.addEventListener('hivocab:word-added', onWordsUpdated);
+    window.addEventListener('hivocab:words-bulk-added', onWordsUpdated);
+    return () => {
+      window.removeEventListener('hi:topics-updated', onTopicsUpdated);
+      window.removeEventListener('hivocab:word-added', onWordsUpdated);
+      window.removeEventListener('hivocab:words-bulk-added', onWordsUpdated);
+    };
+  }, [applyTopics, fetchTopics]);
 
   // Build categories list
   const categories = useMemo(() => {

@@ -3,6 +3,7 @@
 // Synchronizes Auth state, Profile, PRO Subscription & Admin Role
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
+import { clearTopicCache } from '../services/db.js';
 
 export function checkIsPro(profile) {
   if (!profile) return false;
@@ -135,10 +136,6 @@ export function AuthProvider({ children }) {
         }
       }
 
-      // Also notify legacy dataLayer if it's ready (keeps HiDB auth state in sync)
-      if (typeof window !== 'undefined' && window.HiDB && typeof window.HiDB._onAuthChange === 'function') {
-        window.HiDB._onAuthChange(event, newSession);
-      }
     });
 
     return () => subscription.unsubscribe();
@@ -146,15 +143,6 @@ export function AuthProvider({ children }) {
 
   const signInWithEmail = useCallback(async (email, password, captchaToken) => {
     setError(null);
-    if (typeof window !== 'undefined' && window.HiDB?.signInWithPassword) {
-      const res = await window.HiDB.signInWithPassword(email, password, captchaToken);
-      if (res?.user) {
-        setUser(res.user);
-        setSession(res.session);
-        await fetchProfile(res.user.id);
-      }
-      return res;
-    }
     const authParams = { email, password };
     if (captchaToken) {
       authParams.options = { captchaToken };
@@ -171,9 +159,6 @@ export function AuthProvider({ children }) {
 
   const signUpWithEmail = useCallback(async (email, password, captchaToken) => {
     setError(null);
-    if (typeof window !== 'undefined' && window.HiDB?.signUpWithPassword) {
-      return window.HiDB.signUpWithPassword(email, password, captchaToken);
-    }
     const signUpOptions = { emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined };
     if (captchaToken) {
       signUpOptions.captchaToken = captchaToken;
@@ -185,12 +170,6 @@ export function AuthProvider({ children }) {
 
   const signInWithGoogle = useCallback(async () => {
     setError(null);
-    if (typeof window !== 'undefined' && typeof window.handleGoogleLogin === 'function') {
-      return window.handleGoogleLogin();
-    }
-    if (typeof window !== 'undefined' && window.HiDB?.signInWithGoogle) {
-      return window.HiDB.signInWithGoogle();
-    }
     return supabase.auth.signInWithOAuth({ provider: 'google' });
   }, []);
 
@@ -200,11 +179,11 @@ export function AuthProvider({ children }) {
       if (typeof sessionStorage !== 'undefined') {
         sessionStorage.removeItem('hivocab_guest_entered');
       }
+      // Clear the current user's scoped cache while the auth UID is still available.
+      clearTopicCache();
       await supabase.auth.signOut();
-      if (typeof window !== 'undefined' && window.HiDB?.signOut) {
-        await window.HiDB.signOut().catch(() => {});
-      }
     } finally {
+      clearTopicCache();
       setUser(null);
       setSession(null);
       setProfile(null);

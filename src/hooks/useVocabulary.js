@@ -106,6 +106,23 @@ export function useVocabulary() {
     fetchSrsStats();
   }, [fetchTopics, fetchSrsStats]);
 
+  // Keep the notebook in sync when words are added from any modal or page.
+  useEffect(() => {
+    const refreshAfterWordMutation = () => {
+      fetchWords();
+      fetchSrsStats();
+    };
+
+    window.addEventListener('hivocab:word-added', refreshAfterWordMutation);
+    window.addEventListener('hivocab:words-bulk-added', refreshAfterWordMutation);
+    window.addEventListener('hivocab:word-reviewed', refreshAfterWordMutation);
+    return () => {
+      window.removeEventListener('hivocab:word-added', refreshAfterWordMutation);
+      window.removeEventListener('hivocab:words-bulk-added', refreshAfterWordMutation);
+      window.removeEventListener('hivocab:word-reviewed', refreshAfterWordMutation);
+    };
+  }, [fetchWords, fetchSrsStats]);
+
   // Fetch words whenever filters change
   useEffect(() => {
     fetchWords();
