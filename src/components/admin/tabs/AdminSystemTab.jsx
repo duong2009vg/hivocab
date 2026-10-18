@@ -37,7 +37,8 @@ export function AdminSystemTab() {
     let totalBytes = 0;
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      totalBytes += (key?.length || 0) + (val?.length || 0);
+      const value = key ? localStorage.getItem(key) : '';
+      totalBytes += (key?.length || 0) + (value?.length || 0);
     }
     setStorageUsage({
       itemsCount: localStorage.length,

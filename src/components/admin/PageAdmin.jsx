@@ -3,23 +3,24 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../lib/supabaseClient.js';
 import { checkIsPro } from '../../providers/AuthProvider.jsx';
+import { lazyWithRetry as lazy } from '../../utils/lazyWithRetry.js';
 import AdminProtectedRoute from '../common/AdminProtectedRoute.jsx';
 import AdminSidebar from './AdminSidebar.jsx';
 import AdminHeader from './AdminHeader.jsx';
 
-// Tab Components
-import AdminOverviewTab from './tabs/AdminOverviewTab.jsx';
-import AdminOrdersTab from './tabs/AdminOrdersTab.jsx';
-import AdminSubscriptionsTab from './tabs/AdminSubscriptionsTab.jsx';
-import AdminContentGatingTab from './tabs/AdminContentGatingTab.jsx';
-import AdminUsersTab from './tabs/AdminUsersTab.jsx';
-import AdminThptTab from './tabs/AdminThptTab.jsx';
-import AdminReadingTab from './tabs/AdminReadingTab.jsx';
-import AdminWordsTab from './tabs/AdminWordsTab.jsx';
-import AdminFoldersTab from './tabs/AdminFoldersTab.jsx';
-import AdminBulkImportTab from './tabs/AdminBulkImportTab.jsx';
-import AdminReportsTab from './tabs/AdminReportsTab.jsx';
-import AdminSystemTab from './tabs/AdminSystemTab.jsx';
+// Keep the admin shell light. Each tab is loaded only when selected.
+const AdminOverviewTab = lazy(() => import('./tabs/AdminOverviewTab.jsx'));
+const AdminOrdersTab = lazy(() => import('./tabs/AdminOrdersTab.jsx'));
+const AdminSubscriptionsTab = lazy(() => import('./tabs/AdminSubscriptionsTab.jsx'));
+const AdminContentGatingTab = lazy(() => import('./tabs/AdminContentGatingTab.jsx'));
+const AdminUsersTab = lazy(() => import('./tabs/AdminUsersTab.jsx'));
+const AdminThptTab = lazy(() => import('./tabs/AdminThptTab.jsx'));
+const AdminReadingTab = lazy(() => import('./tabs/AdminReadingTab.jsx'));
+const AdminWordsTab = lazy(() => import('./tabs/AdminWordsTab.jsx'));
+const AdminFoldersTab = lazy(() => import('./tabs/AdminFoldersTab.jsx'));
+const AdminBulkImportTab = lazy(() => import('./tabs/AdminBulkImportTab.jsx'));
+const AdminReportsTab = lazy(() => import('./tabs/AdminReportsTab.jsx'));
+const AdminSystemTab = lazy(() => import('./tabs/AdminSystemTab.jsx'));
 
 const TAB_TITLES = {
   overview: 'Tổng quan Studio',
@@ -45,10 +46,10 @@ export function PageAdmin() {
   const [profiles, setProfiles] = useState([]);
   const [orders, setOrders] = useState([]);
   const [counts, setCounts] = useState({
-    thptExams: 0,
-    readings: 0,
-    words: 66000,
-    pendingReports: 0,
+    thptExams: null,
+    readings: null,
+    words: null,
+    pendingReports: null,
   });
 
   const loadAllAdminData = useCallback(async () => {
@@ -65,29 +66,35 @@ export function PageAdmin() {
         supabase
           .from('profiles')
           .select('id, email, full_name, role, tier, subscription_plan, subscription_status, subscription_started_at, subscription_expires_at, created_at')
-          .order('created_at', { ascending: false }),
-        supabase
-          .from('orders')
-          .select('*')
           .order('created_at', { ascending: false })
           .limit(250),
-        supabase.from('thpt_exams').select('*', { count: 'exact', head: true }),
-        supabase.from('passages').select('*', { count: 'exact', head: true }),
-        supabase.from('words').select('*', { count: 'exact', head: true }),
-        supabase.from('system_error_logs').select('*', { count: 'exact', head: true }),
+        supabase
+          .from('orders')
+          .select('id, order_code, user_id, user_email, plan_id, amount, status, created_at, paid_at')
+          .order('created_at', { ascending: false })
+          .limit(250),
+        supabase.from('thpt_exams').select('id', { count: 'exact', head: true }),
+        supabase.from('passages').select('id', { count: 'exact', head: true }),
+        supabase.from('words').select('id', { count: 'exact', head: true }),
+        supabase.from('system_error_logs').select('id', { count: 'exact', head: true }),
       ]);
 
-      if (profRes.status === 'fulfilled' && profRes.value.data) {
+      if (profRes.status === 'fulfilled' && !profRes.value.error && profRes.value.data) {
         setProfiles(profRes.value.data);
       }
-      if (orderRes.status === 'fulfilled' && orderRes.value.data) {
+      if (orderRes.status === 'fulfilled' && !orderRes.value.error && orderRes.value.data) {
         setOrders(orderRes.value.data);
       }
+      const readCount = (result) => (
+        result.status === 'fulfilled' && !result.value.error
+          ? (result.value.count ?? 0)
+          : null
+      );
       setCounts({
-        thptExams: thptCountRes.status === 'fulfilled' ? thptCountRes.value.count || 0 : 0,
-        readings: passageCountRes.status === 'fulfilled' ? passageCountRes.value.count || 0 : 0,
-        words: wordCountRes.status === 'fulfilled' ? wordCountRes.value.count || 66000 : 66000,
-        pendingReports: reportCountRes.status === 'fulfilled' ? reportCountRes.value.count || 0 : 0,
+        thptExams: readCount(thptCountRes),
+        readings: readCount(passageCountRes),
+        words: readCount(wordCountRes),
+        pendingReports: readCount(reportCountRes),
       });
     } catch (err) {
       console.error('[PageAdmin] loadAllAdminData error:', err);
@@ -130,7 +137,6 @@ export function PageAdmin() {
 
     return {
       totalUsers,
-      activeUsers24h: Math.min(totalUsers, Math.max(1, Math.round(totalUsers * 0.28))),
       activePro,
       lifetimePro,
       plan1m,

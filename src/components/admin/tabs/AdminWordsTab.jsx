@@ -6,7 +6,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
 import { playWordAudio } from '../../../services/audioService.js';
-import { deleteFolderCascade, deleteTopicCascade } from '../../../services/db.js';
+import { deleteFolderCascade, deleteTopicCascade } from '../../../services/topicsService.js';
 
 const POS_OPTIONS = [
   { value: 'noun', label: 'Danh từ (n)' },

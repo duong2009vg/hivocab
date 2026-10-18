@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
-import { deleteFolderCascade, deleteTopicCascade } from '../../../services/db.js';
+import { deleteFolderCascade, deleteTopicCascade } from '../../../services/topicsService.js';
 import { getCategoryIcon } from '../../../hooks/useTopics.js';
 
 export function AdminFoldersTab() {

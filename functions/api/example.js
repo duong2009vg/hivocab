@@ -8,7 +8,7 @@ const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
 const CKEY_MODEL = 'deepseek-v4-flash';
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://hivocab.site',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
 };

@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
-import { createTopic, getCachedTopics } from '../../services/db.js';
+import { createTopic, getCachedTopics } from '../../services/topicsService.js';
 
 const AVAILABLE_ICONS = [
   'folder',

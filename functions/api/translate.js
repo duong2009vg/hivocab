@@ -7,7 +7,7 @@ const MAX_TEXT_LENGTH = 900;
 const DEEPL_URL = 'https://api-free.deepl.com/v2/translate';
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': 'https://hivocab.site',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
 };
@@ -19,6 +19,16 @@ function normalizeTexts(body) {
         .filter(Boolean)
         .slice(0, MAX_ITEMS)
         .map(item => item.slice(0, MAX_TEXT_LENGTH));
+}
+
+async function fetchWithTimeout(input, init = {}, timeoutMs = 8000) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+        return await fetch(input, { ...init, signal: controller.signal });
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 export async function onRequestOptions() {
@@ -55,23 +65,20 @@ export async function onRequestPost(context) {
     const apiKey = env.DEEPL_API_KEY;
 
     async function fallbackTranslate(items, targetLangCode = 'vi') {
-        const results = [];
-        for (const item of items) {
+        return Promise.all(items.map(async (item) => {
             try {
                 const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(targetLangCode)}&dt=t&q=${encodeURIComponent(item)}`;
-                const res = await fetch(url);
+                const res = await fetchWithTimeout(url, {}, 5000);
                 if (res.ok) {
                     const data = await res.json();
                     const trans = (data[0] || []).map(seg => seg[0]).join('');
-                    results.push(trans || item);
-                } else {
-                    results.push(item);
+                    return trans || item;
                 }
+                return item;
             } catch (_) {
-                results.push(item);
+                return item;
             }
-        }
-        return results;
+        }));
     }
 
     if (!apiKey) {
@@ -88,7 +95,7 @@ export async function onRequestPost(context) {
     }
 
     try {
-        const deeplRes = await fetch(DEEPL_URL, {
+        const deeplRes = await fetchWithTimeout(DEEPL_URL, {
             method: 'POST',
             headers: {
                 'Authorization': `DeepL-Auth-Key ${apiKey}`,
@@ -99,7 +106,7 @@ export async function onRequestPost(context) {
                 source_lang: sourceLang,
                 target_lang: targetLang,
             }),
-        });
+        }, 12000);
 
         if (!deeplRes.ok) {
             console.warn(`[Translate] DeepL failed with status ${deeplRes.status}, switching to fallback...`);

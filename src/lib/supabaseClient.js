@@ -5,10 +5,9 @@
 // Supabase project (auth sessions are interoperable via cookies/localStorage).
 
 import { createClient } from '@supabase/supabase-js';
+import { assertClientConfiguration, SUPABASE_ANON_KEY, SUPABASE_URL } from '../config/runtime.js';
 
-const SUPABASE_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co';
-const SUPABASE_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
+assertClientConfiguration();
 
 // Single instance shared across entire React app
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {

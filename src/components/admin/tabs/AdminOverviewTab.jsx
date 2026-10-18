@@ -16,7 +16,7 @@ export function AdminOverviewTab({
     {
       title: 'TỔNG HỌC VIÊN',
       value: (stats.totalUsers || 0).toLocaleString(),
-      subtitle: `${stats.activeUsers24h || 0} hoạt động trong 24h`,
+      subtitle: 'Tổng tài khoản trong hệ thống',
       icon: 'group',
       tab: 'users',
     },
@@ -36,8 +36,8 @@ export function AdminOverviewTab({
     },
     {
       title: 'HỌC LIỆU TRỌNG TÂM',
-      value: `${stats.thptExamsCount || 0} Đề / ${stats.readingsCount || 0} Bài`,
-      subtitle: `${(stats.totalWords || 0).toLocaleString()} từ vựng trong hệ thống`,
+      value: `${stats.thptExamsCount == null ? '—' : stats.thptExamsCount} Đề / ${stats.readingsCount == null ? '—' : stats.readingsCount} Bài`,
+      subtitle: `${stats.totalWords == null ? '—' : stats.totalWords.toLocaleString()} từ vựng trong hệ thống`,
       icon: 'school',
       tab: 'thpt',
     },

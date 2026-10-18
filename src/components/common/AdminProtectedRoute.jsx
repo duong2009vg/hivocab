@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import RouteLoadingFallback from './RouteLoadingFallback.jsx';
+import { TURNSTILE_SITE_KEY } from '../../config/runtime.js';
 
 export function AdminProtectedRoute({ children }) {
   const { user, profile, isAdmin, loading, signInWithEmail, signOut } = useAuth();
@@ -16,12 +17,13 @@ export function AdminProtectedRoute({ children }) {
 
   // Auto-render Turnstile cho Admin Login
   useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || (user && !TURNSTILE_SITE_KEY)) return;
     if (!user && typeof window !== 'undefined' && window.turnstile && typeof window.turnstile.render === 'function') {
       const el = document.getElementById('turnstile-admin');
       if (el && !el.hasChildNodes()) {
         try {
           window.turnstile.render('#turnstile-admin', {
-            sitekey: '0x4AAAAAAE9CY0FtESpbO_Cj',
+            sitekey: TURNSTILE_SITE_KEY,
             theme: 'auto',
           });
         } catch (_) {}
@@ -124,7 +126,7 @@ export function AdminProtectedRoute({ children }) {
             <div
               id="turnstile-admin"
               className="cf-turnstile my-2.5 flex justify-center min-h-[65px]"
-              data-sitekey="0x4AAAAAAE9CY0FtESpbO_Cj"
+              data-sitekey={TURNSTILE_SITE_KEY}
               data-theme="auto"
             ></div>
 

@@ -44,62 +44,7 @@
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <link rel="stylesheet" href="/css/app-inline.css?v=20260930-v1"/>
 
-<script>
-(function() {
-    try {
-        // LOẠI BỎ HOÀN TOÀN LUỒNG DARK MODE: Xóa class dark và dọn dẹp localStorage
-        document.documentElement.classList.remove('dark');
-        try {
-            localStorage.removeItem('theme');
-            localStorage.removeItem('dark-mode');
-        } catch (_) {}
-
-        var h = new Date().getHours();
-        var autoTheme = (h >= 0 && h < 4) ? 'ocean' : (h >= 4 && h < 12) ? 'morning' : (h >= 12 && h < 18) ? 'afternoon' : 'night';
-        var saved = localStorage.getItem('colour-theme');
-        var theme = (saved && ['ocean', 'morning', 'afternoon', 'night'].indexOf(saved) !== -1) ? saved : autoTheme;
-        document.documentElement.setAttribute('data-theme', theme);
-
-        // KIỂM TRA PHIÊN ĐĂNG NHẬP NHANH TỪ LOCALSTORAGE ĐỂ CHUYỂN THẲNG VÀO APP
-        var hasAuth = false;
-        for (var i = 0; i < localStorage.length; i++) {
-            var k = localStorage.key(i);
-            if (k && k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
-                try {
-                    var tokenData = JSON.parse(localStorage.getItem(k) || '{}');
-                    if (tokenData && (tokenData.access_token || tokenData.refresh_token || tokenData.user)) {
-                        hasAuth = true;
-                        break;
-                    }
-                } catch(_) {}
-            }
-        }
-        var curPath = (window.location.pathname || '').replace(/^\/+/, '').replace(/\/+$/, '');
-        var curHash = (window.location.hash || '').replace(/^#/, '').replace(/^page-/, '');
-        var isAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
-        var isDeckRoute = curHash.indexOf('d=') === 0 || curHash.indexOf('deck=') === 0 || curHash.indexOf('topic=') === 0 || curHash.indexOf('library') === 0;
-        var isLoginRoute = curHash === 'login' || curPath === 'login';
-
-        var guestEntered = false;
-        try {
-            guestEntered = sessionStorage.getItem('hivocab_guest_entered') === '1';
-        } catch(_) {}
-
-        if (hasAuth) {
-            window._isPreAuthenticated = true;
-            document.documentElement.classList.add('user-logged-in');
-            var initialRoute = isDeckRoute ? 'library' : ((!curHash || curHash === 'landing' || isLoginRoute || isAuthHash) ? 'dashboard' : curHash.split('?')[0]);
-            document.documentElement.setAttribute('data-initial-route', initialRoute);
-        } else if (isLoginRoute) {
-            document.documentElement.setAttribute('data-initial-route', 'login');
-        } else if (guestEntered) {
-            document.documentElement.setAttribute('data-initial-route', curHash || curPath || 'dashboard');
-        } else {
-            document.documentElement.setAttribute('data-initial-route', 'landing');
-        }
-    } catch (e) {}
-})();
-</script>
+<script src="/bootstrap.js"></script>
 <link rel="stylesheet" href="/themes.css?v=20260918-v4"/>
 </head>
 <body class="bg-background text-on-background font-sans antialiased overflow-x-hidden transition-colors duration-300">
@@ -111,15 +56,7 @@
   <script type="module" src="/src/main.jsx"></script>
 
 
-<script>
-if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then((reg) => {
-      reg.update().catch(() => {});
-    }).catch(() => {});
-  });
-}
-</script>
+<script src="/register-sw.js" defer></script>
 </body>
 </html>
 

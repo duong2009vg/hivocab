@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { TURNSTILE_SITE_KEY } from '../../config/runtime.js';
 
 export function PageLogin() {
   const { user, signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
@@ -156,7 +157,7 @@ export function PageLogin() {
       if (el && !el.hasChildNodes()) {
         try {
           window.turnstile.render('#turnstile-user', {
-            sitekey: '0x4AAAAAAE9CY0FtESpbO_Cj',
+            sitekey: TURNSTILE_SITE_KEY,
             theme: 'auto',
           });
         } catch (_) {}
@@ -382,7 +383,7 @@ export function PageLogin() {
             <div 
               id="turnstile-user" 
               className="cf-turnstile my-2.5 flex justify-center min-h-[65px]" 
-              data-sitekey="0x4AAAAAAE9CY0FtESpbO_Cj" 
+              data-sitekey={TURNSTILE_SITE_KEY}
               data-theme="auto"
             ></div>
 

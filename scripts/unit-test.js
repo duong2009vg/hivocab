@@ -9,6 +9,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, '..');
 
+// Direct Node tests do not run through Vite, so provide harmless public test
+// configuration before importing modules that create the Supabase singleton.
+process.env.VITE_SUPABASE_URL ||= 'https://unit-test.invalid.supabase.co';
+process.env.VITE_SUPABASE_ANON_KEY ||= 'unit-test-anon-key';
+
 let totalTests = 0;
 let passedTests = 0;
 

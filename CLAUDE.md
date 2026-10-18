@@ -104,8 +104,8 @@ study_sessions (id, user_id, session_date, words_reviewed, created_at)
 
 ### Quy tắc Supabase
 - RLS bật trên tất cả bảng — mọi query tự filter theo `auth.uid()`
-- KHÔNG dùng `localStorage` để lưu data
-- KHÔNG query trực tiếp DB, phải qua `HiDB`
+- Không lưu dữ liệu nhạy cảm/nguồn chính trong `localStorage`. Chỉ dùng cache UX có TTL, scope theo user và có cơ chế xóa.
+- Không query trực tiếp DB từ component; dùng `src/services/` hoặc hook hiện có.
 
 ---
 
@@ -216,14 +216,14 @@ Không cần API key, không giới hạn request.
 ## Quy tắc khi code — BẮT BUỘC
 
 1. **KHÔNG thay đổi màu sắc, font, spacing** của design system
-2. **KHÔNG dùng localStorage** để lưu data người dùng
+2. **Không dùng localStorage làm nguồn dữ liệu chính**; cache phải có TTL và không chứa secret.
 3. **KHÔNG viết lại cả file** — chỉ sửa đúng hàm/section được yêu cầu
-4. **KHÔNG tạo thêm file JS mới** nếu không được yêu cầu — thêm vào file có sẵn
+4. Tạo service/hook/config mới khi giúp tách domain rõ ràng; không gom thêm logic vào file lớn như `src/services/db.js`.
 5. Mọi call Supabase trong React phải dùng `src/lib/supabaseClient.js` hoặc service/hook hiện có; không tạo thêm client riêng. Các endpoint server dùng biến môi trường và RLS/service-role đúng ngữ cảnh.
 6. Mọi exercise phải qua **HiSession + HiSessionUI**, không render thẳng HTML
 7. Khi thêm UI mới phải dùng đúng **class Tailwind** từ design system, không dùng inline style
 8. Responsive: luôn có cả class `md:` và mobile class
-9. **Git workflow**: Sau khi hoàn thành bất kỳ tính năng hoặc sửa lỗi nào, mặc định tự động commit và push lên GitHub (`origin main`).
+9. **Git workflow**: làm việc trên branch, mở pull request và để CI/review kiểm tra trước khi merge vào `main`; không tự động push thẳng `main`.
 
 ---
 

@@ -2,22 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 
-// LOẠI BỎ HOÀN TOÀN DARK MODE TRÊN TOÀN BỘ ỨNG DỤNG
+// HiVocab currently ships with a light-only design. Keep this decision local to
+// the document root instead of mutating user preferences or observing every DOM
+// class change for the lifetime of the page.
 if (typeof document !== 'undefined') {
   document.documentElement.classList.remove('dark');
   document.documentElement.style.colorScheme = 'light';
-  try {
-    localStorage.removeItem('theme');
-    localStorage.removeItem('dark-mode');
-  } catch (_) {}
-
-  // Chặn mọi tác động add lại class 'dark' (kể cả từ extension hay script ngoài)
-  const darkObserver = new MutationObserver(() => {
-    if (document.documentElement.classList.contains('dark')) {
-      document.documentElement.classList.remove('dark');
-    }
-  });
-  darkObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 }
 
 // Tự động tải lại trang khi có bản build mới làm lỗi dynamic import chunk (Vite standard)
@@ -30,9 +20,15 @@ if (typeof window !== 'undefined') {
     if (!lastRetry || (now - parseInt(lastRetry, 10)) > 20000) {
       sessionStorage.setItem(retryKey, String(now));
       if ('caches' in window) {
-        caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).finally(() => {
+        caches.keys()
+          .then((keys) => Promise.all(
+            keys
+              .filter((key) => key.startsWith('hivocab-'))
+              .map((key) => caches.delete(key))
+          ))
+          .finally(() => {
           window.location.reload();
-        });
+          });
       } else {
         window.location.reload();
       }

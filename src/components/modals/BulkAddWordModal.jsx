@@ -6,7 +6,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-import { clearTopicCache, getCachedTopics } from '../../services/db.js';
+import { clearTopicCache, getCachedTopics } from '../../services/topicsService.js';
 
 // Mẫu Prompt chuẩn hóa để người dùng sao chép gửi cho ChatGPT / Gemini / Claude
 const AI_PROMPT_TEMPLATE = `Bạn là trợ lý học thuật tiếng Anh chuyên nghiệp cho nền tảng học từ vựng HiVocab.

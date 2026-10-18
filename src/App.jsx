@@ -126,6 +126,7 @@ function AppRoutes() {
       case 'dictionary':
         return <PageDictionary />;
       case 'settings':
+        return <ProtectedRoute><PageSettings /></ProtectedRoute>;
       case 'profile':
         return <ProtectedRoute><PageProfile /></ProtectedRoute>;
       case 'bilingual-reading':

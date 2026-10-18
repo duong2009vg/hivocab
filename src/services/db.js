@@ -15,7 +15,10 @@ const MEM = {
   progressUid: null,  // uid that progress belongs to
 };
 const TOPICS_TTL_MS = 5 * 60 * 1000; // 5 min memory cache
+const TOPICS_MAX_CACHE_AGE_MS = 24 * 60 * 60 * 1000;
 const LS_KEY_PREFIX = 'hi_topics_v2';
+let topicsRequest = null;
+let topicsRequestUid = null;
 
 function getStoredAuthUid() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
@@ -54,6 +57,8 @@ function lsSet(topics, uid = getStoredAuthUid()) {
 }
 
 export function clearTopicCache(uid = getStoredAuthUid()) {
+  topicsRequest = null;
+  topicsRequestUid = null;
   MEM.topics = null;
   MEM.topicsAt = 0;
   MEM.topicsUid = null;
@@ -84,13 +89,17 @@ async function fetchTopicsFromSupabase() {
   let rpcData = null;
   let rpcError = null;
   try {
-    const rpcPromise = supabase.rpc('get_topic_summaries');
-    const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('RPC_TIMEOUT')), 2000)
-    );
-    const rpcRes = await Promise.race([rpcPromise, timeoutPromise]);
-    rpcData = rpcRes.data;
-    rpcError = rpcRes.error;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    try {
+      const rpcRes = await supabase
+        .rpc('get_topic_summaries')
+        .abortSignal(controller.signal);
+      rpcData = rpcRes.data;
+      rpcError = rpcRes.error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   } catch (err) {
     rpcError = err;
   }
@@ -124,7 +133,7 @@ async function fetchTopicsFromSupabase() {
       MEM.progress = null;
       MEM.progressUid = uid;
     }
-    lsSet(topics);
+    lsSet(topics, uid);
 
     if (typeof window !== 'undefined') {
       window._allTopics = topics;
@@ -197,7 +206,7 @@ async function fetchTopicsFromSupabase() {
     MEM.progress = null;
     MEM.progressUid = uid;
   }
-  lsSet(topics);
+  lsSet(topics, uid);
 
   if (typeof window !== 'undefined') {
     window._allTopics = topics;
@@ -230,6 +239,7 @@ export function getCachedTopics() {
   const cached = lsGet(uid);
   if (cached?.data?.length > 0) {
     MEM.topics = cached.data;
+    MEM.topicsAt = Number(cached.ts) || 0;
     MEM.topicsUid = uid;
     if (typeof window !== 'undefined') {
       window._allTopics = cached.data;
@@ -238,6 +248,20 @@ export function getCachedTopics() {
     return MEM.topics;
   }
   return [];
+}
+
+function refreshTopics(uid) {
+  if (topicsRequest && topicsRequestUid === uid) return topicsRequest;
+
+  topicsRequestUid = uid;
+  topicsRequest = fetchTopicsFromSupabase().finally(() => {
+    if (topicsRequestUid === uid) {
+      topicsRequest = null;
+      topicsRequestUid = null;
+    }
+  });
+
+  return topicsRequest;
 }
 
 /** SWR-style: return cache immediately, revalidate in background. */
@@ -253,29 +277,31 @@ export async function getTopics(force = false) {
 
   if (!force && memFresh) {
     // Still fresh in memory — return immediately, revalidate silently
-    queueMicrotask(() => fetchTopicsFromSupabase().catch(() => {}));
+    queueMicrotask(() => refreshTopics(uid).catch(() => {}));
     return MEM.topics;
   }
 
   // Try localStorage as instant response while fetching fresh data
   const lsCached = lsGet(uid);
-  const lsFresh = lsCached?.data?.length > 0;
+  const lsAge = lsCached?.ts ? Math.max(0, now - Number(lsCached.ts)) : Number.POSITIVE_INFINITY;
+  const lsFresh = lsCached?.data?.length > 0 && lsAge < TOPICS_MAX_CACHE_AGE_MS;
 
   if (!force && lsFresh) {
     // Return stale-while-revalidate from localStorage
     MEM.topics = lsCached.data;
     MEM.topicsUid = uid;
+    MEM.topicsAt = Number(lsCached.ts) || now;
     if (typeof window !== 'undefined') {
       window._allTopics = lsCached.data;
       window._topicsCacheUid = uid;
     }
     // Fetch fresh in background
-    fetchTopicsFromSupabase().catch(() => {});
+    refreshTopics(uid).catch(() => {});
     return MEM.topics;
   }
 
   // No cache at all — must wait for fresh data (first ever load)
-  return fetchTopicsFromSupabase();
+  return refreshTopics(uid);
 }
 
 // ─── Auth helpers (thin wrappers for React components) ───────────────────────
@@ -1377,7 +1403,8 @@ export async function getDashboardStats() {
 
     if (progressData) {
       progressData.forEach(p => {
-        const lv = Number(p.level) ?? 0;
+        const parsedLevel = Number(p.level);
+        const lv = Number.isFinite(parsedLevel) ? parsedLevel : 0;
         if (lv >= 0 && lv <= 5) {
           memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
         } else {

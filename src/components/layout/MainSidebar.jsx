@@ -10,7 +10,7 @@ import { getMasteryBadge } from '../../utils/masteryBadge.js';
 export function MainSidebar() {
   const { user, signOut } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
-  const { openModal } = useModal ? useModal() : { openModal: () => {} };
+  const { openModal } = useModal();
   const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();
 
   const activeTab =
