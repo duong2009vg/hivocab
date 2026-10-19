@@ -90,6 +90,7 @@ export function CreateTopicModal() {
       // Trigger refresh with created topic in detail
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: { topic: newTopic } }));
+        window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { topic: newTopic, timestamp: Date.now() } }, '*');
       }
     } catch (err) {
       setErrorMessage(err?.message || 'Có lỗi xảy ra khi tạo chủ đề.');
@@ -126,6 +127,7 @@ export function CreateTopicModal() {
 
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('hi:topics-updated'));
+        window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { folder: folderName.trim(), timestamp: Date.now() } }, '*');
       }
     } catch (err) {
       setErrorMessage('Không thể lưu thư mục mới.');

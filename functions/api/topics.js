@@ -66,14 +66,23 @@ export async function onRequestGet(context) {
                     'apikey': supabaseAnonKey,
                     'Content-Type': 'application/json',
                 },
+                cache: 'no-store',
             }
         );
+
+        const noCacheHeaders = {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+        };
 
         if (!topicsRes.ok) {
             console.error('[Topics] Supabase query failed:', topicsRes.status);
             return new Response(JSON.stringify({ ok: false, error: 'Không thể tải danh sách chủ đề.' }), {
                 status: 502,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                headers: noCacheHeaders
             });
         }
 
@@ -89,7 +98,7 @@ export async function onRequestGet(context) {
             })),
         }), {
             status: 200,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            headers: noCacheHeaders
         });
     } catch (err) {
         console.error('[Topics]', err);

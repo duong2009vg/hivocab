@@ -158,6 +158,7 @@ async function trySyncFromOpenTabs() {
 async function apiGet(path, token) {
     const res = await fetch(`${API_BASE_URL}${path}`, {
         headers: { 'Authorization': `Bearer ${token}` },
+        cache: 'no-store',
     });
     return res.json();
 }
@@ -248,6 +249,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
+    // Nhận thông báo topics đã cập nhật từ tab web app hoặc content script
+    if (message?.type === 'topics-updated') {
+        // Broadcast tới tất cả tab (để content scripts xóa cache in-memory)
+        chrome.tabs.query({}, (tabs) => {
+            (tabs || []).forEach(tab => {
+                if (tab.id) {
+                    chrome.tabs.sendMessage(tab.id, { type: 'topics-updated' }).catch(() => {});
+                }
+            });
+        });
+        // Broadcast tới popup (nếu đang mở)
+        chrome.runtime.sendMessage({ type: 'topics-updated' }).catch(() => {});
+        sendResponse({ ok: true });
+        return true;
+    }
+
     // Kiểm tra trạng thái đăng nhập (kết hợp tự động sync từ tab nếu chưa có)
     if (message?.type === 'check-auth') {
         (async () => {
@@ -267,22 +284,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             if (!token) return sendResponse({ ok: false, error: 'Chưa đăng nhập. Vui lòng đăng nhập lại.' });
 
             let topics = [];
+            const cacheBuster = `_t=${Date.now()}`;
             try {
-                const data = await apiGet('/topics', token);
+                const data = await apiGet(`/topics?${cacheBuster}`, token);
                 if (data.ok && Array.isArray(data.topics) && data.topics.length > 0) {
                     topics = data.topics;
                 }
             } catch (_) {}
 
-            // Nếu api chưa trả về category (ví dụ: cache cũ), query trực tiếp từ Supabase REST
+            // Nếu api chưa trả về category (ví dụ: cache cũ) hoặc rỗng, query trực tiếp từ Supabase REST
             const needsCategory = !topics.length || !topics.some(t => t.category);
             if (needsCategory) {
                 try {
-                    const sbRes = await fetch('https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/topics?select=id,name,icon,category,created_at&order=created_at.asc', {
+                    const sbRes = await fetch(`https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/topics?select=id,name,icon,category,created_at&order=created_at.asc&${cacheBuster}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
                             'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
-                        }
+                        },
+                        cache: 'no-store',
                     });
                     if (sbRes.ok) {
                         const sbData = await sbRes.json();

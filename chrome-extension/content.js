@@ -61,11 +61,21 @@
       if (e.key?.startsWith('sb-') && e.key?.endsWith('-auth-token')) syncAuthToken();
     });
 
-    // 4. Lắng nghe thông báo trực tiếp từ app (HiDB.onAuthStateChange)
+    // 4. Lắng nghe thông báo trực tiếp từ app (HiDB.onAuthStateChange, topics-updated)
     window.addEventListener('message', e => {
       if (e.data?.source === 'hi-vocab-app' && e.data?.action === 'auth-state-change') {
         syncAuthToken(e.data.session);
       }
+      if (e.data?.source === 'hi-vocab-app' && e.data?.action === 'topics-updated') {
+        invalidateTopicsCache();
+        send('topics-updated').catch(() => {});
+      }
+    });
+
+    // 5. Bắt CustomEvent nếu cùng DOM context
+    window.addEventListener('hi:topics-updated', () => {
+      invalidateTopicsCache();
+      send('topics-updated').catch(() => {});
     });
   }
 
@@ -136,9 +146,18 @@
   // ── Load topics & folders map ─────────────────────────────────────────────
   let cachedTopics     = null;
   let cachedFoldersMap = null;
+  let cachedTopicsTime = 0;
+  const TOPICS_CACHE_TTL = 30000; // 30s TTL để tự động làm mới chủ đề khi mở save modal
 
-  async function getTopicsData() {
-    if (cachedTopics && cachedFoldersMap) {
+  function invalidateTopicsCache() {
+    cachedTopics     = null;
+    cachedFoldersMap = null;
+    cachedTopicsTime = 0;
+  }
+
+  async function getTopicsData(force = false) {
+    const isFresh = cachedTopics && cachedFoldersMap && (Date.now() - cachedTopicsTime < TOPICS_CACHE_TTL);
+    if (!force && isFresh) {
       return { topics: cachedTopics, foldersMap: cachedFoldersMap };
     }
     const response = await send('get-app-topics');
@@ -154,6 +173,7 @@
     });
     cachedTopics     = topics;
     cachedFoldersMap = foldersMap;
+    cachedTopicsTime = Date.now();
     return { topics, foldersMap };
   }
 
@@ -310,6 +330,12 @@
             <div id="hiv-modal-title" class="hi-vocab-modal-title">Chọn thư mục</div>
             <div id="hiv-modal-subtitle" class="hi-vocab-modal-subtitle">Lưu vào bộ từ vựng</div>
           </div>
+          <button id="hiv-modal-refresh" class="hi-vocab-modal-refresh" type="button" title="Làm mới danh sách chủ đề">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
           <button id="hiv-modal-close" class="hi-vocab-modal-close" type="button" title="Đóng">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
@@ -350,6 +376,7 @@
     const modalEl          = panel.querySelector('#hiv-modal');
     const modalBackBtn     = panel.querySelector('#hiv-modal-back');
     const modalBackLabel   = panel.querySelector('#hiv-modal-back-label');
+    const modalRefreshBtn  = panel.querySelector('#hiv-modal-refresh');
     const modalCloseBtn    = panel.querySelector('#hiv-modal-close');
     const modalTitle       = panel.querySelector('#hiv-modal-title');
     const modalSubtitle    = panel.querySelector('#hiv-modal-subtitle');
@@ -380,6 +407,29 @@
       modalEl.style.display = 'none';
       modalStatus.style.display = 'none';
     };
+
+    if (modalRefreshBtn) {
+      modalRefreshBtn.onclick = async () => {
+        modalRefreshBtn.classList.add('is-refreshing');
+        invalidateTopicsCache();
+        try {
+          await getTopicsData(true);
+          if (currentStep === 'topic' && currentFolder) {
+            selectFolder(currentFolder);
+          } else {
+            renderFolderStep();
+          }
+        } catch (err) {
+          if (modalStatus) {
+            modalStatus.style.display = 'block';
+            modalStatus.style.color = '#ba4b29';
+            modalStatus.textContent = err?.message || 'Không thể làm mới danh sách.';
+          }
+        } finally {
+          setTimeout(() => modalRefreshBtn.classList.remove('is-refreshing'), 400);
+        }
+      };
+    }
 
     modalBackBtn.onclick = () => {
       handleModalBack();
@@ -646,6 +696,9 @@
     openSaveBtn.onclick = () => {
       if (!current?.meaning) return;
       modalEl.style.display = 'flex';
+      if (Date.now() - cachedTopicsTime > TOPICS_CACHE_TTL) {
+        invalidateTopicsCache();
+      }
       renderFolderStep();
     };
   }
@@ -788,6 +841,10 @@
 
   // ── Listener cho web app ─────────────────────────────────────────────────
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message?.type === 'topics-updated') {
+      invalidateTopicsCache();
+      return;
+    }
     if (message?.type !== 'HI_EXTENSION_PAGE_REQUEST') return;
     window.postMessage({ source: 'hi-vocab-extension', requestId: message.requestId, action: message.action, payload: message.payload }, '*');
     const handler = event => {

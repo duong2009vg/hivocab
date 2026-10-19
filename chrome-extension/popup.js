@@ -34,6 +34,7 @@ const authStatus       = document.getElementById('authStatus');
 const saveModal        = document.getElementById('saveModal');
 const modalBackBtn     = document.getElementById('modalBackBtn');
 const modalBackLabel   = document.getElementById('modalBackLabel');
+const modalRefreshBtn  = document.getElementById('modalRefreshBtn');
 const modalCloseBtn    = document.getElementById('modalCloseBtn');
 const modalTitle       = document.getElementById('modalTitle');
 const modalSubtitle    = document.getElementById('modalSubtitle');
@@ -53,6 +54,7 @@ let _currentFolder   = null;
 let _currentTopic    = null;
 let _currentTest     = null;
 let _topicTestsCache = new Map();
+let _topicsLoadedAt  = 0;
 
 // ── Message helper ────────────────────────────────────────────────────────
 function send(type, payload = {}) {
@@ -294,6 +296,7 @@ async function loadTopics() {
     _foldersMap[folder].push(t);
   });
 
+  _topicsLoadedAt = Date.now();
   topicsReady = true;
   if (authStatus) authStatus.textContent = 'Đã đăng nhập';
   setStatus('', '');
@@ -303,7 +306,8 @@ async function loadTopics() {
 // ── Pop-up Modal: Chọn Folder -> Chọn Topic ────────────────────────────────
 async function openSaveModal() {
   if (!currentResult?.meaning) return;
-  if (!topicsReady) {
+  const isStale = Date.now() - _topicsLoadedAt > 30000;
+  if (!topicsReady || isStale) {
     setStatus('Đang tải danh sách thư mục...', '');
     await loadTopics();
     if (!topicsReady) {
@@ -734,6 +738,26 @@ logoutButton?.addEventListener('click', async () => {
   checkAndShowUI();
 });
 
+modalRefreshBtn?.addEventListener('click', async () => {
+  modalRefreshBtn.classList.add('is-refreshing');
+  try {
+    await loadTopics();
+    if (_currentStep === 'topic' && _currentFolder) {
+      selectFolder(_currentFolder);
+    } else {
+      renderFolderStep();
+    }
+  } catch (err) {
+    if (modalStatus) {
+      modalStatus.style.display = 'block';
+      modalStatus.style.color = 'var(--error)';
+      modalStatus.textContent = err?.message || 'Không thể làm mới danh sách.';
+    }
+  } finally {
+    setTimeout(() => modalRefreshBtn.classList.remove('is-refreshing'), 400);
+  }
+});
+
 chrome.runtime.onMessage.addListener(message => {
   if (message?.type === 'login-success') {
     stopLoginPolling();
@@ -741,6 +765,9 @@ chrome.runtime.onMessage.addListener(message => {
   }
   if (message?.type === 'logout-success') {
     checkAndShowUI();
+  }
+  if (message?.type === 'topics-updated') {
+    loadTopics().catch(() => {});
   }
 });
 

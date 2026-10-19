@@ -73,6 +73,9 @@ export function clearTopicCache(uid = getStoredAuthUid()) {
     // Remove the pre-user-scoped cache key from older builds.
     localStorage.removeItem(LS_KEY_PREFIX);
   } catch (_) {}
+  if (typeof window !== 'undefined') {
+    window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { timestamp: Date.now() } }, '*');
+  }
 }
 
 // ─── Core fast query ─────────────────────────────────────────────────────────
@@ -141,6 +144,7 @@ async function fetchTopicsFromSupabase() {
     }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: topics }));
+      window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { count: topics.length, timestamp: Date.now() } }, '*');
     }
     return topics;
   }
@@ -214,6 +218,7 @@ async function fetchTopicsFromSupabase() {
   }
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: topics }));
+    window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { count: topics.length, timestamp: Date.now() } }, '*');
   }
 
   return topics;

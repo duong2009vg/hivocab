@@ -230,6 +230,29 @@
   margin-top: 1px;
 }
 
+.hi-vocab-modal-refresh {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid #d0d8dd;
+  background: white;
+  color: #66747d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.hi-vocab-modal-refresh:hover { background: #f0f4f6; color: #0b6b91; }
+.hi-vocab-modal-refresh.is-refreshing svg {
+  animation: hivSpin 0.6s linear infinite;
+}
+@keyframes hivSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 .hi-vocab-modal-close {
   width: 24px;
   height: 24px;

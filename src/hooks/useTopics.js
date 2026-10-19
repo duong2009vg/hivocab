@@ -235,6 +235,8 @@ export function useTopics() {
         const next = prev.filter(t => t.id !== topicId);
         if (typeof window !== 'undefined') {
           window._allTopics = next;
+          window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: next }));
+          window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { deletedTopicId: topicId, timestamp: Date.now() } }, '*');
         }
         return next;
       });
@@ -312,6 +314,7 @@ export function useTopics() {
       // 6. Trigger update & toast
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('hi:topics-updated', { detail: nextTopics }));
+        window.postMessage({ source: 'hi-vocab-app', action: 'topics-updated', detail: { deletedFolder: name, timestamp: Date.now() } }, '*');
         if (typeof window.showHiToast === 'function') {
           window.showHiToast(`Đã xóa thư mục "${name}" thành công!`, 'success');
         }

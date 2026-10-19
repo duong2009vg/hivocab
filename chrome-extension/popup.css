@@ -497,6 +497,30 @@ blockquote {
   margin-top: 1px;
 }
 
+.modal-refresh-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: white;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.12s, color 0.12s;
+}
+.modal-refresh-btn:hover { background: #f0f4f6; color: var(--primary); }
+.modal-refresh-btn.is-refreshing svg {
+  animation: hivSpin 0.6s linear infinite;
+}
+
+@keyframes hivSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 .modal-close-btn {
   width: 24px;
   height: 24px;
