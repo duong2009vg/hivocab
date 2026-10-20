@@ -474,10 +474,10 @@ export function PageDashboard() {
       </div>
 
       {/* DESKTOP LAYOUT */}
-      <div className="hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
+      <div className="dashboard-desktop-layout hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
         <div className="flex-1 flex flex-col min-w-0">
           {/* TopBar */}
-          <header className="px-8 py-5 border-b-2 border-[#e6dcce] bg-[#FAF5EB] sticky top-0 z-40 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
+          <header className="dashboard-desktop-header px-8 py-5 border-b-2 border-[#e6dcce] bg-[#FAF5EB] sticky top-0 z-40 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-2xl font-black text-crayonText font-quicksand">Chào buổi sáng, {userName} ơi! 🌿</h1>
@@ -520,11 +520,11 @@ export function PageDashboard() {
             </div>
           </header>
 
-          <main className="p-6 lg:p-8 flex-1">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <main className="dashboard-desktop-main p-6 lg:p-8 flex-1">
+            <div className="dashboard-desktop-grid grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
               {/* Left column */}
-              <div className="lg:col-span-7 xl:col-span-8 space-y-7">
-                <section className="bg-[#fffdf9] rounded-3xl p-6 lg:p-7 crayon-border shadow-crayon relative overflow-hidden border-2">
+              <div className="dashboard-desktop-column lg:col-span-7 xl:col-span-8 space-y-7">
+                <section className="dashboard-desktop-card dashboard-desktop-hero bg-[#fffdf9] rounded-3xl p-6 lg:p-7 crayon-border shadow-crayon relative overflow-hidden border-2">
                   <div className="relative z-1 flex flex-col md:flex-row items-center gap-6 justify-between">
                     <div className="space-y-4 max-w-md">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light text-sage border border-sage/30 text-xs font-bold">
@@ -567,7 +567,7 @@ export function PageDashboard() {
                       </div>
                     </div>
                     <div 
-                      className="flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center cursor-pointer group"
+                      className="dashboard-desktop-mascot flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center cursor-pointer group"
                       onClick={handleMascotClick}
                       title="Bấm vào bé hổ để tương tác!"
                     >
@@ -582,7 +582,7 @@ export function PageDashboard() {
                   </div>
                 </section>
 
-                <section className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm space-y-4">
+                <section className="dashboard-desktop-card bg-white rounded-3xl p-6 crayon-border shadow-crayonSm space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-black text-crayonText font-quicksand flex items-center gap-2">
@@ -619,7 +619,7 @@ export function PageDashboard() {
                   </div>
                 </section>
 
-                <section className="bg-gradient-to-r from-[#eef4ee] to-[#f7eee4] rounded-3xl p-6 crayon-border relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-5">
+                <section className="dashboard-desktop-card bg-gradient-to-r from-[#eef4ee] to-[#f7eee4] rounded-3xl p-6 crayon-border relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-5">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-sage text-white text-xs font-extrabold uppercase">HOT</span>
@@ -641,8 +641,8 @@ export function PageDashboard() {
               </div>
 
               {/* Right column */}
-              <div className="lg:col-span-5 xl:col-span-4 space-y-7">
-                <section className="bg-white rounded-3xl p-5 sm:p-6 crayon-border shadow-crayonSm space-y-4">
+              <div className="dashboard-desktop-column lg:col-span-5 xl:col-span-4 space-y-7">
+                <section className="dashboard-desktop-card dashboard-desktop-calendar bg-white rounded-3xl p-5 sm:p-6 crayon-border shadow-crayonSm space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-terracotta text-lg border border-orange-200">🔥</div>
@@ -693,8 +693,8 @@ export function PageDashboard() {
                 </section>
 
                 <section 
+                  className="dashboard-desktop-card bg-white rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden cursor-pointer hover:shadow-crayon transition-all group"
                   onClick={handleOpenIELTSModal}
-                  className="bg-white rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden cursor-pointer hover:shadow-crayon transition-all group"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -734,7 +734,7 @@ export function PageDashboard() {
                   </button>
                 </section>
 
-                <section className="bg-[#fef9ef] rounded-3xl p-6 crayon-border relative">
+                <section className="dashboard-desktop-card bg-[#fef9ef] rounded-3xl p-6 crayon-border relative">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-xs font-black text-warmAmber uppercase tracking-wider flex items-center gap-1.5">
                       <i className="fa-solid fa-lightbulb"></i> Từ vựng ngẫu nhiên hôm nay

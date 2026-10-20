@@ -158,7 +158,7 @@ function AppRoutes() {
     currentRoute !== 'admin';
 
   return (
-    <div id="app-root" className="min-h-screen bg-background text-on-background font-sans antialiased">
+    <div id="app-root" className="desktop-density-compact min-h-screen bg-background text-on-background font-sans antialiased">
       {/* Conditionally render Layout components only when needed */}
       {shouldShowSidebar && <MainSidebar />}
       {(isMainTab || isTopicDetail) && <MobileProfileDropdown />}

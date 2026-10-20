@@ -2,6 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Desktop app density
+ *
+ * The reference screenshot was taken with browser zoom at 80%. Reproduce its
+ * calmer density at the app's normal 100% zoom by tightening the layout
+ * primitives, not by applying CSS zoom/transform to the whole application.
+ * This keeps text size, keyboard focus, fixed controls and mobile breakpoints
+ * predictable. The compact layer is intentionally limited to the signed-in
+ * desktop shell and the dashboard; landing/auth/mobile layouts are unchanged.
+ */
+@media (min-width: 1024px) {
+  #app-root.desktop-density-compact [data-purpose="desktop-sidebar"] {
+    padding: 1.25rem;
+  }
+
+  #app-root.desktop-density-compact [data-purpose="desktop-sidebar"] > div:first-child > div:first-child {
+    margin-bottom: 1.25rem;
+  }
+
+  #app-root.desktop-density-compact [data-purpose="desktop-sidebar"] > div:first-child > div:first-child > div {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  #app-root.desktop-density-compact [data-purpose="desktop-sidebar"] nav {
+    gap: 0.25rem;
+  }
+
+  #app-root.desktop-density-compact [data-purpose="desktop-sidebar"] nav > a {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-header {
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-header h1 {
+    font-size: 1.5rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-main {
+    padding: 1.5rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-grid,
+  #app-root.desktop-density-compact .dashboard-desktop-column {
+    gap: 1.5rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-card {
+    padding: 1.25rem;
+    border-radius: 1.5rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-hero {
+    padding: 1.5rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-hero h2 {
+    font-size: 1.75rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-mascot {
+    width: 14rem;
+    height: 14rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-calendar {
+    padding: 1.25rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  #app-root.desktop-density-compact .dashboard-desktop-header {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  #app-root.desktop-density-compact .dashboard-desktop-main {
+    padding: 1.75rem;
+  }
+}
+
 @layer utilities {
   /* Apple Blur & Glassmorphism helpers */
   .glass-card {
