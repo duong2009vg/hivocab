@@ -196,17 +196,26 @@ export function useLibrary() {
     }
     
     try {
-      const { data: existing } = await supabase
+      const { data: existing, error: existingError } = await supabase
         .from('topic_likes')
-        .select('id')
+        .select('topic_id')
         .eq('topic_id', topicId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+      if (existingError) throw existingError;
         
       if (existing) {
-        await supabase.from('topic_likes').delete().eq('topic_id', topicId).eq('user_id', user.id);
+        const { error } = await supabase
+          .from('topic_likes')
+          .delete()
+          .eq('topic_id', topicId)
+          .eq('user_id', user.id);
+        if (error) throw error;
       } else {
-        await supabase.from('topic_likes').insert({ topic_id: topicId, user_id: user.id });
+        const { error } = await supabase
+          .from('topic_likes')
+          .insert({ topic_id: topicId, user_id: user.id });
+        if (error) throw error;
         window.showHiToast?.('Đã thêm vào bộ sưu tập Yêu thích 💖', 'success');
       }
     } catch (err) {
@@ -251,7 +260,7 @@ export function useLibrary() {
     } catch (err) {
       window.showHiToast?.(err.message || 'Lỗi khi lưu bộ từ vựng.', 'error');
     }
-  }, []);
+  }, [closeDetail]);
 
   const openDetail = useCallback(async (topicId) => {
     setActiveTopicDetail({ id: topicId, _loading: true });
@@ -263,10 +272,12 @@ export function useLibrary() {
       
       const [topicRes, wordsRes, likeRes] = await Promise.all([
         supabase.from('topics').select('id, name, icon, description, created_at, like_count, clone_count, tags, is_public, author_name, author_avatar').eq('id', topicId).maybeSingle(),
-        supabase.from('words').select('id, word, pos, phonetic, meaning, example_sentence, notes, image_url, word_order').eq('topic_id', topicId).order('word_order', { ascending: true, nullsFirst: false }).limit(100),
-        uid ? supabase.from('topic_likes').select('id').eq('topic_id', topicId).eq('user_id', uid).maybeSingle() : Promise.resolve({ data: null }),
+        supabase.from('words').select('id, word, pos, phonetic, meaning, example_sentence, image_url, word_order').eq('topic_id', topicId).order('word_order', { ascending: true, nullsFirst: false }).limit(100),
+        uid ? supabase.from('topic_likes').select('topic_id').eq('topic_id', topicId).eq('user_id', uid).maybeSingle() : Promise.resolve({ data: null }),
       ]);
       if (topicRes.error) throw topicRes.error;
+      if (wordsRes.error) throw wordsRes.error;
+      if (likeRes.error) throw likeRes.error;
       if (!topicRes.data) throw new Error('Không tìm thấy dữ liệu bộ từ vựng.');
       setActiveTopicDetail({
         ...topicRes.data,
@@ -293,7 +304,7 @@ export function useLibrary() {
     try {
       const { data, error: err } = await supabase
         .from('topic_comments')
-        .select('id, content, created_at, author_name, author_avatar')
+        .select('id, content, created_at, author_name:user_name, author_avatar:user_avatar')
         .eq('topic_id', topicId)
         .order('created_at', { ascending: true });
       if (err) throw err;
@@ -327,14 +338,20 @@ export function useLibrary() {
         }
         return;
       }
-      const { data: profile } = await supabase.from('profiles').select('full_name, avatar_url').eq('id', user.id).single();
-      await supabase.from('topic_comments').insert({
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      const { error: insertError } = await supabase.from('topic_comments').insert({
         topic_id: activeCommentsTopicId,
         user_id: user.id,
         content: commentInput.trim(),
-        author_name: profile?.full_name || user.email?.split('@')[0] || 'Học viên HiVocab',
-        author_avatar: profile?.avatar_url || null,
+        user_name: profile?.full_name || user.email?.split('@')[0] || 'Học viên HiVocab',
+        user_avatar: null,
       });
+      if (insertError) throw insertError;
       setCommentInput('');
       await openComments(activeCommentsTopicId, activeCommentsTitle);
       window.showHiToast?.('Bình luận đã được gửi!', 'success');
@@ -361,7 +378,12 @@ export function useLibrary() {
       setPublishDescription('');
     } else {
       try {
-        await supabase.from('topics').update({ is_public: false, tags: [], description: null }).eq('id', topicId);
+        const { error } = await supabase
+          .from('topics')
+          .update({ is_public: false, tags: [], description: null })
+          .eq('id', topicId)
+          .eq('user_id', user.id);
+        if (error) throw error;
         setTopics(prev => prev.map(t => t.id === topicId ? { ...t, is_public: false } : t));
         window.showHiToast?.('Bộ từ đã được chuyển về riêng tư.', 'success');
       } catch (err) {
@@ -377,11 +399,14 @@ export function useLibrary() {
     }
     setIsPublishing(true);
     try {
-      await supabase.from('topics').update({
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Vui lòng đăng nhập để công khai bộ từ.');
+      const { error } = await supabase.from('topics').update({
         is_public: true,
         tags: selectedTags,
         description: publishDescription.trim() || null,
-      }).eq('id', publishTopicId);
+      }).eq('id', publishTopicId).eq('user_id', user.id);
+      if (error) throw error;
       setTopics(prev => prev.map(t => t.id === publishTopicId ? { ...t, is_public: true, tags: selectedTags } : t));
       setPublishTopicId(null);
       window.showHiToast?.('Bộ từ đã được công khai lên Thư Viện! 🎉', 'success');

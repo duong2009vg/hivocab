@@ -1,5 +1,5 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v18';
+const CACHE_NAME = 'hivocab-shell-v19';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',
@@ -78,24 +78,27 @@ self.addEventListener('fetch', (event) => {
     // 1. Navigation requests (HTML documents): LUÔN ưu tiên mạng (Network-First)
     // để trình duyệt luôn nhận file index.html mới nhất, tránh tình trạng chunk hash bị lệch sau khi deploy
     if (isNavigationRequest) {
+      const fallbackToShell = (networkResponse) => caches.match(event.request)
+        .then((cached) => cached || caches.match('/'))
+        .then((shell) => shell || networkResponse || offlineResponse());
+
       event.respondWith(
         fetch(event.request)
           .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
+            if (networkResponse && networkResponse.status >= 200 && networkResponse.status < 300) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
                 cache.put(event.request, responseClone);
               }).catch(() => {});
             }
+            // A transient 5xx from Pages/Cloudflare should not replace the
+            // already cached SPA shell and make every hash route unusable.
+            if (!networkResponse || networkResponse.status >= 500) {
+              return fallbackToShell(networkResponse);
+            }
             return networkResponse;
           })
-          .catch(() => {
-            // Khi không có kết nối internet: dùng app shell đã lưu trong cache
-            return caches.match(event.request).then((cached) => {
-              if (cached) return cached;
-              return caches.match('/').then((shell) => shell || offlineResponse());
-            });
-          })
+          .catch(() => fallbackToShell())
       );
       return;
     }

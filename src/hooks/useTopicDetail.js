@@ -91,7 +91,7 @@ export function useTopicDetail() {
     try {
       const [proStatus, hier] = await Promise.all([
         checkPro().catch(() => false),
-        getCamHierarchy(topicId).catch(() => null),
+        getCamHierarchy(topicId),
       ]);
       setIsUserPro(proStatus);
       if (typeof window !== 'undefined') {

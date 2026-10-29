@@ -5,6 +5,20 @@
 
 import { supabase } from '../lib/supabaseClient.js';
 
+function isMissingRpcError(error) {
+  const code = String(error?.code || '');
+  const message = String(error?.message || '').toLowerCase();
+  return code === '42883' || code === 'PGRST202' || message.includes('could not find the function');
+}
+
+function throwRpcError(error, operation) {
+  if (!error) return;
+  const wrapped = new Error(`${operation}: ${error.message || 'Supabase RPC failed'}`);
+  wrapped.cause = error;
+  wrapped.code = error.code;
+  throw wrapped;
+}
+
 // ─── In-memory cache ────────────────────────────────────────────────────────
 const MEM = {
   topics: null,       // Array | null
@@ -367,39 +381,14 @@ export async function createTopic(name, icon = 'folder', category = 'general') {
 
 export async function deleteTopicCascade(topicId) {
   if (!topicId) return false;
-  try {
-    await supabase.from('words').delete().eq('topic_id', topicId);
-  } catch (e) {
-    console.warn('[deleteTopicCascade] words cleanup:', e);
+  const { data, error } = await supabase.rpc('delete_topic_cascade', {
+    p_topic_id: topicId,
+  });
+  if (error) {
+    throwRpcError(error, 'Không thể xoá chủ đề');
   }
-  try {
-    await supabase.from('passages').delete().eq('topic_id', topicId);
-  } catch (e) {
-    console.warn('[deleteTopicCascade] passages cleanup:', e);
-  }
-  try {
-    await supabase.from('tests').delete().eq('topic_id', topicId);
-  } catch (e) {
-    console.warn('[deleteTopicCascade] tests cleanup:', e);
-  }
-  try {
-    await supabase.from('topic_likes').delete().eq('topic_id', topicId);
-  } catch (e) {
-    console.warn('[deleteTopicCascade] topic_likes cleanup:', e);
-  }
-  try {
-    await supabase.from('topic_comments').delete().eq('topic_id', topicId);
-  } catch (e) {
-    console.warn('[deleteTopicCascade] topic_comments cleanup:', e);
-  }
-  const { error } = await supabase
-    .from('topics')
-    .delete()
-    .eq('id', topicId);
-
-  if (error) throw error;
   clearTopicCache();
-  return true;
+  return data === true;
 }
 
 export async function deleteTopic(topicId) {
@@ -450,7 +439,7 @@ export async function deleteFolderCascade(categoryName) {
   return true;
 }
 
-export async function getCamHierarchy(topicId) {
+async function getCamHierarchyLegacy(topicId) {
   try {
     const { data: testsData, error: testsErr } = await supabase
       .from('tests')
@@ -567,6 +556,21 @@ export async function getCamHierarchy(topicId) {
     console.warn('[db.getCamHierarchy] error:', err);
     return null;
   }
+}
+
+export async function getCamHierarchy(topicId) {
+  const { data, error } = await supabase.rpc('get_cam_hierarchy', {
+    p_topic_id: topicId,
+  });
+
+  if (!error) return data;
+  if (!isMissingRpcError(error)) {
+    throwRpcError(error, 'Không thể tải cấu trúc chủ đề');
+  }
+
+  // Temporary rollout fallback: remove after the migration has been applied
+  // in every environment. The production path is the single aggregate RPC.
+  return getCamHierarchyLegacy(topicId);
 }
 
 export async function getLessonsInTopic(topicId) {
@@ -879,50 +883,15 @@ export async function updatePassageTitle(passageId, title) {
 }
 
 export async function clonePublicTopic(topicId) {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error('Vui lòng đăng nhập để lưu bộ từ!');
-
-  const { data: srcTopic, error: srcErr } = await supabase
-    .from('topics')
-    .select('name, icon, category, description')
-    .eq('id', topicId)
-    .single();
-  if (srcErr || !srcTopic) throw new Error('Không tìm thấy bộ từ nguồn.');
-
-  const { data: newTopic, error: createErr } = await supabase
-    .from('topics')
-    .insert({
-      user_id: user.id,
-      name: `${srcTopic.name} (Bản sao)`,
-      icon: srcTopic.icon || 'folder',
-      category: 'personal',
-      description: srcTopic.description || null,
-      is_public: false,
-    })
-    .select()
-    .single();
-  if (createErr || !newTopic) throw createErr;
-
-  try {
-    await supabase.rpc('increment_topic_clones', { p_topic_id: topicId });
-  } catch (_) {}
-
-  const { data: srcWords } = await supabase
-    .from('words')
-    .select('word, pos, phonetic, meaning, example_sentence, notes, image_url, word_order')
-    .eq('topic_id', topicId);
-
-  if (srcWords && srcWords.length > 0) {
-    const wordsToInsert = srcWords.map((w) => ({
-      ...w,
-      topic_id: newTopic.id,
-      passage_id: null,
-    }));
-    await supabase.from('words').insert(wordsToInsert);
+  const { data, error } = await supabase.rpc('clone_public_topic', {
+    target_topic_id: topicId,
+  });
+  if (error) {
+    throwRpcError(error, 'Không thể sao chép bộ từ');
   }
-
+  if (!data) throw new Error('Supabase không trả về chủ đề mới.');
   clearTopicCache();
-  return newTopic.id;
+  return data;
 }
 
 export async function checkProAccess({ topicId, passageId, showModal = true } = {}) {
@@ -1013,66 +982,28 @@ export async function logStudySession() {
   const user = await getCurrentUser();
   if (!user) return;
   const today = getLocalDateString();
-  try {
-    const { error } = await supabase.rpc('increment_session', {
-      p_user_id: user.id,
-      p_date: today,
-    });
-    if (error) {
-      const { data: existing } = await supabase
-        .from('study_sessions')
-        .select('id, words_reviewed')
-        .eq('user_id', user.id)
-        .eq('session_date', today)
-        .maybeSingle();
-
-      if (existing) {
-        await supabase
-          .from('study_sessions')
-          .update({ words_reviewed: (existing.words_reviewed || 0) + 1 })
-          .eq('id', existing.id);
-      } else {
-        await supabase
-          .from('study_sessions')
-          .insert({ user_id: user.id, session_date: today, words_reviewed: 1 });
-      }
-    }
-  } catch (err) {
-    console.warn('[db.logStudySession]', err);
-  }
+  const { error } = await supabase.rpc('increment_session', {
+    p_user_id: user.id,
+    p_date: today,
+  });
+  if (error) throwRpcError(error, 'Không thể ghi phiên học');
 }
 
 export async function reviewWord(wordId, rating) {
   const user = await getCurrentUser();
   if (!user) throw new Error('Chưa đăng nhập');
 
-  const { data: existing } = await supabase
-    .from('word_progress')
-    .select('level, review_count')
-    .eq('user_id', user.id)
-    .eq('word_id', wordId)
-    .maybeSingle();
-
-  const currentLevel = existing?.level ?? 0;
-  const currentCount = existing?.review_count ?? 0;
-
-  const { newLevel, nextReviewAt } = calculateNextReview(currentLevel, rating);
-
-  const payload = {
-    user_id: user.id,
-    word_id: wordId,
-    level: newLevel,
-    next_review_at: nextReviewAt.toISOString(),
-    last_reviewed_at: new Date().toISOString(),
-    review_count: currentCount + 1,
-  };
-
-  const { error } = await supabase
-    .from('word_progress')
-    .upsert(payload, { onConflict: 'user_id,word_id' });
-
-  if (error) throw error;
-  await logStudySession();
+  const { data, error } = await supabase.rpc('review_word', {
+    p_word_id: wordId,
+    p_rating: rating,
+    p_session_date: getLocalDateString(),
+  });
+  if (error) throwRpcError(error, 'Không thể lưu kết quả ôn tập');
+  const newLevel = Number(data?.newLevel);
+  const nextReviewAt = new Date(data?.nextReviewAt);
+  if (!Number.isFinite(newLevel) || Number.isNaN(nextReviewAt.getTime())) {
+    throw new Error('Supabase trả về kết quả ôn tập không hợp lệ.');
+  }
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('hivocab:word-reviewed', { detail: { wordId, newLevel } }));
@@ -1081,7 +1012,7 @@ export async function reviewWord(wordId, rating) {
   return {
     newLevel,
     nextReviewAt,
-    intervalLabel: getIntervalLabel(newLevel),
+    intervalLabel: data?.intervalLabel || getIntervalLabel(newLevel),
   };
 }
 
@@ -1089,33 +1020,17 @@ export async function reviewWordToLevel(wordId, targetLevel) {
   const user = await getCurrentUser();
   if (!user) throw new Error('Chưa đăng nhập');
 
-  const { data: existing } = await supabase
-    .from('word_progress')
-    .select('review_count')
-    .eq('user_id', user.id)
-    .eq('word_id', wordId)
-    .maybeSingle();
-
-  const currentCount = existing?.review_count ?? 0;
-  const newLevel = Math.max(1, Math.min(5, targetLevel));
-  const intervalMs = getIntervalMs(newLevel);
-  const nextReviewAt = new Date(Date.now() + intervalMs);
-
-  const payload = {
-    user_id: user.id,
-    word_id: wordId,
-    level: newLevel,
-    next_review_at: nextReviewAt.toISOString(),
-    last_reviewed_at: new Date().toISOString(),
-    review_count: currentCount + 1,
-  };
-
-  const { error } = await supabase
-    .from('word_progress')
-    .upsert(payload, { onConflict: 'user_id,word_id' });
-
-  if (error) throw error;
-  await logStudySession();
+  const { data, error } = await supabase.rpc('review_word_to_level', {
+    p_word_id: wordId,
+    p_target_level: targetLevel,
+    p_session_date: getLocalDateString(),
+  });
+  if (error) throwRpcError(error, 'Không thể cập nhật cấp độ từ');
+  const newLevel = Number(data?.newLevel);
+  const nextReviewAt = new Date(data?.nextReviewAt);
+  if (!Number.isFinite(newLevel) || Number.isNaN(nextReviewAt.getTime())) {
+    throw new Error('Supabase trả về kết quả cấp độ không hợp lệ.');
+  }
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('hivocab:word-reviewed', { detail: { wordId, newLevel } }));
@@ -1124,11 +1039,11 @@ export async function reviewWordToLevel(wordId, targetLevel) {
   return {
     newLevel,
     nextReviewAt,
-    intervalLabel: getIntervalLabel(newLevel),
+    intervalLabel: data?.intervalLabel || getIntervalLabel(newLevel),
   };
 }
 
-export async function getVocabularyPage(page = 1, pageSize = 20, search = '', levelFilter = null, topicIdFilter = null) {
+async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', levelFilter = null, topicIdFilter = null) {
   const user = await getCurrentUser();
   if (!user) return { words: [], total: 0, page: 1, pageSize };
 
@@ -1207,7 +1122,59 @@ export async function getVocabularyPage(page = 1, pageSize = 20, search = '', le
   };
 }
 
-export async function getLearnedVocabStats() {
+export async function getVocabularyPage(page = 1, pageSize = 20, search = '', levelFilter = null, topicIdFilter = null) {
+  const user = await getCurrentUser();
+  if (!user) return { words: [], total: 0, page: 1, pageSize };
+
+  const safePage = Math.max(1, Number(page) || 1);
+  const safePageSize = Math.min(100, Math.max(1, Number(pageSize) || 20));
+  const safeLevel = (levelFilter !== undefined && levelFilter !== null && levelFilter !== '')
+    ? Number(levelFilter)
+    : null;
+
+  const { data, error } = await supabase.rpc('get_vocabulary_page', {
+    p_page: safePage,
+    p_page_size: safePageSize,
+    p_search: String(search || '').trim(),
+    p_level_filter: Number.isNaN(safeLevel) ? null : safeLevel,
+    p_topic_id: topicIdFilter ? String(topicIdFilter).trim() : null,
+  });
+
+  if (!error) {
+    const rows = Array.isArray(data) ? data : [];
+    return {
+      words: rows.map((row) => ({
+        id: row.id,
+        wordId: row.id,
+        topicId: row.topic_id,
+        word: row.word,
+        pos: row.pos || '',
+        phonetic: row.phonetic,
+        meaning: row.meaning,
+        exampleSentence: row.example_sentence || '',
+        imageUrl: null,
+        topicName: row.topic_name || '',
+        level: Number(row.level) || 0,
+        nextReviewAt: row.next_review_at,
+        lastReviewedAt: row.last_reviewed_at,
+        reviewCount: Number(row.review_count) || 0,
+        isDue: !row.next_review_at || new Date(row.next_review_at) <= new Date(),
+      })),
+      total: Number(rows[0]?.total_count) || 0,
+      page: safePage,
+      pageSize: safePageSize,
+    };
+  }
+
+  if (!isMissingRpcError(error)) {
+    throwRpcError(error, 'Không thể tải sổ từ');
+  }
+
+  // Temporary rollout fallback until the migration exists in every environment.
+  return getVocabularyPageLegacy(page, pageSize, search, levelFilter, topicIdFilter);
+}
+
+async function getLearnedVocabStatsLegacy() {
   const user = await getCurrentUser();
   if (!user) {
     return { total: 0, due: 0, learning: 0, mastered: 0, memoryLevels: { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } };
@@ -1253,6 +1220,37 @@ export async function getLearnedVocabStats() {
     mastered,
     memoryLevels,
   };
+}
+
+export async function getLearnedVocabStats() {
+  const user = await getCurrentUser();
+  const empty = {
+    total: 0,
+    due: 0,
+    learning: 0,
+    mastered: 0,
+    memoryLevels: { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 },
+  };
+  if (!user) return empty;
+
+  const { data, error } = await supabase.rpc('get_learned_vocab_stats');
+  if (!error) {
+    return {
+      ...empty,
+      ...data,
+      total: Number(data?.total) || 0,
+      due: Number(data?.due) || 0,
+      learning: Number(data?.learning) || 0,
+      mastered: Number(data?.mastered) || 0,
+      memoryLevels: { ...empty.memoryLevels, ...(data?.memoryLevels || {}) },
+    };
+  }
+
+  if (!isMissingRpcError(error)) {
+    throwRpcError(error, 'Không thể tải thống kê sổ từ');
+  }
+
+  return getLearnedVocabStatsLegacy();
 }
 
 export async function getUserWordCount() {
@@ -1509,24 +1507,13 @@ export async function getIELTSGoal() {
   } catch (_) {}
 
   if (user) {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('ielts_goal, ielts_exam_date, motto')
-        .eq('id', user.id)
-        .single();
-      if (data && (data.ielts_goal || data.ielts_exam_date)) {
-        goal = {
-          overall: data.ielts_goal?.overall || goal?.overall || '7.0',
-          listening: data.ielts_goal?.listening || goal?.listening || '7.0',
-          reading: data.ielts_goal?.reading || goal?.reading || '7.0',
-          writing: data.ielts_goal?.writing || goal?.writing || '6.5',
-          speaking: data.ielts_goal?.speaking || goal?.speaking || '6.5',
-          examDate: data.ielts_exam_date || goal?.examDate || '',
-          motto: data.motto || goal?.motto || '',
-        };
-      }
-    } catch (_) {}
+    // IELTS goal fields are not part of the current `profiles` schema.
+    // Keep the data in Supabase Auth metadata instead of querying missing
+    // columns and generating a 400 on every profile/dashboard load.
+    const remoteGoal = user.user_metadata?.hivocab_ielts_goal;
+    if (remoteGoal && typeof remoteGoal === 'object') {
+      goal = { ...goal, ...remoteGoal };
+    }
   }
   return goal;
 }
@@ -1539,20 +1526,13 @@ export async function saveIELTSGoal(goalData) {
 
   if (user) {
     try {
-      await supabase
-        .from('profiles')
-        .update({
-          ielts_goal: {
-            overall: goalData.overall,
-            listening: goalData.listening,
-            reading: goalData.reading,
-            writing: goalData.writing,
-            speaking: goalData.speaking,
-          },
-          ielts_exam_date: goalData.examDate,
-          motto: goalData.motto,
-        })
-        .eq('id', user.id);
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          ...(user.user_metadata || {}),
+          hivocab_ielts_goal: goalData,
+        },
+      });
+      if (error) console.warn('[db.saveIELTSGoal] Auth metadata update:', error.message);
     } catch (_) {}
   }
   return true;

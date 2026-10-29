@@ -846,7 +846,8 @@
       return;
     }
     if (message?.type !== 'HI_EXTENSION_PAGE_REQUEST') return;
-    window.postMessage({ source: 'hi-vocab-extension', requestId: message.requestId, action: message.action, payload: message.payload }, '*');
+    const targetOrigin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : '*';
+    window.postMessage({ source: 'hi-vocab-extension', requestId: message.requestId, action: message.action, payload: message.payload }, targetOrigin);
     const handler = event => {
       if (event.source !== window || event.data?.source !== 'hi-vocab-app' || event.data.requestId !== message.requestId) return;
       clearTimeout(timeout);

@@ -38,7 +38,11 @@
   Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate
 
 /*
-  Cache-Control: public, max-age=0, must-revalidate
+  # Cloudflare JavaScript Detections injects an inline script into HTML. Our
+  # strict CSP intentionally disallows inline scripts, so prevent this edge
+  # transformation on app pages instead of weakening script-src with
+  # 'unsafe-inline'.
+  Cache-Control: public, max-age=0, must-revalidate, no-transform
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY

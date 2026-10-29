@@ -116,11 +116,24 @@ async function trySyncFromOpenTabs() {
         const tabs = await chrome.tabs.query({});
         for (const tab of tabs) {
             if (!tab.id || !tab.url) continue;
-            const url = tab.url.toLowerCase();
-            const isHiVocab = url.includes('hivocab.site') || 
-                              url.includes('hivocab.vercel.app') || 
-                              url.includes('localhost') || 
-                              url.includes('127.0.0.1');
+            let isHiVocab = false;
+            try {
+                const parsedUrl = new URL(tab.url);
+                const protocol = parsedUrl.protocol;
+                const hostname = parsedUrl.hostname.toLowerCase();
+
+                const isHttps = protocol === 'https:';
+                const isHttpLocal = (protocol === 'http:' || protocol === 'https:') &&
+                    (hostname === 'localhost' || hostname === '127.0.0.1');
+
+                if (isHttps && (hostname === 'hivocab.site' || hostname.endsWith('.hivocab.site') || hostname === 'hivocab.vercel.app')) {
+                    isHiVocab = true;
+                } else if (isHttpLocal) {
+                    isHiVocab = true;
+                }
+            } catch (_) {
+                continue;
+            }
             if (!isHiVocab) continue;
 
             try {
