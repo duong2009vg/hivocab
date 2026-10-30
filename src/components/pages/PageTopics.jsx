@@ -340,9 +340,6 @@ export function PageTopics() {
               <h2 className="text-2xl xl:text-3xl font-extrabold text-[#3D352E] flex items-center gap-2.5 tracking-tight font-['Quicksand',sans-serif]">
                 <span>Chủ đề &amp; Khóa học 📚</span>
               </h2>
-              <p className="text-xs xl:text-sm text-[#73695F] font-semibold mt-1">
-                Khám phá và lựa chọn thư mục từ vựng theo giáo trình, mục tiêu thi cử hoặc sở thích cá nhân.
-              </p>
             </div>
 
             {/* Search Bar and Action Button */}
