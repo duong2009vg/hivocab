@@ -259,9 +259,9 @@ export function PageVocabulary() {
                 <div
                   key={lvl}
                   onClick={() => handleLevelFilterChange(isSelected ? null : lvl)}
-                  className={`flex flex-col items-center flex-1 cursor-pointer transition-transform ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
+                  className={`flex flex-col items-center flex-1 cursor-pointer transition-transform active:scale-95 ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
                 >
-                  <span className={`text-sm font-bold ${lvl === 1 ? 'text-[#F07D43]' : 'text-[#4A3E39]'}`}>
+                  <span className={`text-sm font-bold ${isSelected ? 'text-[#F07D43] animate-bounce' : 'text-[#4A3E39]'}`}>
                     {count}
                   </span>
                   <div className="h-24 flex items-end justify-center w-full py-1">
@@ -599,19 +599,19 @@ export function PageVocabulary() {
                     const count = memoryLevels[`lv${lvl}`] || 0;
                     const isSelected = levelFilter === lvl;
                     const theme = LEVEL_COLORS[lvl];
-                    const isDominant = count > 0 && count === maxLevelCount;
 
                     return (
                       <div
                         key={lvl}
                         onClick={() => handleLevelFilterChange(isSelected ? null : lvl)}
-                        className={`flex flex-col items-center gap-2 cursor-pointer transition-transform ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
+                        className={`flex flex-col items-center gap-2 cursor-pointer transition-transform active:scale-95 ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
+                        title={`Lọc từ vựng cấp độ ${lvl}`}
                       >
-                        <span className={`text-base font-black ${isDominant ? 'text-[#ea7349] animate-bounce' : 'text-[#7a7267]'}`}>
+                        <span className={`text-base font-black ${isSelected ? 'text-[#ea7349] animate-bounce' : 'text-[#7a7267]'}`}>
                           {count}
                         </span>
                         <div className={`w-full max-w-[54px] h-28 rounded-2xl border-2 p-1.5 flex flex-col justify-end ${
-                          isSelected || isDominant ? 'bg-[#ffece4] border-[#443c35] shadow-[2px_2px_0px_#443c35]' : 'bg-[#f5ede2] border-dashed border-[#d8c8b4]'
+                          isSelected ? 'bg-[#ffece4] border-[#443c35] shadow-[2px_2px_0px_#443c35]' : 'bg-[#f5ede2] border-dashed border-[#d8c8b4]'
                         }`}>
                           <div
                             className={`w-full rounded-xl transition-all duration-500 ${theme.fill}`}
