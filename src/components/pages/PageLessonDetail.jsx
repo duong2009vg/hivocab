@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useLessonDetail } from '../../hooks/useLessonDetail.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { CrayonLockOverlay } from '../common/CrayonLockOverlay.jsx';
 
 export function PageLessonDetail() {
   const {
@@ -82,6 +83,49 @@ export function PageLessonDetail() {
     }
     startPractice(modeIndex);
   };
+
+  if (error === 'PRO_REQUIRED') {
+    return (
+      <div
+        id="page-lesson-detail"
+        className="page active min-h-screen text-[#322e2b] font-['Quicksand',sans-serif] bg-[#faf7f2] flex flex-col justify-between"
+        style={{
+          backgroundImage: 'radial-gradient(#e2d9cd 1px, transparent 1px), radial-gradient(#eedecb 0.7px, transparent 0.7px)',
+          backgroundSize: '24px 24px, 12px 12px',
+          backgroundPosition: '0 0, 6px 6px',
+        }}
+      >
+        <header className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+          <button
+            onClick={goBack}
+            aria-label="Quay lại"
+            className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#1e1b17] border-2 border-[#3d352e] shadow-[1.5px_2px_0px_#3d352e] active:scale-95 transition-transform cursor-pointer"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+          </button>
+          <span className="font-bold text-sm text-[#786F66] truncate max-w-[200px]">
+            {lessonName || topicName || 'Bài học PRO'}
+          </span>
+          <div className="w-10" />
+        </header>
+
+        <main className="flex-1 flex items-center justify-center px-4 py-8">
+          <CrayonLockOverlay
+            mode="inline"
+            badgeText="NỘI DUNG GÓI PRO 👑"
+            title="Bài Học Này Yêu Cầu Gói PRO"
+            description="Toàn bộ danh sách từ vựng chuyên sâu, phiên âm, ví dụ ngữ cảnh và các chế độ Flashcard SRS của bài học này dành riêng cho thành viên HiVocab PRO."
+            ctaText="Nâng Cấp PRO Ngay 🚀"
+            onUnlockSuccess={() => window.location.reload()}
+            onBack={goBack}
+            backText="Quay lại danh sách bài"
+          />
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div id="page-lesson-detail" className="page active min-h-screen text-[#322e2b] font-['Quicksand',sans-serif] bg-[#faf7f2]" style={{ backgroundImage: 'radial-gradient(#e2d9cd 1px, transparent 1px), radial-gradient(#eedecb 0.7px, transparent 0.7px)', backgroundSize: '24px 24px, 12px 12px', backgroundPosition: '0 0, 6px 6px' }}>

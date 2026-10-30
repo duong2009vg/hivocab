@@ -6,7 +6,7 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 
 export function MobileProfileDropdown() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isPro } = useAuth();
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
 
@@ -83,7 +83,7 @@ export function MobileProfileDropdown() {
           </div>
           <span
             id="mobile-profile-pro-badge"
-            className="profile-pro-badge hidden shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-md shadow-xs"
+            className={`profile-pro-badge ${isPro ? 'inline-flex' : 'hidden'} shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-md shadow-xs`}
           >
             <span className="material-symbols-outlined text-[10px] icon-fill">workspace_premium</span>PRO
           </span>
@@ -93,17 +93,27 @@ export function MobileProfileDropdown() {
         </div>
       </div>
 
-      <button
-        id="mobile-upgrade-pro-btn"
-        onClick={handleUpgrade}
-        className="btn-upgrade-pro w-full flex items-center justify-between px-4 py-2.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer"
-      >
-        <div className="flex items-center gap-2">
-          <span className="material-symbols-outlined text-[16px] text-amber-500">diamond</span>
-          <span>Nâng cấp PRO</span>
+      {!isPro ? (
+        <button
+          id="mobile-upgrade-pro-btn"
+          onClick={handleUpgrade}
+          className="btn-upgrade-pro w-full flex items-center justify-between px-4 py-2.5 text-xs text-amber-700 dark:text-amber-300 bg-amber-500/10 hover:bg-amber-500/15 transition-colors font-bold border-b border-outline-variant/15 cursor-pointer"
+        >
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-[16px] text-amber-500">diamond</span>
+            <span>Nâng cấp PRO</span>
+          </div>
+          <span className="material-symbols-outlined text-[14px] text-amber-500/70">arrow_forward</span>
+        </button>
+      ) : (
+        <div className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-[#557A46] bg-[#E5EFE2] font-black border-b border-outline-variant/15 select-none">
+          <div className="flex items-center gap-1.5">
+            <span>👑</span>
+            <span>HiVocab PRO</span>
+          </div>
+          <span className="text-[10px] bg-[#557A46] text-white px-1.5 py-0.5 rounded-full font-bold">Active</span>
         </div>
-        <span className="material-symbols-outlined text-[14px] text-amber-500/70">arrow_forward</span>
-      </button>
+      )}
 
       <button
         onClick={handleSettings}

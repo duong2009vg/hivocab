@@ -54,7 +54,7 @@ function copyStaticAssetsPlugin() {
           console.log(`[copy-assets] Copied static page: ${page}`);
         }
       }
-    }
+    },
   };
 }
 
@@ -82,8 +82,8 @@ function ttsDevPlugin() {
           const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(lang)}&q=${encodeURIComponent(sanitized)}`;
           const upstream = await fetch(googleUrl, {
             headers: {
-              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
           });
           if (!upstream.ok) {
             res.statusCode = upstream.status;
@@ -99,7 +99,7 @@ function ttsDevPlugin() {
           res.end(e.message);
         }
       });
-    }
+    },
   };
 }
 
@@ -111,11 +111,12 @@ function spaRoutesPlugin() {
         const rawPath = req.url ? req.url.split('?')[0].replace(/\/+$/, '') : '';
         // If route is /app, /login, or /admin, redirect internally to /index.html
         if (rawPath === '/app' || rawPath === '/login' || rawPath === '/admin') {
-          req.url = '/index.html' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
+          req.url =
+            '/index.html' + (req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '');
         }
         next();
       });
-    }
+    },
   };
 }
 
@@ -140,6 +141,9 @@ export default defineConfig({
             }
             if (id.includes('@supabase')) {
               return 'vendor-supabase';
+            }
+            if (id.includes('xlsx')) {
+              return 'vendor-xlsx';
             }
             return 'vendor';
           }

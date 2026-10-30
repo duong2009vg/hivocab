@@ -1,29 +1,32 @@
 // src/components/modals/PricingModal.jsx
 // 100% Pure React Modal for HiVocab PRO Membership & PayOS / VietQR Checkout
+// Chuẩn phong cách Cozy Crayon Study Room (Sáp màu & Giấy thủ công)
 import React, { useState, useEffect, useRef } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
+import { CrayonProBadge } from '../common/CrayonProBadge.jsx';
 
 const PLANS = {
   pro_1m: {
     id: 'pro_1m',
     name: 'Gói 1 Tháng',
     badge: 'Trải Nghiệm',
-    badgeColor: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+    badgeColor: 'bg-[#E3EDE2] text-[#4D6B53]',
     priceFormatted: '29.000đ',
     monthlyEquivalent: '29.000đ / tháng',
-    savings: 'Giá siêu rẻ',
+    savings: 'Dành cho người mới',
     amount: 29000,
   },
   pro_6m: {
     id: 'pro_6m',
     name: 'Gói 6 Tháng',
     badge: '⭐ Phổ Biến Nhất',
-    badgeColor: 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30',
+    badgeColor: 'bg-[#FFE8C2] text-[#8C5311]',
     priceFormatted: '149.000đ',
     monthlyEquivalent: '~24.800đ / tháng',
-    savings: 'Đúng chuẩn 25k/tháng',
+    savings: 'Tiết kiệm 50%',
     amount: 149000,
     recommended: true,
   },
@@ -31,57 +34,92 @@ const PLANS = {
     id: 'pro_1y',
     name: 'Gói 1 Năm',
     badge: '🔥 Tiết Kiệm Nhất',
-    badgeColor: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30',
+    badgeColor: 'bg-[#FBECE7] text-[#C85A3F]',
     priceFormatted: '249.000đ',
     monthlyEquivalent: '~20.700đ / tháng',
-    savings: 'Tiết kiệm hơn 40%',
+    savings: 'Tiết kiệm hơn 60%',
     amount: 249000,
   },
   pro_lifetime: {
     id: 'pro_lifetime',
     name: 'Gói Trọn Đời',
     badge: '👑 Vĩnh Viễn',
-    badgeColor: 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border-purple-500/30',
+    badgeColor: 'bg-[#F3E8FF] text-[#6B21A8]',
     priceFormatted: '499.000đ',
-    monthlyEquivalent: 'Mua 1 lần dùng mãi mãi',
+    monthlyEquivalent: 'Dùng mãi mãi',
     savings: 'Không gia hạn thêm',
     amount: 499000,
   },
 };
 
-export function PricingModal() {
+export function PricingModal({ onSuccess: propOnSuccess }) {
   const { modals, closeModal } = useModal();
   const { success, error: toastError } = useToast();
+  const { user, refreshProfile } = useAuth();
 
-  const isOpen = Boolean(modals?.pricingModal?.open);
+  const modalData = modals?.pricingModal;
+  const isOpen = Boolean(modalData?.open);
 
   const [selectedPlanId, setSelectedPlanId] = useState('pro_6m');
   const [view, setView] = useState('selection'); // 'selection' | 'checkout' | 'success'
   const [orderData, setOrderData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [copiedField, setCopiedField] = useState('');
 
   const pollingRef = useRef(null);
 
+  // Lắng nghe khi mở modal: đặt lại state và nhận defaultPlanId
   useEffect(() => {
     if (!isOpen) {
       if (pollingRef.current) clearInterval(pollingRef.current);
       return;
     }
+    const initialPlan = modalData?.defaultPlanId || 'pro_6m';
+    setSelectedPlanId(PLANS[initialPlan] ? initialPlan : 'pro_6m');
     setView('selection');
-    setSelectedPlanId('pro_6m');
     setOrderData(null);
     setErrorMessage('');
     setIsLoading(false);
-  }, [isOpen]);
+    setCopiedField('');
+  }, [isOpen, modalData?.defaultPlanId]);
+
+  // Dọn dẹp polling khi unmount
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
 
   if (!isOpen) return null;
 
   const handleClose = () => {
     if (pollingRef.current) clearInterval(pollingRef.current);
+    
+    // Nếu đóng khi đã thanh toán thành công, kích hoạt callback mở khóa
+    if (view === 'success') {
+      const callback = modalData?.onSuccess || propOnSuccess;
+      if (typeof callback === 'function') {
+        try {
+          callback();
+        } catch (cbErr) {
+          console.warn('[PricingModal] Callback error:', cbErr);
+        }
+      }
+    }
     closeModal('pricingModal');
   };
 
+  const copyToClipboard = (text, fieldName) => {
+    if (!text) return;
+    navigator.clipboard?.writeText(String(text));
+    setCopiedField(fieldName);
+    setTimeout(() => setCopiedField(''), 2000);
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // Khởi tạo đơn thanh toán với Cloudflare Function /api/payment/create-order
+  // ─────────────────────────────────────────────────────────────────────────────
   const handleStartCheckout = async () => {
     setIsLoading(true);
     setErrorMessage('');
@@ -128,10 +166,32 @@ export function PricingModal() {
               const statusData = await checkRes.json();
               if (statusData.paid || statusData.status === 'PAID') {
                 clearInterval(pollingRef.current);
-                setView('success');
-                success('Nâng cấp PRO thành công! Cảm ơn bạn 🎉');
+
+                // Đồng bộ biến window cho legacy code
                 if (typeof window !== 'undefined') {
                   window._isUserPro = true;
+                }
+
+                // CẬP NHẬT TRẠNG THÁI REACT PROFILE TRONG AUTH PROVIDER NGAY TẠI CHỖ
+                try {
+                  if (typeof refreshProfile === 'function') {
+                    await refreshProfile();
+                  }
+                } catch (refErr) {
+                  console.warn('[PricingModal] refreshProfile exception:', refErr);
+                }
+
+                setView('success');
+                success('Nâng cấp PRO thành công! Cảm ơn bạn 🎉');
+
+                // Kích hoạt callback mở khóa tức thì nếu có
+                const callback = modalData?.onSuccess || propOnSuccess;
+                if (typeof callback === 'function') {
+                  try {
+                    callback(statusData);
+                  } catch (cbErr) {
+                    console.warn('[PricingModal] onSuccess callback error:', cbErr);
+                  }
                 }
               }
             }
@@ -148,120 +208,138 @@ export function PricingModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-5 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar rounded-3xl bg-surface border border-outline-variant/30 shadow-2xl p-5 sm:p-8 flex flex-col">
-        {/* Close button */}
+      <div
+        className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto custom-scrollbar rounded-[32px] bg-[#FAF5EB] border-[3.5px] border-[#3D352E] shadow-[6px_8px_0px_#3D352E] p-5 sm:p-8 flex flex-col"
+        style={{
+          backgroundImage: 'radial-gradient(#E8DFC8 1.2px, transparent 1.2px)',
+          backgroundSize: '24px 24px',
+        }}
+      >
+        {/* Nút Đóng sáp màu tròn */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high text-outline hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer z-10"
-          aria-label="Đóng"
+          type="button"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 flex items-center justify-center transition-all cursor-pointer z-20 font-black text-lg select-none"
+          aria-label="Đóng bảng giá"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          ✕
         </button>
 
-        {/* ── VIEW 1: Lựa chọn gói cước ── */}
+        {/* ── VIEW 1: LỰA CHỌN GÓI CƯỚC ── */}
         {view === 'selection' && (
           <div className="space-y-6">
+            {/* Header */}
             <div className="text-center space-y-2 pr-8 sm:pr-0">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 uppercase tracking-wider">
-                <span className="material-symbols-outlined text-[15px]">diamond</span>
-                <span>HiVocab PRO Membership</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-black bg-[#FFE8C2] text-[#8C5311] border-2 border-[#3D352E] shadow-crayonSm rotate-[-1deg] select-none">
+                <span>👑</span>
+                <span>HIVOCAB PRO MEMBERSHIP</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-on-surface tracking-tight">
-                Bứt Phá Điểm Số &amp; Làm Chủ Từ Vựng
+              <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#3D352E] tracking-tight">
+                Bứt Phá Điểm Số Cùng HiVocab PRO 🌿
               </h2>
-              <p className="text-xs sm:text-sm text-on-surface-variant max-w-xl mx-auto">
-                Mở khóa toàn bộ kho tài liệu IELTS Cambridge, Destination C1-C2, SAT và tính năng học Spaced Repetition không giới hạn.
+              <p className="font-quicksand text-xs sm:text-sm font-semibold text-[#786F66] max-w-xl mx-auto">
+                Mở khóa toàn bộ kho bài đọc Cambridge IELTS song ngữ, 38+ đề thi THPT Quốc Gia và chế độ ôn tập lặp lại ngắt quãng (SM-2) không giới hạn.
               </p>
             </div>
 
-            {/* Pricing Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            {/* Lưới 4 Thẻ Gói Cước Sáp Màu */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2">
               {Object.values(PLANS).map((plan) => {
                 const isSelected = plan.id === selectedPlanId;
                 return (
                   <div
                     key={plan.id}
                     onClick={() => setSelectedPlanId(plan.id)}
-                    className={`relative rounded-2xl border p-4 flex flex-col justify-between transition-all cursor-pointer select-none ${
+                    className={`relative rounded-2xl border-2 border-[#3D352E] p-4 flex flex-col justify-between transition-all cursor-pointer select-none ${
                       isSelected
-                        ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-500/[0.04]'
-                        : 'border-outline-variant/30 hover:border-amber-500/50 bg-surface-container-low'
+                        ? 'bg-[#FFF9F5] border-[3px] border-[#D96C4D] shadow-[4px_6px_0px_#3D352E] ring-2 ring-[#D96C4D]/30 -translate-y-1'
+                        : 'bg-white shadow-crayonSm hover:-translate-y-0.5 hover:shadow-crayon'
                     }`}
                   >
                     {plan.badge && (
-                      <div className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${plan.badgeColor} whitespace-nowrap`}>
+                      <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-heading font-black border border-[#3D352E] shadow-[1px_1px_0px_#3D352E] ${plan.badgeColor} whitespace-nowrap`}>
                         {plan.badge}
                       </div>
                     )}
 
-                    <div className="space-y-2 text-center pt-1">
-                      <div className="text-xs font-bold text-outline uppercase tracking-wider">{plan.name}</div>
-                      <div className="text-2xl font-black text-on-surface tracking-tight">{plan.priceFormatted}</div>
-                      <div className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">{plan.monthlyEquivalent}</div>
+                    <div className="space-y-1.5 text-center pt-2">
+                      <div className="text-xs font-heading font-black text-[#786F66] uppercase tracking-wide">
+                        {plan.name}
+                      </div>
+                      <div className="text-2xl sm:text-[26px] font-heading font-black text-[#3D352E] tracking-tight">
+                        {plan.priceFormatted}
+                      </div>
+                      <div className="text-[11px] font-bold text-[#D96C4D]">
+                        {plan.monthlyEquivalent}
+                      </div>
                     </div>
 
-                    <div className="mt-3 pt-2.5 border-t border-outline-variant/15 text-center">
-                      <span className="text-[10px] font-medium text-on-surface-variant">{plan.savings}</span>
+                    <div className="mt-3 pt-2.5 border-t-2 border-dashed border-[#EBE4D8] text-center">
+                      <span className="text-[11px] font-bold text-[#786F66]">
+                        {plan.savings}
+                      </span>
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Quyền lợi PRO */}
-            <div className="rounded-2xl bg-surface-container-low border border-outline-variant/30 p-4 sm:p-5 space-y-3">
-              <div className="text-xs font-extrabold uppercase tracking-wider text-outline">
-                Quyền lợi độc quyền của thành viên PRO:
+            {/* Hộp Quyền Lợi Độc Quyền PRO */}
+            <div className="rounded-2xl bg-[#FFFDF9] border-2 border-dashed border-[#C4B9AA] p-4 sm:p-5 space-y-3">
+              <div className="text-xs font-heading font-black uppercase tracking-wider text-[#3D352E] flex items-center gap-1.5">
+                <span>⭐</span>
+                <span>Đặc quyền dành riêng cho thành viên HiVocab PRO:</span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-on-surface">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-bold text-[#3D352E]">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
-                  <span>Toàn bộ đề thi &amp; bài đọc Cambridge IELTS</span>
+                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <span>Toàn bộ bài đọc &amp; đề thi Cambridge IELTS song ngữ</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
-                  <span>Kho từ vựng Destination C1-C2, SAT, Actual Tests</span>
+                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <span>Kho 38+ đề thi THPT Quốc Gia chuẩn ma trận Bộ GD&amp;ĐT</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
+                  <span className="text-base text-[#4D6B53]">🌿</span>
                   <span>Thuật toán lặp lại ngắt quãng (SM-2) cá nhân hóa</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-emerald-500 text-[18px]">check_circle</span>
-                  <span>Đồng bộ tiến độ học tập đa thiết bị</span>
+                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <span>Đồng bộ tiến độ học tập đa thiết bị, không quảng cáo</span>
                 </div>
               </div>
             </div>
 
             {errorMessage && (
-              <div className="p-3 rounded-xl bg-error-container text-error text-xs font-semibold flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px]">error</span>
+              <div className="p-3.5 rounded-xl bg-[#FBECE7] border border-[#C85A3F] text-[#C85A3F] text-xs font-bold flex items-center gap-2">
+                <span>⚠️</span>
                 <span>{errorMessage}</span>
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-2">
-              <div className="text-xs text-on-surface-variant">
-                Thanh toán quét mã VietQR tự động kích hoạt trong 30s.
+            {/* Footer hành động */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
+              <div className="text-xs font-semibold text-[#786F66] text-center sm:text-left">
+                Thanh toán quét mã VietQR tự động kích hoạt trong 30 giây.
               </div>
               <button
                 type="button"
                 onClick={handleStartCheckout}
                 disabled={isLoading}
-                className="px-7 py-3 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-sm shadow-md transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#D96C4D] hover:bg-[#C85A3F] text-white font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayon active:translate-y-1 active:shadow-crayonSm transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>
-                    <span className="material-symbols-outlined text-lg animate-spin">sync</span>
+                    <span className="inline-block animate-spin text-base">⏳</span>
                     <span>Đang kết nối PayOS...</span>
                   </>
                 ) : (
                   <>
                     <span>Thanh toán ngay</span>
-                    <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                    <span>🚀</span>
                   </>
                 )}
               </button>
@@ -269,94 +347,145 @@ export function PricingModal() {
           </div>
         )}
 
-        {/* ── VIEW 2: Màn hình quét mã VietQR PayOS ── */}
+        {/* ── VIEW 2: MÀN HÌNH QUÉT MÃ VIETQR PAYOS ── */}
         {view === 'checkout' && orderData && (
           <div className="space-y-5">
-            <div className="flex items-center gap-2 pb-3 border-b border-outline-variant/15">
+            {/* Thanh tiêu đề con */}
+            <div className="flex items-center gap-3 pb-3 border-b-2 border-dashed border-[#EBE4D8]">
               <button
                 type="button"
                 onClick={() => setView('selection')}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-outline hover:bg-surface-container-high transition-colors cursor-pointer"
+                className="w-9 h-9 rounded-full bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-crayonSm flex items-center justify-center font-black cursor-pointer active:translate-y-0.5"
+                title="Quay lại chọn gói"
               >
-                <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+                ←
               </button>
               <div>
-                <h3 className="text-base font-bold text-on-surface">
+                <h3 className="font-heading font-black text-base sm:text-lg text-[#3D352E]">
                   Thanh toán {PLANS[selectedPlanId]?.name}
                 </h3>
-                <p className="text-xs text-amber-600 dark:text-amber-400 font-bold">
-                  Số tiền: {PLANS[selectedPlanId]?.priceFormatted}
+                <p className="text-xs text-[#D96C4D] font-bold">
+                  Số tiền cần thanh toán: {PLANS[selectedPlanId]?.priceFormatted}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-4 bg-surface-container-low rounded-2xl border border-outline-variant/30">
+            {/* Khung QR và Giấy Ghi Chú */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-4 sm:p-6 bg-white rounded-3xl border-2 border-[#3D352E] shadow-crayon">
+              
+              {/* Mã QR */}
               {orderData.qrCode ? (
-                <div className="p-3 bg-white rounded-2xl shadow-md shrink-0">
-                  <img src={orderData.qrCode} alt="VietQR PayOS" className="w-56 h-56 object-contain" />
+                <div className="p-3.5 bg-white rounded-2xl border-2 border-[#3D352E] shadow-crayonSm shrink-0">
+                  <img
+                    src={orderData.qrCode}
+                    alt="VietQR PayOS"
+                    className="w-56 h-56 object-contain rounded-lg"
+                  />
                 </div>
               ) : orderData.checkoutUrl ? (
-                <div className="text-center py-6">
+                <div className="text-center py-8">
                   <a
                     href={orderData.checkoutUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="px-6 py-3 bg-primary text-on-primary rounded-xl font-bold text-sm inline-flex items-center gap-2"
+                    className="px-6 py-3.5 bg-[#4D6B53] hover:bg-[#3D5642] text-white rounded-2xl font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayonSm inline-flex items-center gap-2"
                   >
                     <span>Mở trang thanh toán PayOS</span>
-                    <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                    <span>↗</span>
                   </a>
                 </div>
               ) : null}
 
-              <div className="space-y-3 text-xs text-on-surface-variant flex-1 max-w-sm">
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
-                  <p className="font-bold flex items-center gap-1 mb-1">
-                    <span className="material-symbols-outlined text-sm">qr_code_scanner</span>
+              {/* Tờ Giấy Note Vàng Hướng Dẫn */}
+              <div className="space-y-3.5 text-xs text-[#3D352E] flex-1 max-w-sm">
+                <div className="p-4 rounded-2xl bg-[#FFF9E6] border-2 border-[#3D352E] shadow-crayonSm">
+                  <p className="font-heading font-black flex items-center gap-1.5 mb-1.5 text-sm text-[#8C5311]">
+                    <span>📌</span>
                     <span>Hướng dẫn chuyển khoản:</span>
                   </p>
-                  <p>Mở ứng dụng Ngân hàng bất kỳ, chọn <strong>Quét mã QR</strong> để thanh toán chính xác số tiền và nội dung.</p>
+                  <p className="font-quicksand font-semibold leading-relaxed text-[#786F66]">
+                    Mở ứng dụng Ngân hàng hoặc ví điện tử bất kỳ, chọn <strong>Quét mã QR</strong> để hệ thống tự điền chính xác số tiền và nội dung.
+                  </p>
                 </div>
 
-                <div className="space-y-1.5 font-mono text-[11px] p-3 rounded-xl bg-surface border border-outline-variant/20">
-                  <div className="flex justify-between">
-                    <span className="text-outline">Mã đơn hàng:</span>
-                    <span className="font-bold text-on-surface">{orderData.orderCode}</span>
+                {/* Thông tin đơn hàng */}
+                <div className="space-y-2 font-mono text-xs p-3.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E]">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#786F66] font-sans font-bold">Mã đơn hàng:</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-black text-[#3D352E]">{orderData.orderCode}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(orderData.orderCode, 'orderCode')}
+                        className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-white border border-[#3D352E] cursor-pointer"
+                      >
+                        {copiedField === 'orderCode' ? 'Đã chép' : 'Chép'}
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-outline">Nội dung CK:</span>
-                    <span className="font-bold text-primary">{orderData.description || `HV${orderData.orderCode}`}</span>
+
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#786F66] font-sans font-bold">Nội dung CK:</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-black text-[#D96C4D]">{orderData.description || `HV${orderData.orderCode}`}</span>
+                      <button
+                        type="button"
+                        onClick={() => copyToClipboard(orderData.description || `HV${orderData.orderCode}`, 'desc')}
+                        className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-white border border-[#3D352E] cursor-pointer"
+                      >
+                        {copiedField === 'desc' ? 'Đã chép' : 'Chép'}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-[11px] text-outline">
-                  <span className="material-symbols-outlined text-[15px] animate-spin text-primary">sync</span>
-                  <span>Hệ thống đang tự động lắng nghe thanh toán...</span>
+                {/* Trạng thái lắng nghe với Bé Hổ mascot */}
+                <div className="flex items-center gap-2.5 text-xs font-bold text-[#786F66] p-2 rounded-xl bg-white border border-[#3D352E]/30">
+                  <div className="w-6 h-6 shrink-0 rounded-full overflow-hidden border border-[#3D352E]">
+                    <img
+                      src="/mascot/mascot_cozy.png"
+                      alt="Mascot"
+                      className="w-full h-full object-cover animate-pulse"
+                    />
+                  </div>
+                  <span>Đang tự động lắng nghe thanh toán qua PayOS... 🐾</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ── VIEW 3: Thành công ── */}
+        {/* ── VIEW 3: THÀNH CÔNG (SUCCESS VIEW) ── */}
         {view === 'success' && (
-          <div className="text-center py-8 space-y-5">
-            <div className="w-20 h-20 rounded-full bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
-              <span className="material-symbols-outlined text-5xl">verified</span>
+          <div className="text-center py-8 space-y-6">
+            {/* Bé Hổ mascot chúc mừng */}
+            <div className="w-28 h-28 mx-auto relative">
+              <div className="w-full h-full rounded-3xl bg-[#E3EDE2] border-2 border-[#3D352E] shadow-crayon flex items-center justify-center p-2">
+                <img
+                  src="/mascot/mascot_celebrating.png"
+                  alt="Bé Hổ Chúc Mừng"
+                  className="w-full h-full object-contain"
+                  onError={(e) => { e.currentTarget.src = '/mascot/mascot_cozy.png'; }}
+                />
+              </div>
+              <span className="absolute -top-2 -right-2 text-3xl select-none">🎉</span>
+              <span className="absolute -bottom-2 -left-2 text-2xl select-none">✨</span>
             </div>
+
             <div className="space-y-2">
-              <h3 className="text-2xl sm:text-3xl font-black text-on-surface">
+              <h3 className="text-2xl sm:text-3xl font-heading font-black text-[#3D352E]">
                 Nâng Cấp PRO Thành Công! 🎉
               </h3>
-              <p className="text-sm text-on-surface-variant max-w-md mx-auto">
-                Cảm ơn bạn đã đồng hành cùng HiVocab. Toàn bộ tính năng cao cấp đã được mở khóa ngay bây giờ!
+              <p className="font-quicksand text-sm font-semibold text-[#786F66] max-w-md mx-auto leading-relaxed">
+                Bé Hổ chúc mừng bạn đã chính thức gia nhập <strong>HiVocab PRO</strong>! Toàn bộ bài đọc IELTS Cambridge và 38+ đề thi THPT đã được mở khóa ngay bây giờ.
               </p>
             </div>
+
             <div className="pt-2">
               <button
                 type="button"
                 onClick={handleClose}
-                className="py-3 px-8 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md transition-all cursor-pointer"
+                className="py-3.5 px-10 rounded-2xl bg-[#4D6B53] hover:bg-[#3D5642] text-white font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayon active:translate-y-1 active:shadow-crayonSm transition-all cursor-pointer"
               >
                 Bắt đầu học ngay 🚀
               </button>

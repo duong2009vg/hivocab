@@ -20,7 +20,7 @@ export default [
       "src/**/*.{js,jsx}",
       "functions/**/*.js",
       "workers/**/*.js",
-      "scripts/**/*.js",
+      "scripts/**/*.{js,mjs}",
     ],
     languageOptions: {
       ecmaVersion: "latest",

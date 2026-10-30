@@ -5,7 +5,7 @@ import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function MobileBottomNav() {
-  const { user } = useAuth();
+  const { user, isPro } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
 
   // topic-detail / lesson-detail → highlight 'topics'; settings / profile → highlight 'profile'
@@ -108,7 +108,7 @@ export function MobileBottomNav() {
         <a
           aria-label="Hồ sơ cá nhân"
           onClick={() => navigateTo('profile')}
-          className="flex flex-col items-center justify-center py-1 px-3 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
+          className="relative flex flex-col items-center justify-center py-1 px-3 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
         >
           <div className="w-5 h-5 rounded-full overflow-hidden border border-white shadow-xs flex items-center justify-center mb-0.5">
             <img
@@ -123,6 +123,11 @@ export function MobileBottomNav() {
           <span className="text-[10px] font-bold leading-none tracking-tight">
             Hồ sơ
           </span>
+          {isPro && (
+            <span className="profile-pro-badge absolute -top-1 -right-1 text-[10px] leading-none select-none" title="HiVocab PRO">
+              👑
+            </span>
+          )}
         </a>
       ) : (
         <a
@@ -140,7 +145,13 @@ export function MobileBottomNav() {
               }}
             />
           </div>
-          <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#5a7d4d] ring-2 ring-white"></span>
+          {isPro ? (
+            <span className="profile-pro-badge absolute -top-0.5 -right-0.5 text-[11px] leading-none select-none filter drop-shadow-xs" title="HiVocab PRO">
+              👑
+            </span>
+          ) : (
+            <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#5a7d4d] ring-2 ring-white"></span>
+          )}
         </a>
       )}
     </nav>

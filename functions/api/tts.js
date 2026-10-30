@@ -40,12 +40,15 @@ export async function onRequestGet(context) {
 
     const googleTtsUrl = `https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=${encodeURIComponent(lang)}&q=${encodeURIComponent(sanitizedText)}`;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
     try {
         const upstream = await fetch(googleTtsUrl, {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept': 'audio/mpeg, audio/*;q=0.9, */*;q=0.8',
             },
+            signal: controller.signal,
             cf: {
                 cacheTtl: 604800,
                 cacheEverything: true
@@ -68,10 +71,13 @@ export async function onRequestGet(context) {
             headers
         });
     } catch (err) {
-        console.error('[TTS]', err);
-        return new Response('TTS service unavailable', {
-            status: 502,
+        const isTimeout = err?.name === 'AbortError';
+        console.error('[TTS]', isTimeout ? 'Upstream timeout' : err);
+        return new Response(isTimeout ? 'TTS upstream timeout' : 'TTS service unavailable', {
+            status: isTimeout ? 504 : 502,
             headers: corsHeaders
         });
+    } finally {
+        clearTimeout(timeoutId);
     }
 }

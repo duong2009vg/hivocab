@@ -8,7 +8,7 @@ import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
 
 export function MainSidebar() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, isPro } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const { openModal } = useModal();
   const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();
@@ -168,6 +168,32 @@ export function MainSidebar() {
       {/* Bottom Section: User Profile Card & Actions */}
       <div className="space-y-3 pt-4 border-t border-[#E8DEC8]/80">
 
+        {/* Upsell banner for Free / Guest users */}
+        {!isPro && (
+          <div
+            onClick={() => openModal('pricingModal')}
+            className="bg-gradient-to-br from-[#FFF9EE] to-[#FFE8C2] rounded-2xl p-3 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer hover:-translate-y-0.5 active:translate-y-0.5 transition-all group select-none"
+            role="button"
+            tabIndex={0}
+          >
+            <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-base group-hover:scale-110 transition-transform">👑</span>
+                <span className="text-xs font-black text-[#8C5311] font-heading">HiVocab PRO</span>
+              </div>
+              <span className="text-[10px] font-black bg-[#D96C4D] text-white px-1.5 py-0.5 rounded-full border border-[#3D352E]">
+                Ưu đãi
+              </span>
+            </div>
+            <p className="text-[11px] font-semibold text-[#665C52] leading-tight">
+              Mở khóa trọn bộ IELTS &amp; THPT không giới hạn!
+            </p>
+            <div className="mt-2 text-center py-1 bg-white text-[#3D352E] text-[10px] font-black rounded-xl border border-[#3D352E] shadow-[1px_1px_0px_#3D352E] group-hover:bg-[#FFFDF9] transition-colors">
+              Nâng cấp ngay 🚀
+            </div>
+          </div>
+        )}
+
         {/* User Profile Pill or Guest CTA */}
         {!user ? (
           <div className="bg-[#FAF3E7] rounded-2xl p-3 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2.5">
@@ -214,7 +240,17 @@ export function MainSidebar() {
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></span>
                 </div>
                 <div className="min-w-0">
-                  <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
+                    {isPro && (
+                      <span
+                        className="profile-pro-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#3D352E] rounded-md shadow-[1px_1px_0px_#3D352E] shrink-0"
+                        title="Thành viên HiVocab PRO"
+                      >
+                        <span>👑</span>PRO
+                      </span>
+                    )}
+                  </div>
                   <div className="text-[10px] text-[#786F66] truncate">{userRank}</div>
                 </div>
               </div>

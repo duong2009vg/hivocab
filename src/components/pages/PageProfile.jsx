@@ -6,6 +6,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
+import { CrayonProfileProCard } from '../common/CrayonProfileProCard.jsx';
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
@@ -235,6 +236,9 @@ export function PageProfile() {
               </div>
             </div>
           </section>
+ 
+          {/* Crayon Pro Subscription Card */}
+          <CrayonProfileProCard className="mt-6" />
 
           {/* Settings Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

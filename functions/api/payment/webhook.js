@@ -228,6 +228,24 @@ export async function onRequestPost(context) {
             });
         }
 
+        // 6b. Kiểm tra mệnh giá thanh toán thực tế so với mệnh giá đơn hàng (chống chuyển khoản thiếu tiền)
+        const paidAmount = Number(data.amount ?? 0);
+        const expectedAmount = Number(order.amount ?? 0);
+        if (!Number.isFinite(paidAmount) || expectedAmount <= 0 || paidAmount < expectedAmount) {
+            console.error('[PayOS Webhook] Underpayment / amount mismatch rejected:', {
+                orderCode,
+                paidAmount,
+                expectedAmount,
+            });
+            return new Response(JSON.stringify({
+                success: false,
+                error: 'Amount mismatch',
+            }), {
+                status: 400,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
         // 7. Giao toàn bộ việc kích hoạt cho RPC transactionally/idempotently.
         // Không PATCH profile thủ công ở đây vì có thể cộng hạn hai lần khi
         // PayOS gửi webhook trùng hoặc hai request chạy đồng thời.

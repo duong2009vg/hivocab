@@ -1,5 +1,6 @@
 // src/components/pages/PageExercises.jsx
 // Trang chọn đề thi THPT - Phong cách Cozy Crayon ấm áp (Sáp màu & Bàn học tập)
+// Hỗ trợ tab lọc "Miễn phí" và "Gói PRO" đồng bộ cùng cờ is_pro
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useThptExams } from '../../hooks/useThptExams';
@@ -11,8 +12,9 @@ export function PageExercises() {
   const { navigateTo } = useRoute();
   const { exams, allExams, loading, error, searchQuery, setSearchQuery, bestScores } = useThptExams();
 
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'qg' | 'provinces' | 'completed'
-  const [customTimeModal, setCustomTimeModal] = useState(null); // { examId, examTitle } | null
+  // Tab lọc: 'all' | 'free' | 'pro' | 'qg' | 'provinces' | 'completed'
+  const [activeFilter, setActiveFilter] = useState('all');
+  const [customTimeModal, setCustomTimeModal] = useState(null);
 
   // Bắt đầu thi với số phút cho trước
   const handleStart = useCallback((examId, minutes) => {
@@ -31,10 +33,27 @@ export function PageExercises() {
     handleStart(examId, minutes);
   }, [handleStart]);
 
-  // Lọc theo tabs
+  // Đếm số lượng đề thi theo từng loại
+  const freeCount = useMemo(() => {
+    return (allExams || []).filter((e) => !e.is_pro).length;
+  }, [allExams]);
+
+  const proCount = useMemo(() => {
+    return (allExams || []).filter((e) => Boolean(e.is_pro)).length;
+  }, [allExams]);
+
+  const completedCount = useMemo(() => {
+    return Object.keys(bestScores || {}).length;
+  }, [bestScores]);
+
+  // Lọc danh sách đề thi theo tab được chọn
   const filteredExams = useMemo(() => {
     let list = exams || [];
-    if (activeFilter === 'qg') {
+    if (activeFilter === 'free') {
+      list = list.filter((e) => !e.is_pro);
+    } else if (activeFilter === 'pro') {
+      list = list.filter((e) => Boolean(e.is_pro));
+    } else if (activeFilter === 'qg') {
       list = list.filter(
         (e) =>
           (e.title || '').toLowerCase().includes('quốc gia') ||
@@ -54,18 +73,11 @@ export function PageExercises() {
     return list;
   }, [exams, activeFilter, bestScores]);
 
-  const completedCount = useMemo(() => {
-    return Object.keys(bestScores || {}).length;
-  }, [bestScores]);
-
   return (
     <div id="page-exercises" className="page active min-h-screen bg-[#FAF5EB] font-sans antialiased text-[#382E2B]">
       
-      {/* ========================================================================= */}
-      {/* MOBILE LAYOUT (block lg:hidden) - Cozy Crayon Mobile                     */}
-      {/* ========================================================================= */}
+      {/* MOBILE LAYOUT (block lg:hidden) */}
       <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-3 pwa-safe-top">
-        {/* Mobile Header */}
         <section className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -73,7 +85,7 @@ export function PageExercises() {
                 Luyện đề THPT 🎓
               </h1>
               <span className="inline-block px-2.5 py-0.5 text-xs font-black text-[#557A46] bg-[#E5EFE2] border border-[#8FB383] rounded-full rotate-[-2deg]">
-                38+ Đề
+                {allExams.length}+ Đề
               </span>
             </div>
             <span className="text-2xl select-none">✏️</span>
@@ -104,7 +116,7 @@ export function PageExercises() {
             )}
           </div>
 
-          {/* Filter Pills */}
+          {/* Mobile Filter Pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 pb-1">
             <button
               type="button"
@@ -116,6 +128,28 @@ export function PageExercises() {
               }`}
             >
               Tất cả ({allExams.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveFilter('free')}
+              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
+                activeFilter === 'free'
+                  ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#382E2B]'
+                  : 'bg-[#E5EFE2] text-[#4F7D4B]'
+              }`}
+            >
+              Miễn phí ({freeCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveFilter('pro')}
+              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
+                activeFilter === 'pro'
+                  ? 'bg-[#B87C24] text-white shadow-[2px_2px_0px_#382E2B]'
+                  : 'bg-[#FFE8C2] text-[#8C5311]'
+              }`}
+            >
+              👑 Gói PRO ({proCount})
             </button>
             <button
               type="button"
@@ -185,6 +219,7 @@ export function PageExercises() {
               <ExamCard
                 key={exam.id}
                 exam={exam}
+                is_pro={exam.is_pro}
                 bestScore={bestScores[exam.id]}
                 onStart={handleStart}
                 onCustomTime={handleOpenCustomTime}
@@ -193,11 +228,8 @@ export function PageExercises() {
         </section>
       </div>
 
-      {/* ========================================================================= */}
-      {/* DESKTOP LAYOUT (hidden lg:flex) - Cozy Crayon Desktop                     */}
-      {/* ========================================================================= */}
+      {/* DESKTOP LAYOUT (hidden lg:flex) */}
       <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-64 xl:pl-72">
-        {/* Top Header Bar */}
         <header className="px-8 pt-6 pb-4 bg-[#FFFDF9] border-b-2 border-[#382E2B] flex items-center justify-between sticky top-0 z-10 select-none">
           <div>
             <div className="flex items-center gap-3">
@@ -214,7 +246,6 @@ export function PageExercises() {
             </p>
           </div>
 
-          {/* Search Bar */}
           <div className="relative w-72 xl:w-80">
             <input
               type="text"
@@ -236,7 +267,6 @@ export function PageExercises() {
           </div>
         </header>
 
-        {/* Content Container */}
         <div className="p-8 space-y-6 max-w-[1440px] w-full mx-auto">
           {/* Hero Study Banner */}
           <section className="bg-gradient-to-r from-[#EEF4EE] via-[#FFFDF9] to-[#F7EEE4] rounded-3xl border-2 border-[#382E2B] p-6 xl:p-7 shadow-[3px_4px_0px_#382E2B] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 select-none">
@@ -248,7 +278,6 @@ export function PageExercises() {
               <h2 className="text-xl xl:text-2xl font-heading font-black text-[#382E2B] leading-tight">
                 Rèn luyện áp lực phòng thi thực tế cùng <span className="text-[#D36135]">HiVocab CBT</span>
               </h2>
-              {/* Tiger speech bubble */}
               <div className="bg-[#FFFDF9] border-2 border-[#382E2B] rounded-2xl p-3.5 relative inline-block text-xs xl:text-sm font-bold text-[#382E2B] shadow-2xs">
                 <span className="text-[#D36135]">Bé Hổ nhắc:</span> "Làm bài thi đều đặn mỗi tuần để quen áp lực 50 phút và cọ xát với ma trận từ vựng thực tế nhé! 🐾"
                 <div className="absolute -left-2 top-4 w-3 h-3 bg-[#FFFDF9] border-l-2 border-b-2 border-[#382E2B] rotate-45"></div>
@@ -260,7 +289,6 @@ export function PageExercises() {
               </div>
             </div>
 
-            {/* Mascot Image */}
             <div className="shrink-0 w-44 h-44 xl:w-52 xl:h-52 relative flex items-center justify-center">
               <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
               <img
@@ -271,7 +299,7 @@ export function PageExercises() {
             </div>
           </section>
 
-          {/* Filter Pills Bar & Counter */}
+          {/* Desktop Filter Pills Bar */}
           <div className="flex items-center justify-between gap-4 flex-wrap select-none pt-1">
             <div className="flex items-center gap-2 flex-wrap">
               <button
@@ -284,6 +312,28 @@ export function PageExercises() {
                 }`}
               >
                 Tất cả đề ({allExams.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFilter('free')}
+                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
+                  activeFilter === 'free'
+                    ? 'bg-[#557A46] text-white shadow-[2px_3px_0px_#382E2B]'
+                    : 'bg-[#E5EFE2] text-[#4F7D4B] hover:bg-[#d8e8d4]'
+                }`}
+              >
+                🎁 Đề Miễn Phí ({freeCount})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFilter('pro')}
+                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
+                  activeFilter === 'pro'
+                    ? 'bg-[#B87C24] text-white shadow-[2px_3px_0px_#382E2B]'
+                    : 'bg-[#FFE8C2] text-[#8C5311] hover:bg-[#fde0b2]'
+                }`}
+              >
+                👑 Gói PRO ({proCount})
               </button>
               <button
                 type="button"
@@ -354,7 +404,7 @@ export function PageExercises() {
                 <span className="text-5xl mb-3 block">🔍</span>
                 <h3 className="text-base font-black text-[#382E2B]">Không tìm thấy đề thi phù hợp</h3>
                 <p className="text-xs text-[#766C5F] mt-1 font-semibold">
-                  Không có đề thi nào khớp với từ khóa "{searchQuery}".
+                  Không có đề thi nào khớp với bộ lọc đang chọn.
                 </p>
                 <button
                   type="button"
@@ -375,6 +425,7 @@ export function PageExercises() {
                   <ExamCard
                     key={exam.id}
                     exam={exam}
+                    is_pro={exam.is_pro}
                     bestScore={bestScores[exam.id]}
                     onStart={handleStart}
                     onCustomTime={handleOpenCustomTime}
@@ -386,7 +437,6 @@ export function PageExercises() {
         </div>
       </div>
 
-      {/* Custom Time Modal */}
       {customTimeModal && (
         <ExamCustomTimeModal
           examId={customTimeModal.examId}

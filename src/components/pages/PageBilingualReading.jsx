@@ -9,6 +9,7 @@ import { BilingualReadingView } from '../bilingual/BilingualReadingView.jsx';
 import { BilingualGapFillView } from '../bilingual/BilingualGapFillView.jsx';
 import { BilingualVocabTooltip } from '../bilingual/BilingualVocabTooltip.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
+import { CrayonLockOverlay } from '../common/CrayonLockOverlay.jsx';
 
 export function PageBilingualReading() {
   const { navigateTo } = useRoute();
@@ -49,6 +50,13 @@ export function PageBilingualReading() {
     setCurrentGapIndex,
     switchPassage,
   } = useBilingualReading();
+
+  const isProLocked = Boolean(
+    error?.includes('Pro') ||
+    error === 'PRO_REQUIRED' ||
+    (!loading && (!passage?.contentEn || !passage?.contentVi) && passage?.isPro) ||
+    (!loading && error && error.toLowerCase().includes('pro'))
+  );
 
   const handleClose = useCallback(() => {
     if (typeof window !== 'undefined') {
@@ -106,7 +114,47 @@ export function PageBilingualReading() {
           </div>
         )}
 
-        {error && !loading && (
+        {isProLocked && !loading && (
+          <div className="relative min-h-[520px] flex items-center justify-center py-6">
+            {/* Background blurred reading preview */}
+            <div className="absolute inset-0 filter blur-md select-none pointer-events-none opacity-30 space-y-6 max-w-4xl mx-auto py-8 px-4" aria-hidden="true">
+              <div className="h-8 bg-[#3D352E]/25 rounded-xl w-3/4 mx-auto mb-6"></div>
+              <div className="space-y-3">
+                <div className="h-4 bg-[#3D352E]/20 rounded w-full"></div>
+                <div className="h-4 bg-[#3D352E]/20 rounded w-11/12"></div>
+                <div className="h-4 bg-[#3D352E]/20 rounded w-full"></div>
+                <div className="h-4 bg-[#3D352E]/20 rounded w-4/5"></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="p-4 bg-white rounded-2xl border border-[#3D352E]/20 space-y-2">
+                  <div className="h-4 bg-[#3D352E]/20 rounded w-full"></div>
+                  <div className="h-4 bg-[#3D352E]/20 rounded w-5/6"></div>
+                  <div className="h-4 bg-[#3D352E]/20 rounded w-full"></div>
+                </div>
+                <div className="p-4 bg-[#F4EDE2] rounded-2xl border border-[#3D352E]/20 space-y-2">
+                  <div className="h-4 bg-[#3D352E]/20 rounded w-full"></div>
+                  <div className="h-4 bg-[#3D352E]/20 rounded w-4/5"></div>
+                  <div className="h-4 bg-[#3D352E]/20 rounded w-full"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Center Lock Overlay */}
+            <div className="relative z-20 w-full px-4">
+              <CrayonLockOverlay
+                title="Mở Khóa Toàn Bộ Bài Đọc Song Ngữ & Tra Cứu"
+                badgeText="NỘI DUNG ĐỘC QUYỀN PRO 👑"
+                description="Bài đọc này nằm trong bộ đề Cambridge IELTS dành riêng cho gói HiVocab PRO. Nâng cấp ngay để đọc song ngữ Anh - Việt, tra cứu từ vựng ngữ cảnh và luyện đục lỗ nhé!"
+                ctaText="Nâng Cấp PRO Ngay — Chỉ từ 25k/tháng 🚀"
+                onUnlockSuccess={() => window.location.reload()}
+                onBack={handleClose}
+                backText="Quay lại danh sách bài"
+              />
+            </div>
+          </div>
+        )}
+
+        {error && !isProLocked && !loading && (
           <div className="max-w-md mx-auto text-center py-16 px-6 bg-white rounded-3xl border-2 border-[#382E2B] shadow-[3px_4px_0px_#382E2B]">
             <span className="text-4xl mb-3 block">⚠️</span>
             <h3 className="font-heading font-black text-lg text-[#382E2B] mb-2">Không thể tải bài đọc</h3>

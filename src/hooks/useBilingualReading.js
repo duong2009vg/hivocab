@@ -134,15 +134,26 @@ export function useBilingualReading(initialPassageId = null) {
             topicLabel: fetchedPassage.topic_label || fetchedPassage.topicLabel || foundPassage?.topicLabel,
             contentEn: fetchedPassage.content_en || fetchedPassage.contentEn || foundPassage?.contentEn || '',
             contentVi: fetchedPassage.content_vi || fetchedPassage.contentVi || foundPassage?.contentVi || '',
+            isPro: Boolean(fetchedPassage.is_pro || fetchedPassage.isPro || foundPassage?.is_pro || foundPassage?.isPro),
             testName: foundPassage?.testName || (typeof window !== 'undefined' ? window._currentTestName : 'Test'),
             topicName: foundPassage?.topicName || (typeof window !== 'undefined' ? window._currentTopicName : 'IELTS'),
           };
         } else if (foundPassage) {
-          finalPassage = foundPassage;
+          finalPassage = {
+            ...foundPassage,
+            isPro: Boolean(foundPassage.is_pro || foundPassage.isPro),
+          };
         }
 
         if (!finalPassage || (!finalPassage.contentEn && !finalPassage.contentVi)) {
-          setError('Không tìm thấy nội dung bài đọc song ngữ.');
+          const isProGated = Boolean(
+            finalPassage?.isPro ||
+            foundPassage?.is_pro ||
+            foundPassage?.isPro ||
+            (typeof window !== 'undefined' && window._currentPassageIsPro)
+          );
+          if (finalPassage) setPassage(finalPassage);
+          setError(isProGated ? 'PRO_REQUIRED' : 'Không tìm thấy nội dung bài đọc song ngữ.');
           setLoading(false);
           return;
         }

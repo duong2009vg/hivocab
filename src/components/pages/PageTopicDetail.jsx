@@ -5,9 +5,10 @@ import { useTopicDetail } from '../../hooks/useTopicDetail.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { CrayonProBadge } from '../common/CrayonProBadge.jsx';
 
 export function PageTopicDetail() {
-  const { user } = useAuth();
+  const { user, isPro: isAuthPro } = useAuth();
   const {
     topicId,
     topicName,
@@ -31,6 +32,14 @@ export function PageTopicDetail() {
 
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
+
+  const effectiveIsPro = Boolean(isAuthPro || isUserPro);
+  const handleOpenProModal = (passage) => {
+    openModal('pricingModal', {
+      defaultPlanId: 'pro_6m',
+      onSuccess: () => openPassage(passage, currentTest?.name),
+    });
+  };
 
   // Metrics computation safely guarded against NaN
   const totalTests = useMemo(() => {
@@ -319,6 +328,7 @@ export function PageTopicDetail() {
                 const pProg = passage.progress || 0;
                 const pLearned = Math.round((pProg * pWords) / 100);
                 const colorTheme = passageBadgeColors[pIdx % passageBadgeColors.length];
+                const isLocked = Boolean(passage.isPro) && !effectiveIsPro;
 
                 return (
                   <article
@@ -327,16 +337,23 @@ export function PageTopicDetail() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <span className={`px-2.5 py-1 text-xs font-bold text-[#302A24] ${colorTheme.badgeBg} rounded-xl border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center gap-1`}>
-                          📑 Passage {pNum}
-                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className={`px-2.5 py-1 text-xs font-bold text-[#302A24] ${colorTheme.badgeBg} rounded-xl border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center gap-1`}>
+                            📑 Passage {pNum}
+                          </span>
+                          {isLocked && (
+                            <span className="px-2 py-0.5 text-[11px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#3D352E] rounded-full shadow-[1px_1px_0px_#3D352E] flex items-center gap-0.5">
+                              🔒 Gói PRO
+                            </span>
+                          )}
+                        </div>
                         <span className={`px-2 py-0.5 text-xs font-bold rounded-full border ${colorTheme.progBg}`}>
                           {pProg}% hoàn thành
                         </span>
                       </div>
 
                       <h3
-                        onClick={() => openPassage(passage, currentTest?.name)}
+                        onClick={() => (isLocked ? handleOpenProModal(passage) : openPassage(passage, currentTest?.name))}
                         className="font-bold text-lg text-[#302A24] leading-snug cursor-pointer hover:text-[#C85A3F] font-['Playfair_Display',serif] uppercase"
                       >
                         {pTitle}
@@ -352,7 +369,9 @@ export function PageTopicDetail() {
                       <div className="mt-3 p-3 bg-[#FAF7F0] rounded-xl border border-dashed border-[#C4B9AA] text-xs text-[#302A24]/90 italic font-['Playfair_Display',serif] relative">
                         <span className="text-base text-[#C85A3F] font-bold absolute -top-0.5 left-2">“</span>
                         <p className="pl-3.5 line-clamp-3">
-                          {passage.contentEn ? passage.contentEn.slice(0, 140) + '...' : 'Đoạn trích bài đọc học thuật IELTS...'}
+                          {isLocked
+                            ? '🔒 Nội dung bài đọc học thuật IELTS thuộc gói PRO. Vui lòng mở khóa để đọc toàn văn và học từ vựng ngữ cảnh.'
+                            : (passage.contentEn ? passage.contentEn.slice(0, 140) + '...' : 'Đoạn trích bài đọc học thuật IELTS...')}
                         </p>
                       </div>
 
@@ -365,14 +384,25 @@ export function PageTopicDetail() {
                     </div>
 
                     <div className="mt-4">
-                      <button
-                        onClick={() => openPassage(passage, currentTest?.name)}
-                        className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
-                        type="button"
-                      >
-                        <span>📖</span>
-                        <span>Học bài ngay</span>
-                      </button>
+                      {isLocked ? (
+                        <button
+                          onClick={() => handleOpenProModal(passage)}
+                          className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#D96C4D] hover:bg-[#C85A3F] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                          type="button"
+                        >
+                          <span>🔒</span>
+                          <span>Mở khóa PRO</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openPassage(passage, currentTest?.name)}
+                          className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                          type="button"
+                        >
+                          <span>📖</span>
+                          <span>Học bài ngay</span>
+                        </button>
+                      )}
                     </div>
                   </article>
                 );
@@ -676,6 +706,7 @@ export function PageTopicDetail() {
                 const pProg = passage.progress || 0;
                 const pLearned = Math.round((pProg * pWords) / 100);
                 const colorTheme = passageBadgeColors[pIdx % passageBadgeColors.length];
+                const isLocked = Boolean(passage.isPro) && !effectiveIsPro;
 
                 return (
                   <article
@@ -685,9 +716,16 @@ export function PageTopicDetail() {
                     <div>
                       {/* Top Badge Row */}
                       <div className="flex items-center justify-between mb-3">
-                        <span className={`px-3 py-1 text-xs font-['Comfortaa',sans-serif] font-bold text-[#302A24] ${colorTheme.badgeBg} rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center gap-1.5`}>
-                          📑 Passage {pNum}
-                        </span>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className={`px-3 py-1 text-xs font-['Comfortaa',sans-serif] font-bold text-[#302A24] ${colorTheme.badgeBg} rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center gap-1.5`}>
+                            📑 Passage {pNum}
+                          </span>
+                          {isLocked && (
+                            <span className="px-2.5 py-0.5 text-xs font-black bg-[#FFE8C2] text-[#8C5311] border-2 border-[#3D352E] rounded-full shadow-[1.5px_1.5px_0px_#3D352E] flex items-center gap-1">
+                              🔒 Gói PRO
+                            </span>
+                          )}
+                        </div>
                         <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full border ${colorTheme.progBg}`}>
                           {pProg}% hoàn thành
                         </span>
@@ -695,7 +733,7 @@ export function PageTopicDetail() {
 
                       {/* Passage Title & Topic */}
                       <h5
-                        onClick={() => openPassage(passage, currentTest?.name)}
+                        onClick={() => (isLocked ? handleOpenProModal(passage) : openPassage(passage, currentTest?.name))}
                         className="font-['Playfair_Display',serif] font-bold text-xl text-[#302A24] tracking-tight leading-snug group-hover:text-[#C85A3F] transition-colors cursor-pointer uppercase"
                       >
                         {pTitle}
@@ -713,9 +751,11 @@ export function PageTopicDetail() {
                       <div className="mt-4 p-3.5 bg-[#FAF7F0] rounded-xl border border-dashed border-[#C4B9AA] text-xs text-[#302A24]/90 leading-relaxed font-['Playfair_Display',serif] italic relative">
                         <span className="text-lg font-['Playfair_Display',serif] text-[#C85A3F] font-bold absolute -top-1 left-2">“</span>
                         <p className="pl-3.5 line-clamp-3">
-                          {passage.contentEn
+                          {isLocked
+                            ? '🔒 Nội dung bài đọc học thuật IELTS này thuộc gói PRO. Vui lòng mở khóa để đọc toàn bộ bài đọc và luyện tập từ vựng ngữ cảnh.'
+                            : (passage.contentEn
                             ? passage.contentEn.slice(0, 160) + '...'
-                            : 'During the sixth and seventh centuries, the inhabitants of the northwestern regions of India developed a method of gaining access to clean, fresh groundwater...'}
+                            : 'During the sixth and seventh centuries, the inhabitants of the northwestern regions of India developed a method of gaining access to clean, fresh groundwater...')}
                         </p>
                       </div>
 
@@ -733,14 +773,25 @@ export function PageTopicDetail() {
 
                     {/* Card Bottom Actions */}
                     <div className="mt-5 space-y-2.5">
-                      <button
-                        onClick={() => openPassage(passage, currentTest?.name)}
-                        className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all cursor-pointer"
-                        type="button"
-                      >
-                        <span>📖</span>
-                        <span>Học bài ngay</span>
-                      </button>
+                      {isLocked ? (
+                        <button
+                          onClick={() => handleOpenProModal(passage)}
+                          className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#D96C4D] hover:bg-[#C85A3F] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                          type="button"
+                        >
+                          <span>🔒</span>
+                          <span>Mở khóa PRO</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openPassage(passage, currentTest?.name)}
+                          className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all cursor-pointer"
+                          type="button"
+                        >
+                          <span>📖</span>
+                          <span>Học bài ngay</span>
+                        </button>
+                      )}
                     </div>
                   </article>
                 );

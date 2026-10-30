@@ -179,30 +179,38 @@ export async function onRequestPost(context) {
             returnUrl,
         }, PAYOS_CHECKSUM_KEY);
 
-        // 6. Gọi PayOS API tạo Payment Request
-        const payosRes = await fetch('https://api-merchant.payos.vn/v2/payment-requests', {
-            method: 'POST',
-            headers: {
-                'x-client-id': PAYOS_CLIENT_ID,
-                'x-api-key': PAYOS_API_KEY,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                orderCode,
-                amount: plan.amount,
-                description,
-                returnUrl,
-                cancelUrl,
-                signature,
-                items: [
-                    {
-                        name: plan.name,
-                        quantity: 1,
-                        price: plan.amount,
-                    }
-                ],
-            }),
-        });
+        // 6. Gọi PayOS API tạo Payment Request (có timeout bảo vệ 15s)
+        const payosController = new AbortController();
+        const payosTimeoutId = setTimeout(() => payosController.abort(), 15000);
+        let payosRes;
+        try {
+            payosRes = await fetch('https://api-merchant.payos.vn/v2/payment-requests', {
+                method: 'POST',
+                headers: {
+                    'x-client-id': PAYOS_CLIENT_ID,
+                    'x-api-key': PAYOS_API_KEY,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    orderCode,
+                    amount: plan.amount,
+                    description,
+                    returnUrl,
+                    cancelUrl,
+                    signature,
+                    items: [
+                        {
+                            name: plan.name,
+                            quantity: 1,
+                            price: plan.amount,
+                        }
+                    ],
+                }),
+                signal: payosController.signal,
+            });
+        } finally {
+            clearTimeout(payosTimeoutId);
+        }
 
         const payosResult = await payosRes.json();
         if (!payosRes.ok || payosResult.code !== '00') {

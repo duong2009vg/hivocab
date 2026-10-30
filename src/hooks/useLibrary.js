@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
+import { clonePublicTopic } from '../services/db.js';
 
 export const AVAILABLE_TAGS = [
   { label: 'Tất cả',         value: 'all' },
@@ -229,6 +230,11 @@ export function useLibrary() {
     }
   }, [activeTopicDetail]);
 
+  const closeDetail = useCallback(() => {
+    setActiveTopicDetail(null);
+    setDetailError(null);
+  }, []);
+
   const handleClone = useCallback(async (topicId) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -244,12 +250,18 @@ export function useLibrary() {
       return;
     }
     try {
-      if (typeof window !== 'undefined' && window.HiDB?.clonePublicTopic) {
-        const newId = await window.HiDB.clonePublicTopic(topicId);
+      const cloneFn =
+        typeof clonePublicTopic === 'function'
+          ? clonePublicTopic
+          : typeof window !== 'undefined'
+            ? window.HiDB?.clonePublicTopic
+            : null;
+      if (cloneFn) {
+        const newId = await cloneFn(topicId);
         setTopics(prev => prev.map(t => t.id === topicId ? { ...t, clone_count: (t.clone_count || 0) + 1 } : t));
         window.showHiToast?.('Đã lưu bộ từ vào kho cá nhân thành công! 🎉', 'success');
         setTimeout(() => {
-          if (window.confirm('Bộ từ đã được lưu. Bạn có muốn bắt đầu ôn tập ngay không?')) {
+          if (typeof window !== 'undefined' && typeof window.confirm === 'function' && window.confirm('Bộ từ đã được lưu. Bạn có muốn bắt đầu ôn tập ngay không?')) {
             closeDetail();
             window._openTopic?.(newId);
           }
@@ -290,11 +302,6 @@ export function useLibrary() {
     } finally {
       setIsDetailLoading(false);
     }
-  }, []);
-
-  const closeDetail = useCallback(() => {
-    setActiveTopicDetail(null);
-    setDetailError(null);
   }, []);
 
   const openComments = useCallback(async (topicId, title) => {

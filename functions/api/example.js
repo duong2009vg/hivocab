@@ -54,6 +54,8 @@ export async function onRequestPost(context) {
     const label  = isPhrase ? 'phrase' : 'word';
     const prompt = `Write exactly one short, natural English example sentence that clearly uses the ${label} "${term}" in context. Return only the sentence — no quotes, no explanation, nothing else.`;
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
     try {
         const ckeyRes = await fetch(CKEY_URL, {
             method: 'POST',
@@ -67,6 +69,7 @@ export async function onRequestPost(context) {
                 max_tokens:  150,
                 temperature: 0.5,
             }),
+            signal: controller.signal,
         });
 
         if (!ckeyRes.ok) {
@@ -87,10 +90,13 @@ export async function onRequestPost(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     } catch (err) {
-        console.error('[Example generation]', err);
-        return new Response(JSON.stringify({ ok: false, error: 'Lỗi xử lý nội bộ' }), {
-            status: 500,
+        const isTimeout = err?.name === 'AbortError';
+        console.error('[Example generation]', isTimeout ? 'Upstream timeout' : err);
+        return new Response(JSON.stringify({ ok: false, error: isTimeout ? 'Hệ thống AI phản hồi chậm, vui lòng thử lại.' : 'Lỗi xử lý nội bộ' }), {
+            status: isTimeout ? 504 : 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
+    } finally {
+        clearTimeout(timeoutId);
     }
 }
