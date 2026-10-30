@@ -134,32 +134,145 @@ function VisualInspectorInner() {
   const [highlightedText, setHighlightedText] = useState('');
   const [activeTab, setActiveTab] = useState('liveEdit'); // Mặc định mở tab sửa live
   const [userPromptText, setUserPromptText] = useState('');
-  const [liveText, setLiveText] = useState('');
   const [isLiveEditingText, setIsLiveEditingText] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isPanelMinimized, setIsPanelMinimized] = useState(false);
+
+  // Vị trí kéo thả tự do của bảng điều khiển (Draggable panel position)
+  const [panelPos, setPanelPos] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const initialX = Math.max(16, window.innerWidth - 416);
+      return { x: initialX, y: 70 };
+    }
+    return { x: 800, y: 70 };
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0 });
 
   // Backup original styles for live edit reset
   const originalStylesRef = useRef(null);
 
   const { showToast } = useToast ? useToast() : { showToast: (msg) => alert(msg) };
 
-  // Bật/tắt bằng phím tắt Alt + I hoặc Ctrl + Shift + X
+  // Xử lý kéo thả di chuyển panel bằng chuột
+  const handleHeaderMouseDown = (e) => {
+    if (e.button !== 0) return; // Chỉ chuột trái
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('a')) {
+      return;
+    }
+    e.preventDefault();
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initialX: panelPos.x,
+      initialY: panelPos.y,
+    };
+  };
+
+  // Xử lý kéo thả di chuyển panel trên màn hình cảm ứng
+  const handleHeaderTouchStart = (e) => {
+    if (e.target.closest('button') || e.target.closest('input') || e.target.closest('a')) {
+      return;
+    }
+    const touch = e.touches[0];
+    if (!touch) return;
+    isDraggingRef.current = true;
+    setIsDragging(true);
+    dragStartRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      initialX: panelPos.x,
+      initialY: panelPos.y,
+    };
+  };
+
+  // Lắng nghe sự kiện di chuyển và thả chuột / chạm toàn window
+  useEffect(() => {
+    const handleMove = (clientX, clientY) => {
+      if (!isDraggingRef.current) return;
+      const dx = clientX - dragStartRef.current.startX;
+      const dy = clientY - dragStartRef.current.startY;
+      const panelWidth = 390;
+      const maxX = Math.max(8, window.innerWidth - panelWidth - 8);
+      const maxY = Math.max(8, window.innerHeight - 60);
+
+      const nextX = Math.min(maxX, Math.max(8, dragStartRef.current.initialX + dx));
+      const nextY = Math.min(maxY, Math.max(8, dragStartRef.current.initialY + dy));
+      setPanelPos({ x: nextX, y: nextY });
+    };
+
+    const onMouseMove = (e) => handleMove(e.clientX, e.clientY);
+    const onTouchMove = (e) => {
+      if (e.touches && e.touches[0]) {
+        handleMove(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    };
+
+    const onEnd = () => {
+      if (isDraggingRef.current) {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+      }
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onEnd);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onEnd);
+    };
+  }, []);
+
+  // Đảm bảo panel luôn nằm trong khung nhìn khi co giãn cửa sổ trình duyệt
+  useEffect(() => {
+    const handleResize = () => {
+      setPanelPos((prev) => {
+        const maxX = Math.max(8, window.innerWidth - 398);
+        const maxY = Math.max(8, window.innerHeight - 60);
+        return {
+          x: Math.min(prev.x, maxX),
+          y: Math.min(prev.y, maxY),
+        };
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Đóng panel và dọn dẹp trạng thái gõ chữ
+  const handleClosePanel = useCallback(() => {
+    if (selectedTarget) {
+      if (selectedTarget.contentEditable === 'true') {
+        selectedTarget.contentEditable = 'false';
+      }
+      if (selectedTarget._inspectorInputHandler) {
+        selectedTarget.removeEventListener('input', selectedTarget._inspectorInputHandler);
+        selectedTarget._inspectorInputHandler = null;
+      }
+    }
+    setSelectedTarget(null);
+    setSelectedInfo(null);
+    setIsLiveEditingText(false);
+  }, [selectedTarget]);
+
+  // Bật/tắt bằng phím tắt Alt + I hoặc Ctrl + Shift + X, hoặc Escape
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.altKey && (e.key === 'i' || e.key === 'I')) || (e.ctrlKey && e.shiftKey && (e.key === 'x' || e.key === 'X'))) {
         e.preventDefault();
         setIsActive((prev) => !prev);
-        setSelectedTarget(null);
-        setSelectedInfo(null);
+        handleClosePanel();
       } else if (e.key === 'Escape') {
         if (selectedTarget) {
-          if (selectedTarget.contentEditable === 'true') {
-            selectedTarget.contentEditable = 'false';
-          }
-          setSelectedTarget(null);
-          setSelectedInfo(null);
-          setIsLiveEditingText(false);
+          handleClosePanel();
         } else if (isActive) {
           setIsActive(false);
         }
@@ -168,7 +281,7 @@ function VisualInspectorInner() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isActive, selectedTarget]);
+  }, [isActive, selectedTarget, handleClosePanel]);
 
   // Xử lý hover khi đang ở Inspect Mode (chưa chọn phần tử)
   useEffect(() => {
@@ -221,14 +334,28 @@ function VisualInspectorInner() {
       setHoveredInfo(null);
       setIsPanelMinimized(false);
 
-      // Điền sẵn nội dung text của phần tử vào ô sửa realtime
-      setLiveText((el.innerText || el.textContent || '').trim());
-
       // Lưu lại style và html gốc để có thể hoàn tác
       originalStylesRef.current = {
         cssText: el.style.cssText,
         innerHTML: el.innerHTML,
       };
+
+      // Tự động bật gõ chữ trực tiếp ngay trên trang web cho phần tử được chọn
+      el.contentEditable = 'true';
+      setIsLiveEditingText(true);
+      el.focus();
+
+      // Lắng nghe khi gõ trên trang để cập nhật thông tin hiển thị
+      const onInput = () => {
+        const currentText = (el.innerText || el.textContent || '').trim();
+        setSelectedInfo((prev) => (prev ? { ...prev, innerText: currentText.slice(0, 80) } : null));
+      };
+      el._inspectorInputHandler = onInput;
+      el.addEventListener('input', onInput);
+
+      if (showToast) {
+        showToast('Đã chọn phần tử! Bạn click thẳng vào chữ trên trang để gõ nhé ✏️', 'info');
+      }
 
       // Đặt sẵn prompt mẫu phù hợp
       if (selText) {
@@ -246,16 +373,22 @@ function VisualInspectorInner() {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('click', handleClick, true);
     };
-  }, [isActive, selectedTarget]);
+  }, [isActive, selectedTarget, showToast]);
 
-  // Sửa chữ realtime: Khi gõ trong textarea của panel, chữ trên trang web lập tức nhảy theo!
-  const handleLiveTextChange = useCallback((e) => {
-    const val = e.target.value;
-    setLiveText(val);
-    if (selectedTarget) {
-      selectedTarget.innerText = val;
-      setSelectedInfo((prev) => prev ? { ...prev, innerText: val.slice(0, 80) } : null);
-    }
+  // Ngăn chặn sự kiện click nhảy trang hoặc submit form khi đang gõ chữ trên phần tử được chọn
+  useEffect(() => {
+    if (!selectedTarget) return;
+
+    const handleTargetClick = (e) => {
+      if (selectedTarget.contentEditable === 'true') {
+        e.stopPropagation();
+      }
+    };
+
+    selectedTarget.addEventListener('click', handleTargetClick, true);
+    return () => {
+      selectedTarget.removeEventListener('click', handleTargetClick, true);
+    };
   }, [selectedTarget]);
 
   // Bật/tắt chế độ gõ chữ trực tiếp ngay trên trang web
@@ -266,21 +399,23 @@ function VisualInspectorInner() {
 
     if (willEnable) {
       selectedTarget.focus();
+      if (!selectedTarget._inspectorInputHandler) {
+        const onInput = () => {
+          const currentText = (selectedTarget.innerText || selectedTarget.textContent || '').trim();
+          setSelectedInfo((prev) => (prev ? { ...prev, innerText: currentText.slice(0, 80) } : null));
+        };
+        selectedTarget._inspectorInputHandler = onInput;
+        selectedTarget.addEventListener('input', onInput);
+      }
       if (showToast) {
         showToast('Đã bật gõ chữ trên trang! Bạn click thẳng vào dòng chữ để gõ nhé ✏️', 'info');
       }
-
-      // Lắng nghe khi gõ trên trang để đồng bộ vào panel
-      const onInput = () => {
-        setLiveText((selectedTarget.innerText || '').trim());
-      };
-      selectedTarget._inspectorInputHandler = onInput;
-      selectedTarget.addEventListener('input', onInput);
     } else {
       if (selectedTarget._inspectorInputHandler) {
         selectedTarget.removeEventListener('input', selectedTarget._inspectorInputHandler);
+        selectedTarget._inspectorInputHandler = null;
       }
-      if (showToast) showToast('Đã lưu nội dung vừa sửa thử.', 'success');
+      if (showToast) showToast('Đã tắt gõ chữ. Nội dung vừa sửa được giữ nguyên.', 'success');
       setSelectedInfo(getReactComponentInfo(selectedTarget));
     }
     setIsLiveEditingText(willEnable);
@@ -307,24 +442,24 @@ function VisualInspectorInner() {
     if (!selectedTarget || !originalStylesRef.current) return;
     selectedTarget.style.cssText = originalStylesRef.current.cssText;
     selectedTarget.innerHTML = originalStylesRef.current.innerHTML;
-    selectedTarget.contentEditable = 'false';
-    setIsLiveEditingText(false);
-    setLiveText((selectedTarget.innerText || '').trim());
+    selectedTarget.contentEditable = isLiveEditingText ? 'true' : 'false';
     setSelectedInfo(getReactComponentInfo(selectedTarget));
     if (showToast) showToast('Đã khôi phục lại trạng thái ban đầu.', 'info');
-  }, [selectedTarget, showToast]);
+  }, [selectedTarget, isLiveEditingText, showToast]);
 
   // Sao chép prompt chuẩn cho AI
   const handleCopyAiPrompt = useCallback(() => {
     if (!selectedInfo) return;
 
+    const currentText = (selectedTarget ? (selectedTarget.innerText || selectedTarget.textContent || '') : '').trim();
+
     const prompt = `[Yêu cầu sửa UI Frontend]
 - Component: <${selectedInfo.componentName} />
 - File nguồn gợi ý: ${selectedInfo.fileHint || 'src/components/...'}
 - Phần tử DOM: <${selectedInfo.tagName} class="${selectedInfo.className}">
-${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}- Nội dung hiển thị hiện tại: "${liveText || selectedInfo.innerText}"
+${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}- Nội dung hiển thị sau khi sửa: "${currentText || selectedInfo.innerText}"
 - Kích thước: ${selectedInfo.width}px × ${selectedInfo.height}px
-- Yêu cầu cụ thể: ${userPromptText || `Đổi nội dung thành "${liveText}" và tối ưu lại giao diện/khoảng cách giúp mình nhé.`}`;
+- Yêu cầu cụ thể: ${userPromptText || `Đổi nội dung thành "${currentText}" và cập nhật vào mã nguồn giúp mình nhé.`}`;
 
     navigator.clipboard.writeText(prompt).then(() => {
       if (showToast) {
@@ -333,7 +468,7 @@ ${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}-
         alert('Đã sao chép prompt vào Clipboard!');
       }
     });
-  }, [selectedInfo, highlightedText, liveText, userPromptText, showToast]);
+  }, [selectedInfo, selectedTarget, highlightedText, userPromptText, showToast]);
 
   return (
     <>
@@ -452,20 +587,37 @@ ${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}-
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          5. Bảng điều khiển sửa giao diện (Floating Docked Panel)
+          5. Bảng điều khiển sửa giao diện (Floating Draggable Panel)
           * KHÔNG CÓ LỚP PHỦ CHE MÀN HÌNH (NO BACKDROP)
-          * Cho phép thao tác đồng thời trên trang web và trên panel!
+          * Kéo thả di chuyển tự do khắp màn hình (Draggable)
+          * Gõ sửa chữ trực tiếp ngay trên trang web (Inline Editing)
           ───────────────────────────────────────────────────────────── */}
       {selectedTarget && selectedInfo && (
         <aside
           data-inspector-ui="true"
-          className={`fixed top-16 right-4 z-[10000] w-[390px] max-w-[calc(100vw-32px)] bg-[#FFFDF9] rounded-3xl border-3 border-[#3D352E] shadow-[6px_8px_0px_#3D352E] overflow-hidden flex flex-col transition-all duration-200 select-none pointer-events-auto ${
-            isPanelMinimized ? 'max-h-13' : 'max-h-[85vh]'
-          }`}
+          style={{
+            left: `${panelPos.x}px`,
+            top: `${panelPos.y}px`,
+          }}
+          className={`fixed z-[10000] w-[390px] max-w-[calc(100vw-32px)] bg-[#FFFDF9] rounded-3xl border-3 border-[#3D352E] overflow-hidden flex flex-col select-none pointer-events-auto ${
+            isDragging
+              ? 'shadow-[10px_14px_0px_#3D352E] opacity-95 transition-none'
+              : 'shadow-[6px_8px_0px_#3D352E] transition-shadow duration-150'
+          } ${isPanelMinimized ? 'max-h-13' : 'max-h-[85vh]'}`}
         >
-          {/* Header */}
-          <div className="bg-[#FAF3E7] px-4 py-3 border-b-2 border-[#3D352E] flex items-center justify-between shrink-0">
+          {/* Header - Kéo thả di chuyển tùy ý */}
+          <div
+            onMouseDown={handleHeaderMouseDown}
+            onTouchStart={handleHeaderTouchStart}
+            className={`bg-[#FAF3E7] px-4 py-3 border-b-2 border-[#3D352E] flex items-center justify-between shrink-0 select-none ${
+              isDragging ? 'cursor-grabbing' : 'cursor-grab'
+            }`}
+            title="Bấm giữ và kéo thanh này để di chuyển bảng khắp màn hình"
+          >
             <div className="flex items-center gap-2 min-w-0">
+              <span className="text-gray-400 font-black text-sm tracking-tighter select-none" title="Kéo để di chuyển">
+                ⠿
+              </span>
               <span className="text-lg">🎯</span>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -496,14 +648,7 @@ ${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}-
               {/* Nút đóng hoàn tất */}
               <button
                 type="button"
-                onClick={() => {
-                  if (selectedTarget && selectedTarget.contentEditable === 'true') {
-                    selectedTarget.contentEditable = 'false';
-                  }
-                  setSelectedTarget(null);
-                  setSelectedInfo(null);
-                  setIsLiveEditingText(false);
-                }}
+                onClick={handleClosePanel}
                 className="w-7 h-7 rounded-lg bg-white hover:bg-rose-50 hover:text-rose-600 border border-[#3D352E] text-xs font-black flex items-center justify-center transition active:scale-90 cursor-pointer"
                 title="Đóng bảng công cụ"
               >
@@ -558,37 +703,34 @@ ${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}-
                     ───────────────────────────────────────────────────────── */}
                 {activeTab === 'liveEdit' && (
                   <div className="space-y-3.5">
-                    {/* Ô Gõ Chữ Trực Tiếp (Realtime Live Sync) */}
-                    <div className="bg-[#FAF3E7] p-3 rounded-2xl border-2 border-[#3D352E] space-y-1.5">
+                    {/* Trạng thái Gõ Trực Tiếp Ngay Trên Trang */}
+                    <div className="bg-[#FAF3E7] p-3 rounded-2xl border-2 border-[#3D352E] space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="font-black text-xs text-[#3D352E] flex items-center gap-1.5">
-                          <span>✍️ Gõ đổi chữ:</span>
-                        </label>
-                        <span className="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-1.5 py-0.5 rounded-md">
-                          ● Nhảy chữ ngay trên trang
-                        </span>
-                      </div>
-                      <textarea
-                        rows={2}
-                        value={liveText}
-                        onChange={handleLiveTextChange}
-                        placeholder="Nhập chữ mới tại đây..."
-                        className="w-full p-2.5 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-semibold focus:ring-2 focus:ring-[#4D6B53] outline-none"
-                      />
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] text-[#786F66]">
-                          Hoặc bấm để gõ trực tiếp trên trang web:
-                        </span>
+                        <div className="flex items-center gap-1.5 font-black text-xs text-[#3D352E]">
+                          <span
+                            className={`w-2.5 h-2.5 rounded-full ${
+                              isLiveEditingText ? 'bg-emerald-500 animate-pulse' : 'bg-gray-400'
+                            }`}
+                          />
+                          <span>Gõ trực tiếp trên trang web:</span>
+                        </div>
                         <button
                           type="button"
                           onClick={toggleLiveTextEdit}
-                          className={`px-2.5 py-1 rounded-lg font-black text-[11px] border border-[#3D352E] transition-all cursor-pointer ${
-                            isLiveEditingText ? 'bg-emerald-400 text-[#3D352E]' : 'bg-white hover:bg-gray-100 text-[#3D352E]'
+                          className={`px-3 py-1 rounded-xl font-black text-xs border border-[#3D352E] transition-all cursor-pointer ${
+                            isLiveEditingText
+                              ? 'bg-emerald-400 text-[#3D352E] shadow-sm'
+                              : 'bg-white hover:bg-gray-100 text-[#786F66]'
                           }`}
                         >
-                          {isLiveEditingText ? 'Đang bật gõ trên trang 🟢' : 'Gõ thẳng trên trang ✏️'}
+                          {isLiveEditingText ? '🟢 Đang bật gõ chữ' : '⚪ Đang tắt gõ chữ'}
                         </button>
                       </div>
+                      <p className="text-[11px] text-[#554D44] leading-relaxed">
+                        {isLiveEditingText
+                          ? '👉 Bạn chỉ việc click thẳng chuột vào dòng chữ trên trang web để sửa, gõ thêm hoặc xóa ký tự tùy ý.'
+                          : 'Bấm nút trên để tiếp tục bật chế độ gõ chữ trực tiếp trên trang web.'}
+                      </p>
                     </div>
 
                     {/* Bộ chỉnh CSS trực tiếp */}
@@ -726,7 +868,7 @@ ${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}-
                   <div className="space-y-3">
                     <div className="bg-[#FAF3E7] p-2.5 rounded-xl border border-[#3D352E]/30 space-y-1">
                       <div className="font-semibold text-[#302A24] truncate">
-                        <strong>Text hiện tại:</strong> "{liveText || selectedInfo.innerText || 'Không có chữ'}"
+                        <strong>Text hiện tại:</strong> "{(selectedTarget ? (selectedTarget.innerText || selectedTarget.textContent || '') : '').trim() || selectedInfo.innerText || 'Không có chữ'}"
                       </div>
                       <div className="text-[11px] font-mono text-[#554D45]">
                         <strong>Kích thước:</strong> {selectedInfo.width}px × {selectedInfo.height}px
