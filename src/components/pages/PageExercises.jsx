@@ -231,61 +231,8 @@ export function PageExercises() {
       {/* DESKTOP LAYOUT (hidden lg:flex) */}
       <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
         <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
-          {/* Search Bar Row (Đã gỡ bỏ header trắng và tiêu đề theo yêu cầu) */}
-          <div className="flex items-center justify-end">
-            <div className="relative w-72 xl:w-96 shrink-0">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm nhanh trường, tỉnh, năm thi..."
-                className="w-full pl-10 pr-9 py-2.5 text-xs xl:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:outline-none focus:ring-0 placeholder:text-[#9C8F85] font-semibold transition-all"
-              />
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm select-none">🔍</span>
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-[#766C5F] hover:text-[#382E2B] p-1 cursor-pointer"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-          {/* Hero Study Banner */}
-          <section className="bg-gradient-to-r from-[#EEF4EE] via-[#FFFDF9] to-[#F7EEE4] rounded-3xl border-2 border-[#382E2B] p-5 xl:p-7 shadow-[3px_4px_0px_#382E2B] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-5 select-none">
-            <div className="space-y-2.5 flex-1 min-w-0 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E5EFE2] text-[#557A46] border border-[#8FB383] text-xs font-bold">
-                <span>🌟</span>
-                <span>Cấu trúc chuẩn kỳ thi tốt nghiệp THPT Quốc Gia</span>
-              </div>
-              <h2 className="text-xl xl:text-2xl font-heading font-black text-[#382E2B] leading-tight">
-                Rèn luyện áp lực phòng thi thực tế cùng <span className="text-[#D36135]">HiVocab CBT</span>
-              </h2>
-              <div className="bg-[#FFFDF9] border-2 border-[#382E2B] rounded-2xl p-3 relative inline-block text-xs xl:text-sm font-bold text-[#382E2B] shadow-2xs">
-                <span className="text-[#D36135]">Bé Hổ nhắc:</span> "Làm bài thi đều đặn mỗi tuần để quen áp lực 50 phút và cọ xát với ma trận từ vựng thực tế nhé! 🐾"
-                <div className="absolute -left-2 top-4 w-3 h-3 bg-[#FFFDF9] border-l-2 border-b-2 border-[#382E2B] rotate-45"></div>
-              </div>
-              <div className="flex flex-wrap items-center gap-4 pt-1 text-xs font-bold text-[#6B5A4E]">
-                <span className="flex items-center gap-1.5 whitespace-nowrap">⏱️ 50 phút/đề</span>
-                <span className="flex items-center gap-1.5 whitespace-nowrap">📝 40-50 câu trắc nghiệm</span>
-                <span className="flex items-center gap-1.5 whitespace-nowrap">💡 Chấm điểm &amp; giải thích tức thì</span>
-              </div>
-            </div>
-
-            <div className="shrink-0 w-36 h-36 xl:w-48 xl:h-48 relative flex items-center justify-center">
-              <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
-              <img
-                src="/mascot/mascot_cozy.png"
-                alt="Bé Hổ Churbito"
-                className="w-full h-full object-contain relative z-10 mix-blend-multiply drop-shadow-sm transition-transform hover:scale-105 duration-300 select-none"
-              />
-            </div>
-          </section>
-
-          {/* Desktop Filter Pills Bar */}
-          <div className="flex items-center justify-between gap-4 flex-wrap select-none pt-1">
+          {/* Desktop Filter Pills & Search Bar */}
+          <div className="flex items-center justify-between gap-4 flex-wrap select-none">
             <div className="flex items-center gap-2 flex-wrap">
               <button
                 type="button"
@@ -355,9 +302,30 @@ export function PageExercises() {
               </button>
             </div>
 
-            <div className="text-xs font-black text-[#766C5F]">
-              Hiển thị <span className="text-[#D36135]">{filteredExams.length}</span> đề thi phù hợp
+            {/* Thanh tìm kiếm */}
+            <div className="relative w-72 xl:w-80 shrink-0">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm nhanh trường, tỉnh, năm thi..."
+                className="w-full pl-10 pr-9 py-2.5 text-xs xl:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:outline-none focus:ring-0 placeholder:text-[#9C8F85] font-semibold transition-all"
+              />
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm select-none">🔍</span>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-[#766C5F] hover:text-[#382E2B] p-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
             </div>
+          </div>
+
+          <div className="text-xs font-black text-[#766C5F]">
+            Hiển thị <span className="text-[#D36135]">{filteredExams.length}</span> đề thi phù hợp
           </div>
 
           {/* Exam Grid */}
