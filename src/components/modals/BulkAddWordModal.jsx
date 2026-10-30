@@ -1,51 +1,43 @@
 // src/components/modals/BulkAddWordModal.jsx
-// Modal thêm từ vựng hàng loạt đa năng - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
-// Hỗ trợ: Dán JSON từ AI (ChatGPT/Gemini), Dán bảng tính, Tải file .xlsx/.xls/.csv/.json
+// Modal thêm từ vựng hàng loạt - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
+// Hỗ trợ: Tải file Excel (.xlsx, .xls, .csv) do AI xuất trực tiếp, hoặc Dán bảng từ vựng
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-import { clearTopicCache, getCachedTopics } from '../../services/topicsService.js';
+import { clearTopicCache } from '../../services/topicsService.js';
 
 // Mẫu Prompt chuẩn hóa để người dùng sao chép gửi cho ChatGPT / Gemini / Claude
+// Hướng dẫn AI xuất trực tiếp file Excel (.xlsx) tải về hoặc bảng dữ liệu chuẩn 5 cột
 const AI_PROMPT_TEMPLATE = `Bạn là trợ lý học thuật tiếng Anh chuyên nghiệp cho nền tảng học từ vựng HiVocab.
-Nhiệm vụ của bạn: Tiếp nhận danh sách từ vựng thô bên dưới và chuyển đổi thành một dãy ký tự JSON (JSON Array) chuẩn đầy đủ 5 trường dữ liệu để nạp trực tiếp vào hệ thống HiVocab.
 
-YÊU CẦU ĐỊNH DẠNG ĐẦU RA:
-Trả về DUY NHẤT một dãy ký tự JSON hợp lệ (bắt đầu bằng [ và kết thúc bằng ]), mỗi phần tử là 1 object có đúng 5 trường:
-- "word": từ vựng hoặc cụm từ tiếng Anh gốc (dạng chữ thường, trừ danh từ riêng).
-- "phonetic": phiên âm quốc tế IPA chính xác, đặt trong cặp dấu gạch chéo /.../ (ví dụ: "/rɪˈzɪl.jənt/").
-- "pos": từ loại viết tắt tiếng Anh (noun, verb, adj, adv, phrase, idiom).
-- "meaning": định nghĩa tiếng Việt ngắn gọn, chuẩn xác, tự nhiên theo ngữ cảnh sử dụng.
-- "example_sentence": đúng 1 câu ví dụ tiếng Anh tự nhiên, thực tế và giàu ngữ cảnh chứa từ vựng đó.
+NHIỆM VỤ:
+Tiếp nhận danh sách từ vựng thô bên dưới, tra cứu thông tin chính xác và XUẤT RA FILE EXCEL (.xlsx) hoặc BẢNG DỮ LIỆU chuẩn 5 cột để nạp trực tiếp vào HiVocab:
+1. word: Từ vựng hoặc cụm từ tiếng Anh (viết thường).
+2. phonetic: Phiên âm quốc tế IPA chuẩn, đặt trong cặp dấu /.../ (ví dụ: /rɪˈzɪl.jənt/).
+3. pos: Từ loại viết tắt tiếng Anh (noun, verb, adj, adv, phrase, idiom).
+4. meaning: Định nghĩa tiếng Việt ngắn gọn, chuẩn xác, tự nhiên theo ngữ cảnh.
+5. example_sentence: Đúng 1 câu ví dụ tiếng Anh thực tế và tự nhiên chứa từ vựng.
 
-CẤU TRÚC MẪU BẮT BUỘC:
-[
-  {
-    "word": "resilient",
-    "phonetic": "/rɪˈzɪl.jənt/",
-    "pos": "adj",
-    "meaning": "kiên cường, có khả năng phục hồi nhanh sau khó khăn",
-    "example_sentence": "She remained remarkably resilient throughout all the challenges."
-  }
-]
+HƯỚNG DẪN XUẤT KẾT QUẢ (QUAN TRỌNG):
+- ƯU TIÊN 1 (Nếu AI của bạn có tính năng tạo file / Python / Code Interpreter): Hãy chạy mã để tạo và gửi trực tiếp link tải FILE EXCEL (.xlsx) có tên "hivocab_words.xlsx" chứa đủ 5 cột trên để tôi tải về máy.
+- ƯU TIÊN 2 (Nếu chỉ có thể trả lời bằng văn bản): Hãy xuất duy nhất một BẢNG DỮ LIỆU (Markdown Table) chuẩn 5 cột trên. Tuyệt đối không thêm lời chào, lời dẫn hay giải thích thừa để tôi sao chép trực tiếp vào HiVocab.
 
-QUY TẮC BẮT BUỘC (QUAN TRỌNG NHẤT):
-1. CHỈ TRẢ VỀ DUY NHẤT DÃY KÝ TỰ JSON (bắt đầu bằng [ và kết thúc bằng ]).
-2. TUYỆT ĐỐI KHÔNG thêm bất kỳ lời chào, lời dẫn (như "Dưới đây là..."), lời giải thích hay định dạng văn bản thừa nào trước và sau khối JSON.
-3. Người dùng sẽ sao chép trực tiếp kết quả này để dán vào ứng dụng HiVocab, nên mọi ký tự ngoài JSON đều sẽ gây lỗi.
+BẢNG CỘT MẪU:
+| word | phonetic | pos | meaning | example_sentence |
+| resilient | /rɪˈzɪl.jənt/ | adj | kiên cường, có khả năng phục hồi nhanh | She remained remarkably resilient throughout all the challenges. |
 
 DANH SÁCH TỪ VỰNG THÔ CỦA TÔI:
-[DÁN DANH SÁCH TỪ VỰNG CỦA BẠN VÀO ĐÂY]`;
+[DÁN DANH SÁCH TỪ VỰNG HOẶC CHỦ ĐỀ BẠN MUỐN TẠO VÀO ĐÂY]`;
 
-// Hàm phân tích dữ liệu đa năng: JSON, TSV (Excel), CSV, Markdown table
+// Hàm phân tích dữ liệu đa năng: TSV (Excel), CSV, Markdown table (và fallback JSON an toàn)
 export function parseBulkInput(text) {
   if (!text || !text.trim()) return [];
 
   const trimmed = text.trim();
 
-  // 1. Thử nhận diện JSON (kể cả có bọc trong ```json ... ```)
+  // 1. Silent fallback nhận diện JSON (nếu người dùng vô tình dán JSON cũ)
   let cleanJson = trimmed;
   if (cleanJson.includes('```')) {
     cleanJson = cleanJson.replace(/```(?:json)?([\s\S]*?)```/g, '$1').trim();
@@ -70,7 +62,7 @@ export function parseBulkInput(text) {
     } catch (_) {}
   }
 
-  // 2. Thử tách từng dòng (Bảng Markdown, Tab Excel, CSV, hoặc Dấu gạch ngang)
+  // 2. Tách từng dòng (Bảng Markdown, Tab Excel, CSV, hoặc Dấu gạch ngang)
   const lines = trimmed.split(/\r?\n/).filter((l) => l.trim().length > 0);
   const rows = [];
 
@@ -198,6 +190,7 @@ function spreadsheetRowsToText(rows) {
     'meaning', 'definition', 'vietnamese', 'vietnamese_meaning', 'meaning_vi', 'vi', 'nghia',
     'nghia_tieng_viet', 'example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du'
   ].includes(header));
+
   const dataRows = hasHeader ? rows.slice(1) : rows;
   const cellToText = (value) => {
     if (value === null || value === undefined) return '';
@@ -217,7 +210,7 @@ export function BulkAddWordModal() {
 
   const isOpen = Boolean(modals?.bulkAdd?.open);
 
-  // Bước hiện tại: 'guide' (Bước 1), 'input' (Bước 2), 'preview' (Bước 3)
+  // Bước hiện tại: 'guide' (Bước 1: Prompt AI), 'input' (Bước 2: Nạp File Excel / Bảng), 'preview' (Bước 3: Xem trước & Lưu)
   const [activeStep, setActiveStep] = useState('guide');
 
   // Input & Data
@@ -232,6 +225,7 @@ export function BulkAddWordModal() {
   const [isPromptCopied, setIsPromptCopied] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isFileLoading, setIsFileLoading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -285,6 +279,7 @@ export function BulkAddWordModal() {
     setLessonName('');
     setErrorMessage('');
     setIsSubmitting(false);
+    setIsDragging(false);
 
     loadTopics();
   }, [isOpen, loadTopics]);
@@ -314,7 +309,6 @@ export function BulkAddWordModal() {
       success('✨ Đã sao chép Prompt! Hãy dán vào ChatGPT hoặc Gemini nhé 🐾');
       setTimeout(() => setIsPromptCopied(false), 3000);
     } catch (_) {
-      // Fallback cho trình duyệt cũ
       const ta = document.createElement('textarea');
       ta.value = AI_PROMPT_TEMPLATE;
       document.body.appendChild(ta);
@@ -327,26 +321,25 @@ export function BulkAddWordModal() {
     }
   };
 
-  // 2. Phân tích văn bản khi người dùng dán hoặc nhập
+  // 2. Phân tích văn bản khi người dùng dán bảng tính
   const handleParseText = () => {
     if (!rawText.trim()) {
-      setErrorMessage('Vui lòng dán nội dung từ vựng hoặc JSON từ AI!');
+      setErrorMessage('Vui lòng dán bảng từ vựng hoặc tải lên file Excel!');
       return;
     }
     const rows = parseBulkInput(rawText);
     if (rows.length === 0) {
-      setErrorMessage('Không phân tích được từ vựng nào. Bạn hãy kiểm tra lại định dạng JSON hoặc bảng!');
+      setErrorMessage('Không phân tích được từ vựng nào. Bạn hãy kiểm tra lại định dạng bảng hoặc copy từ file Excel!');
       return;
     }
     setParsedWords(rows);
     setErrorMessage('');
     setActiveStep('preview');
-    success(`Đã phân tích thành công ${rows.length} từ vựng! Hãy xem lại bảng bên dưới nhé.`);
+    success(`Đã nhận diện ${rows.length} từ vựng! Hãy xem lại bảng bên dưới nhé.`);
   };
 
-  // 5. Xử lý tải file lên (.xlsx, .xls, .csv, .tsv, .json, .txt).
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
+  // 3. Xử lý đọc file Excel (.xlsx, .xls) hoặc CSV
+  const processFile = async (file) => {
     if (!file) return;
 
     setIsFileLoading(true);
@@ -359,20 +352,8 @@ export function BulkAddWordModal() {
         throw new Error('File quá lớn. Vui lòng chọn file không quá 10 MB.');
       }
 
-      // Trường hợp 1: File JSON
-      if (fileName.endsWith('.json')) {
-        const text = await file.text();
-        const rows = parseBulkInput(text);
-        if (rows.length > 0) {
-          setParsedWords(rows);
-          setActiveStep('preview');
-          success(`Đã đọc ${rows.length} từ từ file JSON! 🎉`);
-        } else {
-          setErrorMessage('Không tìm thấy dữ liệu từ vựng hợp lệ trong file JSON.');
-        }
-      }
-      // Trường hợp 2: File Excel (.xlsx / .xls), chỉ đọc dữ liệu ô từ sheet đầu tiên.
-      else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+      // File Excel (.xlsx / .xls)
+      if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
         const { default: xlsxModule } = await import('@e965/xlsx/dist/xlsx.mini.min.js');
         const XLSX = xlsxModule?.default || xlsxModule;
         const workbook = XLSX.read(await file.arrayBuffer(), {
@@ -397,40 +378,67 @@ export function BulkAddWordModal() {
         if (parsedRows.length > 0) {
           setParsedWords(parsedRows);
           setActiveStep('preview');
-          success(`Đã đọc ${parsedRows.length} từ từ sheet "${firstSheetName}"! 🎉`);
+          success(`Đã đọc thành công ${parsedRows.length} từ từ file Excel "${file.name}"! 🎉`);
         } else {
-          setErrorMessage('Không tìm thấy dữ liệu từ vựng hợp lệ trong file Excel.');
+          setErrorMessage('Không tìm thấy dữ liệu từ vựng hợp lệ trong file Excel. Hãy kiểm tra các cột word, phonetic, pos, meaning, example_sentence.');
         }
       }
-      // Trường hợp 3: File CSV / TSV / TXT
+      // File CSV / TSV / TXT
       else if (fileName.endsWith('.csv') || fileName.endsWith('.tsv') || fileName.endsWith('.txt')) {
         const text = await file.text();
         const rows = parseBulkInput(text);
         if (rows.length > 0) {
           setParsedWords(rows);
           setActiveStep('preview');
-          success(`Đã nạp thành công ${rows.length} từ từ file! 🎉`);
+          success(`Đã nạp thành công ${rows.length} từ từ file "${file.name}"! 🎉`);
         } else {
           setErrorMessage('Không phân tích được từ vựng từ file này.');
         }
       } else {
-        setErrorMessage('Định dạng file không được hỗ trợ. Vui lòng chọn .xlsx, .xls, .csv, .tsv, .txt hoặc .json');
+        setErrorMessage('Định dạng file không được hỗ trợ. Vui lòng chọn file Excel (.xlsx, .xls) hoặc .csv');
       }
     } catch (err) {
       console.error('[BulkAddWordModal] file upload error:', err);
-      setErrorMessage(err?.message || 'Không thể đọc file Excel. Hãy kiểm tra lại định dạng file.');
+      setErrorMessage(err?.message || 'Không thể đọc file Excel. Hãy kiểm tra lại file của bạn.');
     } finally {
       setIsFileLoading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // 6. Mở pop-up Tạo chủ đề mới (với lựa chọn thư mục & biểu tượng)
+  const handleFileInputChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) processFile(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      processFile(files[0]);
+    }
+  };
+
+  // 4. Mở pop-up Tạo chủ đề mới
   const handleOpenCreateTopic = () => {
     openModal('createTopic', { initialStep: 'topic' });
   };
 
-  // 7. Chỉnh sửa bảng Live Preview
+  // 5. Chỉnh sửa bảng Live Preview
   const handleCellChange = (id, field, value) => {
     setParsedWords((prev) =>
       prev.map((row) => (row.id === id ? { ...row, [field]: value } : row))
@@ -455,7 +463,7 @@ export function BulkAddWordModal() {
     ]);
   };
 
-  // 8. Lưu tất cả từ vào CSDL Supabase
+  // 6. Lưu tất cả từ vào CSDL Supabase
   const handleSaveAll = async () => {
     if (!topicId) {
       setErrorMessage('Bạn chưa có chủ đề cá nhân để lưu từ vựng! Vui lòng quay lại Bước 2 để chọn hoặc tạo chủ đề mới nhé.');
@@ -483,7 +491,6 @@ export function BulkAddWordModal() {
         word_order: idx + 1,
       }));
 
-      // Chèn hàng loạt vào bảng words (chỉ lưu từ vào chủ đề, không tự gán level SRS)
       const { error: insertErr } = await supabase
         .from('words')
         .insert(wordsPayload);
@@ -522,117 +529,114 @@ export function BulkAddWordModal() {
       className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-150 select-none overflow-y-auto"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="w-full max-w-4xl bg-[#FFFDF9] rounded-3xl shadow-[6px_8px_0px_#382E2B] overflow-hidden border-[3px] border-[#382E2B] flex flex-col max-h-[92vh] font-sans my-auto">
-        {/* Header Modal */}
-        <div className="px-5 sm:px-6 py-4 border-b-2 border-[#382E2B] flex items-center justify-between shrink-0 bg-[#FFF8EE]">
+      <div className="w-full max-w-3xl bg-[#FFFDF9] rounded-3xl shadow-[6px_8px_0px_#382E2B] overflow-hidden border-[3px] border-[#382E2B] flex flex-col max-h-[92vh] font-sans my-auto">
+        {/* Header Modal gọn gàng */}
+        <div className="px-5 sm:px-6 py-3.5 border-b-2 border-[#382E2B] flex items-center justify-between shrink-0 bg-[#FFF8EE]">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-[#E1EDDB] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-xl shrink-0">
-              📋
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#E1EDDB] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-lg sm:text-xl shrink-0">
+              📊
             </div>
             <div>
-              <h2 className="text-base sm:text-lg font-heading font-black text-[#382E2B] flex items-center gap-2">
-                <span>Thêm từ vựng hàng loạt</span>
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-[#E5EFE2] text-[#557A46] border border-[#8FB383] hidden sm:inline-block">
-                  Tiết kiệm chi phí AI
-                </span>
+              <h2 className="text-base sm:text-lg font-heading font-black text-[#382E2B]">
+                Thêm từ vựng hàng loạt
               </h2>
-              <p className="text-xs font-semibold text-[#766C5F]">Dán JSON từ AI riêng (ChatGPT/Gemini) hoặc tải file Excel/CSV/JSON 🐾</p>
+              <p className="text-xs font-semibold text-[#766C5F]">Xuất file Excel từ AI hoặc tải file từ máy tính 🐾</p>
             </div>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
+            className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
             aria-label="Đóng"
           >
             ✕
           </button>
         </div>
 
-        {/* Thanh chuyển bước (3 Steps Navigation) */}
-        <div className="flex border-b-2 border-[#382E2B] bg-[#FAF5EB] p-1.5 gap-1.5 sm:gap-2 shrink-0 overflow-x-auto text-xs font-bold">
+        {/* Thanh chuyển bước tinh giản (3 Steps) */}
+        <div className="flex border-b-2 border-[#382E2B] bg-[#FAF5EB] p-1.5 gap-1.5 sm:gap-2 shrink-0 text-xs font-bold">
           <button
             type="button"
             onClick={() => setActiveStep('guide')}
-            className={`flex-1 min-w-[130px] py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeStep === 'guide'
                 ? 'bg-[#382E2B] text-white shadow-sm'
-                : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/20'
+                : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
             }`}
           >
             <span>🤖</span>
-            <span>1. Lấy Prompt AI</span>
+            <span>1. Mẫu Prompt AI</span>
           </button>
+
           <button
             type="button"
             onClick={() => setActiveStep('input')}
-            className={`flex-1 min-w-[130px] py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeStep === 'input'
                 ? 'bg-[#382E2B] text-white shadow-sm'
-                : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/20'
+                : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
             }`}
           >
             <span>📥</span>
-            <span>2. Nạp dữ liệu / File</span>
+            <span>2. Nạp File Excel / Bảng</span>
           </button>
+
           <button
             type="button"
             onClick={() => {
               if (parsedWords.length > 0) setActiveStep('preview');
               else handleParseText();
             }}
-            className={`flex-1 min-w-[130px] py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
               activeStep === 'preview'
                 ? 'bg-[#5a7d4d] text-white shadow-sm font-black'
-                : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/20'
+                : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
             }`}
           >
             <span>👁️</span>
-            <span>3. Xem trước ({parsedWords.length})</span>
+            <span>3. Xem lại & Lưu {parsedWords.length > 0 ? `(${parsedWords.length})` : ''}</span>
           </button>
         </div>
 
-        {/* Nội dung các bước (Step Content) */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4">
-          {/* ════════════ BƯỚC 1: HƯỚNG DẪN & LẤY PROMPT AI ════════════ */}
+        {/* Nội dung các bước */}
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
+          {/* ════════════ BƯỚC 1: LẤY PROMPT AI XUẤT EXCEL ════════════ */}
           {activeStep === 'guide' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Thẻ hướng dẫn 3 bước */}
-              <div className="bg-[#FFF8EE] p-4 sm:p-5 rounded-2xl border-2 border-dashed border-[#E5A13C] space-y-3">
-                <h3 className="font-heading font-black text-sm sm:text-base text-[#382E2B] flex items-center gap-2">
-                  <span>💡</span>
-                  <span>Cách làm giàu từ vựng miễn phí với ChatGPT / Gemini của bạn:</span>
-                </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-[#5C5248]">
-                  <div className="bg-white p-3 rounded-xl border border-[#DECDBB] space-y-1">
-                    <div className="font-black text-[#D36135]">Bước 1.1:</div>
-                    <p>Bấm nút <strong>"Sao chép prompt"</strong> màu cam bên dưới.</p>
+            <div className="space-y-3.5 animate-in fade-in duration-150">
+              {/* Thẻ hướng dẫn 2 bước ngắn gọn */}
+              <div className="bg-[#FFF8EE] p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-[#E5A13C] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                <div className="space-y-1">
+                  <div className="font-heading font-black text-sm text-[#382E2B] flex items-center gap-1.5">
+                    <span>💡</span>
+                    <span>Cách lấy file Excel nhanh từ ChatGPT / Gemini:</span>
                   </div>
-                  <div className="bg-white p-3 rounded-xl border border-[#DECDBB] space-y-1">
-                    <div className="font-black text-[#D36135]">Bước 1.2:</div>
-                    <p>Mở <strong>ChatGPT</strong> hoặc <strong>Gemini</strong>, dán prompt kèm danh sách từ thô của bạn.</p>
-                  </div>
-                  <div className="bg-white p-3 rounded-xl border border-[#DECDBB] space-y-1">
-                    <div className="font-black text-[#D36135]">Bước 1.3:</div>
-                    <p>AI sẽ xuất thẳng dãy ký tự JSON. Bạn chỉ cần ấn <strong>Copy</strong> rồi dán vào Bước 2 để nạp tự động!</p>
-                  </div>
+                  <p className="text-[#6E6458] leading-relaxed">
+                    Sao chép prompt bên dưới và gửi kèm danh sách từ của bạn. AI sẽ xuất file <strong>Excel (.xlsx)</strong> để tải về hoặc bảng dữ liệu chuẩn 5 cột!
+                  </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleCopyPrompt}
+                  className="px-4 py-2 rounded-xl bg-[#EA7349] hover:bg-[#d86238] text-white font-black text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                >
+                  <span>{isPromptCopied ? '✅' : '📋'}</span>
+                  <span>{isPromptCopied ? 'Đã sao chép!' : 'Sao chép Prompt AI'}</span>
+                </button>
               </div>
 
-              {/* Khung xem trước Prompt với nút Sao chép Prompt gọn gàng vừa vặn */}
-              <div className="space-y-1.5 pt-1">
+              {/* Khung nội dung Prompt */}
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-bold text-[#766C5F]">
-                  <span>Xem trước nội dung Prompt (Chuẩn 5 trường):</span>
+                  <span>Nội dung Prompt chuẩn hóa (Yêu cầu xuất Excel & Bảng 5 cột):</span>
                   <button
                     type="button"
                     onClick={handleCopyPrompt}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#EA7349] hover:bg-[#d86238] text-white font-black text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                    className="text-[#D36135] hover:underline cursor-pointer flex items-center gap-1"
                   >
-                    <span>{isPromptCopied ? '✅' : '📋'}</span>
-                    <span>{isPromptCopied ? 'Đã sao chép!' : 'Sao chép prompt'}</span>
+                    <span>{isPromptCopied ? 'Đã sao chép ✅' : 'Sao chép nhanh 📋'}</span>
                   </button>
                 </div>
-                <div className="p-3.5 bg-white rounded-2xl border-2 border-[#382E2B]/30 max-h-52 overflow-y-auto text-xs font-mono text-[#4A4036] leading-relaxed whitespace-pre-wrap select-all">
+                <div className="p-3 bg-white rounded-2xl border-2 border-[#382E2B]/20 max-h-56 overflow-y-auto text-xs font-mono text-[#4A4036] leading-relaxed whitespace-pre-wrap select-all">
                   {AI_PROMPT_TEMPLATE}
                 </div>
               </div>
@@ -642,50 +646,47 @@ export function BulkAddWordModal() {
                 <button
                   type="button"
                   onClick={() => setActiveStep('input')}
-                  className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
                 >
-                  <span>Đã có dữ liệu ➔ Sang bước 2: Nạp dữ liệu</span>
+                  <span>Đã có file từ AI ➔ Sang bước 2: Nạp File</span>
                 </button>
               </div>
             </div>
           )}
 
-          {/* ════════════ BƯỚC 2: NẠP DỮ LIỆU / FILE ════════════ */}
+          {/* ════════════ BƯỚC 2: NẠP FILE EXCEL / DÁN BẢNG ════════════ */}
           {activeStep === 'input' && (
             <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Thông báo nếu chưa có chủ đề cá nhân */}
+              {/* Cảnh báo chưa có chủ đề */}
               {topicsList.length === 0 && (
-                <div className="p-3.5 rounded-2xl bg-[#FFF3D6] border-2 border-[#D97706]/40 text-[#92400E] text-xs font-semibold flex items-center justify-between gap-3">
-                  <div className="flex items-start gap-2.5">
+                <div className="p-3 rounded-2xl bg-[#FFF3D6] border-2 border-[#D97706]/40 text-[#92400E] text-xs font-semibold flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
                     <span className="text-base shrink-0">⚠️</span>
-                    <div>
-                      <p className="font-bold text-[#B45309]">Bạn chưa có chủ đề cá nhân nào!</p>
-                      <p className="text-[11px] mt-0.5">Bấm nút bên cạnh để mở pop-up tạo chủ đề & chọn thư mục nhé.</p>
-                    </div>
+                    <span>Bạn chưa có chủ đề cá nhân nào. Hãy bấm nút tạo chủ đề mới để bắt đầu lưu từ nhé!</span>
                   </div>
                   <button
                     type="button"
                     onClick={handleOpenCreateTopic}
-                    className="px-3.5 py-2 bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs rounded-xl border-2 border-[#382E2B] shadow-sm cursor-pointer active:translate-y-0.5 transition-all shrink-0 flex items-center gap-1"
+                    className="px-3 py-1.5 bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs rounded-xl border-2 border-[#382E2B] shadow-sm cursor-pointer shrink-0"
                   >
-                    <span>+ Tạo chủ đề</span>
+                    + Tạo chủ đề
                   </button>
                 </div>
               )}
 
-              {/* Cấu hình Chủ đề & Bài học con */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 p-4 rounded-2xl bg-[#FAF5EB] border-2 border-[#382E2B]/20">
+              {/* Chọn Chủ đề & Tên bài học */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#382E2B]/15">
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
+                  <div className="flex items-center justify-between mb-1">
                     <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
                       Chủ đề cá nhân <span className="text-[#D36135]">*</span>
                     </label>
                     <button
                       type="button"
                       onClick={handleOpenCreateTopic}
-                      className="text-xs font-extrabold text-[#D36135] hover:underline cursor-pointer flex items-center gap-1"
+                      className="text-[11px] font-bold text-[#D36135] hover:underline cursor-pointer"
                     >
-                      <span>+ Tạo chủ đề mới</span>
+                      + Tạo chủ đề mới
                     </button>
                   </div>
 
@@ -693,16 +694,15 @@ export function BulkAddWordModal() {
                     <button
                       type="button"
                       onClick={handleOpenCreateTopic}
-                      className="w-full bg-white border-2 border-dashed border-[#382E2B] px-3.5 py-2.5 rounded-xl text-[#382E2B] text-xs font-bold shadow-sm hover:bg-[#FAF5EB] cursor-pointer flex items-center justify-center gap-1.5"
+                      className="w-full bg-white border-2 border-dashed border-[#382E2B] px-3 py-2 rounded-xl text-[#382E2B] text-xs font-bold hover:bg-[#FAF5EB] cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <span>📁</span>
-                      <span>Bấm vào đây để tạo chủ đề & chọn thư mục</span>
+                      <span>📁 Bấm để tạo chủ đề & chọn thư mục</span>
                     </button>
                   ) : (
                     <select
                       value={topicId}
                       onChange={(e) => setTopicId(e.target.value)}
-                      className="w-full bg-white border-2 border-[#382E2B] px-3.5 py-2.5 rounded-xl outline-none text-[#382E2B] text-sm font-bold shadow-sm transition-colors cursor-pointer"
+                      className="w-full bg-white border-2 border-[#382E2B] px-3 py-2 rounded-xl outline-none text-[#382E2B] text-xs sm:text-sm font-bold shadow-sm transition-colors cursor-pointer"
                     >
                       {topicsList.map((t) => (
                         <option key={t.id} value={t.id}>
@@ -714,104 +714,116 @@ export function BulkAddWordModal() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
-                    Nhóm bài học con <span className="text-[11px] font-normal text-[#A2978A]">(Tùy chọn)</span>
+                  <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1">
+                    Nhóm bài học <span className="text-[11px] font-normal text-[#A2978A]">(Tùy chọn)</span>
                   </label>
                   <input
                     type="text"
                     value={lessonName}
                     onChange={(e) => setLessonName(e.target.value)}
-                    placeholder="VD: Lesson 1, Unit 2, Từ ngày 05/10..."
-                    className="w-full bg-white border-2 border-[#382E2B] px-3.5 py-2.5 rounded-xl outline-none text-[#382E2B] text-sm font-bold shadow-sm transition-colors"
+                    placeholder="VD: Lesson 1, Unit 2, Từ ngày..."
+                    className="w-full bg-white border-2 border-[#382E2B] px-3 py-2 rounded-xl outline-none text-[#382E2B] text-xs sm:text-sm font-bold shadow-sm transition-colors"
                   />
                 </div>
               </div>
 
-              {/* Ô dán văn bản / JSON trực tiếp */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black text-[#766C5F] uppercase tracking-wider">
-                    Cách 1: Dán JSON từ AI hoặc bảng tính vào đây <span className="text-[#D36135]">*</span>
-                  </label>
-                  <span className="text-xs font-bold text-[#5a7d4d]">Tự động nhận diện 5 cột</span>
-                </div>
-
-                {/* Note gợi ý tải file nếu từ 100 từ trở lên */}
-                <div className="p-3 rounded-xl bg-[#FFF8EE] border-2 border-dashed border-[#E5A13C]/80 text-[#8C5E28] text-xs flex items-start sm:items-center gap-2.5">
-                  <span className="text-base shrink-0 mt-0.5 sm:mt-0">💡</span>
-                  <p className="leading-relaxed">
-                    <strong>Gợi ý:</strong> Nếu bạn muốn thêm từ <strong>100 từ vựng trở lên</strong>, bạn nên <strong>tải lên file</strong> (file <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code> hoặc <code>.json</code> ở <em>Cách 2</em> bên dưới) để thao tác nhanh hơn.
-                  </p>
-                </div>
-
-                <textarea
-                  rows={7}
-                  value={rawText}
-                  onChange={(e) => setRawText(e.target.value)}
-                  placeholder={`Dán dãy ký tự JSON nhận được từ AI vào đây, ví dụ:\n[\n  {\n    "word": "resilient",\n    "phonetic": "/rɪˈzɪl.jənt/",\n    "pos": "adj",\n    "meaning": "kiên cường, bền bỉ",\n    "example_sentence": "She remained resilient despite difficulties."\n  }\n]\n\nHoặc dán trực tiếp bảng từ Excel copy sang.`}
-                  className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] p-3.5 rounded-2xl outline-none text-[#382E2B] text-xs font-mono shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none leading-relaxed"
+              {/* KHU VỰC CHÍNH: TẢI FILE EXCEL TRỰC TIẾP (Kéo thả hoặc Bấm chọn) */}
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`p-5 rounded-2xl border-2 border-dashed transition-all text-center flex flex-col items-center justify-center gap-2 cursor-pointer ${
+                  isDragging
+                    ? 'border-[#5a7d4d] bg-[#F3F8F1] scale-[1.01]'
+                    : 'border-[#382E2B]/40 bg-[#FFFDF7] hover:bg-[#FFF8EE]'
+                }`}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleFileInputChange}
+                  className="hidden"
                 />
-              </div>
 
-              {/* Khu vực Tải file lên (Cách 2) */}
-              <div className="p-4 rounded-2xl border-2 border-dashed border-[#DECDBB] bg-[#FFFDF7] flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">📁</span>
-                  <div>
-                    <h4 className="text-xs font-bold text-[#382E2B]">Cách 2: Hoặc tải file từ máy tính</h4>
-                    <p className="text-[11px] text-[#766C5F]">Hỗ trợ file <strong>.xlsx</strong>, <strong>.xls</strong>, <strong>.csv</strong>, <strong>.tsv</strong>, <strong>.txt</strong> hoặc <strong>.json</strong> (tối đa 10 MB)</p>
-                  </div>
+                <div className="w-12 h-12 rounded-2xl bg-[#E1EDDB] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-2xl">
+                  {isFileLoading ? '⏳' : '📊'}
                 </div>
 
                 <div>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".xlsx,.xls,.csv,.tsv,.json,.txt"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    id="bulk-vocab-file-input"
-                  />
-                  <label
-                    htmlFor="bulk-vocab-file-input"
-                    className="px-4 py-2 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] font-bold text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer inline-flex items-center gap-2 active:translate-y-0.5 transition-all"
-                  >
-                    {isFileLoading ? (
-                      <>
-                        <span className="animate-spin">🔄</span>
-                        <span>Đang đọc file...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>📂</span>
-                        <span>Chọn file tải lên</span>
-                      </>
-                    )}
-                  </label>
+                  <h4 className="text-sm font-heading font-black text-[#382E2B]">
+                    {isDragging ? 'Thả file Excel vào đây ngay 🐾' : 'Kéo thả file Excel vào đây, hoặc bấm để chọn'}
+                  </h4>
+                  <p className="text-xs text-[#766C5F] mt-0.5">
+                    Hỗ trợ file <strong>.xlsx</strong>, <strong>.xls</strong> hoặc <strong>.csv</strong> tải từ AI hoặc chuẩn bị sẵn (tối đa 10 MB)
+                  </p>
                 </div>
+
+                <button
+                  type="button"
+                  disabled={isFileLoading}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  className="mt-1 px-4 py-2 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] font-black text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all inline-flex items-center gap-2 cursor-pointer"
+                >
+                  {isFileLoading ? (
+                    <>
+                      <span className="animate-spin">🔄</span>
+                      <span>Đang đọc file Excel...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>📂</span>
+                      <span>Chọn file từ máy tính</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* HOẶC DÁN BẢNG TỪ VỰNG */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#382E2B]/20"></div>
+                </div>
+                <div className="relative flex justify-center text-[11px] font-black uppercase tracking-wider text-[#A2978A]">
+                  <span className="bg-[#FFFDF9] px-3">Hoặc dán bảng từ vựng trực tiếp</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <textarea
+                  rows={4}
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  placeholder={`Dán trực tiếp bảng từ copy từ Excel, Google Sheets hoặc bảng của AI vào đây...\n\nVí dụ định dạng:\nword\tphonetic\tpos\tmeaning\texample_sentence\nresilient\t/rɪˈzɪl.jənt/\tadj\tkiên cường, bền bỉ\tShe remained resilient despite difficulties.`}
+                  className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] p-3 rounded-2xl outline-none text-[#382E2B] text-xs font-mono shadow-[1px_2px_0px_rgba(56,46,43,0.1)] transition-colors resize-none leading-relaxed"
+                />
               </div>
 
               {/* Thông báo lỗi nếu có */}
               {errorMessage && (
-                <div className="p-3.5 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
+                <div className="p-3 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
                   <span>⚠️</span>
                   <span>{errorMessage}</span>
                 </div>
               )}
 
               {/* Điều hướng */}
-              <div className="pt-2 flex items-center justify-between border-t-2 border-dashed border-[#EFE8D6]">
+              <div className="pt-1 flex items-center justify-between border-t-2 border-dashed border-[#EFE8D6]">
                 <button
                   type="button"
                   onClick={() => setActiveStep('guide')}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
                 >
                   ‹ Quay lại xem Prompt
                 </button>
                 <button
                   type="button"
                   onClick={handleParseText}
-                  className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <span>Phân tích & Xem trước ➔</span>
                 </button>
@@ -819,11 +831,11 @@ export function BulkAddWordModal() {
             </div>
           )}
 
-          {/* ════════════ BƯỚC 3: XEM TRƯỚC (LIVE PREVIEW GRID) ════════════ */}
+          {/* ════════════ BƯỚC 3: XEM TRƯỚC (LIVE PREVIEW) ════════════ */}
           {activeStep === 'preview' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              {/* Thống kê từ vựng */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-[#FFF8EE] rounded-2xl border-2 border-[#382E2B]/20 text-xs font-bold text-[#382E2B]">
+            <div className="space-y-3.5 animate-in fade-in duration-150">
+              {/* Thống kê từ vựng & nút thêm dòng */}
+              <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[#FFF8EE] rounded-2xl border-2 border-[#382E2B]/15 text-xs font-bold text-[#382E2B]">
                 <div className="flex items-center gap-2">
                   <span>📊 Tổng số từ: <strong>{parsedWords.length}</strong></span>
                   <span className="text-[#A2978A]">|</span>
@@ -842,23 +854,23 @@ export function BulkAddWordModal() {
                   className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#FAF5EB] border border-[#382E2B] text-xs font-bold text-[#382E2B] shadow-sm cursor-pointer flex items-center gap-1.5"
                 >
                   <span>+</span>
-                  <span>Thêm 1 dòng</span>
+                  <span>Thêm dòng</span>
                 </button>
               </div>
 
-              {/* Bảng xem trước có thể sửa trực tiếp (Editable Grid) */}
+              {/* Bảng xem trước có thể sửa trực tiếp */}
               <div className="border-2 border-[#382E2B] rounded-2xl overflow-hidden bg-white shadow-sm max-h-72 overflow-y-auto">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead className="bg-[#FAF5EB] border-b-2 border-[#382E2B] text-[#766C5F] uppercase font-black tracking-wider sticky top-0 z-10">
                       <tr>
-                        <th className="py-2.5 px-3 w-12 text-center">#</th>
-                        <th className="py-2.5 px-3 min-w-[120px]">Từ vựng *</th>
-                        <th className="py-2.5 px-3 min-w-[110px]">Phiên âm</th>
-                        <th className="py-2.5 px-3 w-20">Loại từ</th>
-                        <th className="py-2.5 px-3 min-w-[160px]">Nghĩa tiếng Việt *</th>
-                        <th className="py-2.5 px-3 min-w-[200px]">Câu ví dụ</th>
-                        <th className="py-2.5 px-2 w-10 text-center">Xóa</th>
+                        <th className="py-2.5 px-3 w-10 text-center">#</th>
+                        <th className="py-2.5 px-2.5 min-w-[120px]">Từ vựng *</th>
+                        <th className="py-2.5 px-2.5 min-w-[100px]">Phiên âm</th>
+                        <th className="py-2.5 px-2.5 w-20">Loại từ</th>
+                        <th className="py-2.5 px-2.5 min-w-[150px]">Nghĩa tiếng Việt *</th>
+                        <th className="py-2.5 px-2.5 min-w-[180px]">Câu ví dụ</th>
+                        <th className="py-2.5 px-2 w-9 text-center">Xóa</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#EFE8D6]">
@@ -874,7 +886,7 @@ export function BulkAddWordModal() {
                             <td className="py-2 px-3 text-center font-bold text-[#A2978A]">
                               {idx + 1}
                             </td>
-                            <td className="py-1.5 px-2">
+                            <td className="py-1.5 px-1.5">
                               <input
                                 type="text"
                                 value={row.word}
@@ -883,7 +895,7 @@ export function BulkAddWordModal() {
                                 className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs font-bold text-[#382E2B] outline-none"
                               />
                             </td>
-                            <td className="py-1.5 px-2">
+                            <td className="py-1.5 px-1.5">
                               <input
                                 type="text"
                                 value={row.phonetic}
@@ -892,16 +904,16 @@ export function BulkAddWordModal() {
                                 className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs text-[#5C5248] outline-none"
                               />
                             </td>
-                            <td className="py-1.5 px-2">
+                            <td className="py-1.5 px-1.5">
                               <input
                                 type="text"
                                 value={row.pos}
                                 onChange={(e) => handleCellChange(row.id, 'pos', e.target.value)}
-                                placeholder="noun/adj"
+                                placeholder="adj/noun"
                                 className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs text-[#5C5248] outline-none"
                               />
                             </td>
-                            <td className="py-1.5 px-2">
+                            <td className="py-1.5 px-1.5">
                               <input
                                 type="text"
                                 value={row.meaning}
@@ -910,7 +922,7 @@ export function BulkAddWordModal() {
                                 className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs font-semibold text-[#382E2B] outline-none"
                               />
                             </td>
-                            <td className="py-1.5 px-2">
+                            <td className="py-1.5 px-1.5">
                               <input
                                 type="text"
                                 value={row.example_sentence}
@@ -919,7 +931,7 @@ export function BulkAddWordModal() {
                                 className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs text-[#5C5248] outline-none"
                               />
                             </td>
-                            <td className="py-1.5 px-2 text-center">
+                            <td className="py-1.5 px-1.5 text-center">
                               <button
                                 type="button"
                                 onClick={() => handleDeleteRow(row.id)}
@@ -939,7 +951,7 @@ export function BulkAddWordModal() {
 
               {/* Thông báo lỗi nếu có */}
               {errorMessage && (
-                <div className="p-3.5 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
+                <div className="p-3 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
                   <span>⚠️</span>
                   <span>{errorMessage}</span>
                 </div>
@@ -950,16 +962,16 @@ export function BulkAddWordModal() {
                 <button
                   type="button"
                   onClick={() => setActiveStep('input')}
-                  className="px-4 py-2.5 rounded-2xl text-xs font-bold text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
                 >
-                  ‹ Quay lại sửa nguồn
+                  ‹ Quay lại nạp nguồn
                 </button>
 
                 <button
                   type="button"
                   onClick={handleSaveAll}
                   disabled={isSubmitting || validCount === 0}
-                  className="px-6 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                  className="px-5 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -969,7 +981,7 @@ export function BulkAddWordModal() {
                   ) : (
                     <>
                       <span>🚀</span>
-                      <span>Lưu tất cả {validCount} từ vựng vào bộ từ ➔</span>
+                      <span>Lưu tất cả {validCount} từ vào bộ từ ➔</span>
                     </>
                   )}
                 </button>
