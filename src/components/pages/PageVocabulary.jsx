@@ -528,51 +528,32 @@ export function PageVocabulary() {
       {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Match to desktop_vocabulary.html  */}
       {/* ========================================================================= */}
       <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
-        {/* Top Header Bar */}
-        <header className="px-6 xl:px-8 py-4 bg-[#fffdf9] border-b-2 border-[#443c35] sticky top-0 z-20">
-          <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-2xl xl:text-3xl font-black text-[#37322f] tracking-tight">Sổ từ cá nhân</h1>
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#eaf4e8] text-[#4f7d4b] border-2 border-[#6e9b6a] inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-[#6e9b6a] shrink-0"></span>
-                  <span>Đang hoạt động ({total} từ)</span>
-                </span>
-                <span className="text-xs text-[#9c9182] font-bold hidden xl:inline whitespace-nowrap">Lặp lại ngắt quãng SRS v2.4</span>
-              </div>
-              <p className="text-xs xl:text-sm font-semibold text-[#766c5f] mt-1 truncate">
-                Học bạ thông minh: Hệ thống tự động tính toán chu kỳ quên để nhắc bạn ôn tập đúng thời điểm vàng.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2.5 shrink-0">
-              <button
-                onClick={() => navigateTo('topics')}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <span>📁</span>
-                <span>Quản lý chủ đề</span>
-              </button>
-              <button
-                onClick={handleOpenBulkAdd}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <span>📋</span>
-                <span>Thêm hàng loạt</span>
-              </button>
-              <button
-                onClick={handleOpenAddWord}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#ea7349] hover:bg-[#d96237] text-white text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
-              >
-                <span className="text-base leading-none">+</span>
-                <span>Thêm từ mới</span>
-              </button>
-            </div>
-          </div>
-        </header>
-
         {/* Content Container */}
         <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
+          {/* Action Row - 3 nút tác vụ (Quản lý chủ đề, Thêm hàng loạt, Thêm từ mới) */}
+          <div className="flex items-center justify-end gap-2.5">
+            <button
+              onClick={() => navigateTo('topics')}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <span>📁</span>
+              <span>Quản lý chủ đề</span>
+            </button>
+            <button
+              onClick={handleOpenBulkAdd}
+              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <span>📋</span>
+              <span>Thêm hàng loạt</span>
+            </button>
+            <button
+              onClick={handleOpenAddWord}
+              className="flex items-center gap-1.5 px-4 py-2 bg-[#ea7349] hover:bg-[#d96237] text-white text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
+            >
+              <span className="text-base leading-none">+</span>
+              <span>Thêm từ mới</span>
+            </button>
+          </div>
           {/* SRS Stats Banner */}
           <section className="bg-[#fffcf7] rounded-3xl border-2 border-[#443c35] p-6 shadow-[3px_4px_0px_#443c35]">
             <div className="flex flex-col lg:flex-row items-stretch justify-between gap-6">
