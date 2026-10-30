@@ -30,6 +30,9 @@ const AuthContext = createContext({
   session: null,
   profile: null,
   isPro: false,
+  accessMode: 'pro',
+  setAccessMode: () => {},
+  toggleAccessMode: () => {},
   isAdmin: false,
   loading: true,
   error: null,
@@ -199,14 +202,51 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const isPro = checkIsPro(profile);
+  // Access Mode: 'pro' (Chế độ bản quyền chuẩn) | 'free' (Mở khóa toàn bộ học liệu & pop-up)
+  const [accessMode, setAccessModeState] = useState(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('hivocab_access_mode');
+        if (saved === 'free' || saved === 'pro') return saved;
+      }
+    } catch (_) {}
+    return 'pro';
+  });
+
+  const setAccessMode = useCallback((newMode) => {
+    const validMode = newMode === 'free' ? 'free' : 'pro';
+    setAccessModeState(validMode);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('hivocab_access_mode', validMode);
+        window._hivocabAccessMode = validMode;
+        window.dispatchEvent(new CustomEvent('hivocab:access-mode-changed', { detail: { mode: validMode } }));
+      }
+    } catch (_) {}
+  }, []);
+
+  const toggleAccessMode = useCallback(() => {
+    setAccessMode(accessMode === 'free' ? 'pro' : 'free');
+  }, [accessMode, setAccessMode]);
+
+  const isPro = accessMode === 'free' || checkIsPro(profile);
   const isAdmin = Boolean(profile?.role === 'admin');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window._isUserPro = isPro;
+      window._hivocabAccessMode = accessMode;
+    }
+  }, [isPro, accessMode]);
 
   const value = {
     user,
     session,
     profile,
     isPro,
+    accessMode,
+    setAccessMode,
+    toggleAccessMode,
     isAdmin,
     loading,
     error,

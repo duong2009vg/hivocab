@@ -4,13 +4,15 @@ import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
+import { useToast } from '../../context/ToastContext.jsx';
 import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
 
 export function MainSidebar() {
-  const { user, signOut, isPro } = useAuth();
+  const { user, signOut, isPro, accessMode, toggleAccessMode } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const { openModal } = useModal();
+  const { success, info } = useToast();
   const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();
 
   const activeTab =
@@ -177,35 +179,72 @@ export function MainSidebar() {
         data-purpose="sidebar-footer"
       >
 
-        {/* Upsell banner for Free / Guest users */}
-        {!isPro && (
-          <div
-            onClick={() => openModal('pricingModal')}
-            className="bg-gradient-to-br from-[#FFF9EE] to-[#FFE8C2] rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer hover:-translate-y-0.5 active:translate-y-0.5 transition-all group select-none"
-            role="button"
-            tabIndex={0}
-            data-purpose="sidebar-pro-card"
-          >
-            <div className="flex items-center justify-between gap-1.5 mb-1">
-              <div className="flex items-center gap-1.5 min-w-0">
-                <span className="text-sm leading-none group-hover:scale-110 transition-transform shrink-0">👑</span>
-                <span className="text-xs font-black text-[#8C5311] font-heading truncate">HiVocab PRO</span>
-              </div>
-              <span className="text-[10px] font-black bg-[#D96C4D] text-white px-1.5 py-0.5 rounded-full border border-[#3D352E] whitespace-nowrap shrink-0">
-                Ưu đãi
+        {/* Nút gạt chế độ học liệu Free / PRO */}
+        <div
+          onClick={() => {
+            const nextMode = accessMode === 'free' ? 'pro' : 'free';
+            toggleAccessMode();
+            if (nextMode === 'free') {
+              success('✨ Đã gạt sang FREE: Mở khóa full toàn bộ ngữ liệu & tắt pop-up!');
+            } else {
+              info('👑 Đã gạt sang PRO: Kích hoạt giới hạn bản quyền & pop-up nâng cấp');
+            }
+          }}
+          className={`rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer hover:-translate-y-0.5 active:translate-y-0.5 transition-all select-none ${
+            accessMode === 'free'
+              ? 'bg-gradient-to-br from-[#F0F7EE] to-[#E2EFE0]'
+              : 'bg-gradient-to-br from-[#FFF9EE] to-[#FFE8C2]'
+          }`}
+          role="button"
+          tabIndex={0}
+          title="Bấm để gạt giữa Chế độ Free (Mở khóa toàn bộ) và Chế độ PRO"
+          data-purpose="sidebar-pro-card"
+        >
+          {/* Header row: Icon & Status + Toggle Switch */}
+          <div className="flex items-center justify-between gap-1.5 mb-1.5">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="text-sm leading-none shrink-0">
+                {accessMode === 'free' ? '🔓' : '👑'}
+              </span>
+              <span className="text-xs font-black text-[#3D352E] font-heading truncate">
+                {accessMode === 'free' ? 'Học liệu: FREE' : 'Học liệu: PRO'}
               </span>
             </div>
-            <p className="text-[11px] font-semibold text-[#665C52] leading-snug">
-              Mở khóa trọn bộ IELTS &amp; THPT không giới hạn!
-            </p>
+
+            {/* Nút gạt công tắc chuyển đổi (Switch) */}
             <div
-              className="mt-1.5 text-center py-1 bg-white text-[#3D352E] text-[10px] font-black rounded-xl border border-[#3D352E] shadow-[1px_1px_0px_#3D352E] group-hover:bg-[#FFFDF9] transition-colors"
-              data-purpose="sidebar-pro-cta"
+              className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-200 border-2 border-[#3D352E] flex items-center shrink-0 ${
+                accessMode === 'free' ? 'bg-[#557A46]' : 'bg-[#D96C4D]'
+              }`}
             >
-              Nâng cấp ngay 🚀
+              <div
+                className={`w-4 h-4 rounded-full bg-white border border-[#3D352E] shadow-sm transform transition-transform duration-200 flex items-center justify-center text-[8px] font-black ${
+                  accessMode === 'free' ? 'translate-x-5 text-[#557A46]' : 'translate-x-0 text-[#D96C4D]'
+                }`}
+              >
+                {accessMode === 'free' ? 'F' : 'P'}
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Subtitle / trạng thái */}
+          <p className="text-[11px] font-semibold text-[#665C52] leading-snug">
+            {accessMode === 'free'
+              ? 'Mở khóa full toàn bộ IELTS, THPT & tắt pop-up!'
+              : 'Kích hoạt giới hạn bản quyền & pop-up nâng cấp.'}
+          </p>
+
+          {/* Pill indicator đáy */}
+          <div
+            className={`mt-1.5 text-center py-0.5 px-2 text-[10px] font-black rounded-xl border border-[#3D352E] shadow-[1px_1px_0px_#3D352E] transition-colors flex items-center justify-center gap-1 ${
+              accessMode === 'free'
+                ? 'bg-white text-[#557A46]'
+                : 'bg-white text-[#D96C4D]'
+            }`}
+          >
+            <span>{accessMode === 'free' ? 'Gạt sang PRO (Có khóa) ➔' : 'Gạt sang Free (Mở Full) ➔'}</span>
+          </div>
+        </div>
 
         {/* User Profile Pill or Guest CTA */}
         {!user ? (

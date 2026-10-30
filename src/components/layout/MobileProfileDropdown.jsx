@@ -6,7 +6,7 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 
 export function MobileProfileDropdown() {
-  const { user, signOut, isPro } = useAuth();
+  const { user, signOut, isPro, accessMode, toggleAccessMode } = useAuth();
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
 
@@ -114,6 +114,23 @@ export function MobileProfileDropdown() {
           <span className="text-[10px] bg-[#557A46] text-white px-1.5 py-0.5 rounded-full font-bold">Active</span>
         </div>
       )}
+
+      {/* Nút gạt chế độ học liệu Free/PRO cho mobile */}
+      <div
+        onClick={() => {
+          toggleAccessMode();
+          closeDropdown();
+        }}
+        className="w-full flex items-center justify-between px-4 py-2.5 text-xs font-bold border-b border-outline-variant/15 cursor-pointer bg-amber-50/40 hover:bg-amber-100/50 transition-colors"
+      >
+        <div className="flex items-center gap-2">
+          <span>{accessMode === 'free' ? '🔓' : '👑'}</span>
+          <span>Học liệu: <strong>{accessMode === 'free' ? 'FREE (Mở full)' : 'PRO (Có khóa)'}</strong></span>
+        </div>
+        <div className={`w-8 h-4 rounded-full p-0.5 border border-[#3D352E] flex items-center ${accessMode === 'free' ? 'bg-[#557A46]' : 'bg-[#D96C4D]'}`}>
+          <div className={`w-3 h-3 rounded-full bg-white transition-transform ${accessMode === 'free' ? 'translate-x-4' : 'translate-x-0'}`} />
+        </div>
+      </div>
 
       <button
         onClick={handleSettings}
