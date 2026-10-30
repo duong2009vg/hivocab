@@ -107,11 +107,11 @@ export function MainSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-5 flex-col justify-between border-r border-[#E8DEC8]/80 fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#FBF8F1]/95 backdrop-blur-sm select-none overflow-hidden"
+      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-5 flex-col justify-between border-r border-[#E8DEC8]/80 fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#FBF8F1]/95 backdrop-blur-sm select-none overflow-y-auto no-scrollbar"
       data-purpose="desktop-sidebar"
     >
       {/* Top Section: Brand & Nav Links */}
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex flex-col shrink-0">
         {/* Brand Logo - HI Crayon Cream Paper */}
         <div
           onClick={() => navigateTo('dashboard')}
@@ -132,7 +132,7 @@ export function MainSidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col gap-1.5 pt-1 pr-0.5">
+        <nav className="flex flex-col gap-2 pt-1 pr-0.5">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
