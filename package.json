@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit",
     "test": "node scripts/smoke-test.js && node scripts/unit-test.js",
     "test:e2e": "playwright test",
-    "ci": "npm run lint && npm run format:check && npm run typecheck && npm test && npm run build",
+    "ci": "npm run lint && npm run format:check && npm run typecheck && npm run build && npm test",
     "build:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --minify",
     "watch:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --watch"
   },
