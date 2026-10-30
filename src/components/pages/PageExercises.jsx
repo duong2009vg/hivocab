@@ -230,24 +230,10 @@ export function PageExercises() {
 
       {/* DESKTOP LAYOUT (hidden lg:flex) */}
       <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
-        <header className="px-6 xl:px-8 py-4 bg-[#FFFDF9] border-b-2 border-[#382E2B] sticky top-0 z-20 select-none">
-          <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-4">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2.5 flex-wrap">
-                <h1 className="text-xl xl:text-3xl font-heading font-black text-[#382E2B] tracking-tight">
-                  Phòng Luyện Đề THPT Quốc Gia &amp; <span className="whitespace-nowrap">CBT 🎓</span>
-                </h1>
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#EAF4E8] text-[#4F7D4B] border-2 border-[#6E9B6A] inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-[#6E9B6A] shrink-0"></span>
-                  <span>{allExams.length} đề thi sẵn sàng</span>
-                </span>
-              </div>
-              <p className="text-xs xl:text-sm font-semibold text-[#766C5F] mt-1 truncate">
-                Kho đề thi chuẩn ma trận Bộ Giáo dục, tích hợp bộ đếm giờ tự động 50 phút và giải thích từ vựng chi tiết.
-              </p>
-            </div>
-
-            <div className="relative w-60 xl:w-80 shrink-0">
+        <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
+          {/* Search Bar Row (Đã gỡ bỏ header trắng và tiêu đề theo yêu cầu) */}
+          <div className="flex items-center justify-end">
+            <div className="relative w-72 xl:w-96 shrink-0">
               <input
                 type="text"
                 value={searchQuery}
@@ -267,9 +253,6 @@ export function PageExercises() {
               )}
             </div>
           </div>
-        </header>
-
-        <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
           {/* Hero Study Banner */}
           <section className="bg-gradient-to-r from-[#EEF4EE] via-[#FFFDF9] to-[#F7EEE4] rounded-3xl border-2 border-[#382E2B] p-5 xl:p-7 shadow-[3px_4px_0px_#382E2B] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-5 select-none">
             <div className="space-y-2.5 flex-1 min-w-0 max-w-2xl">
