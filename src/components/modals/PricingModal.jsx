@@ -52,6 +52,35 @@ const PLANS = {
   },
 };
 
+function getQrImageUrl(data, selectedPlanAmount) {
+  if (!data) return null;
+
+  // 1. Nếu data đã có sẵn URL ảnh hợp lệ (http hoặc https hoặc data:image)
+  if (data.qrImageUrl && /^https?:\/\//i.test(data.qrImageUrl)) {
+    return data.qrImageUrl;
+  }
+  if (data.qrCode && (/^https?:\/\//i.test(data.qrCode) || /^data:image/i.test(data.qrCode))) {
+    return data.qrCode;
+  }
+
+  // 2. Tạo qua img.vietqr.io nếu có số tài khoản
+  const bin = data.bin || '970422'; // 970422 là MBBank (PayOS default virtual account)
+  const acc = data.accountNumber;
+  const amount = data.amount || selectedPlanAmount || 0;
+  const desc = encodeURIComponent(data.description || `HV${data.orderCode || ''}`);
+  const accName = encodeURIComponent(data.accountName || '');
+  if (acc) {
+    return `https://img.vietqr.io/image/${bin}-${acc}-compact2.png?amount=${amount}&addInfo=${desc}&accountName=${accName}`;
+  }
+
+  // 3. Fallback: chuyển đổi raw EMVCo qrCode thành mã QR bằng qrserver
+  if (data.qrCode && typeof data.qrCode === 'string') {
+    return `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(data.qrCode)}`;
+  }
+
+  return null;
+}
+
 export function PricingModal({ onSuccess: propOnSuccess }) {
   const { modals, closeModal } = useModal();
   const { success, error: toastError } = useToast();
@@ -374,27 +403,58 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 p-4 sm:p-6 bg-white rounded-3xl border-2 border-[#3D352E] shadow-crayon">
               
               {/* Mã QR */}
-              {orderData.qrCode ? (
-                <div className="p-3.5 bg-white rounded-2xl border-2 border-[#3D352E] shadow-crayonSm shrink-0">
-                  <img
-                    src={orderData.qrCode}
-                    alt="VietQR PayOS"
-                    className="w-56 h-56 object-contain rounded-lg"
-                  />
-                </div>
-              ) : orderData.checkoutUrl ? (
-                <div className="text-center py-8">
-                  <a
-                    href={orderData.checkoutUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-6 py-3.5 bg-[#4D6B53] hover:bg-[#3D5642] text-white rounded-2xl font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayonSm inline-flex items-center gap-2"
-                  >
-                    <span>Mở trang thanh toán PayOS</span>
-                    <span>↗</span>
-                  </a>
-                </div>
-              ) : null}
+              {(() => {
+                const qrImageSrc = getQrImageUrl(orderData, PLANS[selectedPlanId]?.amount);
+                if (qrImageSrc) {
+                  return (
+                    <div className="flex flex-col items-center gap-2 shrink-0">
+                      <div className="p-3.5 bg-white rounded-2xl border-2 border-[#3D352E] shadow-crayonSm shrink-0 flex items-center justify-center min-w-[230px] min-h-[230px]">
+                        <img
+                          src={qrImageSrc}
+                          alt="VietQR PayOS"
+                          className="w-56 h-56 sm:w-60 sm:h-60 object-contain rounded-lg"
+                          onError={(e) => {
+                            if (orderData.qrCode && !e.currentTarget.dataset.fallbackTried) {
+                              e.currentTarget.dataset.fallbackTried = '1';
+                              e.currentTarget.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(orderData.qrCode)}`;
+                            } else if (orderData.qrCode && !e.currentTarget.dataset.quickchartTried) {
+                              e.currentTarget.dataset.quickchartTried = '1';
+                              e.currentTarget.src = `https://quickchart.io/qr?size=250&text=${encodeURIComponent(orderData.qrCode)}`;
+                            }
+                          }}
+                        />
+                      </div>
+                      {orderData.checkoutUrl && (
+                        <a
+                          href={orderData.checkoutUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-bold text-[#4D6B53] hover:text-[#3D5642] hover:underline flex items-center gap-1 cursor-pointer pt-0.5"
+                        >
+                          <span>Mở trang thanh toán PayOS</span>
+                          <span>↗</span>
+                        </a>
+                      )}
+                    </div>
+                  );
+                }
+                if (orderData.checkoutUrl) {
+                  return (
+                    <div className="text-center py-8">
+                      <a
+                        href={orderData.checkoutUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-3.5 bg-[#4D6B53] hover:bg-[#3D5642] text-white rounded-2xl font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayonSm inline-flex items-center gap-2"
+                      >
+                        <span>Mở trang thanh toán PayOS</span>
+                        <span>↗</span>
+                      </a>
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               {/* Tờ Giấy Note Vàng Hướng Dẫn */}
               <div className="space-y-3.5 text-xs text-[#3D352E] flex-1 max-w-sm">
@@ -410,6 +470,38 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
 
                 {/* Thông tin đơn hàng */}
                 <div className="space-y-2 font-mono text-xs p-3.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E]">
+                  {orderData.accountNumber && (
+                    <>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#786F66] font-sans font-bold">Ngân hàng:</span>
+                        <span className="font-black text-[#3D352E] font-sans">
+                          {orderData.bin === '970422' || !orderData.bin ? 'MBBank (Quân Đội)' : 'VietQR'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#786F66] font-sans font-bold">Số tài khoản:</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-black text-[#3D352E]">{orderData.accountNumber}</span>
+                          <button
+                            type="button"
+                            onClick={() => copyToClipboard(orderData.accountNumber, 'acc')}
+                            className="text-[10px] font-sans font-bold px-1.5 py-0.5 rounded bg-white border border-[#3D352E] cursor-pointer"
+                          >
+                            {copiedField === 'acc' ? 'Đã chép' : 'Chép'}
+                          </button>
+                        </div>
+                      </div>
+                      {orderData.accountName && (
+                        <div className="flex justify-between items-center">
+                          <span className="text-[#786F66] font-sans font-bold">Chủ tài khoản:</span>
+                          <span className="font-black text-[#3D352E] font-sans uppercase">
+                            {orderData.accountName}
+                          </span>
+                        </div>
+                      )}
+                    </>
+                  )}
+
                   <div className="flex justify-between items-center">
                     <span className="text-[#786F66] font-sans font-bold">Mã đơn hàng:</span>
                     <div className="flex items-center gap-1.5">

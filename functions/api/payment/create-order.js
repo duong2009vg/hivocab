@@ -262,17 +262,25 @@ export async function onRequestPost(context) {
             });
         }
 
+        const bin = payosData.bin || '970422';
+        const orderDescription = payosData.description || description;
+        const vietQrUrl = payosData.accountNumber
+            ? `https://img.vietqr.io/image/${bin}-${payosData.accountNumber}-compact2.png?amount=${plan.amount}&addInfo=${encodeURIComponent(orderDescription)}&accountName=${encodeURIComponent(payosData.accountName || '')}`
+            : (payosData.qrCode ? `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(payosData.qrCode)}` : null);
+
         // 8. Trả về thông tin cho Frontend nhúng PayOS
         return new Response(JSON.stringify({
             ok: true,
             orderCode,
             checkoutUrl: payosData.checkoutUrl,
             qrCode: payosData.qrCode,
+            qrImageUrl: vietQrUrl,
+            bin,
             amount: plan.amount,
             planName: plan.name,
             accountNumber: payosData.accountNumber,
             accountName: payosData.accountName,
-            description: payosData.description,
+            description: orderDescription,
         }), {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
