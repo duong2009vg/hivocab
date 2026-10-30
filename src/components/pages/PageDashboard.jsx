@@ -474,59 +474,65 @@ export function PageDashboard() {
       </div>
 
       {/* DESKTOP LAYOUT */}
-      <div className="dashboard-desktop-layout hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
+      <div className="dashboard-desktop-layout hidden lg:flex flex-1 w-full min-h-screen lg:pl-[var(--sidebar-w,244px)]">
         <div className="flex-1 flex flex-col min-w-0">
           {/* TopBar */}
-          <header className="dashboard-desktop-header px-8 py-5 border-b-2 border-[#e6dcce] bg-[#FAF5EB] sticky top-0 z-40 flex flex-wrap items-center justify-between gap-4 shadow-2xs">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-black text-crayonText font-quicksand">Chào buổi sáng, {userName} ơi! 🌿</h1>
+          <header className="dashboard-desktop-header px-6 xl:px-8 py-4 border-b-2 border-[#e6dcce] bg-[#FAF5EB] sticky top-0 z-20 shadow-2xs">
+            <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-3 xl:gap-4">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 min-w-0">
+                  <h1 className="text-xl xl:text-2xl font-black text-crayonText font-quicksand truncate">
+                    Chào buổi sáng, {userName} ơi! <span className="inline-block">🌿</span>
+                  </h1>
+                </div>
+                <p className="text-xs xl:text-sm text-softMuted mt-0.5 truncate">
+                  Hôm nay là một ngày tuyệt vời để ghi nhớ thêm những từ vựng mới.
+                </p>
               </div>
-              <p className="text-xs md:text-sm text-softMuted mt-0.5">Hôm nay là một ngày tuyệt vời để ghi nhớ thêm những từ vựng mới.</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative w-64 lg:w-72">
-                <input 
-                  className="w-full pl-10 pr-4 py-2 text-sm bg-white rounded-full crayon-border focus:ring-2 focus:ring-sage focus:outline-none transition-all placeholder:text-softMuted/70" 
-                  placeholder="Tìm nhanh từ vựng, chủ đề..." 
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && searchQuery.trim()) {
-                      navigateTo('dictionary');
-                      setTimeout(() => {
-                        if (typeof window !== 'undefined' && window.HiDict?.lookupWord) {
-                          window.HiDict.lookupWord(searchQuery.trim());
-                        }
-                      }, 200);
-                    }
-                  }}
-                />
-                <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-softMuted text-sm"></i>
+              <div className="flex items-center gap-2.5 xl:gap-3 shrink-0">
+                <div className="relative w-48 xl:w-64 2xl:w-72">
+                  <input 
+                    className="w-full pl-9 pr-3.5 py-2 text-xs xl:text-sm bg-white rounded-full crayon-border focus:ring-2 focus:ring-sage focus:outline-none transition-all placeholder:text-softMuted/70" 
+                    placeholder="Tìm nhanh từ vựng, chủ đề..." 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && searchQuery.trim()) {
+                        navigateTo('dictionary');
+                        setTimeout(() => {
+                          if (typeof window !== 'undefined' && window.HiDict?.lookupWord) {
+                            window.HiDict.lookupWord(searchQuery.trim());
+                          }
+                        }, 200);
+                      }
+                    }}
+                  />
+                  <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-softMuted text-xs xl:text-sm"></i>
+                </div>
+                <div className="hidden sm:flex items-center gap-1.5 px-3 xl:px-3.5 py-2 rounded-full bg-orange-100 text-terracotta font-extrabold text-xs xl:text-sm crayon-border shadow-crayonSm whitespace-nowrap shrink-0">
+                  <span className="text-sm xl:text-base animate-bounce">🔥</span>
+                  <span>{streak} ngày liên tiếp</span>
+                </div>
+                <button onClick={handleOpenAddWord} className="bg-terracotta hover:bg-terracotta-dark text-white font-bold text-xs xl:text-sm px-3.5 xl:px-4 py-2 rounded-full crayon-border shadow-crayonOrange active:translate-y-0.5 transition-all flex items-center gap-1.5 xl:gap-2 whitespace-nowrap shrink-0 cursor-pointer">
+                  <i className="fa-solid fa-plus text-xs"></i>
+                  <span>Thêm từ mới</span>
+                </button>
+                <button className="w-9 h-9 xl:w-10 xl:h-10 rounded-full bg-white crayon-border flex items-center justify-center text-crayonText hover:bg-cream transition-all relative shrink-0 cursor-pointer">
+                  <i className="fa-regular fa-bell text-sm"></i>
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-terracotta border-2 border-white"></span>
+                </button>
               </div>
-              <div className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-orange-100 text-terracotta font-extrabold text-sm crayon-border shadow-crayonSm">
-                <span className="text-base animate-bounce">🔥</span>
-                <span>{streak} ngày liên tiếp</span>
-              </div>
-              <button onClick={handleOpenAddWord} className="bg-terracotta hover:bg-terracotta-dark text-white font-bold text-sm px-4 py-2 rounded-full crayon-border shadow-crayonOrange active:translate-y-0.5 transition-all flex items-center gap-2">
-                <i className="fa-solid fa-plus text-xs"></i>
-                <span>Thêm từ mới</span>
-              </button>
-              <button className="w-10 h-10 rounded-full bg-white crayon-border flex items-center justify-center text-crayonText hover:bg-cream transition-all relative">
-                <i className="fa-regular fa-bell text-sm"></i>
-                <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-terracotta border-2 border-white"></span>
-              </button>
             </div>
           </header>
 
-          <main className="dashboard-desktop-main p-6 lg:p-8 flex-1">
-            <div className="dashboard-desktop-grid grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <main className="dashboard-desktop-main p-6 lg:p-7 flex-1">
+            <div className="dashboard-desktop-grid max-w-[1440px] w-full mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-7 items-start">
               {/* Left column */}
-              <div className="dashboard-desktop-column lg:col-span-7 xl:col-span-8 space-y-7">
+              <div className="dashboard-desktop-column lg:col-span-7 xl:col-span-8 space-y-6">
                 <section className="dashboard-desktop-card dashboard-desktop-hero bg-[#fffdf9] rounded-3xl p-6 lg:p-7 crayon-border shadow-crayon relative overflow-hidden border-2">
-                  <div className="relative z-1 flex flex-col md:flex-row items-center gap-6 justify-between">
-                    <div className="space-y-4 max-w-md">
+                  <div className="relative z-1 flex flex-col md:flex-row items-center gap-5 xl:gap-6 justify-between">
+                    <div className="space-y-3.5 flex-1 min-w-0">
                       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light text-sage border border-sage/30 text-xs font-bold">
                         <i className="fa-solid fa-sparkles"></i>
                         <span>Thuật toán ngắt quãng Spaced Repetition</span>
@@ -540,7 +546,7 @@ export function PageDashboard() {
                           <>Đến giờ ôn tập rồi!<br/><span className="text-terracotta">{wordsDueCount} từ vựng</span> đang chờ bạn.</>
                         )}
                       </h2>
-                      <div className="bg-cream/80 border-2 border-[#3d352e] rounded-2xl p-3.5 relative inline-block text-sm font-semibold text-crayonText">
+                      <div className="bg-cream/80 border-2 border-[#3d352e] rounded-2xl p-3 relative inline-block text-xs xl:text-sm font-semibold text-crayonText">
                         <span className="font-bold text-terracotta">Bé Hổ nhắc:</span> {
                           mascotInteracted
                             ? isAngry
@@ -556,18 +562,18 @@ export function PageDashboard() {
                         }
                         <div className="absolute -left-2 top-4 w-3 h-3 bg-cream border-l-2 border-b-2 border-crayonText rotate-45"></div>
                       </div>
-                      <div className="pt-2 flex flex-wrap items-center gap-3">
+                      <div className="pt-1.5 flex flex-wrap items-center gap-3">
                         {heroState !== 'countdown' && (
-                          <button onClick={handleStartReview} className="bg-terracotta hover:bg-terracotta-dark text-white text-base font-black px-6 py-3 rounded-2xl crayon-border shadow-crayonOrange active:translate-y-1 transition-all flex items-center gap-3">
-                            <i className="fa-solid fa-play text-sm"></i>
+                          <button onClick={handleStartReview} className="bg-terracotta hover:bg-terracotta-dark text-white text-sm xl:text-base font-black px-5 xl:px-6 py-2.5 xl:py-3 rounded-2xl crayon-border shadow-crayonOrange active:translate-y-1 transition-all flex items-center gap-2.5 whitespace-nowrap shrink-0 cursor-pointer">
+                            <i className="fa-solid fa-play text-xs xl:text-sm"></i>
                             <span>Ôn tập ngay ({wordsDueCount} từ SRS)</span>
                           </button>
                         )}
-                        <span className="text-xs font-semibold text-softMuted">Mất tầm ~{Math.max(3, Math.round(wordsDueCount * 0.4))} phút</span>
+                        <span className="text-xs font-semibold text-softMuted whitespace-nowrap">Mất tầm ~{Math.max(3, Math.round(wordsDueCount * 0.4))} phút</span>
                       </div>
                     </div>
                     <div 
-                      className="dashboard-desktop-mascot flex-shrink-0 w-56 h-56 lg:w-64 lg:h-64 relative flex items-center justify-center cursor-pointer group"
+                      className="dashboard-desktop-mascot flex-shrink-0 w-44 h-44 xl:w-52 xl:h-52 relative flex items-center justify-center cursor-pointer group"
                       onClick={handleMascotClick}
                       title="Bấm vào bé hổ để tương tác!"
                     >
@@ -641,17 +647,17 @@ export function PageDashboard() {
               </div>
 
               {/* Right column */}
-              <div className="dashboard-desktop-column lg:col-span-5 xl:col-span-4 space-y-7">
+              <div className="dashboard-desktop-column lg:col-span-5 xl:col-span-4 space-y-6">
                 <section className="dashboard-desktop-card dashboard-desktop-calendar bg-white rounded-3xl p-5 sm:p-6 crayon-border shadow-crayonSm space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-terracotta text-lg border border-orange-200">🔥</div>
-                      <div>
-                        <h3 className="text-base font-black text-crayonText font-quicksand">Lịch giữ lửa</h3>
-                        <p className="text-[11px] text-softMuted">Mức độ chuyên cần ôn luyện mỗi ngày</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-terracotta text-lg border border-orange-200 shrink-0">🔥</div>
+                      <div className="min-w-0">
+                        <h3 className="text-base font-black text-crayonText font-quicksand truncate">Lịch giữ lửa</h3>
+                        <p className="text-[11px] text-softMuted truncate">Mức độ chuyên cần ôn luyện mỗi ngày</p>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-terracotta bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">{streak} ngày liên tiếp</span>
+                    <span className="text-xs font-black text-terracotta bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 whitespace-nowrap shrink-0">{streak} ngày liên tiếp</span>
                   </div>
                   <div className="flex items-center justify-between px-3 py-2 bg-[#fbf8f3] rounded-2xl crayon-border text-sm font-bold text-crayonText">
                     <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted"><i className="fa-solid fa-chevron-left text-xs"></i></button>

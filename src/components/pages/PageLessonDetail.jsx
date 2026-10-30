@@ -351,40 +351,40 @@ export function PageLessonDetail() {
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Verbatim Stitch Desktop Screen      */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
-        <main className="flex-1 px-8 py-7 flex flex-col min-w-0 overflow-y-auto">
+      <div className="hidden lg:flex flex-1 w-full min-h-screen lg:pl-[var(--sidebar-w,244px)]">
+        <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 xl:px-8 py-6 flex flex-col min-w-0 overflow-y-auto">
         
         {/* Breadcrumbs & Top Quick Actions */}
-        <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-dashed border-[#b8ae9f]">
-          <div className="flex items-center gap-2 text-sm font-semibold text-[#78726b]">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b-2 border-dashed border-[#b8ae9f]">
+          <div className="flex items-center gap-2 text-sm font-semibold text-[#78726b] min-w-0 flex-wrap">
             <button
               onClick={goBack}
-              className="hover:text-[#322e2b] flex items-center gap-1.5 cursor-pointer font-bold"
+              className="hover:text-[#322e2b] flex items-center gap-1.5 cursor-pointer font-bold whitespace-nowrap shrink-0"
             >
               <span>←</span>
               <span>Quay lại</span>
             </button>
             <span>/</span>
-            <span onClick={goBack} className="hover:text-[#322e2b] cursor-pointer">
+            <span onClick={goBack} className="hover:text-[#322e2b] cursor-pointer truncate max-w-[200px]">
               {topicName || 'Chủ đề'}
             </span>
             <span>/</span>
-            <span className="text-[#322e2b] font-bold bg-white px-2.5 py-0.5 rounded-full border border-[#322e2b] text-xs">
+            <span className="text-[#322e2b] font-bold bg-white px-2.5 py-0.5 rounded-full border border-[#322e2b] text-xs truncate max-w-[260px]">
               {lessonName}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 shrink-0">
             {isPassage && (
               <button
                 onClick={startReading}
-                className="px-3.5 py-1.5 text-xs font-bold bg-white rounded-full border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-bold bg-white rounded-full border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
               >
                 <span>📖</span>
                 <span>Đọc bài song ngữ</span>
               </button>
             )}
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#eef5ec] rounded-full border border-[#799b6e] text-xs font-bold text-[#799b6e]">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#eef5ec] rounded-full border border-[#799b6e] text-xs font-bold text-[#799b6e] whitespace-nowrap shrink-0">
               <span>🌱</span>
               <span>Churbito Level 1</span>
             </div>

@@ -326,28 +326,28 @@ export function PageTopics() {
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Verbatim Stitch Desktop Screen      */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
-        <main className="flex-1 px-8 py-7 flex flex-col gap-6 overflow-x-hidden min-w-0">
+      <div className="hidden lg:flex flex-1 w-full min-h-screen lg:pl-[var(--sidebar-w,244px)]">
+        <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 xl:px-8 py-6 flex flex-col gap-5 overflow-x-hidden min-w-0">
           
           {/* Header and Action Row */}
           <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 text-xs font-bold text-[#827A73] mb-1">
                 <span>HiVocab Desktop</span>
                 <span>•</span>
                 <span className="text-[#5F7C66]">Khóa học &amp; Thư mục</span>
               </div>
-              <h2 className="text-3xl font-extrabold text-[#3D352E] flex items-center gap-2.5 tracking-tight font-['Quicksand',sans-serif]">
-                Chủ đề &amp; Khóa học 📚
+              <h2 className="text-2xl xl:text-3xl font-extrabold text-[#3D352E] flex items-center gap-2.5 tracking-tight font-['Quicksand',sans-serif]">
+                <span>Chủ đề &amp; Khóa học 📚</span>
               </h2>
-              <p className="text-sm text-[#73695F] font-semibold mt-1">
+              <p className="text-xs xl:text-sm text-[#73695F] font-semibold mt-1">
                 Khám phá và lựa chọn thư mục từ vựng theo giáo trình, mục tiêu thi cử hoặc sở thích cá nhân.
               </p>
             </div>
 
             {/* Search Bar and Action Button */}
-            <div className="flex items-center gap-3 shrink-0">
-              <div className="relative w-72 lg:w-80">
+            <div className="flex items-center gap-2.5 xl:gap-3 shrink-0">
+              <div className="relative w-56 xl:w-76">
                 <input
                   type="text"
                   value={searchQuery}
@@ -355,7 +355,7 @@ export function PageTopics() {
                   placeholder="Tìm kiếm khóa học, sách (CAM, IELTS, THPT)..."
                   className="w-full text-xs font-semibold pl-9 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] placeholder-[#9C9286] focus:outline-none focus:ring-2 focus:ring-[#5F7C66]"
                 />
-                <svg className="w-4 h-4 text-[#827A73] absolute left-3 top-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#827A73] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
@@ -363,9 +363,9 @@ export function PageTopics() {
               {/* Create Topic CTA */}
               <button
                 onClick={handleOpenCreateTopic}
-                className="flex items-center gap-2 bg-[#D96B43] hover:bg-[#c85e37] text-white font-bold text-xs px-4 py-2.5 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
+                className="flex items-center gap-2 bg-[#D96B43] hover:bg-[#c85e37] text-white font-bold text-xs px-4 py-2.5 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-x-0.5 active:translate-y-0.5 cursor-pointer whitespace-nowrap shrink-0"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"></path>
                 </svg>
                 <span>Tạo chủ đề mới</span>
@@ -374,7 +374,7 @@ export function PageTopics() {
               {/* Notification Bell */}
               <button
                 aria-label="Thông báo"
-                className="w-10 h-10 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center hover:bg-neutral-50 transition cursor-pointer"
+                className="w-10 h-10 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center hover:bg-neutral-50 transition cursor-pointer shrink-0"
               >
                 <div className="relative">
                   <svg className="w-5 h-5 text-[#3D352E]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -487,11 +487,12 @@ export function PageTopics() {
                     )}
                     <div>
                       {/* Top Tag & Meta */}
-                      <div className="flex items-center justify-between mb-3">
-                        <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${tagColor}`}>
-                          <span>{getCategoryPillEmoji(folder.id)}</span> {folderName}
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border inline-flex items-center gap-1.5 min-w-0 max-w-[65%] ${tagColor}`}>
+                          <span className="shrink-0">{getCategoryPillEmoji(folder.id)}</span>
+                          <span className="truncate">{folderName}</span>
                         </span>
-                        <span className="text-[11px] font-extrabold text-[#73695F] bg-[#EFE9DD] px-2 py-0.5 rounded-lg border border-[#3D352E]/30 mr-8">
+                        <span className={`text-[11px] font-extrabold text-[#73695F] bg-[#EFE9DD] px-2.5 py-0.5 rounded-lg border border-[#3D352E]/30 whitespace-nowrap shrink-0 ${isStarted ? 'mr-7' : ''}`}>
                           {folder.count} chủ đề
                         </span>
                       </div>
@@ -606,12 +607,13 @@ export function PageTopics() {
                       )}
                       <div>
                         {/* Top Tag & Meta */}
-                        <div className="flex items-center justify-between mb-3">
-                          <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border flex items-center gap-1.5 ${tagColor}`}>
-                            <span>{getCategoryPillEmoji(topic.category)}</span> {topic.category || 'Chủ đề'}
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border inline-flex items-center gap-1.5 min-w-0 max-w-[70%] ${tagColor}`}>
+                            <span className="shrink-0">{getCategoryPillEmoji(topic.category)}</span>
+                            <span className="truncate">{topic.category || 'Chủ đề'}</span>
                           </span>
                           {topic.is_pro && !isUserPro && (
-                            <span className="px-2 py-0.5 rounded-full bg-amber-200 text-[#3D352E] text-[10px] font-black border border-[#3D352E]">
+                            <span className={`px-2 py-0.5 rounded-full bg-amber-200 text-[#3D352E] text-[10px] font-black border border-[#3D352E] whitespace-nowrap shrink-0 ${isStarted ? 'mr-7' : ''}`}>
                               PRO
                             </span>
                           )}

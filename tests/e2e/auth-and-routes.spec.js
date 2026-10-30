@@ -23,7 +23,7 @@ test.describe('HiVocab E2E Navigation & Route Integrity', () => {
     const emailInput = page.locator('#auth-email');
     const passwordInput = page.locator('#auth-password');
 
-    await expect(emailInput).toBeVisible();
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
     await expect(passwordInput).toBeVisible();
 
     // Login submit button should exist

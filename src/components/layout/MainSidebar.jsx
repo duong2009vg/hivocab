@@ -107,18 +107,22 @@ export function MainSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex w-72 shrink-0 p-6 flex-col justify-between border-r border-[#E8DEC8]/80 min-h-screen fixed left-0 top-0 h-screen z-20 bg-[#FBF8F1]/95 backdrop-blur-sm select-none"
+      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-5 flex-col justify-between border-r border-[#E8DEC8]/80 fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#FBF8F1]/95 backdrop-blur-sm select-none overflow-hidden"
       data-purpose="desktop-sidebar"
     >
       {/* Top Section: Brand & Nav Links */}
-      <div className="space-y-6">
+      <div className="flex-1 min-h-0 flex flex-col">
         {/* Brand Logo - HI Crayon Cream Paper */}
         <div
           onClick={() => navigateTo('dashboard')}
-          className="px-2 cursor-pointer group select-none flex items-center"
+          className="px-1.5 mb-4 shrink-0 cursor-pointer group select-none flex items-center"
           title="Trang chủ HiVocab"
+          data-purpose="sidebar-brand"
         >
-          <div className="w-16 h-16 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] overflow-hidden bg-[#F7F0DE] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center">
+          <div
+            className="w-14 h-14 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] overflow-hidden bg-[#F7F0DE] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
+            data-purpose="sidebar-logo-box"
+          >
             <img
               src="/logo-hi-cream.png"
               alt="Logo HiVocab"
@@ -128,7 +132,7 @@ export function MainSidebar() {
         </div>
 
         {/* Navigation Menu */}
-        <nav className="space-y-2 pt-2">
+        <nav className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col gap-1.5 pt-1 pr-0.5">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
             return (
@@ -136,26 +140,28 @@ export function MainSidebar() {
                 key={item.id}
                 onClick={() => navigateTo(item.id)}
                 onMouseEnter={item.onMouseEnter}
-                className={`flex items-center justify-between px-4 py-3 rounded-2xl cursor-pointer transition-all ${
+                className={`flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl cursor-pointer transition-all shrink-0 ${
                   isActive
                     ? 'font-bold text-white bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
                     : 'font-semibold text-[#786F66] hover:bg-white/80 hover:text-[#302A24] border border-transparent'
                 }`}
               >
-                <div className="flex items-center gap-3.5">
+                <div className="flex items-center gap-3 min-w-0">
                   {item.emoji ? (
-                    <span className="text-xl">{item.emoji}</span>
+                    <span className="text-lg leading-none shrink-0">{item.emoji}</span>
                   ) : (
                     item.icon
                   )}
-                  <span className={isActive ? 'font-heading text-sm' : ''}>{item.label}</span>
+                  <span className={`truncate whitespace-nowrap text-sm ${isActive ? 'font-heading' : ''}`}>
+                    {item.label}
+                  </span>
                 </div>
 
                 {isActive && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-300 ring-2 ring-white"></span>
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-300 ring-2 ring-white shrink-0"></span>
                 )}
                 {!isActive && item.badge != null && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-[#F4E3B4] text-[#3D352E] rounded-full border border-[#3D352E]">
+                  <span className="px-2 py-0.5 text-xs font-bold bg-[#F4E3B4] text-[#3D352E] rounded-full border border-[#3D352E] shrink-0">
                     {item.badge}
                   </span>
                 )}
@@ -166,29 +172,36 @@ export function MainSidebar() {
       </div>
 
       {/* Bottom Section: User Profile Card & Actions */}
-      <div className="space-y-3 pt-4 border-t border-[#E8DEC8]/80">
+      <div
+        className="shrink-0 flex flex-col gap-2.5 pt-3 mt-2 border-t border-[#E8DEC8]/80 bg-[#FBF8F1]/95"
+        data-purpose="sidebar-footer"
+      >
 
         {/* Upsell banner for Free / Guest users */}
         {!isPro && (
           <div
             onClick={() => openModal('pricingModal')}
-            className="bg-gradient-to-br from-[#FFF9EE] to-[#FFE8C2] rounded-2xl p-3 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer hover:-translate-y-0.5 active:translate-y-0.5 transition-all group select-none"
+            className="bg-gradient-to-br from-[#FFF9EE] to-[#FFE8C2] rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer hover:-translate-y-0.5 active:translate-y-0.5 transition-all group select-none"
             role="button"
             tabIndex={0}
+            data-purpose="sidebar-pro-card"
           >
-            <div className="flex items-center justify-between mb-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-base group-hover:scale-110 transition-transform">👑</span>
-                <span className="text-xs font-black text-[#8C5311] font-heading">HiVocab PRO</span>
+            <div className="flex items-center justify-between gap-1.5 mb-1">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-sm leading-none group-hover:scale-110 transition-transform shrink-0">👑</span>
+                <span className="text-xs font-black text-[#8C5311] font-heading truncate">HiVocab PRO</span>
               </div>
-              <span className="text-[10px] font-black bg-[#D96C4D] text-white px-1.5 py-0.5 rounded-full border border-[#3D352E]">
+              <span className="text-[10px] font-black bg-[#D96C4D] text-white px-1.5 py-0.5 rounded-full border border-[#3D352E] whitespace-nowrap shrink-0">
                 Ưu đãi
               </span>
             </div>
-            <p className="text-[11px] font-semibold text-[#665C52] leading-tight">
+            <p className="text-[11px] font-semibold text-[#665C52] leading-snug">
               Mở khóa trọn bộ IELTS &amp; THPT không giới hạn!
             </p>
-            <div className="mt-2 text-center py-1 bg-white text-[#3D352E] text-[10px] font-black rounded-xl border border-[#3D352E] shadow-[1px_1px_0px_#3D352E] group-hover:bg-[#FFFDF9] transition-colors">
+            <div
+              className="mt-1.5 text-center py-1 bg-white text-[#3D352E] text-[10px] font-black rounded-xl border border-[#3D352E] shadow-[1px_1px_0px_#3D352E] group-hover:bg-[#FFFDF9] transition-colors"
+              data-purpose="sidebar-pro-cta"
+            >
               Nâng cấp ngay 🚀
             </div>
           </div>
@@ -196,9 +209,12 @@ export function MainSidebar() {
 
         {/* User Profile Pill or Guest CTA */}
         {!user ? (
-          <div className="bg-[#FAF3E7] rounded-2xl p-3 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2.5">
+          <div
+            className="bg-[#FAF3E7] rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2"
+            data-purpose="sidebar-profile-card"
+          >
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
                 🐯
               </div>
               <div className="min-w-0 flex-1">
@@ -209,7 +225,7 @@ export function MainSidebar() {
             <button
               type="button"
               onClick={() => navigateTo('login')}
-              className="w-full py-2 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className="w-full py-1.5 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <span>Đăng nhập / Đăng ký</span>
               <span>🔑</span>
@@ -219,14 +235,15 @@ export function MainSidebar() {
           <>
             <div
               onClick={() => navigateTo('profile')}
-              className={`p-3 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-between cursor-pointer transition-all ${
+              className={`p-2.5 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-between gap-2 cursor-pointer transition-all ${
                 activeTab === 'profile' ? 'bg-[#EFF6EE] border-[#4D6B53]' : 'bg-white hover:bg-[#FFFBF3]'
               }`}
               title="Xem thông tin và quản lý hồ sơ học viên"
+              data-purpose="sidebar-profile-card"
             >
-              <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <div className="relative shrink-0">
-                  <div className="w-10 h-10 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-base font-bold overflow-hidden">
+                  <div className="w-9 h-9 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold overflow-hidden">
                     {user?.user_metadata?.avatar_url ? (
                       <img
                         src={user.user_metadata.avatar_url}
@@ -237,9 +254,9 @@ export function MainSidebar() {
                       '🐱'
                     )}
                   </div>
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></span>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
                 </div>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
                     {isPro && (
@@ -255,14 +272,14 @@ export function MainSidebar() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-1 rounded-full border border-[#C85A3F]/40 shrink-0">
+              <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-0.5 rounded-full border border-[#C85A3F]/40 shrink-0 whitespace-nowrap">
                 <span>🔥</span>
                 <span>{displayStreak}</span>
               </div>
             </div>
 
             {/* Sub-actions */}
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#786F66] px-1 pt-1">
+            <div className="flex items-center justify-between text-[11px] font-semibold text-[#786F66] px-1 pt-0.5 whitespace-nowrap">
               <a
                 onClick={() => navigateTo('profile')}
                 className="hover:text-[#302A24] transition cursor-pointer"

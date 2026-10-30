@@ -58,7 +58,7 @@ export function FlashcardModeModal() {
       onClick={() => closeModal('flashcardMode')}
     >
       <div
-        className="w-full max-w-md bg-[#FBF8F1] rounded-[28px] border-[3px] border-[#3D352E] shadow-[6px_8px_0px_#3D352E] p-5 sm:p-6 text-[#302A24] font-comfortaa relative animate-in fade-in zoom-in-95 duration-150"
+        className="w-full max-w-md max-h-[92dvh] overflow-y-auto bg-[#FBF8F1] rounded-[28px] border-[3px] border-[#3D352E] shadow-[6px_8px_0px_#3D352E] p-5 sm:p-6 text-[#302A24] font-comfortaa relative animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
         style={{
           backgroundImage: 'radial-gradient(#D6CEC2 1.2px, transparent 1.2px)',

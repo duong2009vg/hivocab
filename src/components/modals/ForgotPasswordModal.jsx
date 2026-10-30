@@ -58,7 +58,7 @@ export function ForgotPasswordModal() {
       className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={(e) => e.target === e.currentTarget && handleClose()}
     >
-      <div className="w-full max-w-md bg-surface rounded-3xl shadow-2xl overflow-hidden border border-outline-variant/30 p-6 md:p-8 space-y-5">
+      <div className="w-full max-w-md max-h-[92dvh] overflow-y-auto bg-surface rounded-3xl shadow-2xl border border-outline-variant/30 p-6 md:p-8 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">

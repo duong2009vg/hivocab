@@ -279,30 +279,30 @@ export function PageDictionary() {
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Match to desktop_dictionary.html   */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-64 xl:pl-72">
+      <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
         {/* Header Section */}
-        <header className="p-8 pb-4">
+        <header className="px-6 xl:px-8 pt-6 pb-4">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center space-x-3.5">
-              <div className="w-14 h-14 rounded-2xl bg-[#e9f1e6] border-2 border-[#3a342e] shadow-[2px_2px_0px_#3a342e] flex items-center justify-center text-3xl">
+            <div className="flex items-center space-x-3.5 min-w-0 flex-1">
+              <div className="w-12 h-12 xl:w-14 xl:h-14 rounded-2xl bg-[#e9f1e6] border-2 border-[#3a342e] shadow-[2px_2px_0px_#3a342e] flex items-center justify-center text-2xl xl:text-3xl shrink-0">
                 📖
               </div>
-              <div>
-                <div className="flex items-center space-x-2">
-                  <h2 className="text-3xl font-extrabold text-[#2e2823] tracking-tight">Tra Cứu Từ Điển</h2>
-                  <span className="text-xs font-bold bg-[#f5b745] border border-[#3a342e] px-2 py-0.5 rounded-full shadow-[2px_2px_0px_#3a342e]">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-2xl xl:text-3xl font-extrabold text-[#2e2823] tracking-tight">Tra Cứu Từ Điển</h2>
+                  <span className="text-xs font-bold bg-[#f5b745] border border-[#3a342e] px-2.5 py-0.5 rounded-full shadow-[2px_2px_0px_#3a342e] whitespace-nowrap shrink-0">
                     Song ngữ Anh - Việt
                   </span>
                 </div>
-                <p className="text-sm font-semibold text-[#787067] mt-1">
+                <p className="text-xs xl:text-sm font-semibold text-[#787067] mt-1">
                   Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để tra đầy đủ phát âm, CEFR, nét nghĩa và ví dụ tranh vẽ.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <div className="bg-[#fffcf7] border-2 border-[#3a342e] px-3.5 py-1.5 rounded-2xl shadow-[2px_2px_0px_#3a342e] flex items-center space-x-2 text-xs font-bold">
-                <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></span>
+            <div className="flex items-center space-x-3 shrink-0">
+              <div className="bg-[#fffcf7] border-2 border-[#3a342e] px-3.5 py-1.5 rounded-2xl shadow-[2px_2px_0px_#3a342e] flex items-center space-x-2 text-xs font-bold whitespace-nowrap">
+                <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shrink-0"></span>
                 <span>Kho từ: 150.000+ từ sáp</span>
               </div>
             </div>
@@ -310,7 +310,7 @@ export function PageDictionary() {
         </header>
 
         {/* Main Search & Results */}
-        <div className="max-w-6xl mx-auto px-8 w-full pb-12 space-y-7">
+        <div className="max-w-6xl mx-auto px-6 xl:px-8 w-full pb-12 space-y-6">
           {/* Big Search Bar Container */}
           <section className="space-y-4">
             <div

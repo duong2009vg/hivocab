@@ -465,46 +465,46 @@ export function PageTopicDetail() {
       {/* ========================================================================= */}
       {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Verbatim Stitch Screen (screen.png) */}
       {/* ========================================================================= */}
-      <div className="hidden lg:flex flex-1 w-full max-w-[1536px] mx-auto min-h-screen lg:pl-64 xl:pl-72">
-        <main className="flex-1 px-8 py-6 flex flex-col min-w-0 overflow-y-auto" data-purpose="main-content">
+      <div className="hidden lg:flex flex-1 w-full min-h-screen lg:pl-[var(--sidebar-w,244px)]">
+        <main className="flex-1 max-w-[1440px] w-full mx-auto px-6 xl:px-8 py-6 flex flex-col min-w-0 overflow-y-auto" data-purpose="main-content">
         
         {/* BEGIN: TopBar & Breadcrumbs */}
-        <header className="mb-6 space-y-3" data-purpose="top-navigation-bar">
-          <div className="flex flex-wrap items-center justify-between gap-4">
+        <header className="mb-5 space-y-3" data-purpose="top-navigation-bar">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Breadcrumb & Back Link */}
-            <div className="flex items-center gap-2 text-xs font-bold">
+            <div className="flex items-center gap-2 text-xs font-bold min-w-0 flex-wrap">
               <button
                 onClick={() => navigateTo('topics')}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[#302A24] hover:bg-[#EFE7DA] transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[#302A24] hover:bg-[#EFE7DA] transition-colors cursor-pointer whitespace-nowrap shrink-0"
                 type="button"
               >
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
                 <span>Quay lại danh sách chủ đề</span>
               </button>
               <span className="text-[#786F66]">/</span>
-              <span onClick={() => navigateTo('topics')} className="text-[#786F66] hover:text-[#302A24] cursor-pointer">
+              <span onClick={() => navigateTo('topics')} className="text-[#786F66] hover:text-[#302A24] cursor-pointer whitespace-nowrap">
                 Chủ đề &amp; Khóa học
               </span>
               <span className="text-[#786F66]">/</span>
-              <span className="text-[#786F66]">
+              <span className="text-[#786F66] truncate max-w-[160px]">
                 {topicCategoryLabel}
               </span>
               <span className="text-[#786F66]">/</span>
-              <span className="text-[#C85A3F] font-bold font-['Comfortaa',sans-serif]">{topicName}</span>
+              <span className="text-[#C85A3F] font-bold font-['Comfortaa',sans-serif] truncate max-w-[220px]">{topicName}</span>
             </div>
 
             {/* Quick Actions & Search */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 shrink-0">
               {/* Search bar */}
-              <div className="relative w-64">
+              <div className="relative w-52 xl:w-64">
                 <input
                   className="w-full pl-9 pr-3 py-1.5 text-xs bg-white rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] focus:outline-none focus:ring-2 focus:ring-[#4D6B53] font-body placeholder:text-gray-400"
                   placeholder="Tìm từ, passage..."
                   type="text"
                 />
-                <svg className="w-4 h-4 absolute left-3 top-2 text-[#786F66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#786F66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
               </div>
@@ -512,10 +512,10 @@ export function PageTopicDetail() {
               {/* Share Button */}
               <button
                 onClick={handleShare}
-                className="px-3.5 py-1.5 text-xs font-bold bg-white text-[#302A24] rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-[#EFE7DA] transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-bold bg-white text-[#302A24] rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-[#EFE7DA] transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
                 type="button"
               >
-                <svg className="w-4 h-4 text-[#786F66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#786F66] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
                 </svg>
                 <span>Chia sẻ</span>
@@ -524,11 +524,24 @@ export function PageTopicDetail() {
               {/* Add new word */}
               <button
                 onClick={handleAddWord}
-                className="px-3.5 py-1.5 text-xs font-bold bg-[#C85A3F] text-white rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:brightness-105 transition-all flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 text-xs font-bold bg-[#C85A3F] text-white rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:brightness-105 transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
                 type="button"
               >
                 <span className="text-sm leading-none font-bold">+</span>
                 <span>Thêm từ mới</span>
+              </button>
+
+              {/* Report issue button (replaces overlapping floating FAB on desktop) */}
+              <button
+                onClick={() => openModal('bugReport', {
+                  feature: 'Chi tiết chủ đề',
+                  title: `Báo lỗi chủ đề: ${topicName}`,
+                })}
+                className="px-2.5 py-1.5 text-xs font-bold bg-white text-[#C85A3F] rounded-xl border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-[#FFF5E6] transition-all flex items-center gap-1 cursor-pointer whitespace-nowrap shrink-0"
+                type="button"
+                title="Báo lỗi đề / từ vựng"
+              >
+                <span>🚩</span>
               </button>
             </div>
           </div>
@@ -583,10 +596,10 @@ export function PageTopicDetail() {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-3xl font-['Comfortaa',sans-serif] font-bold text-[#3D352E] tracking-tight flex items-center gap-3">
-                    {topicName}
-                    <span className="text-sm font-sans px-2.5 py-0.5 bg-[#FFF2DE] text-amber-900 border border-[#3D352E] rounded-lg font-bold">
-                      {topicName}
+                  <h2 className="text-2xl xl:text-3xl font-['Comfortaa',sans-serif] font-bold text-[#3D352E] tracking-tight flex flex-wrap items-center gap-2.5">
+                    <span>{topicName}</span>
+                    <span className="text-xs xl:text-sm font-sans px-2.5 py-0.5 bg-[#FFF2DE] text-amber-900 border border-[#3D352E] rounded-lg font-bold whitespace-nowrap">
+                      {totalWords} từ vựng
                     </span>
                   </h2>
                 </div>
@@ -896,14 +909,14 @@ export function PageTopicDetail() {
         </main>
       </div>
 
-      {/* Floating Action Button */}
+      {/* Floating Action Button (Mobile only - Desktop uses header action bar) */}
       <button
         onClick={() => openModal('bugReport')}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] flex items-center justify-center hover:scale-105 hover:bg-[#FFF5E6] transition-all cursor-pointer group"
+        className="lg:hidden fixed bottom-20 right-4 z-40 w-11 h-11 rounded-full bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] flex items-center justify-center hover:scale-105 hover:bg-[#FFF5E6] transition-all cursor-pointer group"
         title="Báo lỗi đề / từ vựng"
         aria-label="Báo lỗi đề / từ vựng"
       >
-        <span className="text-xl group-hover:scale-110 transition-transform">🚩</span>
+        <span className="text-lg group-hover:scale-110 transition-transform">🚩</span>
       </button>
     </div>
   );

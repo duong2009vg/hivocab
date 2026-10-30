@@ -229,48 +229,50 @@ export function PageExercises() {
       </div>
 
       {/* DESKTOP LAYOUT (hidden lg:flex) */}
-      <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-64 xl:pl-72">
-        <header className="px-8 pt-6 pb-4 bg-[#FFFDF9] border-b-2 border-[#382E2B] flex items-center justify-between sticky top-0 z-10 select-none">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl xl:text-3xl font-heading font-black text-[#382E2B] tracking-tight">
-                Phòng Luyện Đề THPT Quốc Gia & CBT 🎓
-              </h1>
-              <span className="px-3 py-1 rounded-full text-xs font-black bg-[#EAF4E8] text-[#4F7D4B] border-2 border-[#6E9B6A] flex items-center gap-1.5 shadow-2xs">
-                <span className="w-2 h-2 rounded-full bg-[#6E9B6A]"></span>
-                {allExams.length} đề thi sẵn sàng
-              </span>
+      <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
+        <header className="px-6 xl:px-8 py-4 bg-[#FFFDF9] border-b-2 border-[#382E2B] sticky top-0 z-20 select-none">
+          <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-4">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <h1 className="text-xl xl:text-3xl font-heading font-black text-[#382E2B] tracking-tight">
+                  Phòng Luyện Đề THPT Quốc Gia &amp; <span className="whitespace-nowrap">CBT 🎓</span>
+                </h1>
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#EAF4E8] text-[#4F7D4B] border-2 border-[#6E9B6A] inline-flex items-center gap-1.5 shadow-2xs whitespace-nowrap shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-[#6E9B6A] shrink-0"></span>
+                  <span>{allExams.length} đề thi sẵn sàng</span>
+                </span>
+              </div>
+              <p className="text-xs xl:text-sm font-semibold text-[#766C5F] mt-1 truncate">
+                Kho đề thi chuẩn ma trận Bộ Giáo dục, tích hợp bộ đếm giờ tự động 50 phút và giải thích từ vựng chi tiết.
+              </p>
             </div>
-            <p className="text-xs xl:text-sm font-semibold text-[#766C5F] mt-1">
-              Kho đề thi chuẩn ma trận Bộ Giáo dục, tích hợp bộ đếm giờ tự động 50 phút và giải thích từ vựng chi tiết.
-            </p>
-          </div>
 
-          <div className="relative w-72 xl:w-80">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm nhanh trường, tỉnh, năm thi..."
-              className="w-full pl-10 pr-9 py-2.5 text-xs xl:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:outline-none focus:ring-0 placeholder:text-[#9C8F85] font-semibold transition-all"
-            />
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm select-none">🔍</span>
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-[#766C5F] hover:text-[#382E2B] p-1 cursor-pointer"
-              >
-                ✕
-              </button>
-            )}
+            <div className="relative w-60 xl:w-80 shrink-0">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm nhanh trường, tỉnh, năm thi..."
+                className="w-full pl-10 pr-9 py-2.5 text-xs xl:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:outline-none focus:ring-0 placeholder:text-[#9C8F85] font-semibold transition-all"
+              />
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm select-none">🔍</span>
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-[#766C5F] hover:text-[#382E2B] p-1 cursor-pointer"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
-        <div className="p-8 space-y-6 max-w-[1440px] w-full mx-auto">
+        <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
           {/* Hero Study Banner */}
-          <section className="bg-gradient-to-r from-[#EEF4EE] via-[#FFFDF9] to-[#F7EEE4] rounded-3xl border-2 border-[#382E2B] p-6 xl:p-7 shadow-[3px_4px_0px_#382E2B] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6 select-none">
-            <div className="space-y-3 max-w-xl">
+          <section className="bg-gradient-to-r from-[#EEF4EE] via-[#FFFDF9] to-[#F7EEE4] rounded-3xl border-2 border-[#382E2B] p-5 xl:p-7 shadow-[3px_4px_0px_#382E2B] relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-5 select-none">
+            <div className="space-y-2.5 flex-1 min-w-0 max-w-2xl">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E5EFE2] text-[#557A46] border border-[#8FB383] text-xs font-bold">
                 <span>🌟</span>
                 <span>Cấu trúc chuẩn kỳ thi tốt nghiệp THPT Quốc Gia</span>
@@ -278,18 +280,18 @@ export function PageExercises() {
               <h2 className="text-xl xl:text-2xl font-heading font-black text-[#382E2B] leading-tight">
                 Rèn luyện áp lực phòng thi thực tế cùng <span className="text-[#D36135]">HiVocab CBT</span>
               </h2>
-              <div className="bg-[#FFFDF9] border-2 border-[#382E2B] rounded-2xl p-3.5 relative inline-block text-xs xl:text-sm font-bold text-[#382E2B] shadow-2xs">
+              <div className="bg-[#FFFDF9] border-2 border-[#382E2B] rounded-2xl p-3 relative inline-block text-xs xl:text-sm font-bold text-[#382E2B] shadow-2xs">
                 <span className="text-[#D36135]">Bé Hổ nhắc:</span> "Làm bài thi đều đặn mỗi tuần để quen áp lực 50 phút và cọ xát với ma trận từ vựng thực tế nhé! 🐾"
                 <div className="absolute -left-2 top-4 w-3 h-3 bg-[#FFFDF9] border-l-2 border-b-2 border-[#382E2B] rotate-45"></div>
               </div>
-              <div className="flex items-center gap-4 pt-1 text-xs font-bold text-[#6B5A4E]">
-                <span className="flex items-center gap-1.5">⏱️ 50 phút/đề</span>
-                <span className="flex items-center gap-1.5">📝 40-50 câu trắc nghiệm</span>
-                <span className="flex items-center gap-1.5">💡 Chấm điểm & giải thích tức thì</span>
+              <div className="flex flex-wrap items-center gap-4 pt-1 text-xs font-bold text-[#6B5A4E]">
+                <span className="flex items-center gap-1.5 whitespace-nowrap">⏱️ 50 phút/đề</span>
+                <span className="flex items-center gap-1.5 whitespace-nowrap">📝 40-50 câu trắc nghiệm</span>
+                <span className="flex items-center gap-1.5 whitespace-nowrap">💡 Chấm điểm &amp; giải thích tức thì</span>
               </div>
             </div>
 
-            <div className="shrink-0 w-44 h-44 xl:w-52 xl:h-52 relative flex items-center justify-center">
+            <div className="shrink-0 w-36 h-36 xl:w-48 xl:h-48 relative flex items-center justify-center">
               <div className="absolute inset-0 bg-amber-100/50 rounded-full filter blur-xl transform -rotate-6"></div>
               <img
                 src="/mascot/mascot_cozy.png"

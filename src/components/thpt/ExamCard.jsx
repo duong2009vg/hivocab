@@ -48,24 +48,24 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
         <div className="flex items-center justify-between gap-2 flex-wrap mb-2.5">
           <div className="flex items-center gap-1.5 flex-wrap">
             {exam.year && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-[#EFE8D6] text-[#4A3E39] border border-[#382E2B]/40">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-[#EFE8D6] text-[#4A3E39] border border-[#382E2B]/40 whitespace-nowrap">
                 Năm {exam.year}
               </span>
             )}
-            <span className={`inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border ${level.bg} ${level.text} ${level.border}`}>
+            <span className={`inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border whitespace-nowrap ${level.bg} ${level.text} ${level.border}`}>
               {level.label}
             </span>
 
             {/* PRO Badge / Lock Badge */}
             {isExamPro && !isPro && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#382E2B] bg-[#FFE8C2] text-[#8C5311] shadow-[1.5px_1.5px_0px_#382E2B] rotate-[2deg]">
+              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#382E2B] bg-[#FFE8C2] text-[#8C5311] shadow-[1.5px_1.5px_0px_#382E2B] rotate-[2deg] whitespace-nowrap">
                 <span>🔒</span>
                 <span>Gói PRO</span>
               </span>
             )}
 
             {isExamPro && isPro && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#382E2B] bg-[#FFF5E6] text-[#B87C24] shadow-[1.5px_1.5px_0px_#382E2B]">
+              <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#382E2B] bg-[#FFF5E6] text-[#B87C24] shadow-[1.5px_1.5px_0px_#382E2B] whitespace-nowrap">
                 <span>👑</span>
                 <span>PRO</span>
               </span>
