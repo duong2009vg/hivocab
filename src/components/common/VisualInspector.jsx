@@ -3,6 +3,7 @@
 // Cho phép click chọn component hoặc bôi chọn vùng giao diện để sửa live hoặc tạo prompt gửi AI sửa ngay.
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 
@@ -124,7 +125,7 @@ function getReactComponentInfo(domNode) {
   };
 }
 
-export function VisualInspector() {
+function VisualInspectorInner() {
   const [isActive, setIsActive] = useState(false);
   const [hoveredRect, setHoveredRect] = useState(null);
   const [hoveredInfo, setHoveredInfo] = useState(null);
@@ -713,6 +714,21 @@ ${highlightedText ? `- Đoạn chữ bôi chọn: "${highlightedText}"\n` : ''}-
       )}
     </>
   );
+}
+
+/**
+ * VisualInspector Gatekeeper
+ * Chỉ hiển thị và cấp quyền sử dụng tính năng cho tài khoản Quản trị viên (Admin).
+ * Người học và khách bình thường sẽ không thấy và không dùng được công cụ này.
+ */
+export function VisualInspector() {
+  const { isAdmin } = useAuth();
+
+  if (!isAdmin) {
+    return null;
+  }
+
+  return <VisualInspectorInner />;
 }
 
 export default VisualInspector;
