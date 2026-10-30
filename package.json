@@ -12,14 +12,12 @@
     "format": "prettier --write eslint.config.js tsconfig.json src/config/runtime.js src/services/topicsService.js",
     "typecheck": "tsc --noEmit",
     "test": "node scripts/smoke-test.js && node scripts/unit-test.js",
-    "test:e2e": "playwright test",
     "ci": "npm run lint && npm run format:check && npm run typecheck && npm run build && npm test",
     "build:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --minify",
     "watch:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --watch"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
-    "@playwright/test": "^1.63.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.10",
     "autoprefixer": "^10.4.20",
