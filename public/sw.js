@@ -1,14 +1,12 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v19';
+const CACHE_NAME = 'hivocab-shell-v20';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',
   '/logo-mark.svg',
   '/themes.css',
   '/css/hivocab.min.css',
-  '/fonts/material-symbols-outlined.woff2',
-  '/data/sound/correct.mp3',
-  '/data/sound/incorrect.mp3'
+  '/fonts/material-symbols-outlined.woff2'
 ];
 
 // Các domain CDN/external — để browser tự xử lý, không intercept
@@ -59,6 +57,21 @@ self.addEventListener('fetch', (event) => {
 
   // Bỏ qua /assets/ của Vite (đã có content hash, tránh lỗi cross-world service worker resource mismatch)
   if (url.pathname.startsWith('/assets/')) return;
+
+  // Bỏ qua media / audio / video / Range requests để trình duyệt xử lý native range streams (tránh lỗi 503 Service Worker)
+  if (
+    event.request.destination === 'audio' ||
+    event.request.destination === 'video' ||
+    event.request.headers.has('range') ||
+    url.pathname.startsWith('/data/sound/') ||
+    url.pathname.endsWith('.mp3') ||
+    url.pathname.endsWith('.wav') ||
+    url.pathname.endsWith('.ogg') ||
+    url.pathname.endsWith('.mp4') ||
+    url.pathname.endsWith('.webm')
+  ) {
+    return;
+  }
 
   // Xử lý các tài nguyên cùng origin
   if (url.origin === self.location.origin) {

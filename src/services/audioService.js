@@ -20,6 +20,42 @@ const SOUND_PATHS = {
   ],
 };
 
+// ─── Web Audio API Fallback Tone Synthesizer ─────────────────────────────────
+function playWebAudioTone(type) {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+    if (type === 'correct') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now); // D5
+      osc.frequency.setValueAtTime(880, now + 0.1); // A5
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.35);
+    } else if (type === 'incorrect') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(261.63, now); // C4
+      osc.frequency.setValueAtTime(196, now + 0.1); // G3
+      gain.gain.setValueAtTime(0.12, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.3);
+    }
+  } catch (_) {}
+}
+
 // ─── HiSound (Hiệu ứng trả lời đúng / sai / hoàn thành) ────────────────────────
 class SoundEngine {
   constructor() {
@@ -43,7 +79,7 @@ class SoundEngine {
   _createAudio(srcList, volume = 0.85) {
     if (typeof Audio === 'undefined') return null;
     const audio = new Audio();
-    audio.preload = 'auto';
+    audio.preload = 'metadata';
     audio.volume = volume;
     audio.src = srcList[0];
     let attempt = 0;
@@ -85,7 +121,9 @@ class SoundEngine {
         this._correctIdx++;
         if (audio) {
           audio.currentTime = 0;
-          audio.play().catch(() => {});
+          audio.play().catch(() => {
+            playWebAudioTone('correct');
+          });
         }
       } else if (type === 'incorrect') {
         if (this._audioPool.incorrect.length === 0) this._initPool();
@@ -93,7 +131,9 @@ class SoundEngine {
         this._incorrectIdx++;
         if (audio) {
           audio.currentTime = 0;
-          audio.play().catch(() => {});
+          audio.play().catch(() => {
+            playWebAudioTone('incorrect');
+          });
         }
       } else if (type === 'complete') {
         if (!this._audioPool.complete) this._initPool();

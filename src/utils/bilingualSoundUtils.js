@@ -21,9 +21,9 @@ export function playSound(type) {
 
   // Fallback HTML5 Audio
   const soundMap = {
-    correct: 'data/sound/correct.mp3',
-    incorrect: 'data/sound/incorrect.mp3',
-    complete: 'data/sound/complete.mp3',
+    correct: '/data/sound/correct.mp3',
+    incorrect: '/data/sound/incorrect.mp3',
+    complete: '/data/sound/complete.mp3',
   };
 
   const src = soundMap[type];
