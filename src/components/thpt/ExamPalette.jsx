@@ -61,8 +61,14 @@ export function ExamPalette({ exam, answers, flags, currentQIndex, isReviewMode,
   }
 
   return (
-    <div id="exam-palette-container" className="flex-1 flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide py-0.5">
-      {buttons}
+    <div id="exam-bottom-bar" className="h-[34px] min-h-[34px] max-h-[34px] bg-[#0f172a] text-white border-t border-slate-700 px-2 flex items-center justify-between gap-1.5 shrink-0 z-30 select-none">
+      <div className="hidden xl:flex items-center gap-1 text-[10px] font-bold text-slate-400 shrink-0 uppercase tracking-wider">
+        <span className="material-symbols-outlined text-[13px] text-blue-400">grid_view</span>
+        <span>{total} CÂU:</span>
+      </div>
+      <div id="exam-palette-container" className="flex-1 flex items-center justify-between gap-1 overflow-x-auto scrollbar-hide py-0.5">
+        {buttons}
+      </div>
     </div>
   );
 }
