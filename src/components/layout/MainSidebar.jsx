@@ -75,7 +75,7 @@ export function MainSidebar() {
     },
     {
       id: 'exercises',
-      label: 'Luyện đề THPT',
+      label: 'Luyện đề',
       icon: (
         <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path d="M12 14l9-5-9-5-9 5 9 5z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
