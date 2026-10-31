@@ -3,6 +3,17 @@
 // Phong cách Cozy Crayon Handcrafted ấm áp (Sáp màu & Sổ tay học tập)
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  Folder, 
+  BookOpen, 
+  Search, 
+  RotateCcw, 
+  LogIn, 
+  UserPlus, 
+  Plus, 
+  X, 
+  ArrowRight 
+} from 'lucide-react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
@@ -134,7 +145,7 @@ export function SaveWordToTopicModal() {
 
       await addWord(topic.id, payload);
 
-      success(`✨ Đã lưu từ "${word}" vào "${topic.name}" thành công! 🎉`);
+      success(`Đã lưu từ "${word}" vào "${topic.name}" thành công!`);
       closeModal('saveWordToTopic');
 
       // Bắn sự kiện để các trang khác (Sổ từ, Dashboard, Chủ đề) cập nhật ngay
@@ -158,7 +169,7 @@ export function SaveWordToTopicModal() {
     closeModal('saveWordToTopic');
     if (!isLoggedIn) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để tạo chủ đề 📁',
+        title: 'Đăng nhập để tạo chủ đề',
         message: 'Đăng nhập tài khoản để tạo và sắp xếp các chủ đề từ vựng của riêng bạn nhé!',
         actionName: 'tạo chủ đề',
       });
@@ -184,9 +195,7 @@ export function SaveWordToTopicModal() {
         {/* Header */}
         <div className="flex items-start justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
           <div className="flex items-center gap-2.5">
-            <span className="w-10 h-10 rounded-2xl bg-[#E6F3FB] border-2 border-[#382E2B] flex items-center justify-center text-xl shadow-xs">
-              📁
-            </span>
+            <Folder className="w-8 h-8 text-[#557A46] shrink-0" />
             <div>
               <h2 className="text-lg font-black text-[#382E2B] font-heading leading-tight">
                 Lưu từ vào chủ đề
@@ -201,7 +210,7 @@ export function SaveWordToTopicModal() {
             onClick={() => closeModal('saveWordToTopic')}
             className="w-8 h-8 rounded-full border-2 border-[#382E2B] bg-[#FAF5EB] hover:bg-[#ebdcc8] flex items-center justify-center text-[#382E2B] font-bold text-xs transition-colors cursor-pointer"
           >
-            ✕
+            <X className="w-4 h-4 text-[#382E2B]" />
           </button>
         </div>
 
@@ -247,7 +256,7 @@ export function SaveWordToTopicModal() {
             </div>
           ) : (
             <p className="text-xs font-bold text-[#382E2B] leading-snug">
-              👉 {currentMeaning || 'Từ điển song ngữ'}
+              {currentMeaning || 'Từ điển song ngữ'}
             </p>
           )}
 
@@ -268,7 +277,7 @@ export function SaveWordToTopicModal() {
               placeholder="Tìm nhanh tên chủ đề..."
               className="w-full bg-white border-2 border-[#382E2B] px-3.5 py-2 pl-9 rounded-xl outline-none text-[#382E2B] text-xs font-bold shadow-2xs"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-stone-400">🔍</span>
+            <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
           </div>
         )}
 
@@ -276,7 +285,7 @@ export function SaveWordToTopicModal() {
         <div className="flex-1 overflow-y-auto space-y-2 pr-1 min-h-[160px] max-h-[260px]">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-8 text-[#766C5F] gap-2">
-              <span className="animate-spin text-2xl">🔄</span>
+              <RotateCcw className="w-6 h-6 animate-spin text-[#766C5F]" />
               <span className="text-xs font-bold">Đang tải danh sách chủ đề...</span>
             </div>
           ) : !isLoggedIn ? (
@@ -291,9 +300,10 @@ export function SaveWordToTopicModal() {
                     closeModal('saveWordToTopic');
                     navigateTo('login');
                   }}
-                  className="px-4 py-2 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
+                  className="px-4 py-2 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  🔑 Đăng nhập ngay
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Đăng nhập ngay</span>
                 </button>
                 <button
                   type="button"
@@ -302,9 +312,10 @@ export function SaveWordToTopicModal() {
                     if (typeof window !== 'undefined') window._initialAuthMode = 'signup';
                     navigateTo('login');
                   }}
-                  className="px-4 py-2 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
+                  className="px-4 py-2 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  ✨ Tạo tài khoản mới
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span>Tạo tài khoản mới</span>
                 </button>
               </div>
             </div>
@@ -335,9 +346,7 @@ export function SaveWordToTopicModal() {
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                    <span className="text-lg shrink-0">
-                      {topic.icon ? (topic.icon === 'folder' ? '📁' : '📚') : '📁'}
-                    </span>
+                    <Folder className="w-5 h-5 text-[#557A46] shrink-0" />
                     <div className="min-w-0">
                       <h4 className="text-xs sm:text-sm font-black text-[#382E2B] truncate group-hover:text-[#D36135] transition-colors">
                         {topic.name}
@@ -365,8 +374,8 @@ export function SaveWordToTopicModal() {
             onClick={handleOpenCreateTopic}
             className="w-full py-2.5 px-4 bg-white hover:bg-[#FAF5EB] text-[#382E2B] font-black text-xs rounded-xl border-2 border-dashed border-[#382E2B] flex items-center justify-center gap-1.5 active:scale-98 transition-all cursor-pointer"
           >
-            <span>✨</span>
-            <span>+ Tạo chủ đề mới</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Tạo chủ đề mới</span>
           </button>
         </div>
       </div>

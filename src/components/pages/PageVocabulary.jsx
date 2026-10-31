@@ -1,6 +1,23 @@
 // src/components/pages/PageVocabulary.jsx
 // 100% Pixel-Perfect match to Stitch Design (desktop_vocabulary.html & mobile_vocabulary.html)
 import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  RotateCcw, 
+  Volume2, 
+  Trash2, 
+  Heart, 
+  Search, 
+  LogIn, 
+  UserPlus, 
+  Folder, 
+  BookOpen, 
+  Plus, 
+  Clock, 
+  Sparkles, 
+  ArrowRight, 
+  X, 
+  Layers 
+} from 'lucide-react';
 import { useVocabulary } from '../../hooks/useVocabulary.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
@@ -53,7 +70,7 @@ export function PageVocabulary() {
   const handleOpenAddWord = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để thêm từ vựng 📖',
+        title: 'Đăng nhập để thêm từ vựng',
         message: 'Bạn cần đăng nhập tài khoản để thêm và lưu từ vựng vào sổ từ cá nhân nhé!',
         actionName: 'thêm từ vựng',
       });
@@ -65,7 +82,7 @@ export function PageVocabulary() {
   const handleOpenBulkAdd = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để thêm từ hàng loạt 📑',
+        title: 'Đăng nhập để thêm từ hàng loạt',
         message: 'Bạn cần đăng nhập tài khoản để nhập danh sách nhiều từ vựng cùng lúc nhé!',
         actionName: 'thêm từ hàng loạt',
       });
@@ -77,7 +94,7 @@ export function PageVocabulary() {
   const handleStartReview = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để ôn tập SRS ⚡',
+        title: 'Đăng nhập để ôn tập SRS',
         message: 'Bạn cần đăng nhập tài khoản để ôn tập từ vựng theo chu kỳ ngắt quãng và ghi nhận điểm số nhé!',
         actionName: 'ôn tập SRS',
       });
@@ -168,11 +185,11 @@ export function PageVocabulary() {
                 Đã học
               </span>
             </div>
-            <span className="text-2xl text-[#DF5C58] select-none rotate-12">❤️</span>
+            <Heart className="w-6 h-6 text-[#DF5C58] fill-[#DF5C58] rotate-12 shrink-0" />
           </div>
 
           <p className="text-sm text-[#7D716A] font-medium leading-relaxed -mt-1">
-            Sổ tay nhỏ xinh 🖍️ Tổng cộng <strong className="text-[#4A3E39] font-black text-base">{total}</strong> từ vựng bạn đã lưu trữ.
+            Sổ tay nhỏ xinh. Tổng cộng <strong className="text-[#4A3E39] font-black text-base">{total}</strong> từ vựng bạn đã lưu trữ.
           </p>
 
           {/* Action Buttons */}
@@ -213,7 +230,7 @@ export function PageVocabulary() {
         <section className="bg-[#FFFDF7] p-4 border-2 border-[#5B4C44] rounded-[24px] shadow-[3px_4px_0px_#443833] relative overflow-hidden mt-4">
           <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
             <div className="flex items-center gap-2">
-              <span className="text-lg">🔄</span>
+              <RotateCcw className="w-5 h-5 text-[#5b8fb9] shrink-0" />
               <h2 className="text-xl font-bold text-[#4A3E39] tracking-wide">
                 Tổng quan SRS
               </h2>
@@ -310,7 +327,7 @@ export function PageVocabulary() {
                 onClick={clearSearch}
                 className="absolute right-3 text-xs text-[#7D716A] hover:text-[#4A3E39] font-bold"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -322,10 +339,10 @@ export function PageVocabulary() {
               onChange={(e) => handleTopicFilterChange(e.target.value)}
               className="w-full appearance-none bg-[#EFE9DA] border-2 border-[#7A6B63] px-3.5 py-2 rounded-2xl text-xs font-bold text-[#4A3E39] shadow-xs focus:outline-none cursor-pointer"
             >
-              <option value="">📁 Tất cả chủ đề ({total} từ)</option>
+              <option value="">Tất cả chủ đề ({total} từ)</option>
               {topics.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.icon || '📁'} {t.name}
+                  {t.name}
                 </option>
               ))}
             </select>
@@ -350,7 +367,8 @@ export function PageVocabulary() {
                 levelFilter === -1 ? 'bg-[#DF5C58] text-white shadow-xs' : 'bg-[#F8E2DA] text-[#932C28]'
               }`}
             >
-              <span>⏰ Cần ôn</span>
+              <Clock className="w-3 h-3 text-[#DF5C58]" />
+              <span>Cần ôn</span>
               <span className="bg-[#DF5C58] text-white px-1.5 py-0.2 rounded-full text-[10px]">
                 {srsStats.due || 0}
               </span>
@@ -375,7 +393,7 @@ export function PageVocabulary() {
         <section className="space-y-3.5 mt-4">
           {loading ? (
             <div className="py-12 text-center text-[#7D716A]">
-              <span className="inline-block text-3xl animate-spin mb-2">🔄</span>
+              <RotateCcw className="w-8 h-8 text-[#5b8fb9] animate-spin mb-2 mx-auto" />
               <p className="text-sm font-bold">Đang tải danh sách từ vựng...</p>
             </div>
           ) : error ? (
@@ -384,7 +402,7 @@ export function PageVocabulary() {
             </div>
           ) : !user && words.length === 0 ? (
             <div className="bg-white rounded-3xl border-2 border-[#4A3E39] p-6 text-center shadow-xs space-y-3">
-              <span className="text-4xl block">🐯</span>
+              <BookOpen className="w-12 h-12 text-[#4A3E39] mx-auto mb-2" />
               <h3 className="font-bold text-base text-[#4A3E39]">Chào mừng bạn đến với Sổ từ cá nhân!</h3>
               <p className="text-xs text-[#7D716A] leading-relaxed">
                 Bạn đang xem ở chế độ Khách. Hãy đăng nhập hoặc tạo tài khoản miễn phí để bắt đầu lưu từ, theo dõi các cấp độ ghi nhớ SRS và không bao giờ quên từ vựng!
@@ -395,7 +413,7 @@ export function PageVocabulary() {
                   onClick={() => navigateTo('login')}
                   className="w-full py-2.5 px-4 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
                 >
-                  🔑 Đăng nhập ngay
+                  Đăng nhập ngay
                 </button>
                 <button
                   type="button"
@@ -405,13 +423,13 @@ export function PageVocabulary() {
                   }}
                   className="w-full py-2.5 px-4 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
                 >
-                  ✨ Đăng ký tài khoản (Miễn phí)
+                  Đăng ký tài khoản (Miễn phí)
                 </button>
               </div>
             </div>
           ) : words.length === 0 ? (
             <div className="bg-white rounded-3xl border-2 border-[#4A3E39] p-8 text-center shadow-xs">
-              <span className="text-4xl block mb-2">📖</span>
+              <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-2" />
               <h3 className="font-bold text-base text-[#4A3E39]">Chưa có từ vựng nào</h3>
               <p className="text-xs text-[#7D716A] mt-1 mb-4">
                 Hãy thêm từ vựng mới hoặc chuyển sang chủ đề khác để học.
@@ -536,21 +554,21 @@ export function PageVocabulary() {
               onClick={() => navigateTo('topics')}
               className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
-              <span>📁</span>
+              <Folder className="w-4 h-4 text-[#37322f]" />
               <span>Quản lý chủ đề</span>
             </button>
             <button
               onClick={handleOpenBulkAdd}
               className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
-              <span>📋</span>
+              <Layers className="w-4 h-4 text-[#37322f]" />
               <span>Thêm hàng loạt</span>
             </button>
             <button
               onClick={handleOpenAddWord}
               className="flex items-center gap-1.5 px-4 py-2 bg-[#ea7349] hover:bg-[#d96237] text-white text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
-              <span className="text-base leading-none">+</span>
+              <Plus className="w-4 h-4 text-white" />
               <span>Thêm từ mới</span>
             </button>
           </div>
@@ -561,9 +579,7 @@ export function PageVocabulary() {
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-dashed border-[#e6decb]">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-[#5b8fb9] text-white flex items-center justify-center font-black text-sm border-2 border-[#443c35]">
-                      🔄
-                    </div>
+                    <RotateCcw className="w-6 h-6 text-[#5b8fb9] shrink-0" />
                     <div>
                       <h2 className="text-lg font-black text-[#37322f]">Tổng quan phân bổ trí nhớ SRS</h2>
                       <p className="text-xs text-[#807669] font-bold">6 cấp độ trí nhớ từ ngắn hạn đến ghi nhớ vĩnh viễn</p>
@@ -641,7 +657,7 @@ export function PageVocabulary() {
                       Bé Hổ Đồng Hành
                     </span>
                     <h3 className="font-black text-sm text-[#37322f] leading-snug">
-                      {srsStats.due > 0 ? `Có ${srsStats.due} từ đến hạn ôn tập!` : 'Hôm nay bạn học rất chăm chỉ! 🐾'}
+                      {srsStats.due > 0 ? `Có ${srsStats.due} từ đến hạn ôn tập!` : 'Hôm nay bạn học rất chăm chỉ!'}
                     </h3>
                     <p className="text-xs text-[#6e6354] mt-1 font-semibold leading-relaxed">
                       Luyện tập 10 phút ngắt quãng mỗi ngày sẽ giúp từ vựng khắc sâu vào trí nhớ dài hạn vĩnh viễn.
@@ -655,7 +671,7 @@ export function PageVocabulary() {
                     onClick={handleStartReview}
                     className="px-4 py-2 bg-[#6e9b6a] hover:bg-[#5f875b] text-white text-xs font-black rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
                   >
-                    Ôn tập ngay ⚡
+                    Ôn tập ngay
                   </button>
                 </div>
               </div>
@@ -667,8 +683,8 @@ export function PageVocabulary() {
             <div className="flex flex-col sm:flex-row items-center gap-3">
               {/* Search Box */}
               <div className="relative flex-1 w-full">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-base pointer-events-none">
-                  🔍
+                <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                  <Search className="w-4 h-4 text-[#a69c8f]" />
                 </span>
                 <input
                   value={search}
@@ -682,7 +698,7 @@ export function PageVocabulary() {
                     onClick={clearSearch}
                     className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs text-[#7a7267] hover:text-[#37322f] font-bold"
                   >
-                    ✕
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
@@ -694,10 +710,10 @@ export function PageVocabulary() {
                   onChange={(e) => handleTopicFilterChange(e.target.value)}
                   className="w-full appearance-none bg-[#fffcf7] border-2 border-[#443c35] rounded-2xl px-4 py-3 pr-10 text-sm font-black text-[#37322f] shadow-[2px_2px_0px_#443c35] cursor-pointer focus:outline-none"
                 >
-                  <option value="">📁 Tất cả chủ đề ({total} từ)</option>
+                  <option value="">Tất cả chủ đề ({total} từ)</option>
                   {topics.map((t) => (
                     <option key={t.id} value={t.id}>
-                      {t.icon || '📁'} {t.name}
+                      {t.name}
                     </option>
                   ))}
                 </select>
@@ -723,7 +739,8 @@ export function PageVocabulary() {
                   levelFilter === -1 ? 'bg-[#ea7349] text-white' : 'bg-[#ffede5] text-[#d6572a] hover:bg-[#ffd9cb]'
                 }`}
               >
-                <span>⏰ Cần ôn gấp</span>
+                <Clock className="w-3.5 h-3.5" />
+                <span>Cần ôn gấp</span>
                 <span className="bg-[#ea7349] text-white px-1.5 py-0.2 rounded-full text-[10px]">
                   {srsStats.due || 0}
                 </span>
@@ -762,12 +779,12 @@ export function PageVocabulary() {
 
               {loading ? (
                 <div className="py-16 text-center text-[#7a7267] bg-white rounded-3xl border-2 border-[#443c35]">
-                  <span className="inline-block text-3xl animate-spin mb-2">🔄</span>
+                  <RotateCcw className="w-8 h-8 text-[#5b8fb9] animate-spin mb-2 mx-auto" />
                   <p className="text-sm font-bold">Đang tải danh sách từ vựng...</p>
                 </div>
               ) : !user && words.length === 0 ? (
                 <div className="p-12 text-center bg-white rounded-3xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] max-w-lg mx-auto space-y-4">
-                  <span className="text-5xl block">🐯</span>
+                  <BookOpen className="w-12 h-12 text-[#443c35] mx-auto mb-2" />
                   <h4 className="text-xl font-black text-[#37322f]">Sổ từ vựng thông minh cho riêng bạn</h4>
                   <p className="text-xs text-[#766c5f] leading-relaxed">
                     Bạn đang trải nghiệm HiVocab ở chế độ Khách. Đăng nhập hoặc tạo tài khoản miễn phí để lưu trữ không giới hạn từ vựng, kích hoạt thuật toán lặp lại ngắt quãng SRS và theo dõi chuỗi ngày giữ lửa!
@@ -778,7 +795,7 @@ export function PageVocabulary() {
                       onClick={() => navigateTo('login')}
                       className="px-5 py-2.5 bg-[#382E2B] text-white font-bold text-xs rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      🔑 Đăng nhập ngay
+                      Đăng nhập ngay
                     </button>
                     <button
                       type="button"
@@ -788,13 +805,13 @@ export function PageVocabulary() {
                       }}
                       className="px-5 py-2.5 bg-[#D36135] text-white font-bold text-xs rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-y-0.5 transition-all cursor-pointer"
                     >
-                      ✨ Tạo tài khoản miễn phí
+                      Tạo tài khoản miễn phí
                     </button>
                   </div>
                 </div>
               ) : words.length === 0 ? (
                 <div className="p-12 text-center bg-white rounded-3xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35]">
-                  <span className="text-5xl block mb-3">📖</span>
+                  <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-3" />
                   <h4 className="text-lg font-black text-[#37322f]">Không tìm thấy từ vựng nào</h4>
                   <p className="text-xs text-[#766c5f] mt-1 mb-4">
                     Thử thay đổi từ khóa tìm kiếm hoặc lọc theo cấp độ khác nhé.
@@ -857,7 +874,7 @@ export function PageVocabulary() {
 
                         <div className="flex items-center gap-2 shrink-0">
                           <span className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1 ${lvlTheme.badgeBg}`}>
-                            <span>⏰</span> {intervalText}
+                            <Clock className="w-3 h-3" /> {intervalText}
                           </span>
                           <button
                             onClick={(e) => {
@@ -867,7 +884,7 @@ export function PageVocabulary() {
                             className="p-2 rounded-xl bg-[#f7efe3] hover:bg-[#eee2d1] border border-[#443c35] text-[#37322f] transition-colors cursor-pointer"
                             title="Phát âm"
                           >
-                            🔊
+                            <Volume2 className="w-4 h-4 text-[#37322f]" />
                           </button>
                           <button
                             onClick={(e) => {
@@ -877,7 +894,7 @@ export function PageVocabulary() {
                             className="p-2 rounded-xl text-[#a89b8c] hover:text-red-500 hover:bg-red-50 transition-colors cursor-pointer"
                             title="Xóa từ"
                           >
-                            🗑️
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -943,7 +960,7 @@ export function PageVocabulary() {
                 <div className="bg-[#fffdf9] rounded-3xl border-2 border-[#443c35] p-6 shadow-[3px_4px_0px_#443c35] relative overflow-hidden">
                   <div className="flex items-center justify-between pb-4 border-b-2 border-dashed border-[#e6decb]">
                     <div className="flex items-center gap-2">
-                      <span className="text-xl">🔍</span>
+                      <Search className="w-4 h-4 text-[#73685a]" />
                       <span className="text-xs font-black uppercase text-[#73685a] tracking-wider">
                         Chi Tiết Từ Vựng &amp; Flashcard
                       </span>
@@ -971,9 +988,10 @@ export function PageVocabulary() {
 
                       <button
                         onClick={() => playWord(selectedWord.word)}
-                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#ea7349] hover:text-white border-2 border-[#443c35] text-xs font-black transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                        className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#ea7349] hover:text-white border-2 border-[#443c35] text-xs font-black transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
-                        <span>🔊 Phát âm</span>
+                        <Volume2 className="w-3.5 h-3.5" />
+                        <span>Phát âm</span>
                       </button>
                     </div>
 
@@ -1012,15 +1030,16 @@ export function PageVocabulary() {
                     <div className="mt-6 pt-4 border-t border-[#e6decb] flex items-center justify-between">
                       <button
                         onClick={() => deleteWord(selectedWord.id, selectedWord.word)}
-                        className="px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 border border-transparent hover:border-red-300 transition-all cursor-pointer"
+                        className="px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 border border-transparent hover:border-red-300 transition-all cursor-pointer flex items-center gap-1"
                       >
-                        🗑️ Xóa từ này
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Xóa từ này</span>
                       </button>
                       <button
                         onClick={() => navigateTo('learning')}
                         className="px-5 py-2.5 bg-[#ea7349] hover:bg-[#d96237] text-white font-bold text-xs rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-y-0.5 cursor-pointer"
                       >
-                        Luyện tập ngay ⚡
+                        Luyện tập ngay
                       </button>
                     </div>
                   </div>

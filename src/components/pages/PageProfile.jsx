@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabaseClient.js';
 import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
 import { CrayonProfileProCard } from '../common/CrayonProfileProCard.jsx';
+import { User, Sparkles, Flame, PenTool, Lock, AlertTriangle, CheckCircle2, LogOut, ArrowRight, MessageSquare } from 'lucide-react';
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
@@ -65,8 +66,8 @@ export function PageProfile() {
         } catch (_) {}
       }
 
-      setNameMsg({ text: 'Cập nhật họ tên thành công! 🌿', isError: false });
-      if (showToast) showToast('Đã lưu tên hiển thị mới! 🎉', 'success');
+      setNameMsg({ text: 'Cập nhật họ tên thành công!', isError: false });
+      if (showToast) showToast('Đã lưu tên hiển thị mới!', 'success');
     } catch (err) {
       setNameMsg({ text: err.message || 'Lỗi khi cập nhật họ tên.', isError: true });
     } finally {
@@ -93,10 +94,10 @@ export function PageProfile() {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
 
-      setPwMsg({ text: 'Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới nhé. 🔒', isError: false });
+      setPwMsg({ text: 'Đổi mật khẩu thành công! Hãy ghi nhớ mật khẩu mới nhé.', isError: false });
       setNewPassword('');
       setConfirmPassword('');
-      if (showToast) showToast('Đổi mật khẩu thành công! ✅', 'success');
+      if (showToast) showToast('Đổi mật khẩu thành công!', 'success');
     } catch (err) {
       setPwMsg({ text: err.message || 'Có lỗi xảy ra, vui lòng thử lại.', isError: true });
     } finally {
@@ -110,7 +111,7 @@ export function PageProfile() {
       setIsLoggingOut(true);
       try {
         await signOut();
-        if (showToast) showToast('Đã đăng xuất tài khoản thành công! 👋', 'info');
+        if (showToast) showToast('Đã đăng xuất tài khoản thành công!', 'info');
         navigateTo('landing');
       } catch (err) {
         alert('Lỗi đăng xuất: ' + (err.message || 'Vui lòng thử lại'));
@@ -155,16 +156,14 @@ export function PageProfile() {
                   })}
                   className="px-3.5 py-1.5 text-xs font-bold bg-white text-[#302A24] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] hover:bg-[#EFE7DA] active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>⭐</span>
+                  <MessageSquare className="w-3.5 h-3.5 text-[#302A24] shrink-0" />
                   <span>Góp ý</span>
                 </button>
               </div>
             </div>
 
             <div className="flex items-center gap-3 pt-1">
-              <div className="w-12 h-12 bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl font-bold">
-                🐱
-              </div>
+              <User className="w-10 h-10 text-[#557A46] shrink-0" />
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="text-2xl sm:text-3xl font-bold text-[#302A24] font-heading tracking-tight">
@@ -197,11 +196,11 @@ export function PageProfile() {
                       className="w-full h-full rounded-3xl object-cover"
                     />
                   ) : (
-                    '🐱'
+                    <User className="w-10 h-10 text-[#302A24]" />
                   )}
                 </div>
                 <span className="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white shadow-xs" title="Đang trực tuyến"></span>
-                <span className="absolute -top-2 -left-2 text-xl select-none">✨</span>
+                <Sparkles className="w-5 h-5 text-amber-400 absolute -top-2 -left-2 shrink-0 pointer-events-none" />
               </div>
 
               {/* Info Block */}
@@ -218,7 +217,7 @@ export function PageProfile() {
 
                   <div className="flex items-center justify-center sm:justify-end gap-2">
                     <span className="flex items-center gap-1.5 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-3 py-1.5 rounded-full border border-[#C85A3F]/40 shadow-xs">
-                      <span>🔥</span>
+                      <Flame className="w-3.5 h-3.5 text-[#C85A3F] shrink-0" />
                       <span>{statsLoading ? '…' : `${streakCount} ngày giữ lửa`}</span>
                     </span>
                     <span className="px-2.5 py-1 text-xs font-bold bg-[#EFE7DA] text-[#302A24] rounded-full border border-[#3D352E]">
@@ -247,7 +246,7 @@ export function PageProfile() {
             <section className="bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2.5 pb-4 border-b-2 border-dashed border-[#E2D9CC] mb-4">
-                  <span className="text-xl">✏️</span>
+                  <PenTool className="w-5 h-5 text-[#302A24] shrink-0" />
                   <h3 className="font-bold text-base text-[#302A24] font-heading">
                     Thông tin hiển thị
                   </h3>
@@ -278,7 +277,7 @@ export function PageProfile() {
                         disabled
                         className="w-full px-4 py-2.5 text-xs sm:text-sm bg-[#FAF7F0] rounded-2xl border-2 border-[#3D352E]/40 font-bold text-[#786F66] cursor-not-allowed"
                       />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs">🔒</span>
+                      <Lock className="w-3.5 h-3.5 text-[#786F66] absolute right-3.5 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
                     </div>
                     <span className="text-[10px] text-[#786F66] mt-1 block font-medium">
                       Email dùng để đồng bộ tiến độ học và xác thực tài khoản an toàn.
@@ -291,7 +290,7 @@ export function PageProfile() {
                         ? 'bg-[#FBECE7] text-[#C85A3F] border-[#C85A3F]'
                         : 'bg-[#E3EDE2] text-[#4D6B53] border-[#4D6B53]'
                     }`}>
-                      <span>{nameMsg.isError ? '⚠️' : '✅'}</span>
+                      {nameMsg.isError ? <AlertTriangle className="w-4 h-4 text-[#C85A3F] shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-[#4D6B53] shrink-0" />}
                       <span>{nameMsg.text}</span>
                     </div>
                   )}
@@ -301,7 +300,7 @@ export function PageProfile() {
                     disabled={isSavingName}
                     className="w-full py-2.5 px-4 text-xs sm:text-sm font-heading font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all active:translate-y-0.5 disabled:opacity-50"
                   >
-                    <span>{isSavingName ? 'Đang lưu...' : 'Lưu họ và tên 💾'}</span>
+                    <span>{isSavingName ? 'Đang lưu...' : 'Lưu họ và tên'}</span>
                   </button>
                 </form>
               </div>
@@ -311,7 +310,7 @@ export function PageProfile() {
             <section className="bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2.5 pb-4 border-b-2 border-dashed border-[#E2D9CC] mb-4">
-                  <span className="text-xl">🔑</span>
+                  <Lock className="w-5 h-5 text-[#302A24] shrink-0" />
                   <h3 className="font-bold text-base text-[#302A24] font-heading">
                     Đổi mật khẩu tài khoản
                   </h3>
@@ -350,7 +349,7 @@ export function PageProfile() {
                         ? 'bg-[#FBECE7] text-[#C85A3F] border-[#C85A3F]'
                         : 'bg-[#E3EDE2] text-[#4D6B53] border-[#4D6B53]'
                     }`}>
-                      <span>{pwMsg.isError ? '⚠️' : '✅'}</span>
+                      {pwMsg.isError ? <AlertTriangle className="w-4 h-4 text-[#C85A3F] shrink-0" /> : <CheckCircle2 className="w-4 h-4 text-[#4D6B53] shrink-0" />}
                       <span>{pwMsg.text}</span>
                     </div>
                   )}
@@ -360,7 +359,7 @@ export function PageProfile() {
                     disabled={isSubmittingPw}
                     className="w-full py-2.5 px-4 text-xs sm:text-sm font-heading font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all active:translate-y-0.5 disabled:opacity-50"
                   >
-                    <span>{isSubmittingPw ? 'Đang cập nhật...' : 'Cập nhật mật khẩu mới 🔒'}</span>
+                    <span>{isSubmittingPw ? 'Đang cập nhật...' : 'Cập nhật mật khẩu mới'}</span>
                   </button>
                 </form>
               </div>
@@ -369,9 +368,7 @@ export function PageProfile() {
             {/* Card 3: Danger Zone / Log out */}
             <section className="bg-[#FFF9F7] border-2 border-[#C85A3F] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 md:col-span-2 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3.5 text-center sm:text-left">
-                <div className="w-12 h-12 rounded-2xl bg-[#FBECE7] border-2 border-[#C85A3F] text-[#C85A3F] flex items-center justify-center text-2xl font-bold shrink-0 shadow-xs">
-                  🚪
-                </div>
+                <LogOut className="w-10 h-10 text-[#C85A3F] shrink-0" />
                 <div>
                   <h4 className="font-bold text-sm sm:text-base text-[#302A24] font-heading">
                     Đăng xuất khỏi tài khoản
@@ -389,7 +386,7 @@ export function PageProfile() {
                 className="w-full sm:w-auto px-6 py-2.5 bg-[#C85A3F] hover:bg-[#B34D34] text-white font-heading font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition-all active:translate-y-0.5 flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
               >
                 <span>{isLoggingOut ? 'Đang xử lý...' : 'Đăng xuất tài khoản'}</span>
-                <span>➔</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
             </section>
 

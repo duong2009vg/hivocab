@@ -1,6 +1,7 @@
 // src/components/modals/RequireLoginModal.jsx
 // 100% Cozy Crayon Handcrafted Theme - Modal thông báo yêu cầu đăng nhập cho khách
 import React from 'react';
+import { LogIn, UserPlus, X, Check, ArrowRight } from 'lucide-react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
@@ -13,7 +14,7 @@ export function RequireLoginModal() {
 
   if (!isOpen) return null;
 
-  const title = modalState?.title || 'Đăng nhập để tiếp tục 🐾';
+  const title = modalState?.title || 'Đăng nhập để tiếp tục';
   const message =
     modalState?.message ||
     'Bạn cần đăng nhập hoặc tạo tài khoản để lưu từ vựng, đồng bộ tiến độ học và sử dụng các tính năng nâng cao nhé!';
@@ -43,9 +44,7 @@ export function RequireLoginModal() {
         {/* Header Ribbon */}
         <div className="flex items-center justify-between pb-3 mb-4 border-b-2 border-[#E5DAC6]">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF5E6] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-xl">
-              🐯
-            </div>
+            <LogIn className="w-7 h-7 text-[#D96B43] shrink-0" />
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#302A24] tracking-tight">
                 {title}
@@ -61,7 +60,7 @@ export function RequireLoginModal() {
             className="w-8 h-8 rounded-full bg-white hover:bg-stone-100 border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center justify-center text-sm font-black text-[#302A24] transition-transform active:scale-90 cursor-pointer"
             aria-label="Đóng"
           >
-            ✕
+            <X className="w-4 h-4 text-[#302A24]" />
           </button>
         </div>
 
@@ -74,7 +73,6 @@ export function RequireLoginModal() {
               alt="Bé Hổ HiVocab"
               className="w-24 h-24 object-contain relative z-10 mix-blend-multiply drop-shadow-sm select-none"
             />
-            <span className="absolute -top-1 -right-1 text-xl animate-bounce">✨</span>
           </div>
 
           {actionName && (
@@ -90,15 +88,15 @@ export function RequireLoginModal() {
           {/* Quick Perks Pill */}
           <div className="w-full bg-white rounded-2xl border-2 border-[#3D352E] p-3 mb-5 text-left text-xs space-y-1.5 shadow-2xs">
             <div className="flex items-center gap-2 text-[#3D352E] font-bold">
-              <span className="text-[#609966]">✓</span>
+              <Check className="w-4 h-4 text-[#609966] shrink-0" />
               <span>Lưu và đồng bộ từ vựng cá nhân vĩnh viễn</span>
             </div>
             <div className="flex items-center gap-2 text-[#3D352E] font-bold">
-              <span className="text-[#609966]">✓</span>
-              <span>Ghi nhận chu kỳ ngắt quãng SRS & giữ streak học tập 🔥</span>
+              <Check className="w-4 h-4 text-[#609966] shrink-0" />
+              <span>Ghi nhận chu kỳ ngắt quãng SRS &amp; giữ streak học tập</span>
             </div>
             <div className="flex items-center gap-2 text-[#3D352E] font-bold">
-              <span className="text-[#609966]">✓</span>
+              <Check className="w-4 h-4 text-[#609966] shrink-0" />
               <span>Dùng AI đặt câu ví dụ và giải thích từ chuyên sâu</span>
             </div>
           </div>
@@ -112,7 +110,7 @@ export function RequireLoginModal() {
             className="w-full py-3 px-4 rounded-2xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-sm border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>Đăng nhập ngay</span>
-            <span>🔑</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
 
           <button
@@ -120,8 +118,8 @@ export function RequireLoginModal() {
             onClick={() => handleGoToLogin('signup')}
             className="w-full py-2.5 px-4 rounded-2xl bg-[#EAF2E8] hover:bg-[#DDEBD9] text-[#2F5233] font-black text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
+            <UserPlus className="w-4 h-4 shrink-0" />
             <span>Tạo tài khoản mới (Miễn phí)</span>
-            <span>✨</span>
           </button>
 
           <button

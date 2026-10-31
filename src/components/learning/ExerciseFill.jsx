@@ -299,7 +299,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </span>
-            <span>Churbito gợi ý: Từ gồm {totalLetters} ký tự, bắt đầu '{firstLetter}' 🐾</span>
+            <span>Churbito gợi ý: Từ gồm {totalLetters} ký tự, bắt đầu '{firstLetter}'</span>
           </div>
 
           {onReport && (
@@ -309,7 +309,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
               className="text-stone-400 hover:text-stone-700 text-xs transition cursor-pointer p-1"
               title="Báo cáo lỗi câu này"
             >
-              ⚠️ Báo lỗi
+              <span className="inline-flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Báo lỗi</span>
             </button>
           )}
         </div>
@@ -351,7 +351,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
             disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
             className="crayon-dashed px-3 sm:px-4 py-0.5 sm:py-1 rounded-full text-stone-700 hover:text-stone-900 font-semibold text-[11px] sm:text-xs flex items-center gap-1.5 transition hover:bg-stone-50 border-stone-400 cursor-pointer shadow-2xs disabled:opacity-40"
           >
-            <span className="text-amber-600">💡</span>
+            <Lightbulb className="w-4 h-4 text-amber-600 inline shrink-0" />
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
             <svg className="w-3 h-3 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
@@ -363,7 +363,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
         <div className="w-full max-w-md mx-auto mb-3.5 px-1">
           <div className="bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl sm:rounded-full py-2 px-3.5 sm:px-5 shadow-[2px_2.5px_0px_#2B2523] flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-1.5 text-xs font-black text-[#6E5F52] shrink-0">
-              <span className="text-base">✏️</span>
+              <PenTool className="w-4 h-4 text-[#3d352e] inline shrink-0" />
               <span className="hidden xs:inline">Từ đang gõ:</span>
             </div>
             <div className="flex-1 text-center font-mono font-black text-sm sm:text-lg text-[#2B4566] tracking-wider truncate px-1">

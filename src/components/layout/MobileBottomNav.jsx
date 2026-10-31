@@ -1,6 +1,7 @@
 // src/components/layout/MobileBottomNav.jsx
 // 100% Pixel-Perfect match to fix taskbar 2 design (Deep Olive Frosted Pill capsule)
 import React from 'react';
+import { Crown } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
@@ -124,8 +125,8 @@ export function MobileBottomNav() {
             Hồ sơ
           </span>
           {isPro && (
-            <span className="profile-pro-badge absolute -top-1 -right-1 text-[10px] leading-none select-none" title="HiVocab PRO">
-              👑
+            <span className="profile-pro-badge absolute -top-1 -right-1 leading-none select-none" title="HiVocab PRO">
+              <Crown className="w-3 h-3 text-amber-300 fill-amber-300" />
             </span>
           )}
         </a>
@@ -146,8 +147,8 @@ export function MobileBottomNav() {
             />
           </div>
           {isPro ? (
-            <span className="profile-pro-badge absolute -top-0.5 -right-0.5 text-[11px] leading-none select-none filter drop-shadow-xs" title="HiVocab PRO">
-              👑
+            <span className="profile-pro-badge absolute -top-0.5 -right-0.5 leading-none select-none filter drop-shadow-xs" title="HiVocab PRO">
+              <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
             </span>
           ) : (
             <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#5a7d4d] ring-2 ring-white"></span>

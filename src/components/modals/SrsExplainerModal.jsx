@@ -117,7 +117,7 @@ export function SrsExplainerModal() {
           </div>
 
           <div className="mt-4 p-4 rounded-2xl bg-primary/5 border border-primary/20 text-xs text-on-surface-variant leading-relaxed">
-            <span className="font-bold text-primary block mb-1">💡 Quy tắc thăng / hạ cấp độ:</span>
+            <span className="font-bold text-primary block mb-1">Quy tắc thăng / hạ cấp độ:</span>
             Mỗi khi trả lời <strong>Đúng (Nhớ / Rất dễ)</strong>, từ sẽ thăng 1 cấp. Nếu chọn <strong>Chưa nhớ / Quên</strong>, từ sẽ lập tức trở về <strong>Cấp 1</strong> để bạn ôn luyện lại ngay lập tức!
           </div>
         </div>

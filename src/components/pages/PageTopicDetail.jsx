@@ -1,6 +1,26 @@
 // src/components/pages/PageTopicDetail.jsx
 // 100% Exact match to "frontend fix" (code.html, DESIGN.md, screen.png)
 import React, { useMemo } from 'react';
+import { 
+  BookOpen, 
+  Lock, 
+  FileText, 
+  Lightbulb, 
+  Sparkles, 
+  Flag, 
+  ArrowLeft, 
+  Check, 
+  RotateCcw, 
+  Folder, 
+  Plus, 
+  Search, 
+  Award, 
+  GraduationCap, 
+  Briefcase, 
+  Landmark, 
+  Compass, 
+  Share2 
+} from 'lucide-react';
 import { useTopicDetail } from '../../hooks/useTopicDetail.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
@@ -136,7 +156,7 @@ export function PageTopicDetail() {
   const handleAddWord = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để thêm từ mới ✏️',
+        title: 'Đăng nhập để thêm từ mới',
         message: 'Bạn cần đăng nhập tài khoản để thêm và lưu từ vựng vào chủ đề nhé!',
         actionName: 'thêm từ vựng',
       });
@@ -225,10 +245,7 @@ export function PageTopicDetail() {
               }}
               className="bg-[#EFF6EE] rounded-2xl p-3.5 flex items-center gap-3 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer active:scale-[0.98] transition-transform"
             >
-              <div className="relative w-11 h-11 shrink-0 bg-[#FFF7E8] rounded-xl border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center justify-center text-xl">
-                🐾
-                <span className="absolute -top-1 -right-1 text-xs">✨</span>
-              </div>
+              <Sparkles className="w-8 h-8 text-[#4D6B53] shrink-0" />
               <div className="flex-1 text-xs text-[#302A24]">
                 <span className="font-bold text-[#4D6B53]">Bé Hổ HiVocab nhắn nhủ: </span>
                 <p className="font-medium inline">
@@ -243,8 +260,9 @@ export function PageTopicDetail() {
         <main className="px-4 mt-3 flex flex-col gap-4">
           <div className="bg-white rounded-[20px] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] p-4 relative overflow-hidden">
             <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 text-[11px] font-bold text-[#302A24] bg-[#EFE7DA] rounded-full border border-[#3D352E]">
-                📖 {topicCategoryLabel}
+              <span className="px-2.5 py-0.5 text-[11px] font-bold text-[#302A24] bg-[#EFE7DA] rounded-full border border-[#3D352E] inline-flex items-center gap-1">
+                <BookOpen className="w-3 h-3 text-[#302A24] shrink-0" />
+                <span>{topicCategoryLabel}</span>
               </span>
               {isIeltsReadingTopic && (
                 <span className="px-2 py-0.5 text-[10px] font-semibold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-300">
@@ -276,9 +294,7 @@ export function PageTopicDetail() {
             <section>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-[#F6EBE5] border border-[#3D352E] flex items-center justify-center text-xs font-bold">
-                    📚
-                  </div>
+                  <BookOpen className="w-5 h-5 text-[#C85A3F] shrink-0" />
                   <h2 className="font-bold text-xs uppercase tracking-wide text-[#3D352E]">CHỌN BÀI TEST ĐỌC</h2>
                 </div>
                 <span className="text-[11px] font-bold text-[#786F66]">
@@ -339,11 +355,13 @@ export function PageTopicDetail() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className={`px-2.5 py-1 text-xs font-bold text-[#302A24] ${colorTheme.badgeBg} rounded-xl border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center gap-1`}>
-                            📑 Passage {pNum}
+                            <FileText className="w-3.5 h-3.5 text-[#302A24] shrink-0" />
+                            <span>Passage {pNum}</span>
                           </span>
                           {isLocked && (
-                            <span className="px-2 py-0.5 text-[11px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#3D352E] rounded-full shadow-[1px_1px_0px_#3D352E] flex items-center gap-0.5">
-                              🔒 Gói PRO
+                            <span className="px-2 py-0.5 text-[11px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#3D352E] rounded-full shadow-[1px_1px_0px_#3D352E] flex items-center gap-1">
+                              <Lock className="w-3 h-3 text-[#8C5311] shrink-0" />
+                              <span>Gói PRO</span>
                             </span>
                           )}
                         </div>
@@ -370,13 +388,16 @@ export function PageTopicDetail() {
                         <span className="text-base text-[#C85A3F] font-bold absolute -top-0.5 left-2">“</span>
                         <p className="pl-3.5 line-clamp-3">
                           {isLocked
-                            ? '🔒 Nội dung bài đọc học thuật IELTS thuộc gói PRO. Vui lòng mở khóa để đọc toàn văn và học từ vựng ngữ cảnh.'
+                            ? 'Nội dung bài đọc học thuật IELTS thuộc gói PRO. Vui lòng mở khóa để đọc toàn văn và học từ vựng ngữ cảnh.'
                             : (passage.contentEn ? passage.contentEn.slice(0, 140) + '...' : 'Đoạn trích bài đọc học thuật IELTS...')}
                         </p>
                       </div>
 
                       <div className="mt-3 flex items-center justify-between text-xs py-1.5 border-y border-[#EBE4D8]">
-                        <span className="font-bold text-[#3D352E]">📝 {pWords} từ vựng</span>
+                        <span className="font-bold text-[#3D352E] flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5 text-[#3D352E] shrink-0" />
+                          <span>{pWords} từ vựng</span>
+                        </span>
                         <span className="text-[11px] text-[#786F66]">
                           Đã thuộc: <strong className="text-[#4D6B53]">{pLearned}/{pWords}</strong>
                         </span>
@@ -390,7 +411,7 @@ export function PageTopicDetail() {
                           className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#D96C4D] hover:bg-[#C85A3F] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                           type="button"
                         >
-                          <span>🔒</span>
+                          <Lock className="w-4 h-4 shrink-0" />
                           <span>Mở khóa PRO</span>
                         </button>
                       ) : (
@@ -399,7 +420,7 @@ export function PageTopicDetail() {
                           className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                           type="button"
                         >
-                          <span>📖</span>
+                          <BookOpen className="w-4 h-4 shrink-0" />
                           <span>Học bài ngay</span>
                         </button>
                       )}
@@ -439,7 +460,10 @@ export function PageTopicDetail() {
                       </div>
 
                       <div className="mt-3 flex items-center justify-between text-xs py-1.5 border-y border-[#EBE4D8]">
-                        <span className="font-bold text-[#3D352E]">📝 {lWords} từ vựng</span>
+                        <span className="font-bold text-[#3D352E] flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5 text-[#3D352E] shrink-0" />
+                          <span>{lWords} từ vựng</span>
+                        </span>
                         <span className="text-[11px] text-[#786F66]">
                           Đã thuộc: <strong className="text-[#4D6B53]">{lMastered}/{lWords}</strong>
                         </span>
@@ -450,7 +474,7 @@ export function PageTopicDetail() {
                         onClick={() => openLesson(lesson)}
                         className="w-full py-2.5 px-4 text-xs font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                       >
-                        <span>📖</span>
+                        <BookOpen className="w-4 h-4 shrink-0" />
                         <span>Học bài ngay</span>
                       </button>
                     </div>
@@ -541,7 +565,7 @@ export function PageTopicDetail() {
                 type="button"
                 title="Báo lỗi đề / từ vựng"
               >
-                <span>🚩</span>
+                <Flag className="w-4 h-4 text-[#C85A3F] shrink-0" />
               </button>
             </div>
           </div>
@@ -551,11 +575,7 @@ export function PageTopicDetail() {
         {isIeltsReadingTopic && (
           <section className="mb-6" data-purpose="mascot-coach-tip">
             <div className="p-4 rounded-2xl bg-[#EFF6EE] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] flex items-center gap-4">
-              {/* Mascot Avatar with cute badge */}
-              <div className="relative w-12 h-12 shrink-0 bg-[#FFF7E8] rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl">
-                🐾
-                <span className="absolute -top-1 -right-1 text-xs">✨</span>
-              </div>
+              <Sparkles className="w-9 h-9 text-[#4D6B53] shrink-0" />
               {/* Speech Text */}
               <div className="flex-1 text-xs md:text-sm text-[#302A24]">
                 <span className="font-['Comfortaa',sans-serif] font-bold text-[#4D6B53]">Bé Hổ HiVocab nhắn nhủ:</span>
@@ -587,7 +607,8 @@ export function PageTopicDetail() {
               <div className="space-y-3 max-w-2xl">
                 <div className="flex items-center gap-2">
                   <span className="px-3 py-1 text-xs font-bold text-[#302A24] bg-[#EFE7DA] rounded-full border border-[#3D352E] flex items-center gap-1.5">
-                    📖 {topicCategoryLabel}
+                    <BookOpen className="w-3.5 h-3.5 text-[#302A24] shrink-0" />
+                    <span>{topicCategoryLabel}</span>
                   </span>
                   {isIeltsReadingTopic && (
                     <span className="px-2.5 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded-md border border-emerald-300">
@@ -633,9 +654,7 @@ export function PageTopicDetail() {
             <div className="flex flex-wrap items-center justify-between gap-4 pb-2">
               {/* Section Heading */}
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#F6EBE5] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-sm font-bold">
-                  📚
-                </div>
+                <BookOpen className="w-6 h-6 text-[#C85A3F] shrink-0" />
                 <div>
                   <h3 className="text-base font-['Comfortaa',sans-serif] font-bold text-[#3D352E] tracking-wide uppercase">
                     Chọn Bài Test Đọc
@@ -731,11 +750,13 @@ export function PageTopicDetail() {
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className={`px-3 py-1 text-xs font-['Comfortaa',sans-serif] font-bold text-[#302A24] ${colorTheme.badgeBg} rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center gap-1.5`}>
-                            📑 Passage {pNum}
+                            <FileText className="w-3.5 h-3.5 text-[#302A24] shrink-0" />
+                            <span>Passage {pNum}</span>
                           </span>
                           {isLocked && (
                             <span className="px-2.5 py-0.5 text-xs font-black bg-[#FFE8C2] text-[#8C5311] border-2 border-[#3D352E] rounded-full shadow-[1.5px_1.5px_0px_#3D352E] flex items-center gap-1">
-                              🔒 Gói PRO
+                              <Lock className="w-3 h-3 text-[#8C5311] shrink-0" />
+                              <span>Gói PRO</span>
                             </span>
                           )}
                         </div>
@@ -765,7 +786,7 @@ export function PageTopicDetail() {
                         <span className="text-lg font-['Playfair_Display',serif] text-[#C85A3F] font-bold absolute -top-1 left-2">“</span>
                         <p className="pl-3.5 line-clamp-3">
                           {isLocked
-                            ? '🔒 Nội dung bài đọc học thuật IELTS này thuộc gói PRO. Vui lòng mở khóa để đọc toàn bộ bài đọc và luyện tập từ vựng ngữ cảnh.'
+                            ? 'Nội dung bài đọc học thuật IELTS này thuộc gói PRO. Vui lòng mở khóa để đọc toàn bộ bài đọc và luyện tập từ vựng ngữ cảnh.'
                             : (passage.contentEn
                             ? passage.contentEn.slice(0, 160) + '...'
                             : 'During the sixth and seventh centuries, the inhabitants of the northwestern regions of India developed a method of gaining access to clean, fresh groundwater...')}
@@ -775,7 +796,7 @@ export function PageTopicDetail() {
                       {/* Vocabulary Stats Details */}
                       <div className="mt-4 flex items-center justify-between text-xs py-2 border-y border-[#EBE4D8]">
                         <div className="flex items-center gap-1.5">
-                          <span className="text-base">📝</span>
+                          <BookOpen className="w-4 h-4 text-[#3D352E] shrink-0" />
                           <span className="font-bold text-[#3D352E]">{pWords} từ vựng</span>
                         </div>
                         <div className="text-[11px] text-[#786F66]">
@@ -792,7 +813,7 @@ export function PageTopicDetail() {
                           className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#D96C4D] hover:bg-[#C85A3F] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
                           type="button"
                         >
-                          <span>🔒</span>
+                          <Lock className="w-4 h-4 shrink-0" />
                           <span>Mở khóa PRO</span>
                         </button>
                       ) : (
@@ -801,7 +822,7 @@ export function PageTopicDetail() {
                           className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all cursor-pointer"
                           type="button"
                         >
-                          <span>📖</span>
+                          <BookOpen className="w-4 h-4 shrink-0" />
                           <span>Học bài ngay</span>
                         </button>
                       )}
@@ -842,7 +863,10 @@ export function PageTopicDetail() {
                       </div>
 
                       <div className="mt-4 flex items-center justify-between text-xs py-2 border-y border-[#EBE4D8]">
-                        <span className="font-bold text-[#3D352E]">📝 {lWords} từ vựng</span>
+                        <span className="font-bold text-[#3D352E] flex items-center gap-1">
+                          <BookOpen className="w-3.5 h-3.5 text-[#3D352E] shrink-0" />
+                          <span>{lWords} từ vựng</span>
+                        </span>
                         <span className="text-[#786F66]">Đã thuộc: <strong className="text-[#4D6B53]">{lLearned}/{lWords}</strong></span>
                       </div>
                     </div>
@@ -852,7 +876,7 @@ export function PageTopicDetail() {
                         onClick={() => openLesson(lesson)}
                         className="w-full py-2.5 px-4 text-xs font-['Comfortaa',sans-serif] font-bold text-white bg-[#4D6B53] hover:bg-[#3D5642] rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center gap-2 transition-all cursor-pointer"
                       >
-                        <span>📖</span>
+                        <BookOpen className="w-4 h-4 shrink-0" />
                         <span>Học bài ngay</span>
                       </button>
                     </div>
@@ -867,7 +891,7 @@ export function PageTopicDetail() {
         <section className="mt-auto pt-2 pb-6" data-purpose="quick-tips-footer">
           <div className="p-4 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">💡</span>
+              <Lightbulb className="w-6 h-6 text-[#4D6B53] shrink-0" />
               <div className="text-xs text-[#302A24]">
                 <span className="font-bold">Phương pháp học hiệu quả: </span>
                 <span className="text-[#786F66]">
@@ -902,7 +926,7 @@ export function PageTopicDetail() {
               <span>•</span>
               <a className="hover:text-[#302A24] transition cursor-pointer">Cẩm nang ôn thi</a>
               <span>•</span>
-              <a className="hover:text-[#302A24] transition flex items-center gap-1 cursor-pointer">Hỗ trợ bé Hổ 🐯</a>
+              <a className="hover:text-[#302A24] transition flex items-center gap-1 cursor-pointer">Hỗ trợ bé Hổ</a>
             </div>
           </div>
         </footer>
@@ -916,7 +940,7 @@ export function PageTopicDetail() {
         title="Báo lỗi đề / từ vựng"
         aria-label="Báo lỗi đề / từ vựng"
       >
-        <span className="text-lg group-hover:scale-110 transition-transform">🚩</span>
+        <Flag className="w-5 h-5 text-[#C85A3F] group-hover:scale-110 transition-transform" />
       </button>
     </div>
   );

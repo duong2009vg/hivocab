@@ -1,4 +1,23 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import {
+  Flame,
+  RotateCcw,
+  GraduationCap,
+  Target,
+  Flag,
+  BookOpen,
+  ArrowRight,
+  Search,
+  Plus,
+  Bell,
+  Play,
+  Sparkles,
+  Clock,
+  Users,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+} from 'lucide-react';
 import { useDashboardStats } from '../../hooks/useDashboardStats.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
@@ -50,7 +69,7 @@ export function PageDashboard() {
   const handleStartReview = useCallback(async () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để ôn tập 🐾',
+        title: 'Đăng nhập để ôn tập',
         message: 'Bạn cần đăng nhập để bắt đầu phiên học và kích hoạt thuật toán lặp lại ngắt quãng (SRS)!',
         actionName: 'Luyện tập ngắt quãng SRS',
       });
@@ -112,7 +131,7 @@ export function PageDashboard() {
   const handleOpenIELTSModal = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để đặt mục tiêu 🎯',
+        title: 'Đăng nhập để đặt mục tiêu',
         message: 'Bạn cần đăng nhập để thiết lập và lưu lộ trình mục tiêu IELTS cá nhân!',
         actionName: 'Thiết lập mục tiêu IELTS',
       });
@@ -131,7 +150,7 @@ export function PageDashboard() {
   const handleOpenAddWord = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để thêm từ 📝',
+        title: 'Đăng nhập để thêm từ',
         message: 'Bạn cần đăng nhập để thêm từ vựng mới vào sổ tay cá nhân của bạn!',
         actionName: 'Thêm từ mới',
       });
@@ -208,7 +227,7 @@ export function PageDashboard() {
           {/* Header Section: Tinh gọn chỉ icon chuỗi ngày giữ lửa bên trái và avatar bên phải */}
           <section className="mt-1 mb-4 flex items-center justify-between">
             <div className="inline-flex items-center space-x-1.5 bg-[#382E2B] text-[#FFF9F0] py-2 px-3.5 rounded-2xl shadow-sm">
-              <span className="text-base">🔥</span>
+              <Flame className="w-4 h-4 text-amber-400 shrink-0" />
               <span className="text-sm font-bold tracking-wide">{streak} Ngày giữ lửa</span>
             </div>
             <button
@@ -257,35 +276,36 @@ export function PageDashboard() {
               <h2 className="text-2xl font-bold text-[#382E2B] tracking-tight">
                 {mascotInteracted
                   ? isAngry
-                    ? 'Bé Hổ đang giận dỗi đó! 😾'
-                    : 'Bé Hổ chào bạn nha! 🐯'
+                    ? 'Bé Hổ đang giận dỗi đó!'
+                    : 'Bé Hổ chào bạn nha!'
                   : heroState === 'countdown'
                   ? 'Lần ôn tập kế tiếp'
                   : isAngry
-                  ? 'Mau ôn tập thôi bạn ơi! 😾'
+                  ? 'Mau ôn tập thôi bạn ơi!'
                   : 'Đến giờ ôn tập rồi bạn ơi!'}
               </h2>
               <p className="text-sm text-[#6A5A50] font-medium leading-relaxed">
                 {mascotInteracted ? (
                   isAngry ? (
-                    <>Mau củng cố <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ</strong> ngay để bé hổ hết giận nhé! 🐾</>
+                    <>Mau củng cố <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ</strong> ngay để bé hổ hết giận nhé!</>
                   ) : (
-                    <>Chúc bạn một ngày học từ vựng thật vui và hiệu quả nhé! ✨</>
+                    <>Chúc bạn một ngày học từ vựng thật vui và hiệu quả nhé!</>
                   )
                 ) : heroState === 'countdown' ? (
                   <>Nghỉ ngơi chút nhé! Quay lại sau: <strong className="text-[#F0783C] font-bold text-base">{countdown?.hours || 0}g {countdown?.minutes || 0}p</strong></>
                 ) : isAngry ? (
-                  <>Có tới <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ vựng</strong> đang bị dồn lại cần ôn ngay! 🔥</>
+                  <>Có tới <strong className="text-[#DE5D53] font-bold text-base">{wordsDueCount} từ vựng</strong> đang bị dồn lại cần ôn ngay!</>
                 ) : (
-                  <>Bạn có <strong className="text-[#F0783C] font-bold text-base">{wordsDueCount} từ vựng</strong> đang chờ được củng cố ✨</>
+                  <>Bạn có <strong className="text-[#F0783C] font-bold text-base">{wordsDueCount} từ vựng</strong> đang chờ được củng cố</>
                 )}
               </p>
             </div>
             <div className="mt-3.5">
               {heroState !== 'countdown' && (
                 <button onClick={handleStartReview} className="inline-flex items-center justify-center space-x-2 px-6 py-2.5 bg-[#759864] hover:bg-[#6A8B5A] text-white text-base font-bold rounded-full border-[2.5px] border-[#382E2B] shadow-[2px_3px_0px_#382E2B] transition-transform active:scale-95">
-                  <span className="w-5 h-5 rounded-full bg-[#FAF5EB] text-[#759864] text-xs flex items-center justify-center font-bold">▶</span>
-                  <span>Ôn tập ngay ({wordsDueCount} từ) ✏️</span>
+                  <Play className="w-4 h-4 fill-white shrink-0" />
+                  <span>Ôn tập ngay ({wordsDueCount} từ)</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
               )}
             </div>
@@ -295,7 +315,7 @@ export function PageDashboard() {
           <section className="bg-[#FFFDF7] p-4 border-[2.5px] border-[#443833] rounded-[26px] shadow-[3px_4px_0px_#443833] relative overflow-hidden mb-4">
             <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
               <div className="flex items-center space-x-2">
-                <span className="w-7 h-7 rounded-xl bg-[#E1EDDB] border border-[#8DAA68] flex items-center justify-center text-sm shadow-sm">🔄</span>
+                <RotateCcw className="w-5 h-5 text-[#557A46] shrink-0" />
                 <h2 className="text-xl font-bold text-[#382E2B] tracking-wide">Tổng quan SRS</h2>
                 <button className="w-5 h-5 rounded-full border border-[#86756C] text-[#86756C] text-xs flex items-center justify-center font-bold">?</button>
               </div>
@@ -305,7 +325,7 @@ export function PageDashboard() {
             </div>
             <div className="flex items-center justify-between mt-3 mb-2">
               <span className="text-[11px] font-bold tracking-wider text-[#8A796F] uppercase">Phân bố từ vựng theo cấp độ</span>
-              <span onClick={() => navigateTo('vocabulary')} className="text-xs text-[#DE5D53] font-bold cursor-pointer">Chi tiết ➔</span>
+              <span onClick={() => navigateTo('vocabulary')} className="text-xs text-[#DE5D53] font-bold cursor-pointer inline-flex items-center gap-0.5">Chi tiết <ArrowRight className="w-3.5 h-3.5" /></span>
             </div>
             
             <div className="pt-3 pb-2 flex items-end justify-between px-1 text-center">
@@ -340,7 +360,7 @@ export function PageDashboard() {
           {/* Exam Hall Card */}
           <section className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-4">
             <div className="flex items-start space-x-3">
-              <div className="w-12 h-12 rounded-2xl bg-[#E6F3FB] border-2 border-[#382E2B] flex items-center justify-center text-2xl flex-shrink-0 shadow-sm">🎓</div>
+              <GraduationCap className="w-8 h-8 text-[#2A7BA0] shrink-0 mt-0.5" />
               <div className="flex-1">
                 <div className="flex flex-wrap gap-1.5 mb-1">
                   <span className="text-[11px] font-bold text-[#2A7BA0] bg-[#E1F1FA] px-2.5 py-0.5 rounded-full border border-[#BCE1F5]">PHÒNG THI TRỰC TUYẾN</span>
@@ -352,18 +372,18 @@ export function PageDashboard() {
             <p className="text-xs text-[#6B5A4E] mt-2.5 leading-relaxed">Luyện trắc nghiệm tiếng Anh chuẩn cấu trúc đề thi chính thức mới nhất. Bấm giờ 50 phút thực tế, bảng điều hướng tức thì và giải thích chi tiết.</p>
             <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-[#4E4138] font-bold">
               <div className="flex items-center space-x-1.5">
-                <span className="text-xs bg-[#EAF5E4] text-[#557A46] border border-[#8FB383] rounded-full w-4 h-4 flex items-center justify-center font-bold">✓</span>
+                <Check className="w-4 h-4 text-[#557A46] shrink-0" />
                 <span>Chuẩn ma trận BGD</span>
               </div>
               <div className="flex items-center space-x-1.5">
-                <span className="text-xs bg-[#EAF5E4] text-[#557A46] border border-[#8FB383] rounded-full w-4 h-4 flex items-center justify-center font-bold">✓</span>
+                <Check className="w-4 h-4 text-[#557A46] shrink-0" />
                 <span>Bấm giờ tự động</span>
               </div>
             </div>
             <div className="mt-3.5">
               <button onClick={() => navigateTo('exercises')} className="w-full bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2">
                 <span>Vào phòng thi ngay</span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">38 đề ➔</span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1">38 đề <ArrowRight className="w-3 h-3" /></span>
               </button>
             </div>
           </section>
@@ -372,7 +392,7 @@ export function PageDashboard() {
           <section className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-4">
             <div className="flex items-center justify-between pb-2 border-b-2 border-dashed border-[#E3D9C6]">
               <div className="flex items-center space-x-2">
-                <span className="w-8 h-8 rounded-full bg-[#FEEFEA] border border-[#F8C8B8] flex items-center justify-center text-lg">🔥</span>
+                <Flame className="w-6 h-6 text-amber-500 shrink-0" />
                 <div>
                   <h3 className="text-base font-bold text-[#382E2B]">Lịch giữ lửa</h3>
                   <p className="text-[11px] text-[#7C6C62]">Mức độ chuyên cần ôn luyện mỗi ngày</p>
@@ -411,7 +431,7 @@ export function PageDashboard() {
                 <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#E8DFC8]"></span> 0</span>
                 <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#FCD8BE]"></span> 1-9</span>
                 <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#F0783C]"></span> 10-24</span>
-                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#DE5D53]"></span> 25+🔥</span>
+                <span className="inline-flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#DE5D53]"></span> 25+</span>
               </div>
             </div>
             <div className="mt-2 flex space-x-2 text-xs">
@@ -425,7 +445,7 @@ export function PageDashboard() {
             onClick={handleOpenIELTSModal}
             className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-6 text-center cursor-pointer active:scale-[0.99] transition-transform"
           >
-            <div className="w-11 h-11 mx-auto rounded-2xl bg-[#FDF0EE] border-2 border-[#382E2B] flex items-center justify-center text-xl mb-2 shadow-sm">🚩</div>
+            <Flag className="w-7 h-7 mx-auto mb-1 text-rose-500" />
             <h3 className="text-base font-bold text-[#382E2B]">
               Mục tiêu IELTS {ieltsGoal?.overall || '7.0'}
             </h3>
@@ -453,12 +473,12 @@ export function PageDashboard() {
               onClick={(e) => { e.stopPropagation(); handleOpenIELTSModal(); }}
               className="mt-3.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#382E2B] py-2 px-4 rounded-2xl text-xs font-bold border-2 border-[#382E2B] inline-flex items-center space-x-1.5 shadow-sm cursor-pointer"
             >
-              <span>🎯 Tinh chỉnh band điểm mục tiêu</span>
+              <Target className="w-4 h-4 text-[#DE5D53]" />
+              <span>Tinh chỉnh band điểm mục tiêu</span>
             </button>
           </section>
 
           <footer className="text-center py-2 mb-14">
-            <div className="w-8 h-8 mx-auto mb-1 text-[#8C7B71] text-lg select-none">🐾</div>
             <p className="text-xs text-[#8C7B71] font-medium italic">Trang 1 / {total} từ trong tập vẽ tranh sáp màu</p>
           </footer>
         </div>
@@ -482,7 +502,7 @@ export function PageDashboard() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 min-w-0">
                   <h1 className="text-xl xl:text-2xl font-black text-crayonText font-quicksand truncate">
-                    Chào buổi sáng, {userName} ơi! <span className="inline-block">🌿</span>
+                    Chào buổi sáng, {userName} ơi!
                   </h1>
                 </div>
                 <p className="text-xs xl:text-sm text-softMuted mt-0.5 truncate">
@@ -511,7 +531,7 @@ export function PageDashboard() {
                   <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-softMuted text-xs xl:text-sm"></i>
                 </div>
                 <div className="hidden sm:flex items-center gap-1.5 px-3 xl:px-3.5 py-2 rounded-full bg-orange-100 text-terracotta font-extrabold text-xs xl:text-sm crayon-border shadow-crayonSm whitespace-nowrap shrink-0">
-                  <span className="text-sm xl:text-base animate-bounce">🔥</span>
+                  <Flame className="w-4 h-4 text-amber-500 shrink-0 inline" />
                   <span>{streak} ngày liên tiếp</span>
                 </div>
                 <button onClick={handleOpenAddWord} className="bg-terracotta hover:bg-terracotta-dark text-white font-bold text-xs xl:text-sm px-3.5 xl:px-4 py-2 rounded-full crayon-border shadow-crayonOrange active:translate-y-0.5 transition-all flex items-center gap-1.5 xl:gap-2 whitespace-nowrap shrink-0 cursor-pointer">
@@ -541,7 +561,7 @@ export function PageDashboard() {
                         {heroState === 'countdown' ? (
                           <>Đã ôn xong hôm nay!<br/><span className="text-sage">Quay lại sau {countdown?.hours || 0}g {countdown?.minutes || 0}p.</span></>
                         ) : isAngry ? (
-                          <>Mau ôn tập thôi bạn ơi!<br/><span className="text-terracotta">{wordsDueCount} từ vựng</span> đang bị dồn lại kìa! 😾</>
+                          <>Mau ôn tập thôi bạn ơi!<br/><span className="text-terracotta">{wordsDueCount} từ vựng</span> đang bị dồn lại kìa!</>
                         ) : (
                           <>Đến giờ ôn tập rồi!<br/><span className="text-terracotta">{wordsDueCount} từ vựng</span> đang chờ bạn.</>
                         )}
@@ -550,15 +570,15 @@ export function PageDashboard() {
                         <span className="font-bold text-terracotta">Bé Hổ nhắc:</span> {
                           mascotInteracted
                             ? isAngry
-                              ? '"Grừ! Mau ôn bài thôi, bé hổ đang giận vì còn nhiều từ chưa ôn đó! 😾🐾"'
-                              : '"Chào bạn nhé! Cùng bé hổ ôn tập từ vựng thật chăm chỉ nào! 🐯✨"'
+                              ? '"Grừ! Mau ôn bài thôi, bé hổ đang giận vì còn nhiều từ chưa ôn đó!"'
+                              : '"Chào bạn nhé! Cùng bé hổ ôn tập từ vựng thật chăm chỉ nào!"'
                             : heroState === 'countdown'
-                            ? '"Tuyệt vời! Bạn đã hoàn thành nhiệm vụ hôm nay. ⭐"'
+                            ? '"Tuyệt vời! Bạn đã hoàn thành nhiệm vụ hôm nay."'
                             : isAngry
-                            ? `"Hơn 100 từ tích lũy rồi (${wordsDueCount} từ), mau ôn tập cùng bé hổ ngay nhé! 😾🐾"`
+                            ? `"Hơn 100 từ tích lũy rồi (${wordsDueCount} từ), mau ôn tập cùng bé hổ ngay nhé!"`
                             : wordsDueCount > 0
-                            ? `"Cùng bé hổ hoàn thành ${wordsDueCount} từ hôm nay nhé! 🐾"`
-                            : '"Hôm nay chưa có từ nào đến hạn, tiếp tục phát huy nhé! ⭐"'
+                            ? `"Cùng bé hổ hoàn thành ${wordsDueCount} từ hôm nay nhé!"`
+                            : '"Hôm nay chưa có từ nào đến hạn, tiếp tục phát huy nhé!"'
                         }
                         <div className="absolute -left-2 top-4 w-3 h-3 bg-cream border-l-2 border-b-2 border-crayonText rotate-45"></div>
                       </div>
@@ -651,7 +671,7 @@ export function PageDashboard() {
                 <section className="dashboard-desktop-card dashboard-desktop-calendar bg-white rounded-3xl p-5 sm:p-6 crayon-border shadow-crayonSm space-y-4">
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center text-terracotta text-lg border border-orange-200 shrink-0">🔥</div>
+                      <Flame className="w-6 h-6 text-amber-500 shrink-0" />
                       <div className="min-w-0">
                         <h3 className="text-base font-black text-crayonText font-quicksand truncate">Lịch giữ lửa</h3>
                         <p className="text-[11px] text-softMuted truncate">Mức độ chuyên cần ôn luyện mỗi ngày</p>
@@ -660,9 +680,9 @@ export function PageDashboard() {
                     <span className="text-xs font-black text-terracotta bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200 whitespace-nowrap shrink-0">{streak} ngày liên tiếp</span>
                   </div>
                   <div className="flex items-center justify-between px-3 py-2 bg-[#fbf8f3] rounded-2xl crayon-border text-sm font-bold text-crayonText">
-                    <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted"><i className="fa-solid fa-chevron-left text-xs"></i></button>
+                    <button onClick={prevMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted"><ChevronLeft className="w-4 h-4" /></button>
                     <span className="font-quicksand font-extrabold">{calendar.monthYear}</span>
-                    <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted"><i className="fa-solid fa-chevron-right text-xs"></i></button>
+                    <button onClick={nextMonth} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-200 text-softMuted"><ChevronRight className="w-4 h-4" /></button>
                   </div>
                   <div className="grid grid-cols-7 gap-1 text-center text-xs font-black text-softMuted/80">
                     <span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span><span>CN</span>
@@ -688,7 +708,7 @@ export function PageDashboard() {
                         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>0</span>
                         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-[#fae3d5]"></span>1-9</span>
                         <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span>10-24</span>
-                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-terracotta"></span>25+ 🔥</span>
+                        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-terracotta"></span>25+</span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 pt-1">
@@ -712,9 +732,7 @@ export function PageDashboard() {
                         {vocabStandard.description}
                       </p>
                     </div>
-                    <div className="w-10 h-10 rounded-2xl bg-terracotta/10 text-terracotta flex items-center justify-center text-lg crayon-border group-hover:scale-105 transition-transform shrink-0">
-                      <i className="fa-solid fa-flag"></i>
-                    </div>
+                    <Flag className="w-6 h-6 text-terracotta shrink-0 group-hover:scale-105 transition-transform" />
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between text-xs font-bold text-crayonText">
@@ -734,9 +752,10 @@ export function PageDashboard() {
                   <button 
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleOpenIELTSModal(); }}
-                    className="mt-4 w-full py-2.5 text-center text-xs font-black rounded-xl bg-cream hover:bg-[#eadecb] text-crayonText crayon-border transition-all cursor-pointer"
+                    className="mt-4 w-full py-2.5 text-center text-xs font-black rounded-xl bg-cream hover:bg-[#eadecb] text-crayonText crayon-border transition-all cursor-pointer inline-flex items-center justify-center gap-1.5"
                   >
-                    + Tinh chỉnh band điểm mục tiêu
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tinh chỉnh band điểm mục tiêu</span>
                   </button>
                 </section>
 
@@ -770,7 +789,7 @@ export function PageDashboard() {
             <div className="flex items-center gap-4 font-bold text-crayonText">
               <a className="hover:underline cursor-pointer">Điều khoản</a>
               <a className="hover:underline cursor-pointer">Cẩm nang ôn thi</a>
-              <a className="hover:underline cursor-pointer">Hỗ trợ bé Hổ 🐯</a>
+              <a className="hover:underline cursor-pointer">Hỗ trợ bé Hổ</a>
             </div>
           </footer>
         </div>

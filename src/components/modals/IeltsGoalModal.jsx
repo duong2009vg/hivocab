@@ -126,7 +126,7 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
       };
       await saveIELTSGoal(goalData);
       if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
-        window.showHiToast(`Đã lưu mục tiêu IELTS ${overall}! Chúc bạn rèn luyện bứt phá! 🎯`, 'success');
+        window.showHiToast(`Đã lưu mục tiêu IELTS ${overall}! Chúc bạn rèn luyện bứt phá!`, 'success');
       }
       if (onSaveSuccess) onSaveSuccess(goalData);
       onClose();
@@ -141,10 +141,10 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
   };
 
   const skillFields = [
-    { id: 'listening', label: 'Nghe (Listening)', emoji: '🎧', val: listening, set: setListening },
-    { id: 'reading', label: 'Đọc (Reading)', emoji: '📖', val: reading, set: setReading },
-    { id: 'writing', label: 'Viết (Writing)', emoji: '✍️', val: writing, set: setWriting },
-    { id: 'speaking', label: 'Nói (Speaking)', emoji: '🗣️', val: speaking, set: setSpeaking },
+    { id: 'listening', label: 'Nghe (Listening)', icon: <Headphones className="w-4 h-4 text-[#382E2B] inline mr-1" />, val: listening, set: setListening },
+    { id: 'reading', label: 'Đọc (Reading)', icon: <BookOpen className="w-4 h-4 text-[#382E2B] inline mr-1" />, val: reading, set: setReading },
+    { id: 'writing', label: 'Viết (Writing)', icon: <PenTool className="w-4 h-4 text-[#382E2B] inline mr-1" />, val: writing, set: setWriting },
+    { id: 'speaking', label: 'Nói (Speaking)', icon: <Mic className="w-4 h-4 text-[#382E2B] inline mr-1" />, val: speaking, set: setSpeaking },
   ];
 
   return (
@@ -160,20 +160,18 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
           className="absolute top-4 right-4 w-9 h-9 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] text-[#3D352E] font-black hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all flex items-center justify-center text-sm cursor-pointer"
           title="Đóng"
         >
-          ✕
+          <X className="w-4 h-4" />
         </button>
 
         {/* Header Modal */}
         <div className="flex items-center gap-3 mb-5 pr-8">
-          <div className="w-12 h-12 rounded-2xl bg-[#FEEFEA] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl shrink-0">
-            🚩
-          </div>
+          <Target className="w-10 h-10 text-[#DE5D53] shrink-0" />
           <div>
             <span className="text-[11px] font-black uppercase text-[#DE5D53] tracking-wider block">
               Lộ trình rèn luyện cá nhân
             </span>
             <h2 className="text-xl sm:text-2xl font-black text-[#302A24] font-quicksand leading-tight">
-              Mục Tiêu Band IELTS 🎯
+              Mục Tiêu Band IELTS
             </h2>
           </div>
         </div>
@@ -200,7 +198,7 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
           {/* Chọn Band 4 Kỹ Năng */}
           <div className="space-y-2.5">
             <label className="text-xs font-black text-[#302A24] uppercase tracking-wider flex items-center gap-1.5">
-              <span>🎯 Chọn band điểm mục tiêu cho từng kỹ năng:</span>
+              <span className="inline-flex items-center gap-1.5"><Target className="w-4 h-4 text-[#DE5D53] shrink-0" /> Chọn band điểm mục tiêu cho từng kỹ năng:</span>
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {skillFields.map((skill) => (
@@ -232,7 +230,7 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
           <div className="bg-[#FFF8EA] p-4 rounded-2xl border-2 border-[#E5A83B] relative overflow-hidden space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-black text-[#B4741E] uppercase tracking-wider flex items-center gap-1">
-                📚 Chuẩn từ vựng cốt lõi ({vocabStandard.bandRange})
+                <span className="inline-flex items-center gap-1.5"><BookOpen className="w-4 h-4 text-[#382E2B] shrink-0" /> Chuẩn từ vựng cốt lõi</span> ({vocabStandard.bandRange})
               </span>
               <span className="text-xs font-black text-[#302A24] bg-white px-2.5 py-0.5 rounded-full border border-[#3D352E]">
                 {currentWords} / ~{vocabStandard.target.toLocaleString()} từ
@@ -260,7 +258,7 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1">
-                📅 Ngày thi dự kiến (nếu có)
+                <span className="inline-flex items-center gap-1.5"><Calendar className="w-4 h-4 text-[#382E2B] shrink-0" /> Ngày thi dự kiến (nếu có)</span>
               </label>
               <input
                 type="date"
@@ -271,7 +269,7 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
             </div>
             <div>
               <label className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1">
-                💬 Lời nhắc quyết tâm
+                <span className="inline-flex items-center gap-1.5"><MessageSquare className="w-4 h-4 text-[#382E2B] shrink-0" /> Lời nhắc quyết tâm</span>
               </label>
               <input
                 type="text"
@@ -297,7 +295,8 @@ export function IeltsGoalModal({ isOpen, onClose, currentGoal, currentWords = 0,
               disabled={isSaving}
               className="px-6 py-2.5 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span>{isSaving ? 'Đang lưu...' : 'Lưu Mục Tiêu 🎯'}</span>
+              <span>{isSaving ? 'Đang lưu...' : 'Lưu Mục Tiêu'}</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
             </button>
           </div>
         </form>

@@ -1,62 +1,63 @@
 // src/components/common/CrayonProBadge.jsx
-// Huy hiệu PRO phong cách Sáp màu Cozy Crayon (HiVocab Design System)
+// Huy hiệu PRO phong cách Sáp màu Cozy Crayon (HiVocab Design System) - 100% Vector Lucide
 import React from 'react';
+import { Crown, Lock, Star, Flame } from 'lucide-react';
 
 const BADGE_VARIANTS = {
   crown: {
     bg: 'bg-[#FFE8C2]',
     text: 'text-[#8C5311]',
     border: 'border-[#3D352E]',
-    defaultIcon: '👑',
+    iconType: 'crown',
     defaultLabel: 'PRO',
   },
   pro: {
     bg: 'bg-[#FFE8C2]',
     text: 'text-[#8C5311]',
     border: 'border-[#3D352E]',
-    defaultIcon: '👑',
+    iconType: 'crown',
     defaultLabel: 'HiVocab PRO',
   },
   lock: {
     bg: 'bg-[#FFE8C2]',
     text: 'text-[#8C5311]',
     border: 'border-[#3D352E]',
-    defaultIcon: '🔒',
+    iconType: 'lock',
     defaultLabel: 'Gói PRO',
   },
   lifetime: {
     bg: 'bg-[#F3E8FF]',
     text: 'text-[#6B21A8]',
     border: 'border-[#3D352E]',
-    defaultIcon: '👑',
+    iconType: 'crown',
     defaultLabel: 'Trọn Đời',
   },
   trial: {
     bg: 'bg-[#E3EDE2]',
     text: 'text-[#4D6B53]',
     border: 'border-[#3D352E]',
-    defaultIcon: '⭐',
+    iconType: 'star',
     defaultLabel: 'Trải Nghiệm',
   },
   discount: {
     bg: 'bg-[#FBECE7]',
     text: 'text-[#C85A3F]',
     border: 'border-[#3D352E]',
-    defaultIcon: '🔥',
+    iconType: 'flame',
     defaultLabel: 'Tiết Kiệm 50%',
   },
   mini: {
     bg: 'bg-[#FFE8C2]',
     text: 'text-[#8C5311]',
     border: 'border-[#3D352E]',
-    defaultIcon: '👑',
+    iconType: 'crown',
     defaultLabel: 'PRO',
   },
   compact: {
     bg: 'bg-[#FFE8C2]',
     text: 'text-[#8C5311]',
     border: 'border-[#3D352E]',
-    defaultIcon: '👑',
+    iconType: 'crown',
     defaultLabel: 'PRO',
   },
 };
@@ -67,6 +68,32 @@ const BADGE_SIZES = {
   md: 'text-xs px-3 py-1 gap-1.5 border-2 shadow-crayonSm',
   lg: 'text-sm px-4 py-1.5 gap-2 border-2 shadow-crayon',
 };
+
+function renderBadgeIcon(iconProp, iconType, size) {
+  if (iconProp !== undefined) {
+    if (typeof iconProp === 'string') {
+      if (iconProp === '\u{1F451}') return <Crown className="w-3 h-3 shrink-0" />;
+      if (iconProp === '\u{1F512}') return <Lock className="w-3 h-3 shrink-0" />;
+      if (iconProp === '\u{2B50}') return <Star className="w-3 h-3 shrink-0" />;
+      if (iconProp === '\u{1F525}') return <Flame className="w-3 h-3 shrink-0" />;
+      return <span>{iconProp}</span>;
+    }
+    return iconProp;
+  }
+  const iconCls = size === 'xs' ? 'w-2.5 h-2.5 shrink-0' : 'w-3 h-3 shrink-0';
+  switch (iconType) {
+    case 'crown':
+      return <Crown className={iconCls} />;
+    case 'lock':
+      return <Lock className={iconCls} />;
+    case 'star':
+      return <Star className={iconCls} />;
+    case 'flame':
+      return <Flame className={iconCls} />;
+    default:
+      return null;
+  }
+}
 
 export function CrayonProBadge({
   variant = 'crown',
@@ -82,7 +109,7 @@ export function CrayonProBadge({
   const effectiveSize = variant === 'mini' ? 'xs' : size;
   const sizeClass = BADGE_SIZES[effectiveSize] || BADGE_SIZES.sm;
   const displayLabel = text !== undefined ? text : cfg.defaultLabel;
-  const displayIcon = icon !== undefined ? icon : cfg.defaultIcon;
+  const iconElement = renderBadgeIcon(icon, cfg.iconType, effectiveSize);
 
   let rotateStyle = {};
   if (typeof rotate === 'string') {
@@ -104,7 +131,7 @@ export function CrayonProBadge({
           : ''
       } ${className}`}
     >
-      {displayIcon && <span className="leading-none shrink-0">{displayIcon}</span>}
+      {iconElement && <span className="leading-none shrink-0 inline-flex items-center">{iconElement}</span>}
       {displayLabel && <span className="leading-none tracking-tight">{displayLabel}</span>}
     </span>
   );

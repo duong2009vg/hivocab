@@ -2,6 +2,7 @@
 // Trang đánh giá trải nghiệm HiVocab hỗ trợ song ngữ Tiếng Anh (Mặc định) và Tiếng Việt theo phong cách Cozy Crayon Handcrafted
 import React from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { Star } from 'lucide-react';
 import { useLandingLang } from '../../context/LandingLangContext.jsx';
 import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
@@ -155,7 +156,7 @@ export function PageReviews() {
               onClick={() => navigateTo('landing')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🏠 Home' : '🏠 Trang chủ'}
+              {isEn ? 'Home' : 'Trang chủ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -163,14 +164,14 @@ export function PageReviews() {
               onClick={() => navigateTo('features')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🎨 Features' : '🎨 Tính năng'}
+              {isEn ? 'Features' : 'Tính năng'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
               type="button"
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#DE5D53] bg-[#FDEAE2] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💬 Reviews' : '💬 Đánh giá'}
+              {isEn ? 'Reviews' : 'Đánh giá'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -178,7 +179,7 @@ export function PageReviews() {
               onClick={() => navigateTo('faq')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💡 FAQ' : '💡 FAQ'}
+              {isEn ? 'FAQ' : 'FAQ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -186,7 +187,7 @@ export function PageReviews() {
               onClick={() => navigateTo('support')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💌 Support' : '💌 Hỗ trợ'}
+              {isEn ? 'Support' : 'Hỗ trợ'}
             </button>
           </nav>
 
@@ -200,7 +201,7 @@ export function PageReviews() {
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>{isEn ? 'Learn Now' : 'Vào học ngay'}</span>
-              <span className="text-xs sm:text-sm">🚀</span>
+              
             </button>
           </div>
         </div>
@@ -212,12 +213,12 @@ export function PageReviews() {
         {/* Header Intro */}
         <div className="text-center mb-10 sm:mb-14 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FEF9EE] text-[#D97706] text-xs font-black uppercase tracking-wider border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
-            <span>💬</span>
+            
             <span>{isEn ? 'Early Adopter Feedback' : 'Phản hồi trải nghiệm sớm'}</span>
           </div>
 
           <h1 className="font-quicksand font-black text-3xl sm:text-5xl text-[#3D352E] tracking-tight">
-            {isEn ? 'Voices from Our Early Learners 🌿' : 'Cảm nhận từ những người dùng đầu tiên 🌿'}
+            {isEn ? 'Voices from Our Early Learners' : 'Cảm nhận từ những người dùng đầu tiên'}
           </h1>
 
           <p className="text-sm sm:text-base text-[#6E5D53] font-medium max-w-xl mx-auto leading-relaxed">
@@ -229,7 +230,7 @@ export function PageReviews() {
           {/* Rating Summary Pill */}
           <div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] rounded-full mt-2">
             <div className="flex text-[#F4B41A] text-sm">
-              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+              <span className="inline-flex gap-0.5"><Star className="w-4 h-4 fill-[#F5B745] text-[#F5B745]" /><Star className="w-4 h-4 fill-[#F5B745] text-[#F5B745]" /><Star className="w-4 h-4 fill-[#F5B745] text-[#F5B745]" /><Star className="w-4 h-4 fill-[#F5B745] text-[#F5B745]" /><Star className="w-4 h-4 fill-[#F5B745] text-[#F5B745]" /></span>
             </div>
             <span className="text-xs font-black text-[#3D352E]">
               {isEn ? '4.9 / 5.0 • Verified Community Rating' : '4.9 / 5.0 • Đánh giá từ cộng đồng học viên'}
@@ -247,7 +248,7 @@ export function PageReviews() {
               <div>
                 <div className="flex text-[#F4B41A] text-base mb-3.5">
                   {[...Array(r.rating)].map((_, i) => (
-                    <span key={i}>★</span>
+                    <Star key={i} className="w-3.5 h-3.5 fill-[#F5B745] text-[#F5B745] shrink-0" />
                   ))}
                 </div>
 
@@ -292,7 +293,7 @@ export function PageReviews() {
             className="w-full md:w-auto px-7 py-3.5 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0"
           >
             <span>{isEn ? 'Start Studying Now' : 'Bắt đầu học ngay'}</span>
-            <span>🚀</span>
+            
           </button>
         </div>
       </main>

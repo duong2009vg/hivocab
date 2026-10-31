@@ -7,6 +7,7 @@ import { useThptExams } from '../../hooks/useThptExams';
 import { ExamCard } from '../thpt/ExamCard';
 import { ExamCustomTimeModal } from '../thpt/ExamModals';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { GraduationCap, PenTool, Search, X, Crown, Gift, Landmark, School, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 export function PageExercises() {
   const { navigateTo } = useRoute();
@@ -81,14 +82,15 @@ export function PageExercises() {
         <section className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-heading font-black tracking-tight text-[#382E2B]">
-                Luyện đề THPT 🎓
+              <h1 className="text-2xl font-heading font-black tracking-tight text-[#382E2B] flex items-center gap-2">
+                <GraduationCap className="w-6 h-6 text-[#557A46] shrink-0" />
+                Luyện đề THPT
               </h1>
               <span className="inline-block px-2.5 py-0.5 text-xs font-black text-[#557A46] bg-[#E5EFE2] border border-[#8FB383] rounded-full rotate-[-2deg]">
                 {allExams.length}+ Đề
               </span>
             </div>
-            <span className="text-2xl select-none">✏️</span>
+            <PenTool className="w-6 h-6 text-[#7D716A] shrink-0" />
           </div>
 
           <p className="text-xs text-[#7D716A] font-semibold leading-relaxed -mt-1">
@@ -104,14 +106,14 @@ export function PageExercises() {
               placeholder="Tìm đề thi theo tỉnh, năm..."
               className="w-full pl-9 pr-9 py-2.5 text-xs sm:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:ring-0 focus:outline-none placeholder:text-[#9C8F85] font-semibold"
             />
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm select-none">🔍</span>
+            <Search className="w-4 h-4 text-[#9C8F85] absolute left-3.5 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-[#7D716A] hover:text-[#382E2B]"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -149,7 +151,7 @@ export function PageExercises() {
                   : 'bg-[#FFE8C2] text-[#8C5311]'
               }`}
             >
-              👑 Gói PRO ({proCount})
+              <span className="inline-flex items-center gap-1"><Crown className="w-3.5 h-3.5 text-[#8C5311] shrink-0" /> Gói PRO ({proCount})</span>
             </button>
             <button
               type="button"
@@ -198,14 +200,14 @@ export function PageExercises() {
 
           {error && !loading && (
             <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-6 text-center shadow-[3px_3px_0px_#382E2B]">
-              <span className="text-3xl mb-2 block">⚠️</span>
+              <AlertTriangle className="w-8 h-8 text-[#C85A3F] mx-auto mb-2 shrink-0" />
               <p className="text-xs font-bold text-[#C85A3F]">{error}</p>
             </div>
           )}
 
           {!loading && !error && filteredExams.length === 0 && (
             <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-6 text-center shadow-[3px_3px_0px_#382E2B]">
-              <span className="text-3xl mb-2 block">🔍</span>
+              <Search className="w-8 h-8 text-[#9C8F85] mx-auto mb-2 shrink-0" />
               <h4 className="text-sm font-black text-[#382E2B]">Không tìm thấy đề thi</h4>
               <p className="text-xs text-[#7D716A] mt-1 font-semibold">
                 Thử đổi từ khóa hoặc chọn tab Tất cả nhé!
@@ -254,7 +256,7 @@ export function PageExercises() {
                     : 'bg-[#E5EFE2] text-[#4F7D4B] hover:bg-[#d8e8d4]'
                 }`}
               >
-                🎁 Đề Miễn Phí ({freeCount})
+                <span className="inline-flex items-center gap-1.5"><Gift className="w-4 h-4 shrink-0" /> Đề Miễn Phí ({freeCount})</span>
               </button>
               <button
                 type="button"
@@ -265,7 +267,7 @@ export function PageExercises() {
                     : 'bg-[#FFE8C2] text-[#8C5311] hover:bg-[#fde0b2]'
                 }`}
               >
-                👑 Gói PRO ({proCount})
+                <span className="inline-flex items-center gap-1.5"><Crown className="w-4 h-4 shrink-0" /> Gói PRO ({proCount})</span>
               </button>
               <button
                 type="button"
@@ -276,7 +278,7 @@ export function PageExercises() {
                     : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
                 }`}
               >
-                🏛️ Đề thi Bộ GD&ĐT
+                <span className="inline-flex items-center gap-1.5"><Landmark className="w-4 h-4 shrink-0" /> Đề thi Bộ GD&ĐT</span>
               </button>
               <button
                 type="button"
@@ -287,7 +289,7 @@ export function PageExercises() {
                     : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
                 }`}
               >
-                🏫 Đề thi thử Sở & Chuyên
+                <span className="inline-flex items-center gap-1.5"><School className="w-4 h-4 shrink-0" /> Đề thi thử Sở & Chuyên</span>
               </button>
               <button
                 type="button"
@@ -298,7 +300,7 @@ export function PageExercises() {
                     : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
                 }`}
               >
-                ✅ Đã hoàn thành ({completedCount})
+                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 shrink-0" /> Đã hoàn thành ({completedCount})</span>
               </button>
             </div>
 
@@ -311,14 +313,14 @@ export function PageExercises() {
                 placeholder="Tìm nhanh trường, tỉnh, năm thi..."
                 className="w-full pl-10 pr-9 py-2.5 text-xs xl:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:outline-none focus:ring-0 placeholder:text-[#9C8F85] font-semibold transition-all"
               />
-              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm select-none">🔍</span>
+              <Search className="w-4 h-4 text-[#9C8F85] absolute left-3.5 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-[#766C5F] hover:text-[#382E2B] p-1 cursor-pointer"
                 >
-                  ✕
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -339,7 +341,7 @@ export function PageExercises() {
 
             {error && !loading && (
               <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-12 text-center shadow-[3px_4px_0px_#382E2B] max-w-lg mx-auto">
-                <span className="text-5xl mb-3 block">⚠️</span>
+                <AlertTriangle className="w-12 h-12 text-[#C85A3F] mx-auto mb-3 shrink-0" />
                 <h3 className="text-base font-black text-[#382E2B]">Không thể tải danh sách đề thi</h3>
                 <p className="text-xs text-[#766C5F] mt-1 font-semibold">{error}</p>
                 <button
@@ -354,7 +356,7 @@ export function PageExercises() {
 
             {!loading && !error && filteredExams.length === 0 && (
               <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-12 text-center shadow-[3px_4px_0px_#382E2B] max-w-lg mx-auto">
-                <span className="text-5xl mb-3 block">🔍</span>
+                <Search className="w-12 h-12 text-[#9C8F85] mx-auto mb-3 shrink-0" />
                 <h3 className="text-base font-black text-[#382E2B]">Không tìm thấy đề thi phù hợp</h3>
                 <p className="text-xs text-[#766C5F] mt-1 font-semibold">
                   Không có đề thi nào khớp với bộ lọc đang chọn.

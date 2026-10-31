@@ -7,6 +7,7 @@ import { useStudySession } from '../../hooks/useStudySession.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { getWordsInLesson, getWordsInPassage, getWordsDueForReview } from '../../services/db.js';
+import { Compass, Home, Sparkles } from 'lucide-react';
 import ExerciseFlashcard  from '../learning/ExerciseFlashcard.jsx';
 import ExerciseMCQ        from '../learning/ExerciseMCQ.jsx';
 import ExerciseFill       from '../learning/ExerciseFill.jsx';
@@ -191,7 +192,7 @@ export function PageLearning() {
       <div id="page-learning" className="page active min-h-screen flex flex-col items-center justify-center crayon-paper-pattern font-comfortaa">
         <div className="flex flex-col items-center justify-center gap-4 text-stone-700">
           <div className="w-16 h-16 rounded-full border-4 border-t-[#D36135] border-stone-300 animate-spin"></div>
-          <p className="text-base font-bold">Đang tải bài tập cùng Bé Hổ... 🐾</p>
+          <p className="text-base font-bold">Đang tải bài tập cùng Bé Hổ...</p>
         </div>
       </div>
     );
@@ -216,14 +217,14 @@ export function PageLearning() {
             onClick={() => navigateTo('topics')}
             className="px-6 py-3 bg-[#D36135] text-white rounded-2xl font-bold text-sm flex items-center gap-2 border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <span>Khám phá chủ đề 🧭</span>
+            <span className="inline-flex items-center gap-1.5"><Compass className="w-4 h-4 shrink-0" /> Khám phá chủ đề</span>
           </button>
           <button
             type="button"
             onClick={() => navigateTo('dashboard')}
             className="px-6 py-3 bg-white text-stone-800 rounded-2xl font-bold text-sm border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center gap-2 active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <span>Về trang chủ 🏠</span>
+            <span className="inline-flex items-center gap-1.5"><Home className="w-4 h-4 shrink-0" /> Về trang chủ</span>
           </button>
         </div>
       </div>
@@ -280,7 +281,7 @@ export function PageLearning() {
                 className="h-10 sm:h-12 px-2.5 sm:px-3 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center gap-1.5 hover:bg-amber-50/70 active:translate-y-0.5 transition cursor-pointer text-stone-800 text-xs sm:text-sm font-bold"
                 title={`Đang học: ${flashcardMode === 'en_vi' ? 'Anh - Việt' : 'Việt - Anh'}. Nhấp để đổi chiều.`}
               >
-                <span className="text-sm">{flashcardMode === 'en_vi' ? '🇬🇧➔🇻🇳' : '🇻🇳➔🇬🇧'}</span>
+                <span className="text-xs font-bold">{flashcardMode === 'en_vi' ? 'EN → VI' : 'VI → EN'}</span>
                 <span className="hidden sm:inline font-extrabold text-[11px] uppercase tracking-wider text-stone-700">
                   {flashcardMode === 'en_vi' ? 'Anh - Việt' : 'Việt - Anh'}
                 </span>
@@ -404,7 +405,7 @@ export function PageLearning() {
         <div className="flex items-center gap-1.5 text-stone-500 text-[10px] sm:text-sm font-sans font-semibold">
           <span className="hidden xs:inline">HiVocab! Crayon Study Room</span>
           <span className="xs:hidden">HiVocab!</span>
-          <span>🐾</span>
+          <Sparkles className="w-4 h-4 text-emerald-600 inline shrink-0" />
         </div>
       </footer>
     </div>

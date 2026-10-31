@@ -1,33 +1,57 @@
 // src/components/pages/PageTopics.jsx
 // 100% Pixel-Perfect match to Stitch Design (desktop_topics.html & mobile_topics.html)
 import React, { useMemo } from 'react';
+import { 
+  BookOpen, 
+  Award, 
+  GraduationCap, 
+  Briefcase, 
+  Landmark, 
+  Folder, 
+  Plus, 
+  Search, 
+  Bell, 
+  Trash2, 
+  Sparkles, 
+  ArrowRight, 
+  Tag, 
+  Pin, 
+  Check 
+} from 'lucide-react';
 import { useTopics } from '../../hooks/useTopics.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 
-function getCategoryEmoji(catId) {
+function renderCategoryVectorIcon(catId, className = 'w-8 h-8 text-[#5F7C66] shrink-0') {
   const c = String(catId || '').toLowerCase();
-  if (c.includes('cam')) return '📚';
-  if (c.includes('dest')) return '🏛️';
-  if (c.includes('actual') || c.includes('ielts')) return '🏆';
-  if (c.includes('oxford') || c.includes('3000')) return '🗂️';
-  if (c.includes('thpt') || c.includes('dgnl')) return '🎯';
-  if (c.includes('tu vung cua toi') || c.includes('cua toi') || c.includes('personal')) return '📝';
-  if (c.includes('sat')) return '🎓';
-  if (c.includes('toeic')) return '💼';
-  return '📁';
+  if (c.includes('cam') || c.includes('oxford') || c.includes('3000')) {
+    return <BookOpen className={className} />;
+  }
+  if (c.includes('actual') || c.includes('ielts')) {
+    return <Award className={className} />;
+  }
+  if (c.includes('thpt') || c.includes('dgnl') || c.includes('sat')) {
+    return <GraduationCap className={className} />;
+  }
+  if (c.includes('toeic')) {
+    return <Briefcase className={className} />;
+  }
+  if (c.includes('dest')) {
+    return <Landmark className={className} />;
+  }
+  return <Folder className={className} />;
 }
 
-function getCategoryPillEmoji(catId) {
+function renderCategoryPillIcon(catId) {
   const c = String(catId || '').toLowerCase();
-  if (c === 'all') return '🗂️';
-  if (c.includes('thpt') || c.includes('dgnl')) return '🎓';
-  if (c.includes('ielts')) return '🏆';
-  if (c.includes('oxford') || c.includes('can ban') || c.includes('3000')) return '📚';
-  if (c.includes('tu vung cua toi') || c.includes('cua toi') || c.includes('personal')) return '📁';
-  if (c.includes('dest')) return '🏛️';
-  return '🏷️';
+  const cls = 'w-3.5 h-3.5 shrink-0';
+  if (c === 'all') return <Folder className={cls} />;
+  if (c.includes('thpt') || c.includes('dgnl') || c.includes('sat')) return <GraduationCap className={cls} />;
+  if (c.includes('ielts')) return <Award className={cls} />;
+  if (c.includes('oxford') || c.includes('can ban') || c.includes('3000') || c.includes('cam')) return <BookOpen className={cls} />;
+  if (c.includes('dest')) return <Landmark className={cls} />;
+  return <Tag className={cls} />;
 }
 
 function getCategoryTagColor(catId) {
@@ -85,7 +109,7 @@ export function PageTopics() {
   const handleOpenCreateTopic = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để tạo chủ đề 📁',
+        title: 'Đăng nhập để tạo chủ đề',
         message: 'Bạn cần đăng nhập tài khoản để tự tạo và quản lý bộ chủ đề từ vựng theo ý muốn nhé!',
         actionName: 'tạo chủ đề',
       });
@@ -116,12 +140,9 @@ export function PageTopics() {
         {/* Mobile Header */}
         <header className="flex items-center justify-between py-2">
           <div>
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-2xl font-bold text-[#1e1b17] flex items-center gap-1">
-                Chủ đề <span className="text-xl">🎨</span>
-              </h2>
-              <span className="text-sm">🌿</span>
-            </div>
+            <h2 className="text-2xl font-bold text-[#1e1b17] font-['Quicksand',sans-serif]">
+              Chủ đề
+            </h2>
             <p className="text-xs text-[#43483f] mt-0.5 max-w-[210px] leading-tight">
               Khám phá và lựa chọn thư mục từ vựng để bắt đầu học nhé!
             </p>
@@ -131,7 +152,7 @@ export function PageTopics() {
             onClick={handleOpenCreateTopic}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#86a378] text-[#203918] font-bold text-xs border-[2.5px] border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-transform shrink-0"
           >
-            <span className="text-sm font-bold">+</span>
+            <Plus className="w-3.5 h-3.5 shrink-0" />
             <span>Tạo chủ đề</span>
           </button>
         </header>
@@ -145,9 +166,7 @@ export function PageTopics() {
             placeholder="Tìm kiếm chủ đề, khóa học..."
             className="w-full pl-9 pr-4 py-2 text-xs font-semibold rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] placeholder-[#9C9286] focus:outline-none focus:ring-2 focus:ring-[#5F7C66]"
           />
-          <svg className="w-4 h-4 text-[#827A73] absolute left-3 top-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
+          <Search className="w-4 h-4 text-[#827A73] absolute left-3 top-2.5" />
         </div>
 
         {/* Category Filter Pills (Horizontal Scroll) */}
@@ -160,7 +179,7 @@ export function PageTopics() {
                 : 'bg-white text-[#1e1b17]'
             }`}
           >
-            <span>🗂️</span>
+            <Folder className="w-3.5 h-3.5 shrink-0" />
             <span>Tất cả</span>
           </button>
           {categories
@@ -178,7 +197,7 @@ export function PageTopics() {
                       : 'bg-white text-[#1e1b17] shadow-sm'
                   }`}
                 >
-                  <span>{getCategoryPillEmoji(cat.id)}</span>
+                  {renderCategoryPillIcon(cat.id)}
                   <span>{catLabel}</span>
                 </button>
               );
@@ -198,7 +217,6 @@ export function PageTopics() {
             <div className="grid grid-cols-2 gap-3.5">
               {folderList.map((folder) => {
                 const folderName = folder.label || folder.name || folder.id;
-                const emoji = getCategoryEmoji(folder.id);
                 return (
                   <div
                     key={folder.id}
@@ -207,9 +225,7 @@ export function PageTopics() {
                   >
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <div className="w-9 h-9 rounded-full bg-[#f4ede6] border border-[#3d352e] flex items-center justify-center text-lg">
-                          {emoji}
-                        </div>
+                        {renderCategoryVectorIcon(folder.id, 'w-7 h-7 text-[#5F7C66] shrink-0')}
                         <div className="flex items-center gap-1">
                           <span className="px-2 py-0.5 rounded-full bg-[#eee7e1] text-[#1e1b17] text-[10px] font-bold border border-[#3d352e]/40">
                             {folder.count} chủ đề
@@ -223,9 +239,7 @@ export function PageTopics() {
                             className="w-6 h-6 rounded-lg bg-white hover:bg-rose-50 text-rose-500 border border-[#3d352e] flex items-center justify-center transition active:scale-90 cursor-pointer shrink-0"
                             title={`Xóa thư mục "${folderName}"`}
                           >
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
@@ -265,7 +279,6 @@ export function PageTopics() {
               ) : (
                 filteredTopics.map((topic) => {
                   const pct = Math.round(topic.progress || 0);
-                  const emoji = getCategoryEmoji(topic.category || topic.name);
                   return (
                     <div
                       key={topic.id}
@@ -274,9 +287,7 @@ export function PageTopics() {
                     >
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <div className="w-9 h-9 rounded-full bg-[#f4ede6] border border-[#3d352e] flex items-center justify-center text-lg">
-                            {emoji}
-                          </div>
+                          {renderCategoryVectorIcon(topic.category || topic.name, 'w-7 h-7 text-[#D96B43] shrink-0')}
                           <div className="flex items-center gap-1">
                             {topic.is_pro && !isUserPro && (
                               <span className="px-1.5 py-0.5 rounded-full bg-amber-200 text-[#3d352e] text-[9px] font-black border border-[#3d352e]">
@@ -292,9 +303,7 @@ export function PageTopics() {
                               className="w-6 h-6 rounded-lg bg-white hover:bg-rose-50 text-rose-500 border border-[#3d352e] flex items-center justify-center transition active:scale-90 cursor-pointer shrink-0"
                               title={`Xóa chủ đề "${topic.name}"`}
                             >
-                              <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                              </svg>
+                              <Trash2 className="w-3 h-3" />
                             </button>
                           </div>
                         </div>
@@ -338,7 +347,7 @@ export function PageTopics() {
                 <span className="text-[#5F7C66]">Khóa học &amp; Thư mục</span>
               </div>
               <h2 className="text-2xl xl:text-3xl font-extrabold text-[#3D352E] flex items-center gap-2.5 tracking-tight font-['Quicksand',sans-serif]">
-                <span>Chủ đề &amp; Khóa học 📚</span>
+                <span>Chủ đề &amp; Khóa học</span>
               </h2>
             </div>
 
@@ -352,9 +361,7 @@ export function PageTopics() {
                   placeholder="Tìm kiếm khóa học, sách (CAM, IELTS, THPT)..."
                   className="w-full text-xs font-semibold pl-9 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] placeholder-[#9C9286] focus:outline-none focus:ring-2 focus:ring-[#5F7C66]"
                 />
-                <svg className="w-4 h-4 text-[#827A73] absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
+                <Search className="w-4 h-4 text-[#827A73] absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
 
               {/* Create Topic CTA */}
@@ -362,9 +369,7 @@ export function PageTopics() {
                 onClick={handleOpenCreateTopic}
                 className="flex items-center gap-2 bg-[#D96B43] hover:bg-[#c85e37] text-white font-bold text-xs px-4 py-2.5 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-x-0.5 active:translate-y-0.5 cursor-pointer whitespace-nowrap shrink-0"
               >
-                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"></path>
-                </svg>
+                <Plus className="w-4 h-4 shrink-0" />
                 <span>Tạo chủ đề mới</span>
               </button>
 
@@ -374,9 +379,7 @@ export function PageTopics() {
                 className="w-10 h-10 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center hover:bg-neutral-50 transition cursor-pointer shrink-0"
               >
                 <div className="relative">
-                  <svg className="w-5 h-5 text-[#3D352E]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                  </svg>
+                  <Bell className="w-5 h-5 text-[#3D352E]" />
                   <span className="w-2 h-2 bg-[#D96B43] rounded-full absolute top-0 right-0"></span>
                 </div>
               </button>
@@ -395,7 +398,7 @@ export function PageTopics() {
                     : 'bg-white hover:bg-[#FDF9ED] text-[#3D352E]'
                 }`}
               >
-                <span>🗂️</span>
+                <Folder className="w-3.5 h-3.5 shrink-0" />
                 <span>Tất cả chủ đề ({totalTopicsCount})</span>
               </button>
 
@@ -416,7 +419,7 @@ export function PageTopics() {
                           : 'bg-white hover:bg-[#FDF9ED] text-[#3D352E]'
                       }`}
                     >
-                      <span>{getCategoryPillEmoji(cat.id)}</span>
+                      {renderCategoryPillIcon(cat.id)}
                       <span>{catLabel} ({count})</span>
                     </button>
                   );
@@ -426,7 +429,7 @@ export function PageTopics() {
             {/* Progress Summary Strip Banner */}
             <div className="bg-[#FFFDF8] px-5 py-3 rounded-[20px] border-2 border-[#3D352E] shadow-[3px_3px_0px_#3D352E] flex flex-wrap items-center justify-between text-xs font-semibold gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-base">📌</span>
+                <Pin className="w-4 h-4 text-[#D96B43] shrink-0" />
                 <span className="text-[#3D352E]">
                   Bạn đang xem <b className="text-[#5F7C66]">{activeCategory === 'all' ? `${folderList.length} thư mục` : `${filteredTopics.length} chủ đề`}</b>
                   <span className="mx-1.5 text-gray-300">|</span>
@@ -439,7 +442,7 @@ export function PageTopics() {
                     className="ml-2 px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[11px] font-bold inline-flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
                     title="Xóa toàn bộ thư mục này"
                   >
-                    <span>🗑️</span>
+                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
                     <span>Xóa thư mục</span>
                   </button>
                 )}
@@ -466,9 +469,7 @@ export function PageTopics() {
             <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {folderList.map((folder) => {
                 const folderName = folder.label || folder.name || folder.id;
-                const emoji = getCategoryEmoji(folder.id);
                 const tagColor = getCategoryTagColor(folder.id);
-                const iconBg = getCategoryIconBg(folder.id);
                 const isStarted = (folder.avgProgress || 0) > 0;
                 const sampleTopics = (folder.topics || []).slice(0, 3).map((t) => t.name).join(', ');
 
@@ -486,7 +487,7 @@ export function PageTopics() {
                       {/* Top Tag & Meta */}
                       <div className="flex items-center justify-between gap-2 mb-3">
                         <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border inline-flex items-center gap-1.5 min-w-0 max-w-[65%] ${tagColor}`}>
-                          <span className="shrink-0">{getCategoryPillEmoji(folder.id)}</span>
+                          {renderCategoryPillIcon(folder.id)}
                           <span className="truncate">{folderName}</span>
                         </span>
                         <span className={`text-[11px] font-extrabold text-[#73695F] bg-[#EFE9DD] px-2.5 py-0.5 rounded-lg border border-[#3D352E]/30 whitespace-nowrap shrink-0 ${isStarted ? 'mr-7' : ''}`}>
@@ -494,11 +495,9 @@ export function PageTopics() {
                         </span>
                       </div>
 
-                      {/* Card Header & Icon */}
+                      {/* Card Header & Vector Icon (Dạng tách nền, không đóng khung hộp cứng) */}
                       <div className="flex items-start gap-3.5 mt-2">
-                        <div className={`w-14 h-14 rounded-2xl ${iconBg} border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl shrink-0`}>
-                          {emoji}
-                        </div>
+                        {renderCategoryVectorIcon(folder.id, "w-10 h-10 text-[#5F7C66] shrink-0 mt-0.5")}
                         <div>
                           <h3
                             onClick={() => setActiveCategory(folder.id)}
@@ -541,7 +540,7 @@ export function PageTopics() {
                           } text-white text-xs font-extrabold border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition flex items-center justify-center gap-1.5 cursor-pointer`}
                         >
                           <span>{isStarted ? 'Tiếp tục học' : 'Bắt đầu học'}</span>
-                          <span className="text-sm">{isStarted ? '➔' : '✨'}</span>
+                          <ArrowRight className="w-4 h-4 shrink-0" />
                         </button>
                         <button
                           onClick={() => setActiveCategory(folder.id)}
@@ -561,9 +560,7 @@ export function PageTopics() {
                           className="p-2.5 rounded-xl bg-white hover:bg-rose-50 text-rose-500 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-y-0.5 cursor-pointer shrink-0"
                           title={`Xóa thư mục "${folderName}"`}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
+                          <Trash2 className="w-4 h-4 shrink-0" />
                         </button>
                       </div>
                     </div>
@@ -588,9 +585,7 @@ export function PageTopics() {
                 filteredTopics.map((topic) => {
                   const pct = Math.round(topic.progress || 0);
                   const isStarted = pct > 0;
-                  const emoji = getCategoryEmoji(topic.category || topic.name);
                   const tagColor = getCategoryTagColor(topic.category);
-                  const iconBg = getCategoryIconBg(topic.category);
 
                   return (
                     <article
@@ -606,7 +601,7 @@ export function PageTopics() {
                         {/* Top Tag & Meta */}
                         <div className="flex items-center justify-between gap-2 mb-3">
                           <span className={`px-2.5 py-1 rounded-xl text-xs font-bold border inline-flex items-center gap-1.5 min-w-0 max-w-[70%] ${tagColor}`}>
-                            <span className="shrink-0">{getCategoryPillEmoji(topic.category)}</span>
+                            {renderCategoryPillIcon(topic.category)}
                             <span className="truncate">{topic.category || 'Chủ đề'}</span>
                           </span>
                           {topic.is_pro && !isUserPro && (
@@ -616,11 +611,9 @@ export function PageTopics() {
                           )}
                         </div>
 
-                        {/* Card Header & Icon */}
+                        {/* Card Header & Vector Icon (Dạng tách nền, không đóng khung hộp cứng) */}
                         <div className="flex items-start gap-3.5 mt-2">
-                          <div className={`w-14 h-14 rounded-2xl ${iconBg} border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl shrink-0`}>
-                            {emoji}
-                          </div>
+                          {renderCategoryVectorIcon(topic.category || topic.name, "w-10 h-10 text-[#D96B43] shrink-0 mt-0.5")}
                           <div>
                             <h3
                               onClick={() => openTopic(topic.id, topic.name, topic.category)}
@@ -655,16 +648,14 @@ export function PageTopics() {
                             className="flex-1 py-2.5 px-3 rounded-xl bg-[#5F7C66] hover:bg-[#4d6653] text-white text-xs font-extrabold border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <span>Vào học ngay</span>
-                            <span className="text-sm">➔</span>
+                            <ArrowRight className="w-4 h-4 shrink-0" />
                           </button>
                           <button
                             onClick={() => handleDeleteTopic(topic.id, topic.name)}
                             className="p-2.5 rounded-xl bg-white hover:bg-rose-50 text-rose-500 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition cursor-pointer"
                             title="Xóa chủ đề"
                           >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
+                            <Trash2 className="w-4 h-4 shrink-0" />
                           </button>
                         </div>
                       </div>
@@ -688,7 +679,7 @@ export function PageTopics() {
                 </div>
                 <div className="space-y-1">
                   <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#E8EFEA] text-[#5F7C66] text-xs font-black border border-[#5F7C66]">
-                    <span>🐾</span> CHURBITO GỢI Ý ÔN TẬP
+                    <Sparkles className="w-3.5 h-3.5 text-[#5F7C66] shrink-0" /> CHURBITO GỢI Ý ÔN TẬP
                   </div>
                   <h4 className="text-lg font-black text-[#3D352E]">
                     "Hôm nay bạn nên hoàn thành 1 bài đọc hoặc 1 bài học để duy trì chuỗi học tập nhé!"
@@ -707,7 +698,7 @@ export function PageTopics() {
                   className="py-3 px-6 rounded-2xl bg-[#5F7C66] hover:bg-[#4d6653] text-white font-extrabold text-sm border-2 border-[#3D352E] shadow-[3px_3px_0px_#3D352E] transition flex items-center gap-2 cursor-pointer"
                 >
                   <span>Bắt đầu học ngay</span>
-                  <span className="text-base">🚀</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
               </div>
             </div>
@@ -722,7 +713,6 @@ export function PageTopics() {
               <a className="hover:text-[#3D352E] transition cursor-pointer">Cẩm nang ôn thi</a>
               <a className="hover:text-[#3D352E] transition flex items-center gap-1 cursor-pointer">
                 <span>Hỗ trợ bé Hổ</span>
-                <span>🐯</span>
               </a>
             </div>
           </footer>

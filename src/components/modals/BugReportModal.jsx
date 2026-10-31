@@ -2,23 +2,24 @@
 // Cozy Crayon Handcrafted Bug Report & Feedback Modal with Hidden Diagnostic Browser Logs
 import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
+import { Sparkles, Bug, AlertTriangle, Pin } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import { getBrowserDiagnosticLogs } from '../../utils/browserLogger.js';
 
 const FEEDBACK_SUBTYPES = [
-  { id: 'feature_request', label: '💡 Gợi ý tính năng mới', desc: 'Ý tưởng bạn muốn HiVocab phát triển' },
-  { id: 'ui_ux_improve', label: '🎨 Cải tiến giao diện & trải nghiệm', desc: 'Góp ý màu sắc, nút bấm, bố cục dễ dùng hơn' },
-  { id: 'content_request', label: '📚 Đề xuất thêm chủ đề / bài học', desc: 'Bộ từ vựng, tài liệu bạn mong muốn có trên app' },
-  { id: 'other_feedback', label: '💬 Phản hồi khác', desc: 'Bất kỳ chia sẻ hay cảm nghĩ nào của bạn' },
+  { id: 'feature_request', label: 'Gợi ý tính năng mới', desc: 'Ý tưởng bạn muốn HiVocab phát triển' },
+  { id: 'ui_ux_improve', label: 'Cải tiến giao diện & trải nghiệm', desc: 'Góp ý màu sắc, nút bấm, bố cục dễ dùng hơn' },
+  { id: 'content_request', label: 'Đề xuất thêm chủ đề / bài học', desc: 'Bộ từ vựng, tài liệu bạn mong muốn có trên app' },
+  { id: 'other_feedback', label: 'Phản hồi khác', desc: 'Bất kỳ chia sẻ hay cảm nghĩ nào của bạn' },
 ];
 
 const BUG_SUBTYPES = [
-  { id: 'wrong_answer', label: '❌ Sai đáp án / Dịch thuật', desc: 'Nghĩa từ, phiên âm, ví dụ hoặc đáp án chưa đúng' },
-  { id: 'audio_error', label: '🔊 Lỗi âm thanh / Phát âm', desc: 'Không nghe được âm thanh hoặc giọng đọc sai' },
-  { id: 'ui_bug', label: '📱 Lỗi giao diện / Không bấm được', desc: 'Nút bị đơ, tràn viền, trắng trang hoặc che khuất' },
-  { id: 'exam_error', label: '📝 Lỗi phòng luyện đề thi', desc: 'Lỗi câu hỏi, đồng hồ đếm giờ hoặc bảng nộp bài' },
-  { id: 'other_bug', label: '⚠️ Lỗi kỹ thuật khác', desc: 'Các vấn đề phát sinh khác trong quá trình học' },
+  { id: 'wrong_answer', label: 'Sai đáp án / Dịch thuật', desc: 'Nghĩa từ, phiên âm, ví dụ hoặc đáp án chưa đúng' },
+  { id: 'audio_error', label: 'Lỗi âm thanh / Phát âm', desc: 'Không nghe được âm thanh hoặc giọng đọc sai' },
+  { id: 'ui_bug', label: 'Lỗi giao diện / Không bấm được', desc: 'Nút bị đơ, tràn viền, trắng trang hoặc che khuất' },
+  { id: 'exam_error', label: 'Lỗi phòng luyện đề thi', desc: 'Lỗi câu hỏi, đồng hồ đếm giờ hoặc bảng nộp bài' },
+  { id: 'other_bug', label: 'Lỗi kỹ thuật khác', desc: 'Các vấn đề phát sinh khác trong quá trình học' },
 ];
 
 export function BugReportModal() {
@@ -110,8 +111,8 @@ export function BugReportModal() {
       if (error) throw error;
 
       const successMsg = activeTab === 'feedback'
-        ? 'Cảm ơn bạn! Ý kiến đóng góp quý báu đã được gửi tới đội ngũ HiVocab 🌟'
-        : 'Cảm ơn bạn! Báo cáo lỗi kèm log hệ thống đã được gửi tới quản trị viên 🛠️';
+        ? 'Cảm ơn bạn! Ý kiến đóng góp quý báu đã được gửi tới đội ngũ HiVocab'
+        : 'Cảm ơn bạn! Báo cáo lỗi kèm log hệ thống đã được gửi tới quản trị viên';
 
       if (typeof window !== 'undefined' && window.showHiToast) {
         window.showHiToast(successMsg, 'success');
@@ -149,11 +150,11 @@ export function BugReportModal() {
         {/* Header */}
         <div className="flex items-center justify-between border-b-2 border-dashed border-[#D9CEBA] pb-3.5">
           <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-2xl border-2 border-[#3D352E] flex items-center justify-center text-xl shadow-[2px_2px_0px_#3D352E] ${
-              activeTab === 'feedback' ? 'bg-[#FFF2B2] text-[#B87A00]' : 'bg-[#FEEFEA] text-[#DE5D53]'
-            }`}>
-              {activeTab === 'feedback' ? '⭐' : '🐞'}
-            </div>
+            {activeTab === 'feedback' ? (
+              <Sparkles className="w-8 h-8 text-[#B87A00] shrink-0" />
+            ) : (
+              <Bug className="w-8 h-8 text-[#DE5D53] shrink-0" />
+            )}
             <div>
               <h3 className="text-lg font-black text-[#302A24] font-quicksand leading-tight">
                 {activeTab === 'feedback' ? 'Góp ý phát triển HiVocab' : 'Báo cáo lỗi & Phản hồi'}
@@ -184,7 +185,7 @@ export function BugReportModal() {
                 : 'text-[#6E5D53] hover:text-[#302A24]'
             }`}
           >
-            <span>💡</span>
+            <Sparkles className="w-3.5 h-3.5 text-[#302A24] shrink-0 inline mr-1" />
             <span>Góp ý &amp; Đề xuất</span>
           </button>
           <button
@@ -196,7 +197,7 @@ export function BugReportModal() {
                 : 'text-[#6E5D53] hover:text-[#302A24]'
             }`}
           >
-            <span>🚨</span>
+            <AlertTriangle className="w-3.5 h-3.5 text-[#DE5D53] shrink-0 inline mr-1" />
             <span>Báo cáo sự cố</span>
           </button>
         </div>
@@ -204,7 +205,7 @@ export function BugReportModal() {
         {/* Context Chip */}
         <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-white border border-[#3D352E] text-xs">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="text-[#DE5D53] font-bold">📍 Vị trí:</span>
+            <span className="text-[#DE5D53] font-bold inline-flex items-center gap-1"><Pin className="w-3.5 h-3.5 shrink-0" /> Vị trí:</span>
             <span className="font-bold text-[#302A24] truncate">{feature}</span>
           </div>
           {contextData?.word && (

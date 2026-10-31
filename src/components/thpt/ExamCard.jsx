@@ -5,6 +5,7 @@
 import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
+import { Lock, Crown, FileQuestion, Clock, Check } from 'lucide-react';
 
 const LEVEL_COLORS = {
   easy:   { bg: 'bg-[#eaf4e8]', text: 'text-[#4f7d4b]', border: 'border-[#6e9b6a]', label: 'Cơ bản' },
@@ -59,14 +60,14 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
             {/* PRO Badge / Lock Badge */}
             {isExamPro && !isPro && (
               <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#382E2B] bg-[#FFE8C2] text-[#8C5311] shadow-[1.5px_1.5px_0px_#382E2B] rotate-[2deg] whitespace-nowrap">
-                <span>🔒</span>
+                <Lock className="w-3 h-3 text-[#8C5311] shrink-0" />
                 <span>Gói PRO</span>
               </span>
             )}
 
             {isExamPro && isPro && (
               <span className="inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border border-[#382E2B] bg-[#FFF5E6] text-[#B87C24] shadow-[1.5px_1.5px_0px_#382E2B] whitespace-nowrap">
-                <span>👑</span>
+                <Crown className="w-3 h-3 text-[#B87C24] shrink-0" />
                 <span>PRO</span>
               </span>
             )}
@@ -88,19 +89,19 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
         {/* Specs row */}
         <div className="flex items-center gap-2.5 flex-wrap mt-3.5 pt-3 border-t-2 border-dashed border-[#EFE8D6] text-xs font-bold text-[#6B5A4E]">
           <span className="inline-flex items-center gap-1">
-            <span className="text-sm">📝</span>
+            <FileQuestion className="w-3.5 h-3.5 text-[#6B5A4E] shrink-0" />
             <span>{exam.total_questions || 40} câu</span>
           </span>
           <span>•</span>
           <span className="inline-flex items-center gap-1">
-            <span className="text-sm">⏱️</span>
+            <Clock className="w-3.5 h-3.5 text-[#6B5A4E] shrink-0" />
             <span>{exam.duration_minutes || exam.time_limit || 50} phút</span>
           </span>
           {hasScore && (
             <>
               <span>•</span>
               <span className="inline-flex items-center gap-1 text-[#4f7d4b]">
-                <span className="text-sm">✅</span>
+                <Check className="w-3.5 h-3.5 text-[#4f7d4b] shrink-0" />
                 <span>{bestScore.correct}/{exam.total_questions || 40} đúng</span>
               </span>
             </>
@@ -120,8 +121,8 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
               }}
               className="flex-1 py-2.5 px-4 rounded-2xl bg-[#D96C4D] hover:bg-[#C85A3F] text-white text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
             >
-              <span>🔒</span>
-              <span>Mở Khóa PRO 👑</span>
+              <Lock className="w-4 h-4 shrink-0" />
+              <span>Mở Khóa PRO</span>
             </button>
             <button
               type="button"
@@ -132,7 +133,7 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
               className="w-10 h-10 rounded-2xl bg-[#FFF8EE] hover:bg-[#F3E7D5] text-[#382E2B] border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer shrink-0 opacity-80"
               title="Đề thi yêu cầu gói PRO"
             >
-              <span className="text-sm">🔒</span>
+              <Lock className="w-4 h-4 text-[#382E2B] shrink-0" />
             </button>
           </>
         ) : (

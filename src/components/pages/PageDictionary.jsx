@@ -2,6 +2,7 @@
 // 100% Pixel-Perfect match to Stitch Design (desktop_dictionary.html & mobile_dictionary.html)
 import React, { useRef, useEffect } from 'react';
 import { useDictionary } from '../../hooks/useDictionary.js';
+import { BookOpen, Search, X, Clock, RotateCcw, Volume2, Tag, MessageSquare, Sparkles, Zap, Copy, Bookmark } from 'lucide-react';
 
 export function PageDictionary() {
   const {
@@ -96,7 +97,7 @@ export function PageDictionary() {
         {/* Mobile Header Bar */}
         <header className="flex justify-between items-center w-full py-2 mb-3">
           <div className="flex items-center space-x-2">
-            <span className="text-2xl">📖</span>
+            <BookOpen className="w-6 h-6 text-[#4b6540] shrink-0" />
             <h1 className="text-2xl font-bold text-[#4b6540] tracking-tight">Từ điển</h1>
           </div>
           <span className="text-xs font-bold text-[#4b6540] bg-[#eef5ec] px-2.5 py-1 rounded-full border border-[#86a378]">
@@ -111,7 +112,7 @@ export function PageDictionary() {
             className="border-[2.5px] border-[#3d352e] bg-white rounded-full p-1.5 pl-4 flex items-center justify-between shadow-[2px_3px_0px_rgba(61,53,46,0.15)] focus-within:ring-2 focus-within:ring-[#4b6540]/40 relative"
           >
             <div className="flex items-center space-x-2.5 flex-1 min-w-0 pr-2">
-              <span className="text-lg text-[#74796f] flex-shrink-0">🔍</span>
+              <Search className="w-4 h-4 text-[#74796f] shrink-0" />
               <input
                 value={query}
                 onChange={(e) => handleInputChange(e.target.value)}
@@ -122,7 +123,7 @@ export function PageDictionary() {
               />
               {query && (
                 <button onClick={clearInput} className="text-xs text-[#74796f] font-bold px-1.5">
-                  ✕
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -159,7 +160,7 @@ export function PageDictionary() {
           <section className="w-full mb-5">
             <div className="flex justify-between items-center mb-2 px-1">
               <div className="flex items-center space-x-1 text-xs text-[#74796f] font-bold">
-                <span>🕒</span>
+                <Clock className="w-3.5 h-3.5 text-[#74796f] shrink-0" />
                 <span>TỪ VỪA TRA GẦN ĐÂY</span>
               </div>
               <button onClick={clearRecent} className="text-[11px] font-bold text-[#4b6540] hover:underline">
@@ -176,7 +177,7 @@ export function PageDictionary() {
                     {term}
                   </span>
                   <button onClick={() => removeRecent(term)} className="text-gray-400 hover:text-gray-700 ml-1 text-xs">
-                    ✕
+                    <X className="w-3 h-3" />
                   </button>
                 </div>
               ))}
@@ -187,7 +188,7 @@ export function PageDictionary() {
         {/* Mobile Result State */}
         {status === 'loading' ? (
           <div className="py-16 text-center text-[#74796f]">
-            <span className="inline-block text-3xl animate-spin mb-2">🔄</span>
+            <RotateCcw className="w-7 h-7 animate-spin mx-auto mb-2 text-[#4b6540] shrink-0" />
             <p className="text-sm font-bold">Đang tra cứu từ điển...</p>
           </div>
         ) : status === 'error' ? (
@@ -218,7 +219,7 @@ export function PageDictionary() {
                     onClick={() => playAudio(result.word)}
                     className="px-2.5 py-1 rounded-lg bg-[#FAF5EB] hover:bg-[#F0E6D2] border border-[#3d352e] text-xs font-bold active:scale-95 transition-transform flex items-center gap-1 cursor-pointer"
                   >
-                    <span>🔊</span>
+                    <Volume2 className="w-3.5 h-3.5 text-[#3d352e] shrink-0" />
                     <span>Nghe</span>
                   </button>
                 </div>
@@ -237,7 +238,7 @@ export function PageDictionary() {
             {entriesToRender.map((entry, idx) => (
               <div key={idx} className="space-y-2">
                 <div className="text-xs font-bold uppercase text-[#e87248] flex items-center gap-1">
-                  <span>🏷️</span>
+                  <Tag className="w-3.5 h-3.5 text-[#e87248] shrink-0" />
                   <span>NGHĨA TIẾNG VIỆT {entriesToRender.length > 1 ? `#${idx + 1}` : ''}</span>
                 </div>
                 <p className="text-base font-bold text-[#1e1b17] leading-snug">
@@ -256,7 +257,7 @@ export function PageDictionary() {
           </section>
         ) : (
           <div className="bg-white border-2 border-[#3d352e] rounded-3xl p-6 text-center shadow-xs">
-            <span className="text-4xl block mb-2">🔍</span>
+            <Search className="w-8 h-8 text-[#74796f] mx-auto mb-2 shrink-0" />
             <h3 className="font-bold text-base text-[#1e1b17]">Tra cứu từ vựng tức thì</h3>
             <p className="text-xs text-[#74796f] mt-1 mb-4 leading-relaxed">
               Nhập từ vựng, thành ngữ hoặc cụm từ bất kỳ vào ô tìm kiếm bên trên để tra cứu nghĩa đầy đủ.
@@ -284,9 +285,7 @@ export function PageDictionary() {
         <header className="px-6 xl:px-8 pt-6 pb-4">
           <div className="max-w-6xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center space-x-3.5 min-w-0 flex-1">
-              <div className="w-12 h-12 xl:w-14 xl:h-14 rounded-2xl bg-[#e9f1e6] border-2 border-[#3a342e] shadow-[2px_2px_0px_#3a342e] flex items-center justify-center text-2xl xl:text-3xl shrink-0">
-                📖
-              </div>
+              <BookOpen className="w-10 h-10 xl:w-12 xl:h-12 text-[#557A46] shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-2xl xl:text-3xl font-extrabold text-[#2e2823] tracking-tight">Tra Cứu Từ Điển</h2>
@@ -317,7 +316,7 @@ export function PageDictionary() {
               ref={inputRef}
               className="relative bg-[#fffcf7] border-2 border-[#3a342e] rounded-full p-2 pl-6 shadow-[3px_3px_0px_#3a342e] flex items-center"
             >
-              <span className="text-xl text-[#787067] mr-3">🔍</span>
+              <Search className="w-5 h-5 text-[#787067] mr-3 shrink-0" />
               <input
                 value={query}
                 onChange={(e) => handleInputChange(e.target.value)}
@@ -328,7 +327,7 @@ export function PageDictionary() {
               />
               {query && (
                 <button onClick={clearInput} className="text-sm text-stone-400 hover:text-stone-700 font-bold px-3">
-                  ✕
+                  <X className="w-4 h-4" />
                 </button>
               )}
               <button
@@ -362,7 +361,7 @@ export function PageDictionary() {
               <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
                 <div className="flex items-center flex-wrap gap-2">
                   <span className="flex items-center text-xs font-bold uppercase tracking-wider text-[#787067] mr-1">
-                    <span className="mr-1">🕒</span> TỪ VỪA TRA GẦN ĐÂY:
+                    <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-[#787067] shrink-0" /> TỪ VỪA TRA GẦN ĐÂY:</span>
                   </span>
                   {recentSearches.map((term, i) => (
                     <button
@@ -370,8 +369,8 @@ export function PageDictionary() {
                       className="bg-white border-2 border-[#3a342e] px-3 py-1 rounded-full text-xs font-bold shadow-[2px_2px_0px_#3a342e] hover:bg-stone-50 flex items-center space-x-1.5 transition-colors cursor-pointer"
                     >
                       <span onClick={() => searchWord(term)}>{term}</span>
-                      <span onClick={() => removeRecent(term)} className="text-stone-400 hover:text-stone-700 ml-1">
-                        ✕
+                      <span onClick={() => removeRecent(term)} className="text-stone-400 hover:text-stone-700 ml-1 inline-flex items-center">
+                        <X className="w-3 h-3" />
                       </span>
                     </button>
                   ))}
@@ -385,7 +384,7 @@ export function PageDictionary() {
             {/* Suggested Words Row */}
             <div className="flex items-center flex-wrap gap-2 pt-1 text-sm">
               <span className="text-xs font-bold uppercase tracking-wider text-[#787067] mr-1">
-                ✨ TỪ KHÓA HAY GẶP:
+                <span className="inline-flex items-center gap-1"><Sparkles className="w-3.5 h-3.5 text-[#e87248] shrink-0" /> TỪ KHÓA HAY GẶP:</span>
               </span>
               {suggestedWords.map((word) => (
                 <button
@@ -402,7 +401,7 @@ export function PageDictionary() {
           {/* Result Master-Detail Grid (12 cols) */}
           {status === 'loading' ? (
             <div className="py-24 text-center text-[#787067] bg-[#fffcf7] rounded-3xl border-2 border-[#3a342e]">
-              <span className="inline-block text-4xl animate-spin mb-3">🔄</span>
+              <RotateCcw className="w-10 h-10 animate-spin mx-auto mb-3 text-[#e87248] shrink-0" />
               <p className="text-base font-bold">Đang tra cứu từ điển...</p>
             </div>
           ) : status === 'error' ? (
@@ -436,7 +435,7 @@ export function PageDictionary() {
                           onClick={() => playAudio(result.word)}
                           className="bg-white hover:bg-stone-100 border border-[#3a342e] px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 shadow-[2px_2px_0px_#3a342e] cursor-pointer"
                         >
-                          <span>🔊 Phát âm</span>
+                          <Volume2 className="w-3.5 h-3.5 shrink-0" /> <span>Phát âm</span>
                         </button>
                       </div>
                     </div>
@@ -455,7 +454,7 @@ export function PageDictionary() {
                     <div key={idx} className="space-y-3 pt-1 border-b border-[#3a342e]/10 pb-5 last:border-0 last:pb-0">
                       <div className="space-y-1.5">
                         <div className="text-xs font-extrabold tracking-wider uppercase text-[#e87248] flex items-center space-x-1.5">
-                          <span>🏷️</span>
+                          <Tag className="w-3.5 h-3.5 text-[#e87248] shrink-0" />
                           <span>NGHĨA TIẾNG VIỆT {entriesToRender.length > 1 ? `#${idx + 1}` : ''}</span>
                         </div>
                         <p className="text-xl font-bold text-[#2e2823] leading-snug">
@@ -466,7 +465,7 @@ export function PageDictionary() {
                       {entry.example && (
                         <div className="space-y-2">
                           <div className="text-xs font-extrabold tracking-wider uppercase text-[#2e2823] flex items-center space-x-1.5">
-                            <span>💬</span>
+                            <MessageSquare className="w-3.5 h-3.5 text-[#2e2823] shrink-0" />
                             <span>VÍ DỤ NGỮ CẢNH THỰC TẾ</span>
                           </div>
                           <div className="bg-[#fdf0ea]/60 border-2 border-dashed border-[#3a342e] p-4 rounded-2xl space-y-1.5">
@@ -490,8 +489,9 @@ export function PageDictionary() {
               <section className="lg:col-span-5 space-y-6">
                 <div className="bg-[#fffcf7] border-2 border-[#3a342e] rounded-3xl p-6 shadow-[3px_3px_0px_#3a342e] relative overflow-hidden">
                   <div className="text-center space-y-3">
-                    <div className="inline-block bg-[#e9f1e6] text-[#658a5c] border border-[#3a342e] px-3 py-1 rounded-full text-xs font-bold">
-                      🐾 Bạn đồng hành học từ vựng
+                    <div className="inline-flex items-center gap-1.5 bg-[#e9f1e6] text-[#658a5c] border border-[#3a342e] px-3 py-1 rounded-full text-xs font-bold">
+                      <Sparkles className="w-3.5 h-3.5 text-[#658a5c] shrink-0" />
+                      <span>Bạn đồng hành học từ vựng</span>
                     </div>
                     <div className="relative w-40 h-40 mx-auto flex items-center justify-center">
                       <img
@@ -511,7 +511,7 @@ export function PageDictionary() {
 
                 <div className="bg-white border-2 border-[#3a342e] rounded-3xl p-5 shadow-[2px_2px_0px_#3a342e] space-y-3">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl">⚡</span>
+                    <Zap className="w-4 h-4 text-[#e87248] shrink-0" />
                     <h4 className="font-bold text-sm text-[#2e2823]">Thao tác nhanh</h4>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -519,14 +519,14 @@ export function PageDictionary() {
                       onClick={() => copyWord(result.word)}
                       className="w-full text-left p-2.5 rounded-xl border border-[#3a342e] text-xs font-bold hover:bg-[#fdf0ea] transition-colors flex items-center justify-between cursor-pointer"
                     >
-                      <span>📋 Sao chép từ vựng</span>
+                      <span className="inline-flex items-center gap-1.5"><Copy className="w-3.5 h-3.5 shrink-0" /> Sao chép từ vựng</span>
                       <span className="text-xs">→</span>
                     </button>
                     <button
                       onClick={openSaveModal}
                       className="w-full text-left p-2.5 rounded-xl bg-[#e87248] text-white text-xs font-bold hover:bg-[#d96339] transition-colors flex items-center justify-between cursor-pointer"
                     >
-                      <span>💾 Lưu vào Sổ từ</span>
+                      <span className="inline-flex items-center gap-1.5"><Bookmark className="w-3.5 h-3.5 shrink-0" /> Lưu vào Sổ từ</span>
                       <span className="text-xs">→</span>
                     </button>
                   </div>
@@ -535,7 +535,7 @@ export function PageDictionary() {
             </div>
           ) : (
             <div className="bg-[#fffcf7] border-2 border-[#3a342e] rounded-3xl p-12 text-center shadow-[3px_3px_0px_#3a342e]">
-              <span className="text-5xl block mb-3">📖</span>
+              <BookOpen className="w-12 h-12 text-[#e87248] mx-auto mb-3 shrink-0" />
               <h3 className="text-xl font-black text-[#2e2823]">Tra cứu từ vựng cùng HiVocab</h3>
               <p className="text-sm font-semibold text-[#787067] mt-1 max-w-md mx-auto">
                 Nhập từ tiếng Anh để khám phá phiên âm, nghĩa tiếng Việt chuẩn xác và ví dụ ngữ cảnh sinh động.

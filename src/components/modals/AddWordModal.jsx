@@ -2,6 +2,17 @@
 // Modal thêm từ vựng mới - Phong cách Cozy Crayon ấm áp (Sáp màu & Sổ tay học tập)
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  BookOpen, 
+  Sparkles, 
+  RotateCcw, 
+  Volume2, 
+  AlertTriangle, 
+  Check, 
+  ArrowRight, 
+  X, 
+  Plus 
+} from 'lucide-react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useSound } from '../../hooks/useSound.js';
@@ -130,7 +141,7 @@ export function AddWordModal() {
         if (data.example && !exampleSentence) {
           setExampleSentence(data.example);
         }
-        success('✨ DeepSeek AI đã tự động điền gợi ý!');
+        success('DeepSeek AI đã tự động điền gợi ý!');
       } else {
         setErrorMessage(`Không tìm thấy gợi ý cho "${clean}". Bạn có thể tự điền thủ công nhé!`);
       }
@@ -173,7 +184,7 @@ export function AddWordModal() {
         passageId: passageId,
       });
 
-      success(`Đã thêm từ "${cleanWord}" vào sổ từ! 🎉`);
+      success(`Đã thêm từ "${cleanWord}" vào sổ từ!`);
       handleClose();
 
       // Trigger custom event so page lists can reload
@@ -197,12 +208,10 @@ export function AddWordModal() {
         {/* Header */}
         <div className="px-6 py-4.5 border-b-2 border-[#382E2B] flex items-center justify-between shrink-0 bg-[#FFF8EE]">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-[#FFE8C2] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-xl shrink-0">
-              📝
-            </div>
+            <BookOpen className="w-8 h-8 text-[#D36135] shrink-0" />
             <div>
               <h2 className="text-base sm:text-lg font-heading font-black text-[#382E2B]">Thêm từ vựng mới</h2>
-              <p className="text-xs font-semibold text-[#766C5F]">Lưu vào kho từ cá nhân với Spaced Repetition 🐾</p>
+              <p className="text-xs font-semibold text-[#766C5F]">Lưu vào kho từ cá nhân với Spaced Repetition</p>
             </div>
           </div>
           <button
@@ -211,7 +220,7 @@ export function AddWordModal() {
             className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
             aria-label="Đóng"
           >
-            ✕
+            <X className="w-4 h-4 text-[#382E2B]" />
           </button>
         </div>
 
@@ -228,7 +237,8 @@ export function AddWordModal() {
                 onClick={handleOpenCreateTopic}
                 className="text-xs font-extrabold text-[#D36135] hover:underline cursor-pointer flex items-center gap-1"
               >
-                <span>+ Tạo chủ đề mới</span>
+                <Plus className="w-3.5 h-3.5" />
+                <span>Tạo chủ đề mới</span>
               </button>
             </div>
 
@@ -236,10 +246,10 @@ export function AddWordModal() {
             {topicsList.length === 0 && !isLoadingTopics ? (
               <div className="p-3.5 rounded-2xl bg-[#FFF3D6] border-2 border-[#D97706]/40 text-[#92400E] text-xs font-semibold flex items-center justify-between gap-2.5">
                 <div className="flex items-start gap-2">
-                  <span className="text-base shrink-0">⚠️</span>
+                  <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0 mt-0.5" />
                   <div>
                     <p className="font-bold text-[#B45309]">Bạn chưa có chủ đề cá nhân nào!</p>
-                    <p className="text-[11px] mt-0.5">Bấm nút bên cạnh để mở pop-up tạo chủ đề & chọn thư mục nhé.</p>
+                    <p className="text-[11px] mt-0.5">Bấm nút bên cạnh để mở pop-up tạo chủ đề &amp; chọn thư mục nhé.</p>
                   </div>
                 </div>
                 <button
@@ -247,7 +257,8 @@ export function AddWordModal() {
                   onClick={handleOpenCreateTopic}
                   className="px-3 py-1.5 bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs rounded-xl border-2 border-[#382E2B] shadow-sm cursor-pointer active:translate-y-0.5 transition-all shrink-0 flex items-center gap-1"
                 >
-                  <span>+ Tạo chủ đề</span>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Tạo chủ đề</span>
                 </button>
               </div>
             ) : (
@@ -258,7 +269,7 @@ export function AddWordModal() {
               >
                 {topicsList.map((t) => (
                   <option key={t.id} value={t.id}>
-                    📂 {t.name} {t.category ? `(${t.category})` : ''}
+                    {t.name} {t.category ? `(${t.category})` : ''}
                   </option>
                 ))}
               </select>
@@ -277,7 +288,7 @@ export function AddWordModal() {
                 disabled={isAiLoading}
                 className="px-3 py-1.5 rounded-xl text-xs font-black bg-[#FFF3D6] hover:bg-[#FFE5B4] text-[#B87C24] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center gap-1.5 transition-all cursor-pointer active:translate-y-0.5 disabled:opacity-50"
               >
-                <span>{isAiLoading ? '🔄' : '✨'}</span>
+                {isAiLoading ? <RotateCcw className="w-3.5 h-3.5 animate-spin shrink-0" /> : <Sparkles className="w-3.5 h-3.5 shrink-0" />}
                 <span>{isAiLoading ? 'Đang điền...' : 'AI Điền tự động'}</span>
               </button>
             </div>
@@ -312,7 +323,7 @@ export function AddWordModal() {
                     className="absolute right-2 p-1 rounded-xl text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer text-xs"
                     title="Nghe phát âm"
                   >
-                    🔊
+                    <Volume2 className="w-4 h-4 text-[#766C5F] hover:text-[#382E2B]" />
                   </button>
                 )}
               </div>
@@ -363,7 +374,7 @@ export function AddWordModal() {
 
           {errorMessage && (
             <div className="p-3.5 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
-              <span>⚠️</span>
+              <AlertTriangle className="w-4 h-4 text-[#EA7349] shrink-0" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -384,13 +395,14 @@ export function AddWordModal() {
             >
               {isSubmitting ? (
                 <>
-                  <span className="animate-spin">🔄</span>
+                  <RotateCcw className="w-4 h-4 animate-spin shrink-0" />
                   <span>Đang lưu...</span>
                 </>
               ) : (
                 <>
-                  <span>✓</span>
-                  <span>Lưu từ vựng ➔</span>
+                  <Check className="w-4 h-4 shrink-0" />
+                  <span>Lưu từ vựng</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </>
               )}
             </button>

@@ -40,7 +40,7 @@ export function ExamConfirmModal({ exam, answers, onConfirm, onCancel }) {
 
         {unans > 0 && (
           <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3.5 py-2.5 rounded-xl">
-            ⚠️ Còn {unans} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài không?
+            Còn {unans} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài không?
           </p>
         )}
 
@@ -213,7 +213,7 @@ export function ExamCustomTimeModal({ examId, examTitle, onStart, onCancel }) {
             onClick={() => onStart(examId, selectedMinutes)}
             className="px-5 py-2.5 rounded-2xl bg-[#D36135] text-white text-xs sm:text-sm font-black hover:bg-[#c2542a] transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
           >
-            Bắt đầu thi ➔
+            Bắt đầu thi
           </button>
         </div>
       </div>

@@ -2,12 +2,13 @@
 // Lớp phủ khóa nội dung Pro phong cách sáp màu ấm áp Cozy Crayon
 import React from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
+import { Lock, Check } from 'lucide-react';
 
 export function CrayonLockOverlay({
-  title = 'Mở Khóa Toàn Bộ Bài Đọc & Đề Thi 🌿',
+  title = 'Mở Khóa Toàn Bộ Bài Đọc & Đề Thi',
   description,
   message,
-  badgeText = 'NỘI DUNG ĐỘC QUYỀN PRO 👑',
+  badgeText = 'NỘI DUNG ĐỘC QUYỀN PRO',
   defaultPlanId = 'pro_6m',
   onUnlockSuccess,
   onUpgrade,
@@ -26,7 +27,7 @@ export function CrayonLockOverlay({
     message ||
     'Nội dung này dành riêng cho thành viên HiVocab PRO. Nâng cấp ngay để đọc song ngữ Anh - Việt không giới hạn, tra cứu từ vựng học thuật theo ngữ cảnh và luyện trọn bộ kho đề thi THPT!';
 
-  const effectiveCtaText = ctaText || upgradeText || 'Nâng Cấp PRO Ngay — Chỉ từ 25k/tháng 🚀';
+  const effectiveCtaText = ctaText || upgradeText || 'Nâng Cấp PRO Ngay — Chỉ từ 25k/tháng';
 
   const handleOpenPricing = () => {
     if (typeof onUpgrade === 'function') {
@@ -47,10 +48,8 @@ export function CrayonLockOverlay({
         backgroundSize: '24px 24px',
       }}
     >
-      {/* Icon Ổ khóa sáp màu */}
-      <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-3.5 bg-[#FFE8C2] border-2 border-[#3D352E] rounded-3xl flex items-center justify-center text-3xl sm:text-4xl shadow-crayonSm rotate-[-3deg] hover:rotate-0 transition-transform">
-        🔒
-      </div>
+      {/* Icon Ổ khóa dạng tách nền */}
+      <Lock className="w-14 h-14 sm:w-16 sm:h-16 text-[#D96C4D] mx-auto mb-3.5 shrink-0" />
 
       {/* Huy hiệu sticker */}
       <span className="inline-block px-3 py-1 bg-[#FBECE7] text-[#C85A3F] border border-[#C85A3F]/40 rounded-full text-[11px] font-heading font-black uppercase tracking-wider mb-2.5 shadow-[1px_1px_0px_#3D352E]">
@@ -70,15 +69,15 @@ export function CrayonLockOverlay({
       {/* Danh sách micro perks */}
       <div className="bg-[#FFFDF9] border border-dashed border-[#C4B9AA] rounded-2xl p-3 mb-6 text-left space-y-1.5 text-xs font-bold text-[#3D352E]">
         <div className="flex items-center gap-2">
-          <span className="text-[#4D6B53]">🌿</span>
+          <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
           <span>Đọc song ngữ Anh - Việt đối chiếu từng câu</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[#4D6B53]">🌿</span>
+          <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
           <span>Kho 38+ đề thi THPT bấm giờ & giải chi tiết</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-[#4D6B53]">🌿</span>
+          <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
           <span>Ghi nhớ dài hạn với thuật toán Spaced Repetition (SM-2)</span>
         </div>
       </div>

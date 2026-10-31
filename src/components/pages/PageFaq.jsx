@@ -124,7 +124,7 @@ export function PageFaq() {
               onClick={() => navigateTo('landing')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🏠 Home' : '🏠 Trang chủ'}
+              {isEn ? 'Home' : 'Trang chủ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -132,7 +132,7 @@ export function PageFaq() {
               onClick={() => navigateTo('features')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🎨 Features' : '🎨 Tính năng'}
+              {isEn ? 'Features' : 'Tính năng'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -140,14 +140,14 @@ export function PageFaq() {
               onClick={() => navigateTo('reviews')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💬 Reviews' : '💬 Đánh giá'}
+              {isEn ? 'Reviews' : 'Đánh giá'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
               type="button"
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#DE5D53] bg-[#FDEAE2] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💡 FAQ' : '💡 FAQ'}
+              {isEn ? 'FAQ' : 'FAQ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -155,7 +155,7 @@ export function PageFaq() {
               onClick={() => navigateTo('support')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💌 Support' : '💌 Hỗ trợ'}
+              {isEn ? 'Support' : 'Hỗ trợ'}
             </button>
           </nav>
 
@@ -169,7 +169,7 @@ export function PageFaq() {
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>{isEn ? 'Learn Now' : 'Vào học ngay'}</span>
-              <span className="text-xs sm:text-sm">🚀</span>
+              
             </button>
           </div>
         </div>
@@ -181,12 +181,12 @@ export function PageFaq() {
         {/* Header Intro */}
         <div className="text-center mb-10 sm:mb-14 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAF3E7] text-[#557A46] text-xs font-black uppercase tracking-wider border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
-            <span>💡</span>
+            
             <span>{isEn ? 'Frequently Asked Questions' : 'Giải đáp thắc mắc'}</span>
           </div>
 
           <h1 className="font-quicksand font-black text-3xl sm:text-5xl text-[#3D352E] tracking-tight">
-            {isEn ? 'HiVocab Help & FAQ 🎨' : 'Câu hỏi thường gặp 🎨'}
+            {isEn ? 'HiVocab Help & FAQ' : 'Câu hỏi thường gặp'}
           </h1>
 
           <p className="text-sm sm:text-base text-[#6E5D53] font-medium max-w-xl mx-auto leading-relaxed">
@@ -236,7 +236,7 @@ export function PageFaq() {
         <div className="mt-12 sm:mt-16 p-6 sm:p-8 rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4 text-center md:text-left">
             <div className="w-13 h-13 rounded-2xl bg-[#EAF3E7] border-2 border-[#3D352E] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
-              🐯
+              
             </div>
             <div>
               <h3 className="font-quicksand font-black text-base sm:text-lg text-[#3D352E]">
@@ -256,7 +256,7 @@ export function PageFaq() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-6 py-3 bg-[#0068FF] hover:bg-[#0054cc] text-white font-black text-xs sm:text-sm rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all shrink-0 cursor-pointer"
           >
-            <span>💬</span>
+            
             <span>{isEn ? 'Chat via Zalo: 0846 407 898' : 'Nhắn Zalo: 0846 407 898'}</span>
           </a>
         </div>

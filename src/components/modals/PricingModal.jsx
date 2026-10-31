@@ -2,6 +2,17 @@
 // 100% Pure React Modal for HiVocab PRO Membership & PayOS / VietQR Checkout
 // Chuẩn phong cách Cozy Crayon Study Room (Sáp màu & Giấy thủ công)
 import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Crown, 
+  X, 
+  Check, 
+  AlertTriangle, 
+  ArrowRight, 
+  Pin, 
+  Sparkles, 
+  RotateCcw, 
+  Star 
+} from 'lucide-react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
@@ -22,7 +33,7 @@ const PLANS = {
   pro_6m: {
     id: 'pro_6m',
     name: 'Gói 6 Tháng',
-    badge: '⭐ Phổ Biến Nhất',
+    badge: 'Phổ Biến Nhất',
     badgeColor: 'bg-[#FFE8C2] text-[#8C5311]',
     priceFormatted: '149.000đ',
     monthlyEquivalent: '~24.800đ / tháng',
@@ -33,7 +44,7 @@ const PLANS = {
   pro_1y: {
     id: 'pro_1y',
     name: 'Gói 1 Năm',
-    badge: '🔥 Tiết Kiệm Nhất',
+    badge: 'Tiết Kiệm Nhất',
     badgeColor: 'bg-[#FBECE7] text-[#C85A3F]',
     priceFormatted: '249.000đ',
     monthlyEquivalent: '~20.700đ / tháng',
@@ -43,7 +54,7 @@ const PLANS = {
   pro_lifetime: {
     id: 'pro_lifetime',
     name: 'Gói Trọn Đời',
-    badge: '👑 Vĩnh Viễn',
+    badge: 'Vĩnh Viễn',
     badgeColor: 'bg-[#F3E8FF] text-[#6B21A8]',
     priceFormatted: '499.000đ',
     monthlyEquivalent: 'Dùng mãi mãi',
@@ -211,7 +222,7 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
                 }
 
                 setView('success');
-                success('Nâng cấp PRO thành công! Cảm ơn bạn 🎉');
+                success('Nâng cấp PRO thành công! Cảm ơn bạn');
 
                 // Kích hoạt callback mở khóa tức thì nếu có
                 const callback = modalData?.onSuccess || propOnSuccess;
@@ -251,10 +262,10 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
         <button
           onClick={handleClose}
           type="button"
-          className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 flex items-center justify-center transition-all cursor-pointer z-20 font-black text-lg select-none"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 rounded-full bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 flex items-center justify-center transition-all cursor-pointer z-20 select-none"
           aria-label="Đóng bảng giá"
         >
-          ✕
+          <X className="w-5 h-5 text-[#3D352E]" />
         </button>
 
         {/* ── VIEW 1: LỰA CHỌN GÓI CƯỚC ── */}
@@ -263,11 +274,11 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
             {/* Header */}
             <div className="text-center space-y-2 pr-8 sm:pr-0">
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-heading font-black bg-[#FFE8C2] text-[#8C5311] border-2 border-[#3D352E] shadow-crayonSm rotate-[-1deg] select-none">
-                <span>👑</span>
+                <Crown className="w-3.5 h-3.5 text-[#8C5311] shrink-0" />
                 <span>HIVOCAB PRO MEMBERSHIP</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-heading font-black text-[#3D352E] tracking-tight">
-                Bứt Phá Điểm Số Cùng HiVocab PRO 🌿
+                Bứt Phá Điểm Số Cùng HiVocab PRO
               </h2>
               <p className="font-quicksand text-xs sm:text-sm font-semibold text-[#786F66] max-w-xl mx-auto">
                 Mở khóa toàn bộ kho bài đọc Cambridge IELTS song ngữ, 38+ đề thi THPT Quốc Gia và chế độ ôn tập lặp lại ngắt quãng (SM-2) không giới hạn.
@@ -319,24 +330,24 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
             {/* Hộp Quyền Lợi Độc Quyền PRO */}
             <div className="rounded-2xl bg-[#FFFDF9] border-2 border-dashed border-[#C4B9AA] p-4 sm:p-5 space-y-3">
               <div className="text-xs font-heading font-black uppercase tracking-wider text-[#3D352E] flex items-center gap-1.5">
-                <span>⭐</span>
+                <Star className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                 <span>Đặc quyền dành riêng cho thành viên HiVocab PRO:</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs font-bold text-[#3D352E]">
                 <div className="flex items-center gap-2">
-                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
                   <span>Toàn bộ bài đọc &amp; đề thi Cambridge IELTS song ngữ</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
                   <span>Kho 38+ đề thi THPT Quốc Gia chuẩn ma trận Bộ GD&amp;ĐT</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
                   <span>Thuật toán lặp lại ngắt quãng (SM-2) cá nhân hóa</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-base text-[#4D6B53]">🌿</span>
+                  <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
                   <span>Đồng bộ tiến độ học tập đa thiết bị, không quảng cáo</span>
                 </div>
               </div>
@@ -344,7 +355,7 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
 
             {errorMessage && (
               <div className="p-3.5 rounded-xl bg-[#FBECE7] border border-[#C85A3F] text-[#C85A3F] text-xs font-bold flex items-center gap-2">
-                <span>⚠️</span>
+                <AlertTriangle className="w-4 h-4 text-[#C85A3F] shrink-0" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -362,13 +373,13 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
               >
                 {isLoading ? (
                   <>
-                    <span className="inline-block animate-spin text-base">⏳</span>
+                    <RotateCcw className="w-4 h-4 animate-spin shrink-0" />
                     <span>Đang kết nối PayOS...</span>
                   </>
                 ) : (
                   <>
                     <span>Thanh toán ngay</span>
-                    <span>🚀</span>
+                    <ArrowRight className="w-4 h-4 shrink-0" />
                   </>
                 )}
               </button>
@@ -460,7 +471,7 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
               <div className="space-y-3.5 text-xs text-[#3D352E] flex-1 max-w-sm">
                 <div className="p-4 rounded-2xl bg-[#FFF9E6] border-2 border-[#3D352E] shadow-crayonSm">
                   <p className="font-heading font-black flex items-center gap-1.5 mb-1.5 text-sm text-[#8C5311]">
-                    <span>📌</span>
+                    <Pin className="w-3.5 h-3.5 text-[#8C5311] shrink-0" />
                     <span>Hướng dẫn chuyển khoản:</span>
                   </p>
                   <p className="font-quicksand font-semibold leading-relaxed text-[#786F66]">
@@ -540,7 +551,7 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
                       className="w-full h-full object-cover animate-pulse"
                     />
                   </div>
-                  <span>Đang tự động lắng nghe thanh toán qua PayOS... 🐾</span>
+                  <span>Đang tự động lắng nghe thanh toán qua PayOS...</span>
                 </div>
               </div>
             </div>
@@ -560,13 +571,12 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
                   onError={(e) => { e.currentTarget.src = '/mascot/mascot_cozy.png'; }}
                 />
               </div>
-              <span className="absolute -top-2 -right-2 text-3xl select-none">🎉</span>
-              <span className="absolute -bottom-2 -left-2 text-2xl select-none">✨</span>
+              <Sparkles className="w-7 h-7 text-amber-500 absolute -top-2 -right-2 select-none" />
             </div>
 
             <div className="space-y-2">
               <h3 className="text-2xl sm:text-3xl font-heading font-black text-[#3D352E]">
-                Nâng Cấp PRO Thành Công! 🎉
+                Nâng Cấp PRO Thành Công!
               </h3>
               <p className="font-quicksand text-sm font-semibold text-[#786F66] max-w-md mx-auto leading-relaxed">
                 Bé Hổ chúc mừng bạn đã chính thức gia nhập <strong>HiVocab PRO</strong>! Toàn bộ bài đọc IELTS Cambridge và 38+ đề thi THPT đã được mở khóa ngay bây giờ.
@@ -577,9 +587,10 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
               <button
                 type="button"
                 onClick={handleClose}
-                className="py-3.5 px-10 rounded-2xl bg-[#4D6B53] hover:bg-[#3D5642] text-white font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayon active:translate-y-1 active:shadow-crayonSm transition-all cursor-pointer"
+                className="py-3.5 px-10 rounded-2xl bg-[#4D6B53] hover:bg-[#3D5642] text-white font-heading font-black text-sm border-2 border-[#3D352E] shadow-crayon active:translate-y-1 active:shadow-crayonSm transition-all cursor-pointer inline-flex items-center gap-2"
               >
-                Bắt đầu học ngay 🚀
+                <span>Bắt đầu học ngay</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
             </div>
           </div>

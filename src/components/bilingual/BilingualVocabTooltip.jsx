@@ -51,7 +51,7 @@ export function BilingualVocabTooltip({ tooltip, onClose }) {
           className="w-7 h-7 flex items-center justify-center rounded-full text-[#766C5F] hover:text-[#382E2B] hover:bg-[#FAF5EB] cursor-pointer text-xs font-black transition-colors"
           title="Đóng"
         >
-          ✕
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -61,7 +61,7 @@ export function BilingualVocabTooltip({ tooltip, onClose }) {
 
       <div className="bg-[#FFF8EE] rounded-2xl p-3.5 mb-3.5 border-2 border-dashed border-[#E5A13C]">
         <p className="text-[10px] font-black text-[#D36135] uppercase tracking-wider mb-1">
-          Nghĩa tiếng Việt 🐾
+          Nghĩa tiếng Việt
         </p>
         <p className="text-xs sm:text-sm font-black text-[#382E2B] leading-snug">{meaning}</p>
       </div>
@@ -72,7 +72,7 @@ export function BilingualVocabTooltip({ tooltip, onClose }) {
           onClick={() => speakWord(word)}
           className="flex-1 py-2 px-3 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer active:translate-y-0.5 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B]"
         >
-          <span>🔊</span>
+          <Volume2 className="w-3.5 h-3.5 shrink-0" />
           <span>Phát âm</span>
         </button>
         <button

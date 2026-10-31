@@ -1,4 +1,30 @@
 import React, { useState } from 'react';
+import { 
+  BookOpen, 
+  Heart, 
+  Search, 
+  Share2, 
+  Download, 
+  Compass, 
+  Folder, 
+  MessageSquare, 
+  RotateCcw, 
+  Send, 
+  Globe, 
+  Lock, 
+  X, 
+  Volume2, 
+  Plus, 
+  Trophy, 
+  Flag, 
+  Lightbulb, 
+  Sparkles, 
+  Bookmark, 
+  Award, 
+  Flame, 
+  ArrowRight, 
+  AlertCircle 
+} from 'lucide-react';
 import { useLibrary } from '../../hooks/useLibrary';
 import { useModal } from '../../context/ModalContext';
 
@@ -32,7 +58,7 @@ function isMaterialIcon(val) {
 }
 
 function renderTopicIcon(icon, className = '') {
-  if (!icon) return <span className={className}>📚</span>;
+  if (!icon) return <BookOpen className={`w-5 h-5 text-[#5A7E56] inline-block ${className}`} />;
   const trimmed = icon.trim();
   if (isMaterialIcon(trimmed)) {
     return <span className={`material-symbols-outlined select-none align-middle ${className}`}>{trimmed}</span>;
@@ -44,7 +70,7 @@ function LoadingSpinner() {
   return (
     <div className="flex flex-col items-center justify-center p-12 gap-3">
       <div className="w-10 h-10 border-4 border-[#2D2824]/20 border-t-[#E66946] rounded-full animate-spin" />
-      <span className="text-xs sm:text-sm font-bold text-[#68594D]">Đang nạp dữ liệu cộng đồng sáp màu... 🎨</span>
+      <span className="text-xs sm:text-sm font-bold text-[#68594D]">Đang nạp dữ liệu cộng đồng sáp màu...</span>
     </div>
   );
 }
@@ -52,15 +78,16 @@ function LoadingSpinner() {
 function ErrorState({ error, onRetry }) {
   return (
     <div className="flex flex-col items-center justify-center p-10 text-center bg-white rounded-3xl border-2 border-[#2D2824] shadow-[3px_3px_0px_#2D2824]">
-      <span className="text-4xl mb-2">🌧️</span>
+      <AlertCircle className="w-10 h-10 text-rose-500 mb-2" />
       <h3 className="text-base font-black text-[#2D2824] mb-1">Không thể tải dữ liệu thư viện</h3>
       <p className="text-xs sm:text-sm text-[#68594D] max-w-sm mb-4 font-semibold">{error}</p>
       <button 
         type="button"
         onClick={onRetry}
-        className="px-5 py-2.5 rounded-2xl bg-[#E66946] text-white text-xs sm:text-sm font-extrabold shadow-[2px_2px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5"
+        className="px-5 py-2.5 rounded-2xl bg-[#E66946] text-white text-xs sm:text-sm font-extrabold shadow-[2px_2px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5 inline-flex items-center gap-1.5"
       >
-        Thử lại ngay 🔄
+        <RotateCcw className="w-4 h-4" />
+        <span>Thử lại ngay</span>
       </button>
     </div>
   );
@@ -72,9 +99,13 @@ function EmptyState({ tab, onOpenCreate }) {
 
   return (
     <div className="flex flex-col items-center justify-center p-12 text-center bg-white rounded-3xl border-2 border-[#2D2824] shadow-[3px_3px_0px_#2D2824]">
-      <span className="text-5xl mb-3">
-        {isMy ? '🗂️' : isLiked ? '💖' : '🔍'}
-      </span>
+      {isMy ? (
+        <Folder className="w-12 h-12 text-[#E66946] mb-3" />
+      ) : isLiked ? (
+        <Heart className="w-12 h-12 text-rose-500 mb-3" />
+      ) : (
+        <Search className="w-12 h-12 text-stone-400 mb-3" />
+      )}
       <h3 className="text-lg font-black text-[#2D2824] mb-1">
         {isMy ? 'Bạn chưa tạo bộ từ nào' : isLiked ? 'Chưa có bộ từ yêu thích' : 'Không tìm thấy bộ từ phù hợp'}
       </h3>
@@ -91,7 +122,7 @@ function EmptyState({ tab, onOpenCreate }) {
           onClick={onOpenCreate}
           className="px-5 py-2.5 rounded-2xl bg-[#E66946] text-white text-xs sm:text-sm font-black shadow-[3px_3px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-2"
         >
-          <span>✏️</span>
+          <Plus className="w-4 h-4" />
           <span>Tạo bộ từ mới ngay</span>
         </button>
       )}
@@ -111,7 +142,7 @@ function CommentsDrawer({ lib }) {
       <div className="bg-[#FAF5ED] w-full max-w-xl h-[80vh] sm:h-[600px] rounded-t-3xl sm:rounded-3xl flex flex-col shadow-2xl border-2 border-[#2D2824] overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b-2 border-dashed border-[#2D2824]/20 sticky top-0 bg-[#FAF5ED]/95 backdrop-blur-md z-10">
           <div className="flex items-center gap-2">
-            <span className="text-xl">💬</span>
+            <MessageSquare className="w-5 h-5 text-[#5A7E56]" />
             <h3 className="font-black text-base sm:text-lg text-[#2D2824] truncate pr-4">
               Bình luận: {lib.activeCommentsTitle || 'Bộ từ vựng'}
             </h3>
@@ -121,7 +152,7 @@ function CommentsDrawer({ lib }) {
             onClick={lib.closeComments}
             className="w-8 h-8 flex items-center justify-center rounded-xl bg-white border border-[#2D2824] hover:bg-[#FAF5ED] text-[#2D2824] transition-colors shadow-[1.5px_1.5px_0px_#2D2824]"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -130,8 +161,8 @@ function CommentsDrawer({ lib }) {
             <LoadingSpinner />
           ) : lib.comments.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center opacity-70 p-8">
-              <span className="text-4xl mb-2">🐾</span>
-              <p className="text-sm font-bold text-[#68594D]">Chưa có bình luận nào.<br/>Hãy là người đầu tiên để lại lời nhắn cùng bé Hổ!</p>
+              <MessageSquare className="w-10 h-10 text-stone-300 mb-2" />
+              <p className="text-sm font-bold text-[#68594D]">Chưa có bình luận nào.<br/>Hãy là người đầu tiên để lại lời nhắn cùng các bạn học!</p>
             </div>
           ) : (
             lib.comments.map(c => (
@@ -170,7 +201,7 @@ function CommentsDrawer({ lib }) {
             disabled={!lib.commentInput.trim()}
             className="w-11 h-11 rounded-2xl bg-[#E66946] text-white flex items-center justify-center hover:bg-[#db5d39] disabled:opacity-40 transition-all shrink-0 active:scale-95 shadow-[2px_2px_0px_#2D2824] border-2 border-[#2D2824]"
           >
-            ➤
+            <Send className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -188,9 +219,7 @@ function HashtagPublishModal({ lib }) {
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
       <div className="bg-[#FAF5ED] w-full max-w-[440px] rounded-3xl flex flex-col shadow-2xl p-6 border-[2.5px] border-[#2D2824]">
-        <div className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#FDEEE9] text-[#E66946] border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] mx-auto mb-3 text-2xl">
-          🎒
-        </div>
+        <BookOpen className="w-10 h-10 text-[#E66946] mx-auto mb-3" />
         <h3 className="font-black text-xl text-center text-[#2D2824] mb-1">Công khai bộ từ vựng</h3>
         <p className="text-center text-[#68594D] text-xs font-semibold mb-4 leading-relaxed">
           Thêm mô tả và hashtag để bộ từ của bạn tiếp cận hàng ngàn học viên trên Thư Viện Sáp Màu.
@@ -236,7 +265,7 @@ function HashtagPublishModal({ lib }) {
             disabled={lib.isPublishing || lib.selectedTags.length === 0}
             className="flex-1 py-2.5 rounded-2xl bg-[#5A7E56] border-2 border-[#2D2824] text-white font-black text-xs sm:text-sm hover:bg-[#4B6B46] transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-[2px_2px_0px_#2D2824] active:translate-x-0.5 active:translate-y-0.5"
           >
-            {lib.isPublishing ? 'Đang đăng tải...' : 'Đăng tải ngay 🚀'}
+            {lib.isPublishing ? 'Đang đăng tải...' : 'Đăng tải ngay'}
           </button>
         </div>
       </div>
@@ -253,7 +282,7 @@ function LibrarySearchModal({ lib, onClose }) {
           onClick={onClose}
           className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] font-bold shrink-0"
         >
-          ‹
+          <ChevronLeft className="w-5 h-5 text-[#2D2824]" />
         </button>
         <div className="flex-1 relative">
           <input
@@ -264,14 +293,14 @@ function LibrarySearchModal({ lib, onClose }) {
             placeholder="Tìm kiếm bộ từ..."
             className="w-full bg-white rounded-2xl pl-10 pr-10 py-2.5 text-xs sm:text-sm text-[#2D2824] outline-none border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] font-bold"
           />
-          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-stone-400">🔍</span>
+          <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           {lib.searchQuery && (
             <button 
               type="button"
               onClick={() => lib.setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-stone-200 text-[#2D2824] text-xs font-bold"
             >
-              ✕
+              <X className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
@@ -309,7 +338,7 @@ function ThreadDetailModal({ lib }) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b-2 border-dashed border-[#2D2824]/20 sticky top-0 bg-[#FAF5ED]/95 backdrop-blur-md z-10">
           <div className="flex items-center gap-2.5">
-            <span className="text-2xl">📖</span>
+            <BookOpen className="w-6 h-6 text-[#E66946] shrink-0" />
             <div>
               <h2 className="font-black text-base sm:text-lg text-[#2D2824] truncate">
                 {detail.name || 'Chi tiết bộ từ vựng'}
@@ -322,7 +351,7 @@ function ThreadDetailModal({ lib }) {
             onClick={lib.closeDetail}
             className="w-9 h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] hover:bg-[#FAF5ED] text-[#2D2824] font-bold transition-colors"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -374,7 +403,7 @@ function ThreadDetailModal({ lib }) {
               <div>
                 <div className="flex items-center justify-between mb-4 pb-2 border-b-2 border-dashed border-[#2D2824]/20">
                   <h4 className="font-black text-base text-[#2D2824] flex items-center gap-2">
-                    <span>📝</span>
+                    <BookOpen className="w-4 h-4 text-[#5A7E56]" />
                     Danh sách từ ({detail.words?.length || 0} từ)
                   </h4>
                   <span className="text-xs font-bold text-[#68594D] bg-[#FEF8EA] border border-[#2D2824] px-2.5 py-0.5 rounded-full">
@@ -399,7 +428,7 @@ function ThreadDetailModal({ lib }) {
                             className="w-8 h-8 rounded-xl bg-[#FEF8EA] border border-[#2D2824] text-[#2D2824] flex items-center justify-center hover:bg-amber-100 transition-colors shrink-0 shadow-sm"
                             title="Nghe phát âm"
                           >
-                            🔊
+                            <Volume2 className="w-4 h-4 text-[#2D2824]" />
                           </button>
                         </div>
                         <p className="text-[#2D2824] text-xs sm:text-sm font-bold mb-2">{word.meaning}</p>
@@ -427,7 +456,7 @@ function ThreadDetailModal({ lib }) {
                 detail.hasLiked ? 'bg-[#FDEEE9] text-[#E66946]' : 'bg-white text-[#2D2824] hover:bg-[#FAF5ED]'
               }`}
             >
-              <span>{detail.hasLiked ? '❤️' : '🤍'}</span>
+              <Heart className={`w-4 h-4 ${detail.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#2D2824]'}`} />
               <span>{detail.like_count || 0}</span>
             </button>
             <button 
@@ -435,7 +464,7 @@ function ThreadDetailModal({ lib }) {
               onClick={() => lib.openComments(detail.id, detail.name)}
               className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
             >
-              <span>💬</span>
+              <MessageSquare className="w-4 h-4 text-[#2D2824]" />
               <span>Bình luận</span>
             </button>
             <button 
@@ -443,7 +472,7 @@ function ThreadDetailModal({ lib }) {
               onClick={() => lib.handleClone(detail.id)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#5A7E56] border-2 border-[#2D2824] text-white hover:bg-[#4B6B46] transition-all font-black text-xs sm:text-sm shadow-[3px_3px_0px_#2D2824] active:translate-x-0.5 active:translate-y-0.5"
             >
-              <span>📥</span>
+              <Download className="w-4 h-4 text-white" />
               <span>Lưu bộ từ ({detail.clone_count || 0})</span>
             </button>
             <button 
@@ -451,7 +480,7 @@ function ThreadDetailModal({ lib }) {
               onClick={() => lib.handleShare(detail.id, detail.name)}
               className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
             >
-              <span>🔗</span>
+              <Share2 className="w-4 h-4 text-[#2D2824]" />
               <span>Chia sẻ</span>
             </button>
           </div>
@@ -485,14 +514,11 @@ export function PageLibrary() {
         {/* Sticky Top Header */}
         <header className="border-b-2 border-[#2D2824] bg-white/90 backdrop-blur-sm px-6 xl:px-8 py-4 sticky top-0 z-20 shadow-xs">
           <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              <div className="w-11 h-11 rounded-2xl bg-[#FDEEE9] border-2 border-[#2D2824] flex items-center justify-center text-2xl shadow-[2px_2px_0px_#2D2824] shrink-0">
-                🎒
-              </div>
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <BookOpen className="w-8 h-8 text-[#E66946] shrink-0" />
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h1 className="text-xl xl:text-2xl font-black text-[#2D2824] font-quicksand">Thư viện cộng đồng</h1>
-                  <span className="text-[#E66946] text-base animate-pulse">✨</span>
                   <span className="bg-[#E8EFE5] text-[#5A7E56] text-xs font-black px-2.5 py-0.5 rounded-full border border-[#5A7E56] whitespace-nowrap shrink-0">
                     {lib.topics.length > 0 ? `${lib.topics.length} Bộ từ vựng` : '2,500+ Bộ từ vựng'}
                   </span>
@@ -512,7 +538,7 @@ export function PageLibrary() {
                   lib.currentTab === 'liked' ? 'bg-[#2D2824] text-white' : 'bg-white text-[#2D2824] hover:bg-[#FAF5ED]'
                 }`}
               >
-                <span>🔖</span>
+                <Bookmark className="w-3.5 h-3.5" />
                 <span>Bộ từ đã lưu</span>
               </button>
               <button 
@@ -520,17 +546,17 @@ export function PageLibrary() {
                 onClick={handleOpenCreate}
                 className="bg-[#E66946] text-white border-2 border-[#2D2824] font-black px-4 xl:px-5 py-2 xl:py-2.5 rounded-2xl shadow-[3px_3px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5 text-xs xl:text-sm whitespace-nowrap shrink-0 cursor-pointer"
               >
-                <span className="text-base font-black leading-none">+</span>
+                <Plus className="w-4 h-4" />
                 <span>Tạo &amp; Đóng góp bộ từ</span>
               </button>
               <button
                 type="button"
                 onClick={() => window.openBugReportModal?.({ initialType: 'feedback', feature: 'Thư viện cộng đồng', title: 'Góp ý Thư viện' })}
-                className="w-10 h-10 bg-white hover:bg-[#FAF5ED] border-2 border-[#2D2824] rounded-2xl shadow-[2px_2px_0px_#2D2824] text-[#E66946] text-base flex items-center justify-center active:translate-y-0.5 transition-all shrink-0 cursor-pointer"
+                className="w-10 h-10 bg-white hover:bg-[#FAF5ED] border-2 border-[#2D2824] rounded-2xl shadow-[2px_2px_0px_#2D2824] text-[#E66946] flex items-center justify-center active:translate-y-0.5 transition-all shrink-0 cursor-pointer"
                 title="Góp ý cho thư viện"
                 aria-label="Góp ý cho thư viện"
               >
-                🚩
+                <Flag className="w-4 h-4 text-[#E66946]" />
               </button>
             </div>
           </div>
@@ -542,7 +568,7 @@ export function PageLibrary() {
             
             {/* Search Box */}
             <div className="relative flex-1 w-full min-w-0">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-base text-[#68594D]">🔍</span>
+              <Search className="w-4 h-4 text-[#68594D] absolute left-4 top-1/2 -translate-y-1/2" />
               <input 
                 type="text"
                 value={lib.searchQuery}
@@ -556,7 +582,7 @@ export function PageLibrary() {
                   onClick={() => lib.setSearchQuery('')}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 p-1 rounded-xl text-[#68594D] hover:bg-stone-100 transition-all font-bold text-xs"
                 >
-                  ✕
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
@@ -572,7 +598,7 @@ export function PageLibrary() {
                     : 'text-[#68594D] hover:text-[#2D2824] hover:bg-white/80'
                 }`}
               >
-                <span>🧭</span>
+                <Compass className="w-3.5 h-3.5" />
                 <span>Khám phá</span>
               </button>
               <button 
@@ -584,7 +610,7 @@ export function PageLibrary() {
                     : 'text-[#68594D] hover:text-[#2D2824] hover:bg-white/80'
                 }`}
               >
-                <span>🗂️</span>
+                <Folder className="w-3.5 h-3.5" />
                 <span>Bộ từ của tôi</span>
               </button>
               <button 
@@ -596,7 +622,7 @@ export function PageLibrary() {
                     : 'text-[#68594D] hover:text-[#2D2824] hover:bg-white/80'
                 }`}
               >
-                <span>❤️</span>
+                <Heart className="w-3.5 h-3.5" />
                 <span>Đã thích</span>
               </button>
             </div>
@@ -613,9 +639,9 @@ export function PageLibrary() {
                   onChange={(e) => lib.setSortBy(e.target.value)}
                   className="bg-[#FDEEE9] text-[#E66946] border-2 border-[#2D2824] px-3.5 py-1.5 rounded-full font-black text-xs shadow-[2px_2px_0px_#2D2824] cursor-pointer outline-none hover:bg-orange-100 transition-all"
                 >
-                  <option value="popular">🔥 Phổ biến nhất</option>
-                  <option value="clones">📥 Tải nhiều nhất</option>
-                  <option value="newest">✨ Mới nhất</option>
+                  <option value="popular">Phổ biến nhất</option>
+                  <option value="clones">Tải nhiều nhất</option>
+                  <option value="newest">Mới nhất</option>
                 </select>
 
                 <span className="text-stone-300">|</span>
@@ -674,11 +700,20 @@ export function PageLibrary() {
                           </p>
                         )}
                         <div className="flex items-center gap-3 text-xs text-[#68594D] font-bold">
-                          <span>📖 {topic.totalWords || 0} từ</span>
+                          <span className="flex items-center gap-1">
+                            <BookOpen className="w-3.5 h-3.5" />
+                            {topic.totalWords || 0} từ
+                          </span>
                           <span>•</span>
-                          <span className="flex items-center gap-1">❤️ {topic.like_count || 0}</span>
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3.5 h-3.5 text-rose-500" />
+                            {topic.like_count || 0}
+                          </span>
                           <span>•</span>
-                          <span className="flex items-center gap-1">📥 {topic.clone_count || 0}</span>
+                          <span className="flex items-center gap-1">
+                            <Download className="w-3.5 h-3.5 text-[#5A7E56]" />
+                            {topic.clone_count || 0}
+                          </span>
                           <span>•</span>
                           <span>{formatTimeAgo(topic.created_at)}</span>
                         </div>
@@ -694,7 +729,7 @@ export function PageLibrary() {
                               : 'bg-stone-100 text-stone-600'
                           }`}
                         >
-                          <span>{topic.is_public ? '🌐' : '🔒'}</span>
+                          {topic.is_public ? <Globe className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                           <span>{topic.is_public ? 'Công khai' : 'Riêng tư'}</span>
                         </button>
 
@@ -704,7 +739,7 @@ export function PageLibrary() {
                           className="px-4 py-2 rounded-2xl bg-[#5A7E56] text-white text-xs font-black border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] hover:bg-[#4B6B46] active:translate-y-0.5 transition-all flex items-center gap-1.5"
                         >
                           <span>Mở học</span>
-                          <span>➔</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -765,7 +800,7 @@ export function PageLibrary() {
                           className="w-9 h-9 rounded-2xl border-2 border-[#2D2824] bg-white flex items-center justify-center text-[#68594D] hover:bg-[#FAF5ED] shadow-[1.5px_1.5px_0px_#2D2824] active:translate-y-0.5 transition-all"
                           title="Sao chép liên kết chia sẻ"
                         >
-                          🔗
+                          <Share2 className="w-4 h-4 text-[#68594D]" />
                         </button>
                         <button 
                           type="button"
@@ -775,7 +810,7 @@ export function PageLibrary() {
                           }`}
                           title={topic.hasLiked ? 'Bỏ thích' : 'Thích bộ từ'}
                         >
-                          {topic.hasLiked ? '❤️' : '⭐'}
+                          <Heart className={`w-4 h-4 ${topic.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#68594D]'}`} />
                         </button>
                       </div>
                     </div>
@@ -799,7 +834,8 @@ export function PageLibrary() {
                     {/* Tags Section */}
                     <div className="flex flex-wrap items-center gap-2 pt-3 pb-4">
                       <span className="bg-[#FAF5ED] border border-[#2D2824] px-3 py-1 rounded-xl text-xs font-black flex items-center gap-1.5">
-                        <span>📖</span> {topic.totalWords || 0} từ vựng
+                        <BookOpen className="w-3.5 h-3.5 text-[#68594D]" />
+                        <span>{topic.totalWords || 0} từ vựng</span>
                       </span>
                       {topic.tags && topic.tags.map(tag => (
                         <span key={tag} className="bg-stone-100 text-stone-700 px-2.5 py-1 rounded-xl text-xs font-bold border border-stone-200">
@@ -816,7 +852,7 @@ export function PageLibrary() {
                           onClick={() => lib.handleLike(topic.id)}
                           className="flex items-center gap-1.5 hover:text-[#E66946] transition-colors whitespace-nowrap"
                         >
-                          <span className="text-base text-[#E66946]">{topic.hasLiked ? '❤️' : '🤍'}</span>
+                          <Heart className={`w-4 h-4 ${topic.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#68594D]'}`} />
                           <span>{topic.like_count || 0}</span>
                         </button>
                         <button 
@@ -824,11 +860,11 @@ export function PageLibrary() {
                           onClick={() => lib.openComments(topic.id, topic.name)}
                           className="flex items-center gap-1.5 hover:text-[#2D2824] transition-colors whitespace-nowrap"
                         >
-                          <span>💬</span>
+                          <MessageSquare className="w-4 h-4" />
                           <span>Bình luận</span>
                         </button>
                         <div className="flex items-center gap-1.5 whitespace-nowrap">
-                          <span>📥</span>
+                          <Download className="w-4 h-4" />
                           <span>{topic.clone_count || 0} lượt lưu</span>
                         </div>
                       </div>
@@ -838,7 +874,7 @@ export function PageLibrary() {
                           onClick={() => lib.openDetail(topic.id)}
                           className="px-4 py-2 bg-[#5A7E56] text-white font-extrabold text-xs rounded-xl border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] hover:bg-[#4B6B46] active:translate-x-0.5 active:translate-y-0.5 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                         >
-                          <span>✏️</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
                           <span>Mở học ngay</span>
                         </button>
                       </div>
@@ -856,7 +892,7 @@ export function PageLibrary() {
             <div className="bg-gradient-to-b from-[#E7EFE3] to-[#F1F7EE] border-[2.5px] border-[#2D2824] rounded-3xl p-5 xl:p-6 shadow-[3px_3px_0px_#2D2824] relative overflow-hidden">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <span className="inline-flex items-center gap-1.5 bg-[#5A7E56] text-white text-[11px] font-black px-3 py-1 rounded-full border border-[#2D2824] shadow-xs whitespace-nowrap">
-                  <span>🐻</span> Gợi ý từ Bé Hổ
+                  <Sparkles className="w-3.5 h-3.5 text-white" /> Gợi ý từ Bé Hổ
                 </span>
                 <span className="text-xs font-black text-[#5A7E56] font-hand whitespace-nowrap shrink-0">+50 Hạt mầm</span>
               </div>
@@ -882,7 +918,7 @@ export function PageLibrary() {
                 onClick={handleOpenCreate}
                 className="w-full bg-white hover:bg-[#FAF5ED] text-[#2D2824] font-black py-2.5 xl:py-3 px-4 rounded-2xl border-2 border-[#2D2824] shadow-[3px_3px_0px_#2D2824] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2 text-xs xl:text-sm mt-3 whitespace-nowrap cursor-pointer"
               >
-                <span className="text-base">📝</span>
+                <Plus className="w-4 h-4 text-[#2D2824]" />
                 <span>Tạo &amp; Tải lên bộ từ ngay</span>
               </button>
             </div>
@@ -891,7 +927,7 @@ export function PageLibrary() {
             <div className="bg-white border-[2.5px] border-[#2D2824] rounded-3xl p-5 xl:p-6 shadow-[3px_3px_0px_#2D2824] space-y-3.5">
               <div className="flex items-center justify-between gap-2 pb-3 border-b-2 border-dashed border-[#2D2824]/20">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="text-xl shrink-0">🏆</span>
+                  <Trophy className="w-5 h-5 text-amber-500 shrink-0" />
                   <h4 className="font-black text-sm xl:text-base text-[#2D2824] font-quicksand truncate">Tác giả nổi bật tuần</h4>
                 </div>
                 <span className="text-xs font-bold text-[#E66946] whitespace-nowrap shrink-0">Tuyển chọn</span>
@@ -900,9 +936,7 @@ export function PageLibrary() {
               {/* Author 1 */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-[#FDEEE9] border-2 border-[#2D2824] flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-                    🥇
-                  </div>
+                  <Award className="w-5 h-5 text-amber-500 shrink-0" />
                   <div className="min-w-0">
                     <h5 className="text-xs font-black text-[#2D2824] truncate">Cô Mai Phương</h5>
                     <p className="text-[11px] font-medium text-[#68594D] truncate">12 bộ từ • 1.2k lượt học</p>
@@ -916,9 +950,7 @@ export function PageLibrary() {
               {/* Author 2 */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-[#FEF8EA] border-2 border-[#2D2824] flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-                    🥈
-                  </div>
+                  <Award className="w-5 h-5 text-stone-400 shrink-0" />
                   <div className="min-w-0">
                     <h5 className="text-xs font-black text-[#2D2824] truncate">Master Vocab Lab</h5>
                     <p className="text-[11px] font-medium text-[#68594D] truncate">8 bộ từ • 940 lượt học</p>
@@ -932,9 +964,7 @@ export function PageLibrary() {
               {/* Author 3 */}
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-stone-100 border-2 border-[#2D2824] flex items-center justify-center font-bold text-xs shadow-xs shrink-0">
-                    🥉
-                  </div>
+                  <Award className="w-5 h-5 text-amber-700 shrink-0" />
                   <div className="min-w-0">
                     <h5 className="text-xs font-black text-[#2D2824] truncate">Ngọc Linh Vocab</h5>
                     <p className="text-[11px] font-medium text-[#68594D] truncate">6 bộ từ • 720 lượt học</p>
@@ -949,7 +979,7 @@ export function PageLibrary() {
             {/* Community Guidelines Note */}
             <div className="bg-[#FEF8EA] border-2 border-[#2D2824] rounded-2xl p-4 shadow-[2px_2px_0px_#2D2824]">
               <div className="flex items-start gap-2.5">
-                <span className="text-xl shrink-0">💡</span>
+                <Lightbulb className="w-5 h-5 text-amber-500 shrink-0" />
                 <div className="text-xs leading-relaxed text-[#68594D] font-semibold">
                   <strong className="text-[#2D2824] font-black block mb-0.5">Tiêu chuẩn cộng đồng sáp màu:</strong>
                   Mọi bộ từ vựng được tải lên đều được tự động hỗ trợ phiên âm IPA và đồng bộ giải thuật ngắt quãng thông minh (SRS) giúp cả nhà cùng nhau ghi nhớ lâu dài!
@@ -970,37 +1000,37 @@ export function PageLibrary() {
             <button 
               type="button"
               onClick={() => lib.setCurrentTab('feed')}
-              className={`flex-1 py-2 px-1 rounded-full flex items-center justify-center gap-1 transition-transform active:scale-95 text-xs font-black ${
+              className={`flex-1 py-2 px-1 rounded-full flex items-center justify-center gap-1.5 transition-transform active:scale-95 text-xs font-black ${
                 lib.currentTab === 'feed'
                   ? 'bg-[#2D2824] text-white border-2 border-[#2D2824] shadow-xs'
                   : 'text-[#68594D]'
               }`}
             >
-              <span>🧭</span>
+              <Compass className="w-3.5 h-3.5" />
               <span>Khám phá</span>
             </button>
             <button 
               type="button"
               onClick={() => lib.setCurrentTab('my')}
-              className={`flex-1 py-2 px-1 rounded-full flex items-center justify-center gap-1 transition-transform active:scale-95 text-xs font-black ${
+              className={`flex-1 py-2 px-1 rounded-full flex items-center justify-center gap-1.5 transition-transform active:scale-95 text-xs font-black ${
                 lib.currentTab === 'my'
                   ? 'bg-[#2D2824] text-white border-2 border-[#2D2824] shadow-xs'
                   : 'text-[#68594D]'
               }`}
             >
-              <span>🗂️</span>
+              <Folder className="w-3.5 h-3.5" />
               <span>Của tôi</span>
             </button>
             <button 
               type="button"
               onClick={() => lib.setCurrentTab('liked')}
-              className={`flex-1 py-2 px-1 rounded-full flex items-center justify-center gap-1 transition-transform active:scale-95 text-xs font-black ${
+              className={`flex-1 py-2 px-1 rounded-full flex items-center justify-center gap-1.5 transition-transform active:scale-95 text-xs font-black ${
                 lib.currentTab === 'liked'
                   ? 'bg-[#2D2824] text-white border-2 border-[#2D2824] shadow-xs'
                   : 'text-[#68594D]'
               }`}
             >
-              <span>❤️</span>
+              <Heart className="w-3.5 h-3.5" />
               <span>Đã thích</span>
             </button>
           </div>
@@ -1009,7 +1039,7 @@ export function PageLibrary() {
         {/* Search Bar on Mobile */}
         <div className="mt-3">
           <div className="relative flex items-center bg-white rounded-[22px_26px_28px_24px] border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] px-3.5 py-2.5">
-            <span className="text-stone-400 text-base mr-2.5">🔍</span>
+            <Search className="w-4 h-4 text-stone-400 mr-2.5 shrink-0" />
             <input 
               type="text"
               value={lib.searchQuery}
@@ -1023,7 +1053,7 @@ export function PageLibrary() {
                 onClick={() => lib.setSearchQuery('')}
                 className="text-stone-400 hover:text-[#2D2824] p-1 font-bold text-xs"
               >
-                ✕
+                <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
@@ -1037,7 +1067,7 @@ export function PageLibrary() {
               onClick={() => lib.setSortBy(lib.sortBy === 'popular' ? 'clones' : lib.sortBy === 'clones' ? 'newest' : 'popular')}
               className="inline-flex items-center gap-1.5 bg-[#FFDBC9] text-[#70370F] text-xs font-black py-1.5 px-3.5 rounded-full border-2 border-[#2D2824] shadow-[1.5px_2px_0px_rgba(51,48,44,0.85)] whitespace-nowrap active:scale-95 transition-transform"
             >
-              <span>🔥</span>
+              <Flame className="w-3.5 h-3.5 text-[#70370F] shrink-0" />
               <span>{lib.sortBy === 'popular' ? 'Phổ biến nhất' : lib.sortBy === 'clones' ? 'Tải nhiều nhất' : 'Mới nhất'}</span>
               <span className="text-[10px]">▼</span>
             </button>
@@ -1081,23 +1111,33 @@ export function PageLibrary() {
                   </p>
                 )}
                 <div className="flex items-center justify-between pt-2 border-t border-stone-200">
-                  <div className="text-xs font-bold text-[#68594D]">
-                    {topic.totalWords || 0} từ • ❤️ {topic.like_count || 0}
+                  <div className="text-xs font-bold text-[#68594D] flex items-center gap-2">
+                    <span className="flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" />
+                      {topic.totalWords || 0} từ
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3 h-3 text-rose-500" />
+                      {topic.like_count || 0}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => lib.handlePublicToggle(topic.id, !topic.is_public)}
-                      className="px-2.5 py-1 text-xs font-black rounded-xl border border-[#2D2824] bg-stone-100"
+                      className="px-2.5 py-1 text-xs font-black rounded-xl border border-[#2D2824] bg-stone-100 flex items-center gap-1"
                     >
-                      {topic.is_public ? '🌐 Công khai' : '🔒 Riêng tư'}
+                      {topic.is_public ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                      <span>{topic.is_public ? 'Công khai' : 'Riêng tư'}</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => window._openTopic?.(topic.id)}
-                      className="px-3 py-1 bg-[#5A7E56] text-white text-xs font-black rounded-xl border border-[#2D2824]"
+                      className="px-3 py-1 bg-[#5A7E56] text-white text-xs font-black rounded-xl border border-[#2D2824] flex items-center gap-1"
                     >
-                      Mở ➔
+                      <span>Mở</span>
+                      <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
                 </div>
@@ -1149,7 +1189,7 @@ export function PageLibrary() {
                     onClick={() => lib.handleShare(topic.id, topic.name)}
                     className="w-8 h-8 rounded-full flex items-center justify-center text-[#68594D] hover:text-[#2D2824] transition-colors"
                   >
-                    🔗
+                    <Share2 className="w-4 h-4" />
                   </button>
                 </div>
 
@@ -1171,7 +1211,7 @@ export function PageLibrary() {
                   {/* Badges & Tags Row */}
                   <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
                     <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-[#FAF5ED] text-xs font-black text-[#2D2824] rounded-xl border border-[#2D2824]">
-                      <span>📖</span>
+                      <BookOpen className="w-3 h-3 text-[#68594D]" />
                       <span>{topic.totalWords || 0} từ</span>
                     </span>
                     {topic.tags && topic.tags.map(tag => (
@@ -1189,7 +1229,7 @@ export function PageLibrary() {
                     onClick={() => lib.handleLike(topic.id)}
                     className="flex items-center gap-1.5 hover:text-[#E66946] transition-colors"
                   >
-                    <span>{topic.hasLiked ? '❤️' : '🤍'}</span>
+                    <Heart className={`w-3.5 h-3.5 ${topic.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#68594D]'}`} />
                     <span>{topic.like_count || 0}</span>
                   </button>
                   <button 
@@ -1197,7 +1237,7 @@ export function PageLibrary() {
                     onClick={() => lib.openComments(topic.id, topic.name)}
                     className="flex items-center gap-1.5 hover:text-[#2D2824] transition-colors"
                   >
-                    <span>💬</span>
+                    <MessageSquare className="w-3.5 h-3.5" />
                     <span>Bình luận</span>
                   </button>
                   <button 
@@ -1205,7 +1245,7 @@ export function PageLibrary() {
                     onClick={() => lib.handleClone(topic.id)}
                     className="flex items-center gap-1.5 hover:text-[#5A7E56] transition-colors"
                   >
-                    <span>📥</span>
+                    <Download className="w-3.5 h-3.5" />
                     <span>{topic.clone_count || 0} lưu</span>
                   </button>
                 </div>
@@ -1216,8 +1256,9 @@ export function PageLibrary() {
           {/* Mascot Prompt Invitation Banner on Mobile */}
           <section className="bg-[#CCE8BC] rounded-[26px_22px_24px_28px] p-4 border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] relative overflow-hidden flex items-center justify-between mt-1">
             <div className="relative z-10 max-w-[72%]">
-              <div className="inline-block bg-[#4B6540] text-white text-[10px] font-black px-2 py-0.5 rounded-full mb-1">
-                Gợi ý từ Bé Hổ 🐻
+              <div className="inline-flex items-center gap-1 bg-[#4B6540] text-white text-[10px] font-black px-2 py-0.5 rounded-full mb-1">
+                <Sparkles className="w-3 h-3 text-white" />
+                <span>Gợi ý từ Bé Hổ</span>
               </div>
               <h4 className="text-sm font-black text-[#092104]">Đăng tải bộ thẻ từ của bạn!</h4>
               <p className="text-[11px] font-semibold text-[#344D2A] mt-0.5">Cùng 25,000+ bạn học mở rộng kho từ vựng mỗi ngày.</p>
@@ -1240,10 +1281,10 @@ export function PageLibrary() {
           <button 
             type="button"
             onClick={() => window.openBugReportModal?.({ initialType: 'feedback', feature: 'Thư viện cộng đồng', title: 'Góp ý Thư viện' })}
-            className="w-12 h-12 bg-white text-[#E66946] rounded-full border-[2.5px] border-[#2D2824] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[2px_2px_0px_#2D2824] text-xl cursor-pointer"
+            className="w-12 h-12 bg-white text-[#E66946] rounded-full border-[2.5px] border-[#2D2824] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[2px_2px_0px_#2D2824] cursor-pointer"
             title="Góp ý cho thư viện"
           >
-            🚩
+            <Flag className="w-5 h-5 text-[#E66946]" />
           </button>
         </div>
       </div>

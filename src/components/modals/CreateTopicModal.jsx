@@ -2,6 +2,7 @@
 // 100% Pure React Modal for Creating Topics and Folders
 // Cozy Crayon Handcrafted Design System (Sáp màu & Sổ tay thủ công)
 import React, { useState, useEffect } from 'react';
+import { BookOpen, Folder } from 'lucide-react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { createTopic, getCachedTopics } from '../../services/topicsService.js';
@@ -84,7 +85,7 @@ export function CreateTopicModal() {
 
     try {
       const newTopic = await createTopic(topicName.trim(), selectedIcon, selectedCategory);
-      success('Tạo chủ đề mới thành công! 🎉');
+      success('Tạo chủ đề mới thành công!');
       handleClose();
 
       // Trigger refresh with created topic in detail
@@ -117,7 +118,7 @@ export function CreateTopicModal() {
 
       saved.push({ name: folderName.trim(), isExam: folderType === 'exam' });
       localStorage.setItem('hivocab_user_folders', JSON.stringify(saved));
-      success(`Đã tạo thư mục "${folderName.trim()}"! 🎉`);
+      success(`Đã tạo thư mục "${folderName.trim()}"!`);
 
       // Cập nhật lại dropdown và chuyển về tạo chủ đề với thư mục vừa tạo
       setUserFolders((prev) => [...prev, folderName.trim()]);
@@ -170,9 +171,7 @@ export function CreateTopicModal() {
                 onClick={() => setStep('topic')}
                 className="group flex flex-col items-center gap-3.5 p-5 rounded-[24px] bg-white hover:bg-[#FFFDF9] border-[2.5px] border-[#382E2B] shadow-[3px_3.5px_0px_#382E2B] hover:shadow-[4px_4.5px_0px_#382E2B] hover:-translate-y-0.5 active:translate-y-0.5 transition-all text-center cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-2xl bg-[#EAF3E7] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-[#557A46] group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[28px]">menu_book</span>
-                </div>
+                <BookOpen className="w-11 h-11 text-[#557A46] group-hover:scale-105 transition-transform" />
                 <div>
                   <p className="font-black font-quicksand text-base text-[#382E2B]">Tạo Chủ đề</p>
                   <p className="text-[11px] font-bold text-[#6E5D53] mt-0.5 leading-snug">Chứa danh sách từ vựng</p>
@@ -184,9 +183,7 @@ export function CreateTopicModal() {
                 onClick={() => setStep('folder')}
                 className="group flex flex-col items-center gap-3.5 p-5 rounded-[24px] bg-white hover:bg-[#FFFDF9] border-[2.5px] border-[#382E2B] shadow-[3px_3.5px_0px_#382E2B] hover:shadow-[4px_4.5px_0px_#382E2B] hover:-translate-y-0.5 active:translate-y-0.5 transition-all text-center cursor-pointer"
               >
-                <div className="w-14 h-14 rounded-2xl bg-[#FFF9EE] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-[#D9822B] group-hover:scale-105 transition-transform">
-                  <span className="material-symbols-outlined text-[28px]">folder_open</span>
-                </div>
+                <Folder className="w-11 h-11 text-[#D9822B] group-hover:scale-105 transition-transform" />
                 <div>
                   <p className="font-black font-quicksand text-base text-[#382E2B]">Tạo Thư mục</p>
                   <p className="text-[11px] font-bold text-[#6E5D53] mt-0.5 leading-snug">Gom nhóm nhiều chủ đề</p>
@@ -281,7 +278,7 @@ export function CreateTopicModal() {
               >
                 {userFolders.map((cat) => (
                   <option key={cat} value={cat}>
-                    📁 {cat}
+                    {cat}
                   </option>
                 ))}
               </select>
@@ -315,7 +312,7 @@ export function CreateTopicModal() {
                     <span>Đang tạo...</span>
                   </>
                 ) : (
-                  <span>Tạo chủ đề ✨</span>
+                  <span>Tạo chủ đề</span>
                 )}
               </button>
             </div>
@@ -384,7 +381,7 @@ export function CreateTopicModal() {
                     className="mt-0.5 accent-[#557A46] shrink-0"
                   />
                   <div>
-                    <p className="font-black font-quicksand text-xs text-[#382E2B]">Thư mục thông thường 📁</p>
+                    <p className="font-black font-quicksand text-xs text-[#382E2B]">Thư mục thông thường</p>
                     <p className="text-[11px] font-bold text-[#6E5D53] leading-snug">Danh sách phẳng phù hợp Oxford, IELTS, Từ cá nhân...</p>
                   </div>
                 </label>
@@ -406,7 +403,7 @@ export function CreateTopicModal() {
                   />
                   <div>
                     <p className="font-black font-quicksand text-xs text-[#382E2B] flex items-center gap-1.5">
-                      <span>Thư mục đề thi 🎓</span>
+                      <span>Thư mục đề thi</span>
                       <span className="text-[10px] font-black text-[#DE5D53] bg-[#FFF0E6] border border-[#DE5D53] px-2 py-0.5 rounded-full">
                         Test → Passage
                       </span>
@@ -438,7 +435,7 @@ export function CreateTopicModal() {
                 type="submit"
                 className="flex-1 py-3 rounded-2xl bg-[#382E2B] hover:bg-[#2A231E] text-white border-2 border-[#382E2B] shadow-[2.5px_3px_0px_#382E2B] text-xs font-black font-quicksand active:translate-y-0.5 transition-all cursor-pointer"
               >
-                Tạo thư mục 🚀
+                Tạo thư mục
               </button>
             </div>
           </form>

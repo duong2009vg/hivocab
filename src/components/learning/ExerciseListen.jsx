@@ -313,7 +313,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
                 onError={(e) => { e.currentTarget.style.display = 'none'; }}
               />
             </span>
-            <span>Churbito: Lắng nghe kỹ & điền từng chữ cái nhé! 🐾</span>
+            <span>Churbito: Lắng nghe kỹ & điền từng chữ cái nhé!</span>
           </div>
 
           {onReport && (
@@ -323,7 +323,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
               className="text-stone-400 hover:text-stone-700 text-xs transition cursor-pointer p-1"
               title="Báo cáo câu hỏi"
             >
-              ⚠️ Báo lỗi
+              <span className="inline-flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Báo lỗi</span>
             </button>
           )}
         </div>
@@ -367,7 +367,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
               currentSpeed === 0.6 ? 'bg-amber-50 text-amber-800 border-amber-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
           >
-            <span>🐢 0.6x</span>
+            <span>0.6x</span>
           </button>
         </div>
 
@@ -386,7 +386,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
             disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
             className="px-3 sm:px-4 py-1 sm:py-1.5 bg-amber-50 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs sm:text-sm text-amber-900 shadow-[1.5px_1.5px_0px_#2B2523] hover:bg-amber-100 cursor-pointer active:translate-y-0.5 disabled:opacity-40"
           >
-            <span>💡</span>
+            <Lightbulb className="w-4 h-4 inline shrink-0" />
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
           </button>
 
@@ -395,7 +395,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
             onClick={() => setShowMeaning((m) => !m)}
             className="px-3 sm:px-4 py-1 sm:py-1.5 bg-stone-50 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs sm:text-sm text-stone-700 shadow-[1.5px_1.5px_0px_#2B2523] hover:bg-stone-100 cursor-pointer active:translate-y-0.5"
           >
-            <span>👁</span>
+            <Eye className="w-4 h-4 inline shrink-0" />
             <span>{showMeaning ? 'Ẩn nghĩa' : 'Xem nghĩa'}</span>
           </button>
         </div>
@@ -411,7 +411,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
         <div className="w-full max-w-md mx-auto mb-3.5 px-1">
           <div className="bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl sm:rounded-full py-2 px-3.5 sm:px-5 shadow-[2px_2.5px_0px_#2B2523] flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-1.5 text-xs font-black text-[#6E5F52] shrink-0">
-              <span className="text-base">✏️</span>
+              <PenTool className="w-4 h-4 text-[#3d352e] inline shrink-0" />
               <span className="hidden xs:inline">Từ đang gõ:</span>
             </div>
             <div className="flex-1 text-center font-mono font-black text-sm sm:text-lg text-[#2B4566] tracking-wider truncate px-1">

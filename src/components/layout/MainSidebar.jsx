@@ -1,6 +1,7 @@
 // src/components/layout/MainSidebar.jsx
 // 100% Pixel-Perfect match to taskbar fix design (code.html & screen.png)
 import React from 'react';
+import { BookOpen, User, LogIn, Crown, Flame, Folder } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
@@ -56,7 +57,7 @@ export function MainSidebar() {
     {
       id: 'topics',
       label: 'Chủ đề & Khóa học',
-      emoji: '🏔️',
+      icon: <Folder className="w-5 h-5 shrink-0" />,
       onMouseEnter: () => {
         import('../../services/db.js')
           .then(({ getTopics }) => getTopics().catch(() => {}))
@@ -184,7 +185,7 @@ export function MainSidebar() {
           >
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
-                🐯
+                <User className="w-4 h-4 text-[#8A796F]" />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-xs font-black text-[#302A24] truncate">Khách trải nghiệm</div>
@@ -197,7 +198,7 @@ export function MainSidebar() {
               className="w-full py-1.5 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
               <span>Đăng nhập / Đăng ký</span>
-              <span>🔑</span>
+              <LogIn className="w-3.5 h-3.5 shrink-0" />
             </button>
           </div>
         ) : (
@@ -220,7 +221,7 @@ export function MainSidebar() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      '🐱'
+                      <User className="w-5 h-5 text-[#302A24]" />
                     )}
                   </div>
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
@@ -233,7 +234,8 @@ export function MainSidebar() {
                         className="profile-pro-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#3D352E] rounded-md shadow-[1px_1px_0px_#3D352E] shrink-0"
                         title="Thành viên HiVocab PRO"
                       >
-                        <span>👑</span>PRO
+                        <Crown className="w-2.5 h-2.5 text-[#8C5311] shrink-0" />
+                        <span>PRO</span>
                       </span>
                     )}
                   </div>
@@ -242,7 +244,7 @@ export function MainSidebar() {
               </div>
 
               <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-0.5 rounded-full border border-[#C85A3F]/40 shrink-0 whitespace-nowrap">
-                <span>🔥</span>
+                <Flame className="w-3.5 h-3.5 text-[#C85A3F] shrink-0" />
                 <span>{displayStreak}</span>
               </div>
             </div>

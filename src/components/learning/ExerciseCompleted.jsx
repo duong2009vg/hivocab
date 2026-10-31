@@ -6,9 +6,9 @@ import React, { useEffect } from 'react';
 function ratingLabel(w) {
   if (w.skipped) return { text: 'Bỏ qua', cls: 'bg-stone-100 text-stone-700 border border-stone-300' };
   if (w.isNew)   return { text: 'Từ mới',  cls: 'bg-blue-100 text-blue-800 border border-blue-300' };
-  if (w.rating === 'easy') return { text: 'Đã nhớ kỹ 🌟', cls: 'bg-emerald-100 text-emerald-800 border border-emerald-300' };
-  if (w.rating === 'good') return { text: 'Tốt 👍', cls: 'bg-sky-100 text-sky-800 border border-sky-300' };
-  return { text: 'Cần ôn thêm ✏️', cls: 'bg-amber-100 text-amber-800 border border-amber-300' };
+  if (w.rating === 'easy') return { text: 'Đã nhớ kỹ', cls: 'bg-emerald-100 text-emerald-800 border border-emerald-300' };
+  if (w.rating === 'good') return { text: 'Tốt', cls: 'bg-sky-100 text-sky-800 border border-sky-300' };
+  return { text: 'Cần ôn thêm', cls: 'bg-amber-100 text-amber-800 border border-amber-300' };
 }
 
 export default function ExerciseCompleted({ completedWords = [], onGoHome }) {
@@ -34,11 +34,11 @@ export default function ExerciseCompleted({ completedWords = [], onGoHome }) {
         </div>
 
         <div className="inline-flex items-center gap-1.5 px-4 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>🎉</span> Hoàn thành xuất sắc bài học
+          <Trophy className="w-5 h-5 text-amber-500 inline mr-2 shrink-0" /> Hoàn thành xuất sắc bài học
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight mb-1">
-          Giỏi quá bạn ơi! 🌿
+          Giỏi quá bạn ơi!
         </h2>
         <p className="text-stone-600 text-sm sm:text-base font-quicksand font-semibold mb-5 max-w-sm">
           Bạn đã ôn tập và củng cố thành công{' '}

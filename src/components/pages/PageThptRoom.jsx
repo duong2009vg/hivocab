@@ -14,6 +14,7 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { CrayonLockOverlay } from '../common/CrayonLockOverlay.jsx';
+import { AlertTriangle, Flag, X, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient.js';
 
 export function PageThptRoom() {
@@ -273,11 +274,11 @@ export function PageThptRoom() {
         <div className="flex-1 flex items-center justify-center p-4">
           <CrayonLockOverlay
             mode="inline"
-            title="Đề Thi Dành Riêng Cho Gói PRO 👑"
+            title="Đề Thi Dành Riêng Cho Gói PRO"
             description={`Đề thi "${examMetadata?.title || 'này'}" thuộc kho đề thi nâng cao của HiVocab PRO. Nâng cấp ngay để làm bài thi có bấm giờ tự động 50 phút, ma trận 40 câu hỏi và chấm điểm chi tiết!`}
             onUpgrade={() => openModal('pricingModal', { defaultPlanId: 'pro_6m' })}
             onBack={handleExit}
-            ctaText="Nâng Cấp PRO Để Vào Thi Ngay 🚀"
+            ctaText="Nâng Cấp PRO Để Vào Thi Ngay"
             backText="Quay lại danh sách đề thi"
           />
         </div>
@@ -292,7 +293,7 @@ export function PageThptRoom() {
     return (
       <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-screen w-screen overflow-hidden items-center justify-center p-6">
         <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-8 max-w-md w-full text-center shadow-[4px_6px_0px_#382E2B]">
-          <span className="text-4xl mb-3 block">⚠️</span>
+          <AlertTriangle className="w-10 h-10 text-[#C85A3F] mx-auto mb-3 shrink-0" />
           <h3 className="font-heading font-black text-lg text-[#382E2B] mb-2">Không thể tải đề thi</h3>
           <p className="text-xs font-semibold text-[#766C5F] mb-6">{initError}</p>
           <button
@@ -432,7 +433,7 @@ export function PageThptRoom() {
           <div className="bg-white rounded-3xl border-2 border-[#382E2B] shadow-[5px_6px_0px_#382E2B] p-6 max-w-md w-full select-none animate-in fade-in duration-150">
             <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#EFE8D6] mb-4">
               <h3 className="font-heading font-black text-base text-[#382E2B] flex items-center gap-2">
-                <span>🚩</span>
+                <Flag className="w-4 h-4 text-[#C85A3F] shrink-0" />
                 <span>Báo lỗi câu {reportModal.qNum}</span>
               </h3>
               <button
@@ -440,13 +441,13 @@ export function PageThptRoom() {
                 onClick={() => setReportModal(null)}
                 className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-xs font-bold"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {reportSent ? (
               <div className="text-center py-6 space-y-3">
-                <span className="text-4xl block">✅</span>
+                <CheckCircle2 className="w-10 h-10 text-[#5a7d4d] mx-auto block shrink-0" />
                 <p className="font-bold text-sm text-[#382E2B]">Cảm ơn bạn đã phản hồi!</p>
                 <p className="text-xs text-[#766C5F]">Đội ngũ giáo viên HiVocab sẽ kiểm tra và điều chỉnh câu hỏi sớm nhất.</p>
                 <button

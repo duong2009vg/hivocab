@@ -2,6 +2,7 @@
 // 100% Cozy Crayon Handcrafted Theme - Flashcard Direction Selector (Anh-Việt / Việt-Anh)
 import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
+import { Zap, X, Check, ArrowRight } from 'lucide-react';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function FlashcardModeModal() {
@@ -68,9 +69,7 @@ export function FlashcardModeModal() {
         {/* Header Ribbon */}
         <div className="flex items-center justify-between pb-3 mb-4 border-b-2 border-[#E5DAC6]">
           <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-2xl bg-[#FFF5E6] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-xl">
-              🎴
-            </div>
+            <Zap className="w-8 h-8 text-[#D96B43] shrink-0" />
             <div>
               <h2 className="text-lg sm:text-xl font-black text-[#302A24] tracking-tight">
                 Chế độ Flashcard
@@ -86,7 +85,7 @@ export function FlashcardModeModal() {
             className="w-8 h-8 rounded-full bg-white hover:bg-stone-100 border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center justify-center text-sm font-black text-[#302A24] transition-transform active:scale-90 cursor-pointer"
             aria-label="Đóng"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -103,18 +102,18 @@ export function FlashcardModeModal() {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🇬🇧 ➔ 🇻🇳</span>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-white border border-[#3D352E]/30 font-black text-xs text-[#302A24] shrink-0">EN <ArrowRight className="w-3 h-3 text-[#4D6B53]" /> VI</div>
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <h3 className="font-black text-sm sm:text-base text-[#302A24]">
                       Flashcard Anh - Việt
                     </h3>
                     <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-[#E0F2E9] text-[#245E3A] border border-[#245E3A]/30">
-                      Khuyên dùng ⭐
+                      Khuyên dùng
                     </span>
                   </div>
                   <p className="text-xs text-[#6B6155] mt-1 leading-relaxed">
-                    Mặt trước xem <strong>từ tiếng Anh, phát âm 🔊</strong>; lật mặt sau để xem <strong>nghĩa tiếng Việt</strong>.
+                    Mặt trước xem <strong>từ tiếng Anh, phát âm</strong>; lật mặt sau để xem <strong>nghĩa tiếng Việt</strong>.
                   </p>
                 </div>
               </div>
@@ -125,7 +124,7 @@ export function FlashcardModeModal() {
                     : 'border-[#8F8477] bg-white'
                 }`}
               >
-                {selectedMode === 'en_vi' && <span className="text-[10px] font-bold">✓</span>}
+                {selectedMode === 'en_vi' && <Check className="w-3 h-3 text-white" />}
               </div>
             </div>
 
@@ -147,18 +146,18 @@ export function FlashcardModeModal() {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span className="text-xl">🇻🇳 ➔ 🇬🇧</span>
+                <div className="flex items-center gap-1 px-2 py-1 rounded-xl bg-white border border-[#3D352E]/30 font-black text-xs text-[#302A24] shrink-0">VI <ArrowRight className="w-3 h-3 text-[#C85A3F]" /> EN</div>
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <h3 className="font-black text-sm sm:text-base text-[#302A24]">
                       Flashcard Việt - Anh
                     </h3>
                     <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-[#FEF3C7] text-[#92400E] border border-[#92400E]/30">
-                      Nhớ chủ động 🎯
+                      Nhớ chủ động
                     </span>
                   </div>
                   <p className="text-xs text-[#6B6155] mt-1 leading-relaxed">
-                    Mặt trước xem <strong>nghĩa tiếng Việt</strong>; lật mặt sau để xem <strong>từ tiếng Anh &amp; phiên âm 🔊</strong>.
+                    Mặt trước xem <strong>nghĩa tiếng Việt</strong>; lật mặt sau để xem <strong>từ tiếng Anh &amp; phiên âm</strong>.
                   </p>
                 </div>
               </div>
@@ -169,7 +168,7 @@ export function FlashcardModeModal() {
                     : 'border-[#8F8477] bg-white'
                 }`}
               >
-                {selectedMode === 'vi_en' && <span className="text-[10px] font-bold">✓</span>}
+                {selectedMode === 'vi_en' && <Check className="w-3 h-3 text-white" />}
               </div>
             </div>
 
@@ -196,7 +195,7 @@ export function FlashcardModeModal() {
             className="w-2/3 py-2.5 px-4 rounded-2xl bg-[#4D6B53] hover:bg-[#3D5642] text-white font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[3px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>Bắt đầu học</span>
-            <span>🚀</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>

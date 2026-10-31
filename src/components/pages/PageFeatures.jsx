@@ -2,6 +2,7 @@
 // Trang tính năng HiVocab hỗ trợ song ngữ Tiếng Anh (Mặc định) và Tiếng Việt theo phong cách Cozy Crayon Handcrafted
 import React from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { BookOpen, Search, RotateCcw, Gamepad2, Bot, BarChart2 } from 'lucide-react';
 import { useLandingLang } from '../../context/LandingLangContext.jsx';
 import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
@@ -14,7 +15,7 @@ export function PageFeatures() {
         {
           tag: 'Exclusive',
           tagColor: 'bg-[#FEEFEA] text-[#DE5D53] border-[#DE5D53]/40',
-          icon: '📚',
+          iconType: 'book',
           title: '66,000+ Cambridge & Vol Word Vault',
           desc: 'All 12 Cambridge IELTS books (CAM 10–21) and 9 IELTS Actual Test volumes (VOL 1–9). 100% standardized with parts of speech (POS), international IPA phonetics, accurate meanings, and real example sentences extracted directly from test passages.',
           highlight: '100 Tests • 300 Complete Passages',
@@ -22,7 +23,7 @@ export function PageFeatures() {
         {
           tag: 'Breakthrough',
           tagColor: 'bg-[#EAF3E7] text-[#557A46] border-[#557A46]/40',
-          icon: '🔍',
+          iconType: 'search',
           title: 'Active Reading & Curtain Mode',
           desc: 'Our proprietary Curtain Mode lets you read aligned bilingual English-Vietnamese passages with a smart collapsible curtain. Trains your brain to actively deduce meanings in context before revealing translations, with integrated cloze tests.',
           highlight: 'Double your reading speed & retention',
@@ -30,7 +31,7 @@ export function PageFeatures() {
         {
           tag: 'Scientific',
           tagColor: 'bg-[#FEF9EE] text-[#D97706] border-[#D97706]/40',
-          icon: '🔄',
+          iconType: 'srs',
           title: 'Spaced Repetition (SRS SM-2)',
           desc: 'Powered by the SuperMemo-2 (SM-2) algorithm across 5 memory tiers from Fresh (1 day) to Mastered (30 days). Automatically calculates the exact moment you are about to forget a word to prompt review, locking words into long-term memory.',
           highlight: 'Saves up to 80% study time',
@@ -38,7 +39,7 @@ export function PageFeatures() {
         {
           tag: 'Multi-Sensory',
           tagColor: 'bg-[#F3E8FF] text-[#8B5CF6] border-[#8B5CF6]/40',
-          icon: '🎮',
+          iconType: 'game',
           title: '5 Dynamic Practice Modes',
           desc: 'Flexibly switch between 3D Flip Flashcards for rapid reflex, 4-Option Multiple Choice (Quiz), Contextual Type-in for spelling precision, Native Audio Dictation for listening acuity, and fun Adventure Challenges.',
           highlight: 'Fun, engaging, zero study fatigue',
@@ -46,7 +47,7 @@ export function PageFeatures() {
         {
           tag: 'AI Assisted',
           tagColor: 'bg-[#FEEFEA] text-[#DE5D53] border-[#DE5D53]/40',
-          icon: '🤖',
+          iconType: 'bot',
           title: 'AI Companion & Contextual Dictionary',
           desc: 'Smart AI deeply analyzes academic sentence context, clarifying collocations, synonyms, and offering unique mnemonic memory hooks. Instant word lookup without ever leaving your study screen.',
           highlight: 'Contextual explanations tailored to real exams',
@@ -54,7 +55,7 @@ export function PageFeatures() {
         {
           tag: 'Discipline',
           tagColor: 'bg-[#E6F3FB] text-[#2A7BA0] border-[#2A7BA0]/40',
-          icon: '📊',
+          iconType: 'stats',
           title: 'Progress Analytics & Daily Streak',
           desc: 'Track mastered words and cumulative learning time with intuitive charts. The daily flame Streak keeps you motivated to sustain everyday study habits for the highest scores.',
           highlight: 'Build lifelong study discipline',
@@ -64,7 +65,7 @@ export function PageFeatures() {
         {
           tag: 'Độc quyền',
           tagColor: 'bg-[#FEEFEA] text-[#DE5D53] border-[#DE5D53]/40',
-          icon: '📚',
+          iconType: 'book',
           title: 'Kho 66.000+ từ vựng Cam & Vol',
           desc: 'Trọn bộ 12 cuốn Cambridge IELTS (CAM 10–21) và 9 tập IELTS Actual Tests (VOL 1–9). Chuẩn hóa 100% từ loại (POS), phiên âm quốc tế (IPA), bản dịch chuẩn xác và câu ví dụ thật từ bài đọc.',
           highlight: '100 Tests • 300 Passages đầy đủ',
@@ -72,7 +73,7 @@ export function PageFeatures() {
         {
           tag: 'Đột phá',
           tagColor: 'bg-[#EAF3E7] text-[#557A46] border-[#557A46]/40',
-          icon: '🔍',
+          iconType: 'search',
           title: 'Đọc Chủ Động & Che Bản Dịch',
           desc: 'Phương pháp Curtain Mode độc quyền: Đọc song ngữ Anh - Việt đối chiếu với rèm che thông minh giúp kích thích tư duy tự suy luận nghĩa từ ngữ cảnh. Tích hợp bài tập đục lỗ ngay trong bài đọc.',
           highlight: 'Tăng tốc độ đọc hiểu x2',
@@ -80,7 +81,7 @@ export function PageFeatures() {
         {
           tag: 'Khoa học',
           tagColor: 'bg-[#FEF9EE] text-[#D97706] border-[#D97706]/40',
-          icon: '🔄',
+          iconType: 'srs',
           title: 'Lặp lại ngắt quãng (SRS SM-2)',
           desc: 'Thuật toán SuperMemo-2 phân tầng 5 cấp độ trí nhớ từ Khởi động (1 ngày) đến Thành thạo (30 ngày). Nhắc nhở ôn tập chính xác thời điểm chuẩn bị quên, chuyển hóa từ vựng thành trí nhớ dài hạn vĩnh viễn.',
           highlight: 'Tiết kiệm 80% thời gian học',
@@ -88,7 +89,7 @@ export function PageFeatures() {
         {
           tag: 'Đa giác quan',
           tagColor: 'bg-[#F3E8FF] text-[#8B5CF6] border-[#8B5CF6]/40',
-          icon: '🎮',
+          iconType: 'game',
           title: '5 Chế độ Luyện tập Đa dạng',
           desc: 'Tự do đổi gió với Flashcard lật mặt 3D, Trắc nghiệm 4 đáp án (Quiz) phản xạ, Điền từ ngữ cảnh (Type-in), Nghe chép chính tả (Dictation) chuẩn giọng bản ngữ và Trò chơi phiêu lưu vượt ải sinh động.',
           highlight: 'Học không chán, nhớ bền lâu',
@@ -96,7 +97,7 @@ export function PageFeatures() {
         {
           tag: 'Trí tuệ AI',
           tagColor: 'bg-[#FEEFEA] text-[#DE5D53] border-[#DE5D53]/40',
-          icon: '🤖',
+          iconType: 'bot',
           title: 'Trợ lý AI & Từ điển Ngữ cảnh',
           desc: 'Trí tuệ nhân tạo phân tích ngữ cảnh học thuật chuyên sâu, giải nghĩa Collocations, Synonyms và cung cấp mẹo ghi nhớ (Mnemonics) độc đáo. Tra cứu tức thời không rời màn hình học.',
           highlight: 'Giải nghĩa sát đề thi thật',
@@ -104,7 +105,7 @@ export function PageFeatures() {
         {
           tag: 'Động lực',
           tagColor: 'bg-[#E6F3FB] text-[#2A7BA0] border-[#2A7BA0]/40',
-          icon: '📊',
+          iconType: 'stats',
           title: 'Thống kê Tiến độ & Chuỗi Streak',
           desc: 'Theo dõi chi tiết số từ đã thành thạo, thời gian học tập tích lũy qua biểu đồ trực quan. Ngọn lửa Streak hàng ngày nhắc nhở bạn duy trì thói quen học tập để gặt hái kết quả cao nhất.',
           highlight: 'Xây dựng kỷ luật học mỗi ngày',
@@ -155,14 +156,14 @@ export function PageFeatures() {
               onClick={() => navigateTo('landing')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🏠 Home' : '🏠 Trang chủ'}
+              {isEn ? 'Home' : 'Trang chủ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
               type="button"
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#DE5D53] bg-[#FDEAE2] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🎨 Features' : '🎨 Tính năng'}
+              {isEn ? 'Features' : 'Tính năng'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -170,7 +171,7 @@ export function PageFeatures() {
               onClick={() => navigateTo('reviews')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💬 Reviews' : '💬 Đánh giá'}
+              {isEn ? 'Reviews' : 'Đánh giá'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -178,7 +179,7 @@ export function PageFeatures() {
               onClick={() => navigateTo('faq')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💡 FAQ' : '💡 FAQ'}
+              {isEn ? 'FAQ' : 'FAQ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -186,7 +187,7 @@ export function PageFeatures() {
               onClick={() => navigateTo('support')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💌 Support' : '💌 Hỗ trợ'}
+              {isEn ? 'Support' : 'Hỗ trợ'}
             </button>
           </nav>
 
@@ -200,7 +201,7 @@ export function PageFeatures() {
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>{isEn ? 'Learn Now' : 'Vào học ngay'}</span>
-              <span className="text-xs sm:text-sm">🚀</span>
+              
             </button>
           </div>
         </div>
@@ -212,12 +213,12 @@ export function PageFeatures() {
         {/* Header Intro */}
         <div className="text-center mb-12 sm:mb-16 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAF3E7] text-[#557A46] text-xs font-black uppercase tracking-wider border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
-            <span>✨</span>
+            
             <span>{isEn ? 'Comprehensive Learning Ecosystem' : 'Hệ thống học tập toàn diện'}</span>
           </div>
 
           <h1 className="font-quicksand font-black text-3xl sm:text-5xl text-[#3D352E] tracking-tight">
-            {isEn ? 'Breakthrough Features of HiVocab 🎨' : 'Tính năng đột phá của HiVocab 🎨'}
+            {isEn ? 'Breakthrough Features of HiVocab' : 'Tính năng đột phá của HiVocab'}
           </h1>
 
           <p className="text-sm sm:text-base text-[#6E5D53] font-medium max-w-2xl mx-auto leading-relaxed">
@@ -254,7 +255,7 @@ export function PageFeatures() {
               </div>
 
               <div className="mt-5 pt-3.5 border-t-2 border-dashed border-[#DECDBB] flex items-center gap-2 text-xs font-black text-[#557A46]">
-                <span>✓</span>
+                
                 <span>{item.highlight}</span>
               </div>
             </div>
@@ -265,7 +266,7 @@ export function PageFeatures() {
         <div className="mt-14 sm:mt-20 w-full bg-[#FFFDF9] border-[3px] border-[#3D352E] rounded-[32px] p-6 sm:p-10 shadow-[5px_7px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
           <div className="space-y-2">
             <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider">
-              {isEn ? 'Join Thousands of Learners 🐾' : 'Cùng hàng ngàn bạn học 🐾'}
+              {isEn ? 'Join Thousands of Learners' : 'Cùng hàng ngàn bạn học'}
             </span>
             <h2 className="font-quicksand font-black text-2xl sm:text-3xl text-[#3D352E]">
               {isEn
@@ -285,7 +286,7 @@ export function PageFeatures() {
             className="w-full md:w-auto px-8 py-4 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2 shrink-0"
           >
             <span>{isEn ? 'Start Learning for Free' : 'Bắt đầu học miễn phí'}</span>
-            <span className="text-lg">🚀</span>
+            
           </button>
         </div>
       </main>

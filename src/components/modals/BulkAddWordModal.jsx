@@ -3,6 +3,21 @@
 // Hỗ trợ: Tải file Excel (.xlsx, .xls, .csv) do AI xuất trực tiếp, hoặc Dán bảng từ vựng
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { 
+  FileSpreadsheet, 
+  Bot, 
+  Upload, 
+  Eye, 
+  Copy, 
+  Check, 
+  AlertTriangle, 
+  Folder, 
+  RotateCcw, 
+  X, 
+  ArrowRight, 
+  Plus, 
+  Lightbulb 
+} from 'lucide-react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
@@ -306,7 +321,7 @@ export function BulkAddWordModal() {
     try {
       await navigator.clipboard.writeText(AI_PROMPT_TEMPLATE);
       setIsPromptCopied(true);
-      success('✨ Đã sao chép Prompt! Hãy dán vào ChatGPT hoặc Gemini nhé 🐾');
+      success('Đã sao chép Prompt! Hãy dán vào ChatGPT hoặc Gemini nhé.');
       setTimeout(() => setIsPromptCopied(false), 3000);
     } catch (_) {
       const ta = document.createElement('textarea');
@@ -316,7 +331,7 @@ export function BulkAddWordModal() {
       document.execCommand('copy');
       document.body.removeChild(ta);
       setIsPromptCopied(true);
-      success('✨ Đã sao chép Prompt vào clipboard!');
+      success('Đã sao chép Prompt vào clipboard!');
       setTimeout(() => setIsPromptCopied(false), 3000);
     }
   };
@@ -378,7 +393,7 @@ export function BulkAddWordModal() {
         if (parsedRows.length > 0) {
           setParsedWords(parsedRows);
           setActiveStep('preview');
-          success(`Đã đọc thành công ${parsedRows.length} từ từ file Excel "${file.name}"! 🎉`);
+          success(`Đã đọc thành công ${parsedRows.length} từ từ file Excel "${file.name}"!`);
         } else {
           setErrorMessage('Không tìm thấy dữ liệu từ vựng hợp lệ trong file Excel. Hãy kiểm tra các cột word, phonetic, pos, meaning, example_sentence.');
         }
@@ -390,7 +405,7 @@ export function BulkAddWordModal() {
         if (rows.length > 0) {
           setParsedWords(rows);
           setActiveStep('preview');
-          success(`Đã nạp thành công ${rows.length} từ từ file "${file.name}"! 🎉`);
+          success(`Đã nạp thành công ${rows.length} từ từ file "${file.name}"!`);
         } else {
           setErrorMessage('Không phân tích được từ vựng từ file này.');
         }
@@ -503,7 +518,7 @@ export function BulkAddWordModal() {
       }
 
       clearTopicCache();
-      success(`Đã nạp thành công ${validWords.length} từ vựng vào chủ đề! 🎉🐾`);
+      success(`Đã nạp thành công ${validWords.length} từ vựng vào chủ đề!`);
       handleClose();
 
       if (typeof window !== 'undefined') {
@@ -533,14 +548,12 @@ export function BulkAddWordModal() {
         {/* Header Modal gọn gàng */}
         <div className="px-5 sm:px-6 py-3.5 border-b-2 border-[#382E2B] flex items-center justify-between shrink-0 bg-[#FFF8EE]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-[#E1EDDB] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-lg sm:text-xl shrink-0">
-              📊
-            </div>
+            <FileSpreadsheet className="w-8 h-8 text-[#5a7d4d] shrink-0" />
             <div>
               <h2 className="text-base sm:text-lg font-heading font-black text-[#382E2B]">
                 Thêm từ vựng hàng loạt
               </h2>
-              <p className="text-xs font-semibold text-[#766C5F]">Xuất file Excel từ AI hoặc tải file từ máy tính 🐾</p>
+              <p className="text-xs font-semibold text-[#766C5F]">Xuất file Excel từ AI hoặc tải file từ máy tính</p>
             </div>
           </div>
           <button
@@ -549,7 +562,7 @@ export function BulkAddWordModal() {
             className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#382E2B] hover:bg-[#FAF5EB] active:translate-y-0.5 transition-all cursor-pointer font-black text-sm"
             aria-label="Đóng"
           >
-            ✕
+            <X className="w-4 h-4 text-[#382E2B]" />
           </button>
         </div>
 
@@ -564,7 +577,7 @@ export function BulkAddWordModal() {
                 : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
             }`}
           >
-            <span>🤖</span>
+            <Bot className="w-3.5 h-3.5 shrink-0" />
             <span>1. Mẫu Prompt AI</span>
           </button>
 
@@ -577,7 +590,7 @@ export function BulkAddWordModal() {
                 : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
             }`}
           >
-            <span>📥</span>
+            <Upload className="w-3.5 h-3.5 shrink-0" />
             <span>2. Nạp File Excel / Bảng</span>
           </button>
 
@@ -593,8 +606,8 @@ export function BulkAddWordModal() {
                 : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
             }`}
           >
-            <span>👁️</span>
-            <span>3. Xem lại & Lưu {parsedWords.length > 0 ? `(${parsedWords.length})` : ''}</span>
+            <Eye className="w-3.5 h-3.5 shrink-0" />
+            <span>3. Xem lại &amp; Lưu {parsedWords.length > 0 ? `(${parsedWords.length})` : ''}</span>
           </button>
         </div>
 
@@ -607,7 +620,7 @@ export function BulkAddWordModal() {
               <div className="bg-[#FFF8EE] p-3.5 sm:p-4 rounded-2xl border-2 border-dashed border-[#E5A13C] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
                 <div className="space-y-1">
                   <div className="font-heading font-black text-sm text-[#382E2B] flex items-center gap-1.5">
-                    <span>💡</span>
+                    <Lightbulb className="w-4 h-4 text-[#E5A13C] shrink-0" />
                     <span>Cách lấy file Excel nhanh từ ChatGPT / Gemini:</span>
                   </div>
                   <p className="text-[#6E6458] leading-relaxed">
@@ -619,7 +632,7 @@ export function BulkAddWordModal() {
                   onClick={handleCopyPrompt}
                   className="px-4 py-2 rounded-xl bg-[#EA7349] hover:bg-[#d86238] text-white font-black text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
                 >
-                  <span>{isPromptCopied ? '✅' : '📋'}</span>
+                  {isPromptCopied ? <Check className="w-3.5 h-3.5 shrink-0" /> : <Copy className="w-3.5 h-3.5 shrink-0" />}
                   <span>{isPromptCopied ? 'Đã sao chép!' : 'Sao chép Prompt AI'}</span>
                 </button>
               </div>
@@ -627,13 +640,14 @@ export function BulkAddWordModal() {
               {/* Khung nội dung Prompt */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between text-xs font-bold text-[#766C5F]">
-                  <span>Nội dung Prompt chuẩn hóa (Yêu cầu xuất Excel & Bảng 5 cột):</span>
+                  <span>Nội dung Prompt chuẩn hóa (Yêu cầu xuất Excel &amp; Bảng 5 cột):</span>
                   <button
                     type="button"
                     onClick={handleCopyPrompt}
                     className="text-[#D36135] hover:underline cursor-pointer flex items-center gap-1"
                   >
-                    <span>{isPromptCopied ? 'Đã sao chép ✅' : 'Sao chép nhanh 📋'}</span>
+                    {isPromptCopied ? <Check className="w-3 h-3 shrink-0" /> : <Copy className="w-3 h-3 shrink-0" />}
+                    <span>{isPromptCopied ? 'Đã sao chép' : 'Sao chép nhanh'}</span>
                   </button>
                 </div>
                 <div className="p-3 bg-white rounded-2xl border-2 border-[#382E2B]/20 max-h-56 overflow-y-auto text-xs font-mono text-[#4A4036] leading-relaxed whitespace-pre-wrap select-all">
@@ -648,7 +662,9 @@ export function BulkAddWordModal() {
                   onClick={() => setActiveStep('input')}
                   className="px-5 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
                 >
-                  <span>Đã có file từ AI ➔ Sang bước 2: Nạp File</span>
+                  <span>Đã có file từ AI</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
+                  <span>Sang bước 2: Nạp File</span>
                 </button>
               </div>
             </div>
@@ -661,7 +677,7 @@ export function BulkAddWordModal() {
               {topicsList.length === 0 && (
                 <div className="p-3 rounded-2xl bg-[#FFF3D6] border-2 border-[#D97706]/40 text-[#92400E] text-xs font-semibold flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-base shrink-0">⚠️</span>
+                    <AlertTriangle className="w-4 h-4 text-[#D97706] shrink-0" />
                     <span>Bạn chưa có chủ đề cá nhân nào. Hãy bấm nút tạo chủ đề mới để bắt đầu lưu từ nhé!</span>
                   </div>
                   <button
@@ -696,7 +712,8 @@ export function BulkAddWordModal() {
                       onClick={handleOpenCreateTopic}
                       className="w-full bg-white border-2 border-dashed border-[#382E2B] px-3 py-2 rounded-xl text-[#382E2B] text-xs font-bold hover:bg-[#FAF5EB] cursor-pointer flex items-center justify-center gap-1.5"
                     >
-                      <span>📁 Bấm để tạo chủ đề & chọn thư mục</span>
+                      <Folder className="w-4 h-4 text-[#382E2B] shrink-0" />
+                      <span>Bấm để tạo chủ đề &amp; chọn thư mục</span>
                     </button>
                   ) : (
                     <select
@@ -706,7 +723,7 @@ export function BulkAddWordModal() {
                     >
                       {topicsList.map((t) => (
                         <option key={t.id} value={t.id}>
-                          📂 {t.name} {t.category ? `(${t.category})` : ''}
+                          {t.name} {t.category ? `(${t.category})` : ''}
                         </option>
                       ))}
                     </select>
@@ -747,13 +764,15 @@ export function BulkAddWordModal() {
                   className="hidden"
                 />
 
-                <div className="w-12 h-12 rounded-2xl bg-[#E1EDDB] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-2xl">
-                  {isFileLoading ? '⏳' : '📊'}
-                </div>
+                {isFileLoading ? (
+                  <RotateCcw className="w-10 h-10 animate-spin text-[#5a7d4d] shrink-0" />
+                ) : (
+                  <FileSpreadsheet className="w-10 h-10 text-[#5a7d4d] shrink-0" />
+                )}
 
                 <div>
                   <h4 className="text-sm font-heading font-black text-[#382E2B]">
-                    {isDragging ? 'Thả file Excel vào đây ngay 🐾' : 'Kéo thả file Excel vào đây, hoặc bấm để chọn'}
+                    {isDragging ? 'Thả file Excel vào đây ngay' : 'Kéo thả file Excel vào đây, hoặc bấm để chọn'}
                   </h4>
                   <p className="text-xs text-[#766C5F] mt-0.5">
                     Hỗ trợ file <strong>.xlsx</strong>, <strong>.xls</strong> hoặc <strong>.csv</strong> tải từ AI hoặc chuẩn bị sẵn (tối đa 10 MB)
@@ -771,12 +790,12 @@ export function BulkAddWordModal() {
                 >
                   {isFileLoading ? (
                     <>
-                      <span className="animate-spin">🔄</span>
+                      <RotateCcw className="w-4 h-4 animate-spin shrink-0" />
                       <span>Đang đọc file Excel...</span>
                     </>
                   ) : (
                     <>
-                      <span>📂</span>
+                      <Upload className="w-4 h-4 shrink-0" />
                       <span>Chọn file từ máy tính</span>
                     </>
                   )}
@@ -806,7 +825,7 @@ export function BulkAddWordModal() {
               {/* Thông báo lỗi nếu có */}
               {errorMessage && (
                 <div className="p-3 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
-                  <span>⚠️</span>
+                  <AlertTriangle className="w-4 h-4 text-[#EA7349] shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
               )}
@@ -825,7 +844,8 @@ export function BulkAddWordModal() {
                   onClick={handleParseText}
                   className="px-5 py-2.5 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-2"
                 >
-                  <span>Phân tích & Xem trước ➔</span>
+                  <span>Phân tích &amp; Xem trước</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
               </div>
             </div>
@@ -837,7 +857,8 @@ export function BulkAddWordModal() {
               {/* Thống kê từ vựng & nút thêm dòng */}
               <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[#FFF8EE] rounded-2xl border-2 border-[#382E2B]/15 text-xs font-bold text-[#382E2B]">
                 <div className="flex items-center gap-2">
-                  <span>📊 Tổng số từ: <strong>{parsedWords.length}</strong></span>
+                  <FileSpreadsheet className="w-4 h-4 text-[#5a7d4d] shrink-0" />
+                  <span>Tổng số từ: <strong>{parsedWords.length}</strong></span>
                   <span className="text-[#A2978A]">|</span>
                   <span className="text-[#557A46]">Hợp lệ: <strong>{validCount}</strong></span>
                   {parsedWords.length - validCount > 0 && (
@@ -853,7 +874,7 @@ export function BulkAddWordModal() {
                   onClick={handleAddEmptyRow}
                   className="px-3 py-1.5 rounded-xl bg-white hover:bg-[#FAF5EB] border border-[#382E2B] text-xs font-bold text-[#382E2B] shadow-sm cursor-pointer flex items-center gap-1.5"
                 >
-                  <span>+</span>
+                  <Plus className="w-3.5 h-3.5" />
                   <span>Thêm dòng</span>
                 </button>
               </div>
@@ -938,7 +959,7 @@ export function BulkAddWordModal() {
                                 className="w-7 h-7 inline-flex items-center justify-center rounded-lg hover:bg-[#FFECE4] text-[#CF4F23] font-bold text-xs cursor-pointer"
                                 title="Xóa dòng này"
                               >
-                                ✕
+                                <X className="w-3.5 h-3.5" />
                               </button>
                             </td>
                           </tr>
@@ -952,7 +973,7 @@ export function BulkAddWordModal() {
               {/* Thông báo lỗi nếu có */}
               {errorMessage && (
                 <div className="p-3 rounded-2xl bg-[#FFECE4] border-2 border-[#EA7349] text-[#CF4F23] text-xs font-bold flex items-center gap-2">
-                  <span>⚠️</span>
+                  <AlertTriangle className="w-4 h-4 text-[#EA7349] shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
               )}
@@ -975,13 +996,14 @@ export function BulkAddWordModal() {
                 >
                   {isSubmitting ? (
                     <>
-                      <span className="animate-spin">🔄</span>
+                      <RotateCcw className="w-4 h-4 animate-spin shrink-0" />
                       <span>Đang lưu {validCount} từ...</span>
                     </>
                   ) : (
                     <>
-                      <span>🚀</span>
-                      <span>Lưu tất cả {validCount} từ vào bộ từ ➔</span>
+                      <Check className="w-4 h-4 shrink-0" />
+                      <span>Lưu tất cả {validCount} từ vào bộ từ</span>
+                      <ArrowRight className="w-4 h-4 shrink-0" />
                     </>
                   )}
                 </button>

@@ -1,6 +1,19 @@
 // src/components/pages/PageLessonDetail.jsx
 // 100% Pixel-Perfect match to Stitch Design (desktop_lesson_detail.html & mobile_lesson_detail.html)
 import React, { useMemo } from 'react';
+import {
+  Zap,
+  HelpCircle,
+  PenTool,
+  Headphones,
+  Volume2,
+  Trash2,
+  Search,
+  BookOpen,
+  ArrowRight,
+  BarChart2,
+  Sparkles,
+} from 'lucide-react';
 import { useLessonDetail } from '../../hooks/useLessonDetail.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
@@ -41,7 +54,7 @@ export function PageLessonDetail() {
   const handleAddWord = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để thêm từ mới ✏️',
+        title: 'Đăng nhập để thêm từ mới',
         message: 'Bạn cần đăng nhập tài khoản để lưu và bổ sung từ vựng mới vào bài học nhé!',
         actionName: 'thêm từ vựng',
       });
@@ -53,7 +66,7 @@ export function PageLessonDetail() {
   const handleOpenFlashcard = () => {
     if (!user) {
       openModal('requireLogin', {
-        title: 'Đăng nhập để học Flashcard ⚡',
+        title: 'Đăng nhập để học Flashcard',
         message: 'Đăng nhập tài khoản để lật thẻ Flashcard hai mặt và đồng bộ tiến độ ghi nhớ SRS nhé!',
         actionName: 'học Flashcard',
       });
@@ -75,7 +88,7 @@ export function PageLessonDetail() {
       };
       const name = modeNames[modeIndex] || 'Luyện tập';
       openModal('requireLogin', {
-        title: `Đăng nhập để luyện tập ${name} 🎯`,
+        title: `Đăng nhập để luyện tập ${name}`,
         message: `Đăng nhập tài khoản để làm bài ${name}, tích lũy điểm kinh nghiệm và tăng level từ vựng nhé!`,
         actionName: `luyện tập ${name}`,
       });
@@ -114,10 +127,10 @@ export function PageLessonDetail() {
         <main className="flex-1 flex items-center justify-center px-4 py-8">
           <CrayonLockOverlay
             mode="inline"
-            badgeText="NỘI DUNG GÓI PRO 👑"
+            badgeText="NỘI DUNG GÓI PRO"
             title="Bài Học Này Yêu Cầu Gói PRO"
             description="Toàn bộ danh sách từ vựng chuyên sâu, phiên âm, ví dụ ngữ cảnh và các chế độ Flashcard SRS của bài học này dành riêng cho thành viên HiVocab PRO."
-            ctaText="Nâng Cấp PRO Ngay 🚀"
+            ctaText="Nâng Cấp PRO Ngay"
             onUnlockSuccess={() => window.location.reload()}
             onBack={goBack}
             backText="Quay lại danh sách bài"
@@ -151,7 +164,7 @@ export function PageLessonDetail() {
             </h1>
           </div>
           <div className="flex items-center gap-1.5 bg-[#ccecbc] px-3 py-1 rounded-full border-2 border-[#3d352e] shadow-xs">
-            <span className="text-xs">🌱</span>
+            <Sparkles className="w-3.5 h-3.5 text-[#092104] shrink-0" />
             <span className="text-xs font-bold text-[#092104]">Churbito</span>
           </div>
         </header>
@@ -198,38 +211,30 @@ export function PageLessonDetail() {
           <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
             <button
               onClick={handleOpenFlashcard}
-              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1.5 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer hover:bg-[#fff2ec]"
             >
-              <div className="w-8 h-8 rounded-full bg-[#feab79]/30 flex items-center justify-center text-sm">
-                ⚡
-              </div>
+              <Zap className="w-6 h-6 text-[#E87248] shrink-0" />
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Flashcard</span>
             </button>
             <button
               onClick={() => handleStartPractice(1)}
-              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1.5 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer hover:bg-[#fff9e6]"
             >
-              <div className="w-8 h-8 rounded-full bg-[#c3e8ff] flex items-center justify-center text-sm">
-                ❓
-              </div>
+              <HelpCircle className="w-6 h-6 text-[#D49817] shrink-0" />
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Trắc nghiệm</span>
             </button>
             <button
               onClick={() => handleStartPractice(2)}
-              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1.5 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer hover:bg-[#eef5ec]"
             >
-              <div className="w-8 h-8 rounded-full bg-[#ccecbc] flex items-center justify-center text-sm">
-                ✏️
-              </div>
+              <PenTool className="w-6 h-6 text-[#799B6E] shrink-0" />
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Điền từ</span>
             </button>
             <button
               onClick={() => handleStartPractice(3)}
-              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer"
+              className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1.5 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer hover:bg-[#f3e8ff]"
             >
-              <div className="w-8 h-8 rounded-full bg-[#f3e8ff] flex items-center justify-center text-sm text-[#8b5cf6]">
-                🎧
-              </div>
+              <Headphones className="w-6 h-6 text-[#8B5CF6] shrink-0" />
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Nghe chính tả</span>
             </button>
           </div>
@@ -319,7 +324,7 @@ export function PageLessonDetail() {
                       aria-label="Phát âm từ"
                       className="p-1.5 text-[#1e1b17] hover:text-[#4b6540] active:scale-90 transition-transform cursor-pointer"
                     >
-                      <span className="text-lg">🔊</span>
+                      <Volume2 className="w-5 h-5 text-[#1e1b17]" />
                     </button>
                   </div>
 
@@ -380,12 +385,12 @@ export function PageLessonDetail() {
                 onClick={startReading}
                 className="px-3.5 py-1.5 text-xs font-bold bg-white rounded-full border-2 border-[#322e2b] shadow-[2px_2px_0px_#322e2b] hover:bg-gray-50 flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
               >
-                <span>📖</span>
+                <BookOpen className="w-4 h-4 text-[#322e2b] shrink-0" />
                 <span>Đọc bài song ngữ</span>
               </button>
             )}
             <div className="flex items-center gap-1.5 px-3 py-1 bg-[#eef5ec] rounded-full border border-[#799b6e] text-xs font-bold text-[#799b6e] whitespace-nowrap shrink-0">
-              <span>🌱</span>
+              <Sparkles className="w-3.5 h-3.5 text-[#799b6e] shrink-0" />
               <span>Churbito Level 1</span>
             </div>
           </div>
@@ -427,7 +432,7 @@ export function PageLessonDetail() {
                 onClick={handleOpenFlashcard}
                 className="px-5 py-2.5 bg-[#799b6e] hover:bg-[#688a5d] text-white font-bold text-sm rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] flex items-center gap-2 cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
               >
-                <span>🚀</span>
+                <ArrowRight className="w-4 h-4 shrink-0" />
                 <span>Bắt đầu học ngay</span>
               </button>
             </div>
@@ -437,7 +442,7 @@ export function PageLessonDetail() {
           <div className="mt-6 pt-5 border-t border-dashed border-[#dcd4c7]">
             <div className="flex items-center justify-between text-xs font-bold mb-2">
               <span className="text-[#322e2b] flex items-center gap-1.5">
-                <span>📊</span> Tiến độ ghi nhớ bài học
+                <BarChart2 className="w-4 h-4 text-[#5F7C66] shrink-0" /> Tiến độ ghi nhớ bài học
               </span>
               <span className="text-[#322e2b] font-bold">
                 {progressPercent}% <span className="font-normal text-[#78726b]">({masteredCount} / {words.length} từ)</span>
@@ -456,7 +461,7 @@ export function PageLessonDetail() {
         <section className="mb-7">
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="text-base font-bold uppercase tracking-wider text-[#322e2b] flex items-center gap-2">
-              <span>✏️</span> Chế Độ Học Tập
+              <PenTool className="w-4 h-4 text-[#799b6e] shrink-0" /> Chế Độ Học Tập
             </h2>
             <span className="text-xs font-bold text-[#78726b] bg-[#f4ede4] px-2.5 py-1 rounded-full border border-[#322e2b]/30">
               4 dạng bài tập rèn luyện
@@ -469,10 +474,8 @@ export function PageLessonDetail() {
               onClick={handleOpenFlashcard}
               className="group p-4 bg-white hover:bg-[#fff2ec] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#fff2ec] border-2 border-[#322e2b] flex items-center justify-center text-[#e87248] text-lg group-hover:scale-105 transition-transform">
-                  ⚡
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <Zap className="w-8 h-8 text-[#e87248] group-hover:scale-110 transition-transform shrink-0" />
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-[#e87248] text-white rounded-full">
                   Phổ biến
                 </span>
@@ -488,10 +491,8 @@ export function PageLessonDetail() {
               onClick={() => handleStartPractice(1)}
               className="group p-4 bg-white hover:bg-[#fff9e6] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#fff9e6] border-2 border-[#322e2b] flex items-center justify-center text-[#d49817] text-lg group-hover:scale-105 transition-transform">
-                  ❔
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <HelpCircle className="w-8 h-8 text-[#d49817] group-hover:scale-110 transition-transform shrink-0" />
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-[#f5c35b] text-[#322e2b] rounded-full border border-[#322e2b]">
                   SRS v2
                 </span>
@@ -507,10 +508,8 @@ export function PageLessonDetail() {
               onClick={() => handleStartPractice(2)}
               className="group p-4 bg-white hover:bg-[#eef5ec] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#eef5ec] border-2 border-[#322e2b] flex items-center justify-center text-[#799b6e] text-lg group-hover:scale-105 transition-transform">
-                  ✏️
-                </div>
+              <div className="flex items-center justify-between mb-3">
+                <PenTool className="w-8 h-8 text-[#799b6e] group-hover:scale-110 transition-transform shrink-0" />
                 <span className="text-[10px] font-bold px-2 py-0.5 bg-[#799b6e] text-white rounded-full">
                   Ghi nhớ
                 </span>
@@ -526,11 +525,9 @@ export function PageLessonDetail() {
               onClick={() => handleStartPractice(3)}
               className="group p-4 bg-white hover:bg-[#f3e8ff] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-xl bg-[#f3e8ff] border-2 border-[#322e2b] flex items-center justify-center text-[#b39ddb] text-lg group-hover:scale-105 transition-transform">
-                  🎧
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#b39ddb] text-white rounded-full">
+              <div className="flex items-center justify-between mb-3">
+                <Headphones className="w-8 h-8 text-[#8b5cf6] group-hover:scale-110 transition-transform shrink-0" />
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-[#8b5cf6] text-white rounded-full">
                   Nghe hiểu
                 </span>
               </div>
@@ -553,7 +550,7 @@ export function PageLessonDetail() {
                 placeholder="Tìm từ, phát âm, nghĩa tiếng Việt..."
                 className="w-full pl-10 pr-4 py-2 bg-[#faf7f2] rounded-xl border-2 border-[#322e2b] text-sm font-medium focus:ring-0 focus:border-[#799b6e] focus:bg-white placeholder-[#78726b]"
               />
-              <span className="absolute left-3.5 top-2.5 text-[#78726b] text-sm">🔍</span>
+              <Search className="w-4 h-4 text-[#78726b] absolute left-3.5 top-3" />
             </div>
 
             <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
@@ -625,7 +622,7 @@ export function PageLessonDetail() {
                           </div>
                           {word.pos && (
                             <div className="text-xs text-[#78726b] font-semibold mt-0.5 flex items-center gap-1">
-                              <span>✕</span> {word.pos}
+                              {word.pos}
                             </div>
                           )}
                         </div>
@@ -638,14 +635,14 @@ export function PageLessonDetail() {
                           className="w-8 h-8 rounded-xl border-2 border-[#322e2b] flex items-center justify-center hover:bg-[#f4ede4] transition-colors cursor-pointer text-sm"
                           title="Phát âm"
                         >
-                          🔊
+                          <Volume2 className="w-4 h-4 text-[#322e2b]" />
                         </button>
                         <button
                           onClick={() => handleDeleteWord(word.id, word.word)}
                           className="w-8 h-8 rounded-xl border-2 border-[#322e2b] flex items-center justify-center hover:bg-rose-50 text-rose-500 transition-colors cursor-pointer text-sm"
                           title="Xóa từ"
                         >
-                          🗑️
+                          <Trash2 className="w-4 h-4 text-rose-500" />
                         </button>
                       </div>
                     </div>

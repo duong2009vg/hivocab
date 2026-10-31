@@ -3,6 +3,7 @@
 
 import React, { useCallback } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
+import { AlertTriangle, X } from 'lucide-react';
 import { useBilingualReading } from '../../hooks/useBilingualReading.js';
 import { BilingualHeader } from '../bilingual/BilingualHeader.jsx';
 import { BilingualReadingView } from '../bilingual/BilingualReadingView.jsx';
@@ -109,7 +110,7 @@ export function PageBilingualReading() {
           <div className="flex flex-col items-center justify-center py-24 gap-4">
             <div className="w-12 h-12 border-4 border-[#5a7d4d]/30 border-t-[#5a7d4d] rounded-full animate-spin" />
             <p className="text-[#766C5F] text-xs sm:text-sm font-bold animate-pulse">
-              Đang chuẩn bị nội dung bài đọc song ngữ... 🐾
+              Đang chuẩn bị nội dung bài đọc song ngữ...
             </p>
           </div>
         )}
@@ -143,9 +144,9 @@ export function PageBilingualReading() {
             <div className="relative z-20 w-full px-4">
               <CrayonLockOverlay
                 title="Mở Khóa Toàn Bộ Bài Đọc Song Ngữ & Tra Cứu"
-                badgeText="NỘI DUNG ĐỘC QUYỀN PRO 👑"
+                badgeText="NỘI DUNG ĐỘC QUYỀN PRO"
                 description="Bài đọc này nằm trong bộ đề Cambridge IELTS dành riêng cho gói HiVocab PRO. Nâng cấp ngay để đọc song ngữ Anh - Việt, tra cứu từ vựng ngữ cảnh và luyện đục lỗ nhé!"
-                ctaText="Nâng Cấp PRO Ngay — Chỉ từ 25k/tháng 🚀"
+                ctaText="Nâng Cấp PRO Ngay — Chỉ từ 25k/tháng"
                 onUnlockSuccess={() => window.location.reload()}
                 onBack={handleClose}
                 backText="Quay lại danh sách bài"
@@ -156,7 +157,7 @@ export function PageBilingualReading() {
 
         {error && !isProLocked && !loading && (
           <div className="max-w-md mx-auto text-center py-16 px-6 bg-white rounded-3xl border-2 border-[#382E2B] shadow-[3px_4px_0px_#382E2B]">
-            <span className="text-4xl mb-3 block">⚠️</span>
+            <AlertTriangle className="w-10 h-10 text-[#C85A3F] mx-auto mb-3 shrink-0" />
             <h3 className="font-heading font-black text-lg text-[#382E2B] mb-2">Không thể tải bài đọc</h3>
             <p className="text-xs font-semibold text-[#766C5F] mb-6">{error}</p>
             <button
@@ -215,7 +216,7 @@ export function PageBilingualReading() {
           onClick={handleClose}
           className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#D36135] text-white border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all text-xs font-black cursor-pointer"
         >
-          <span>✕</span>
+          <X className="w-4 h-4 shrink-0" />
           <span>Thoát bài đọc</span>
         </button>
       </div>

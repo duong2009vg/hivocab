@@ -79,7 +79,7 @@ export function BilingualHeader({
                 : 'text-[#766C5F] hover:text-[#382E2B] font-bold'
             }`}
           >
-            <span>📖</span>
+            <BookOpen className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Đọc chủ động</span>
           </button>
 
@@ -92,7 +92,7 @@ export function BilingualHeader({
                 : 'text-[#766C5F] hover:text-[#382E2B] font-bold'
             }`}
           >
-            <span>✏️</span>
+            <PenTool className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline">Đục lỗ song ngữ</span>
           </button>
         </div>
@@ -166,7 +166,7 @@ export function BilingualHeader({
                 className="w-9 h-9 rounded-2xl bg-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-[#C85A3F] flex items-center justify-center hover:bg-[#FFF3E8] active:translate-y-0.5 transition-all cursor-pointer"
                 title="Báo lỗi bài đọc này"
               >
-                🚩
+                <Flag className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -178,7 +178,7 @@ export function BilingualHeader({
             className="flex items-center gap-1 px-3 py-1.5 sm:px-4 sm:py-2 rounded-2xl bg-[#D36135] hover:bg-[#c2542a] text-white font-black text-xs sm:text-sm shrink-0 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer"
             title="Thoát bài đọc"
           >
-            <span>✕</span>
+            <X className="w-4 h-4 shrink-0" />
             <span>Thoát</span>
           </button>
         </div>
@@ -247,7 +247,7 @@ export function BilingualHeader({
               className="p-1 px-2 text-[#C85A3F] cursor-pointer"
               title="Báo lỗi bài đọc"
             >
-              🚩
+              <Flag className="w-4 h-4" />
             </button>
           </div>
         </div>

@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useLandingLang } from '../../context/LandingLangContext.jsx';
 import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
+import { BookOpen, GraduationCap, RotateCcw, Search, ArrowRight, Star, Heart, Check, Shield, FileText } from 'lucide-react';
 
 function useCountUp(end, duration = 1600, delay = 0) {
   const [count, setCount] = useState(0);
@@ -93,7 +94,7 @@ export function PageLanding() {
               onClick={() => navigateTo('features')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🎨 Features' : '🎨 Tính năng'}
+              {isEn ? 'Features' : 'Tính năng'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -101,7 +102,7 @@ export function PageLanding() {
               onClick={() => navigateTo('reviews')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💬 Reviews' : '💬 Đánh giá'}
+              {isEn ? 'Reviews' : 'Đánh giá'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -109,7 +110,7 @@ export function PageLanding() {
               onClick={() => navigateTo('faq')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💡 FAQ' : '💡 FAQ'}
+              {isEn ? 'FAQ' : 'FAQ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -117,7 +118,7 @@ export function PageLanding() {
               onClick={() => navigateTo('support')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💌 Support' : '💌 Hỗ trợ'}
+              {isEn ? 'Support' : 'Hỗ trợ'}
             </button>
           </nav>
 
@@ -139,7 +140,7 @@ export function PageLanding() {
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>{isEn ? 'Get Started' : 'Bắt đầu ngay'}</span>
-              <span className="text-xs sm:text-sm">✏️</span>
+              
             </button>
           </div>
         </div>
@@ -168,7 +169,7 @@ export function PageLanding() {
                       <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
                     </svg>
                   </span>{' '}
-                  mastery with Little Tiger! 🌿
+                  mastery with Little Tiger!
                 </>
               ) : (
                 <>
@@ -184,7 +185,7 @@ export function PageLanding() {
                       <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
                     </svg>
                   </span>{' '}
-                  vững chắc nhất! 🌿
+                  vững chắc nhất!
                 </>
               )}
             </h1>
@@ -193,9 +194,7 @@ export function PageLanding() {
             <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
               {/* Thẻ 1: Số từ vựng học thuật (chạy trước: delay 150ms) */}
               <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                <div className="w-12 h-12 rounded-xl bg-[#FEEFEA] border-2 border-[#DE5D53] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
-                  📚
-                </div>
+                <BookOpen className="w-10 h-10 text-[#DE5D53] shrink-0" />
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-baseline gap-1.5">
                     <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#DE5D53] tracking-tight">
@@ -213,9 +212,7 @@ export function PageLanding() {
 
               {/* Thẻ 2: Số đề thi (chạy tiếp sau: delay 800ms) */}
               <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                <div className="w-12 h-12 rounded-xl bg-[#EAF3E7] border-2 border-[#557A46] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
-                  🎓
-                </div>
+                <GraduationCap className="w-10 h-10 text-[#557A46] shrink-0" />
                 <div className="flex flex-col min-w-0">
                   <div className="flex items-baseline gap-1.5">
                     <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#557A46] tracking-tight">
@@ -247,7 +244,7 @@ export function PageLanding() {
                 className="px-8 py-4 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
               >
                 <span>{isEn ? 'Enter Study Room' : 'Vào phòng học ngay'}</span>
-                <span className="text-xl">🚀</span>
+                <ArrowRight className="w-5 h-5 shrink-0" />
               </button>
 
               <button
@@ -256,22 +253,22 @@ export function PageLanding() {
                 className="px-7 py-4 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-base sm:text-lg border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>{isEn ? 'Explore Features' : 'Khám phá tính năng'}</span>
-                <span>🎨</span>
+                
               </button>
             </div>
 
             {/* Sticker ghi chú nét sáp nhỏ phía dưới */}
             <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-7 text-xs sm:text-sm font-bold text-[#8A796F]">
               <div className="flex items-center gap-1.5">
-                <span className="text-[#F4B41A] text-base">★</span>
+                <Star className="w-4 h-4 fill-[#F4B41A] text-[#F4B41A] shrink-0" />
                 <span>{isEn ? 'Spaced Repetition (SRS SM-2)' : 'Thuật toán ngắt quãng SRS SM-2'}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[#DE5D53] text-base">❤</span>
+                <Heart className="w-4 h-4 fill-[#DE5D53] text-[#DE5D53] shrink-0" />
                 <span>{isEn ? 'Bilingual Curtain Reading Mode' : 'Song ngữ Anh - Việt che dịch'}</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-[#557A46] text-base">✓</span>
+                <Check className="w-4 h-4 text-[#557A46] shrink-0" />
                 <span>{isEn ? '38+ Real CBT Practice Tests' : '38+ Đề thi THPT Quốc Gia CBT'}</span>
               </div>
             </div>
@@ -290,7 +287,7 @@ export function PageLanding() {
 
               {/* Đám mây thoại hình bong bóng sáp màu */}
               <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-5 py-3 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base md:text-lg flex items-center gap-2 mb-3 mt-1 transform -rotate-2">
-                <span>{isEn ? '"Hello learner! Let\'s study together! 🐾"' : '"Chào bạn học ơi! Cùng tớ vào học nhé! 🐾"'}</span>
+                <span>{isEn ? '"Hello learner! Let\'s study together!"' : '"Chào bạn học ơi! Cùng tớ vào học nhé!"'}</span>
                 {/* Mũi tên bong bóng chỉ xuống mascot */}
                 <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#FFF9EE] border-r-2 border-b-2 border-[#3D352E] transform rotate-45"></div>
               </div>
@@ -312,7 +309,7 @@ export function PageLanding() {
               {/* Thẻ tên bé Hổ bằng phong cách nét vẽ sáp */}
               <div className="mt-1 space-y-1">
                 <h2 className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E]">
-                  {isEn ? 'Churbito the Tiger 🐯' : 'Bé Hổ Churbito 🐯'}
+                  {isEn ? 'Churbito the Tiger' : 'Bé Hổ Churbito'}
                 </h2>
                 <p className="text-xs sm:text-sm font-semibold text-[#86756C]">
                   {isEn
@@ -328,16 +325,16 @@ export function PageLanding() {
                 className="mt-4 w-full py-3 px-5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm md:text-base font-black rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>{isEn ? 'Open App & Learn Now' : 'Mở app học ngay'}</span>
-                <span>📖</span>
+                <BookOpen className="w-3.5 h-3.5 shrink-0 inline mr-1" />
               </button>
             </div>
 
             {/* Nhãn dán sticker bé bên cạnh trang trí */}
             <div className="hidden sm:flex absolute -bottom-5 -left-4 bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#DE5D53] rotate-[-6deg]">
-              {isEn ? '★ Keep your daily streak!' : '★ Giữ lửa mỗi ngày!'}
+              {isEn ? 'Keep your daily streak!' : 'Giữ lửa mỗi ngày!'}
             </div>
             <div className="hidden sm:flex absolute -top-4 -right-3 bg-[#EAF3E7] border-2 border-[#557A46] shadow-[2px_3px_0px_#557A46] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#557A46] rotate-[8deg]">
-              {isEn ? '🌱 100% Stress-free!' : '🌱 100% Không áp lực!'}
+              {isEn ? '100% Stress-free!' : '100% Không áp lực!'}
             </div>
           </div>
         </div>
@@ -349,7 +346,7 @@ export function PageLanding() {
               {isEn ? 'Feature Postcards' : 'Tranh ghép tính năng'}
             </span>
             <h2 className="font-quicksand font-black text-2xl sm:text-4xl text-[#3D352E]">
-              {isEn ? 'Why You\'ll Love HiVocab? 🎨' : 'Vì sao bạn sẽ yêu thích HiVocab? 🎨'}
+              {isEn ? 'Why You\'ll Love HiVocab?' : 'Vì sao bạn sẽ yêu thích HiVocab?'}
             </h2>
             <p className="text-xs sm:text-sm text-[#78685E] max-w-lg mx-auto">
               {isEn
@@ -363,9 +360,7 @@ export function PageLanding() {
             {/* Card 1: Kho 66.000+ từ vựng */}
             <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#FEEFEA] border-2 border-[#3D352E] flex items-center justify-center text-2xl mb-4 shadow-2xs">
-                  📚
-                </div>
+                <BookOpen className="w-10 h-10 text-[#DE5D53] mb-4 shrink-0" />
                 <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
                   {isEn ? '66,000+ Academic Words Vault' : 'Kho 66.000+ Từ Học Thuật'}
                 </h3>
@@ -382,7 +377,7 @@ export function PageLanding() {
                   className="text-xs font-black text-[#DE5D53] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>{isEn ? 'Explore word vault' : 'Xem chi tiết danh mục'}</span>
-                  <span>➔</span>
+                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                 </button>
               </div>
             </div>
@@ -390,9 +385,7 @@ export function PageLanding() {
             {/* Card 2: Lặp lại ngắt quãng SRS */}
             <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#EAF3E7] border-2 border-[#3D352E] flex items-center justify-center text-2xl mb-4 shadow-2xs">
-                  🔄
-                </div>
+                <RotateCcw className="w-10 h-10 text-[#557A46] mb-4 shrink-0" />
                 <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
                   {isEn ? 'Spaced Repetition SRS v4' : 'Lặp Lại Ngắt Quãng SRS v4'}
                 </h3>
@@ -409,7 +402,7 @@ export function PageLanding() {
                   className="text-xs font-black text-[#557A46] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>{isEn ? 'Discover SRS algorithm' : 'Khám phá thuật toán SRS'}</span>
-                  <span>➔</span>
+                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                 </button>
               </div>
             </div>
@@ -417,9 +410,7 @@ export function PageLanding() {
             {/* Card 3: Đọc hiểu song ngữ che dịch */}
             <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#E6F3FB] border-2 border-[#3D352E] flex items-center justify-center text-2xl mb-4 shadow-2xs">
-                  🔍
-                </div>
+                <Search className="w-10 h-10 text-[#2A7BA0] mb-4 shrink-0" />
                 <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
                   {isEn ? 'Bilingual Reading & Curtain Mode' : 'Đọc Song Ngữ & Che Dịch'}
                 </h3>
@@ -436,7 +427,7 @@ export function PageLanding() {
                   className="text-xs font-black text-[#2A7BA0] hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <span>{isEn ? 'Experience reading room' : 'Trải nghiệm phòng đọc'}</span>
-                  <span>➔</span>
+                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
                 </button>
               </div>
             </div>
@@ -448,7 +439,7 @@ export function PageLanding() {
           <div className="w-full bg-[#FFFDF9] border-[3px] border-[#3D352E] rounded-[32px] p-6 sm:p-10 shadow-[5px_7px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="space-y-2 text-center md:text-left">
               <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wide">
-                {isEn ? 'Little Tiger is waiting 🐾' : 'Bé Hổ đang đợi bạn 🐾'}
+                {isEn ? 'Little Tiger is waiting' : 'Bé Hổ đang đợi bạn'}
               </span>
               <h3 className="font-quicksand font-black text-2xl sm:text-3xl text-[#3D352E]">
                 {isEn ? 'Ready to expand your vocabulary today?' : 'Sẵn sàng nâng cao vốn từ vựng hôm nay?'}
@@ -467,7 +458,7 @@ export function PageLanding() {
                 className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>{isEn ? 'Start Learning with Tiger' : 'Vào học cùng Bé Hổ'}</span>
-                <span>🚀</span>
+                <ArrowRight className="w-4 h-4 shrink-0 inline ml-1" />
               </button>
               <button
                 type="button"
@@ -506,9 +497,9 @@ export function PageLanding() {
                 : 'Hệ sinh thái học từ vựng tiếng Anh thông minh với phong cách tranh vẽ sáp màu ấm áp. Kết hợp Spaced Repetition (SRS) và phương pháp Đọc chủ động chuẩn hóa Cambridge IELTS & THPT Quốc Gia.'}
             </p>
             <div className="text-[11px] text-[#86756C] space-y-1 pt-1">
-              <p>📍 <strong>{isEn ? 'Developer:' : 'Đơn vị phát triển:'}</strong> HiVocab Education</p>
-              <p>✉️ <strong>{isEn ? 'Support:' : 'Hỗ trợ:'}</strong> <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">support@hivocab.site</a></p>
-              <p>📞 <strong>Hotline/Zalo:</strong> 0846 407 898</p>
+              <p><strong>{isEn ? 'Developer:' : 'Đơn vị phát triển:'}</strong> HiVocab Education</p>
+              <p><strong>{isEn ? 'Support:' : 'Hỗ trợ:'}</strong> <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">support@hivocab.site</a></p>
+              <p><strong>Hotline/Zalo:</strong> 0846 407 898</p>
             </div>
           </div>
 
@@ -520,27 +511,27 @@ export function PageLanding() {
             <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
               <li>
                 <a onClick={() => navigateTo('features')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  {isEn ? '🎨 Learning Features' : '🎨 Tính năng học tập'}
+                  {isEn ? 'Learning Features' : 'Tính năng học tập'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('reviews')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  {isEn ? '💬 Learner Reviews' : '💬 Đánh giá từ bạn học'}
+                  {isEn ? 'Learner Reviews' : 'Đánh giá từ bạn học'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('support')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  {isEn ? '💌 Support & Contact' : '💌 Hỗ trợ & Liên hệ'}
+                  {isEn ? 'Support & Contact' : 'Hỗ trợ & Liên hệ'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('faq')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  {isEn ? '💡 Frequently Asked Questions (FAQ)' : '💡 Câu hỏi thường gặp (FAQ)'}
+                  {isEn ? 'Frequently Asked Questions (FAQ)' : 'Câu hỏi thường gặp (FAQ)'}
                 </a>
               </li>
               <li>
                 <a onClick={() => navigateTo('login')} className="cursor-pointer hover:text-[#DE5D53] transition-colors">
-                  {isEn ? '🔑 Log in / Sign up' : '🔑 Đăng nhập / Đăng ký'}
+                  {isEn ? 'Log in / Sign up' : 'Đăng nhập / Đăng ký'}
                 </a>
               </li>
             </ul>
@@ -554,13 +545,13 @@ export function PageLanding() {
             <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
               <li>
                 <a href="/privacy" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
-                  <span>🛡️</span>
+                  <Shield className="w-3.5 h-3.5 shrink-0 inline mr-1" />
                   <span>{isEn ? 'Privacy Policy' : 'Chính sách quyền riêng tư'}</span>
                 </a>
               </li>
               <li>
                 <a href="/terms" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
-                  <span>📜</span>
+                  <FileText className="w-3.5 h-3.5 shrink-0 inline mr-1" />
                   <span>{isEn ? 'Terms of Service' : 'Điều khoản dịch vụ'}</span>
                 </a>
               </li>

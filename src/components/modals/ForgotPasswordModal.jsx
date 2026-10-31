@@ -44,7 +44,7 @@ export function ForgotPasswordModal() {
       if (error) throw error;
 
       setIsSuccess(true);
-      success('Đã gửi email khôi phục mật khẩu! 📩');
+      success('Đã gửi email khôi phục mật khẩu!');
     } catch (err) {
       setErrorMessage(err?.message || 'Không thể gửi email đặt lại mật khẩu.');
       toastError(err?.message || 'Lỗi gửi email.');

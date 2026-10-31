@@ -88,7 +88,7 @@ export function PageSupport() {
               onClick={() => navigateTo('landing')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🏠 Home' : '🏠 Trang chủ'}
+              {isEn ? 'Home' : 'Trang chủ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -96,7 +96,7 @@ export function PageSupport() {
               onClick={() => navigateTo('features')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '🎨 Features' : '🎨 Tính năng'}
+              {isEn ? 'Features' : 'Tính năng'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -104,7 +104,7 @@ export function PageSupport() {
               onClick={() => navigateTo('reviews')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💬 Reviews' : '💬 Đánh giá'}
+              {isEn ? 'Reviews' : 'Đánh giá'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -112,14 +112,14 @@ export function PageSupport() {
               onClick={() => navigateTo('faq')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💡 FAQ' : '💡 FAQ'}
+              {isEn ? 'FAQ' : 'FAQ'}
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
               type="button"
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#DE5D53] bg-[#FDEAE2] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? '💌 Support' : '💌 Hỗ trợ'}
+              {isEn ? 'Support' : 'Hỗ trợ'}
             </button>
           </nav>
 
@@ -133,7 +133,7 @@ export function PageSupport() {
               className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>{isEn ? 'Learn Now' : 'Vào học ngay'}</span>
-              <span className="text-xs sm:text-sm">🚀</span>
+              
             </button>
           </div>
         </div>
@@ -145,12 +145,12 @@ export function PageSupport() {
         {/* Header Intro */}
         <div className="text-center mb-10 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAF3E7] text-[#557A46] text-xs font-black uppercase tracking-wider border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
-            <span>🎧</span>
+            
             <span>{isEn ? 'Support Center & Helpdesk' : 'Trung tâm hỗ trợ & CSKH'}</span>
           </div>
 
           <h1 className="font-quicksand font-black text-3xl sm:text-5xl text-[#3D352E] tracking-tight">
-            {isEn ? 'How Can We Help You? 💌' : 'Chúng tôi có thể giúp gì cho bạn? 💌'}
+            {isEn ? 'How Can We Help You?' : 'Chúng tôi có thể giúp gì cho bạn?'}
           </h1>
 
           <p className="text-sm sm:text-base text-[#6E5D53] font-medium max-w-lg mx-auto leading-relaxed">
@@ -194,7 +194,7 @@ export function PageSupport() {
               onClick={handleCopyZalo}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#F2ECE0] text-[#3D352E] text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer shrink-0"
             >
-              <span>{copied ? '✓' : '📋'}</span>
+              <span>{copied ? 'Đã sao chép' : 'Sao chép'}</span>
               <span>{copied ? (isEn ? 'Copied!' : 'Đã chép số!') : (isEn ? 'Copy' : 'Sao chép')}</span>
             </button>
           </div>
@@ -206,14 +206,14 @@ export function PageSupport() {
               rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-2 py-3 px-5 bg-[#0068FF] hover:bg-[#0054cc] text-white font-black text-xs sm:text-sm rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
-              <span>💬</span>
+              
               <span>{isEn ? 'Open Zalo Chat Now' : 'Nhắn tin Zalo ngay'}</span>
             </a>
             <a
               href="tel:0846407898"
               className="flex items-center justify-center gap-2 py-3 px-5 bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-xs sm:text-sm rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
-              <span>📞</span>
+              
               <span>{isEn ? 'Call Directly' : 'Gọi trực tiếp'}</span>
             </a>
           </div>
@@ -222,7 +222,7 @@ export function PageSupport() {
         {/* ── WELCOME & 2-MONTH GIFT NOTICE ── */}
         <div className="bg-[#FFFDF9] border-[2.5px] border-[#3D352E] rounded-2xl p-5 mb-6 shadow-[3px_4px_0px_#3D352E] flex items-start gap-4">
           <div className="w-12 h-12 rounded-xl bg-[#FEF9EE] border-2 border-[#3D352E] flex items-center justify-center text-2xl shrink-0 shadow-2xs">
-            🎁
+            
           </div>
           <div className="text-xs sm:text-sm leading-relaxed text-[#5C4F46]">
             <h3 className="font-quicksand font-black text-base text-[#3D352E] mb-1">
@@ -245,7 +245,7 @@ export function PageSupport() {
             className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 flex items-center gap-3.5 shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 transition-all cursor-pointer"
           >
             <div className="w-11 h-11 rounded-xl bg-[#FEEFEA] border-2 border-[#3D352E] flex items-center justify-center text-xl shrink-0">
-              🐞
+              
             </div>
             <div>
               <h4 className="font-quicksand font-black text-sm text-[#3D352E]">
@@ -264,7 +264,7 @@ export function PageSupport() {
             className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 flex items-center gap-3.5 shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 transition-all cursor-pointer"
           >
             <div className="w-11 h-11 rounded-xl bg-[#EAF3E7] border-2 border-[#3D352E] flex items-center justify-center text-xl shrink-0">
-              🎓
+              
             </div>
             <div>
               <h4 className="font-quicksand font-black text-sm text-[#3D352E]">
@@ -296,8 +296,8 @@ export function PageSupport() {
           {submitted && (
             <div className="p-3.5 bg-[#EAF3E7] text-[#557A46] border-2 border-[#557A46] rounded-xl text-xs font-black">
               {isEn
-                ? '✓ Message submitted successfully! Admin will get back to you shortly.'
-                : '✓ Đã gửi thông tin thành công! Admin sẽ phản hồi bạn trong thời gian sớm nhất.'}
+                ? 'Message submitted successfully! Admin will get back to you shortly.'
+                : 'Đã gửi thông tin thành công! Admin sẽ phản hồi bạn trong thời gian sớm nhất.'}
             </div>
           )}
 
@@ -350,7 +350,7 @@ export function PageSupport() {
             type="submit"
             className="w-full bg-[#557A46] hover:bg-[#476739] text-white font-black py-3.5 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer text-sm"
           >
-            <span>✉️</span>
+            
             <span>{isEn ? 'Send to Admin' : 'Gửi thông tin cho Admin'}</span>
           </button>
         </form>

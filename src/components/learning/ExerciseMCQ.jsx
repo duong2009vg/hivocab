@@ -91,7 +91,7 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
                 }}
               />
             </span>
-            <span>Bé Hổ nhắc: Nhấn chọn đáp án đúng nhé 🐾</span>
+            <span>Bé Hổ nhắc: Nhấn chọn đáp án đúng nhé</span>
           </div>
 
           {onReport && (
@@ -101,7 +101,7 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
               className="text-stone-400 hover:text-stone-700 text-xs transition cursor-pointer p-1"
               title="Báo cáo lỗi câu này"
             >
-              ⚠️ Báo lỗi
+              <span className="inline-flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Báo lỗi</span>
             </button>
           )}
         </div>
@@ -239,7 +239,7 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
         </div>
 
         <div className="flex items-center gap-1 text-stone-600 ml-auto">
-          <span>💡</span>
+          <Lightbulb className="w-4 h-4 inline shrink-0" />
           <span>
             {d.rootHint || `Từ gồm ${d.word?.length || 0} ký tự`}
           </span>

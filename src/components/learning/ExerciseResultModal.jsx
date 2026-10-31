@@ -221,7 +221,7 @@ export default function ExerciseResultModal({
                 className="hover:scale-110 active:scale-95 transition-transform shrink-0 mt-0.5 cursor-pointer text-white"
                 title="Nghe câu ví dụ"
               >
-                🔊
+                <Volume2 className="w-4 h-4 text-white" />
               </button>
               <div className="min-w-0">
                 <strong className="font-bold text-white">Ví dụ: </strong>
@@ -233,7 +233,7 @@ export default function ExerciseResultModal({
           {/* Row 4: Notes / Synonyms */}
           {notes && (
             <div className="text-white/90 text-xs sm:text-sm pl-1 sm:pl-2 flex items-center gap-1.5 font-sans font-medium">
-              <span className="shrink-0">📝</span>
+              <BookOpen className="w-3.5 h-3.5 text-[#3d352e] shrink-0" />
               <span className="truncate">
                 <strong className="font-bold">Ghi chú:</strong> {notes}
               </span>

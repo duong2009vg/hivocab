@@ -186,9 +186,9 @@ export function PageLogin() {
         </button>
 
         <div className="flex items-center gap-1.5 select-none text-xs font-black text-[#786F66]">
-          <span className="text-[#F4B41A]">★</span>
+          <Star className="w-4 h-4 fill-[#F4B41A] text-[#F4B41A] inline shrink-0" />
           <span>Học cùng Bé Hổ</span>
-          <span className="text-[#DE5D53]">❤</span>
+          <Heart className="w-4 h-4 fill-[#DE5D53] text-[#DE5D53] inline shrink-0" />
         </div>
       </header>
 
@@ -211,7 +211,7 @@ export function PageLogin() {
             </div>
 
             <h1 className="font-quicksand font-black text-2xl sm:text-[26px] text-[#302A24] leading-tight">
-              {authMode === 'login' ? 'Chào mừng trở lại! 🌿' : 'Tạo tài khoản mới ✨'}
+              {authMode === 'login' ? 'Chào mừng trở lại!' : 'Tạo tài khoản mới'}
             </h1>
             <p className="text-xs sm:text-sm text-[#786F66] font-medium mt-1">
               {authMode === 'login'
@@ -274,7 +274,7 @@ export function PageLogin() {
           <form id="email-auth-form" onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="auth-email" className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                <span>📧 Địa chỉ Email</span>
+                <span className="inline-flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-[#302A24] shrink-0" /> Địa chỉ Email</span>
               </label>
               <input
                 type="email"
@@ -291,7 +291,7 @@ export function PageLogin() {
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label htmlFor="auth-password" className="block text-xs font-black text-[#302A24] uppercase tracking-wider flex items-center gap-1.5">
-                  <span>🔑 Mật khẩu</span>
+                  <span className="inline-flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-[#302A24] shrink-0" /> Mật khẩu</span>
                 </label>
                 {authMode === 'login' && (
                   <button
@@ -320,7 +320,7 @@ export function PageLogin() {
             {authMode === 'signup' && (
               <div id="field-confirm-password">
                 <label htmlFor="auth-confirm-password" className="block text-xs font-black text-[#302A24] uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
-                  <span>🔒 Xác nhận mật khẩu</span>
+                  <span className="inline-flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-[#302A24] shrink-0" /> Xác nhận mật khẩu</span>
                 </label>
                 <input
                   type="password"
@@ -337,7 +337,7 @@ export function PageLogin() {
             {/* Error Message */}
             {errorMessage && !isExistingAccount && (
               <div id="auth-error" className="text-xs text-[#B4482B] bg-[#FDEAE2] border-2 border-[#F8C8B8] p-3 rounded-2xl font-bold flex items-start gap-2 shadow-xs">
-                <span>⚠️</span>
+                <AlertTriangle className="w-4 h-4 text-[#DE5D53] shrink-0 inline mr-1" />
                 <span>{errorMessage}</span>
               </div>
             )}
@@ -346,7 +346,7 @@ export function PageLogin() {
             {isExistingAccount && (
               <div id="auth-error" className="text-xs bg-[#FDEAE2] border-2 border-[#F8C8B8] p-3.5 rounded-2xl font-bold space-y-2.5 shadow-xs">
                 <div className="text-[#B4482B] flex items-center gap-1.5 text-xs font-black">
-                  <span>⚠️</span>
+                  <AlertTriangle className="w-4 h-4 text-[#DE5D53] shrink-0 inline mr-1" />
                   <span>Email này đã có tài khoản trên hệ thống!</span>
                 </div>
                 <p className="text-[#6E5D53] text-[11px] font-medium leading-relaxed">
@@ -374,7 +374,7 @@ export function PageLogin() {
             {/* Success Message */}
             {successMessage && (
               <div id="auth-success" className="text-xs text-[#3D5A32] bg-[#EAF5E4] border-2 border-[#8FB383] p-3 rounded-2xl font-bold space-y-1 shadow-xs">
-                <p className="text-xs font-black">🎉 Đăng ký thành công!</p>
+                <p className="text-xs font-black"><span className="inline-flex items-center gap-1"><CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> Đăng ký thành công!</span></p>
                 <p className="text-[11px] font-medium leading-relaxed">{successMessage}</p>
               </div>
             )}
@@ -398,7 +398,7 @@ export function PageLogin() {
                   : 'bg-[#DE5D53] hover:bg-[#C84F45]'
               }`}
             >
-              <span>{isSubmitting ? 'Đang xử lý...' : (authMode === 'login' ? 'Đăng nhập ngay 🚀' : 'Tạo tài khoản học tập ✏️')}</span>
+              <span>{isSubmitting ? 'Đang xử lý...' : (authMode === 'login' ? 'Đăng nhập ngay' : 'Tạo tài khoản học tập')}</span>
             </button>
           </form>
 
@@ -410,7 +410,7 @@ export function PageLogin() {
               className="w-8 h-8 object-contain shrink-0 mix-blend-multiply" 
             />
             <p className="text-[11px] font-semibold text-[#6E5D53]">
-              Bé Hổ nhắc: &ldquo;Chỉ 15 phút mỗi ngày để nâng cấp vốn từ vựng nhé!&rdquo; 🐾
+              Bé Hổ nhắc: &ldquo;Chỉ 15 phút mỗi ngày để nâng cấp vốn từ vựng nhé!&rdquo;
             </p>
           </div>
 
@@ -435,7 +435,7 @@ export function PageLogin() {
 
       {/* Footer mộc mạc */}
       <footer className="w-full text-center py-4 text-xs font-semibold text-[#8A796F]">
-        <p>© 2026 HiVocab! - Nền tảng học từ vựng tiếng Anh theo phong cách sáp màu ấm áp 🌿</p>
+        <p>© 2026 HiVocab! - Nền tảng học từ vựng tiếng Anh theo phong cách sáp màu ấm áp</p>
       </footer>
     </div>
   );

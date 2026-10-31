@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
+import { Crown } from 'lucide-react';
 
 export function MobileProfileDropdown() {
   const { user, signOut, isPaidPro: isPro } = useAuth();
@@ -108,7 +109,7 @@ export function MobileProfileDropdown() {
       ) : (
         <div className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-[#557A46] bg-[#E5EFE2] font-black border-b border-outline-variant/15 select-none">
           <div className="flex items-center gap-1.5">
-            <span>👑</span>
+            <Crown className="w-3.5 h-3.5 text-[#557A46] shrink-0" />
             <span>HiVocab PRO</span>
           </div>
           <span className="text-[10px] bg-[#557A46] text-white px-1.5 py-0.5 rounded-full font-bold">Active</span>

@@ -4,6 +4,7 @@ import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { CrayonProBadge } from './CrayonProBadge.jsx';
+import { Crown, Sparkles, Calendar, Clock, RotateCcw, GraduationCap, ArrowRight } from 'lucide-react';
 
 const PLAN_NAMES = {
   pro_1m: 'Gói 1 Tháng (Trải Nghiệm)',
@@ -63,9 +64,7 @@ export function CrayonProfileProCard({ className = '' }) {
       <section className={`bg-gradient-to-r from-[#FAF5EB] via-[#FFFDF9] to-[#F5EEFF] border-[2.5px] border-[#3D352E] shadow-crayon rounded-3xl p-6 relative overflow-hidden select-none ${className}`}>
         <div className="flex flex-col sm:flex-row items-center justify-between gap-5 relative z-10">
           <div className="flex items-center gap-4 text-center sm:text-left">
-            <div className="w-16 h-16 rounded-2xl bg-[#F3E8FF] border-2 border-[#3D352E] shadow-crayonSm flex items-center justify-center text-3xl shrink-0 rotate-[-2deg]">
-              👑
-            </div>
+            <Crown className="w-12 h-12 text-[#6B21A8] shrink-0" />
             <div>
               <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap mb-1">
                 <CrayonProBadge variant="lifetime" size="sm" />
@@ -84,7 +83,7 @@ export function CrayonProfileProCard({ className = '' }) {
 
           <div className="shrink-0">
             <span className="px-4 py-2 rounded-2xl bg-[#F3E8FF] border-2 border-[#3D352E] shadow-crayonSm text-xs font-heading font-black text-[#6B21A8] inline-flex items-center gap-1.5">
-              <span>✨</span>
+              <Sparkles className="w-4 h-4 text-[#6B21A8] shrink-0" />
               <span>Đặc quyền Vô Cực</span>
             </span>
           </div>
@@ -106,9 +105,7 @@ export function CrayonProfileProCard({ className = '' }) {
           
           {/* Cột trái: Tên gói và thời hạn */}
           <div className="flex items-start gap-4 text-center md:text-left">
-            <div className="w-16 h-16 rounded-2xl bg-[#FFE8C2] border-2 border-[#3D352E] shadow-crayonSm flex items-center justify-center text-3xl shrink-0 rotate-[-2deg]">
-              👑
-            </div>
+            <Crown className="w-12 h-12 text-[#8C5311] shrink-0" />
             <div>
               <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap mb-1">
                 <CrayonProBadge variant="crown" size="sm" />
@@ -117,7 +114,7 @@ export function CrayonProfileProCard({ className = '' }) {
                     ? 'bg-[#FBECE7] text-[#C85A3F] border-[#C85A3F]/50 animate-pulse'
                     : 'bg-[#E3EDE2] text-[#4D6B53] border-[#4D6B53]/50'
                 }`}>
-                  {isUrgent ? `⚠️ Sắp hết hạn (Còn ${daysRemaining} ngày)` : `🟢 Đang kích hoạt (Còn ${daysRemaining} ngày)`}
+                  {isUrgent ? `Sắp hết hạn (Còn ${daysRemaining} ngày)` : `Đang kích hoạt (Còn ${daysRemaining} ngày)`}
                 </span>
               </div>
               <h3 className="font-heading font-black text-xl text-[#3D352E]">
@@ -127,12 +124,12 @@ export function CrayonProfileProCard({ className = '' }) {
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs font-bold text-[#786F66] mt-2">
                 {startedAt && (
                   <span className="flex items-center gap-1">
-                    <span>📅</span>
+                    <Calendar className="w-3.5 h-3.5 text-[#786F66] shrink-0" />
                     <span>Bắt đầu: {formatVietnameseDate(startedAt)}</span>
                   </span>
                 )}
                 <span className="flex items-center gap-1 text-[#3D352E]">
-                  <span>⏳</span>
+                  <Clock className="w-3.5 h-3.5 text-[#786F66] shrink-0" />
                   <span>Hết hạn: <strong className="text-[#C85A3F]">{formatVietnameseDate(expiresAt)}</strong></span>
                 </span>
               </div>
@@ -146,7 +143,7 @@ export function CrayonProfileProCard({ className = '' }) {
               onClick={() => handleOpenPricing('pro_6m')}
               className="w-full sm:w-auto py-2.5 px-5 bg-[#4D6B53] hover:bg-[#3D5642] text-white font-heading font-black text-xs rounded-2xl border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <span>🌿</span>
+              <RotateCcw className="w-3.5 h-3.5 shrink-0" />
               <span>Gia hạn gói cước</span>
             </button>
             <button
@@ -154,7 +151,7 @@ export function CrayonProfileProCard({ className = '' }) {
               onClick={() => handleOpenPricing('pro_lifetime')}
               className="w-full sm:w-auto py-2.5 px-5 bg-[#F3E8FF] hover:bg-[#E9D5FF] text-[#6B21A8] font-heading font-black text-xs rounded-2xl border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <span>👑</span>
+              <Crown className="w-3.5 h-3.5 shrink-0" />
               <span>Lên Trọn Đời</span>
             </button>
           </div>
@@ -172,9 +169,7 @@ export function CrayonProfileProCard({ className = '' }) {
         
         {/* Nội dung bên trái */}
         <div className="flex items-center gap-4 text-center sm:text-left">
-          <div className="w-16 h-16 rounded-2xl bg-white border-2 border-[#3D352E] shadow-crayonSm flex items-center justify-center text-3xl shrink-0">
-            🌱
-          </div>
+          <GraduationCap className="w-12 h-12 text-[#557A46] shrink-0" />
           <div>
             <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#EFE7DA] text-[#3D352E] border border-[#3D352E]">
@@ -182,7 +177,7 @@ export function CrayonProfileProCard({ className = '' }) {
               </span>
             </div>
             <h3 className="font-heading font-black text-lg sm:text-xl text-[#3D352E]">
-              Mở Khóa Toàn Bộ Đề Thi &amp; Bài Đọc Với HiVocab PRO ⭐
+              Mở Khóa Toàn Bộ Đề Thi &amp; Bài Đọc Với HiVocab PRO
             </h3>
             <p className="font-quicksand text-xs font-semibold text-[#786F66] mt-0.5 max-w-xl">
               Nâng cấp gói PRO để đọc song ngữ Cambridge không giới hạn, làm 38+ đề thi THPT bấm giờ và lưu tiến độ học tập không quảng cáo.
@@ -198,7 +193,7 @@ export function CrayonProfileProCard({ className = '' }) {
             className="w-full sm:w-auto py-3 px-6 bg-[#D96C4D] hover:bg-[#C85A3F] text-white font-heading font-black text-xs sm:text-sm rounded-2xl border-2 border-[#3D352E] shadow-crayon active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
             <span>Nâng cấp PRO ngay</span>
-            <span>🚀</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </button>
         </div>
       </div>

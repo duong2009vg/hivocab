@@ -65,14 +65,12 @@ export function BilingualGapFillView({
     return (
       <div className="max-w-2xl mx-auto w-full pb-20 fade-in select-none">
         <div className="bg-[#FFFDF9] border-[3.5px] border-[#382E2B] rounded-3xl p-8 md:p-10 text-center shadow-[6px_8px_0px_#382E2B] mt-6 relative overflow-hidden">
-          <div className="w-20 h-20 mx-auto rounded-3xl bg-[#FFF3D6] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-4xl mb-4 animate-bounce">
-            🎉
-          </div>
+          <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-4 animate-bounce shrink-0" />
           <h3 className="text-2xl md:text-3xl font-heading font-black text-[#382E2B] mb-2">
             Xuất sắc! Bạn đã hoàn thành!
           </h3>
           <p className="text-sm md:text-base text-[#766C5F] font-semibold mb-6 max-w-md mx-auto">
-            Bạn đã trả lời chính xác toàn bộ <strong className="text-[#5a7d4d]">{total} / {total} câu</strong> đục lỗ trong ngữ cảnh bài đọc IELTS này. 🐾
+            Bạn đã trả lời chính xác toàn bộ <strong className="text-[#5a7d4d]">{total} / {total} câu</strong> đục lỗ trong ngữ cảnh bài đọc IELTS này.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
@@ -80,7 +78,7 @@ export function BilingualGapFillView({
               onClick={() => onSwitchTab('reading')}
               className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-sm border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>📖</span>
+              <BookOpen className="w-4 h-4 shrink-0" />
               <span>Đọc lại toàn bài</span>
             </button>
             <button
@@ -88,7 +86,7 @@ export function BilingualGapFillView({
               onClick={onReset}
               className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] font-black text-sm border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>🔄</span>
+              <RotateCcw className="w-4 h-4 shrink-0" />
               <span>Làm lại bài tập</span>
             </button>
           </div>
@@ -100,7 +98,7 @@ export function BilingualGapFillView({
   if (!currentItem) {
     return (
       <div className="text-center py-20 text-[#766C5F] max-w-md mx-auto bg-[#FFFDF9] rounded-3xl border-2 border-[#382E2B] p-8 shadow-[3px_4px_0px_#382E2B]">
-        <span className="text-4xl mb-3 block">✏️</span>
+        <PenTool className="w-10 h-10 text-[#5a7d4d] mx-auto mb-3 shrink-0" />
         <h3 className="font-heading font-black text-lg text-[#382E2B] mb-1">Chưa có bài tập đục lỗ</h3>
         <p className="text-xs font-semibold text-[#766C5F]">Bài đọc này hiện chưa có danh sách từ vựng trọng tâm để tạo bài tập.</p>
       </div>
@@ -125,7 +123,7 @@ export function BilingualGapFillView({
               Luyện từ trong ngữ cảnh bài đọc
             </span>
             <h2 className="text-xl md:text-2xl font-heading font-black text-[#382E2B] leading-tight">
-              Bài tập Đục Lỗ Song Ngữ ✏️
+              Bài tập Đục Lỗ Song Ngữ
             </h2>
             <p className="text-xs font-semibold text-[#766C5F] mt-1">
               Điền từ còn thiếu vào câu văn IELTS gốc dựa vào gợi ý nghĩa tiếng Việt.
@@ -145,7 +143,7 @@ export function BilingualGapFillView({
               className="w-10 h-10 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center transition-all cursor-pointer active:translate-y-0.5"
               title="Làm lại tất cả"
             >
-              🔄
+              <RotateCcw className="w-4 h-4 text-[#382E2B]" />
             </button>
           </div>
         </div>
@@ -189,7 +187,7 @@ export function BilingualGapFillView({
                 className={`w-8 h-8 rounded-xl text-xs flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer ${btnClass}`}
                 title={`Chuyển đến câu ${i + 1}`}
               >
-                {itDone && !isCurr ? '✓' : i + 1}
+                {itDone && !isCurr ? <Check className="w-3.5 h-3.5" /> : i + 1}
               </button>
             );
           })}
@@ -214,7 +212,7 @@ export function BilingualGapFillView({
                 currentItem.isCorrect ? 'bg-[#5a7d4d] text-white' : 'bg-[#FFF3D6] text-[#D36135]'
               }`}
             >
-              {currentItem.isCorrect ? '✓' : currentGapIndex + 1}
+              {currentItem.isCorrect ? <Check className="w-3.5 h-3.5" /> : currentGapIndex + 1}
             </span>
             <div>
               <span className="text-xs font-black text-[#766C5F] uppercase tracking-wider block">
@@ -241,7 +239,7 @@ export function BilingualGapFillView({
               className="w-8 h-8 rounded-xl bg-[#FFF8EE] border border-[#382E2B]/40 hover:border-[#382E2B] text-[#382E2B] flex items-center justify-center transition-all cursor-pointer active:scale-95 text-sm"
               title="Nghe phát âm"
             >
-              🔊
+              <Volume2 className="w-4 h-4 text-[#382E2B]" />
             </button>
           </div>
         </div>
@@ -283,7 +281,7 @@ export function BilingualGapFillView({
 
           {/* Gợi ý nghĩa tiếng Việt */}
           <div className="bg-[#FFF8EE] rounded-2xl p-4 mb-6 flex items-start gap-2.5 text-xs sm:text-sm border-2 border-dashed border-[#E5A13C]">
-            <span className="text-lg shrink-0 select-none">💡</span>
+            <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 inline mr-1" />
             <div>
               <span className="text-[#766C5F] font-bold">Gợi ý nghĩa:</span>
               <span className="font-black text-[#382E2B] ml-1.5">{currentItem.meaning}</span>
@@ -299,7 +297,7 @@ export function BilingualGapFillView({
           {currentItem.isCorrect && (
             <div className="mb-5 p-3.5 rounded-2xl bg-[#E5EFE2] border-2 border-[#8FB383] text-[#4F7D4B] flex items-center justify-between text-xs sm:text-sm font-black fade-in shadow-2xs">
               <span className="flex items-center gap-2">
-                <span>🎉</span>
+                <Trophy className="w-4 h-4 text-amber-500 shrink-0 inline mr-1" />
                 <span>
                   Chính xác! Từ cần điền là: <strong className="underline">{currentItem.blankWord}</strong>
                 </span>
@@ -309,7 +307,7 @@ export function BilingualGapFillView({
                 onClick={() => onNext(currentGapIndex)}
                 className="px-3.5 py-1.5 rounded-xl bg-[#5a7d4d] text-white hover:bg-[#4d6d41] transition-colors flex items-center gap-1 cursor-pointer"
               >
-                <span>Câu tiếp ➔</span>
+                <span className="inline-flex items-center gap-1">Câu tiếp <ArrowRight className="w-4 h-4 shrink-0" /></span>
               </button>
             </div>
           )}
@@ -328,14 +326,14 @@ export function BilingualGapFillView({
                     }}
                     className="px-3.5 py-2 rounded-2xl bg-[#FFF3D6] hover:bg-[#FFE5B4] text-[#B87C24] text-xs font-black flex items-center gap-1.5 transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
                   >
-                    <span>💡 Gợi ý ({currentItem.hintLevel}/{currentItem.blankWord.length})</span>
+                    <span className="inline-flex items-center gap-1"><Lightbulb className="w-3.5 h-3.5 shrink-0" /> Gợi ý ({currentItem.hintLevel}/{currentItem.blankWord.length})</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onReveal(currentGapIndex)}
                     className="px-3.5 py-2 rounded-2xl bg-[#FAF5EB] hover:bg-[#F3E7D5] text-[#766C5F] text-xs font-black flex items-center gap-1.5 transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
                   >
-                    <span>👁️ Xem đáp án</span>
+                    <span className="inline-flex items-center gap-1"><Eye className="w-3.5 h-3.5 shrink-0" /> Xem đáp án</span>
                   </button>
                 </>
               )}
@@ -361,7 +359,7 @@ export function BilingualGapFillView({
                   type="submit"
                   className="px-6 py-2 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm active:translate-y-0.5 transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>Kiểm tra ➔</span>
+                  <span className="inline-flex items-center gap-1">Kiểm tra <ArrowRight className="w-4 h-4 shrink-0" /></span>
                 </button>
               ) : (
                 <button
@@ -369,7 +367,7 @@ export function BilingualGapFillView({
                   onClick={() => onNext(currentGapIndex)}
                   className="px-6 py-2 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm active:translate-y-0.5 transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center gap-1.5 cursor-pointer"
                 >
-                  <span>Tiếp tục ➔</span>
+                  <span className="inline-flex items-center gap-1">Tiếp tục <ArrowRight className="w-4 h-4 shrink-0" /></span>
                 </button>
               )}
             </div>

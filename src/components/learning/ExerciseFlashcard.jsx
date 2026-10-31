@@ -124,7 +124,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] shadow-[1.5px_1.5px_0px_#2D2825] flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
                       title="Báo lỗi từ này"
                     >
-                      <span className="text-xs">⚠️</span>
+                      <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" />
                     </button>
                   )}
                   <div className="inline-flex items-center gap-1 px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] rounded-full shadow-[1.5px_1.5px_0px_#2D2825] text-[11px] sm:text-xs font-bold text-stone-700 transition-colors">
@@ -146,7 +146,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                       e.currentTarget.style.display = 'none';
                     }}
                   />
-                  <span className="absolute -top-1.5 -right-1.5 text-[#feab79] text-lg sm:text-xl animate-bounce">✨</span>
+                  <Sparkles className="w-4 h-4 absolute -top-1.5 -right-1.5 text-[#feab79] animate-bounce shrink-0" />
                 </div>
               ) : (
                 <div className="my-2 sm:my-3 relative flex items-center justify-center w-28 h-28 sm:w-36 sm:h-36">
@@ -156,7 +156,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                     className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 object-contain mix-blend-multiply select-none"
                     src="/mascot/mascot_cozy.png"
                   />
-                  <span className="absolute -top-1 -right-1 text-[#feab79] text-base sm:text-lg animate-bounce">✨</span>
+                  <Sparkles className="w-3.5 h-3.5 absolute -top-1 -right-1 text-[#feab79] animate-bounce shrink-0" />
                 </div>
               )}
 
@@ -257,7 +257,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                       className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-stone-100 hover:bg-stone-200 border-2 border-[#2D2825] shadow-[1.5px_1.5px_0px_#2D2825] flex items-center justify-center text-stone-600 transition-colors cursor-pointer"
                       title="Báo lỗi từ này"
                     >
-                      <span className="text-xs">⚠️</span>
+                      <AlertTriangle className="w-3.5 h-3.5 inline shrink-0" />
                     </button>
                   )}
                   <button
@@ -356,7 +356,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                   }}
                   className="py-2.5 sm:py-3 px-3 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#D36135] font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>✏️</span>
+                  <PenTool className="w-4 h-4 shrink-0 inline" />
                   <span>Cần ôn lại (1)</span>
                 </button>
 
@@ -368,7 +368,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                   }}
                   className="py-2.5 sm:py-3 px-3 bg-[#609966] hover:bg-[#528357] text-white font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>🌟</span>
+                  <Star className="w-4 h-4 shrink-0 inline" />
                   <span>Đã nhớ kỹ (2)</span>
                 </button>
               </div>

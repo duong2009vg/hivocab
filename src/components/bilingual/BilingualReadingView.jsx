@@ -46,7 +46,7 @@ function HighlightedEnglishText({ text, vocabRegex, vocabMap, onWordClick }) {
           onWordClick(wordObj, e.clientX, e.clientY);
         }}
         className="inline-flex items-baseline px-2 py-0.5 mx-0.5 rounded-lg bg-[#FFF2D6] hover:bg-[#FFE6B3] text-[#B85D19] font-black border border-[#D36135]/40 border-b-2 border-b-[#D36135] cursor-pointer transition-all active:scale-95 shadow-2xs select-text"
-        title="Nhấp để xem nghĩa & phát âm 🐾"
+        title="Nhấp để xem nghĩa & phát âm"
       >
         {matchedWord}
       </span>
@@ -106,7 +106,7 @@ export function BilingualReadingView({
               {passage?.title || `Passage ${passage?.passageNumber || ''}`}
             </h2>
             <p className="text-xs font-semibold text-[#766C5F] mt-1">
-              {totalParas} đoạn văn · {words.length} từ vựng trọng tâm trong bài 🐾
+              {totalParas} đoạn văn · {words.length} từ vựng trọng tâm trong bài
             </p>
           </div>
 
@@ -118,7 +118,7 @@ export function BilingualReadingView({
               className="px-3.5 py-2 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] text-xs font-black border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center gap-1.5 transition-all active:translate-y-0.5 cursor-pointer"
               title="Mở toàn bộ bản dịch tiếng Việt"
             >
-              <span>👁️</span>
+              <Eye className="w-4 h-4 shrink-0" />
               <span>Hiện tất cả</span>
             </button>
             <button
@@ -127,7 +127,7 @@ export function BilingualReadingView({
               className="px-3.5 py-2 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#382E2B] text-xs font-black border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center gap-1.5 transition-all active:translate-y-0.5 cursor-pointer"
               title="Che toàn bộ bản dịch tiếng Việt"
             >
-              <span>🙈</span>
+              <EyeOff className="w-4 h-4 shrink-0" />
               <span>Che tất cả</span>
             </button>
           </div>
@@ -135,7 +135,7 @@ export function BilingualReadingView({
 
         {/* Hướng dẫn chế độ Curtain Mode */}
         <div className="mt-4 pt-3 border-t-2 border-dashed border-[#EFE8D6] flex items-center gap-2 text-xs font-semibold text-[#766C5F]">
-          <span className="text-base select-none">💡</span>
+          <Lightbulb className="w-4 h-4 text-amber-600 shrink-0 inline mr-1" />
           <span>
             <strong className="text-[#382E2B]">Mẹo học chủ động:</strong> Cột tiếng Việt mặc định được che rèm. Hãy đọc đoạn văn tiếng Anh trước và tự dịch trong đầu, sau đó chạm vào bản dịch để đối chiếu.
           </span>
@@ -222,7 +222,7 @@ export function BilingualReadingView({
                 <div>
                   <div className="flex items-center justify-between mb-2 pb-1 border-b border-[#382E2B]/20">
                     <span className="text-xs font-black text-[#D36135] uppercase tracking-wider flex items-center gap-1.5">
-                      <span>📖</span>
+                      <BookOpen className="w-3.5 h-3.5 shrink-0" />
                       Bản dịch đối ứng
                     </span>
                     <button
@@ -230,7 +230,7 @@ export function BilingualReadingView({
                       onClick={() => onToggleCurtain(i)}
                       className="text-xs font-black px-2.5 py-1 rounded-xl bg-white border border-[#382E2B] text-[#382E2B] shadow-2xs hover:bg-[#FAF5EB] cursor-pointer"
                     >
-                      {isRevealed ? '🙈 Che lại' : '👁️ Hiện dịch'}
+                      {isRevealed ? <span className="inline-flex items-center gap-1"><EyeOff className="w-3.5 h-3.5 shrink-0" /> Che lại</span> : <span className="inline-flex items-center gap-1"><Eye className="w-3.5 h-3.5 shrink-0" /> Hiện dịch</span>}
                     </button>
                   </div>
 
@@ -257,7 +257,7 @@ export function BilingualReadingView({
                     className="absolute inset-0 z-10 bg-[#FAF5EB]/95 backdrop-blur-[2px] flex items-center justify-center cursor-pointer hover:bg-[#F3E7D5]/90 transition-all select-none"
                   >
                     <div className="bg-white text-[#382E2B] px-4 py-2 rounded-2xl shadow-[2px_3px_0px_#382E2B] border-2 border-[#382E2B] flex items-center gap-2 text-xs font-black active:translate-y-0.5">
-                      <span>📖</span>
+                      <BookOpen className="w-4 h-4 shrink-0" />
                       <span>Chạm để lật mở bản dịch</span>
                     </div>
                   </div>
