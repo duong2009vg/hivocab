@@ -95,9 +95,9 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {/* Top Filter and Search Bar */}
-      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
           <div className="relative flex-1 max-w-sm">
             <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#86756C]">search</span>
@@ -106,14 +106,14 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
               placeholder="Tìm tài khoản theo email, tên, ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+              className="w-full h-[38px] pl-9 pr-3 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
           </div>
 
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+            className="h-[38px] px-3.5 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46] cursor-pointer"
           >
             <option value="ALL">Tất cả vai trò</option>
             <option value="admin">Quản trị viên (Admin)</option>
@@ -127,16 +127,16 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
       </div>
 
       {/* Users Table */}
-      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] overflow-hidden">
+        <div className="overflow-x-auto max-h-[640px]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
+            <thead className="sticky top-0 z-10 bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="py-3 px-4">TÀI KHOẢN</th>
-                <th className="py-3 px-4">VAI TRÒ</th>
-                <th className="py-3 px-4">GÓI TÀI KHOẢN</th>
-                <th className="py-3 px-4">NGÀY THAM GIA</th>
-                <th className="py-3 px-4 text-right">THAO TÁC</th>
+                <th className="py-2.5 px-3.5">TÀI KHOẢN</th>
+                <th className="py-2.5 px-3.5">VAI TRÒ</th>
+                <th className="py-2.5 px-3.5">GÓI TÀI KHOẢN</th>
+                <th className="py-2.5 px-3.5">NGÀY THAM GIA</th>
+                <th className="py-2.5 px-3.5 text-right">THAO TÁC</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DECDBB]">
@@ -153,10 +153,10 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
 
                   return (
                     <tr key={p.id} className="hover:bg-[#FAF5EB]/50 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center gap-2.5">
+                      <td className="py-2.5 px-3.5">
+                        <div className="flex items-center gap-2">
                           <div
-                            className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 border border-[#3D352E]/30 ${
+                            className={`w-7 h-7 rounded-lg font-black text-xs flex items-center justify-center shrink-0 border border-[#3D352E]/30 ${
                               isAdmin
                                 ? 'bg-[#FEEFEA] text-[#DE5D53]'
                                 : 'bg-[#FAF5EB] text-[#86756C]'
@@ -177,7 +177,7 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         {isAdmin ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53]">
                             <span>🛡️</span>
@@ -188,7 +188,7 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         {p.tier === 'lifetime' ? (
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#F3E8FF] text-[#7E22CE] border border-[#C084FC]">PRO Trọn đời ✨</span>
                         ) : p.tier === 'pro' || p.is_pro ? (
@@ -198,14 +198,15 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 font-mono font-bold text-[11px] text-[#86756C]">
+                      <td className="py-2.5 px-3.5 font-mono font-bold text-[11px] text-[#86756C]">
                         {formatDate(p.created_at)}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
+                      <td className="py-2.5 px-3.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Toggle Admin */}
                           <button
+                            type="button"
                             onClick={() => handleToggleAdminRole(p)}
                             disabled={processingId === p.id}
                             className={`px-2.5 py-1 rounded-xl text-[11px] font-black border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 transition-all inline-flex items-center gap-1 cursor-pointer ${
@@ -223,6 +224,7 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
 
                           {/* Reset Password */}
                           <button
+                            type="button"
                             onClick={() => handleSendResetPassword(p.email)}
                             className="p-1 rounded-xl border border-transparent hover:border-[#3D352E] hover:bg-[#FAF5EB] text-[#3D352E] transition-colors cursor-pointer"
                             title="Gửi email đổi mật khẩu"

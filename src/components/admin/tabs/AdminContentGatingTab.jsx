@@ -311,15 +311,15 @@ export function AdminContentGatingTab() {
       {/* MASTER FREE / PRO TOGGLE SWITCH (QUẢN TRỊ TOÀN HỆ THỐNG)     */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div
-        className={`p-5 sm:p-6 rounded-3xl border-2 border-[#3D352E] shadow-[4px_5px_0px_#3D352E] transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-5 select-none ${
+        className={`p-4 sm:p-5 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 select-none ${
           globalGatingMode === 'free'
             ? 'bg-gradient-to-br from-[#EAF3E7] via-[#F5FAF2] to-[#FFFDF9]'
             : 'bg-gradient-to-br from-[#FFF9EE] via-[#FFF3E0] to-[#FFFDF9]'
         }`}
       >
-        <div className="flex items-start gap-4 max-w-xl">
+        <div className="flex items-start gap-3.5 max-w-xl">
           <div
-            className={`w-12 h-12 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl shrink-0 ${
+            className={`w-10 h-10 rounded-xl border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center justify-center text-xl shrink-0 ${
               globalGatingMode === 'free' ? 'bg-[#EAF3E7] text-[#557A46]' : 'bg-[#FFE8C2] text-[#D96B43]'
             }`}
           >
@@ -327,11 +327,11 @@ export function AdminContentGatingTab() {
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-quicksand font-black text-base sm:text-lg text-[#3D352E]">
+              <h3 className="font-quicksand font-black text-sm sm:text-base text-[#3D352E]">
                 Cài Đặt Chế Độ Học Liệu Toàn Web
               </h3>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-[11px] font-black border uppercase tracking-wider ${
+                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${
                   globalGatingMode === 'free'
                     ? 'bg-[#557A46] text-white border-[#3D352E]'
                     : 'bg-[#DE5D53] text-white border-[#3D352E]'
@@ -340,14 +340,14 @@ export function AdminContentGatingTab() {
                 {globalGatingMode === 'free' ? 'FREE TOÀN BỘ 🌐' : 'BẢN QUYỀN PRO 🔒'}
               </span>
             </div>
-            <p className="text-xs sm:text-[13px] font-semibold text-[#6E5D53] mt-1 leading-relaxed">
+            <p className="text-[11.5px] font-semibold text-[#6E5D53] mt-1 leading-relaxed">
               {globalGatingMode === 'free' ? (
                 <>
-                  <strong className="text-[#557A46]">Đang mở khóa full:</strong> Mọi người dùng (kể cả khách chưa đăng ký) đều có thể học toàn bộ 38 đề THPT, 444 bài đọc Cambridge và từ điển. Toàn bộ pop-up nâng cấp PRO được tắt hoàn toàn.
+                  <strong className="text-[#557A46]">Đang mở khóa full:</strong> Mọi người dùng (kể cả khách chưa đăng nhập) đều được mở 38 đề THPT, 444 bài Cambridge và từ điển. Pop-up nâng cấp được tắt hoàn toàn.
                 </>
               ) : (
                 <>
-                  <strong className="text-[#DE5D53]">Đang bật khóa bản quyền:</strong> Các học liệu gắn cờ PRO yêu cầu người dùng nâng cấp gói thành viên. Pop-up và màn hình khóa được hiển thị theo đúng chính sách bản quyền.
+                  <strong className="text-[#DE5D53]">Đang bật khóa bản quyền:</strong> Các học liệu gắn cờ PRO yêu cầu nâng cấp gói hội viên. Pop-up và màn hình khóa hiển thị chuẩn theo chính sách.
                 </>
               )}
             </p>
@@ -355,12 +355,12 @@ export function AdminContentGatingTab() {
         </div>
 
         {/* Nút gạt công tắc lớn Tactile Crayon Switch */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0 self-stretch sm:self-auto justify-between sm:justify-end">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2.5 shrink-0 self-stretch sm:self-auto justify-between sm:justify-end">
           <button
             type="button"
             onClick={handleToggleGlobalMode}
             disabled={isUpdatingGlobalMode}
-            className={`px-5 py-3 rounded-2xl border-2 border-[#3D352E] shadow-[3px_3px_0px_#3D352E] font-black text-xs sm:text-sm flex items-center gap-3 transition-all cursor-pointer active:translate-y-0.5 disabled:opacity-60 ${
+            className={`h-[40px] px-4 rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] font-black text-xs flex items-center gap-2.5 transition-all cursor-pointer active:translate-y-0.5 disabled:opacity-60 ${
               globalGatingMode === 'free'
                 ? 'bg-[#557A46] hover:bg-[#466639] text-white'
                 : 'bg-[#DE5D53] hover:bg-[#C84F45] text-white'
@@ -369,11 +369,11 @@ export function AdminContentGatingTab() {
           >
             <span>{isUpdatingGlobalMode ? 'Đang cập nhật...' : globalGatingMode === 'free' ? 'Gạt sang PRO (Bật khóa)' : 'Gạt sang FREE (Mở Full)'}</span>
             <div
-              className={`w-12 h-6 rounded-full p-0.5 bg-black/25 border border-white/60 flex items-center transition-colors`}
+              className={`w-10 h-5 rounded-full p-0.5 bg-black/25 border border-white/60 flex items-center transition-colors`}
             >
               <div
-                className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 flex items-center justify-center text-[10px] font-black ${
-                  globalGatingMode === 'free' ? 'translate-x-6 text-[#557A46]' : 'translate-x-0 text-[#DE5D53]'
+                className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 flex items-center justify-center text-[9px] font-black ${
+                  globalGatingMode === 'free' ? 'translate-x-5 text-[#557A46]' : 'translate-x-0 text-[#DE5D53]'
                 }`}
               >
                 {globalGatingMode === 'free' ? '✓' : '✕'}
@@ -386,33 +386,36 @@ export function AdminContentGatingTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SUB TABS & COUNTS SUMMARY                                     */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-dashed border-[#DECDBB]">
-        <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-2xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2.5 border-b border-[#DECDBB]">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-2 border-[#3D352E] shadow-2xs">
           <button
+            type="button"
             onClick={() => setSubTab('topics')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               subTab === 'topics'
-                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                ? 'bg-[#557A46] text-white border border-[#3D352E] shadow-2xs'
                 : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             Chủ đề Từ vựng ({items && subTab === 'topics' ? items.length : '110'})
           </button>
           <button
+            type="button"
             onClick={() => setSubTab('thpt')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               subTab === 'thpt'
-                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                ? 'bg-[#557A46] text-white border border-[#3D352E] shadow-2xs'
                 : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
             Đề thi THPT Quốc Gia ({items && subTab === 'thpt' ? items.length : '38'})
           </button>
           <button
+            type="button"
             onClick={() => setSubTab('passages')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
               subTab === 'passages'
-                ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                ? 'bg-[#557A46] text-white border border-[#3D352E] shadow-2xs'
                 : 'text-[#6E5D53] hover:text-[#3D352E]'
             }`}
           >
@@ -421,13 +424,13 @@ export function AdminContentGatingTab() {
         </div>
 
         {/* Counts summary */}
-        <div className="flex items-center gap-3 text-xs font-black">
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53]">
+        <div className="flex items-center gap-2.5 text-xs font-black">
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53] text-[11px]">
             <span>🔒</span>
             <span>{proCount} Khóa PRO</span>
           </span>
-          <span>•</span>
-          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
+          <span className="text-[#86756C]">•</span>
+          <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EAF3E7] text-[#557A46] border border-[#8FB383] text-[11px]">
             <span>🌐</span>
             <span>{freeCount} Miễn phí</span>
           </span>
@@ -437,7 +440,7 @@ export function AdminContentGatingTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SEARCH, STATUS FILTER & QUICK SELECTION TOOLS                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
         <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2">
           {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
@@ -449,15 +452,16 @@ export function AdminContentGatingTab() {
               placeholder={`Tìm theo tên ${subTab === 'topics' ? 'chủ đề' : subTab === 'thpt' ? 'đề thi' : 'bài đọc'}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+              className="w-full h-[38px] pl-9 pr-3 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
           </div>
 
           {/* Status Filter Buttons */}
-          <div className="flex items-center gap-1 p-1 rounded-2xl bg-white border-2 border-[#3D352E] text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-2 border-[#3D352E] text-xs h-[38px]">
             <button
+              type="button"
               onClick={() => setStatusFilter('all')}
-              className={`px-3 py-1 rounded-xl font-black transition-all cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg font-black transition-all cursor-pointer text-xs ${
                 statusFilter === 'all'
                   ? 'bg-[#3D352E] text-white shadow-2xs'
                   : 'text-[#6E5D53] hover:text-[#3D352E]'
@@ -466,8 +470,9 @@ export function AdminContentGatingTab() {
               Tất cả ({items.length})
             </button>
             <button
+              type="button"
               onClick={() => setStatusFilter('pro')}
-              className={`px-3 py-1 rounded-xl font-black transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg font-black transition-all flex items-center gap-1 cursor-pointer text-xs ${
                 statusFilter === 'pro'
                   ? 'bg-[#DE5D53] text-white shadow-2xs'
                   : 'text-[#6E5D53] hover:text-[#3D352E]'
@@ -477,8 +482,9 @@ export function AdminContentGatingTab() {
               <span>PRO ({proCount})</span>
             </button>
             <button
+              type="button"
               onClick={() => setStatusFilter('free')}
-              className={`px-3 py-1 rounded-xl font-black transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-lg font-black transition-all flex items-center gap-1 cursor-pointer text-xs ${
                 statusFilter === 'free'
                   ? 'bg-[#557A46] text-white shadow-2xs'
                   : 'text-[#6E5D53] hover:text-[#3D352E]'
@@ -494,23 +500,26 @@ export function AdminContentGatingTab() {
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] font-black text-[#86756C] mr-1">Tích chọn nhanh:</span>
           <button
+            type="button"
             onClick={handleSelectAllFree}
-            className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#EAF3E7] text-[11px] font-black text-[#557A46] border-2 border-[#3D352E] shadow-2xs active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
+            className="h-[32px] px-2.5 rounded-lg bg-white hover:bg-[#EAF3E7] text-[11px] font-black text-[#557A46] border border-[#3D352E] shadow-2xs active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             title="Chọn toàn bộ các mục đang Miễn phí để chuẩn bị khóa PRO"
           >
             <span>Tất cả Miễn phí ({freeCount})</span>
           </button>
           <button
+            type="button"
             onClick={handleSelectAllPro}
-            className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#FEEFEA] text-[11px] font-black text-[#DE5D53] border-2 border-[#3D352E] shadow-2xs active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
+            className="h-[32px] px-2.5 rounded-lg bg-white hover:bg-[#FEEFEA] text-[11px] font-black text-[#DE5D53] border border-[#3D352E] shadow-2xs active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             title="Chọn toàn bộ các mục đang khóa PRO để chuẩn bị mở Miễn phí"
           >
             <span>Tất cả PRO ({proCount})</span>
           </button>
           {selectedCount > 0 && (
             <button
+              type="button"
               onClick={handleClearSelection}
-              className="px-2 py-1 rounded-xl text-[#DE5D53] hover:bg-[#FEEFEA] text-[11px] font-black transition-all cursor-pointer"
+              className="h-[32px] px-2 rounded-lg text-[#DE5D53] hover:bg-[#FEEFEA] text-[11px] font-black transition-all cursor-pointer"
             >
               Bỏ chọn
             </button>
@@ -522,17 +531,17 @@ export function AdminContentGatingTab() {
       {/* FLOATING BATCH ACTION BAR (HIỂN THỊ KHI CÓ MỤC ĐƯỢC CHỌN)     */}
       {/* ───────────────────────────────────────────────────────────── */}
       {selectedCount > 0 && (
-        <div className="sticky top-4 z-30 p-3.5 rounded-3xl bg-[#FFF9EE] text-[#3D352E] shadow-[4px_6px_0px_#3D352E] border-2 border-[#3D352E] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+        <div className="sticky top-4 z-30 p-3 rounded-2xl bg-[#FFF9EE] text-[#3D352E] shadow-[3px_4px_0px_#3D352E] border-2 border-[#3D352E] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
           <div className="flex items-center gap-2.5">
-            <span className="w-8 h-8 rounded-xl bg-[#DE5D53] text-white font-black text-xs flex items-center justify-center border border-[#3D352E] shadow-2xs">
+            <span className="w-7 h-7 rounded-lg bg-[#DE5D53] text-white font-black text-xs flex items-center justify-center border border-[#3D352E] shadow-2xs">
               {selectedCount}
             </span>
             <div>
               <div className="text-xs font-black text-[#3D352E]">
-                Đã tích chọn <span className="text-[#DE5D53] font-black">{selectedCount}</span> / {items.length} {subTab === 'topics' ? 'chủ đề' : subTab === 'thpt' ? 'đề thi' : 'bài đọc'}
+                Đã chọn <span className="text-[#DE5D53] font-black">{selectedCount}</span> / {items.length} {subTab === 'topics' ? 'chủ đề' : subTab === 'thpt' ? 'đề thi' : 'bài đọc'}
               </div>
               <div className="text-[11px] font-semibold text-[#86756C]">
-                Khóa hoặc mở gói PRO cho toàn bộ mục đã chọn
+                Khóa hoặc mở Free cho toàn bộ mục đã chọn
               </div>
             </div>
           </div>
@@ -540,31 +549,34 @@ export function AdminContentGatingTab() {
           <div className="flex items-center gap-2">
             {/* Batch Lock PRO button */}
             <button
+              type="button"
               onClick={() => handleBatchSetPro(true)}
               disabled={isBatchUpdating}
-              className="px-4 py-2 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 cursor-pointer"
+              className="h-[34px] px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 cursor-pointer"
             >
               <span>🔒</span>
-              <span>Khóa PRO hàng loạt ({selectedCount})</span>
+              <span>Khóa PRO ({selectedCount})</span>
             </button>
 
             {/* Batch Open Free button */}
             <button
+              type="button"
               onClick={() => handleBatchSetPro(false)}
               disabled={isBatchUpdating}
-              className="px-4 py-2 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 cursor-pointer"
+              className="h-[34px] px-3.5 rounded-xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 cursor-pointer"
             >
               <span>🌐</span>
-              <span>Mở Miễn Phí ({selectedCount})</span>
+              <span>Mở Free ({selectedCount})</span>
             </button>
 
             {/* Cancel Selection button */}
             <button
+              type="button"
               onClick={handleClearSelection}
               disabled={isBatchUpdating}
-              className="px-3 py-2 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] text-xs font-black transition-all cursor-pointer"
+              className="h-[34px] px-3 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] text-xs font-black transition-all cursor-pointer"
             >
-              Hủy chọn
+              Hủy
             </button>
           </div>
         </div>
@@ -573,7 +585,7 @@ export function AdminContentGatingTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* CONTENT LIST TABLE WITH CHECKBOXES                            */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
+      <div className="bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] overflow-hidden">
         {loading ? (
           <div className="py-16 text-center text-[#86756C] flex flex-col items-center gap-2">
             <span className="material-symbols-outlined text-[#DE5D53] text-[28px] animate-spin">
@@ -582,12 +594,12 @@ export function AdminContentGatingTab() {
             <span className="text-xs font-bold">Đang tải danh sách học liệu...</span>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[640px]">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
+              <thead className="sticky top-0 z-10 bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
                 <tr>
                   {/* Master Checkbox */}
-                  <th className="py-3 px-4 w-12 text-center">
+                  <th className="py-2.5 px-3.5 w-12 text-center">
                     <input
                       ref={selectAllRef}
                       type="checkbox"
@@ -596,10 +608,10 @@ export function AdminContentGatingTab() {
                       className="w-4 h-4 rounded text-[#557A46] focus:ring-[#557A46] cursor-pointer"
                     />
                   </th>
-                  <th className="py-3 px-4">TÊN HỌC LIỆU</th>
-                  <th className="py-3 px-4">QUY MÔ</th>
-                  <th className="py-3 px-4">TRẠNG THÁI HIỆN TẠI</th>
-                  <th className="py-3 px-4 text-right">CHUYỂN ĐỔI (KHÓA PRO)</th>
+                  <th className="py-2.5 px-3.5">TÊN HỌC LIỆU</th>
+                  <th className="py-2.5 px-3.5">QUY MÔ</th>
+                  <th className="py-2.5 px-3.5">TRẠNG THÁI HIỆN TẠI</th>
+                  <th className="py-2.5 px-3.5 text-right">CHUYỂN ĐỔI (KHÓA PRO)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DECDBB]">
@@ -626,7 +638,7 @@ export function AdminContentGatingTab() {
                         }`}
                       >
                         {/* Row Checkbox */}
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="py-2.5 px-3.5 text-center">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -636,9 +648,9 @@ export function AdminContentGatingTab() {
                         </td>
 
                         {/* Title & Icon */}
-                        <td className="py-3.5 px-4">
-                          <div className="flex items-center gap-2.5">
-                            <span className="text-lg shrink-0">{icon}</span>
+                        <td className="py-2.5 px-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base shrink-0">{icon}</span>
                             <span
                               className="font-black text-[#3D352E] max-w-[340px] truncate cursor-pointer hover:text-[#DE5D53] transition-colors"
                               title={title}
@@ -650,7 +662,7 @@ export function AdminContentGatingTab() {
                         </td>
 
                         {/* Scale / Word count / Questions */}
-                        <td className="py-3.5 px-4 text-[#6E5D53] font-bold">
+                        <td className="py-2.5 px-3.5 text-[#6E5D53] font-bold">
                           {subTab === 'topics' && `${item.word_count || 0} từ vựng`}
                           {subTab === 'thpt' &&
                             `${item.total_questions || 40} câu hỏi (${item.year || '2026'})`}
@@ -658,7 +670,7 @@ export function AdminContentGatingTab() {
                         </td>
 
                         {/* Current Status Badge */}
-                        <td className="py-3.5 px-4">
+                        <td className="py-2.5 px-3.5">
                           {isPro ? (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53]">
                               <span>🔒</span>

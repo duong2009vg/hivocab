@@ -346,9 +346,9 @@ export function AdminReportsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SEARCH TOOLBAR & QUICK ACTIONS                                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-md">
-          <span className="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-[#6E5D53]">
+          <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#6E5D53]">
             search
           </span>
           <input
@@ -356,19 +356,20 @@ export function AdminReportsTab() {
             placeholder="Tìm theo nội dung lỗi, URL, email học viên, component..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
+            className="w-full h-[38px] pl-9 pr-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
           />
         </div>
 
-        <div className="flex items-center gap-3 justify-between sm:justify-end text-xs">
+        <div className="flex items-center gap-2.5 justify-between sm:justify-end text-xs">
           <span className="text-[#6E5D53] font-bold">
             Hiển thị <strong className="text-[#3D352E] font-black font-mono">{filteredItems.length}</strong> / {currentList.length} bản ghi
           </span>
 
           <button
+            type="button"
             onClick={fetchAllData}
             disabled={loading}
-            className="p-2.5 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[#3D352E] transition-all flex items-center justify-center cursor-pointer"
+            className="h-[38px] px-3 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-[#3D352E] transition-all flex items-center justify-center cursor-pointer"
             title="Làm mới dữ liệu"
           >
             <span className={`material-symbols-outlined text-[16px] ${loading ? 'animate-spin' : ''}`}>
@@ -382,9 +383,9 @@ export function AdminReportsTab() {
       {/* STICKY BATCH RESOLVE BAR (HIỂN THỊ KHI TÍCH CHỌN)            */}
       {/* ───────────────────────────────────────────────────────────── */}
       {selectedCount > 0 && (
-        <div className="sticky top-4 z-30 p-4 rounded-3xl bg-[#FFF9EE] text-[#3D352E] shadow-[4px_5px_0px_#3D352E] border-2 border-[#3D352E] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-xl bg-[#557A46] text-white border-2 border-[#3D352E] font-black text-xs flex items-center justify-center shadow-[1.5px_2px_0px_#3D352E]">
+        <div className="sticky top-4 z-30 p-3.5 rounded-2xl bg-[#FFF9EE] text-[#3D352E] shadow-[3px_4px_0px_#3D352E] border-2 border-[#3D352E] flex flex-wrap items-center justify-between gap-3 animate-fade-in">
+          <div className="flex items-center gap-2.5">
+            <span className="w-7 h-7 rounded-lg bg-[#557A46] text-white border border-[#3D352E] font-black text-xs flex items-center justify-center shadow-[1px_1.5px_0px_#3D352E]">
               {selectedCount}
             </span>
             <div>
@@ -399,18 +400,20 @@ export function AdminReportsTab() {
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handleBatchResolveAndDelete}
               disabled={isDeleting}
-              className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
+              className="h-[36px] px-4 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">check_circle</span>
               <span>Đã giải quyết & Xóa ({selectedCount}) 🎉</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setSelectedIds(new Set())}
               disabled={isDeleting}
-              className="px-4 py-2.5 rounded-2xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-[#3D352E] text-xs font-bold transition-all cursor-pointer"
+              className="h-[36px] px-3.5 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-[#3D352E] text-xs font-bold transition-all cursor-pointer"
             >
               Hủy chọn
             </button>

@@ -502,36 +502,37 @@ export function AdminWordsTab() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
+    <div className="space-y-4 animate-fade-in font-nunito text-[#3D352E]">
       {/* ───────────────────────────────────────────────────────────── */}
       {/* HIERARCHY SELECTOR PANEL (DANH MỤC -> CHỦ ĐỀ -> BÀI HỌC)     */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-5">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] space-y-4">
         {/* Step 1: Category Selector Pills */}
         <div>
-          <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">
-            <label className="block text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+          <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+            <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53]">
               1. Thư mục / Danh mục học tập (Category)
             </label>
             {selectedCategory && selectedCategory !== 'all' && (
               <button
                 type="button"
                 onClick={() => handleDeleteCategory(selectedCategory)}
-                className="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[11px] font-black flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
+                className="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[10px] font-bold flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
                 title={`Xóa vĩnh viễn thư mục "${selectedCategory}" và tất cả dữ liệu bên trong`}
               >
-                <span className="material-symbols-outlined text-[14px]">delete</span>
+                <span className="material-symbols-outlined text-[13px]">delete</span>
                 <span>Xóa thư mục "{selectedCategory}"</span>
               </button>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
+              type="button"
               onClick={() => setSelectedCategory('all')}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-black font-quicksand transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-xl text-xs font-black font-quicksand transition-all cursor-pointer ${
                 selectedCategory === 'all'
-                  ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
-                  : 'bg-[#FAF5EB] text-[#6E5D53] border-2 border-[#3D352E] hover:bg-[#F2ECE0]'
+                  ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                  : 'bg-[#FAF5EB] text-[#6E5D53] border border-[#3D352E]/30 hover:bg-[#F2ECE0]'
               }`}
             >
               Tất cả danh mục
@@ -539,11 +540,12 @@ export function AdminWordsTab() {
             {categories.map((cat) => (
               <button
                 key={cat}
+                type="button"
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-black font-quicksand transition-all cursor-pointer ${
+                className={`px-3 py-1 rounded-xl text-xs font-black font-quicksand transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
-                    : 'bg-[#FAF5EB] text-[#6E5D53] border-2 border-[#3D352E] hover:bg-[#F2ECE0]'
+                    ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                    : 'bg-[#FAF5EB] text-[#6E5D53] border border-[#3D352E]/30 hover:bg-[#F2ECE0]'
                 }`}
               >
                 {cat}
@@ -553,18 +555,18 @@ export function AdminWordsTab() {
         </div>
 
         {/* Step 2: Topic Selector & Sub-units */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t-2 border-[#FAF5EB]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3 border-t-2 border-[#FAF5EB]">
           {/* Topic Dropdown */}
           <div>
-            <div className="flex items-center justify-between gap-1 mb-1.5">
-              <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+            <div className="flex items-center justify-between gap-1 mb-1">
+              <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53]">
                 2. Chủ đề (Topic)
               </label>
               {currentTopic && (
                 <button
                   type="button"
                   onClick={handleDeleteCurrentTopic}
-                  className="text-rose-600 hover:text-rose-700 text-[11px] font-black inline-flex items-center gap-0.5 cursor-pointer"
+                  className="text-rose-600 hover:text-rose-700 text-[10px] font-bold inline-flex items-center gap-0.5 cursor-pointer"
                   title={`Xóa chủ đề "${currentTopic.name}"`}
                 >
                   <span className="material-symbols-outlined text-[13px]">delete</span>
@@ -575,7 +577,7 @@ export function AdminWordsTab() {
             <select
               value={selectedTopicId}
               onChange={(e) => setSelectedTopicId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
+              className="w-full h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
             >
               {topics.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -590,13 +592,13 @@ export function AdminWordsTab() {
             <>
               {/* Cambridge Test Selector */}
               <div>
-                <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+                <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1">
                   3. Bài Test (Cambridge)
                 </label>
                 <select
                   value={selectedTestId}
                   onChange={(e) => setSelectedTestId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
+                  className="w-full h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
                 >
                   {camTests.map((t) => (
                     <option key={t.id} value={t.id}>
@@ -608,13 +610,13 @@ export function AdminWordsTab() {
 
               {/* Cambridge Passage Selector */}
               <div>
-                <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+                <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1">
                   4. Bài đọc (Passage)
                 </label>
                 <select
                   value={selectedPassageId}
                   onChange={(e) => setSelectedPassageId(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
+                  className="w-full h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
                 >
                   {camPassages.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -627,13 +629,13 @@ export function AdminWordsTab() {
           ) : (
             /* Non-CAM: Standard Lesson Selector */
             <div className="sm:col-span-1 lg:col-span-2">
-              <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+              <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1">
                 3. Bài học (Lesson)
               </label>
               <select
                 value={selectedLessonIndex}
                 onChange={(e) => setSelectedLessonIndex(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
+                className="w-full h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E]"
               >
                 <option value="all">
                   Tất cả bài học ({totalTopicWords} từ trong chủ đề)
@@ -652,10 +654,10 @@ export function AdminWordsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* TOOLBAR: SEARCH & ADD NEW WORD BUTTON                        */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
           <div className="relative w-full">
-            <span className="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-[#6E5D53]">
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#6E5D53]">
               search
             </span>
             <input
@@ -663,7 +665,7 @@ export function AdminWordsTab() {
               placeholder="Tìm từ vựng, phiên âm, nghĩa tiếng Việt..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
+              className="w-full h-[38px] pl-9 pr-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
             />
           </div>
         </div>
@@ -674,9 +676,10 @@ export function AdminWordsTab() {
           </span>
 
           <button
+            type="button"
             onClick={handleOpenAdd}
             disabled={!selectedTopicId}
-            className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
+            className="h-[38px] px-4 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[16px]">add</span>
             <span>Thêm từ mới ✨</span>
@@ -687,7 +690,7 @@ export function AdminWordsTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* WORDS LIST TABLE                                             */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
+      <div className="bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] overflow-hidden max-h-[640px] flex flex-col">
         {loading ? (
           <div className="py-16 text-center text-[#6E5D53] flex flex-col items-center gap-2">
             <span className="material-symbols-outlined text-[#557A46] text-[32px] animate-spin">
@@ -702,46 +705,48 @@ export function AdminWordsTab() {
               Chưa có từ vựng nào trong bài học này.
             </p>
             <button
+              type="button"
               onClick={handleOpenAdd}
-              className="mt-3 px-5 py-2.5 rounded-2xl bg-[#557A46] text-white text-xs font-black inline-flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
+              className="mt-2 h-[36px] px-4 rounded-xl bg-[#557A46] text-white text-xs font-black inline-flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-[16px]">add</span>
               <span>Thêm từ đầu tiên 🚀</span>
             </button>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto overflow-y-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black font-quicksand uppercase tracking-wider text-[11px]">
+              <thead className="sticky top-0 z-10 bg-[#FAF5EB] shadow-xs border-b-2 border-[#3D352E] text-[#6E5D53] font-black font-quicksand uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="py-3 px-4 w-12 text-center">#</th>
-                  <th className="py-3 px-4">TỪ VỰNG & PHÁT ÂM</th>
-                  <th className="py-3 px-4">TỪ LOẠI</th>
-                  <th className="py-3 px-4">NGHĨA TIẾNG VIỆT</th>
-                  <th className="py-3 px-4">CÂU VÍ DỤ MINH HỌA</th>
-                  <th className="py-3 px-4 text-right">THAO TÁC</th>
+                  <th className="py-2.5 px-3.5 w-12 text-center">#</th>
+                  <th className="py-2.5 px-3.5">TỪ VỰNG & PHÁT ÂM</th>
+                  <th className="py-2.5 px-3.5">TỪ LOẠI</th>
+                  <th className="py-2.5 px-3.5">NGHĨA TIẾNG VIỆT</th>
+                  <th className="py-2.5 px-3.5">CÂU VÍ DỤ MINH HỌA</th>
+                  <th className="py-2.5 px-3.5 text-right">THAO TÁC</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EADDC7]">
                 {filteredWords.map((w, idx) => (
                   <tr key={w.id} className="hover:bg-[#FFF9EE] transition-colors">
-                    <td className="py-3.5 px-4 text-center font-mono font-bold text-[#6E5D53]">
+                    <td className="py-2.5 px-3.5 text-center font-mono font-bold text-[#6E5D53]">
                       {idx + 1}
                     </td>
 
-                    <td className="py-3.5 px-4">
-                      <div className="flex items-center gap-2.5">
+                    <td className="py-2.5 px-3.5">
+                      <div className="flex items-center gap-2">
                         <button
+                          type="button"
                           onClick={() => playWordAudio(w.word)}
-                          className="w-8 h-8 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-[#557A46] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center justify-center shrink-0 cursor-pointer active:translate-y-0.5 transition-all"
+                          className="w-7 h-7 rounded-lg bg-[#FAF5EB] hover:bg-[#F2ECE0] border border-[#3D352E] text-[#557A46] shadow-[1px_1px_0px_#3D352E] flex items-center justify-center shrink-0 cursor-pointer active:translate-y-0.5 transition-all"
                           title="Nghe phát âm chuẩn"
                         >
-                          <span className="material-symbols-outlined text-[16px]">volume_up</span>
+                          <span className="material-symbols-outlined text-[15px]">volume_up</span>
                         </button>
                         <div>
-                          <div className="font-black text-sm text-[#3D352E] font-quicksand">{w.word}</div>
+                          <div className="font-bold text-xs text-[#3D352E] font-quicksand">{w.word}</div>
                           {w.phonetic && (
-                            <div className="text-[11px] font-mono font-bold text-[#6E5D53]">
+                            <div className="text-[10px] font-mono font-bold text-[#6E5D53]">
                               {w.phonetic}
                             </div>
                           )}
@@ -749,9 +754,9 @@ export function AdminWordsTab() {
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3.5">
                       {w.pos ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FAF5EB] text-[#3D352E] border border-[#3D352E] uppercase">
+                        <span className="px-2 py-0.5 rounded-md text-[9px] font-black bg-[#FAF5EB] text-[#3D352E] border border-[#3D352E]/40 uppercase">
                           {w.pos}
                         </span>
                       ) : (
@@ -759,11 +764,11 @@ export function AdminWordsTab() {
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-2.5 px-3.5">
                       <span className="font-bold text-[#3D352E] text-xs">{w.meaning}</span>
                     </td>
 
-                    <td className="py-3.5 px-4 max-w-xs">
+                    <td className="py-2.5 px-3.5 max-w-xs">
                       {w.example_sentence ? (
                         <p className="text-[#6E5D53] italic text-[11px] line-clamp-2">
                           "{w.example_sentence}"
@@ -773,7 +778,7 @@ export function AdminWordsTab() {
                       )}
                     </td>
 
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-2.5 px-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleOpenEdit(w)}

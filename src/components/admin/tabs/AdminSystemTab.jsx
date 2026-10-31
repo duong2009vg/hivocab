@@ -66,23 +66,23 @@ export function AdminSystemTab() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-5xl font-nunito text-[#3D352E]">
+    <div className="space-y-5 animate-fade-in max-w-5xl font-nunito text-[#3D352E]">
       {/* Infrastructure Health Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Supabase Status */}
-        <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53]">
                 Cơ sở Dữ liệu
               </span>
-              <div className="w-8 h-8 rounded-xl bg-[#EAF3E7] border-2 border-[#3D352E] flex items-center justify-center text-[#557A46]">
+              <div className="w-8 h-8 rounded-xl bg-[#EAF3E7] border border-[#3D352E]/30 flex items-center justify-center text-[#557A46]">
                 <span className="material-symbols-outlined text-[18px]">database</span>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span
-                className={`w-3 h-3 rounded-full border-2 border-[#3D352E] ${
+                className={`w-2.5 h-2.5 rounded-full ${
                   dbStatus === 'connected' ? 'bg-[#557A46] animate-pulse' : 'bg-[#DE5D53]'
                 }`}
               ></span>
@@ -90,15 +90,16 @@ export function AdminSystemTab() {
                 {dbStatus === 'connected' ? 'Supabase Trực tuyến ⚡' : 'Mất kết nối ⚠️'}
               </span>
             </div>
-            <p className="text-xs text-[#6E5D53] mt-1.5 font-mono font-bold">
+            <p className="text-xs text-[#6E5D53] mt-1 font-mono font-bold">
               {latency ? `Độ trễ API: ${latency}ms` : 'Đang kiểm tra kết nối...'}
             </p>
           </div>
 
           <button
+            type="button"
             onClick={checkPing}
             disabled={isPinging}
-            className="mt-5 w-full py-2.5 px-3 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#3D352E] flex items-center justify-center gap-1.5 active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
+            className="mt-4 w-full h-[36px] px-3 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] flex items-center justify-center gap-1.5 active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
           >
             <span className={`material-symbols-outlined text-[16px] ${isPinging ? 'animate-spin' : ''}`}>
               refresh
@@ -108,27 +109,28 @@ export function AdminSystemTab() {
         </div>
 
         {/* Local Storage Cache */}
-        <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53]">
                 Bộ nhớ Trình duyệt
               </span>
-              <div className="w-8 h-8 rounded-xl bg-[#FFF9EE] border-2 border-[#3D352E] flex items-center justify-center text-[#F4B41A]">
+              <div className="w-8 h-8 rounded-xl bg-[#FFF9EE] border border-[#3D352E]/30 flex items-center justify-center text-[#F4B41A]">
                 <span className="material-symbols-outlined text-[18px]">memory</span>
               </div>
             </div>
             <p className="text-base font-black font-quicksand text-[#3D352E]">
               {storageUsage.itemsCount} Mục lưu trữ
             </p>
-            <p className="text-xs text-[#6E5D53] mt-1.5 font-mono font-bold">
+            <p className="text-xs text-[#6E5D53] mt-1 font-mono font-bold">
               ~{storageUsage.approxSizeKb} KB đã ghi bộ nhớ
             </p>
           </div>
 
           <button
+            type="button"
             onClick={handleClearClientCache}
-            className="mt-5 w-full py-2.5 px-3 rounded-2xl bg-[#FFF0E6] hover:bg-[#FFE3D4] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-bold text-[#DE5D53] flex items-center justify-center gap-1.5 active:translate-y-0.5 transition-all cursor-pointer"
+            className="mt-4 w-full h-[36px] px-3 rounded-xl bg-[#FFF0E6] hover:bg-[#FFE3D4] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#DE5D53] flex items-center justify-center gap-1.5 active:translate-y-0.5 transition-all cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
             <span>Dọn dẹp Cache 🧹</span>
@@ -136,30 +138,30 @@ export function AdminSystemTab() {
         </div>
 
         {/* Environment */}
-        <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-black font-quicksand uppercase tracking-wider text-[#6E5D53]">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53]">
                 Môi trường Máy chủ
               </span>
-              <div className="w-8 h-8 rounded-xl bg-[#F0F5FF] border-2 border-[#3D352E] flex items-center justify-center text-[#4A72B2]">
+              <div className="w-8 h-8 rounded-xl bg-[#F0F5FF] border border-[#3D352E]/30 flex items-center justify-center text-[#4A72B2]">
                 <span className="material-symbols-outlined text-[18px]">cloud</span>
               </div>
             </div>
             <p className="text-base font-black font-quicksand text-[#3D352E]">Cloudflare Pages</p>
-            <p className="text-xs text-[#6E5D53] mt-1.5 font-bold">
-      Vite 6 + React 19 SPA
+            <p className="text-xs text-[#6E5D53] mt-1 font-bold">
+              Vite 6 + React 19 SPA
             </p>
           </div>
 
-          <div className="mt-5 py-2.5 px-3 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] text-center text-xs font-mono font-black text-[#557A46]">
+          <div className="mt-4 h-[36px] px-3 rounded-xl bg-[#FAF5EB] border-2 border-[#3D352E] flex items-center justify-center text-xs font-mono font-black text-[#557A46]">
             🌱 v2.4-production
           </div>
         </div>
       </div>
 
       {/* Architecture System Information Card */}
-      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-4">
+      <div className="p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] space-y-3.5">
         <div className="flex items-center gap-2 pb-2 border-b-2 border-[#EADDC7]">
           <span className="text-xl">🛠️</span>
           <h4 className="text-sm font-black font-quicksand uppercase tracking-wider text-[#3D352E]">

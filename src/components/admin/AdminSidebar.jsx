@@ -143,15 +143,15 @@ export function AdminSidebar({
                             onSelectTab(item.id);
                             onCloseMobile();
                           }}
-                          className={`w-full flex h-10 items-center justify-between px-3 rounded-2xl text-[13px] transition-all text-left cursor-pointer ${
+                          className={`w-full flex h-[38px] items-center justify-between px-2.5 rounded-xl text-[12.5px] transition-all text-left cursor-pointer ${
                             isActive
-                              ? 'bg-[#557A46] text-white font-black border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E]'
-                              : 'text-[#6E5D53] hover:text-[#3D352E] hover:bg-white/80 font-bold border border-transparent'
+                              ? 'bg-[#557A46] text-white font-black border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]'
+                              : 'text-[#6E5D53] hover:text-[#3D352E] hover:bg-white/90 font-bold border border-transparent'
                           }`}
                         >
-                          <div className="flex items-center gap-2.5 truncate flex-1 min-w-0">
+                          <div className="flex items-center gap-2 truncate flex-1 min-w-0">
                             <span
-                              className={`material-symbols-outlined text-[18px] shrink-0 ${
+                              className={`material-symbols-outlined text-[17px] shrink-0 ${
                                 isActive ? 'text-white' : 'text-[#86756C]'
                               }`}
                             >
@@ -162,18 +162,14 @@ export function AdminSidebar({
 
                           {badge !== undefined && badge !== null && (
                             <span
-                              className={`ml-2 text-[10px] tabular-nums font-black shrink-0 px-2 py-0.5 rounded-full ${
+                              className={`ml-1.5 text-[10px] tabular-nums font-black shrink-0 px-2 py-0.5 rounded-full ${
                                 isActive
-                                  ? 'bg-white/20 text-white border border-white/40'
-                                  : 'bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53] shadow-2xs'
+                                  ? 'bg-white/25 text-white border border-white/50'
+                                  : 'bg-[#FEEFEA] text-[#DE5D53] border border-[#DE5D53]'
                               }`}
                             >
                               {badge}
                             </span>
-                          )}
-
-                          {isActive && (
-                            <span className="ml-1.5 w-2 h-2 rounded-full bg-[#F4B41A] shrink-0"></span>
                           )}
                         </button>
                       );

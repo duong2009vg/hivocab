@@ -155,64 +155,64 @@ export function AdminSubscriptionsTab({
   };
 
   return (
-    <div className="space-y-6 animate-fade-in relative">
+    <div className="space-y-5 animate-fade-in relative">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <div
           onClick={() => setTierFilter('PRO')}
-          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+          className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'PRO' ? 'bg-[#EAF3E7] ring-2 ring-[#557A46]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Hội viên PRO 👑</span>
-            <span className="material-symbols-outlined text-[18px] text-[#557A46]">verified</span>
+            <span className="text-[10px] font-extrabold text-[#86756C] uppercase tracking-wider">Hội viên PRO 👑</span>
+            <span className="material-symbols-outlined text-[17px] text-[#557A46]">verified</span>
           </div>
           <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.activePro}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('LIFETIME')}
-          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+          className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'LIFETIME' ? 'bg-[#F3E8FF] ring-2 ring-[#7E22CE]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Trọn đời ✨</span>
-            <span className="material-symbols-outlined text-[18px] text-[#7E22CE]">all_inclusive</span>
+            <span className="text-[10px] font-extrabold text-[#86756C] uppercase tracking-wider">Trọn đời ✨</span>
+            <span className="material-symbols-outlined text-[17px] text-[#7E22CE]">all_inclusive</span>
           </div>
           <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.lifetime}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('EXPIRING')}
-          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+          className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'EXPIRING' ? 'bg-[#FEEFEA] ring-2 ring-[#DE5D53]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Sắp hết hạn (&le;7d) ⏳</span>
-            <span className="material-symbols-outlined text-[18px] text-[#DE5D53]">alarm</span>
+            <span className="text-[10px] font-extrabold text-[#86756C] uppercase tracking-wider">Sắp hết hạn (&le;7d) ⏳</span>
+            <span className="material-symbols-outlined text-[17px] text-[#DE5D53]">alarm</span>
           </div>
           <p className="font-quicksand font-black text-xl sm:text-2xl text-[#DE5D53] tabular-nums">{stats.expiring}</p>
         </div>
 
         <div
           onClick={() => setTierFilter('FREE')}
-          className={`p-4 rounded-3xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[3px_3.5px_0px_#3D352E] ${
+          className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'FREE' ? 'bg-[#FAF5EB] ring-2 ring-[#3D352E]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
         >
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[10px] font-black text-[#86756C] uppercase tracking-wider">Miễn phí 🌱</span>
-            <span className="material-symbols-outlined text-[18px] text-[#86756C]">person</span>
+            <span className="text-[10px] font-extrabold text-[#86756C] uppercase tracking-wider">Miễn phí 🌱</span>
+            <span className="material-symbols-outlined text-[17px] text-[#86756C]">person</span>
           </div>
           <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.free}</p>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
           {/* Search Box */}
           <div className="relative flex-1 max-w-md">
@@ -222,7 +222,7 @@ export function AdminSubscriptionsTab({
               placeholder="Tìm theo email, tên, id học viên..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+              className="w-full h-[38px] pl-9 pr-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
           </div>
 
@@ -230,7 +230,7 @@ export function AdminSubscriptionsTab({
           <select
             value={tierFilter}
             onChange={(e) => setTierFilter(e.target.value)}
-            className="px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+            className="h-[38px] px-3.5 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46] cursor-pointer"
           >
             <option value="ALL">Tất cả hội viên</option>
             <option value="PRO">Đang dùng PRO</option>
@@ -244,8 +244,9 @@ export function AdminSubscriptionsTab({
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
           {selectedUserIds.size > 0 && (
             <button
+              type="button"
               onClick={() => setIsBulkModalOpen(true)}
-              className="px-4 py-2 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
+              className="h-[38px] px-4 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
               <span>🎁</span>
               <span>Tặng PRO {selectedUserIds.size} người</span>
@@ -256,7 +257,7 @@ export function AdminSubscriptionsTab({
 
       {/* Floating Bulk Action Bar */}
       {selectedUserIds.size > 0 && (
-        <div className="sticky top-20 z-20 p-3 rounded-2xl bg-[#FFF9EE] border-2 border-[#3D352E] shadow-[4px_5px_0px_#3D352E] flex items-center justify-between gap-4 animate-fade-in">
+        <div className="sticky top-20 z-20 p-3 rounded-2xl bg-[#FFF9EE] border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] flex items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-center gap-2 text-xs font-black text-[#3D352E]">
             <span className="material-symbols-outlined text-[#DE5D53] text-[18px]">check_box</span>
             <span>Đã chọn {selectedUserIds.size} học viên</span>
@@ -264,12 +265,14 @@ export function AdminSubscriptionsTab({
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setSelectedUserIds(new Set())}
               className="px-3 py-1.5 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#3D352E] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
             >
               Bỏ chọn
             </button>
             <button
+              type="button"
               onClick={() => setIsBulkModalOpen(true)}
               className="px-4 py-1.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white text-xs font-black border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             >
@@ -281,12 +284,12 @@ export function AdminSubscriptionsTab({
       )}
 
       {/* Subscribers Table */}
-      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] overflow-hidden">
+        <div className="overflow-x-auto max-h-[640px]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
+            <thead className="sticky top-0 z-10 bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="py-3 px-4 w-10 text-center">
+                <th className="py-2.5 px-3.5 w-10 text-center">
                   <input
                     type="checkbox"
                     checked={filteredProfiles.length > 0 && selectedUserIds.size === filteredProfiles.length}
@@ -294,11 +297,11 @@ export function AdminSubscriptionsTab({
                     className="w-4 h-4 rounded text-[#557A46] focus:ring-[#557A46]"
                   />
                 </th>
-                <th className="py-3 px-4">HỌC VIÊN</th>
-                <th className="py-3 px-4">GÓI HIỆN TẠI</th>
-                <th className="py-3 px-4">TRẠNG THÁI</th>
-                <th className="py-3 px-4">HẠN DÙNG</th>
-                <th className="py-3 px-4 text-right">THAO TÁC</th>
+                <th className="py-2.5 px-3.5">HỌC VIÊN</th>
+                <th className="py-2.5 px-3.5">GÓI HIỆN TẠI</th>
+                <th className="py-2.5 px-3.5">TRẠNG THÁI</th>
+                <th className="py-2.5 px-3.5">HẠN DÙNG</th>
+                <th className="py-2.5 px-3.5 text-right">THAO TÁC</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DECDBB]">

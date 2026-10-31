@@ -277,10 +277,10 @@ export function AdminThptTab() {
   return (
     <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
       {/* Top Header & Search Bar */}
-      <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex flex-1 w-full sm:w-auto items-center gap-3">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
           <div className="relative flex-1 max-w-sm">
-            <span className="material-symbols-outlined absolute left-3.5 top-2.5 text-[18px] text-[#6E5D53]">
+            <span className="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-[#86756C]">
               search
             </span>
             <input
@@ -288,50 +288,54 @@ export function AdminThptTab() {
               placeholder="Tìm theo tên đề, năm thi, mã đề..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/60"
+              className="w-full h-[38px] pl-9 pr-3 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/70"
             />
           </div>
 
           {/* PRO filter pills */}
-          <div className="flex items-center gap-1.5 p-1 rounded-full bg-[#FAF5EB] border-2 border-[#3D352E] text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-2 border-[#3D352E] text-xs h-[38px]">
             <button
+              type="button"
               onClick={() => setProFilter('all')}
-              className={`px-3 py-1.5 rounded-full font-black font-quicksand transition-all cursor-pointer ${
+              className={`px-3 py-1 rounded-lg font-black font-quicksand transition-all cursor-pointer text-xs ${
                 proFilter === 'all'
-                  ? 'bg-[#3D352E] text-white shadow-[1.5px_2px_0px_#3D352E]'
+                  ? 'bg-[#3D352E] text-white shadow-2xs'
                   : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
               Tất cả ({exams.length})
             </button>
             <button
+              type="button"
               onClick={() => setProFilter('pro')}
-              className={`px-3 py-1.5 rounded-full font-black font-quicksand transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-3 py-1 rounded-lg font-black font-quicksand transition-all flex items-center gap-1 cursor-pointer text-xs ${
                 proFilter === 'pro'
-                  ? 'bg-[#DE5D53] text-white shadow-[1.5px_2px_0px_#3D352E]'
+                  ? 'bg-[#DE5D53] text-white shadow-2xs'
                   : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
-              <span className="material-symbols-outlined text-[14px]">lock</span>
+              <span className="material-symbols-outlined text-[13px]">lock</span>
               <span>PRO</span>
             </button>
             <button
+              type="button"
               onClick={() => setProFilter('free')}
-              className={`px-3 py-1.5 rounded-full font-black font-quicksand transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-3 py-1 rounded-lg font-black font-quicksand transition-all flex items-center gap-1 cursor-pointer text-xs ${
                 proFilter === 'free'
-                  ? 'bg-[#557A46] text-white shadow-[1.5px_2px_0px_#3D352E]'
+                  ? 'bg-[#557A46] text-white shadow-2xs'
                   : 'text-[#6E5D53] hover:text-[#3D352E]'
               }`}
             >
-              <span className="material-symbols-outlined text-[14px]">public</span>
+              <span className="material-symbols-outlined text-[13px]">public</span>
               <span>Free</span>
             </button>
           </div>
         </div>
 
         <button
+          type="button"
           onClick={() => setIsCreateOpen(true)}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center justify-center gap-1.5 border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
+          className="w-full sm:w-auto h-[38px] px-4 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs flex items-center justify-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
           <span>Thêm Đề Thi Mới 📝</span>

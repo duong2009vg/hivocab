@@ -132,8 +132,8 @@ export function AdminBulkImportTab() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in font-nunito text-[#3D352E]">
-      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-4">
+    <div className="space-y-4 animate-fade-in font-nunito text-[#3D352E]">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] space-y-3.5">
         <div>
           <h3 className="font-black text-lg font-quicksand text-[#3D352E] flex items-center gap-2">
             <span>📥</span>
@@ -146,13 +146,13 @@ export function AdminBulkImportTab() {
 
         {/* Target Topic Selector */}
         <div className="max-w-md">
-          <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+          <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
             Chủ đề Đích (Target Topic)
           </label>
           <select
             value={selectedTopicId}
             onChange={(e) => setSelectedTopicId(e.target.value)}
-            className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
+            className="w-full h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46] focus:outline-none"
           >
             {topics.map((t) => (
               <option key={t.id} value={t.id}>
@@ -164,7 +164,7 @@ export function AdminBulkImportTab() {
 
         {/* Text Input Area */}
         <div>
-          <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
+          <label className="block text-[11px] font-extrabold font-quicksand uppercase tracking-wider text-[#6E5D53] mb-1.5">
             Dữ liệu Từ Vựng (Paste văn bản vào đây)
           </label>
           <textarea
@@ -172,20 +172,21 @@ export function AdminBulkImportTab() {
             placeholder={`abandon, /ə'bændən/, verb, từ bỏ/ruồng bỏ, He abandoned his car.\nbenefit, /'benifit/, noun, lợi ích, For the benefit of all.`}
             value={rawText}
             onChange={(e) => handleParse(e.target.value)}
-            className="w-full p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] font-mono text-xs text-[#3D352E] leading-relaxed focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/50"
+            className="w-full p-3.5 rounded-xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] font-mono text-xs text-[#3D352E] leading-relaxed focus:ring-2 focus:ring-[#557A46] focus:outline-none placeholder:text-[#8C7A6B]/50"
           />
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
           <div className="text-xs font-bold text-[#6E5D53]">
             Đã nhận diện: <strong className="font-black text-[#557A46] font-mono text-sm">{parsedWords.filter((w) => w.isValid).length}</strong> từ vựng hợp lệ
           </div>
 
           <button
+            type="button"
             onClick={handleExecuteImport}
             disabled={isImporting || parsedWords.filter((w) => w.isValid).length === 0}
-            className="w-full sm:w-auto px-6 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto h-[38px] px-5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
           >
             {isImporting ? (
               <>
@@ -204,8 +205,8 @@ export function AdminBulkImportTab() {
 
       {/* Preview Table */}
       {parsedWords.length > 0 && (
-        <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
-          <div className="px-5 py-3.5 border-b-2 border-[#3D352E] flex items-center justify-between bg-[#FAF5EB]">
+        <div className="bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] overflow-hidden">
+          <div className="px-4 py-3 border-b-2 border-[#3D352E] flex items-center justify-between bg-[#FAF5EB]">
             <h4 className="text-xs font-black font-quicksand uppercase tracking-wider text-[#3D352E]">
               Xem trước dữ liệu ({parsedWords.length} dòng đã phân tích)
             </h4>
@@ -213,29 +214,29 @@ export function AdminBulkImportTab() {
 
           <div className="overflow-x-auto max-h-80">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF5EB] sticky top-0 border-b-2 border-[#3D352E] text-[#6E5D53] font-black font-quicksand uppercase text-[11px]">
+              <thead className="bg-[#FAF5EB] sticky top-0 z-10 border-b-2 border-[#3D352E] text-[#6E5D53] font-black font-quicksand uppercase text-[11px] shadow-xs">
                 <tr>
-                  <th className="py-2.5 px-4">TỪ VỰNG</th>
-                  <th className="py-2.5 px-4">PHIÊN ÂM</th>
-                  <th className="py-2.5 px-4">TỪ LOẠI</th>
-                  <th className="py-2.5 px-4">NGHĨA</th>
-                  <th className="py-2.5 px-4">TRẠNG THÁI</th>
+                  <th className="py-2.5 px-3.5">TỪ VỰNG</th>
+                  <th className="py-2.5 px-3.5">PHIÊN ÂM</th>
+                  <th className="py-2.5 px-3.5">TỪ LOẠI</th>
+                  <th className="py-2.5 px-3.5">NGHĨA</th>
+                  <th className="py-2.5 px-3.5">TRẠNG THÁI</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#EADDC7]">
                 {parsedWords.map((row, idx) => (
                   <tr key={idx} className="hover:bg-[#FFF9EE] transition-colors">
-                    <td className="py-2.5 px-4 font-bold text-[#3D352E]">{row.word}</td>
-                    <td className="py-2.5 px-4 font-mono text-[#6E5D53]">{row.phonetic || '—'}</td>
-                    <td className="py-2.5 px-4 font-semibold text-[#6E5D53]">{row.pos || '—'}</td>
-                    <td className="py-2.5 px-4 font-semibold text-[#3D352E]">{row.meaning || '—'}</td>
-                    <td className="py-2.5 px-4">
+                    <td className="py-2.5 px-3.5 font-bold text-[#3D352E]">{row.word}</td>
+                    <td className="py-2.5 px-3.5 font-mono text-[#6E5D53]">{row.phonetic || '—'}</td>
+                    <td className="py-2.5 px-3.5 font-semibold text-[#6E5D53]">{row.pos || '—'}</td>
+                    <td className="py-2.5 px-3.5 font-semibold text-[#3D352E]">{row.meaning || '—'}</td>
+                    <td className="py-2.5 px-3.5">
                       {row.isValid ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#557A46]">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#557A46]/40">
                           ✓ Hợp lệ
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#FFF0E6] text-[#DE5D53] border border-[#DE5D53]">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#FFF0E6] text-[#DE5D53] border border-[#DE5D53]/40">
                           ✕ Thiếu nghĩa
                         </span>
                       )}

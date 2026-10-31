@@ -200,11 +200,11 @@ export function AdminFoldersTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* HEADER & METRIC SUMMARY STRIP                                */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-6 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] space-y-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black font-quicksand text-[#3D352E]">
+              <h2 className="text-lg font-black font-quicksand text-[#3D352E]">
                 Quản lý Thư mục & Khóa học Public 📁
               </h2>
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
@@ -218,16 +218,18 @@ export function AdminFoldersTab() {
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setIsCreateOpen(true)}
-              className="px-4 py-2 rounded-2xl bg-[#D96B43] hover:bg-[#C25832] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
+              className="h-[38px] px-3.5 rounded-xl bg-[#D96B43] hover:bg-[#C25832] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
               <span>➕</span>
               <span>Tạo thư mục mới</span>
             </button>
             <button
+              type="button"
               onClick={loadData}
               disabled={loading}
-              className="p-2 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] transition active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
+              className="h-[38px] w-[38px] rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center justify-center transition active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
               title="Tải lại danh sách"
             >
               <span className={`material-symbols-outlined text-[18px] ${loading ? 'animate-spin text-[#DE5D53]' : ''}`}>
@@ -239,33 +241,33 @@ export function AdminFoldersTab() {
 
         {/* Metric Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-3 border-t-2 border-[#FAF5EB]">
-          <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-2xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#E8DEC8] border border-[#3D352E] flex items-center justify-center text-xl shrink-0">
+          <div className="p-3 rounded-xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#E8DEC8] border border-[#3D352E] flex items-center justify-center text-lg shrink-0">
               📁
             </div>
             <div>
-              <div className="text-[11px] font-bold text-[#86756C] uppercase">Tổng Thư mục Public</div>
-              <div className="text-lg font-black font-quicksand text-[#3D352E]">{stats.totalFolders} thư mục</div>
+              <div className="text-[10px] font-bold text-[#86756C] uppercase">Tổng Thư mục Public</div>
+              <div className="text-base font-black font-quicksand text-[#3D352E]">{stats.totalFolders} thư mục</div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-2xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#EAF3E7] border border-[#8FB383] text-[#557A46] flex items-center justify-center text-xl shrink-0">
+          <div className="p-3 rounded-xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#EAF3E7] border border-[#8FB383] text-[#557A46] flex items-center justify-center text-lg shrink-0">
               📚
             </div>
             <div>
-              <div className="text-[11px] font-bold text-[#86756C] uppercase">Tổng Chủ đề con</div>
-              <div className="text-lg font-black font-quicksand text-[#3D352E]">{stats.totalTopics} chủ đề</div>
+              <div className="text-[10px] font-bold text-[#86756C] uppercase">Tổng Chủ đề con</div>
+              <div className="text-base font-black font-quicksand text-[#3D352E]">{stats.totalTopics} chủ đề</div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-2xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#FEEFEA] border border-[#DE5D53] text-[#DE5D53] flex items-center justify-center text-xl shrink-0">
+          <div className="p-3 rounded-xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#FEEFEA] border border-[#DE5D53] text-[#DE5D53] flex items-center justify-center text-lg shrink-0">
               🔤
             </div>
             <div>
-              <div className="text-[11px] font-bold text-[#86756C] uppercase">Tổng Từ vựng liên kết</div>
-              <div className="text-lg font-black font-quicksand text-[#3D352E]">{stats.totalWords.toLocaleString()} từ</div>
+              <div className="text-[10px] font-bold text-[#86756C] uppercase">Tổng Từ vựng liên kết</div>
+              <div className="text-base font-black font-quicksand text-[#3D352E]">{stats.totalWords.toLocaleString()} từ</div>
             </div>
           </div>
         </div>
@@ -274,7 +276,7 @@ export function AdminFoldersTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SEARCH BAR                                                    */}
       {/* ───────────────────────────────────────────────────────────── */}
-      <div className="p-4 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
+      <div className="p-3.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E]">
         <div className="relative">
           <span className="material-symbols-outlined text-[18px] text-[#86756C] absolute left-3 top-1/2 -translate-y-1/2">
             search
@@ -284,7 +286,7 @@ export function AdminFoldersTab() {
             placeholder="Tìm theo tên thư mục hoặc tên chủ đề con..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#557A46]"
+            className="w-full h-[38px] pl-9 pr-3 rounded-xl bg-[#FAF5EB] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:bg-white focus:ring-2 focus:ring-[#557A46]"
           />
         </div>
       </div>

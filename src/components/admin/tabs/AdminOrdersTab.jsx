@@ -145,30 +145,30 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
       {/* Top Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
-          <p className="text-[11px] font-black text-[#86756C] uppercase tracking-wider">Doanh thu Thực nhận 💰</p>
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E]">
+          <p className="text-[11px] font-extrabold text-[#86756C] uppercase tracking-wider">Doanh thu Thực nhận 💰</p>
           <p className="font-quicksand font-black text-2xl lg:text-3xl text-[#557A46] mt-1 tabular-nums">{formatCurrency(totalRevenue)}</p>
-          <p className="text-xs font-bold text-[#6E5D53] mt-1">{paidCount} đơn thanh toán thành công</p>
+          <p className="text-[11.5px] font-semibold text-[#6E5D53] mt-1 border-t border-[#3D352E]/10 pt-1.5">{paidCount} đơn thanh toán thành công</p>
         </div>
 
-        <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
-          <p className="text-[11px] font-black text-[#86756C] uppercase tracking-wider">Đơn Chờ Xử lý ⏳</p>
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E]">
+          <p className="text-[11px] font-extrabold text-[#86756C] uppercase tracking-wider">Đơn Chờ Xử lý ⏳</p>
           <p className="font-quicksand font-black text-2xl lg:text-3xl text-[#DE5D53] mt-1 tabular-nums">{pendingCount}</p>
-          <p className="text-xs font-bold text-[#6E5D53] mt-1">Khách đã mở mã QR PayOS</p>
+          <p className="text-[11.5px] font-semibold text-[#6E5D53] mt-1 border-t border-[#3D352E]/10 pt-1.5">Khách đã mở mã QR PayOS</p>
         </div>
 
-        <div className="p-5 rounded-3xl bg-white border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E]">
-          <p className="text-[11px] font-black text-[#86756C] uppercase tracking-wider">Tổng Đơn Hệ thống 📦</p>
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E]">
+          <p className="text-[11px] font-extrabold text-[#86756C] uppercase tracking-wider">Tổng Đơn Hệ thống 📦</p>
           <p className="font-quicksand font-black text-2xl lg:text-3xl text-[#3D352E] mt-1 tabular-nums">{orders.length}</p>
-          <p className="text-xs font-bold text-[#6E5D53] mt-1">Bao gồm PayOS và Tặng quà</p>
+          <p className="text-[11.5px] font-semibold text-[#6E5D53] mt-1 border-t border-[#3D352E]/10 pt-1.5">Bao gồm PayOS và Tặng quà</p>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="p-4 rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex flex-1 w-full sm:w-auto items-center gap-2">
           {/* Search Input */}
           <div className="relative flex-1 max-w-sm">
@@ -178,10 +178,11 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
               placeholder="Tìm mã đơn, email học viên..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+              className="w-full h-[38px] pl-9 pr-8 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] placeholder:text-[#86756C]/70 focus:outline-none focus:ring-2 focus:ring-[#557A46]"
             />
             {searchTerm && (
               <button
+                type="button"
                 onClick={() => setSearchTerm('')}
                 className="absolute right-2.5 top-2.5 text-[#86756C] hover:text-[#3D352E]"
               >
@@ -194,7 +195,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3.5 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+            className="h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#557A46] cursor-pointer"
           >
             <option value="ALL">Tất cả trạng thái</option>
             <option value="PAID">Đã thanh toán (PAID)</option>
@@ -205,27 +206,28 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
 
         {/* Export Button */}
         <button
+          type="button"
           onClick={handleExportCSV}
-          className="w-full sm:w-auto px-4 py-2 rounded-2xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-black text-[#3D352E] flex items-center justify-center gap-1.5 transition-all active:translate-y-0.5 cursor-pointer"
+          className="w-full sm:w-auto h-[38px] px-3.5 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] text-xs font-black text-[#3D352E] flex items-center justify-center gap-1.5 transition-all active:translate-y-0.5 cursor-pointer"
         >
           <span className="material-symbols-outlined text-[16px] text-[#557A46]">download</span>
-          <span>Xuất CSV 📑</span>
+          <span>Xuất CSV</span>
         </button>
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-3xl border-2 border-[#3D352E] shadow-[3.5px_4px_0px_#3D352E] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] overflow-hidden">
+        <div className="overflow-x-auto max-h-[640px]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
+            <thead className="sticky top-0 z-10 bg-[#FAF5EB] border-b-2 border-[#3D352E] text-[#6E5D53] font-black uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="py-3 px-4">MÃ ĐƠN</th>
-                <th className="py-3 px-4">HỌC VIÊN</th>
-                <th className="py-3 px-4">GÓI PRO</th>
-                <th className="py-3 px-4">SỐ TIỀN</th>
-                <th className="py-3 px-4">TRẠNG THÁI</th>
-                <th className="py-3 px-4">NGÀY TẠO</th>
-                <th className="py-3 px-4 text-right">THAO TÁC</th>
+                <th className="py-2.5 px-3.5">MÃ ĐƠN</th>
+                <th className="py-2.5 px-3.5">HỌC VIÊN</th>
+                <th className="py-2.5 px-3.5">GÓI PRO</th>
+                <th className="py-2.5 px-3.5">SỐ TIỀN</th>
+                <th className="py-2.5 px-3.5">TRẠNG THÁI</th>
+                <th className="py-2.5 px-3.5">NGÀY TẠO</th>
+                <th className="py-2.5 px-3.5 text-right">THAO TÁC</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#DECDBB]">
@@ -242,11 +244,11 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
 
                   return (
                     <tr key={order.id} className="hover:bg-[#FAF5EB]/50 transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-black text-[#3D352E]">
+                      <td className="py-2.5 px-3.5 font-mono font-black text-[#3D352E]">
                         #{order.order_code}
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         <p className="font-bold text-[#3D352E] max-w-[200px] truncate" title={order.user_email}>
                           {order.user_email || '—'}
                         </p>
@@ -257,13 +259,13 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         <span className="px-2 py-0.5 rounded-lg font-black text-[11px] bg-[#FAF5EB] border border-[#3D352E]/20 text-[#3D352E]">
                           {order.plan_id || 'pro'}
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-4 font-black text-[#3D352E] tabular-nums">
+                      <td className="py-2.5 px-3.5 font-black text-[#3D352E] tabular-nums">
                         {isGift ? (
                           <span className="text-[#DE5D53]">0đ (Quà tặng)</span>
                         ) : (
@@ -271,7 +273,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4">
+                      <td className="py-2.5 px-3.5">
                         {isPaid ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#557A46]"></span>
@@ -285,13 +287,14 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 font-mono text-[#86756C] font-bold text-[11px]">
+                      <td className="py-2.5 px-3.5 font-mono text-[#86756C] font-bold text-[11px]">
                         {formatDate(order.created_at)}
                       </td>
 
-                      <td className="py-3.5 px-4 text-right">
-                        {!isPaid && (
+                      <td className="py-2.5 px-3.5 text-right">
+                        {!isPaid ? (
                           <button
+                            type="button"
                             onClick={() => handleApprovePending(order)}
                             disabled={processingOrderId === order.id}
                             className="px-3 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-xs border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all disabled:opacity-50 inline-flex items-center gap-1 cursor-pointer"
@@ -304,6 +307,11 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                             )}
                             <span>Duyệt Đơn</span>
                           </button>
+                        ) : (
+                          <span className="text-[11px] font-bold text-[#557A46] flex items-center justify-end gap-1">
+                            <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                            <span>Hoàn tất</span>
+                          </span>
                         )}
                       </td>
                     </tr>

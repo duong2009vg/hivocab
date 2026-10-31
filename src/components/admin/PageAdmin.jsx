@@ -226,6 +226,7 @@ export function PageAdmin() {
             onRefresh={loadAllAdminData}
             isRefreshing={isRefreshing}
             activeProCount={stats.activePro}
+            onSelectTab={setActiveTab}
           />
 
           <main className="flex-1 p-4 lg:p-7 max-w-[1560px] w-full mx-auto animate-fade-in">
