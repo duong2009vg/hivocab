@@ -14,11 +14,80 @@ export function AdminContentGatingTab() {
   const [loading, setLoading] = useState(false);
   const [togglingId, setTogglingId] = useState(null);
 
+  // Master Global Free / PRO State (Quản lý cấp hệ thống)
+  const [globalGatingMode, setGlobalGatingMode] = useState('pro');
+  const [isUpdatingGlobalMode, setIsUpdatingGlobalMode] = useState(false);
+
   // Bulk Selection State
   const [selectedIds, setSelectedIds] = useState(new Set());
   const [isBatchUpdating, setIsBatchUpdating] = useState(false);
 
   const selectAllRef = useRef(null);
+
+  // Tải chế độ Master Free/PRO toàn hệ thống từ Supabase system_settings
+  const fetchGlobalGatingMode = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('value')
+        .eq('key', 'content_gating_mode')
+        .maybeSingle();
+
+      if (!error && data?.value) {
+        setGlobalGatingMode(data.value === 'free' ? 'free' : 'pro');
+      }
+    } catch (err) {
+      console.warn('fetchGlobalGatingMode error:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGlobalGatingMode();
+  }, [fetchGlobalGatingMode]);
+
+  // Xử lý bật/tắt công tắc Master Free/PRO toàn hệ thống
+  const handleToggleGlobalMode = async () => {
+    const nextMode = globalGatingMode === 'free' ? 'pro' : 'free';
+    const confirmMsg =
+      nextMode === 'free'
+        ? 'Bạn có chắc chắn muốn GẠT SANG FREE (Mở khóa 100% học liệu)?\n\nToàn bộ website sẽ mở full ngữ liệu (THPT, IELTS, Từ vựng) và tắt toàn bộ pop-up nâng cấp cho tất cả người dùng.'
+        : 'Bạn có chắc chắn muốn GẠT SANG PRO (Kích hoạt khóa bản quyền)?\n\nWebsite sẽ bật lại giới hạn bản quyền: các mục PRO sẽ yêu cầu tài khoản nâng cấp.';
+
+    if (!window.confirm(confirmMsg)) return;
+
+    setIsUpdatingGlobalMode(true);
+    try {
+      const { error } = await supabase
+        .from('system_settings')
+        .upsert({
+          key: 'content_gating_mode',
+          value: nextMode,
+          updated_at: new Date().toISOString(),
+        });
+
+      if (error) throw error;
+
+      setGlobalGatingMode(nextMode);
+      if (typeof window !== 'undefined') {
+        window._hivocabGlobalFree = nextMode === 'free';
+        window._systemGatingMode = nextMode;
+        try {
+          sessionStorage.setItem('hivocab_gating_mode', nextMode);
+        } catch (_) {}
+      }
+
+      if (nextMode === 'free') {
+        showToast('✨ Đã gạt sang FREE: Mở khóa full toàn bộ ngữ liệu & tắt pop-up! 🎉', 'success');
+      } else {
+        showToast('🔒 Đã gạt sang PRO: Kích hoạt giới hạn bản quyền PRO thành công!', 'info');
+      }
+    } catch (err) {
+      console.error('Error updating global gating mode:', err);
+      showToast(`Không thể cập nhật chế độ: ${err.message}`, 'error');
+    } finally {
+      setIsUpdatingGlobalMode(false);
+    }
+  };
 
   // Clear selection when subtab or status filter changes
   useEffect(() => {
@@ -238,6 +307,82 @@ export function AdminContentGatingTab() {
 
   return (
     <div className="space-y-6 animate-fade-in relative">
+      {/* ───────────────────────────────────────────────────────────── */}
+      {/* MASTER FREE / PRO TOGGLE SWITCH (QUẢN TRỊ TOÀN HỆ THỐNG)     */}
+      {/* ───────────────────────────────────────────────────────────── */}
+      <div
+        className={`p-5 sm:p-6 rounded-3xl border-2 border-[#3D352E] shadow-[4px_5px_0px_#3D352E] transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-5 select-none ${
+          globalGatingMode === 'free'
+            ? 'bg-gradient-to-br from-[#EAF3E7] via-[#F5FAF2] to-[#FFFDF9]'
+            : 'bg-gradient-to-br from-[#FFF9EE] via-[#FFF3E0] to-[#FFFDF9]'
+        }`}
+      >
+        <div className="flex items-start gap-4 max-w-xl">
+          <div
+            className={`w-12 h-12 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-center text-2xl shrink-0 ${
+              globalGatingMode === 'free' ? 'bg-[#EAF3E7] text-[#557A46]' : 'bg-[#FFE8C2] text-[#D96B43]'
+            }`}
+          >
+            {globalGatingMode === 'free' ? '🔓' : '👑'}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-quicksand font-black text-base sm:text-lg text-[#3D352E]">
+                Cài Đặt Chế Độ Học Liệu Toàn Web
+              </h3>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-[11px] font-black border uppercase tracking-wider ${
+                  globalGatingMode === 'free'
+                    ? 'bg-[#557A46] text-white border-[#3D352E]'
+                    : 'bg-[#DE5D53] text-white border-[#3D352E]'
+                }`}
+              >
+                {globalGatingMode === 'free' ? 'FREE TOÀN BỘ 🌐' : 'BẢN QUYỀN PRO 🔒'}
+              </span>
+            </div>
+            <p className="text-xs sm:text-[13px] font-semibold text-[#6E5D53] mt-1 leading-relaxed">
+              {globalGatingMode === 'free' ? (
+                <>
+                  <strong className="text-[#557A46]">Đang mở khóa full:</strong> Mọi người dùng (kể cả khách chưa đăng ký) đều có thể học toàn bộ 38 đề THPT, 444 bài đọc Cambridge và từ điển. Toàn bộ pop-up nâng cấp PRO được tắt hoàn toàn.
+                </>
+              ) : (
+                <>
+                  <strong className="text-[#DE5D53]">Đang bật khóa bản quyền:</strong> Các học liệu gắn cờ PRO yêu cầu người dùng nâng cấp gói thành viên. Pop-up và màn hình khóa được hiển thị theo đúng chính sách bản quyền.
+                </>
+              )}
+            </p>
+          </div>
+        </div>
+
+        {/* Nút gạt công tắc lớn Tactile Crayon Switch */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 shrink-0 self-stretch sm:self-auto justify-between sm:justify-end">
+          <button
+            type="button"
+            onClick={handleToggleGlobalMode}
+            disabled={isUpdatingGlobalMode}
+            className={`px-5 py-3 rounded-2xl border-2 border-[#3D352E] shadow-[3px_3px_0px_#3D352E] font-black text-xs sm:text-sm flex items-center gap-3 transition-all cursor-pointer active:translate-y-0.5 disabled:opacity-60 ${
+              globalGatingMode === 'free'
+                ? 'bg-[#557A46] hover:bg-[#466639] text-white'
+                : 'bg-[#DE5D53] hover:bg-[#C84F45] text-white'
+            }`}
+            title="Bấm để chuyển đổi chế độ học liệu giữa Free và PRO cho toàn website"
+          >
+            <span>{isUpdatingGlobalMode ? 'Đang cập nhật...' : globalGatingMode === 'free' ? 'Gạt sang PRO (Bật khóa)' : 'Gạt sang FREE (Mở Full)'}</span>
+            <div
+              className={`w-12 h-6 rounded-full p-0.5 bg-black/25 border border-white/60 flex items-center transition-colors`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200 flex items-center justify-center text-[10px] font-black ${
+                  globalGatingMode === 'free' ? 'translate-x-6 text-[#557A46]' : 'translate-x-0 text-[#DE5D53]'
+                }`}
+              >
+                {globalGatingMode === 'free' ? '✓' : '✕'}
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+
       {/* ───────────────────────────────────────────────────────────── */}
       {/* SUB TABS & COUNTS SUMMARY                                     */}
       {/* ───────────────────────────────────────────────────────────── */}

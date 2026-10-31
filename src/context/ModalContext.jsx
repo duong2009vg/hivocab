@@ -21,6 +21,10 @@ export function ModalProvider({ children }) {
   });
 
   const openModal = useCallback((modalName, data = {}) => {
+    // Khi quản trị viên bật chế độ Free toàn hệ thống, tự động tắt/bỏ qua pop-up bảng giá PRO
+    if (modalName === 'pricingModal' && typeof window !== 'undefined' && window._hivocabGlobalFree) {
+      return;
+    }
     setModals((prev) => ({
       ...prev,
       [modalName]: { open: true, ...data },

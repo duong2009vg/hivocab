@@ -331,14 +331,9 @@ export async function getCurrentUser() {
 }
 
 export async function isUserPro() {
-  if (typeof window !== 'undefined' && window._hivocabAccessMode === 'free') {
+  if (typeof window !== 'undefined' && window._hivocabGlobalFree) {
     return true;
   }
-  try {
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('hivocab_access_mode') === 'free') {
-      return true;
-    }
-  } catch (_) {}
   const user = await getCurrentUser();
   if (!user) return false;
   const { data } = await supabase

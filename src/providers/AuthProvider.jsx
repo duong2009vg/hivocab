@@ -30,9 +30,8 @@ const AuthContext = createContext({
   session: null,
   profile: null,
   isPro: false,
-  accessMode: 'pro',
-  setAccessMode: () => {},
-  toggleAccessMode: () => {},
+  globalGatingMode: 'pro',
+  isGlobalFree: false,
   isAdmin: false,
   loading: true,
   error: null,
@@ -202,51 +201,85 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  // Access Mode: 'pro' (Chế độ bản quyền chuẩn) | 'free' (Mở khóa toàn bộ học liệu & pop-up)
-  const [accessMode, setAccessModeState] = useState(() => {
+  // Global Content Gating Mode ('pro' | 'free') quản lý tập trung từ Supabase system_settings
+  const [globalGatingMode, setGlobalGatingMode] = useState(() => {
     try {
       if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('hivocab_access_mode');
-        if (saved === 'free' || saved === 'pro') return saved;
+        const cached = sessionStorage.getItem('hivocab_gating_mode');
+        if (cached === 'free' || cached === 'pro') return cached;
       }
     } catch (_) {}
     return 'pro';
   });
 
-  const setAccessMode = useCallback((newMode) => {
-    const validMode = newMode === 'free' ? 'free' : 'pro';
-    setAccessModeState(validMode);
-    try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('hivocab_access_mode', validMode);
-        window._hivocabAccessMode = validMode;
-        window.dispatchEvent(new CustomEvent('hivocab:access-mode-changed', { detail: { mode: validMode } }));
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSystemGating() {
+      try {
+        const { data, error } = await supabase
+          .from('system_settings')
+          .select('value')
+          .eq('key', 'content_gating_mode')
+          .maybeSingle();
+
+        if (!error && data?.value && !cancelled) {
+          const mode = data.value === 'free' ? 'free' : 'pro';
+          setGlobalGatingMode(mode);
+          try {
+            sessionStorage.setItem('hivocab_gating_mode', mode);
+          } catch (_) {}
+        }
+      } catch (err) {
+        console.warn('Load system_settings error:', err);
       }
-    } catch (_) {}
+    }
+
+    loadSystemGating();
+
+    // Lắng nghe realtime cập nhật cài đặt hệ thống từ Admin
+    const channel = supabase
+      .channel('system_settings_realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'system_settings' },
+        (payload) => {
+          if (payload.new?.key === 'content_gating_mode') {
+            const nextMode = payload.new.value === 'free' ? 'free' : 'pro';
+            setGlobalGatingMode(nextMode);
+            try {
+              sessionStorage.setItem('hivocab_gating_mode', nextMode);
+            } catch (_) {}
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      supabase.removeChannel(channel);
+    };
   }, []);
 
-  const toggleAccessMode = useCallback(() => {
-    setAccessMode(accessMode === 'free' ? 'pro' : 'free');
-  }, [accessMode, setAccessMode]);
-
-  const isPro = accessMode === 'free' || checkIsPro(profile);
+  const isGlobalFree = globalGatingMode === 'free';
+  const isPro = isGlobalFree || checkIsPro(profile);
   const isAdmin = Boolean(profile?.role === 'admin');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window._isUserPro = isPro;
-      window._hivocabAccessMode = accessMode;
+      window._hivocabGlobalFree = isGlobalFree;
+      window._systemGatingMode = globalGatingMode;
     }
-  }, [isPro, accessMode]);
+  }, [isPro, isGlobalFree, globalGatingMode]);
 
   const value = {
     user,
     session,
     profile,
     isPro,
-    accessMode,
-    setAccessMode,
-    toggleAccessMode,
+    globalGatingMode,
+    isGlobalFree,
     isAdmin,
     loading,
     error,
