@@ -14,7 +14,7 @@ const PLAN_NAMES = {
 };
 
 export function CrayonProfileProCard({ className = '' }) {
-  const { user, profile, isPro, refreshProfile } = useAuth();
+  const { user, profile, isPaidPro: isPro, refreshProfile } = useAuth();
   const { openModal } = useModal();
 
   const handleOpenPricing = (planId = 'pro_6m') => {

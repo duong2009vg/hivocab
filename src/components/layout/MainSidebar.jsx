@@ -8,7 +8,7 @@ import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
 
 export function MainSidebar() {
-  const { user, signOut, isPro } = useAuth();
+  const { user, signOut, isPaidPro: isPro } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const { openModal } = useModal();
   const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();

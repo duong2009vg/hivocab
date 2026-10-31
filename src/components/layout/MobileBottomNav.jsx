@@ -5,7 +5,7 @@ import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function MobileBottomNav() {
-  const { user, isPro } = useAuth();
+  const { user, isPaidPro: isPro } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
 
   // topic-detail / lesson-detail → highlight 'topics'; settings / profile → highlight 'profile'

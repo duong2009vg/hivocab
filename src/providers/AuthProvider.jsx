@@ -263,6 +263,7 @@ export function AuthProvider({ children }) {
 
   const isGlobalFree = globalGatingMode === 'free';
   const isPro = isGlobalFree || checkIsPro(profile);
+  const isPaidPro = checkIsPro(profile);
   const isAdmin = Boolean(profile?.role === 'admin');
 
   useEffect(() => {
@@ -278,6 +279,7 @@ export function AuthProvider({ children }) {
     session,
     profile,
     isPro,
+    isPaidPro,
     globalGatingMode,
     isGlobalFree,
     isAdmin,

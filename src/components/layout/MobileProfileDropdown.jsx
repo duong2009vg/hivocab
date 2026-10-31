@@ -6,7 +6,7 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 
 export function MobileProfileDropdown() {
-  const { user, signOut, isPro } = useAuth();
+  const { user, signOut, isPaidPro: isPro } = useAuth();
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
 
