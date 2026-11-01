@@ -293,9 +293,6 @@ export function PageDictionary() {
                     Song ngữ Anh - Việt
                   </span>
                 </div>
-                <p className="text-xs xl:text-sm font-semibold text-[#787067] mt-1">
-                  Gõ bất kỳ từ vựng, cụm từ (phrasal verb) hoặc thành ngữ nào để tra đầy đủ phát âm, CEFR, nét nghĩa và ví dụ tranh vẽ.
-                </p>
               </div>
             </div>
 

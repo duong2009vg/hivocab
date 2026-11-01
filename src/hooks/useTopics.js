@@ -5,12 +5,13 @@ import { getTopics, getCachedTopics, deleteTopic as apiDeleteTopic, deleteFolder
 import { useRoute } from '../router/RouteContext.jsx';
 
 export const DEFAULT_TOPIC_CATEGORIES = [
+  'CEFR',
+  'TOEIC',
   'CAM',
   'Destination C1-C2',
   'IELTS Actual Tests',
   'Oxford 3000',
   'SAT 3500',
-  'TOEIC',
   'personal',
   'general',
 ];
