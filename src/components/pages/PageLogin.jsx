@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Heart, Mail, CheckCircle2, Lock, Star, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { TURNSTILE_SITE_KEY } from '../../config/runtime.js';

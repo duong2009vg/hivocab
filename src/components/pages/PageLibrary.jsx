@@ -23,7 +23,8 @@ import {
   Award, 
   Flame, 
   ArrowRight, 
-  AlertCircle 
+  AlertCircle,
+  ChevronLeft 
 } from 'lucide-react';
 import { useLibrary } from '../../hooks/useLibrary';
 import { useModal } from '../../context/ModalContext';

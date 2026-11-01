@@ -1,6 +1,17 @@
 // src/components/modals/IeltsGoalModal.jsx
 // Modal Thiết Lập Lộ Trình Rèn Luyện IELTS - Phong cách Cozy Crayon ấm áp
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  MessageSquare,
+  PenTool,
+  Mic,
+  Calendar,
+  Headphones,
+  Target,
+  BookOpen,
+  ArrowRight,
+  X,
+} from 'lucide-react';
 import { saveIELTSGoal } from '../../services/db.js';
 
 export const IELTS_BANDS = ['4.0', '4.5', '5.0', '5.5', '6.0', '6.5', '7.0', '7.5', '8.0', '8.5', '9.0'];

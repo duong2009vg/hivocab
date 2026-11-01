@@ -3,6 +3,7 @@
 // Listen & type exercise — Pure React with Pop-up Result Notification and Full SVG Icons.
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AlertTriangle, Lightbulb, Eye, PenTool } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 function getSlotDimensions(maxPartLen) {

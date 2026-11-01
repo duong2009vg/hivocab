@@ -1,6 +1,7 @@
 // src/components/learning/ExerciseFlashcard.jsx
 // 100% Cozy Crayon Handcrafted Flashcard - Centered & Responsive
 import React, { useState, useEffect, useCallback } from 'react';
+import { AlertTriangle, Sparkles, PenTool, Star } from 'lucide-react';
 
 export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo }) {
   const [flipped, setFlipped] = useState(false);

@@ -3,6 +3,7 @@
 // Fill-in-the-blank letter boxes — Pure React with Pop-up Result Notification.
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AlertTriangle, Lightbulb, PenTool } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 function renderSentence(sentence, targetWord) {

@@ -3,6 +3,7 @@
 // No extra "Kiểm tra & Tiếp tục" button needed for MCQ.
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { AlertTriangle, Lightbulb } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionInfo }) {

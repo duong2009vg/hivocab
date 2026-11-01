@@ -2,6 +2,7 @@
 // Floating popover tooltip cho từ vựng bài đọc - Phong cách Cozy Crayon ấm áp
 
 import React, { useEffect, useRef } from 'react';
+import { Volume2, X } from 'lucide-react';
 import { speakWord } from '../../utils/bilingualSoundUtils.js';
 
 export function BilingualVocabTooltip({ tooltip, onClose }) {

@@ -2,6 +2,7 @@
 // Session completion screen — Pure React with Warm Crayon Study Room aesthetic.
 
 import React, { useEffect } from 'react';
+import { Trophy } from 'lucide-react';
 
 function ratingLabel(w) {
   if (w.skipped) return { text: 'Bỏ qua', cls: 'bg-stone-100 text-stone-700 border border-stone-300' };

@@ -2,6 +2,7 @@
 // Header & Navigation cho bài đọc song ngữ - Phong cách Cozy Crayon ấm áp
 
 import React, { useState } from 'react';
+import { PenTool, BookOpen, Flag, X } from 'lucide-react';
 import { BilingualPassageSwitcher } from './BilingualPassageSwitcher.jsx';
 
 export function BilingualHeader({

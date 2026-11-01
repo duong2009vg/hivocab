@@ -2,6 +2,7 @@
 // Chế độ Đọc Chủ Động Song Ngữ - Phong cách Cozy Crayon ấm áp
 
 import React from 'react';
+import { Lightbulb, EyeOff, BookOpen, Eye } from 'lucide-react';
 
 // Extract paragraph label (e.g. Paragraph A, Section 1...)
 function getParagraphLabel(paraText, index) {

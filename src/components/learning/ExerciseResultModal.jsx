@@ -3,6 +3,7 @@
 // Green for correct, Red for wrong, with audio button, phonetic, meaning, example, notes & auto-countdown timer.
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Volume2, BookOpen } from 'lucide-react';
 
 export default function ExerciseResultModal({
   isOpen,

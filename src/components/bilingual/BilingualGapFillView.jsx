@@ -2,6 +2,17 @@
 // Chế độ Đục Lỗ Song Ngữ Trong Ngữ Cảnh - Phong cách Cozy Crayon ấm áp
 
 import React, { useState, useEffect, useRef } from 'react';
+import {
+  PenTool,
+  Lightbulb,
+  Volume2,
+  Check,
+  Trophy,
+  Eye,
+  ArrowRight,
+  BookOpen,
+  RotateCcw,
+} from 'lucide-react';
 import { speakWord } from '../../utils/bilingualSoundUtils.js';
 
 export function BilingualGapFillView({
