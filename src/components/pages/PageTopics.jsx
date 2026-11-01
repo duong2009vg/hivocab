@@ -621,9 +621,6 @@ export function PageTopics() {
                             >
                               {topic.name}
                             </h3>
-                            <p className="text-xs text-[#827A73] font-semibold mt-1">
-                              {topic.description || 'Học và ghi nhớ từ vựng với phương pháp ngắt quãng.'}
-                            </p>
                           </div>
                         </div>
                       </div>

@@ -10,7 +10,7 @@ export const DEFAULT_TOPIC_CATEGORIES = [
   'CAM',
   'Destination C1-C2',
   'IELTS Actual Tests',
-  'Oxford 3000',
+  'Common Words',
   'SAT 3500',
   'personal',
   'general',
@@ -26,6 +26,7 @@ export function getCategoryIcon(category) {
   if (compact.includes('ielts') || compact.includes('toeic')) return 'military_tech';
   if (compact.includes('cefr')) return 'workspace_premium';
   if (compact.includes('thpt')) return 'school';
+  if (compact.includes('common')) return 'auto_stories';
   if (compact.includes('idiom') || compact.includes('collocation')) return 'format_quote';
   if (compact.includes('general')) return 'public';
   return 'folder';

@@ -122,15 +122,25 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
       showToast('Không có dữ liệu đơn hàng để xuất!', 'warning');
       return;
     }
+    // Sanitize against CSV Formula Injection (CWE-1236)
+    const sanitizeCsvCell = (val) => {
+      const str = String(val ?? '');
+      const escaped = str.replace(/"/g, '""');
+      if (/^[=+\-@\t\r]/.test(str)) {
+        return `"'${escaped}"`;
+      }
+      return `"${escaped}"`;
+    };
+
     const headers = ['Mã Đơn', 'Email Học Viên', 'Gói Đăng Ký', 'Số Tiền (VND)', 'Trạng Thái', 'Phương Thức', 'Thời Gian'];
     const rows = filteredOrders.map((o) => [
-      o.order_code,
-      `"${o.user_email || ''}"`,
-      o.plan_id,
+      sanitizeCsvCell(o.order_code),
+      sanitizeCsvCell(o.user_email),
+      sanitizeCsvCell(o.plan_id),
       o.amount || 0,
-      o.status,
-      o.payment_method || 'PAYOS',
-      o.created_at,
+      sanitizeCsvCell(o.status),
+      sanitizeCsvCell(o.payment_method || 'PAYOS'),
+      sanitizeCsvCell(o.created_at),
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');

@@ -134,6 +134,7 @@ export function PageTopicDetail() {
     if (cat === 'cam' || cat === 'cambridge') return 'Bộ đề Cambridge Official';
     if (cat.includes('actual')) return 'Bộ đề IELTS Actual Tests';
     if (cat.includes('dest')) return 'Destination C1-C2';
+    if (cat.includes('common')) return 'Common Words';
     if (cat.includes('oxford')) return 'Oxford 3000';
     if (cat.includes('tuvungcuatoi') || cat.includes('cuatoi') || cat === 'personal') return 'Từ vựng của tôi';
     if (cat.includes('thpt') || cat.includes('dgnl')) return 'THPT/ĐGNL';

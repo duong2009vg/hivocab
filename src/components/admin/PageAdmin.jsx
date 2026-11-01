@@ -2,7 +2,7 @@
 // HiVocab Studio Master Admin Dashboard Shell (Option A: Modern Studio Sidebar Layout)
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../lib/supabaseClient.js';
-import { checkIsPro } from '../../providers/AuthProvider.jsx';
+import { checkIsPro, useAuth } from '../../providers/AuthProvider.jsx';
 import { lazyWithRetry as lazy } from '../../utils/lazyWithRetry.js';
 import AdminProtectedRoute from '../common/AdminProtectedRoute.jsx';
 import AdminSidebar from './AdminSidebar.jsx';
@@ -103,9 +103,13 @@ export function PageAdmin() {
     }
   }, []);
 
+  const { isAdmin } = useAuth();
+
   useEffect(() => {
-    loadAllAdminData();
-  }, [loadAllAdminData]);
+    if (isAdmin) {
+      loadAllAdminData();
+    }
+  }, [isAdmin, loadAllAdminData]);
 
   // Aggregate Metrics for Overview
   const stats = useMemo(() => {

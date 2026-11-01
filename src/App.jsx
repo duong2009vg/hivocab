@@ -12,6 +12,7 @@ import MobileProfileDropdown from './components/layout/MobileProfileDropdown.jsx
 import MobileBottomNav from './components/layout/MobileBottomNav.jsx';
 import RouteLoadingFallback from './components/common/RouteLoadingFallback.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
+import AdminProtectedRoute from './components/common/AdminProtectedRoute.jsx';
 import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 
 // 100% Pure React Modals
@@ -135,7 +136,7 @@ function AppRoutes() {
       case 'learning':
         return <PageLearning />;
       case 'admin':
-        return <PageAdmin />;
+        return <AdminProtectedRoute><PageAdmin /></AdminProtectedRoute>;
       default:
         return <PageLanding />;
     }
