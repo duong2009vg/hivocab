@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   Flame,
   RotateCcw,
@@ -160,6 +160,12 @@ export function PageDashboard() {
   };
 
   const userName = profile?.full_name || user?.email?.split('@')[0] || 'bạn học';
+  const greeting = useMemo(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return 'Chào buổi sáng';
+    if (hour >= 12 && hour < 18) return 'Chào buổi chiều';
+    return 'Chào buổi tối';
+  }, []);
   const streak = stats.streak || 0;
   const wordsDueCount = stats.wordsDueCount || 0;
   const total = stats.totalWordsCount || 0;
@@ -502,7 +508,7 @@ export function PageDashboard() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 min-w-0">
                   <h1 className="text-xl xl:text-2xl font-black text-crayonText font-quicksand truncate">
-                    Chào buổi sáng, {userName} ơi!
+                    {greeting}, {userName} ơi!
                   </h1>
                 </div>
                 <p className="text-xs xl:text-sm text-softMuted mt-0.5 truncate">
