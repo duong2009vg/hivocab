@@ -559,10 +559,6 @@ export function PageDashboard() {
                 <section className="dashboard-desktop-card dashboard-desktop-hero bg-[#fffdf9] rounded-3xl p-6 lg:p-7 crayon-border shadow-crayon relative overflow-hidden border-2">
                   <div className="relative z-1 flex flex-col md:flex-row items-center gap-5 xl:gap-6 justify-between">
                     <div className="space-y-3.5 flex-1 min-w-0">
-                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sage-light text-sage border border-sage/30 text-xs font-bold">
-                        <i className="fa-solid fa-sparkles"></i>
-                        <span>Thuật toán ngắt quãng Spaced Repetition</span>
-                      </div>
                       <h2 className="text-2xl lg:text-3xl font-black text-crayonText font-quicksand leading-tight">
                         {heroState === 'countdown' ? (
                           <>Đã ôn xong hôm nay!<br/><span className="text-sage">Quay lại sau {countdown?.hours || 0}g {countdown?.minutes || 0}p.</span></>
