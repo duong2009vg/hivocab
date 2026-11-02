@@ -21,12 +21,13 @@ export function PageThptRoom() {
   const { navigateTo } = useRoute();
   const { isPro, loading: authLoading } = useAuth();
   const { openModal } = useModal();
-  const session = useThptSession();
-  const splitPanel = useSplitPanel(Boolean(session.exam && !isLocked));
 
   const [examMetadata, setExamMetadata] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
   const [initError, setInitError] = useState(null);
+
+  const session = useThptSession();
+  const splitPanel = useSplitPanel(Boolean(session.exam && !isLocked));
 
   // Report modal state (answer report)
   const [reportModal, setReportModal] = useState(null); // { qNum, q }
