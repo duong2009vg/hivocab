@@ -195,7 +195,7 @@ export function useThptSession() {
     setFontSizeLevel(prev => Math.max(-1, Math.min(2, prev + delta)));
   }, []);
 
-  const fontSizeClass = ['text-[12px]', 'text-[14px]', 'text-[16px]', 'text-[18px]'][fontSizeLevel + 1];
+  const fontSizeClass = ['text-[13px] sm:text-[14px]', 'text-[15px] sm:text-[16px]', 'text-[17px] sm:text-[18px]', 'text-[19px] sm:text-[20px]'][fontSizeLevel + 1];
 
   // ---------- DERIVED ----------
   const answeredCount = Object.keys(answers).length;

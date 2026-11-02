@@ -27,6 +27,7 @@ function OptionButton({
   correctAnswer,
   isReviewMode,
   qNum,
+  fontSizeClass,
   onSelectAnswer,
 }) {
   const isSelected = userAnswer === letter;
@@ -88,7 +89,9 @@ function OptionButton({
         )}
       </span>
 
-      <span className="flex-1 text-sm sm:text-base leading-relaxed text-left font-sans pt-0.5">
+      <span
+        className={`flex-1 leading-relaxed text-left font-sans pt-0.5 ${fontSizeClass ?? 'text-sm sm:text-base'}`}
+      >
         {text}
       </span>
 
@@ -120,10 +123,12 @@ function OptionButton({
 // Review Banner
 // ---------------------------------------------------------------------------
 
-function ReviewBanner({ qNum, userAnswer, correctAnswer }) {
+function ReviewBanner({ qNum, userAnswer, correctAnswer, fontSizeClass }) {
   if (!userAnswer) {
     return (
-      <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs sm:text-sm font-medium">
+      <div
+        className={`flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 font-medium ${fontSizeClass ?? 'text-xs sm:text-sm'}`}
+      >
         <HelpCircle className="w-4 h-4 text-amber-600 shrink-0" />
         <span>
           Câu {qNum}: Chưa trả lời — Đáp án đúng là <strong>{correctAnswer}</strong>
@@ -135,7 +140,9 @@ function ReviewBanner({ qNum, userAnswer, correctAnswer }) {
   const isCorrect = userAnswer === correctAnswer;
   if (isCorrect) {
     return (
-      <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-medium">
+      <div
+        className={`flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 font-medium ${fontSizeClass ?? 'text-xs sm:text-sm'}`}
+      >
         <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
         <span>Câu {qNum}: Trả lời chính xác! (+0.25 điểm)</span>
       </div>
@@ -143,7 +150,9 @@ function ReviewBanner({ qNum, userAnswer, correctAnswer }) {
   }
 
   return (
-    <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 text-xs sm:text-sm font-medium">
+    <div
+      className={`flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 font-medium ${fontSizeClass ?? 'text-xs sm:text-sm'}`}
+    >
       <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
       <span>
         Câu {qNum}: Sai — Bạn chọn <strong>{userAnswer}</strong>, đáp án đúng là <strong>{correctAnswer}</strong>
@@ -282,22 +291,24 @@ function highlightKeywords(text) {
   });
 }
 
-function SolutionBox({ explanation }) {
+function SolutionBox({ explanation, fontSizeClass }) {
   if (!explanation) return null;
   return (
-    <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EFE8D6] text-[#2D2422] text-xs sm:text-sm space-y-2">
+    <div
+      className={`mt-4 p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EFE8D6] text-[#2D2422] space-y-2 ${fontSizeClass ?? 'text-xs sm:text-sm'}`}
+    >
       <div className="font-bold text-[#557A46] flex items-center gap-2 pb-2 border-b border-[#EFE8D6]">
         <Lightbulb className="w-4 h-4 text-[#557A46] shrink-0" />
         <span className="uppercase tracking-wider text-xs">Giải thích chi tiết</span>
       </div>
-      <div className="space-y-1.5 pt-1 text-xs sm:text-sm leading-relaxed">
+      <div className="space-y-1.5 pt-1 leading-relaxed">
         {formatExplanation(explanation)}
       </div>
     </div>
   );
 }
 
-function ArrangementPrompt({ qNum, q }) {
+function ArrangementPrompt({ qNum, q, fontSizeClass }) {
   const raw = q.arrangement_sentences || q.raw_sentences || '';
   const letters = [];
   const regex = /(?:^|\n)\s*([a-f])\./gi;
@@ -306,7 +317,9 @@ function ArrangementPrompt({ qNum, q }) {
   const labelStr = letters.length > 0 ? `(${letters.join(', ')})` : '';
 
   return (
-    <p className="text-xs sm:text-sm italic text-[#6B5A4E] mt-1 mb-3">
+    <p
+      className={`italic text-[#6B5A4E] mt-1 mb-3 ${fontSizeClass ?? 'text-xs sm:text-sm'}`}
+    >
       Xem câu {labelStr} ở ngữ liệu cột bên trái.
     </p>
   );
@@ -400,7 +413,7 @@ function QuestionCard({
       </div>
 
       {/* ── Arrangement note ────────────────────────────────────────── */}
-      {isArrangement && <ArrangementPrompt qNum={qNum} q={q} />}
+      {isArrangement && <ArrangementPrompt qNum={qNum} q={q} fontSizeClass={fontSizeClass} />}
 
       {/* ── Review banner ───────────────────────────────────────────── */}
       {isReviewMode && (
@@ -408,6 +421,7 @@ function QuestionCard({
           qNum={qNum}
           userAnswer={userAnswer}
           correctAnswer={correctAnswer}
+          fontSizeClass={fontSizeClass}
         />
       )}
 
@@ -429,6 +443,7 @@ function QuestionCard({
               correctAnswer={isReviewMode ? correctAnswer : null}
               isReviewMode={isReviewMode}
               qNum={qNum}
+              fontSizeClass={fontSizeClass}
               onSelectAnswer={onSelectAnswer}
             />
           );
@@ -436,7 +451,7 @@ function QuestionCard({
       </div>
 
       {/* ── Solution box ────────────────────────────────────────────── */}
-      {isReviewMode && <SolutionBox explanation={q.explanation} />}
+      {isReviewMode && <SolutionBox explanation={q.explanation} fontSizeClass={fontSizeClass} />}
     </div>
   );
 }

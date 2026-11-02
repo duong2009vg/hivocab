@@ -1,11 +1,12 @@
 // src/hooks/useSplitPanel.js
 // Draggable split panel + drag-to-scroll + wheel forwarding
+// Đảm bảo ref lifecycle đồng bộ khi session.exam được nạp xong
 
 import { useEffect, useRef, useCallback } from 'react';
 
 const SPLIT_RATIO_KEY = 'thpt_split_left_pct';
 
-export function useSplitPanel() {
+export function useSplitPanel(isReady = true) {
   const containerRef = useRef(null);
   const leftRef = useRef(null);
   const rightRef = useRef(null);
@@ -20,9 +21,9 @@ export function useSplitPanel() {
     if (!left || !right) return;
     if (window.innerWidth >= 768) {
       const saved = parseFloat(localStorage.getItem(SPLIT_RATIO_KEY) || '50');
-      const pct = (!isNaN(saved) && saved >= 20 && saved <= 80) ? saved : 50;
+      const pct = !isNaN(saved) && saved >= 20 && saved <= 80 ? saved : 50;
       left.style.width = pct + '%';
-      right.style.width = (100 - pct) + '%';
+      right.style.width = 100 - pct + '%';
     } else {
       left.style.width = '';
       right.style.width = '';
@@ -31,6 +32,7 @@ export function useSplitPanel() {
 
   // Drag divider
   useEffect(() => {
+    if (!isReady) return;
     const divider = dividerRef.current;
     const left = leftRef.current;
     const right = rightRef.current;
@@ -41,22 +43,25 @@ export function useSplitPanel() {
 
     let isDragging = false;
 
-    const onStart = () => {
+    const onStart = (e) => {
       if (window.innerWidth < 768) return;
       isDragging = true;
       document.body.style.userSelect = 'none';
       document.body.style.cursor = 'col-resize';
-      divider.classList.add('bg-blue-600', 'w-3');
+      left.style.transition = 'none';
+      right.style.transition = 'none';
+      divider.classList.add('bg-[#5a7d4d]', 'w-2.5');
     };
 
     const onMove = (e) => {
       if (!isDragging || window.innerWidth < 768) return;
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const rect = container.getBoundingClientRect();
+      if (!rect.width) return;
       let pct = ((clientX - rect.left) / rect.width) * 100;
       pct = Math.max(20, Math.min(80, pct));
       left.style.width = pct + '%';
-      right.style.width = (100 - pct) + '%';
+      right.style.width = 100 - pct + '%';
     };
 
     const onEnd = () => {
@@ -64,11 +69,15 @@ export function useSplitPanel() {
       isDragging = false;
       document.body.style.userSelect = '';
       document.body.style.cursor = '';
-      divider.classList.remove('bg-blue-600', 'w-3');
+      left.style.transition = '';
+      right.style.transition = '';
+      divider.classList.remove('bg-[#5a7d4d]', 'w-2.5');
       const rect = container.getBoundingClientRect();
-      const leftW = left.getBoundingClientRect().width;
-      const pct = (leftW / rect.width) * 100;
-      localStorage.setItem(SPLIT_RATIO_KEY, pct.toFixed(1));
+      if (rect.width) {
+        const leftW = left.getBoundingClientRect().width;
+        const pct = (leftW / rect.width) * 100;
+        localStorage.setItem(SPLIT_RATIO_KEY, pct.toFixed(1));
+      }
     };
 
     divider.addEventListener('mousedown', onStart);
@@ -88,14 +97,13 @@ export function useSplitPanel() {
       window.removeEventListener('touchend', onEnd);
       window.removeEventListener('resize', applySavedRatio);
     };
-  }, [applySavedRatio]);
+  }, [applySavedRatio, isReady]);
 
   // Wheel forwarding + drag-to-scroll
   useEffect(() => {
+    if (!isReady) return;
     const passagePane = passagePaneRef.current;
-    const questionsPane = questionsPaneRef.current;
     const leftCol = leftRef.current;
-    const rightCol = rightRef.current;
 
     if (leftCol && passagePane) {
       const handler = (e) => {
@@ -106,9 +114,10 @@ export function useSplitPanel() {
       leftCol.addEventListener('wheel', handler, { passive: true });
       return () => leftCol.removeEventListener('wheel', handler);
     }
-  }, []);
+  }, [isReady]);
 
   useEffect(() => {
+    if (!isReady) return;
     const questionsPane = questionsPaneRef.current;
     const rightCol = rightRef.current;
     if (rightCol && questionsPane) {
@@ -120,63 +129,7 @@ export function useSplitPanel() {
       rightCol.addEventListener('wheel', handler, { passive: true });
       return () => rightCol.removeEventListener('wheel', handler);
     }
-  }, []);
-
-  // Enable drag-to-scroll on a pane
-  const enableDragToScroll = useCallback((el) => {
-    if (!el) return () => {};
-    let isDown = false, startY = 0, scrollTop = 0, isDragging = false;
-
-    const onMouseDown = (e) => {
-      if (e.button !== 0) return;
-      if (e.target.closest('button, input, select, textarea, a, .opt-btn, [onclick]')) return;
-      const sel = window.getSelection();
-      if (sel && sel.toString().length > 0) return;
-      isDown = true;
-      isDragging = false;
-      startY = e.pageY - el.offsetTop;
-      scrollTop = el.scrollTop;
-    };
-
-    const onMouseUp = () => {
-      if (!isDown) return;
-      isDown = false;
-      if (isDragging) {
-        isDragging = false;
-        el.style.userSelect = '';
-        el.style.cursor = '';
-      }
-    };
-
-    const onMouseMove = (e) => {
-      if (!isDown) return;
-      const walk = (e.pageY - el.offsetTop) - startY;
-      if (!isDragging && Math.abs(walk) > 5) {
-        isDragging = true;
-        el.style.userSelect = 'none';
-        el.style.cursor = 'grab';
-      }
-      if (isDragging) el.scrollTop = scrollTop - walk;
-    };
-
-    el.addEventListener('mousedown', onMouseDown);
-    el.addEventListener('mouseleave', onMouseUp);
-    window.addEventListener('mouseup', onMouseUp);
-    el.addEventListener('mousemove', onMouseMove);
-
-    return () => {
-      el.removeEventListener('mousedown', onMouseDown);
-      el.removeEventListener('mouseleave', onMouseUp);
-      window.removeEventListener('mouseup', onMouseUp);
-      el.removeEventListener('mousemove', onMouseMove);
-    };
-  }, []);
-
-  useEffect(() => {
-    const cleanup1 = enableDragToScroll(passagePaneRef.current);
-    const cleanup2 = enableDragToScroll(questionsPaneRef.current);
-    return () => { cleanup1(); cleanup2(); };
-  }, [enableDragToScroll]);
+  }, [isReady]);
 
   return {
     containerRef,
@@ -185,5 +138,8 @@ export function useSplitPanel() {
     dividerRef,
     passagePaneRef,
     questionsPaneRef,
+    applySavedRatio,
   };
 }
+
+export default useSplitPanel;

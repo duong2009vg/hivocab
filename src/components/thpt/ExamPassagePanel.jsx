@@ -48,7 +48,7 @@ function buildArrangementSectionHtml(sec, questions) {
           <span class="w-6 h-6 rounded-lg bg-[#5a7d4d] text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
             ${escHtml(letter)}
           </span>
-          <div class="text-[#2D2422] text-sm leading-relaxed q-text-size select-text font-sans flex-1">
+          <div class="text-[#2D2422] leading-relaxed q-text-size select-text font-sans flex-1">
             ${escHtml(text)}
           </div>
         </div>`;
@@ -73,7 +73,7 @@ function buildArrangementSectionHtml(sec, questions) {
 
         ${
           q.arrangement_context
-            ? `<div class="font-bold text-[#2D2422] italic text-sm pb-1">${escHtml(q.arrangement_context)}</div>`
+            ? `<div class="font-bold text-[#2D2422] italic pb-1">${escHtml(q.arrangement_context)}</div>`
             : ''
         }
 
@@ -136,7 +136,7 @@ function buildParagraphsHtml(sec, questions) {
 
       if (isBullet) {
         parasHtml += `
-          <div class="flex items-start gap-2.5 text-base text-[#2D2422] my-2 pl-2 leading-relaxed font-serif">
+          <div class="flex items-start gap-2.5 text-[#2D2422] my-2 pl-2 leading-relaxed font-serif">
             <span class="w-1.5 h-1.5 rounded-full bg-[#5a7d4d] shrink-0 mt-2.5"></span>
             <div class="flex-1">${formatBlanksInHtml(
               p.replace(/^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s*/, ''),
@@ -162,20 +162,20 @@ function buildParagraphsHtml(sec, questions) {
                 Đoạn ${pIdx + 1}
               </span>
             </div>
-            <p class="text-justify text-base text-[#2D2422] leading-relaxed md:leading-loose select-text font-serif">
+            <p class="text-justify text-[#2D2422] leading-relaxed md:leading-loose select-text font-serif">
               ${formatBlanksInHtml(p, startQ, endQ)}
             </p>
           </div>`;
       } else {
         parasHtml += `
-          <p class="text-justify text-base text-[#2D2422] leading-relaxed md:leading-loose indent-6 my-3 font-serif">
+          <p class="text-justify text-[#2D2422] leading-relaxed md:leading-loose indent-6 my-3 font-serif">
             ${formatBlanksInHtml(p, startQ, endQ)}
           </p>`;
       }
     });
   } else if (rawText) {
     parasHtml = `
-      <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif text-base q-text-size select-text whitespace-pre-line space-y-2.5">
+      <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif q-text-size select-text whitespace-pre-line space-y-2.5">
         ${formatBlanksInHtml(rawText, startQ, endQ)}
       </div>`;
   } else {
@@ -185,7 +185,7 @@ function buildParagraphsHtml(sec, questions) {
     );
     if (secQuestions.length > 0 && secQuestions[0].passage) {
       parasHtml = `
-        <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif text-base q-text-size select-text whitespace-pre-line space-y-2.5">
+        <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif q-text-size select-text whitespace-pre-line space-y-2.5">
           ${formatBlanksInHtml(secQuestions[0].passage, startQ, endQ)}
         </div>`;
     } else {
@@ -234,7 +234,7 @@ function buildReadingSectionHtml(sec, questions) {
       ${titleHtml}
 
       <!-- Real Exam Paper Typography -->
-      <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif text-base q-text-size select-text space-y-1">
+      <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif q-text-size select-text space-y-1">
         ${parasHtml}
       </div>
     </div>`;

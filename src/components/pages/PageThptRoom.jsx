@@ -22,7 +22,7 @@ export function PageThptRoom() {
   const { isPro, loading: authLoading } = useAuth();
   const { openModal } = useModal();
   const session = useThptSession();
-  const splitPanel = useSplitPanel();
+  const splitPanel = useSplitPanel(Boolean(session.exam && !isLocked));
 
   const [examMetadata, setExamMetadata] = useState(null);
   const [isLocked, setIsLocked] = useState(false);
@@ -372,8 +372,8 @@ export function PageThptRoom() {
 
         <div
           ref={splitPanel.dividerRef}
-          className="hidden md:block w-1.5 bg-[#EFE8D6] hover:bg-[#5a7d4d]/60 cursor-col-resize shrink-0 transition-colors"
-          title="Kéo để thay đổi kích thước hai cột"
+          className="hidden md:block w-2 bg-[#EFE8D6] hover:bg-[#5a7d4d] cursor-col-resize shrink-0 transition-colors z-10 select-none"
+          title="Kéo sang trái/phải để thay đổi kích thước hai cột"
         />
 
         <div ref={splitPanel.rightRef} className={rightColClass}>
