@@ -1,125 +1,133 @@
 // src/components/thpt/ExamQuestionsPanel.jsx
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
-import { escHtml } from '../../utils/thptPassageUtils';
+// Cột bên phải phòng thi THPT: danh sách 40 câu hỏi, lựa chọn A/B/C/D, gắn cờ và giải thích chi tiết.
+// Chuẩn phong cách HiVocab Exam Focus Mode: tối giản, công thái học, không gây mỏi mắt.
 
-// ---------------------------------------------------------------------------
-// Helper – safe HTML escape for rendering text nodes
-// ---------------------------------------------------------------------------
+import React, { useEffect, useMemo } from 'react';
+import {
+  Flag,
+  AlertCircle,
+  Check,
+  X,
+  Lightbulb,
+  CheckCircle2,
+  XCircle,
+  HelpCircle,
+} from 'lucide-react';
 
-/** Render a question prompt string as plain text (no dangerouslySetInnerHTML). */
-function QuestionText({ text, className }) {
-  // escHtml is only needed for raw HTML contexts; here we render as text nodes.
-  return <span className={className}>{text}</span>;
-}
-
-// ---------------------------------------------------------------------------
-// Option letter label
-// ---------------------------------------------------------------------------
 const LETTERS = ['A', 'B', 'C', 'D'];
 
 // ---------------------------------------------------------------------------
-// Sub-components
+// Option Button
 // ---------------------------------------------------------------------------
 
-/** Animated radio circle shown in the option button. */
-function OptCircle({ filled, isCorrect, isWrong }) {
-  let inner = null;
-  if (isCorrect) {
-    // Check icon
-    inner = (
-      <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <polyline points="1.5,6 4.5,9 10.5,3" />
-      </svg>
-    );
-  } else if (isWrong) {
-    // Close icon
-    inner = (
-      <svg viewBox="0 0 12 12" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-        <line x1="2" y1="2" x2="10" y2="10" />
-        <line x1="10" y1="2" x2="2" y2="10" />
-      </svg>
-    );
-  } else if (filled) {
-    inner = <span className="opt-circle-dot" />;
-  }
-
-  return <span className="opt-circle">{inner}</span>;
-}
-
-/** Single option button (A / B / C / D). */
-function OptionButton({ letter, text, userAnswer, correctAnswer, isReviewMode, qNum, onSelectAnswer }) {
+function OptionButton({
+  letter,
+  text,
+  userAnswer,
+  correctAnswer,
+  isReviewMode,
+  qNum,
+  onSelectAnswer,
+}) {
   const isSelected = userAnswer === letter;
   const isCorrect = correctAnswer === letter;
   const isWrong = isReviewMode && isSelected && !isCorrect;
 
-  // Build class name
-  let cls = 'opt-btn';
+  // Build styling
+  let containerCls =
+    'w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 transition-all flex items-start gap-3 select-none cursor-pointer';
+  let circleCls =
+    'w-6 h-6 rounded-full font-bold flex items-center justify-center shrink-0 text-xs transition-colors mt-0.5';
+
   if (isReviewMode) {
-    if (isCorrect) cls += ' opt-correct';
-    else if (isWrong) cls += ' opt-wrong';
-    else cls += ' opacity-50';
+    if (isCorrect && isSelected) {
+      containerCls += ' bg-emerald-50 border-emerald-500 text-emerald-950 font-semibold shadow-2xs';
+      circleCls += ' bg-emerald-600 text-white';
+    } else if (isCorrect && !isSelected) {
+      containerCls += ' bg-emerald-50/70 border-emerald-400 text-emerald-900 border-dashed';
+      circleCls += ' bg-emerald-600 text-white';
+    } else if (isWrong) {
+      containerCls += ' bg-rose-50 border-rose-500 text-rose-950 font-semibold shadow-2xs';
+      circleCls += ' bg-rose-600 text-white';
+    } else {
+      containerCls += ' opacity-50 border-[#EFE8D6] bg-white text-[#786F66]';
+      circleCls += ' border border-[#382E2B]/20 bg-white text-[#786F66]';
+    }
   } else {
-    if (isSelected) cls += ' opt-selected';
+    if (isSelected) {
+      containerCls +=
+        ' bg-[#FAF5EB] border-[#5a7d4d] text-[#1E3B14] font-semibold shadow-2xs ring-1 ring-[#5a7d4d]';
+      circleCls += ' bg-[#5a7d4d] text-white';
+    } else {
+      containerCls +=
+        ' bg-[#FAF9F6] border-[#EFE8D6] hover:bg-[#F3EFE6] hover:border-[#382E2B]/30 text-[#2D2422]';
+      circleCls += ' border border-[#382E2B]/25 bg-white text-[#6B5A4E]';
+    }
   }
 
   const handleClick = () => {
     if (!isReviewMode) onSelectAnswer(qNum, letter);
   };
 
-  // Badge shown in review mode
-  let badge = null;
-  if (isReviewMode) {
-    if (isCorrect && isSelected) {
-      badge = (
-        <span className="ml-auto shrink-0 text-[11px] font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-          Bạn chọn (Đúng)
-        </span>
-      );
-    } else if (isCorrect && !isSelected) {
-      badge = (
-        <span className="ml-auto shrink-0 text-[11px] font-semibold text-emerald-700 bg-emerald-100 border border-emerald-300 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-          Đáp án chuẩn
-        </span>
-      );
-    } else if (isWrong) {
-      badge = (
-        <span className="ml-auto shrink-0 text-[11px] font-semibold text-red-700 bg-red-100 border border-red-300 px-1.5 py-0.5 rounded-full whitespace-nowrap">
-          Bạn đã chọn
-        </span>
-      );
-    }
-  }
-
   return (
     <button
       type="button"
-      className={cls}
+      className={containerCls}
       disabled={isReviewMode}
       onClick={handleClick}
       aria-pressed={isSelected}
       aria-label={`Đáp án ${letter}`}
     >
-      <OptCircle
-        filled={isSelected}
-        isCorrect={isReviewMode && isCorrect}
-        isWrong={isReviewMode && isWrong}
-      />
-      <span className="opt-letter font-bold mr-1">{letter}.</span>
-      <span className="opt-text flex-1 text-left">{text}</span>
-      {badge}
+      <span className={circleCls}>
+        {isReviewMode && isCorrect ? (
+          <Check className="w-3.5 h-3.5 stroke-[3]" />
+        ) : isReviewMode && isWrong ? (
+          <X className="w-3.5 h-3.5 stroke-[3]" />
+        ) : (
+          letter
+        )}
+      </span>
+
+      <span className="flex-1 text-sm sm:text-base leading-relaxed text-left font-sans pt-0.5">
+        {text}
+      </span>
+
+      {/* Badges in Review Mode */}
+      {isReviewMode && (
+        <span className="ml-auto shrink-0 mt-0.5">
+          {isCorrect && isSelected && (
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full whitespace-nowrap">
+              Bạn chọn (Đúng)
+            </span>
+          )}
+          {isCorrect && !isSelected && (
+            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full whitespace-nowrap">
+              Đáp án chuẩn
+            </span>
+          )}
+          {isWrong && (
+            <span className="text-[11px] font-bold text-rose-700 bg-rose-100 border border-rose-300 px-2 py-0.5 rounded-full whitespace-nowrap">
+              Bạn đã chọn
+            </span>
+          )}
+        </span>
+      )}
     </button>
   );
 }
 
-/** Review banner shown at the top of each question card in review mode. */
+// ---------------------------------------------------------------------------
+// Review Banner
+// ---------------------------------------------------------------------------
+
 function ReviewBanner({ qNum, userAnswer, correctAnswer }) {
   if (!userAnswer) {
     return (
-      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-amber-50 border border-amber-300 text-amber-800 text-sm font-medium">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
-        </svg>
-        Câu {qNum}: Chưa trả lời — Đáp án: <strong>{correctAnswer}</strong>
+      <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-800 text-xs sm:text-sm font-medium">
+        <HelpCircle className="w-4 h-4 text-amber-600 shrink-0" />
+        <span>
+          Câu {qNum}: Chưa trả lời — Đáp án đúng là <strong>{correctAnswer}</strong>
+        </span>
       </div>
     );
   }
@@ -127,95 +135,73 @@ function ReviewBanner({ qNum, userAnswer, correctAnswer }) {
   const isCorrect = userAnswer === correctAnswer;
   if (isCorrect) {
     return (
-      <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-800 text-sm font-medium">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
-        </svg>
-        Câu {qNum}: Trả lời đúng!
+      <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs sm:text-sm font-medium">
+        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <span>Câu {qNum}: Trả lời chính xác! (+0.25 điểm)</span>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-lg bg-red-50 border border-red-300 text-red-800 text-sm font-medium">
-      <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
-      </svg>
-      Câu {qNum}: Sai — Đáp án đúng là <strong>{correctAnswer}</strong>
+    <div className="flex items-center gap-2 mb-3 px-3.5 py-2.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-900 text-xs sm:text-sm font-medium">
+      <XCircle className="w-4 h-4 text-rose-600 shrink-0" />
+      <span>
+        Câu {qNum}: Sai — Bạn chọn <strong>{userAnswer}</strong>, đáp án đúng là <strong>{correctAnswer}</strong>
+      </span>
     </div>
   );
 }
 
-/**
- * Format explanation text into React elements.
- *
- * The explanation JSON uses \n both for:
- *   - Real paragraph/item breaks (before A. B. C. D. •  Giải thích: blank line)
- *   - Soft word-wrap (line continues same sentence, ends mid-word or mid-sentence)
- *
- * Strategy:
- *   1. Split by \n
- *   2. Detect "paragraph starters": blank line, •, A./B./C./D. at start, "Giải thích", quotes "
- *   3. All other continuation lines are appended with a space to the previous paragraph
- *   4. Render each paragraph with ĐÚNG/SAI highlights
- */
+// ---------------------------------------------------------------------------
+// Solution Box
+// ---------------------------------------------------------------------------
+
 function formatExplanation(text) {
   if (!text) return null;
 
   const rawLines = text.split('\n');
-
-  // ── Step 1: group into logical paragraphs ──────────────────────────────
-  const paragraphs = []; // { type: 'blank'|'bullet'|'option'|'text', content: string }
+  const paragraphs = [];
   let current = null;
 
   const isOptionStart = (s) => /^[A-D]\.\s/.test(s);
   const isBulletStart = (s) => s.startsWith('•');
-  const isGiaiThich  = (s) => /^Gi[aả]i th[íi]ch/i.test(s) || /^Tạm dịch/i.test(s);
-  const isQuoteStart = (s) => s.startsWith('"') || s.startsWith('"') || s.startsWith('"');
+  const isGiaiThich = (s) => /^Gi[aả]i th[íi]ch/i.test(s) || /^Tạm dịch/i.test(s);
+  const isQuoteStart = (s) => s.startsWith('"') || s.startsWith('“') || s.startsWith('”');
 
   const pushCurrent = () => {
-    if (current) { paragraphs.push(current); current = null; }
+    if (current) {
+      paragraphs.push(current);
+      current = null;
+    }
   };
 
   for (const rawLine of rawLines) {
     const trimmed = rawLine.trim();
-
-    // Blank line → hard break
     if (trimmed === '') {
       pushCurrent();
       paragraphs.push({ type: 'blank', content: '' });
       continue;
     }
-
-    // Bullet item
     if (isBulletStart(trimmed)) {
       pushCurrent();
       current = { type: 'bullet', content: trimmed.slice(1).trim() };
       continue;
     }
-
-    // Option A/B/C/D line
     if (isOptionStart(trimmed)) {
       pushCurrent();
       current = { type: 'option', content: trimmed };
       continue;
     }
-
-    // "Giải thích:" / "Tạm dịch:" section header
     if (isGiaiThich(trimmed)) {
       pushCurrent();
       current = { type: 'header', content: trimmed };
       continue;
     }
-
-    // Quote line (passage sentence)
     if (isQuoteStart(trimmed)) {
       pushCurrent();
       current = { type: 'quote', content: trimmed };
       continue;
     }
-
-    // Continuation line — append to current paragraph with a space
     if (current) {
       current.content = current.content + ' ' + trimmed;
     } else {
@@ -224,54 +210,47 @@ function formatExplanation(text) {
   }
   pushCurrent();
 
-  // ── Step 2: render ──────────────────────────────────────────────────────
   const elements = [];
   let key = 0;
 
   for (const para of paragraphs) {
     if (para.type === 'blank') {
-      elements.push(<div key={key++} className="h-1" />);
+      elements.push(<div key={key++} className="h-1.5" />);
       continue;
     }
-
     if (para.type === 'bullet') {
       elements.push(
         <div key={key++} className="flex items-start gap-2 pl-1 py-0.5">
-          <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+          <span className="mt-[8px] w-1.5 h-1.5 rounded-full bg-[#5a7d4d] shrink-0" />
           <span className="flex-1 leading-relaxed">{highlightKeywords(para.content)}</span>
         </div>
       );
       continue;
     }
-
     if (para.type === 'option') {
       elements.push(
-        <p key={key++} className="leading-relaxed pl-2 border-l-2 border-blue-200 ml-1">
+        <p key={key++} className="leading-relaxed pl-3 border-l-2 border-[#5a7d4d]/40 ml-1 py-0.5">
           {highlightKeywords(para.content)}
         </p>
       );
       continue;
     }
-
     if (para.type === 'header') {
       elements.push(
-        <p key={key++} className="font-semibold text-blue-700 mt-2 leading-relaxed">
+        <p key={key++} className="font-bold text-[#382E2B] mt-2.5 leading-relaxed">
           {highlightKeywords(para.content)}
         </p>
       );
       continue;
     }
-
     if (para.type === 'quote') {
       elements.push(
-        <p key={key++} className="leading-relaxed italic text-slate-600 bg-slate-50 border-l-4 border-blue-300 pl-3 py-1 rounded-r">
+        <p key={key++} className="leading-relaxed italic text-[#6B5A4E] bg-[#FAF5EB] border-l-3 border-[#5a7d4d] pl-3 py-1.5 rounded-r-lg my-1">
           {para.content}
         </p>
       );
       continue;
     }
-
-    // Default text
     elements.push(
       <p key={key++} className="leading-relaxed">
         {highlightKeywords(para.content)}
@@ -282,46 +261,43 @@ function formatExplanation(text) {
   return elements;
 }
 
-/** Split a line and wrap ĐÚNG/SAI tokens with color badges. */
 function highlightKeywords(text) {
-  // Split on ĐÚNG or SAI surrounded by word boundaries (dash, colon, space)
   const parts = text.split(/(ĐÚNG|SAI)/g);
   return parts.map((part, i) => {
     if (part === 'ĐÚNG') {
       return (
-        <strong key={i} className="text-emerald-700 font-black">ĐÚNG</strong>
+        <strong key={i} className="text-emerald-700 font-black">
+          ĐÚNG
+        </strong>
       );
     }
     if (part === 'SAI') {
       return (
-        <strong key={i} className="text-rose-600 font-black">SAI</strong>
+        <strong key={i} className="text-rose-600 font-black">
+          SAI
+        </strong>
       );
     }
     return part;
   });
 }
 
-/** Explanation/solution box shown below the options in review mode. */
 function SolutionBox({ explanation }) {
   if (!explanation) return null;
   return (
-    <div className="mt-3 p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 text-sm space-y-1">
-      <p className="font-semibold text-blue-700 mb-2 flex items-center gap-1.5">
-        <svg className="w-4 h-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
-        </svg>
-        Giải thích
-      </p>
-      <div className="space-y-1">
+    <div className="mt-4 p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EFE8D6] text-[#2D2422] text-xs sm:text-sm space-y-2">
+      <div className="font-bold text-[#557A46] flex items-center gap-2 pb-2 border-b border-[#EFE8D6]">
+        <Lightbulb className="w-4 h-4 text-[#557A46] shrink-0" />
+        <span className="uppercase tracking-wider text-xs">Giải thích chi tiết</span>
+      </div>
+      <div className="space-y-1.5 pt-1 text-xs sm:text-sm leading-relaxed">
         {formatExplanation(explanation)}
       </div>
     </div>
   );
 }
 
-/** Prompt shown for arrangement question type. */
 function ArrangementPrompt({ qNum, q }) {
-  // Detect sub-labels (a, b, c, ...) from the question text if present
   const raw = q.arrangement_sentences || q.raw_sentences || '';
   const letters = [];
   const regex = /(?:^|\n)\s*([a-f])\./gi;
@@ -330,8 +306,8 @@ function ArrangementPrompt({ qNum, q }) {
   const labelStr = letters.length > 0 ? `(${letters.join(', ')})` : '';
 
   return (
-    <p className="text-sm italic text-slate-500 mt-1 mb-2">
-      Xem câu {labelStr} ở cột bên trái.
+    <p className="text-xs sm:text-sm italic text-[#6B5A4E] mt-1 mb-3">
+      Xem câu {labelStr} ở ngữ liệu cột bên trái.
     </p>
   );
 }
@@ -357,86 +333,76 @@ function QuestionCard({
   const qNum = q.number;
   const isCurrent = qIndex === currentQIndex;
   const userAnswer = answers?.[qNum] ?? null;
-  const isFlagged = !!(flags?.[qNum]);
+  const isFlagged = Boolean(flags?.[qNum]);
 
-  // Correct answer from results (post-submit) or from question itself
   const correctAnswer = useMemo(() => {
     if (results?.answers) return results.answers[qNum] ?? q.correct_answer ?? null;
     return q.correct_answer ?? null;
   }, [results, qNum, q.correct_answer]);
 
-  const isArrangement = q.type === 'arrangement';
+  const isArrangement = q.type === 'arrangement' || Boolean(q.is_arrangement);
 
-  // Card ring highlight for current question
-  const cardCls = [
-    'question-card mb-4 p-4 rounded-xl border bg-white shadow-sm transition-all duration-200',
-    isCurrent ? 'ring-2 ring-blue-500 border-blue-300 shadow-md' : 'border-slate-200',
-  ].join(' ');
+  let cardCls =
+    'question-card mb-4 p-4 sm:p-6 rounded-2xl bg-white border transition-all duration-200 shadow-xs';
+  if (isCurrent) {
+    cardCls += ' ring-2 ring-[#5a7d4d]/30 border-[#5a7d4d] shadow-sm';
+  } else {
+    cardCls += ' border-[#EFE8D6] hover:border-[#382E2B]/20';
+  }
 
   return (
     <div id={`q-card-${qNum}`} className={cardCls}>
-      {/* ── Header row ─────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-2 mb-2">
-        {/* Question number + prompt */}
+      {/* ── Header row: Câu hỏi + Cờ + Báo lỗi ───────────────────────── */}
+      <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex-1 min-w-0">
           <button
             type="button"
-            className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-full px-2.5 py-0.5 mr-2 transition-colors cursor-pointer"
+            className="text-xs font-black text-[#486b3c] bg-[#5a7d4d]/10 hover:bg-[#5a7d4d]/20 border border-[#5a7d4d]/20 rounded-full px-3 py-1 mr-2.5 transition-colors cursor-pointer shrink-0 inline-flex items-center gap-1"
             onClick={() => onJumpToQuestion(qNum)}
             title="Nhảy đến câu này"
           >
-            Câu {qNum}
+            <span>Câu {qNum}</span>
           </button>
-          <span className={`font-medium text-slate-800 leading-snug ${fontSizeClass ?? ''}`}>
+          <span
+            className={`font-bold text-[#2D2422] leading-snug font-sans ${fontSizeClass ?? 'text-sm sm:text-base'}`}
+          >
             {q.prompt || q.question || ''}
           </span>
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+        <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
           {/* Flag button */}
           <button
             type="button"
             onClick={() => onToggleFlag(qNum)}
-            title={isFlagged ? 'Bỏ đánh dấu' : 'Đánh dấu câu này'}
-            className={[
-              'p-1.5 rounded-lg border transition-colors',
+            title={isFlagged ? 'Bỏ đánh dấu cờ' : 'Đánh dấu cờ câu này để xem lại sau'}
+            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
               isFlagged
-                ? 'text-amber-600 bg-amber-50 border-amber-300 hover:bg-amber-100'
-                : 'text-slate-400 bg-slate-50 border-slate-200 hover:text-amber-500 hover:bg-amber-50 hover:border-amber-300',
-            ].join(' ')}
+                ? 'bg-amber-100/90 text-amber-800 border-amber-300 shadow-2xs'
+                : 'text-[#8C827A] bg-[#FAF9F6] border-[#EFE8D6] hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200'
+            }`}
           >
-            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-              <path
-                fillRule="evenodd"
-                d={
-                  isFlagged
-                    ? 'M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm3.293 1.293A1 1 0 017 4h9a1 1 0 01.707 1.707L13.414 9l3.293 3.293A1 1 0 0116 14H7a1 1 0 01-1-1V5a1 1 0 01.293-.707z'
-                    : 'M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm3.293 1.293A1 1 0 017 4h9a1 1 0 01.707 1.707L13.414 9l3.293 3.293A1 1 0 0116 14H7a1 1 0 01-1-1V5a1 1 0 01.293-.707z'
-                }
-                clipRule="evenodd"
-              />
-            </svg>
+            <Flag className={`w-3.5 h-3.5 ${isFlagged ? 'fill-current text-amber-600' : ''}`} />
+            <span className="hidden sm:inline">{isFlagged ? 'Đã cờ' : 'Gắn cờ'}</span>
           </button>
 
           {/* Report button */}
           <button
             type="button"
             onClick={() => onReportAnswer(qNum, q)}
-            title="Báo lỗi câu hỏi"
-            className="p-1.5 rounded-lg border text-slate-400 bg-slate-50 border-slate-200 hover:text-red-500 hover:bg-red-50 hover:border-red-300 transition-colors"
+            title="Báo lỗi nội dung hoặc đáp án câu hỏi này"
+            className="p-1.5 rounded-xl border text-[#8C827A] bg-[#FAF9F6] border-[#EFE8D6] hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer"
           >
-            <svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
-            </svg>
+            <AlertCircle className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* ── Arrangement note ────────────────────────────────────────────── */}
+      {/* ── Arrangement note ────────────────────────────────────────── */}
       {isArrangement && <ArrangementPrompt qNum={qNum} q={q} />}
 
-      {/* ── Review banner ───────────────────────────────────────────────── */}
+      {/* ── Review banner ───────────────────────────────────────────── */}
       {isReviewMode && (
         <ReviewBanner
           qNum={qNum}
@@ -445,8 +411,8 @@ function QuestionCard({
         />
       )}
 
-      {/* ── Options A / B / C / D ───────────────────────────────────────── */}
-      <div className={`flex flex-col gap-1.5 ${fontSizeClass ?? ''}`}>
+      {/* ── Options A / B / C / D ───────────────────────────────────── */}
+      <div className={`flex flex-col gap-2 ${fontSizeClass ?? ''}`}>
         {LETTERS.map((letter) => {
           const optKey = `option_${letter.toLowerCase()}`;
           const optText =
@@ -469,7 +435,7 @@ function QuestionCard({
         })}
       </div>
 
-      {/* ── Solution box ────────────────────────────────────────────────── */}
+      {/* ── Solution box ────────────────────────────────────────────── */}
       {isReviewMode && <SolutionBox explanation={q.explanation} />}
     </div>
   );
@@ -493,12 +459,10 @@ export function ExamQuestionsPanel({
   onJumpToQuestion,
   onReportAnswer,
 }) {
-  // Guard
   if (!exam) return null;
 
   const questions = exam.questions ?? [];
 
-  // ── Scroll current question into view whenever currentQIndex changes ──
   useEffect(() => {
     if (currentQIndex == null || currentQIndex < 0 || currentQIndex >= questions.length) return;
     const q = questions[currentQIndex];
@@ -513,7 +477,7 @@ export function ExamQuestionsPanel({
   return (
     <div
       ref={questionsPaneRef}
-      className="questions-panel h-full overflow-y-auto px-3 py-4"
+      className="questions-panel h-full overflow-y-auto px-3 sm:px-5 py-4 space-y-4"
     >
       {questions.map((q, idx) => (
         <QuestionCard

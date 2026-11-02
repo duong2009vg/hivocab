@@ -1,7 +1,21 @@
 // src/components/thpt/ExamHeader.jsx
-// Header bar (38px): timer, câu hỏi navigation, controls, nộp bài
+// Header bar (52px): điều hướng câu hỏi, đồng hồ đếm ngược, kiểm soát font chữ, nộp bài
+// Chuẩn phong cách HiVocab Exam Focus Mode: tối giản, tương phản cao, công thái học
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  CheckCircle2,
+  Maximize2,
+  Minimize2,
+  Send,
+  Award,
+  GraduationCap,
+  Sparkles,
+} from 'lucide-react';
 
 export function ExamHeader({
   exam,
@@ -23,137 +37,186 @@ export function ExamHeader({
 }) {
   const totalQ = exam?.total_questions || 40;
   const currentQNum = currentQIndex + 1;
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(Boolean(document.fullscreenElement));
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   return (
-    <header className="h-[38px] min-h-[38px] max-h-[38px] bg-[#1a365d] text-white px-3 md:px-4 flex items-center justify-between border-b border-[#2b4c7e] shrink-0 shadow-sm z-30 select-none">
-      {/* Left: Kỳ thi */}
-      <div className="flex items-center gap-2 min-w-0">
-        <div className="w-6 h-6 rounded-lg bg-blue-600/40 border border-blue-400/30 flex items-center justify-center shrink-0">
-          <span className="material-symbols-outlined text-white text-[16px]">school</span>
-        </div>
-        <div className="min-w-0 flex items-center gap-1.5">
-          <span className="text-xs font-black tracking-wide uppercase text-blue-200 truncate">THPT TIẾNG ANH</span>
-          <span className="text-amber-300 font-mono font-bold text-[10px] bg-[#0f2342] px-1.5 py-0.5 rounded border border-blue-400/20 shrink-0">
-            SBD: 10082401
+    <header className="h-[52px] min-h-[52px] max-h-[52px] bg-[#FFFDF9] text-[#2D2422] px-3 sm:px-5 flex items-center justify-between border-b border-[#EFE8D6] shrink-0 shadow-xs z-30 select-none">
+      {/* ── Left: Thoát & Tên Đề Thi ─────────────────────────────────── */}
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button
+          type="button"
+          onClick={onExit}
+          className="p-1.5 -ml-1 text-[#6B5A4E] hover:text-[#2D2422] hover:bg-[#FAF5EB] rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+          title="Thoát phòng thi"
+        >
+          <ArrowLeft className="w-5 h-5 shrink-0" />
+          <span className="hidden xl:inline text-xs font-bold text-[#6B5A4E]">Thoát</span>
+        </button>
+
+        <div className="h-5 w-px bg-[#EFE8D6] hidden sm:block shrink-0" />
+
+        <div className="min-w-0 flex items-center gap-2">
+          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#5a7d4d]/10 text-[#486b3c] border border-[#5a7d4d]/25 shrink-0">
+            <GraduationCap className="w-3 h-3" />
+            <span>THPT QG</span>
           </span>
-          {isReviewMode ? (
-            <span className="hidden xl:inline-block text-[11px] text-emerald-300 font-bold truncate max-w-[160px]">
-              XEM LỜI GIẢI CHI TIẾT
-            </span>
-          ) : (
-            <span className="hidden xl:inline-block text-[11px] text-slate-300 font-medium truncate max-w-[120px]">
-              {exam?.title || 'Thí sinh'}
+
+          <h2
+            className="font-heading font-black text-xs sm:text-sm text-[#2D2422] truncate max-w-[120px] sm:max-w-[200px] md:max-w-[280px] xl:max-w-md"
+            title={exam?.title || 'Phòng luyện thi THPT'}
+          >
+            {exam?.title || 'Phòng luyện thi THPT'}
+          </h2>
+
+          {isReviewMode && (
+            <span className="hidden md:inline-flex items-center gap-1 text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 shrink-0">
+              <Sparkles className="w-3 h-3 text-emerald-600" />
+              <span>Xem giải chi tiết</span>
             </span>
           )}
         </div>
       </div>
 
-      {/* Center: Navigation + Timer + Progress */}
-      <div className="flex items-center gap-1.5 md:gap-2.5">
-        {/* Question nav */}
-        <div className="flex items-center bg-[#0f2342] border border-blue-400/30 rounded-lg p-0.5">
+      {/* ── Center: Điều hướng câu + Đồng hồ đếm ngược ───────────────── */}
+      <div className="flex items-center gap-1.5 sm:gap-2.5">
+        {/* Bộ điều hướng câu trước/sau */}
+        <div className="flex items-center bg-[#FAF5EB] border border-[#EFE8D6] rounded-xl p-0.5">
           <button
             type="button"
             onClick={onPrev}
-            className="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-95"
             title="Câu trước (←)"
           >
-            <span className="material-symbols-outlined text-[15px]">chevron_left</span>
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className="px-1.5 text-[11px] font-mono font-bold text-blue-100 whitespace-nowrap">
-            Câu <span>{currentQNum}</span>/{totalQ}
+          <div className="px-2 text-xs font-bold text-[#2D2422] whitespace-nowrap">
+            Câu <span className="font-black text-[#5a7d4d]">{currentQNum}</span>
+            <span className="text-[#8C827A] font-normal">/{totalQ}</span>
           </div>
           <button
             type="button"
             onClick={onNext}
-            className="w-6 h-6 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer"
+            className="w-7 h-7 flex items-center justify-center text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-95"
             title="Câu kế tiếp (→ hoặc Enter)"
           >
-            <span className="material-symbols-outlined text-[15px]">chevron_right</span>
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Timer */}
+        {/* Đồng hồ đếm ngược */}
         {!isReviewMode && (
-          <div className={`flex items-center gap-1 bg-[#0f2342] border border-blue-400/30 px-2 py-0.5 rounded-lg shadow-inner text-white ${isTimerWarning ? 'text-rose-400 animate-pulse' : ''}`}>
-            <span className="material-symbols-outlined text-[15px] text-amber-400">timer</span>
-            <span className="font-mono text-xs md:text-sm font-black tracking-wider text-amber-300">
-              {timerDisplay}
-            </span>
+          <div
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs sm:text-sm font-black transition-colors ${
+              isTimerWarning
+                ? 'bg-rose-50 text-rose-600 border-rose-300 animate-pulse'
+                : 'bg-[#FFFDF9] text-[#8C5311] border-[#EFE8D6]'
+            }`}
+            title="Thời gian còn lại"
+          >
+            <Clock className={`w-3.5 h-3.5 ${isTimerWarning ? 'text-rose-500' : 'text-amber-500'}`} />
+            <span className="tabular-nums tracking-wider">{timerDisplay}</span>
           </div>
         )}
 
-        {/* Progress */}
-        <div className="hidden sm:flex items-center gap-1 text-[11px] font-bold text-blue-200 bg-blue-900/50 border border-blue-400/20 px-2 py-0.5 rounded-lg">
-          <span className="material-symbols-outlined text-[13px] text-emerald-400">task_alt</span>
+        {/* Tiến độ hoàn thành bài thi */}
+        <div className="hidden lg:flex items-center gap-1.5 text-xs font-bold text-[#6B5A4E] bg-[#FAF5EB] border border-[#EFE8D6] px-2.5 py-1 rounded-xl">
           {isReviewMode && results ? (
-            <span>
-              Đúng: <strong>{results.correct}</strong>/{results.total} ({results.score.toFixed(2)}đ)
+            <span className="text-emerald-800 flex items-center gap-1">
+              <Award className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Đúng: <strong>{results.correct}</strong>/{results.total} ({results.score.toFixed(2)}đ)</span>
             </span>
           ) : (
-            <span>{answeredCount} / {totalQ}</span>
+            <span className="flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#5a7d4d]" />
+              <span><strong>{answeredCount}</strong>/{totalQ} đã làm</span>
+            </span>
           )}
         </div>
       </div>
 
-      {/* Right: Controls */}
-      <div className="flex items-center gap-1 md:gap-1.5 shrink-0">
-        {/* Mobile view switcher */}
-        <div className="flex md:hidden items-center bg-[#0f2342] border border-blue-400/30 p-0.5 rounded-lg text-[10px] font-bold">
+      {/* ── Right: Bộ điều khiển & Nộp bài ──────────────────────────── */}
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Bộ chuyển đổi view trên điện thoại */}
+        <div className="flex md:hidden items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl text-[11px] font-bold">
           {['passage', 'both', 'questions'].map((mode) => (
             <button
               key={mode}
               type="button"
               onClick={() => onSetMobileView(mode)}
-              className={`px-1.5 py-0.5 rounded transition-colors ${mobileView === mode ? 'bg-blue-600 text-white' : 'text-slate-300 hover:text-white'}`}
+              className={`px-2 py-1 rounded-lg transition-colors ${
+                mobileView === mode
+                  ? 'bg-[#5a7d4d] text-white shadow-2xs'
+                  : 'text-[#6B5A4E] hover:text-[#2D2422]'
+              }`}
             >
               {mode === 'passage' ? 'Đọc' : mode === 'both' ? '2 bên' : 'Câu'}
             </button>
           ))}
         </div>
 
-        {/* Font size */}
-        <div className="hidden lg:flex items-center gap-0.5 bg-[#0f2342] border border-blue-400/30 p-0.5 rounded-lg">
-          <button onClick={() => onChangeFontSize(-1)} className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Giảm cỡ chữ">A-</button>
-          <button onClick={() => onChangeFontSize(1)} className="w-5 h-5 rounded flex items-center justify-center text-[10px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer" title="Tăng cỡ chữ">A+</button>
+        {/* Cỡ chữ */}
+        <div className="hidden lg:flex items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl">
+          <button
+            type="button"
+            onClick={() => onChangeFontSize(-1)}
+            className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white transition-colors cursor-pointer"
+            title="Giảm cỡ chữ (A-)"
+          >
+            A-
+          </button>
+          <div className="w-px h-3.5 bg-[#EFE8D6]" />
+          <button
+            type="button"
+            onClick={() => onChangeFontSize(1)}
+            className="w-6 h-6 rounded-lg flex items-center justify-center text-[11px] font-bold text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white transition-colors cursor-pointer"
+            title="Tăng cỡ chữ (A+)"
+          >
+            A+
+          </button>
         </div>
 
-        {/* Fullscreen */}
+        {/* Toàn màn hình */}
         <button
+          type="button"
           onClick={onToggleFullscreen}
-          className="hidden sm:flex w-6 h-6 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 items-center justify-center transition-colors cursor-pointer"
-          title="Toàn màn hình"
+          className="hidden sm:flex w-8 h-8 rounded-xl text-[#6B5A4E] hover:text-[#2D2422] hover:bg-[#FAF5EB] border border-transparent hover:border-[#EFE8D6] items-center justify-center transition-colors cursor-pointer"
+          title={isFullscreen ? 'Thu nhỏ cửa sổ' : 'Toàn màn hình'}
         >
-          <span className="material-symbols-outlined text-[16px]">fullscreen</span>
+          {isFullscreen ? (
+            <Minimize2 className="w-4 h-4" />
+          ) : (
+            <Maximize2 className="w-4 h-4" />
+          )}
         </button>
 
-        {/* Submit / Results */}
+        {/* Nút Nộp Bài / Xem Kết Quả */}
         {isReviewMode ? (
           <button
+            type="button"
             onClick={onShowResults}
-            className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-xs hover:shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">military_tech</span>
-            <span>KẾT QUẢ</span>
+            <Award className="w-4 h-4 shrink-0" />
+            <span className="hidden xs:inline">KẾT QUẢ</span>
           </button>
         ) : (
           <button
+            type="button"
             onClick={onConfirmSubmit}
-            className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-black text-xs uppercase tracking-wider shadow hover:shadow-md transition-all flex items-center gap-1 cursor-pointer"
+            className="px-3.5 py-1.5 rounded-xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs uppercase tracking-wider shadow-xs hover:shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
           >
-            <span className="material-symbols-outlined text-[14px]">send</span>
+            <Send className="w-3.5 h-3.5 shrink-0" />
             <span>NỘP BÀI</span>
           </button>
         )}
-
-        {/* Exit */}
-        <button
-          onClick={onExit}
-          className="p-1 rounded-lg text-slate-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
-          title="Thoát phòng thi"
-        >
-          <span className="material-symbols-outlined text-[18px]">close</span>
-        </button>
       </div>
     </header>
   );

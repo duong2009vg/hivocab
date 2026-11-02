@@ -255,7 +255,7 @@ export function PageThptRoom() {
   // ──────────────────────────────────────────────
   if (isLocked) {
     return (
-      <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-screen w-screen overflow-hidden">
+      <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-[100dvh] min-h-[100dvh] w-screen overflow-hidden">
         <header className="px-6 py-3.5 bg-[#FFFDF9] border-b-2 border-[#382E2B] flex items-center justify-between select-none">
           <button
             type="button"
@@ -291,7 +291,7 @@ export function PageThptRoom() {
   // ──────────────────────────────────────────────
   if (initError) {
     return (
-      <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-screen w-screen overflow-hidden items-center justify-center p-6">
+      <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-[100dvh] min-h-[100dvh] w-screen overflow-hidden items-center justify-center p-6">
         <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-8 max-w-md w-full text-center shadow-[4px_6px_0px_#382E2B]">
           <AlertTriangle className="w-10 h-10 text-[#C85A3F] mx-auto mb-3 shrink-0" />
           <h3 className="font-heading font-black text-lg text-[#382E2B] mb-2">Không thể tải đề thi</h3>
@@ -310,7 +310,7 @@ export function PageThptRoom() {
 
   if (!session.exam) {
     return (
-      <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-screen w-screen overflow-hidden items-center justify-center gap-4">
+      <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF5EB] flex flex-col h-[100dvh] min-h-[100dvh] w-screen overflow-hidden items-center justify-center gap-4">
         <div className="w-12 h-12 border-4 border-[#5a7d4d]/30 border-t-[#5a7d4d] rounded-full animate-spin" />
         <p className="text-[#382E2B] text-sm font-bold">Đang nạp đề thi THPT...</p>
       </div>
@@ -327,13 +327,13 @@ export function PageThptRoom() {
   }[session.mobileView] || 'w-full md:w-1/2 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full';
 
   const rightColClass = {
-    passage:   'hidden md:flex w-full md:w-1/2 flex-col bg-slate-50/70 overflow-hidden min-h-0 md:h-full transition-all border-l border-slate-200 md:border-l-0',
-    questions: 'w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-full transition-all border-l border-slate-200 md:border-l-0',
-    both:      'w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-1/2 md:h-full transition-all border-l border-slate-200 md:border-l-0',
-  }[session.mobileView] || 'w-full md:w-1/2 flex flex-col bg-slate-50/70 overflow-hidden min-h-0 h-1/2 md:h-full';
+    passage:   'hidden md:flex w-full md:w-1/2 flex-col bg-[#FAF9F6] overflow-hidden min-h-0 md:h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
+    questions: 'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
+    both:      'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-1/2 md:h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
+  }[session.mobileView] || 'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-1/2 md:h-full';
 
   return (
-    <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#f4f6f9] flex flex-col h-screen w-screen overflow-hidden">
+    <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF9F6] flex flex-col h-[100dvh] min-h-[100dvh] w-screen overflow-hidden">
       <ExamHeader
         exam={session.exam}
         currentQIndex={session.currentQIndex}
@@ -372,7 +372,7 @@ export function PageThptRoom() {
 
         <div
           ref={splitPanel.dividerRef}
-          className="hidden md:block w-1.5 bg-slate-200 hover:bg-blue-400 cursor-col-resize shrink-0 transition-colors"
+          className="hidden md:block w-1.5 bg-[#EFE8D6] hover:bg-[#5a7d4d]/60 cursor-col-resize shrink-0 transition-colors"
           title="Kéo để thay đổi kích thước hai cột"
         />
 

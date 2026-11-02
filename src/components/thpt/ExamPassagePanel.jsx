@@ -1,7 +1,9 @@
 // src/components/thpt/ExamPassagePanel.jsx
 // Cột bên trái phòng thi THPT: hiển thị toàn bộ ngữ liệu đề bài theo section.
+// Chuẩn phong cách HiVocab Exam Focus Mode: giấy thi trang nhã, công thái học đọc hiểu tiếng Anh.
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { BookOpen } from 'lucide-react';
 import {
   buildExamSections,
   formatBlanksInHtml,
@@ -42,11 +44,11 @@ function buildArrangementSectionHtml(sec, questions) {
       if (!text) return;
 
       sHtml += `
-        <div class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/90 hover:bg-blue-50/50 hover:border-blue-300 transition-colors">
-          <span class="w-6 h-6 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
+        <div class="flex items-start gap-3 p-3 rounded-xl bg-[#FAF9F6] border border-[#EFE8D6] hover:bg-[#F3EFE6] transition-colors">
+          <span class="w-6 h-6 rounded-lg bg-[#5a7d4d] text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5 shadow-2xs">
             ${escHtml(letter)}
           </span>
-          <div class="text-slate-800 text-sm leading-relaxed q-text-size select-text font-sans flex-1">
+          <div class="text-[#2D2422] text-sm leading-relaxed q-text-size select-text font-sans flex-1">
             ${escHtml(text)}
           </div>
         </div>`;
@@ -54,24 +56,24 @@ function buildArrangementSectionHtml(sec, questions) {
 
     arrCardsHtml += `
       <div id="passage-q-${q.number}"
-           class="passage-q-arr-card p-4 rounded-xl bg-white border border-slate-200 shadow-2xs space-y-3 transition-all duration-300">
-        <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+           class="passage-q-arr-card p-5 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-3.5 transition-all duration-200">
+        <div class="flex items-center justify-between pb-2.5 border-b border-[#EFE8D6]">
           <div class="flex items-center gap-2">
-            <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 font-black text-xs flex items-center justify-center shrink-0">
+            <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
               ${q.number}
             </span>
-            <span class="font-bold text-xs uppercase tracking-wide text-slate-700 font-sans">
-              Câu ${q.number}: Ngữ liệu sắp xếp
+            <span class="font-bold text-xs uppercase tracking-wide text-[#2D2422] font-sans">
+              Câu ${q.number}: Ngữ liệu sắp xếp câu
             </span>
           </div>
-          <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 font-sans">
+          <span class="text-[10px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20 font-sans">
             Sắp xếp logic
           </span>
         </div>
 
         ${
           q.arrangement_context
-            ? `<div class="font-bold text-slate-800 italic text-sm pb-1">${escHtml(q.arrangement_context)}</div>`
+            ? `<div class="font-bold text-[#2D2422] italic text-sm pb-1">${escHtml(q.arrangement_context)}</div>`
             : ''
         }
 
@@ -82,31 +84,31 @@ function buildArrangementSectionHtml(sec, questions) {
   });
 
   const sectionInstruction = sec.instruction
-    ? `<div class="text-xs text-slate-500 font-medium italic pb-1 font-serif leading-relaxed">
+    ? `<div class="text-xs text-[#6B5A4E] font-medium italic pb-1 font-serif leading-relaxed border-l-2 border-[#5a7d4d] pl-3 py-1 bg-[#FAF5EB]/50 rounded-r-lg">
          ${escHtml(sec.instruction)}
        </div>`
     : '';
 
   return `
     <div id="passage-sec-${sec.index}"
-         class="passage-sec-card p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-4 transition-all duration-300 font-sans">
-      <div class="flex items-center justify-between pb-2.5 border-b border-slate-100 gap-2">
+         class="passage-sec-card p-6 md:p-8 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-4 transition-all duration-300 font-sans">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D6] gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 font-black text-xs flex items-center justify-center shrink-0">
+          <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
             ${sec.index}
           </span>
-          <h3 class="font-bold text-xs uppercase tracking-wide text-slate-800 truncate">
+          <h3 class="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#2D2422] truncate">
             ${escHtml(sec.name || sec.group || '')}
           </h3>
         </div>
-        <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
+        <span class="text-[11px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20 shrink-0">
           Câu ${sec.startQ} - ${sec.endQ}
         </span>
       </div>
 
       ${sectionInstruction}
 
-      <div class="space-y-3">
+      <div class="space-y-4">
         ${arrCardsHtml}
       </div>
     </div>`;
@@ -134,8 +136,8 @@ function buildParagraphsHtml(sec, questions) {
 
       if (isBullet) {
         parasHtml += `
-          <div class="flex items-start gap-2.5 text-sm text-slate-800 my-2 pl-2 leading-relaxed font-sans">
-            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 shrink-0 mt-2"></span>
+          <div class="flex items-start gap-2.5 text-base text-[#2D2422] my-2 pl-2 leading-relaxed font-serif">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#5a7d4d] shrink-0 mt-2.5"></span>
             <div class="flex-1">${formatBlanksInHtml(
               p.replace(/^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s*/, ''),
               startQ,
@@ -144,36 +146,36 @@ function buildParagraphsHtml(sec, questions) {
           </div>`;
       } else if (isSource) {
         parasHtml += `
-          <div class="text-right text-xs text-slate-500 italic mt-2.5 font-serif select-text">
+          <div class="text-right text-xs text-[#8C827A] italic mt-3 font-serif select-text">
             ${formatBlanksInHtml(p, startQ, endQ)}
           </div>`;
       } else if (isHeader) {
         parasHtml += `
-          <div class="font-bold text-slate-900 text-xs uppercase tracking-wide mt-3 mb-1 font-sans">
+          <div class="font-bold text-[#2D2422] text-xs uppercase tracking-wider mt-4 mb-2 font-sans">
             ${formatBlanksInHtml(p, startQ, endQ)}
           </div>`;
       } else if (isReadingComprehension) {
         parasHtml += `
-          <div class="reading-para-block my-3 p-3.5 rounded-xl bg-slate-50/70 border border-slate-200/80 hover:bg-blue-50/30 transition-colors">
+          <div class="reading-para-block my-4 select-text">
             <div class="flex items-center gap-1.5 mb-1.5 select-none">
-              <span class="inline-flex items-center text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100/80 border border-blue-200 px-2 py-0.5 rounded-md">
+              <span class="inline-flex items-center text-[10px] font-black uppercase tracking-wider text-[#486b3c] bg-[#5a7d4d]/10 border border-[#5a7d4d]/20 px-2 py-0.5 rounded-md">
                 Đoạn ${pIdx + 1}
               </span>
             </div>
-            <p class="text-justify text-sm text-slate-800 leading-relaxed select-text font-sans">
+            <p class="text-justify text-base text-[#2D2422] leading-relaxed md:leading-loose select-text font-serif">
               ${formatBlanksInHtml(p, startQ, endQ)}
             </p>
           </div>`;
       } else {
         parasHtml += `
-          <p class="text-justify text-sm text-slate-800 leading-relaxed indent-6 my-2.5 font-sans">
+          <p class="text-justify text-base text-[#2D2422] leading-relaxed md:leading-loose indent-6 my-3 font-serif">
             ${formatBlanksInHtml(p, startQ, endQ)}
           </p>`;
       }
     });
   } else if (rawText) {
     parasHtml = `
-      <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text whitespace-pre-line space-y-2">
+      <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif text-base q-text-size select-text whitespace-pre-line space-y-2.5">
         ${formatBlanksInHtml(rawText, startQ, endQ)}
       </div>`;
   } else {
@@ -183,12 +185,12 @@ function buildParagraphsHtml(sec, questions) {
     );
     if (secQuestions.length > 0 && secQuestions[0].passage) {
       parasHtml = `
-        <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text whitespace-pre-line space-y-2">
+        <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif text-base q-text-size select-text whitespace-pre-line space-y-2.5">
           ${formatBlanksInHtml(secQuestions[0].passage, startQ, endQ)}
         </div>`;
     } else {
       parasHtml =
-        '<p class="text-xs text-slate-500 italic">Phần này bao gồm các câu hỏi độc lập (xem chi tiết ở cột bên phải).</p>';
+        '<p class="text-xs text-[#8C827A] italic">Phần này bao gồm các câu hỏi độc lập (xem chi tiết ở cột bên phải).</p>';
     }
   }
 
@@ -200,30 +202,30 @@ function buildReadingSectionHtml(sec, questions) {
   const parasHtml = buildParagraphsHtml(sec, questions);
 
   const instructionHtml = sec.instruction
-    ? `<div class="italic text-slate-600 text-xs mb-2 font-serif leading-relaxed border-l-2 border-blue-400 pl-2.5 py-0.5 bg-blue-50/40 rounded-r">
+    ? `<div class="italic text-[#6B5A4E] text-xs mb-3 font-serif leading-relaxed border-l-2 border-[#5a7d4d] pl-3 py-1 bg-[#FAF5EB]/50 rounded-r-lg">
          ${escHtml(sec.instruction)}
        </div>`
     : '';
 
   const titleHtml = sec.title
-    ? `<h4 class="text-center font-black text-sm uppercase tracking-wider text-slate-900 my-3 pb-1 border-b border-slate-100">
+    ? `<h4 class="text-center font-heading font-black text-sm uppercase tracking-wider text-[#2D2422] my-4 pb-2 border-b border-[#EFE8D6]">
          ${escHtml(sec.title)}
        </h4>`
     : '';
 
   return `
     <div id="passage-sec-${sec.index}"
-         class="passage-sec-card p-5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-3 transition-all duration-300 font-sans">
-      <div class="flex items-center justify-between pb-2.5 border-b border-slate-100 gap-2">
+         class="passage-sec-card p-6 md:p-8 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-4 transition-all duration-300 font-sans">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D6] gap-2">
         <div class="flex items-center gap-2 min-w-0">
-          <span class="w-6 h-6 rounded-lg bg-blue-100 text-blue-800 font-black text-xs flex items-center justify-center shrink-0">
+          <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
             ${sec.index}
           </span>
-          <h3 class="font-bold text-xs uppercase tracking-wide text-slate-800 truncate">
+          <h3 class="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#2D2422] truncate">
             ${escHtml(sec.name || sec.group || '')}
           </h3>
         </div>
-        <span class="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200 shrink-0">
+        <span class="text-[11px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20 shrink-0">
           Câu ${sec.startQ} - ${sec.endQ}
         </span>
       </div>
@@ -232,7 +234,7 @@ function buildReadingSectionHtml(sec, questions) {
       ${titleHtml}
 
       <!-- Real Exam Paper Typography -->
-      <div class="text-slate-800 leading-relaxed font-sans text-sm q-text-size select-text space-y-1">
+      <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif text-base q-text-size select-text space-y-1">
         ${parasHtml}
       </div>
     </div>`;
@@ -324,7 +326,7 @@ function applyWordHighlight(pane, word, paraIndex) {
         }
         const mark = document.createElement('mark');
         mark.className =
-          'thpt-word-highlight bg-amber-300 text-slate-900 rounded px-0.5 font-semibold';
+          'thpt-word-highlight bg-[#FEF08A] text-[#1E293B] rounded px-1 py-0.5 font-bold shadow-2xs';
         mark.textContent = match[1];
         frag.appendChild(mark);
         if (!firstMatch) firstMatch = mark;
@@ -372,7 +374,6 @@ function applySentenceHighlight(pane, paraIndex) {
 
 function buildPillLabel(sec) {
   const name = sec.name || sec.group || `P.${sec.index}`;
-  // Shorten: "Phần X" → "P.X", "Part X" → "P.X", otherwise truncate
   const shortened = name
     .replace(/^ph[aầ]n\s*/i, 'P.')
     .replace(/^part\s*/i, 'P.')
@@ -400,7 +401,7 @@ export function ExamPassagePanel({
   // 2. Active pill state (1-based section index)
   const [activeSecIndex, setActiveSecIndex] = useState(1);
 
-  // Internal ref for the scrollable content div (the pane that holds the cards)
+  // Internal ref for the scrollable content div
   const contentRef = useRef(null);
 
   // ---------------------------------------------------------------------------
@@ -454,7 +455,7 @@ export function ExamPassagePanel({
 
       // Remove existing ring highlights
       pane.querySelectorAll('.passage-sec-card, .passage-q-arr-card').forEach((c) => {
-        c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+        c.classList.remove('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
       });
 
       const q = exam.questions[qNum - 1];
@@ -464,7 +465,7 @@ export function ExamPassagePanel({
         const arrCard = pane.querySelector(`#passage-q-${qNum}`);
         if (arrCard) {
           arrCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          arrCard.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+          arrCard.classList.add('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
         }
         // Highlight the parent section pill
         const targetSec = sections.find(
@@ -482,7 +483,7 @@ export function ExamPassagePanel({
           const card = pane.querySelector(`#passage-sec-${targetSec.index}`);
           if (card) {
             card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+            card.classList.add('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
           }
         }
 
@@ -506,7 +507,7 @@ export function ExamPassagePanel({
 
   useEffect(() => {
     if (currentQIndex == null) return;
-    syncPassage(currentQIndex + 1); // currentQIndex is 0-based, qNum is 1-based
+    syncPassage(currentQIndex + 1);
   }, [currentQIndex, syncPassage]);
 
   // ---------------------------------------------------------------------------
@@ -520,13 +521,13 @@ export function ExamPassagePanel({
 
       // Remove old highlights
       pane.querySelectorAll('.passage-sec-card, .passage-q-arr-card').forEach((c) => {
-        c.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+        c.classList.remove('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
       });
 
       const card = pane.querySelector(`#passage-sec-${sec.index}`);
       if (card) {
         card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        card.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50/15', 'shadow-md');
+        card.classList.add('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
       }
     },
     [passagePaneRef],
@@ -536,14 +537,12 @@ export function ExamPassagePanel({
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <div className="w-full flex flex-col bg-white overflow-hidden min-h-0 h-full">
+    <div className="w-full flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full">
       {/* Sub-header: label + section nav pills */}
-      <div className="h-[28px] min-h-[28px] max-h-[28px] px-3 bg-slate-100/90 border-b border-slate-200 flex items-center justify-between shrink-0 gap-2 select-none">
-        <div className="flex items-center gap-1.5 shrink-0">
-          <span className="material-symbols-outlined text-blue-600 text-[16px]">
-            menu_book
-          </span>
-          <span className="font-bold text-[11px] uppercase tracking-wider text-slate-700">
+      <div className="h-[44px] min-h-[44px] max-h-[44px] px-4 bg-[#FFFDF9] border-b border-[#EFE8D6] flex items-center justify-between shrink-0 gap-2 select-none">
+        <div className="flex items-center gap-2 shrink-0">
+          <BookOpen className="w-4 h-4 text-[#557A46]" />
+          <span className="font-heading font-black text-xs uppercase tracking-wider text-[#382E2B]">
             Ngữ Liệu Đề Bài
           </span>
         </div>
@@ -551,7 +550,7 @@ export function ExamPassagePanel({
         {/* Section pills */}
         <div
           id="exam-passage-nav-pills"
-          className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-0.5 max-w-full"
+          className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 max-w-full"
         >
           {sections.map((sec) => {
             const isActive = sec.index === activeSecIndex;
@@ -564,8 +563,8 @@ export function ExamPassagePanel({
                 onClick={() => handlePillClick(sec)}
                 className={
                   isActive
-                    ? 'passage-pill-btn px-2.5 py-1 rounded-md text-[11px] font-black whitespace-nowrap transition-all border border-blue-600 bg-blue-600 text-white shadow-xs cursor-pointer shrink-0 font-sans'
-                    : 'passage-pill-btn px-2.5 py-1 rounded-md text-[11px] font-bold whitespace-nowrap transition-all border border-slate-200 bg-white text-slate-700 hover:border-blue-400 hover:text-blue-700 cursor-pointer shrink-0 font-sans'
+                    ? 'px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap transition-all bg-[#5a7d4d] text-white shadow-2xs cursor-pointer shrink-0 font-sans'
+                    : 'px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all border border-[#EFE8D6] bg-white text-[#6B5A4E] hover:border-[#382E2B]/30 hover:text-[#2D2422] cursor-pointer shrink-0 font-sans'
                 }
               >
                 {buildPillLabel(sec)}
@@ -578,14 +577,13 @@ export function ExamPassagePanel({
       {/* Scrollable passage content */}
       <div
         ref={(el) => {
-          // Attach to both our local ref and the external passagePaneRef if provided
           contentRef.current = el;
           if (passagePaneRef) {
             passagePaneRef.current = el;
           }
         }}
         id="exam-passage-content"
-        className={`flex-1 overflow-y-auto min-h-0 p-4 md:p-6 select-text space-y-4 font-sans leading-relaxed text-slate-800${fontSizeClass ? ` ${fontSizeClass}` : ''}`}
+        className={`flex-1 overflow-y-auto min-h-0 p-4 md:p-6 lg:p-8 select-text space-y-5 font-serif leading-relaxed text-[#2D2422]${fontSizeClass ? ` ${fontSizeClass}` : ''}`}
         // biome-ignore lint/security/noDangerouslySetInnerHtml: passage HTML is generated server-side from controlled exam data
         dangerouslySetInnerHTML={{ __html: passageHtml }}
       />
