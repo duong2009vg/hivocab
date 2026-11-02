@@ -356,11 +356,8 @@ export function PageLogin() {
 
             {/* Tách riêng sự đồng ý theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 */}
             {authMode === 'signup' && (
-              <div className="p-3 bg-[#FAF5EB] rounded-2xl border-2 border-[#EADCC8] space-y-2.5">
-                <p className="text-[10px] font-black uppercase tracking-wider text-[#786F66]">
-                  Quy định đăng ký & Quyền riêng tư (NĐ 356/2025/NĐ-CP)
-                </p>
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#3D352E] font-medium leading-snug select-none">
+              <div className="space-y-2 pt-1">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
                   <input
                     type="checkbox"
                     id="consent-terms"
@@ -382,7 +379,7 @@ export function PageLogin() {
                   </span>
                 </label>
 
-                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#3D352E] font-medium leading-snug select-none">
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
                   <input
                     type="checkbox"
                     id="consent-privacy"
@@ -399,8 +396,7 @@ export function PageLogin() {
                       className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
                     >
                       Chính sách bảo mật
-                    </a>{' '}
-                    (tuân thủ Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15).
+                    </a>.
                   </span>
                 </label>
               </div>
