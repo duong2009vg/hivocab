@@ -534,13 +534,17 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
 
             {/* Footer cam kết phong cách Claude */}
             <div className="pt-2 text-center text-xs text-stone-500 space-y-2">
-              <div className="flex items-center justify-center gap-6 flex-wrap">
+              <div className="flex items-center justify-center gap-4 sm:gap-6 flex-wrap">
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-stone-600" />
                   Bảo mật giao dịch qua Cổng thanh toán Quốc gia PayOS
                 </span>
                 <span>·</span>
                 <span>Kích hoạt tài khoản PRO tự động 24/7 trong 30 giây</span>
+                <span>·</span>
+                <span className="text-emerald-700 font-medium">
+                  Hoàn tiền trong 05 ngày làm việc nếu phát sinh lỗi
+                </span>
               </div>
               <p className="text-stone-400 text-[11px]">
                 Bạn muốn sử dụng vĩnh viễn không cần gia hạn?{' '}
@@ -551,6 +555,15 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
                 >
                   Xem Gói Trọn Đời (499.000 ₫)
                 </button>
+                {' · '}
+                <a
+                  href="/terms.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-stone-500 hover:text-stone-800 underline"
+                >
+                  Điều khoản hoàn tiền
+                </a>
               </p>
             </div>
           </div>
@@ -687,6 +700,13 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
                   </span>
                   <span>Đang tự động lắng nghe thanh toán... (Tự kích hoạt trong 3s)</span>
                 </div>
+
+                <p className="text-[11px] text-stone-500 text-center pt-1">
+                  💡 Hỗ trợ đối soát & cam kết hoàn tiền 100% trong 05 ngày làm việc nếu xảy ra lỗi trừ tiền.{' '}
+                  <a href="/terms.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-stone-800">
+                    Chi tiết điều khoản
+                  </a>
+                </p>
               </div>
             </div>
           </div>

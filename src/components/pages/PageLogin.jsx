@@ -26,6 +26,8 @@ export function PageLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [consentPrivacy, setConsentPrivacy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -43,6 +45,8 @@ export function PageLogin() {
     setErrorMessage('');
     setSuccessMessage('');
     setIsExistingAccount(false);
+    setConsentTerms(false);
+    setConsentPrivacy(false);
     if (typeof window !== 'undefined' && typeof window.switchAuthMode === 'function') {
       window.switchAuthMode(mode);
     }
@@ -67,6 +71,14 @@ export function PageLogin() {
       }
       if (password !== confirmPassword) {
         setErrorMessage('Mật khẩu xác nhận không khớp.');
+        return;
+      }
+      if (!consentTerms) {
+        setErrorMessage('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ để tiếp tục.');
+        return;
+      }
+      if (!consentPrivacy) {
+        setErrorMessage('Vui lòng tích chọn đồng ý cho phép xử lý dữ liệu cá nhân theo Chính sách bảo mật (tuân thủ Nghị định 356/2025/NĐ-CP).');
         return;
       }
     }
@@ -95,7 +107,14 @@ export function PageLogin() {
           window.navigateTo('dashboard');
         }
       } else {
-        const res = await signUpWithEmail(cleanEmail, password, captchaToken);
+        const consentMeta = {
+          consent_terms: true,
+          consent_privacy: true,
+          consent_at: new Date().toISOString(),
+          decree: '356/2025/ND-CP',
+          law: '91/2025/QH15'
+        };
+        const res = await signUpWithEmail(cleanEmail, password, captchaToken, consentMeta);
 
         // Account already exists in Supabase
         if (res?.user && (!res.user.identities || res.user.identities.length === 0)) {
@@ -335,6 +354,58 @@ export function PageLogin() {
               </div>
             )}
 
+            {/* Tách riêng sự đồng ý theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 */}
+            {authMode === 'signup' && (
+              <div className="p-3 bg-[#FAF5EB] rounded-2xl border-2 border-[#EADCC8] space-y-2.5">
+                <p className="text-[10px] font-black uppercase tracking-wider text-[#786F66]">
+                  Quy định đăng ký & Quyền riêng tư (NĐ 356/2025/NĐ-CP)
+                </p>
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#3D352E] font-medium leading-snug select-none">
+                  <input
+                    type="checkbox"
+                    id="consent-terms"
+                    checked={consentTerms}
+                    onChange={(e) => setConsentTerms(e.target.checked)}
+                    className="mt-0.5 rounded border-[#3D352E] text-[#DE5D53] focus:ring-[#DE5D53] w-4 h-4 cursor-pointer accent-[#DE5D53] shrink-0"
+                  />
+                  <span>
+                    Tôi đã đọc và đồng ý với{' '}
+                    <a
+                      href="/terms.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
+                    >
+                      Điều khoản dịch vụ
+                    </a>{' '}
+                    của HiVocab.
+                  </span>
+                </label>
+
+                <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#3D352E] font-medium leading-snug select-none">
+                  <input
+                    type="checkbox"
+                    id="consent-privacy"
+                    checked={consentPrivacy}
+                    onChange={(e) => setConsentPrivacy(e.target.checked)}
+                    className="mt-0.5 rounded border-[#3D352E] text-[#DE5D53] focus:ring-[#DE5D53] w-4 h-4 cursor-pointer accent-[#DE5D53] shrink-0"
+                  />
+                  <span>
+                    Tôi đồng ý cho phép HiVocab thu thập và xử lý dữ liệu cá nhân theo{' '}
+                    <a
+                      href="/privacy.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
+                    >
+                      Chính sách bảo mật
+                    </a>{' '}
+                    (tuân thủ Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15).
+                  </span>
+                </label>
+              </div>
+            )}
+
             {/* Error Message */}
             {errorMessage && !isExistingAccount && (
               <div id="auth-error" className="text-xs text-[#B4482B] bg-[#FDEAE2] border-2 border-[#F8C8B8] p-3 rounded-2xl font-bold flex items-start gap-2 shadow-xs">
@@ -415,9 +486,23 @@ export function PageLogin() {
             </p>
           </div>
 
-          <p className="text-[11px] text-center text-[#8A796F] mt-4 leading-relaxed font-medium">
-            Bằng việc tiếp tục, bạn đồng ý với <a href="/terms.html" target="_blank" rel="noopener noreferrer" className="text-[#302A24] font-bold underline">Điều khoản</a> & <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="text-[#302A24] font-bold underline">Chính sách bảo mật</a> của HiVocab.
-          </p>
+          {authMode === 'login' ? (
+            <p className="text-[11px] text-center text-[#8A796F] mt-4 leading-relaxed font-medium">
+              Đăng nhập đồng nghĩa với việc bạn đồng ý với{' '}
+              <a href="/terms.html" target="_blank" rel="noopener noreferrer" className="text-[#302A24] font-bold underline hover:text-[#557A46]">
+                Điều khoản
+              </a>{' '}
+              &{' '}
+              <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="text-[#302A24] font-bold underline hover:text-[#557A46]">
+                Chính sách bảo mật
+              </a>{' '}
+              của HiVocab.
+            </p>
+          ) : (
+            <p className="text-[10.5px] text-center text-[#8A796F] mt-4 leading-relaxed font-medium">
+              🔒 Dữ liệu cá nhân của bạn được mã hóa an toàn theo Luật Bảo vệ DLCN 91/2025/QH15 & Nghị định 356/2025/NĐ-CP.
+            </p>
+          )}
 
           {/* Dev mode toggle */}
           <div className="mt-4 pt-3 border-t border-[#DECDBB]/60 text-center">

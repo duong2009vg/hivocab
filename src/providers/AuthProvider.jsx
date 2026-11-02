@@ -159,9 +159,12 @@ export function AuthProvider({ children }) {
     return data;
   }, [fetchProfile]);
 
-  const signUpWithEmail = useCallback(async (email, password, captchaToken) => {
+  const signUpWithEmail = useCallback(async (email, password, captchaToken, meta = {}) => {
     setError(null);
-    const signUpOptions = { emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined };
+    const signUpOptions = { 
+      emailRedirectTo: typeof window !== 'undefined' ? window.location.origin : undefined,
+      data: meta || {}
+    };
     if (captchaToken) {
       signUpOptions.captchaToken = captchaToken;
     }
