@@ -3,7 +3,7 @@
 // Chuẩn phong cách HiVocab Exam Focus Mode: giấy thi trang nhã, công thái học đọc hiểu tiếng Anh.
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ChevronDown, X } from 'lucide-react';
 import {
   buildExamSections,
   formatBlanksInHtml,
@@ -400,6 +400,8 @@ export function ExamPassagePanel({
 
   // 2. Active pill state (1-based section index)
   const [activeSecIndex, setActiveSecIndex] = useState(1);
+  // State ẩn/hiện thanh ngữ liệu (mặc định ẩn để không vướng màn hình làm bài)
+  const [showNav, setShowNav] = useState(false);
 
   // Internal ref for the scrollable content div
   const contentRef = useRef(null);
@@ -537,42 +539,68 @@ export function ExamPassagePanel({
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <div className="w-full flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full">
-      {/* Sub-header: label + section nav pills */}
-      <div className="h-[44px] min-h-[44px] max-h-[44px] px-4 bg-[#FFFDF9] border-b border-[#EFE8D6] flex items-center justify-between shrink-0 gap-2 select-none">
-        <div className="flex items-center gap-2 shrink-0">
-          <BookOpen className="w-4 h-4 text-[#557A46]" />
-          <span className="font-heading font-black text-xs uppercase tracking-wider text-[#382E2B]">
-            Ngữ Liệu Đề Bài
-          </span>
-        </div>
-
-        {/* Section pills */}
-        <div
-          id="exam-passage-nav-pills"
-          className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 max-w-full"
+    <div className="w-full flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full relative">
+      {/* Nút nổi mở thanh ngữ liệu (khi đang ẩn) */}
+      {!showNav && (
+        <button
+          type="button"
+          onClick={() => setShowNav(true)}
+          className="absolute top-3 right-4 z-20 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm border border-[#EFE8D6] shadow-xs hover:shadow-sm text-xs font-bold text-[#382E2B] hover:text-[#557A46] flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
+          title="Mở thanh danh sách phần ngữ liệu"
         >
-          {sections.map((sec) => {
-            const isActive = sec.index === activeSecIndex;
-            return (
-              <button
-                key={sec.index}
-                id={`passage-pill-${sec.index}`}
-                type="button"
-                title={sec.name || sec.group}
-                onClick={() => handlePillClick(sec)}
-                className={
-                  isActive
-                    ? 'px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap transition-all bg-[#5a7d4d] text-white shadow-2xs cursor-pointer shrink-0 font-sans'
-                    : 'px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all border border-[#EFE8D6] bg-white text-[#6B5A4E] hover:border-[#382E2B]/30 hover:text-[#2D2422] cursor-pointer shrink-0 font-sans'
-                }
-              >
-                {buildPillLabel(sec)}
-              </button>
-            );
-          })}
+          <BookOpen className="w-3.5 h-3.5 text-[#557A46]" />
+          <span>Ngữ liệu ({sections.length} phần)</span>
+          <ChevronDown className="w-3.5 h-3.5 text-[#8C827A]" />
+        </button>
+      )}
+
+      {/* Sub-header: label + section nav pills (chỉ hiện khi người dùng ấn mở) */}
+      {showNav && (
+        <div className="h-[44px] min-h-[44px] max-h-[44px] px-4 bg-[#FFFDF9] border-b border-[#EFE8D6] flex items-center justify-between shrink-0 gap-2 select-none animate-in fade-in slide-in-from-top-1 duration-150">
+          <div className="flex items-center gap-2 shrink-0">
+            <BookOpen className="w-4 h-4 text-[#557A46]" />
+            <span className="font-heading font-black text-xs uppercase tracking-wider text-[#382E2B]">
+              Ngữ Liệu Đề Bài
+            </span>
+          </div>
+
+          {/* Section pills */}
+          <div
+            id="exam-passage-nav-pills"
+            className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 max-w-full"
+          >
+            {sections.map((sec) => {
+              const isActive = sec.index === activeSecIndex;
+              return (
+                <button
+                  key={sec.index}
+                  id={`passage-pill-${sec.index}`}
+                  type="button"
+                  title={sec.name || sec.group}
+                  onClick={() => handlePillClick(sec)}
+                  className={
+                    isActive
+                      ? 'px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap transition-all bg-[#5a7d4d] text-white shadow-2xs cursor-pointer shrink-0 font-sans'
+                      : 'px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all border border-[#EFE8D6] bg-white text-[#6B5A4E] hover:border-[#382E2B]/30 hover:text-[#2D2422] cursor-pointer shrink-0 font-sans'
+                  }
+                >
+                  {buildPillLabel(sec)}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Nút ẩn / đóng thanh ngữ liệu */}
+          <button
+            type="button"
+            onClick={() => setShowNav(false)}
+            className="p-1 rounded-lg text-[#8C827A] hover:text-[#2D2422] hover:bg-[#FAF5EB] transition-colors cursor-pointer shrink-0 ml-1"
+            title="Ẩn thanh ngữ liệu"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-      </div>
+      )}
 
       {/* Scrollable passage content */}
       <div
@@ -583,7 +611,9 @@ export function ExamPassagePanel({
           }
         }}
         id="exam-passage-content"
-        className={`flex-1 overflow-y-auto min-h-0 p-4 md:p-6 lg:p-8 select-text space-y-5 font-serif leading-relaxed text-[#2D2422]${fontSizeClass ? ` ${fontSizeClass}` : ''}`}
+        className={`flex-1 overflow-y-auto min-h-0 p-4 md:p-6 lg:p-8 select-text space-y-5 font-serif leading-relaxed text-[#2D2422]${
+          !showNav ? ' pt-10 sm:pt-10' : ''
+        }${fontSizeClass ? ` ${fontSizeClass}` : ''}`}
         // biome-ignore lint/security/noDangerouslySetInnerHtml: passage HTML is generated server-side from controlled exam data
         dangerouslySetInnerHTML={{ __html: passageHtml }}
       />
