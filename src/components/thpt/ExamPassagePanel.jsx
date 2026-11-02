@@ -3,7 +3,7 @@
 // Chuẩn phong cách HiVocab Exam Focus Mode: giấy thi trang nhã, công thái học đọc hiểu tiếng Anh.
 
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { BookOpen, ChevronDown, X } from 'lucide-react';
+import { BookOpen, X } from 'lucide-react';
 import {
   buildExamSections,
   formatBlanksInHtml,
@@ -545,12 +545,11 @@ export function ExamPassagePanel({
         <button
           type="button"
           onClick={() => setShowNav(true)}
-          className="absolute top-3 right-4 z-20 px-3 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm border border-[#EFE8D6] shadow-xs hover:shadow-sm text-xs font-bold text-[#382E2B] hover:text-[#557A46] flex items-center gap-1.5 cursor-pointer transition-all active:scale-95"
-          title="Mở thanh danh sách phần ngữ liệu"
+          className="absolute top-3 right-4 z-20 p-2 rounded-xl bg-white/95 backdrop-blur-sm border border-[#EFE8D6] shadow-xs hover:shadow-sm text-[#557A46] hover:bg-[#FAF5EB] flex items-center justify-center cursor-pointer transition-all active:scale-95"
+          title="Mở thanh ngữ liệu đề bài"
+          aria-label="Mở thanh ngữ liệu đề bài"
         >
-          <BookOpen className="w-3.5 h-3.5 text-[#557A46]" />
-          <span>Ngữ liệu ({sections.length} phần)</span>
-          <ChevronDown className="w-3.5 h-3.5 text-[#8C827A]" />
+          <BookOpen className="w-4 h-4 text-[#557A46]" />
         </button>
       )}
 
