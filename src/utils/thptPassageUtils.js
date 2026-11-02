@@ -46,51 +46,134 @@ export function formatBlanksInHtml(text, startQ, endQ) {
 }
 
 /**
+ * Helper to strip duplicated title from passage paragraphs or raw text
+ */
+function sanitizeSectionText(title, paragraphs, rawText) {
+  let cleanParas = Array.isArray(paragraphs) ? [...paragraphs] : [];
+  let cleanRaw = typeof rawText === 'string' ? rawText : '';
+
+  if (title && title.trim()) {
+    const escapedTitle = title.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const titlePrefixRegex = new RegExp(`^${escapedTitle}[:\\-\\s]+`, 'i');
+
+    if (cleanParas.length > 0) {
+      const first = (cleanParas[0] || '').trim();
+      if (first.toLowerCase() === title.trim().toLowerCase()) {
+        cleanParas.shift();
+      } else if (titlePrefixRegex.test(first)) {
+        cleanParas[0] = first.replace(titlePrefixRegex, '').trim();
+      }
+    }
+
+    if (cleanRaw) {
+      const trimmedRaw = cleanRaw.trim();
+      if (trimmedRaw.toLowerCase() === title.trim().toLowerCase()) {
+        cleanRaw = '';
+      } else if (titlePrefixRegex.test(trimmedRaw)) {
+        cleanRaw = trimmedRaw.replace(titlePrefixRegex, '').trim();
+      }
+    }
+  }
+
+  return {
+    paragraphs: cleanParas.filter((p) => p && p.trim().length > 0),
+    rawText: cleanRaw,
+  };
+}
+
+/**
  * Build examSections array from exam data (mirrors thptExam.js buildExamSections)
  */
 export function buildExamSections(exam) {
   if (!exam) return [];
 
+  const questions = exam.questions || [];
+
   if (exam.sections && exam.sections.length > 0) {
-    return exam.sections.map((s, idx) => ({
-      index: s.part || (idx + 1),
-      part: s.part || (idx + 1),
-      type: s.type || 'reading',
-      group: s.name || `Phần ${idx + 1}`,
-      name: s.name || `Phần ${idx + 1}`,
-      startQ: s.start_q,
-      endQ: s.end_q,
-      instruction: s.instruction || '',
-      title: s.title || '',
-      paragraphs: s.paragraphs || [],
-      rawText: s.raw_text || '',
-    }));
+    return exam.sections.map((s, idx) => {
+      const startQ = s.start_q;
+      const endQ = s.end_q;
+      const secQuestions = questions.filter(
+        (q) => q.number >= startQ && q.number <= endQ,
+      );
+      const firstQ = secQuestions[0] || null;
+
+      let title = (s.title || firstQ?.passage_title || '').trim();
+      let instruction = (s.instruction || firstQ?.passage_instruction || '').trim();
+      let paragraphs = s.paragraphs || [];
+      let rawText = s.raw_text || '';
+
+      // If section paragraphs is empty or single squashed block, check if first question has richer multi-paragraph passage
+      if (
+        firstQ?.passage &&
+        (!paragraphs || paragraphs.length <= 1) &&
+        firstQ.passage.includes('\n\n')
+      ) {
+        const qParas = firstQ.passage
+          .split(/\n\s*\n/)
+          .map((p) => p.trim())
+          .filter(Boolean);
+        if (qParas.length > (paragraphs?.length || 0)) {
+          paragraphs = qParas;
+          if (!rawText) rawText = firstQ.passage;
+        }
+      }
+
+      const sanitized = sanitizeSectionText(title, paragraphs, rawText);
+
+      return {
+        index: s.part || (idx + 1),
+        part: s.part || (idx + 1),
+        type: s.type || 'reading',
+        group: s.name || `Phần ${idx + 1}`,
+        name: s.name || `Phần ${idx + 1}`,
+        startQ,
+        endQ,
+        instruction,
+        title,
+        paragraphs: sanitized.paragraphs,
+        rawText: sanitized.rawText,
+      };
+    });
   }
 
   // Auto-group from questions
   const sections = [];
   let currentSec = null;
-  (exam.questions || []).forEach(q => {
+  questions.forEach((q) => {
     const grpName = q.group || 'Ngữ Liệu Đề Thi';
     if (!currentSec || currentSec.group !== grpName) {
       currentSec = {
         index: sections.length + 1,
         group: grpName,
         name: grpName,
-        type: 'reading',
+        type: q.is_arrangement || q.type === 'arrangement' ? 'arrangement' : 'reading',
         startQ: q.number,
         endQ: q.number,
-        instruction: '',
-        title: '',
-        paragraphs: [],
-        rawText: '',
+        instruction: q.passage_instruction || '',
+        title: q.passage_title || '',
+        paragraphs: q.passage
+          ? q.passage
+              .split(/\n\s*\n/)
+              .map((p) => p.trim())
+              .filter(Boolean)
+          : [],
+        rawText: q.passage || '',
       };
       sections.push(currentSec);
     } else {
       currentSec.endQ = q.number;
     }
   });
-  return sections;
+
+  return sections.map((sec) => {
+    const sanitized = sanitizeSectionText(sec.title, sec.paragraphs, sec.rawText);
+    return {
+      ...sec,
+      paragraphs: sanitized.paragraphs,
+      rawText: sanitized.rawText,
+    };
+  });
 }
 
 /**

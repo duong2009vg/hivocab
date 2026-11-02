@@ -116,7 +116,30 @@ function buildArrangementSectionHtml(sec, questions) {
 
 /** Render paragraphs for reading/cloze/etc sections. */
 function buildParagraphsHtml(sec, questions) {
-  const { paragraphs, rawText, startQ, endQ, type } = sec;
+  let { paragraphs, rawText, startQ, endQ, type, title } = sec;
+
+  // Defensive strip in case sec.paragraphs was passed without prior sanitization
+  if (title && title.trim()) {
+    const escapedTitle = title.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const titleRegex = new RegExp(`^${escapedTitle}[:\\-\\s]+`, 'i');
+    if (Array.isArray(paragraphs) && paragraphs.length > 0) {
+      const first = (paragraphs[0] || '').trim();
+      if (first.toLowerCase() === title.trim().toLowerCase()) {
+        paragraphs = paragraphs.slice(1);
+      } else if (titleRegex.test(first)) {
+        paragraphs = [first.replace(titleRegex, '').trim(), ...paragraphs.slice(1)];
+      }
+    }
+    if (rawText && typeof rawText === 'string') {
+      const trimmedRaw = rawText.trim();
+      if (trimmedRaw.toLowerCase() === title.trim().toLowerCase()) {
+        rawText = '';
+      } else if (titleRegex.test(trimmedRaw)) {
+        rawText = trimmedRaw.replace(titleRegex, '').trim();
+      }
+    }
+  }
+
   const isReadingComprehension =
     type === 'reading' && Array.isArray(paragraphs) && paragraphs.length > 1;
 
@@ -129,7 +152,9 @@ function buildParagraphsHtml(sec, questions) {
 
       const isBullet = /^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s+/.test(p);
       const isHeader =
-        !isBullet && p.length < 50 && (p.endsWith(':') || p === p.toUpperCase());
+        !isBullet &&
+        p.length < 60 &&
+        (p.endsWith(':') || p.endsWith('?') || p.endsWith('!') || p === p.toUpperCase());
       const isSource =
         /^\((?:Adapted|Source)[^)]*\)$/i.test(p) ||
         /^(?:Adapted|Source)\s+from/i.test(p);
