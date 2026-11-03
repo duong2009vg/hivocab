@@ -172,17 +172,45 @@ export function PageLogin() {
 
   // Tự động kích hoạt / render widget Cloudflare Turnstile khi đổi tab hoặc mount
   React.useEffect(() => {
-    if (typeof window !== 'undefined' && window.turnstile && typeof window.turnstile.render === 'function') {
+    let intervalId = null;
+    let attempts = 0;
+
+    const renderTurnstile = () => {
+      attempts++;
+      if (typeof window === 'undefined') return true;
       const el = document.getElementById('turnstile-user');
-      if (el && !el.hasChildNodes()) {
-        try {
-          window.turnstile.render('#turnstile-user', {
-            sitekey: TURNSTILE_SITE_KEY,
-            theme: 'auto',
-          });
-        } catch (_) {}
+      if (!el) return false;
+
+      if (window.turnstile && typeof window.turnstile.render === 'function') {
+        if (!el.hasChildNodes()) {
+          try {
+            window.turnstile.render('#turnstile-user', {
+              sitekey: TURNSTILE_SITE_KEY,
+              theme: 'auto',
+            });
+            return true;
+          } catch (err) {
+            console.warn('[PageLogin] Turnstile render error:', err);
+          }
+        } else {
+          return true;
+        }
       }
+
+      return attempts > 30; // Dừng thăm dò sau ~4.5s
+    };
+
+    if (!renderTurnstile()) {
+      intervalId = setInterval(() => {
+        if (renderTurnstile()) {
+          clearInterval(intervalId);
+        }
+      }, 150);
     }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [authMode]);
 
   return (

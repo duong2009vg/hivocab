@@ -17,18 +17,46 @@ export function AdminProtectedRoute({ children }) {
 
   // Auto-render Turnstile cho Admin Login
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || (user && !TURNSTILE_SITE_KEY)) return;
-    if (!user && typeof window !== 'undefined' && window.turnstile && typeof window.turnstile.render === 'function') {
+    if (!TURNSTILE_SITE_KEY || user) return;
+    let intervalId = null;
+    let attempts = 0;
+
+    const renderAdminTurnstile = () => {
+      attempts++;
+      if (typeof window === 'undefined') return true;
       const el = document.getElementById('turnstile-admin');
-      if (el && !el.hasChildNodes()) {
-        try {
-          window.turnstile.render('#turnstile-admin', {
-            sitekey: TURNSTILE_SITE_KEY,
-            theme: 'auto',
-          });
-        } catch (_) {}
+      if (!el) return false;
+
+      if (window.turnstile && typeof window.turnstile.render === 'function') {
+        if (!el.hasChildNodes()) {
+          try {
+            window.turnstile.render('#turnstile-admin', {
+              sitekey: TURNSTILE_SITE_KEY,
+              theme: 'auto',
+            });
+            return true;
+          } catch (err) {
+            console.warn('[AdminProtectedRoute] Turnstile render error:', err);
+          }
+        } else {
+          return true;
+        }
       }
+
+      return attempts > 30;
+    };
+
+    if (!renderAdminTurnstile()) {
+      intervalId = setInterval(() => {
+        if (renderAdminTurnstile()) {
+          clearInterval(intervalId);
+        }
+      }, 150);
     }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [user]);
 
   if (loading) {
