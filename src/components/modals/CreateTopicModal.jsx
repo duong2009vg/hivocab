@@ -54,17 +54,21 @@ export function CreateTopicModal() {
       const savedFolders = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
       const cached = getCachedTopics();
       const catSet = new Set(['Từ vựng của tôi', 'Cá nhân', 'IELTS', 'THPT-QG', 'Giao tiếp', 'general']);
+      const defaultCat = modals?.createTopic?.defaultCategory;
+      if (defaultCat) catSet.add(defaultCat);
       
       savedFolders.forEach((f) => f?.name && catSet.add(f.name));
       cached.forEach((t) => t?.category && catSet.add(t.category));
 
       const list = Array.from(catSet);
       setUserFolders(list);
-      setSelectedCategory(list[0] || 'Từ vựng của tôi');
+      setSelectedCategory(defaultCat || list[0] || 'Từ vựng của tôi');
     } catch (_) {
-      setUserFolders(['Từ vựng của tôi', 'Cá nhân']);
+      const defaultCat = modals?.createTopic?.defaultCategory;
+      setUserFolders(defaultCat ? [defaultCat, 'Từ vựng của tôi', 'Cá nhân'] : ['Từ vựng của tôi', 'Cá nhân']);
+      if (defaultCat) setSelectedCategory(defaultCat);
     }
-  }, [isOpen, modals?.createTopic?.initialStep]);
+  }, [isOpen, modals?.createTopic?.initialStep, modals?.createTopic?.defaultCategory]);
 
   if (!isOpen) return null;
 

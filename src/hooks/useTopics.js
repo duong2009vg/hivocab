@@ -5,13 +5,18 @@ import { getTopics, getCachedTopics, deleteTopic as apiDeleteTopic, deleteFolder
 import { useRoute } from '../router/RouteContext.jsx';
 
 export const DEFAULT_TOPIC_CATEGORIES = [
-  'CEFR',
-  'TOEIC',
+  'THPT/ĐGNL',
+  'THPT-QG',
   'CAM',
-  'Destination C1-C2',
   'IELTS Actual Tests',
-  'Common Words',
+  'Destination C1-C2',
+  'IELTS',
+  'CEFR',
+  'SAT',
   'SAT 3500',
+  'TOEIC',
+  'Common Words',
+  'Từ vựng của tôi',
   'personal',
   'general',
 ];
