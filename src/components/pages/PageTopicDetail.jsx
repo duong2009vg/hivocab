@@ -199,30 +199,32 @@ export function PageTopicDetail() {
       {/* ========================================================================= */}
       <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen flex flex-col pb-28">
         {/* Mobile Top Bar */}
-        <header className="sticky top-0 z-40 bg-[#FBF8F1]/95 backdrop-blur-xs px-4 py-3 flex items-center justify-between border-b border-[#E8DEC8] pwa-safe-top-sticky">
-          <div className="flex items-center gap-2">
+        <header className="sticky top-0 z-40 bg-[#FBF8F1]/95 backdrop-blur-xs px-3 sm:px-4 py-2.5 sm:py-3 flex items-center justify-between gap-2 border-b border-[#E8DEC8] pwa-safe-top-sticky">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
             <button
               onClick={() => navigateTo('topics')}
               aria-label="Quay lại"
-              className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#302A24] border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:scale-95 transition-transform"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-xl bg-white flex items-center justify-center text-[#302A24] border border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:scale-95 transition-transform cursor-pointer"
               type="button"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
             </button>
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               <span className="font-bold text-base text-[#302A24] truncate font-['Comfortaa',sans-serif]">{topicName || 'Chi tiết'}</span>
-              <span className="text-[11px] text-[#786F66]">
+              <span className="text-[11px] text-[#786F66] truncate">
                 {isIeltsReadingTopic ? 'Luyện đọc & Từ vựng' : 'Chủ đề từ vựng'}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleShare}
-              className="w-9 h-9 rounded-xl bg-white text-[#302A24] flex items-center justify-center border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:scale-95"
+              aria-label="Chia sẻ chủ đề"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-xl bg-white text-[#302A24] flex items-center justify-center border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:scale-95 transition-transform cursor-pointer"
               title="Chia sẻ"
+              type="button"
             >
               <svg className="w-4 h-4 text-[#786F66]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
@@ -230,7 +232,9 @@ export function PageTopicDetail() {
             </button>
             <button
               onClick={handleAddWord}
-              className="px-3 py-1.5 rounded-xl bg-[#C85A3F] text-white text-xs font-bold border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:scale-95"
+              aria-label="Thêm từ mới vào chủ đề"
+              className="min-h-[44px] px-3.5 py-2 shrink-0 rounded-xl bg-[#C85A3F] text-white text-xs font-bold border border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:scale-95 transition-transform flex items-center justify-center cursor-pointer"
+              type="button"
             >
               + Từ mới
             </button>

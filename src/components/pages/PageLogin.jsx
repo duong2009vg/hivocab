@@ -241,8 +241,8 @@ export function PageLogin() {
       </header>
 
       {/* Main Container */}
-      <main className="relative z-10 w-full flex-1 flex items-center justify-center px-4 py-8">
-        <div className="w-full max-w-[460px] bg-[#FFFDF9] rounded-[32px] border-[3px] border-[#3D352E] shadow-[5px_6px_0px_#3D352E] p-6 sm:p-8 relative select-none">
+      <main className="relative z-10 w-full flex-1 flex items-center justify-center px-2.5 sm:px-4 py-6 sm:py-8">
+        <div className="w-full max-w-[460px] bg-[#FFFDF9] rounded-[32px] border-[3px] border-[#3D352E] shadow-[5px_6px_0px_#3D352E] px-3.5 py-6 sm:p-8 relative select-none">
           
           {/* Header Card với Logo HI và tiêu đề sáp màu */}
           <div className="text-center mb-6">
@@ -478,7 +478,7 @@ export function PageLogin() {
             {/* Cloudflare Turnstile CAPTCHA */}
             <div 
               id="turnstile-user" 
-              className="cf-turnstile my-2.5 flex justify-center min-h-[65px]" 
+              className="cf-turnstile my-2.5 flex justify-center min-h-[65px] overflow-hidden max-w-full" 
               data-sitekey={TURNSTILE_SITE_KEY}
               data-theme="auto"
             ></div>

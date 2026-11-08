@@ -147,7 +147,7 @@ export default function ExerciseResultModal({
           </svg>
         </button>
 
-        <div className="px-5 sm:px-8 pt-5 sm:pt-6 pb-6 sm:pb-8 flex flex-col gap-2.5 sm:gap-3 select-text">
+        <div className="px-5 sm:px-8 pt-5 sm:pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] sm:pb-8 flex flex-col gap-2.5 sm:gap-3 select-text">
           {/* Row 1: Audio Speaker + Word + POS */}
           <div className="flex items-start gap-3">
             {/* White Rounded Square Speaker Button */}

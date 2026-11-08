@@ -229,7 +229,7 @@ export function BilingualReadingView({
                     <button
                       type="button"
                       onClick={() => onToggleCurtain(i)}
-                      className="text-xs font-black px-2.5 py-1 rounded-xl bg-white border border-[#382E2B] text-[#382E2B] shadow-2xs hover:bg-[#FAF5EB] cursor-pointer"
+                      className="text-xs font-black px-3 py-1.5 min-h-[38px] flex items-center justify-center rounded-xl bg-white border border-[#382E2B] text-[#382E2B] shadow-2xs hover:bg-[#FAF5EB] cursor-pointer"
                     >
                       {isRevealed ? <span className="inline-flex items-center gap-1"><EyeOff className="w-3.5 h-3.5 shrink-0" /> Che lại</span> : <span className="inline-flex items-center gap-1"><Eye className="w-3.5 h-3.5 shrink-0" /> Hiện dịch</span>}
                     </button>

@@ -249,9 +249,9 @@ export function PageLearning() {
           </button>
 
           {/* Center Progress Track with Crayon Aesthetic */}
-          <div className="flex-1 max-w-2xl px-1 sm:px-4 flex flex-col gap-0.5 sm:gap-1.5" data-purpose="learning-progress">
-            <div className="flex items-center justify-between text-[11px] sm:text-sm font-bold text-stone-700">
-              <span className="flex items-center gap-1.5 truncate max-w-[170px] sm:max-w-none">
+          <div className="flex-1 min-w-0 max-w-2xl px-1 sm:px-4 flex flex-col gap-0.5 sm:gap-1.5" data-purpose="learning-progress">
+            <div className="flex items-center justify-between text-[11px] sm:text-sm font-bold text-stone-700 gap-1">
+              <span className="flex items-center gap-1.5 min-w-0 flex-1">
                 <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#D36135] inline-block shrink-0"></span>
                 <span className="truncate tracking-wide">{currentTitle}</span>
               </span>

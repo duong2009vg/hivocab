@@ -242,13 +242,14 @@ export function CreateTopicModal() {
               <label className="block text-xs font-black font-quicksand uppercase tracking-wider text-[#6E5D53] mb-2">
                 BIỂU TƯỢNG
               </label>
-              <div className="grid grid-cols-6 gap-2">
+              <div className="grid grid-cols-5 sm:grid-cols-6 gap-2">
                 {AVAILABLE_ICONS.map((icon) => (
                   <button
                     key={icon}
                     type="button"
                     onClick={() => setSelectedIcon(icon)}
-                    className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all cursor-pointer ${
+                    aria-label={`Biểu tượng ${icon}`}
+                    className={`h-11 w-full rounded-2xl flex items-center justify-center text-xl transition-all cursor-pointer ${
                       selectedIcon === icon
                         ? 'bg-[#382E2B] text-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] scale-105'
                         : 'bg-white hover:bg-[#FAF5EB] text-[#382E2B] border-2 border-[#382E2B]/20 hover:border-[#382E2B] shadow-[1px_1px_0px_rgba(56,46,43,0.1)]'

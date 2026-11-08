@@ -375,7 +375,7 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
         <button
           onClick={handleClose}
           type="button"
-          className="absolute top-5 right-5 sm:top-7 sm:right-7 w-9 h-9 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 flex items-center justify-center transition-colors cursor-pointer z-20"
+          className="absolute top-5 right-5 sm:top-7 sm:right-7 w-11 h-11 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 flex items-center justify-center transition-colors cursor-pointer z-20"
           aria-label="Đóng bảng giá"
         >
           <X className="w-5 h-5" />

@@ -567,11 +567,11 @@ export function BulkAddWordModal() {
         </div>
 
         {/* Thanh chuyển bước tinh giản (3 Steps) */}
-        <div className="flex border-b-2 border-[#382E2B] bg-[#FAF5EB] p-1.5 gap-1.5 sm:gap-2 shrink-0 text-xs font-bold">
+        <div className="flex items-center border-b-2 border-[#382E2B] bg-[#FAF5EB] p-1.5 gap-1.5 sm:gap-2 shrink-0 text-xs font-bold overflow-x-auto min-w-0 no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveStep('guide')}
-            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`min-h-[44px] shrink-0 sm:shrink sm:flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               activeStep === 'guide'
                 ? 'bg-[#382E2B] text-white shadow-sm'
                 : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
@@ -584,7 +584,7 @@ export function BulkAddWordModal() {
           <button
             type="button"
             onClick={() => setActiveStep('input')}
-            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`min-h-[44px] shrink-0 sm:shrink sm:flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               activeStep === 'input'
                 ? 'bg-[#382E2B] text-white shadow-sm'
                 : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'
@@ -600,7 +600,7 @@ export function BulkAddWordModal() {
               if (parsedWords.length > 0) setActiveStep('preview');
               else handleParseText();
             }}
-            className={`flex-1 py-2 px-2.5 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+            className={`min-h-[44px] shrink-0 sm:shrink sm:flex-1 py-2 px-3 rounded-xl flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
               activeStep === 'preview'
                 ? 'bg-[#5a7d4d] text-white shadow-sm font-black'
                 : 'bg-white text-[#766C5F] hover:text-[#382E2B] border border-[#382E2B]/15'

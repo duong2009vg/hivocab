@@ -566,10 +566,11 @@ export function AdminThptTab() {
             {/* Modal Subtabs & Question Navigator */}
             <div className="px-4 sm:px-5 py-3 border-b-2 border-[#3D352E] bg-[#FAF5EB] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               {/* 2 Main Functions: Sửa đề bài / Sửa đáp án */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                 <button
+                  type="button"
                   onClick={() => setEditActiveTab('prompt')}
-                  className={`px-4 py-2 rounded-2xl text-xs font-black font-quicksand flex items-center gap-1.5 transition-all cursor-pointer ${
+                  className={`min-h-[44px] px-4 py-2 rounded-2xl text-xs font-black font-quicksand flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     editActiveTab === 'prompt'
                       ? 'bg-[#3D352E] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
                       : 'bg-white border-2 border-[#3D352E] text-[#6E5D53] hover:text-[#3D352E]'
@@ -579,8 +580,9 @@ export function AdminThptTab() {
                   <span>1. Chỉnh sửa Đề bài & Bài đọc</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setEditActiveTab('answer')}
-                  className={`px-4 py-2 rounded-2xl text-xs font-black font-quicksand flex items-center gap-1.5 transition-all cursor-pointer ${
+                  className={`min-h-[44px] px-4 py-2 rounded-2xl text-xs font-black font-quicksand flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                     editActiveTab === 'answer'
                       ? 'bg-[#557A46] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
                       : 'bg-white border-2 border-[#3D352E] text-[#6E5D53] hover:text-[#3D352E]'

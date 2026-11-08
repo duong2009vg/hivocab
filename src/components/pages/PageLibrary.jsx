@@ -449,40 +449,47 @@ function ThreadDetailModal({ lib }) {
 
         {/* Action bar bottom */}
         {!detail._loading && !lib.detailError && (
-          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-white border-t-2 border-[#2D2824] flex items-center justify-around z-20">
+          <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-4 bg-white border-t-2 border-[#2D2824] flex items-center justify-between sm:justify-around gap-1.5 sm:gap-2 z-20">
             <button 
               type="button"
               onClick={() => lib.handleLike(detail.id)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-2xl border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] transition-all font-black text-xs sm:text-sm active:translate-y-0.5 ${
+              aria-label="Thích bộ từ"
+              className={`min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] transition-all font-black text-xs sm:text-sm active:translate-y-0.5 ${
                 detail.hasLiked ? 'bg-[#FDEEE9] text-[#E66946]' : 'bg-white text-[#2D2824] hover:bg-[#FAF5ED]'
               }`}
             >
-              <Heart className={`w-4 h-4 ${detail.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#2D2824]'}`} />
+              <Heart className={`w-4 h-4 shrink-0 ${detail.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#2D2824]'}`} />
               <span>{detail.like_count || 0}</span>
             </button>
             <button 
               type="button"
               onClick={() => lib.openComments(detail.id, detail.name)}
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
+              aria-label="Bình luận"
+              className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
             >
-              <MessageSquare className="w-4 h-4 text-[#2D2824]" />
-              <span>Bình luận</span>
+              <MessageSquare className="w-4 h-4 shrink-0 text-[#2D2824]" />
+              <span className="hidden sm:inline">Bình luận</span>
             </button>
             <button 
               type="button"
               onClick={() => lib.handleClone(detail.id)}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#5A7E56] border-2 border-[#2D2824] text-white hover:bg-[#4B6B46] transition-all font-black text-xs sm:text-sm shadow-[3px_3px_0px_#2D2824] active:translate-x-0.5 active:translate-y-0.5"
+              aria-label="Lưu bộ từ"
+              className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl bg-[#5A7E56] border-2 border-[#2D2824] text-white hover:bg-[#4B6B46] transition-all font-black text-xs sm:text-sm shadow-[3px_3px_0px_#2D2824] active:translate-x-0.5 active:translate-y-0.5 shrink-0"
             >
-              <Download className="w-4 h-4 text-white" />
-              <span>Lưu bộ từ ({detail.clone_count || 0})</span>
+              <Download className="w-4 h-4 shrink-0 text-white" />
+              <span>
+                <span className="hidden sm:inline">Lưu bộ từ</span>
+                <span className="sm:hidden">Lưu</span> ({detail.clone_count || 0})
+              </span>
             </button>
             <button 
               type="button"
               onClick={() => lib.handleShare(detail.id, detail.name)}
-              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
+              aria-label="Chia sẻ"
+              className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
             >
-              <Share2 className="w-4 h-4 text-[#2D2824]" />
-              <span>Chia sẻ</span>
+              <Share2 className="w-4 h-4 shrink-0 text-[#2D2824]" />
+              <span className="hidden sm:inline">Chia sẻ</span>
             </button>
           </div>
         )}
@@ -994,7 +1001,7 @@ export function PageLibrary() {
       {/* ─────────────────────────────────────────────────────────────────
           MOBILE VIEW (block lg:hidden, max-w-[430px] mx-auto)
           ───────────────────────────────────────────────────────────────── */}
-      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen px-4 pt-3 pb-24 relative pwa-safe-top">
+      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen px-4 pt-3 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] relative pwa-safe-top">
         {/* Storybook Tabs */}
         <div className="my-2">
           <div className="bg-white rounded-[26px_22px_24px_28px] p-1.5 flex items-center justify-between border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] gap-1">
@@ -1278,12 +1285,13 @@ export function PageLibrary() {
         </div>
 
         {/* Mobile Floating Feedback Action Button */}
-        <div className="fixed bottom-20 right-5 z-40">
+        <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] right-4 z-40">
           <button 
             type="button"
             onClick={() => window.openBugReportModal?.({ initialType: 'feedback', feature: 'Thư viện cộng đồng', title: 'Góp ý Thư viện' })}
             className="w-12 h-12 bg-white text-[#E66946] rounded-full border-[2.5px] border-[#2D2824] flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[2px_2px_0px_#2D2824] cursor-pointer"
             title="Góp ý cho thư viện"
+            aria-label="Góp ý cho thư viện"
           >
             <Flag className="w-5 h-5 text-[#E66946]" />
           </button>

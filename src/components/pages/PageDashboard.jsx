@@ -229,7 +229,7 @@ export function PageDashboard() {
       
       {/* MOBILE LAYOUT */}
       <div className="block lg:hidden w-full">
-        <div className="w-full max-w-[430px] min-h-screen flex flex-col px-4 pt-3 pb-8 relative mx-auto bg-[#FAF5EB] pwa-safe-top">
+        <div className="w-full max-w-[430px] min-h-screen flex flex-col px-4 pt-3 pb-[calc(6rem+env(safe-area-inset-bottom,0px))] relative mx-auto bg-[#FAF5EB] pwa-safe-top">
           {/* Header Section: Tinh gọn chỉ icon chuỗi ngày giữ lửa bên trái và avatar bên phải */}
           <section className="mt-1 mb-4 flex items-center justify-between">
             <div className="inline-flex items-center space-x-1.5 bg-[#382E2B] text-[#FFF9F0] py-2 px-3.5 rounded-2xl shadow-sm">
@@ -484,14 +484,18 @@ export function PageDashboard() {
             </button>
           </section>
 
-          <footer className="text-center py-2 mb-14">
+          <footer className="text-center py-2 mb-4">
             <p className="text-xs text-[#8C7B71] font-medium italic">Trang 1 / {total} từ trong tập vẽ tranh sáp màu</p>
           </footer>
         </div>
 
         {/* Mobile FAB */}
-        <div className="fixed bottom-20 right-5 z-40">
-          <button onClick={handleOpenAddWord} className="w-13 h-13 p-3 bg-[#DE5D53] hover:bg-[#C84F45] text-white rounded-full border-[3px] border-[#382E2B] shadow-lg flex items-center justify-center">
+        <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] right-4 z-40">
+          <button
+            onClick={handleOpenAddWord}
+            aria-label="Thêm từ mới"
+            className="w-12 h-12 sm:w-14 sm:h-14 p-3 bg-[#DE5D53] hover:bg-[#C84F45] text-white rounded-full border-[3px] border-[#382E2B] shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

@@ -484,8 +484,8 @@ export function AdminReportsTab() {
                           : 'bg-white shadow-[3px_3.5px_0px_#3D352E] hover:bg-[#FFFDF9]'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0 w-full sm:w-auto">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -526,11 +526,12 @@ export function AdminReportsTab() {
                         </div>
 
                         {/* Action: Resolve & DELETE */}
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-[#FAF5EB] w-full sm:w-auto justify-end">
                           {log.error_stack && (
                             <button
+                              type="button"
                               onClick={() => toggleStack(log.id)}
-                              className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] transition-all flex items-center gap-1 cursor-pointer"
+                              className="min-h-[40px] sm:min-h-[36px] px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] transition-all flex items-center gap-1 cursor-pointer"
                               title="Xem Stack Trace chi tiết"
                             >
                               <span className="material-symbols-outlined text-[15px]">
@@ -543,11 +544,12 @@ export function AdminReportsTab() {
                           )}
 
                           <button
+                            type="button"
                             onClick={() =>
                               handleResolveAndDelete(log.id, 'system_error_logs', 'log lỗi')
                             }
                             disabled={isDeleting}
-                            className="px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
+                            className="min-h-[40px] sm:min-h-[36px] px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                             title="Xác nhận đã giải quyết và xóa log khỏi database để tiết kiệm dung lượng"
                           >
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>
@@ -632,8 +634,8 @@ export function AdminReportsTab() {
                           : 'bg-white shadow-[3px_3.5px_0px_#3D352E] hover:bg-[#FFFDF9]'
                       }`}
                     >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-start gap-3.5 flex-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="flex items-start gap-3.5 flex-1 min-w-0 w-full sm:w-auto">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -697,12 +699,12 @@ export function AdminReportsTab() {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 pt-2 sm:pt-0 border-t sm:border-0 border-[#FAF5EB] w-full sm:w-auto justify-end">
                           {dev && (
                             <button
                               type="button"
                               onClick={() => toggleStack(report.id)}
-                              className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] transition-all flex items-center gap-1 cursor-pointer"
+                              className="min-h-[40px] sm:min-h-[36px] px-3 py-1.5 rounded-xl bg-[#FAF5EB] hover:bg-[#F2ECE0] border-2 border-[#3D352E] text-xs font-bold text-[#3D352E] transition-all flex items-center gap-1 cursor-pointer"
                               title="Xem chi tiết log trình duyệt ẩn và môi trường máy khách"
                             >
                               <span className="material-symbols-outlined text-[15px]">
@@ -715,6 +717,7 @@ export function AdminReportsTab() {
                           )}
 
                           <button
+                            type="button"
                             onClick={() =>
                               handleResolveAndDelete(
                                 report.id,
@@ -723,7 +726,7 @@ export function AdminReportsTab() {
                               )
                             }
                             disabled={isDeleting}
-                            className="px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
+                            className="min-h-[40px] sm:min-h-[36px] px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#466638] text-white text-xs font-black flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
                             title="Xác nhận đã xử lý và xóa khỏi database để tiết kiệm dung lượng"
                           >
                             <span className="material-symbols-outlined text-[16px]">check_circle</span>

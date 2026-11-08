@@ -448,7 +448,7 @@ export function AdminFoldersTab() {
       {/* ───────────────────────────────────────────────────────────── */}
       {isCreateOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-white rounded-3xl border-2 border-[#3D352E] shadow-[4px_6px_0px_#3D352E] p-6 space-y-4">
+          <div className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white rounded-3xl border-2 border-[#3D352E] shadow-[4px_6px_0px_#3D352E] p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b-2 border-[#FAF5EB]">
               <div className="flex items-center gap-2">
                 <span className="text-xl">📁</span>
@@ -458,7 +458,8 @@ export function AdminFoldersTab() {
               </div>
               <button
                 onClick={() => setIsCreateOpen(false)}
-                className="w-8 h-8 rounded-full bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] border-2 border-[#3D352E] font-black text-sm flex items-center justify-center cursor-pointer"
+                aria-label="Đóng modal"
+                className="w-10 h-10 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] border-2 border-[#3D352E] font-black text-sm flex items-center justify-center cursor-pointer"
               >
                 ✕
               </button>
@@ -528,14 +529,14 @@ export function AdminFoldersTab() {
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] border-2 border-[#3D352E] text-xs font-black transition cursor-pointer"
+                  className="min-h-[44px] px-4 py-2 rounded-2xl bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] border-2 border-[#3D352E] text-xs font-black transition cursor-pointer flex items-center justify-center"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={isCreating}
-                  className="px-5 py-2 rounded-2xl bg-[#D96B43] hover:bg-[#C25832] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition disabled:opacity-50 cursor-pointer"
+                  className="min-h-[44px] px-5 py-2 rounded-2xl bg-[#D96B43] hover:bg-[#C25832] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition disabled:opacity-50 cursor-pointer flex items-center justify-center"
                 >
                   {isCreating ? 'Đang tạo...' : 'Tạo Thư mục'}
                 </button>

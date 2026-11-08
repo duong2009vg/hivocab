@@ -215,7 +215,7 @@ export function PageVocabulary() {
             <button
               aria-label="Cài đặt"
               onClick={() => navigateTo('settings')}
-              className="w-10 h-10 flex items-center justify-center bg-[#E5DFCC] border-2 border-[#4A3E39] text-[#4A3E39] rounded-2xl shadow-xs active:scale-90 transition-transform cursor-pointer"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-[#E5DFCC] border-2 border-[#4A3E39] text-[#4A3E39] rounded-2xl shadow-xs active:scale-90 transition-transform cursor-pointer"
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -242,9 +242,9 @@ export function PageVocabulary() {
               </button>
             </div>
             <button
-              aria-label="Làm mới"
+              aria-label="Làm mới trạng thái"
               onClick={refresh}
-              className="text-[#7D716A] hover:text-[#4A3E39] transition-colors active:rotate-45"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[#7D716A] hover:text-[#4A3E39] hover:bg-[#FAF5EB] transition-colors active:rotate-45 cursor-pointer"
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -471,11 +471,11 @@ export function PageVocabulary() {
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-1.5 text-[#4A3E39]">
+                    <div className="flex items-center gap-2 shrink-0 text-[#4A3E39]">
                       <button
                         onClick={() => playWord(w.word)}
-                        aria-label="Phát âm"
-                        className="p-1 hover:text-[#F07D43] transition-colors cursor-pointer"
+                        aria-label={`Phát âm từ ${w.word}`}
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-[#F6EFE3] hover:bg-[#EFE5D5] border border-[#4A3E39]/20 text-[#4A3E39] hover:text-[#F07D43] flex items-center justify-center active:scale-95 transition-all cursor-pointer shadow-xs"
                         type="button"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -485,8 +485,8 @@ export function PageVocabulary() {
                       </button>
                       <button
                         onClick={() => deleteWord(w.id, w.word)}
-                        aria-label="Xóa"
-                        className="p-1 text-[#7D716A] hover:text-red-500 transition-colors cursor-pointer"
+                        aria-label={`Xóa từ ${w.word}`}
+                        className="w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl text-[#9C8F85] hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center cursor-pointer ml-1"
                         type="button"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -523,7 +523,7 @@ export function PageVocabulary() {
               <button
                 disabled={page <= 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-                className="px-3.5 py-2 rounded-xl bg-white border-2 border-[#4A3E39] font-bold text-xs shadow-xs disabled:opacity-40"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-white border-2 border-[#4A3E39] font-bold text-xs shadow-xs disabled:opacity-40 flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
               >
                 ← Trước
               </button>
@@ -533,7 +533,7 @@ export function PageVocabulary() {
               <button
                 disabled={page >= totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                className="px-3.5 py-2 rounded-xl bg-[#F07D43] text-white border-2 border-[#4A3E39] font-bold text-xs shadow-xs disabled:opacity-40"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#F07D43] text-white border-2 border-[#4A3E39] font-bold text-xs shadow-xs disabled:opacity-40 flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
               >
                 Sau →
               </button>

@@ -47,7 +47,7 @@ function getBookDimensions(wordCount, isSingleShelfView = false) {
   const ratio = (Math.log10(clamped) - minLog) / (maxLog - minLog);
 
   const scale = isSingleShelfView ? 1.14 : 1.0;
-  const widthPx = Math.round((38 + ratio * 20) * scale);
+  const widthPx = Math.max(42, Math.round((38 + ratio * 20) * scale));
   const heightPx = Math.round((152 + ratio * 28) * scale);
 
   return { widthPx, heightPx, ratio };
@@ -317,7 +317,7 @@ function ShelfRowTier({
           <button
             type="button"
             onClick={() => onSelectFolder(shelf.id)}
-            className="brass-plaque px-3.5 py-1 rounded-lg border-2 border-[#3D352E] flex items-center gap-2 cursor-pointer hover:brightness-105 transition-all min-w-0"
+            className="brass-plaque min-h-[44px] px-3 sm:px-3.5 py-1.5 rounded-lg border-2 border-[#3D352E] flex items-center gap-2 cursor-pointer hover:brightness-105 active:scale-[0.98] transition-all min-w-0"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#3D352E] shrink-0" />
             <span className="font-display font-extrabold text-xs sm:text-sm text-[#302A24] tracking-wide truncate">
@@ -329,22 +329,22 @@ function ShelfRowTier({
 
         <div className="flex items-center gap-2 shrink-0">
           {shelf.books.length > 8 && (
-            <div className="flex items-center gap-1 mr-1">
+            <div className="hidden sm:flex items-center gap-1 mr-1">
               <button
                 type="button"
                 onClick={() => handleScrollShelf(-1)}
                 title="Kéo sang trái"
-                className="p-1 rounded-lg bg-[#FAF5EB] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-[#FAF5EB] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] cursor-pointer flex items-center justify-center active:scale-[0.96]"
               >
-                <ChevronLeft className="w-3.5 h-3.5" />
+                <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => handleScrollShelf(1)}
                 title="Kéo sang phải"
-                className="p-1 rounded-lg bg-[#FAF5EB] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] cursor-pointer"
+                className="w-8 h-8 rounded-lg bg-[#FAF5EB] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] cursor-pointer flex items-center justify-center active:scale-[0.96]"
               >
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           )}
@@ -353,10 +353,10 @@ function ShelfRowTier({
             <button
               type="button"
               onClick={() => onSelectFolder(shelf.id)}
-              className="px-2.5 py-1 rounded-lg bg-[#382010]/80 hover:bg-[#241308] text-[#FAF5EB] border border-[#D4AF37]/50 text-[11px] font-bold cursor-pointer flex items-center gap-1 transition-all"
+              className="min-h-[44px] px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#382010]/80 hover:bg-[#241308] text-[#FAF5EB] border border-[#D4AF37]/50 text-[11px] sm:text-xs font-bold cursor-pointer flex items-center gap-1 transition-all shrink-0 active:scale-[0.98]"
             >
-              <span>Mở riêng kệ này</span>
-              <ChevronRight className="w-3 h-3" />
+              <span>Mở riêng<span className="hidden sm:inline"> kệ này</span><span className="sm:hidden text-[0px] leading-[0] opacity-0 select-none inline"> kệ này</span></span>
+              <ChevronRight className="w-3.5 h-3.5 shrink-0" />
             </button>
           ) : (
             <div className="flex items-center gap-1.5">
@@ -364,16 +364,16 @@ function ShelfRowTier({
                 type="button"
                 onClick={() => onDeleteFolder(shelf.id, shelf.code)}
                 title={`Xóa thư mục "${shelf.code}"`}
-                className="p-1.5 rounded-lg bg-[#FAF5EB] hover:bg-rose-100 text-rose-600 border-2 border-[#3D352E] cursor-pointer transition-all"
+                className="min-h-[44px] min-w-[44px] p-2 rounded-lg bg-[#FAF5EB] hover:bg-rose-100 text-rose-600 border-2 border-[#3D352E] cursor-pointer transition-all flex items-center justify-center shrink-0 active:scale-[0.98]"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => onSelectFolder('all')}
-                className="px-3 py-1 rounded-lg bg-[#FAF5EB] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] text-xs font-black cursor-pointer flex items-center gap-1.5"
+                className="min-h-[44px] px-3.5 py-2 rounded-lg bg-[#FAF5EB] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] text-xs font-black cursor-pointer flex items-center gap-1.5 shrink-0 active:scale-[0.98]"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span>Xem tất cả giá sách</span>
               </button>
             </div>
@@ -388,7 +388,7 @@ function ShelfRowTier({
         <div
           ref={scrollRef}
           onScroll={() => onHoverBook(null)}
-          className="flex-1 antique-recess-cavity px-4 sm:px-7 pt-9 pb-0 relative overflow-x-auto shelf-scrollbar"
+          className="flex-1 min-w-0 antique-recess-cavity px-4 sm:px-7 pt-9 pb-0 relative overflow-x-auto shelf-scrollbar"
         >
           <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2">
             <div className="w-14 h-1.5 bg-[#D4AF37]/80 border-x border-b border-[#3D352E] rounded-b-full shadow-[0_4px_14px_rgba(244,180,26,0.65)]" />
@@ -472,9 +472,9 @@ function ShelfRowTier({
                                 onDeleteTopic(book.id, book.title);
                               }}
                               title={`Xóa "${book.title}"`}
-                              className="p-0.5 rounded bg-black/30 hover:bg-rose-600 text-white transition-colors"
+                              className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-black/40 hover:bg-rose-600 text-white transition-colors flex items-center justify-center relative z-20 cursor-pointer active:scale-[0.95]"
                             >
-                              <Trash2 className="w-2.5 h-2.5" />
+                              <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           )}
                         </div>
@@ -503,7 +503,7 @@ function ShelfRowTier({
                       marginLeft: `${lean.marginLeftPx}px`,
                       marginRight: `${lean.marginRightPx}px`,
                     }}
-                    className="book-spine-leaning group relative rounded-t-[5px] border-[2.5px] border-[#3D352E] shadow-[3px_0px_6px_rgba(15,8,3,0.65)] cursor-pointer flex flex-col items-center justify-between py-2.5 px-1 select-none shrink-0 text-[#FAF5EB]"
+                    className="book-spine-leaning group relative rounded-t-[5px] border-[2.5px] border-[#3D352E] shadow-[3px_0px_6px_rgba(15,8,3,0.65)] cursor-pointer flex flex-col items-center justify-between py-2.5 px-1 select-none shrink-0 text-[#FAF5EB] active:scale-[0.98] before:absolute before:-top-6 before:bottom-0 before:inset-x-0"
                   >
                     {/* Top page edge stripes */}
                     <div
@@ -566,9 +566,9 @@ function ShelfRowTier({
                 type="button"
                 onClick={() => onAddBookToShelf(shelf.id)}
                 title="Thêm chủ đề / sách mới vào kệ này"
-                className="h-32 w-9 rounded-t-md border border-dashed border-[#E6C98A]/45 hover:border-[#FEF3C7] bg-white/5 hover:bg-white/15 flex flex-col items-center justify-center gap-1 text-[#E6C98A]/80 hover:text-[#FEF3C7] transition-all cursor-pointer"
+                className="h-32 w-11 min-w-[44px] rounded-t-md border border-dashed border-[#E6C98A]/45 hover:border-[#FEF3C7] bg-white/5 hover:bg-white/15 flex flex-col items-center justify-center gap-1 text-[#E6C98A]/80 hover:text-[#FEF3C7] transition-all cursor-pointer active:scale-[0.96]"
               >
-                <Plus className="w-3.5 h-3.5" />
+                <Plus className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -769,7 +769,7 @@ export function PageTopics() {
   return (
     <div
       id="page-topics"
-      className="page active min-h-screen text-[#302A24] selection:bg-[#FEF3C7] selection:text-[#302A24] lg:pl-[var(--sidebar-w,244px)] pb-28 lg:pb-10 pwa-safe-top"
+      className="page active min-h-screen text-[#302A24] selection:bg-[#FEF3C7] selection:text-[#302A24] lg:pl-[var(--sidebar-w,244px)] pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] lg:pb-10 pwa-safe-top"
       style={{
         backgroundColor: '#FAF5EB',
         backgroundImage: 'radial-gradient(#E2D6C3 1.25px, transparent 1.25px)',
@@ -836,6 +836,8 @@ export function PageTopics() {
             inset 14px 0 20px -8px rgba(8, 4, 1, 0.7),
             inset -14px 0 20px -8px rgba(8, 4, 1, 0.7),
             inset 0 -6px 14px rgba(8, 4, 1, 0.65);
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior-x: contain;
         }
         .antique-pilaster {
           background: linear-gradient(90deg, #341D0E 0%, #684024 35%, #7E5030 50%, #56341C 75%, #2E190B 100%);
@@ -881,17 +883,21 @@ export function PageTopics() {
           transform-origin: bottom center;
           transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, filter 0.2s ease;
         }
-        .book-spine-leaning:hover {
-          transform: translateY(-14px) rotate(0deg) scale(1.06);
-          filter: brightness(1.08);
-          z-index: 35;
+        @media (hover: hover) and (pointer: fine) {
+          .book-spine-leaning:hover {
+            transform: translateY(-14px) rotate(0deg) scale(1.06);
+            filter: brightness(1.08);
+            z-index: 35;
+          }
         }
         .book-cover-item {
           transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
         }
-        .book-cover-item:hover {
-          transform: translateY(-10px) rotate(1deg) scale(1.03);
-          z-index: 35;
+        @media (hover: hover) and (pointer: fine) {
+          .book-cover-item:hover {
+            transform: translateY(-10px) rotate(1deg) scale(1.03);
+            z-index: 35;
+          }
         }
 
         .writing-vertical {
@@ -951,48 +957,71 @@ export function PageTopics() {
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-7 max-w-[1400px] mx-auto w-full">
         {/* COMPACT TOP HEADER BAR */}
         <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b-2 border-dashed border-[#DECDBB]">
-          <div>
-            <h2 className="font-display font-extrabold text-xl sm:text-2xl text-[#302A24] tracking-tight">
-              Thư Viện Chủ Đề &amp; Khóa Học HiVocab
-            </h2>
-            <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
-              {stats.totalWords > 0 ? (
-                <>
-                  Đã thuộc{' '}
-                  <strong className="text-[#557A46]">
-                    {stats.learnedWords.toLocaleString()}
-                  </strong>{' '}
-                  / {stats.totalWords.toLocaleString()} từ vựng trên{' '}
-                  <strong>{stats.totalBooks} cuốn sách</strong>
-                </>
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-display font-extrabold text-xl sm:text-2xl text-[#302A24] tracking-tight">
+                Thư Viện Chủ Đề &amp; Khóa Học HiVocab
+              </h2>
+              <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
+                {stats.totalWords > 0 ? (
+                  <>
+                    Đã thuộc{' '}
+                    <strong className="text-[#557A46]">
+                      {stats.learnedWords.toLocaleString()}
+                    </strong>{' '}
+                    / {stats.totalWords.toLocaleString()} từ vựng trên{' '}
+                    <strong>{stats.totalBooks} cuốn sách</strong>
+                  </>
+                ) : (
+                  <>
+                    Khám phá <strong>{stats.totalBooks} cuốn sách</strong> trên{' '}
+                    <strong>{stats.totalShelves} giá sách chuyên đề</strong>
+                  </>
+                )}
+              </p>
+            </div>
+
+            {/* Mobile User Avatar Dropdown Trigger */}
+            <button
+              type="button"
+              data-mobile-avatar="true"
+              onClick={() => window.toggleMobileProfileDropdown?.()}
+              aria-label="Mở menu tài khoản cá nhân"
+              className="mobile-user-avatar lg:hidden w-11 h-11 min-w-[44px] min-h-[44px] rounded-full border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] bg-[#FEF3C7] text-[#302A24] flex items-center justify-center font-display font-extrabold text-sm cursor-pointer select-none overflow-hidden shrink-0 active:scale-[0.96]"
+            >
+              {user?.user_metadata?.avatar_url ? (
+                <img
+                  src={user.user_metadata.avatar_url}
+                  alt={user?.user_metadata?.full_name || 'User'}
+                  className="w-full h-full object-cover"
+                />
               ) : (
-                <>
-                  Khám phá <strong>{stats.totalBooks} cuốn sách</strong> trên{' '}
-                  <strong>{stats.totalShelves} giá sách chuyên đề</strong>
-                </>
+                <span>
+                  {(user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email || 'H').charAt(0).toUpperCase()}
+                </span>
               )}
-            </p>
+            </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Search Input */}
-            <div className="relative flex-1 sm:w-64">
-              <Search className="w-4 h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="relative w-full sm:w-64 min-w-[200px] flex-1">
+              <Search className="w-4 h-4 text-[#786F66] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm sách (CAM 21, Cô MP, SAT...)"
-                className="w-full pl-9 pr-7 py-2 rounded-xl bg-white border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+                className="w-full min-h-[44px] pl-10 pr-11 py-2.5 rounded-xl bg-white border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] text-sm sm:text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
                   aria-label="Xóa tìm kiếm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-[#786F66] cursor-pointer"
+                  className="absolute right-0 top-0 bottom-0 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#786F66] hover:text-[#302A24] cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -1011,9 +1040,9 @@ export function PageTopics() {
                     playCrayonSound('page-flip', soundMuted);
                     setBookDisplayStyle(m.id);
                   }}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all cursor-pointer ${
+                  className={`min-h-[44px] px-3 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center ${
                     bookDisplayStyle === m.id
-                      ? 'bg-[#557A46] text-white'
+                      ? 'bg-[#557A46] text-white shadow-sm'
                       : 'text-[#786F66] hover:text-[#302A24]'
                   }`}
                 >
@@ -1027,7 +1056,7 @@ export function PageTopics() {
               type="button"
               onClick={() => setSoundMuted((m) => !m)}
               title={soundMuted ? 'Bật âm thanh mở sách thật' : 'Tắt âm thanh mở sách'}
-              className="p-2 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer"
+              className="min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer flex items-center justify-center shrink-0 active:scale-[0.98]"
             >
               {soundMuted ? (
                 <VolumeX className="w-4 h-4 text-[#786F66]" />
@@ -1040,7 +1069,7 @@ export function PageTopics() {
             <button
               type="button"
               onClick={() => handleOpenCreateTopic(activeCategory)}
-              className="py-2 px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="min-h-[44px] py-2 px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span>Thêm sách mới</span>
@@ -1050,8 +1079,8 @@ export function PageTopics() {
 
         {/* FOLDER / CATEGORY PILLS */}
         <section className="mt-4">
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar">
+          <div className="flex items-center justify-between gap-2 mb-2 w-full min-w-0">
+            <div className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar">
               {categoryPills.map((pill) => {
                 const active =
                   activeCategory.toLowerCase() === pill.id.toLowerCase();
@@ -1063,7 +1092,7 @@ export function PageTopics() {
                       playCrayonSound('page-flip', soundMuted);
                       setActiveCategory(pill.id);
                     }}
-                    className={`px-3.5 py-1.5 rounded-full font-extrabold text-xs whitespace-nowrap border-2 border-[#3D352E] transition-all cursor-pointer flex items-center gap-1.5 ${
+                    className={`min-h-[44px] px-3.5 py-2 rounded-full font-extrabold text-xs whitespace-nowrap border-2 border-[#3D352E] transition-all cursor-pointer flex items-center gap-1.5 select-none ${
                       active
                         ? 'bg-[#557A46] text-white shadow-[2px_3px_0px_#3D352E] -translate-y-0.5'
                         : 'bg-[#FFFDF9] hover:bg-[#FEF3C7] text-[#302A24]'
@@ -1178,12 +1207,12 @@ export function PageTopics() {
                 ))}
               </div>
 
-              <div className="antique-cornice h-6 border-t-[3px] border-[#3D352E] flex items-center justify-between px-10">
-                <div className="w-12 h-2 rounded-full bg-[#241308]" />
-                <span className="text-[9px] font-black uppercase tracking-widest text-[#E6C98A]/75">
+              <div className="antique-cornice h-6 border-t-[3px] border-[#3D352E] flex items-center justify-between px-3 sm:px-10">
+                <div className="w-6 sm:w-12 h-2 rounded-full bg-[#241308] shrink-0" />
+                <span className="text-[8px] sm:text-[9px] font-black uppercase tracking-wider sm:tracking-widest text-[#E6C98A]/75 truncate px-1">
                   HIVOCAB CLASSICAL LIBRARY ARCHIVE
                 </span>
-                <div className="w-12 h-2 rounded-full bg-[#241308]" />
+                <div className="w-6 sm:w-12 h-2 rounded-full bg-[#241308] shrink-0" />
               </div>
             </div>
           </section>

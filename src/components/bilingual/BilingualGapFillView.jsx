@@ -195,7 +195,7 @@ export function BilingualGapFillView({
                 key={it.wordId || i}
                 type="button"
                 onClick={() => onGoTo(i)}
-                className={`w-8 h-8 rounded-xl text-xs flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer ${btnClass}`}
+                className={`w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl text-xs flex items-center justify-center shrink-0 transition-all active:scale-95 cursor-pointer ${btnClass}`}
                 title={`Chuyển đến câu ${i + 1}`}
               >
                 {itDone && !isCurr ? <Check className="w-3.5 h-3.5" /> : i + 1}
@@ -280,8 +280,8 @@ export function BilingualGapFillView({
                     : 'border-[#382E2B] bg-white text-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:border-[#D36135]'
                 } ${isShaking ? 'border-[#C85A3F] animate-pulse' : ''}`}
                 style={{
-                  minWidth: `${Math.max(120, currentItem.blankWord.length * 16)}px`,
-                  maxWidth: '280px',
+                  minWidth: `${Math.min(100, Math.max(70, currentItem.blankWord.length * 12))}px`,
+                  maxWidth: 'min(280px, calc(100vw - 96px))',
                 }}
                 placeholder={hintDisplay || '...'}
               />
@@ -316,7 +316,7 @@ export function BilingualGapFillView({
               <button
                 type="button"
                 onClick={() => onNext(currentGapIndex)}
-                className="px-3.5 py-1.5 rounded-xl bg-[#5a7d4d] text-white hover:bg-[#4d6d41] transition-colors flex items-center gap-1 cursor-pointer"
+                className="px-4 py-2 min-h-[40px] rounded-xl bg-[#5a7d4d] text-white hover:bg-[#4d6d41] transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
                 <span className="inline-flex items-center gap-1">Câu tiếp <ArrowRight className="w-4 h-4 shrink-0" /></span>
               </button>
@@ -335,14 +335,14 @@ export function BilingualGapFillView({
                       onHint(currentGapIndex);
                       if (inputRef.current) inputRef.current.focus();
                     }}
-                    className="px-3.5 py-2 rounded-2xl bg-[#FFF3D6] hover:bg-[#FFE5B4] text-[#B87C24] text-xs font-black flex items-center gap-1.5 transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
+                    className="px-3.5 py-2.5 min-h-[44px] rounded-2xl bg-[#FFF3D6] hover:bg-[#FFE5B4] text-[#B87C24] text-xs font-black flex items-center justify-center gap-1.5 transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
                   >
                     <span className="inline-flex items-center gap-1"><Lightbulb className="w-3.5 h-3.5 shrink-0" /> Gợi ý ({currentItem.hintLevel}/{currentItem.blankWord.length})</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => onReveal(currentGapIndex)}
-                    className="px-3.5 py-2 rounded-2xl bg-[#FAF5EB] hover:bg-[#F3E7D5] text-[#766C5F] text-xs font-black flex items-center gap-1.5 transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
+                    className="px-3.5 py-2.5 min-h-[44px] rounded-2xl bg-[#FAF5EB] hover:bg-[#F3E7D5] text-[#766C5F] text-xs font-black flex items-center justify-center gap-1.5 transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
                   >
                     <span className="inline-flex items-center gap-1"><Eye className="w-3.5 h-3.5 shrink-0" /> Xem đáp án</span>
                   </button>
@@ -356,7 +356,7 @@ export function BilingualGapFillView({
                 type="button"
                 onClick={() => onPrev(currentGapIndex)}
                 disabled={currentGapIndex === 0}
-                className={`px-3.5 py-2 rounded-2xl text-xs font-black flex items-center gap-1 transition-all ${
+                className={`px-3.5 py-2.5 min-h-[44px] rounded-2xl text-xs font-black flex items-center justify-center gap-1 transition-all ${
                   currentGapIndex === 0
                     ? 'opacity-40 cursor-not-allowed text-[#9C8F85] border-2 border-[#382E2B]/20'
                     : 'bg-white hover:bg-[#FAF5EB] text-[#382E2B] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer'
@@ -368,7 +368,7 @@ export function BilingualGapFillView({
               {!currentItem.isCorrect ? (
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm active:translate-y-0.5 transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center gap-1.5 cursor-pointer"
+                  className="px-6 py-2.5 min-h-[44px] rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm active:translate-y-0.5 transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <span className="inline-flex items-center gap-1">Kiểm tra <ArrowRight className="w-4 h-4 shrink-0" /></span>
                 </button>
@@ -376,7 +376,7 @@ export function BilingualGapFillView({
                 <button
                   type="button"
                   onClick={() => onNext(currentGapIndex)}
-                  className="px-6 py-2 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm active:translate-y-0.5 transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center gap-1.5 cursor-pointer"
+                  className="px-6 py-2.5 min-h-[44px] rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs sm:text-sm active:translate-y-0.5 transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <span className="inline-flex items-center gap-1">Tiếp tục <ArrowRight className="w-4 h-4 shrink-0" /></span>
                 </button>

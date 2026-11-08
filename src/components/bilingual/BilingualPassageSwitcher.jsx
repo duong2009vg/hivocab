@@ -37,7 +37,7 @@ export function BilingualPassageSwitcher({
   return (
     <div
       ref={dropdownRef}
-      className="absolute left-0 top-full mt-2 w-72 sm:w-84 bg-[#FFFDF9] border-2 border-[#382E2B] rounded-3xl shadow-[5px_6px_0px_#382E2B] p-3 z-50 max-h-80 overflow-y-auto fade-in select-none"
+      className="absolute left-0 top-full mt-2 w-72 sm:w-84 max-w-[calc(100vw-32px)] bg-[#FFFDF9] border-2 border-[#382E2B] rounded-3xl shadow-[5px_6px_0px_#382E2B] p-3 z-50 max-h-80 overflow-y-auto fade-in select-none"
     >
       {tests.length === 0 ? (
         <p className="text-xs font-bold text-[#766C5F] p-4 text-center">
@@ -66,7 +66,7 @@ export function BilingualPassageSwitcher({
                         onSelectPassage(p.id);
                         onClose();
                       }}
-                      className={`w-full text-left px-3 py-2 rounded-2xl text-xs font-bold flex items-center justify-between gap-2 transition-all cursor-pointer ${
+                      className={`w-full text-left px-3 py-2.5 min-h-[44px] rounded-2xl text-xs font-bold flex items-center justify-between gap-2 transition-all cursor-pointer ${
                         isActive
                           ? 'bg-[#5a7d4d] text-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B]'
                           : 'text-[#382E2B] hover:bg-[#FAF5EB] border-2 border-transparent'

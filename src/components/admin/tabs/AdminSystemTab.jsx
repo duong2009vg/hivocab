@@ -169,23 +169,23 @@ export function AdminSystemTab() {
           </h4>
         </div>
         <div className="divide-y-2 divide-[#FAF5EB] text-xs font-bold">
-          <div className="py-3 flex items-center justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
             <span className="text-[#6E5D53]">Kiến trúc Ứng dụng</span>
             <span className="font-black text-[#3D352E]">React 19 Pure SPA (Zero DOM mutation) ⚡</span>
           </div>
-          <div className="py-3 flex items-center justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
             <span className="text-[#6E5D53]">Cổng Thanh toán Tự động</span>
             <span className="font-black text-[#3D352E]">PayOS VietQR HMAC-SHA256 💳</span>
           </div>
-          <div className="py-3 flex items-center justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
             <span className="text-[#6E5D53]">Cơ chế Bảo mật Tuyến đường</span>
-            <span className="font-black text-[#DE5D53] bg-[#FFF0E6] px-2.5 py-0.5 rounded-full border-2 border-[#DE5D53]">
+            <span className="font-black text-[#DE5D53] bg-[#FFF0E6] px-2.5 py-0.5 rounded-full border-2 border-[#DE5D53] self-start sm:self-auto text-left">
               AdminProtectedRoute (Role: admin) 🛡️
             </span>
           </div>
-          <div className="py-3 flex items-center justify-between">
+          <div className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
             <span className="text-[#6E5D53]">Đồng bộ Trạng thái PRO</span>
-            <span className="font-mono text-[#557A46] bg-[#EAF3E7] px-2.5 py-0.5 rounded-full border-2 border-[#557A46]">
+            <span className="font-mono text-[#557A46] bg-[#EAF3E7] px-2.5 py-1 rounded-xl border-2 border-[#557A46] break-all self-start sm:self-auto text-[11px]">
               profiles.tier + subscription_expires_at + is_pro
             </span>
           </div>

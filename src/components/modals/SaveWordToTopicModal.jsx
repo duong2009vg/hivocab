@@ -293,16 +293,16 @@ export function SaveWordToTopicModal() {
               <p className="text-xs font-bold text-[#92400E]">
                 Vui lòng đăng nhập để lưu từ vựng vào kho cá nhân của bạn!
               </p>
-              <div className="flex items-center justify-center gap-2 pt-1">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => {
                     closeModal('saveWordToTopic');
                     navigateTo('login');
                   }}
-                  className="px-4 py-2 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="min-h-[44px] w-full sm:w-auto px-4 py-2.5 bg-[#382E2B] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <LogIn className="w-3.5 h-3.5" />
+                  <LogIn className="w-4 h-4 shrink-0" />
                   <span>Đăng nhập ngay</span>
                 </button>
                 <button
@@ -312,9 +312,9 @@ export function SaveWordToTopicModal() {
                     if (typeof window !== 'undefined') window._initialAuthMode = 'signup';
                     navigateTo('login');
                   }}
-                  className="px-4 py-2 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center gap-1.5"
+                  className="min-h-[44px] w-full sm:w-auto px-4 py-2.5 bg-[#D36135] text-white text-xs font-black rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 >
-                  <UserPlus className="w-3.5 h-3.5" />
+                  <UserPlus className="w-4 h-4 shrink-0" />
                   <span>Tạo tài khoản mới</span>
                 </button>
               </div>

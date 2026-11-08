@@ -26,7 +26,7 @@ export function ExamConfirmModal({ exam, answers = {}, onConfirm, onCancel }) {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="bg-[#FFFDF9] rounded-3xl border-2 border-[#382E2B] shadow-[5px_6px_0px_#382E2B] w-full max-w-sm p-6 sm:p-7 space-y-4 font-sans select-none">
+      <div className="bg-[#FFFDF9] rounded-3xl border-2 border-[#382E2B] shadow-[5px_6px_0px_#382E2B] w-full max-w-sm max-h-[90vh] overflow-y-auto p-6 sm:p-7 space-y-4 font-sans select-none">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-[#5a7d4d]/10 text-[#5a7d4d] border-2 border-[#5a7d4d]/30 flex items-center justify-center shrink-0">
             <Send className="w-5 h-5" />
@@ -94,7 +94,7 @@ export function ExamResultsModal({ results, onReview, onRetake, onExit }) {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="bg-[#FFFDF9] rounded-3xl border-2 border-[#382E2B] shadow-[6px_8px_0px_#382E2B] w-full max-w-md p-6 sm:p-7 space-y-5 font-sans select-none">
+      <div className="bg-[#FFFDF9] rounded-3xl border-2 border-[#382E2B] shadow-[6px_8px_0px_#382E2B] w-full max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-7 space-y-4 sm:space-y-5 font-sans select-none">
         {/* Header */}
         <div className="text-center space-y-1.5">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-[#5a7d4d]/10 border-2 border-[#5a7d4d]/30 text-[#5a7d4d] flex items-center justify-center mb-2 shadow-2xs">
@@ -165,18 +165,18 @@ export function ExamResultsModal({ results, onReview, onRetake, onExit }) {
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-col sm:flex-row gap-2 pt-2">
           <button
             type="button"
             onClick={onExit}
-            className="flex-1 py-2.5 rounded-xl border border-[#EFE8D6] text-[#766C5F] hover:text-[#382E2B] text-xs sm:text-sm font-bold hover:bg-[#FAF5EB] transition-colors cursor-pointer"
+            className="w-full sm:flex-1 min-h-[44px] py-2.5 px-4 rounded-xl border border-[#EFE8D6] text-[#766C5F] hover:text-[#382E2B] text-xs sm:text-sm font-bold hover:bg-[#FAF5EB] transition-colors cursor-pointer flex items-center justify-center"
           >
             Thoát
           </button>
           <button
             type="button"
             onClick={onRetake}
-            className="flex-1 py-2.5 rounded-xl border border-[#5a7d4d]/30 text-[#486b3c] hover:bg-[#5a7d4d]/10 text-xs sm:text-sm font-bold transition-colors cursor-pointer flex items-center justify-center gap-1"
+            className="w-full sm:flex-1 min-h-[44px] py-2.5 px-4 rounded-xl border border-[#5a7d4d]/30 text-[#486b3c] hover:bg-[#5a7d4d]/10 text-xs sm:text-sm font-bold transition-colors cursor-pointer flex items-center justify-center gap-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Làm lại</span>
@@ -184,7 +184,7 @@ export function ExamResultsModal({ results, onReview, onRetake, onExit }) {
           <button
             type="button"
             onClick={onReview}
-            className="flex-1 py-2.5 rounded-xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white text-xs sm:text-sm font-black transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer flex items-center justify-center gap-1"
+            className="w-full sm:flex-1 min-h-[44px] py-2.5 px-4 rounded-xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white text-xs sm:text-sm font-black transition-all border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer flex items-center justify-center gap-1"
           >
             <BookOpen className="w-3.5 h-3.5" />
             <span>Xem đáp án</span>
@@ -204,7 +204,7 @@ export function ExamCustomTimeModal({ examId, examTitle, onStart, onCancel }) {
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-150">
-      <div className="bg-[#FFFDF9] rounded-3xl border-[3px] border-[#382E2B] shadow-[6px_8px_0px_#382E2B] w-full max-w-sm p-6 sm:p-7 space-y-5 font-sans select-none">
+      <div className="bg-[#FFFDF9] rounded-3xl border-[3px] border-[#382E2B] shadow-[6px_8px_0px_#382E2B] w-full max-w-sm max-h-[90vh] overflow-y-auto p-5 sm:p-7 space-y-4 sm:space-y-5 font-sans select-none">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-[#FFF3D6] text-[#D36135] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-center text-xl shrink-0">
             <Clock className="w-6 h-6 text-[#D36135]" />
@@ -221,13 +221,13 @@ export function ExamCustomTimeModal({ examId, examTitle, onStart, onCancel }) {
               key={mins}
               type="button"
               onClick={() => setSelectedMinutes(mins)}
-              className={`py-3 px-3.5 rounded-2xl border-2 text-xs sm:text-sm font-black transition-all cursor-pointer ${
+              className={`py-3 px-3.5 rounded-2xl border-2 text-xs sm:text-sm font-black transition-all cursor-pointer min-h-[44px] flex flex-col items-center justify-center ${
                 selectedMinutes === mins
                   ? 'border-[#382E2B] bg-[#5a7d4d] text-white shadow-[2px_3px_0px_#382E2B]'
                   : 'border-[#382E2B]/30 bg-white text-[#382E2B] hover:border-[#382E2B] hover:bg-[#FAF5EB]'
               }`}
             >
-              {mins === 0 ? 'Không giới hạn' : `${mins} phút`}
+              <span>{mins === 0 ? 'Không giới hạn' : `${mins} phút`}</span>
               {mins === 50 && (
                 <span
                   className={`block text-[10px] font-bold mt-0.5 ${
@@ -245,14 +245,14 @@ export function ExamCustomTimeModal({ examId, examTitle, onStart, onCancel }) {
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2.5 rounded-2xl text-xs sm:text-sm text-[#786F66] hover:text-[#382E2B] hover:bg-[#FAF5EB] border-2 border-transparent transition-colors font-bold cursor-pointer"
+            className="min-h-[44px] px-4 py-2.5 rounded-2xl text-xs sm:text-sm text-[#786F66] hover:text-[#382E2B] hover:bg-[#FAF5EB] border-2 border-transparent transition-colors font-bold cursor-pointer flex items-center justify-center"
           >
             Huỷ
           </button>
           <button
             type="button"
             onClick={() => onStart(examId, selectedMinutes)}
-            className="px-5 py-2.5 rounded-2xl bg-[#D36135] text-white text-xs sm:text-sm font-black hover:bg-[#c2542a] transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
+            className="min-h-[44px] px-5 py-2.5 rounded-2xl bg-[#D36135] text-white text-xs sm:text-sm font-black hover:bg-[#c2542a] transition-all border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer flex items-center justify-center"
           >
             Bắt đầu thi
           </button>

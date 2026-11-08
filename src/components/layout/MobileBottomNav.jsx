@@ -63,7 +63,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-5 left-4 right-4 max-w-[390px] mx-auto z-50 flex items-center justify-between px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)] lg:hidden select-none"
+      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 right-4 max-w-[390px] mx-auto z-50 flex items-center justify-between px-2.5 sm:px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)] lg:hidden select-none"
     >
       {regularTabs.map((tab) => {
         const isActive = activeTab === tab.id;

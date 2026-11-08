@@ -49,7 +49,7 @@ export function ExamPalette({
 
     let cls = isLarge
       ? 'h-11 w-full rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center relative transition-all cursor-pointer select-none '
-      : 'h-7 sm:h-8 min-w-[20px] max-w-[32px] flex-1 px-0 rounded-md sm:rounded-lg text-[11px] font-bold flex items-center justify-center relative transition-all cursor-pointer select-none shrink-0 sm:shrink ';
+      : 'h-9 min-w-[38px] sm:min-w-[40px] px-1 rounded-lg text-xs font-bold flex items-center justify-center relative transition-all cursor-pointer select-none shrink-0 ';
     let title = `Câu ${i}`;
 
     if (isReviewMode && results) {
@@ -105,14 +105,14 @@ export function ExamPalette({
     <>
       <div
         id="exam-bottom-bar"
-        className="h-[52px] min-h-[52px] max-h-[52px] bg-[#FFFDF9] text-[#2D2422] border-t border-[#EFE8D6] px-2.5 sm:px-4 flex items-center justify-between gap-1.5 sm:gap-2 shrink-0 z-30 select-none shadow-xs"
+        className="min-h-[52px] bg-[#FFFDF9] text-[#2D2422] border-t border-[#EFE8D6] px-2 sm:px-4 pb-[env(safe-area-inset-bottom,0px)] flex items-center justify-between gap-1.5 sm:gap-2 shrink-0 z-30 select-none shadow-xs w-full max-w-full overflow-hidden"
       >
         {/* ── Left: Lọc nhanh câu hỏi (Tất cả / Chưa làm / Cờ) ───────── */}
         <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={() => setFilterMode('all')}
-            className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+            className={`px-2 py-1.5 min-h-[36px] sm:min-h-0 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
               filterMode === 'all'
                 ? 'bg-[#5a7d4d] text-white shadow-2xs'
                 : 'text-[#6B5A4E] hover:bg-[#FAF5EB]'
@@ -126,7 +126,7 @@ export function ExamPalette({
             <button
               type="button"
               onClick={() => setFilterMode(filterMode === 'unanswered' ? 'all' : 'unanswered')}
-              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+              className={`px-2 py-1.5 min-h-[36px] sm:min-h-0 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                 filterMode === 'unanswered'
                   ? 'bg-amber-600 text-white shadow-2xs'
                   : 'text-amber-800 bg-amber-50 border border-amber-200/80 hover:bg-amber-100'
@@ -141,7 +141,7 @@ export function ExamPalette({
             <button
               type="button"
               onClick={() => setFilterMode(filterMode === 'flagged' ? 'all' : 'flagged')}
-              className={`px-2 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-2 py-1.5 min-h-[36px] sm:min-h-0 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
                 filterMode === 'flagged'
                   ? 'bg-amber-600 text-white shadow-2xs'
                   : 'text-amber-800 bg-amber-50 border border-amber-200/80 hover:bg-amber-100'
@@ -167,7 +167,7 @@ export function ExamPalette({
           <button
             type="button"
             onClick={() => setShowGridModal(true)}
-            className="p-1 sm:px-2.5 sm:py-1 rounded-lg border border-[#EFE8D6] bg-[#FAF5EB] hover:bg-white text-xs font-bold text-[#6B5A4E] hover:text-[#2D2422] flex items-center gap-1 transition-colors cursor-pointer"
+            className="p-2 sm:px-2.5 sm:py-1 min-w-[36px] min-h-[36px] rounded-lg border border-[#EFE8D6] bg-[#FAF5EB] hover:bg-white text-xs font-bold text-[#6B5A4E] hover:text-[#2D2422] flex items-center justify-center gap-1 transition-colors cursor-pointer"
             title="Mở bảng tổng quan 40 câu hỏi"
           >
             <LayoutGrid className="w-3.5 h-3.5 text-[#5a7d4d]" />
@@ -191,7 +191,7 @@ export function ExamPalette({
               <button
                 type="button"
                 onClick={() => setShowGridModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-xs font-bold text-[#382E2B] cursor-pointer"
+                className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-xs font-bold text-[#382E2B] cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -229,7 +229,7 @@ export function ExamPalette({
               <button
                 type="button"
                 onClick={() => setShowGridModal(false)}
-                className="px-5 py-2 rounded-2xl bg-[#5a7d4d] text-white text-xs font-black border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer hover:bg-[#4d6d41]"
+                className="px-5 py-2.5 min-h-[44px] rounded-2xl bg-[#5a7d4d] text-white text-xs font-black border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer hover:bg-[#4d6d41] flex items-center justify-center"
               >
                 Đóng
               </button>

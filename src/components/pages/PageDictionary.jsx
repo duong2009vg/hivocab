@@ -413,8 +413,8 @@ export function PageDictionary() {
                   {/* Word Header */}
                   <div className="flex flex-wrap items-start justify-between gap-4 pb-5 border-b-2 border-[#3a342e]/30">
                     <div>
-                      <div className="flex items-center space-x-3">
-                        <h3 className="text-4xl font-extrabold text-[#2e2823] tracking-tight">{result.word}</h3>
+                      <div className="flex flex-wrap items-center gap-2.5">
+                        <h3 className="text-3xl sm:text-4xl font-extrabold text-[#2e2823] tracking-tight break-words">{result.word}</h3>
                         {result.cefr && (
                           <span className="bg-[#f5b745] border-2 border-[#3a342e] text-[#2e2823] text-xs font-black px-2.5 py-0.5 rounded-full shadow-[2px_2px_0px_#3a342e]">
                             {result.cefr}
@@ -426,11 +426,12 @@ export function PageDictionary() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center space-x-3 mt-2 text-sm font-semibold text-[#787067]">
+                      <div className="flex flex-wrap items-center gap-2.5 mt-2 text-sm font-semibold text-[#787067]">
                         {formattedPhonetic && <span className="font-mono text-base text-stone-700">{formattedPhonetic}</span>}
                         <button
+                          type="button"
                           onClick={() => playAudio(result.word)}
-                          className="bg-white hover:bg-stone-100 border border-[#3a342e] px-2.5 py-1 rounded-lg text-xs font-bold flex items-center space-x-1 shadow-[2px_2px_0px_#3a342e] cursor-pointer"
+                          className="min-h-[40px] sm:min-h-[36px] bg-white hover:bg-stone-100 border border-[#3a342e] px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-[2px_2px_0px_#3a342e] cursor-pointer"
                         >
                           <Volume2 className="w-3.5 h-3.5 shrink-0" /> <span>Phát âm</span>
                         </button>

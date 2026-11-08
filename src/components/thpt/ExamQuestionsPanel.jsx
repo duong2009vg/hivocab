@@ -390,7 +390,7 @@ function QuestionCard({
             type="button"
             onClick={() => onToggleFlag(qNum)}
             title={isFlagged ? 'Bỏ đánh dấu cờ' : 'Đánh dấu cờ câu này để xem lại sau'}
-            className={`p-1.5 sm:px-2.5 sm:py-1 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+            className={`min-w-[40px] min-h-[40px] sm:min-w-0 sm:min-h-0 p-2 sm:px-2.5 sm:py-1 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1 ${
               isFlagged
                 ? 'bg-amber-100/90 text-amber-800 border-amber-300 shadow-2xs'
                 : 'text-[#8C827A] bg-[#FAF9F6] border-[#EFE8D6] hover:text-amber-600 hover:bg-amber-50 hover:border-amber-200'
@@ -405,7 +405,7 @@ function QuestionCard({
             type="button"
             onClick={() => onReportAnswer(qNum, q)}
             title="Báo lỗi nội dung hoặc đáp án câu hỏi này"
-            className="p-1.5 rounded-xl border text-[#8C827A] bg-[#FAF9F6] border-[#EFE8D6] hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer"
+            className="w-10 h-10 min-w-[40px] min-h-[40px] p-2 rounded-xl border text-[#8C827A] bg-[#FAF9F6] border-[#EFE8D6] hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 transition-colors cursor-pointer flex items-center justify-center"
           >
             <AlertCircle className="w-3.5 h-3.5" />
           </button>

@@ -48,13 +48,13 @@ export function ExamHeader({
   }, []);
 
   return (
-    <header className="h-[52px] min-h-[52px] max-h-[52px] bg-[#FFFDF9] text-[#2D2422] px-3 sm:px-5 flex items-center justify-between border-b border-[#EFE8D6] shrink-0 shadow-xs z-30 select-none">
+    <header className="h-[52px] min-h-[52px] max-h-[52px] w-full max-w-full bg-[#FFFDF9] text-[#2D2422] px-2 sm:px-4 md:px-5 flex items-center justify-between border-b border-[#EFE8D6] shrink-0 shadow-xs z-30 select-none overflow-hidden">
       {/* ── Left: Thoát & Tên Đề Thi ─────────────────────────────────── */}
-      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+      <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
         <button
           type="button"
           onClick={onExit}
-          className="p-1.5 -ml-1 text-[#6B5A4E] hover:text-[#2D2422] hover:bg-[#FAF5EB] rounded-xl transition-colors cursor-pointer flex items-center gap-1"
+          className="p-1.5 sm:p-2 -ml-1 text-[#6B5A4E] hover:text-[#2D2422] hover:bg-[#FAF5EB] rounded-xl transition-colors cursor-pointer flex items-center gap-1 min-w-[36px] min-h-[36px] justify-center"
           title="Thoát phòng thi"
         >
           <ArrowLeft className="w-5 h-5 shrink-0" />
@@ -63,14 +63,14 @@ export function ExamHeader({
 
         <div className="h-5 w-px bg-[#EFE8D6] hidden sm:block shrink-0" />
 
-        <div className="min-w-0 flex items-center gap-2">
-          <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#5a7d4d]/10 text-[#486b3c] border border-[#5a7d4d]/25 shrink-0">
+        <div className="min-w-0 hidden sm:flex items-center gap-2">
+          <span className="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#5a7d4d]/10 text-[#486b3c] border border-[#5a7d4d]/25 shrink-0">
             <GraduationCap className="w-3 h-3" />
             <span>THPT QG</span>
           </span>
 
           <h2
-            className="font-heading font-black text-xs sm:text-sm text-[#2D2422] truncate max-w-[120px] sm:max-w-[200px] md:max-w-[280px] xl:max-w-md"
+            className="font-heading font-black text-xs sm:text-sm text-[#2D2422] truncate max-w-[120px] sm:max-w-[180px] md:max-w-[280px] xl:max-w-md"
             title={exam?.title || 'Phòng luyện thi THPT'}
           >
             {exam?.title || 'Phòng luyện thi THPT'}
@@ -86,25 +86,26 @@ export function ExamHeader({
       </div>
 
       {/* ── Center: Điều hướng câu + Đồng hồ đếm ngược ───────────────── */}
-      <div className="flex items-center gap-1.5 sm:gap-2.5">
+      <div className="flex items-center gap-1 sm:gap-2.5 min-w-0">
         {/* Bộ điều hướng câu trước/sau */}
         <div className="flex items-center bg-[#FAF5EB] border border-[#EFE8D6] rounded-xl p-0.5">
           <button
             type="button"
             onClick={onPrev}
-            className="w-7 h-7 flex items-center justify-center text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-95"
+            className="w-8 h-8 sm:w-7 sm:h-7 min-w-[32px] min-h-[32px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-95"
             title="Câu trước (←)"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <div className="px-2 text-xs font-bold text-[#2D2422] whitespace-nowrap">
-            Câu <span className="font-black text-[#5a7d4d]">{currentQNum}</span>
+          <div className="px-1.5 sm:px-2 text-xs font-bold text-[#2D2422] whitespace-nowrap">
+            <span className="hidden xs:inline">Câu </span>
+            <span className="font-black text-[#5a7d4d]">{currentQNum}</span>
             <span className="text-[#8C827A] font-normal">/{totalQ}</span>
           </div>
           <button
             type="button"
             onClick={onNext}
-            className="w-7 h-7 flex items-center justify-center text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-95"
+            className="w-8 h-8 sm:w-7 sm:h-7 min-w-[32px] min-h-[32px] sm:min-w-0 sm:min-h-0 flex items-center justify-center text-[#6B5A4E] hover:text-[#2D2422] hover:bg-white rounded-lg transition-colors cursor-pointer active:scale-95"
             title="Câu kế tiếp (→ hoặc Enter)"
           >
             <ChevronRight className="w-4 h-4" />
@@ -114,7 +115,7 @@ export function ExamHeader({
         {/* Đồng hồ đếm ngược */}
         {!isReviewMode && (
           <div
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-xl border text-xs sm:text-sm font-black transition-colors ${
+            className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 min-h-[32px] sm:min-h-0 rounded-xl border text-xs sm:text-sm font-black transition-colors ${
               isTimerWarning
                 ? 'bg-rose-50 text-rose-600 border-rose-300 animate-pulse'
                 : 'bg-[#FFFDF9] text-[#8C5311] border-[#EFE8D6]'
@@ -143,15 +144,15 @@ export function ExamHeader({
       </div>
 
       {/* ── Right: Bộ điều khiển & Nộp bài ──────────────────────────── */}
-      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* Bộ chuyển đổi view trên điện thoại */}
-        <div className="flex md:hidden items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl text-[11px] font-bold">
+        <div className="flex md:hidden items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl text-[10px] sm:text-[11px] font-bold">
           {['passage', 'both', 'questions'].map((mode) => (
             <button
               key={mode}
               type="button"
               onClick={() => onSetMobileView(mode)}
-              className={`px-2 py-1 rounded-lg transition-colors ${
+              className={`px-1.5 py-1 sm:px-2 rounded-lg transition-colors min-h-[30px] flex items-center justify-center ${
                 mobileView === mode
                   ? 'bg-[#5a7d4d] text-white shadow-2xs'
                   : 'text-[#6B5A4E] hover:text-[#2D2422]'
@@ -202,19 +203,21 @@ export function ExamHeader({
           <button
             type="button"
             onClick={onShowResults}
-            className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-xs hover:shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-2.5 sm:px-3.5 py-1.5 min-h-[34px] sm:min-h-0 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs uppercase tracking-wider shadow-xs hover:shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
           >
-            <Award className="w-4 h-4 shrink-0" />
+            <Award className="w-3.5 h-3.5 shrink-0" />
             <span className="hidden xs:inline">KẾT QUẢ</span>
+            <span className="xs:hidden">KQ</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={onConfirmSubmit}
-            className="px-3.5 py-1.5 rounded-xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs uppercase tracking-wider shadow-xs hover:shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
+            className="px-2.5 sm:px-3.5 py-1.5 min-h-[34px] sm:min-h-0 rounded-xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white font-black text-xs uppercase tracking-wider shadow-xs hover:shadow-sm active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 shrink-0" />
-            <span>NỘP BÀI</span>
+            <span className="hidden xs:inline">NỘP BÀI</span>
+            <span className="xs:hidden">NỘP</span>
           </button>
         )}
       </div>

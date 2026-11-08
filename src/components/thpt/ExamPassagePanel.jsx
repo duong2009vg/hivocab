@@ -591,7 +591,7 @@ export function ExamPassagePanel({
           {/* Section pills */}
           <div
             id="exam-passage-nav-pills"
-            className="flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 max-w-full"
+            className="min-w-0 flex-1 flex items-center gap-1.5 overflow-x-auto scrollbar-hide py-1 max-w-full"
           >
             {sections.map((sec) => {
               const isActive = sec.index === activeSecIndex;
@@ -604,8 +604,8 @@ export function ExamPassagePanel({
                   onClick={() => handlePillClick(sec)}
                   className={
                     isActive
-                      ? 'px-3 py-1 rounded-xl text-xs font-black whitespace-nowrap transition-all bg-[#5a7d4d] text-white shadow-2xs cursor-pointer shrink-0 font-sans'
-                      : 'px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all border border-[#EFE8D6] bg-white text-[#6B5A4E] hover:border-[#382E2B]/30 hover:text-[#2D2422] cursor-pointer shrink-0 font-sans'
+                      ? 'px-3 py-1.5 min-h-[36px] flex items-center justify-center rounded-xl text-xs font-black whitespace-nowrap transition-all bg-[#5a7d4d] text-white shadow-2xs cursor-pointer shrink-0 font-sans'
+                      : 'px-3 py-1.5 min-h-[36px] flex items-center justify-center rounded-xl text-xs font-bold whitespace-nowrap transition-all border border-[#EFE8D6] bg-white text-[#6B5A4E] hover:border-[#382E2B]/30 hover:text-[#2D2422] cursor-pointer shrink-0 font-sans'
                   }
                 >
                   {buildPillLabel(sec)}
@@ -618,7 +618,7 @@ export function ExamPassagePanel({
           <button
             type="button"
             onClick={() => setShowNav(false)}
-            className="p-1 rounded-lg text-[#8C827A] hover:text-[#2D2422] hover:bg-[#FAF5EB] transition-colors cursor-pointer shrink-0 ml-1"
+            className="p-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-[#8C827A] hover:text-[#2D2422] hover:bg-[#FAF5EB] transition-colors cursor-pointer shrink-0 ml-1"
             title="Ẩn thanh ngữ liệu"
           >
             <X className="w-4 h-4" />

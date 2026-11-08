@@ -108,20 +108,20 @@ export function PageLessonDetail() {
           backgroundPosition: '0 0, 6px 6px',
         }}
       >
-        <header className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <header className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center justify-between gap-2">
           <button
             onClick={goBack}
             aria-label="Quay lại"
-            className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#1e1b17] border-2 border-[#3d352e] shadow-[1.5px_2px_0px_#3d352e] active:scale-95 transition-transform cursor-pointer"
+            className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white flex items-center justify-center text-[#1e1b17] border-2 border-[#3d352e] shadow-[1.5px_2px_0px_#3d352e] active:scale-95 transition-transform cursor-pointer"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
           </button>
-          <span className="font-bold text-sm text-[#786F66] truncate max-w-[200px]">
+          <span className="font-bold text-sm text-[#786F66] truncate min-w-0 flex-1 text-center">
             {lessonName || topicName || 'Bài học PRO'}
           </span>
-          <div className="w-10" />
+          <div className="w-11 shrink-0" />
         </header>
 
         <main className="flex-1 flex items-center justify-center px-4 py-8">
@@ -148,22 +148,22 @@ export function PageLessonDetail() {
       {/* ========================================================================= */}
       <div className="block lg:hidden w-full max-w-md mx-auto min-h-screen relative flex flex-col px-4 pt-3 pb-28 pwa-safe-top">
         {/* Top Header */}
-        <header className="flex items-center justify-between py-2 mb-2">
-          <div className="flex items-center gap-2.5">
+        <header className="flex items-center justify-between gap-2 py-2 mb-2">
+          <div className="flex items-center gap-2.5 flex-1 min-w-0">
             <button
               onClick={goBack}
               aria-label="Quay lại"
-              className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-[#1e1b17] border-2 border-[#3d352e] shadow-[1.5px_2px_0px_#3d352e] active:scale-95 transition-transform"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] shrink-0 rounded-full bg-white flex items-center justify-center text-[#1e1b17] border-2 border-[#3d352e] shadow-[1.5px_2px_0px_#3d352e] active:scale-95 transition-transform cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
               </svg>
             </button>
-            <h1 className="font-bold text-lg text-[#1e1b17] truncate max-w-[200px]">
+            <h1 className="font-bold text-lg text-[#1e1b17] truncate min-w-0 flex-1">
               {lessonName || 'Bài học'}
             </h1>
           </div>
-          <div className="flex items-center gap-1.5 bg-[#ccecbc] px-3 py-1 rounded-full border-2 border-[#3d352e] shadow-xs">
+          <div className="flex items-center gap-1.5 bg-[#ccecbc] px-3 py-1 rounded-full border-2 border-[#3d352e] shadow-xs shrink-0">
             <Sparkles className="w-3.5 h-3.5 text-[#092104] shrink-0" />
             <span className="text-xs font-bold text-[#092104]">Churbito</span>
           </div>
@@ -181,7 +181,8 @@ export function PageLessonDetail() {
             </div>
             <button
               onClick={handleAddWord}
-              className="flex items-center gap-1 bg-[#33302c] text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm active:scale-95 transition-transform"
+              aria-label="Thêm từ vào bài học"
+              className="flex items-center gap-1 bg-[#33302c] text-white text-xs font-bold px-3.5 py-2.5 min-h-[44px] rounded-full shadow-sm active:scale-95 transition-transform cursor-pointer shrink-0"
             >
               <span>+ Thêm từ</span>
             </button>

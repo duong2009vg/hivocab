@@ -387,11 +387,11 @@ export function AdminContentGatingTab() {
       {/* SUB TABS & COUNTS SUMMARY                                     */}
       {/* ───────────────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-2.5 border-b border-[#DECDBB]">
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-2 border-[#3D352E] shadow-2xs">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-white border-2 border-[#3D352E] shadow-2xs overflow-x-auto no-scrollbar w-full sm:w-auto max-w-full">
           <button
             type="button"
             onClick={() => setSubTab('topics')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+            className={`min-h-[40px] sm:min-h-[36px] shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
               subTab === 'topics'
                 ? 'bg-[#557A46] text-white border border-[#3D352E] shadow-2xs'
                 : 'text-[#6E5D53] hover:text-[#3D352E]'
@@ -402,7 +402,7 @@ export function AdminContentGatingTab() {
           <button
             type="button"
             onClick={() => setSubTab('thpt')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+            className={`min-h-[40px] sm:min-h-[36px] shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
               subTab === 'thpt'
                 ? 'bg-[#557A46] text-white border border-[#3D352E] shadow-2xs'
                 : 'text-[#6E5D53] hover:text-[#3D352E]'
@@ -413,7 +413,7 @@ export function AdminContentGatingTab() {
           <button
             type="button"
             onClick={() => setSubTab('passages')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer ${
+            className={`min-h-[40px] sm:min-h-[36px] shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center justify-center ${
               subTab === 'passages'
                 ? 'bg-[#557A46] text-white border border-[#3D352E] shadow-2xs'
                 : 'text-[#6E5D53] hover:text-[#3D352E]'

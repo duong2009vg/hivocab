@@ -49,7 +49,7 @@ export function BilingualHeader({
               <button
                 type="button"
                 onClick={() => setIsSwitcherOpen((prev) => !prev)}
-                className="w-6 h-6 rounded-lg bg-[#FAF5EB] border border-[#382E2B]/40 hover:border-[#382E2B] text-[#382E2B] flex items-center justify-center transition-colors shrink-0 cursor-pointer text-xs font-bold"
+                className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-lg bg-[#FAF5EB] border border-[#382E2B]/40 hover:border-[#382E2B] text-[#382E2B] flex items-center justify-center transition-colors shrink-0 cursor-pointer text-xs font-bold"
                 title="Đổi bài đọc khác trong bộ đề"
               >
                 ▼
@@ -187,13 +187,13 @@ export function BilingualHeader({
 
       {/* Mobile Secondary Toolbar (shown in Reading tab) */}
       {activeTab === 'reading' && (
-        <div className="md:hidden flex items-center justify-between px-3 py-2 bg-[#FFFDF9] border-b-2 border-[#382E2B] text-xs font-bold select-none">
+        <div className="md:hidden flex items-center justify-between px-3 py-2 bg-[#FFFDF9] border-b-2 border-[#382E2B] text-xs font-bold select-none gap-2 flex-wrap">
           <div className="flex items-center gap-1">
             <span className="text-[10px] text-[#766C5F] uppercase font-black mr-0.5">Chế độ:</span>
             <button
               type="button"
               onClick={() => onViewModeChange('bilingual')}
-              className={`px-2.5 py-1 rounded-xl transition-colors font-black ${
+              className={`px-2.5 py-1.5 min-h-[36px] flex items-center justify-center rounded-xl transition-colors font-black ${
                 viewMode === 'bilingual'
                   ? 'bg-[#382E2B] text-white'
                   : 'text-[#766C5F]'
@@ -204,7 +204,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onViewModeChange('en')}
-              className={`px-2.5 py-1 rounded-xl transition-colors font-black ${
+              className={`px-2.5 py-1.5 min-h-[36px] flex items-center justify-center rounded-xl transition-colors font-black ${
                 viewMode === 'en'
                   ? 'bg-[#382E2B] text-white'
                   : 'text-[#766C5F]'
@@ -215,7 +215,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onViewModeChange('vi')}
-              className={`px-2.5 py-1 rounded-xl transition-colors font-black ${
+              className={`px-2.5 py-1.5 min-h-[36px] flex items-center justify-center rounded-xl transition-colors font-black ${
                 viewMode === 'vi'
                   ? 'bg-[#382E2B] text-white'
                   : 'text-[#766C5F]'
@@ -229,7 +229,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onChangeFontSize(-1)}
-              className="p-1 px-2 bg-[#F4EFE6] border border-[#382E2B]/40 rounded-lg cursor-pointer"
+              className="p-1 px-2.5 min-w-[36px] min-h-[36px] flex items-center justify-center bg-[#F4EFE6] border border-[#382E2B]/40 rounded-xl cursor-pointer"
               title="Giảm cỡ chữ"
             >
               A-
@@ -237,7 +237,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onChangeFontSize(1)}
-              className="p-1 px-2 bg-[#F4EFE6] border border-[#382E2B]/40 rounded-lg cursor-pointer"
+              className="p-1 px-2.5 min-w-[36px] min-h-[36px] flex items-center justify-center bg-[#F4EFE6] border border-[#382E2B]/40 rounded-xl cursor-pointer"
               title="Tăng cỡ chữ"
             >
               A+
@@ -245,7 +245,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={onReportError}
-              className="p-1 px-2 text-[#C85A3F] cursor-pointer"
+              className="p-1 px-2 min-w-[36px] min-h-[36px] flex items-center justify-center text-[#C85A3F] cursor-pointer rounded-xl hover:bg-[#FAF5EB]"
               title="Báo lỗi bài đọc"
             >
               <Flag className="w-4 h-4" />
