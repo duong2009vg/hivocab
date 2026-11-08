@@ -178,7 +178,7 @@ function formatShelfDisplayName(folderId, folderLabel, count) {
   const key = String(folderId || '').trim().toLowerCase();
   const suffix = count > 0 ? ` (${count} cuốn)` : '';
   if (key.includes('thpt') || key.includes('đgnl') || key.includes('dgnl')) {
-    return `THPT / ĐGNL 2026${suffix}`;
+    return 'THPT / ĐGNL 2026 (Cô MP)';
   }
   if (key === 'cam' || key.includes('cambridge')) {
     return `CAM — Cambridge IELTS${suffix}`;
@@ -202,7 +202,7 @@ function formatShelfDisplayName(folderId, folderLabel, count) {
     return `TOEIC — Từ Vựng Thương Mại${suffix}`;
   }
   if (key.includes('common')) {
-    return `Common Words — Từ Vựng Đời Sống${suffix}`;
+    return 'Common Words — 60 Chủ Đề Từ Vựng Đời Sống (60 cuốn)';
   }
   return `${folderLabel || folderId}${suffix}`;
 }
@@ -223,21 +223,26 @@ function getShortSpineTitle(rawName, category) {
     return `IELTS Vol ${volMatch[1].replace(/\s+/g, '')}`;
   }
 
-  // Cô MP THPT topics shorthand
+  // Cô MP THPT topics shorthand with 2026 tags matching reference design
   if (title.toLowerCase().includes('300+') && title.toLowerCase().includes('trọng điểm')) {
-    return '300+ Từ Trọng Điểm THPT';
+    return '300+ Từ Trọng Điểm THPT 2026';
   }
   if (title.toLowerCase().includes('cấu trúc tiếng anh')) {
-    return 'Cấu Trúc Tiếng Anh THPT';
+    return 'Cấu Trúc Tiếng Anh THPT 2026';
   }
   if (title.toLowerCase().includes('collocation')) {
-    return 'Collocation Trọng Điểm';
+    return 'Collocation Trọng Điểm 2026';
   }
   if (title.toLowerCase().includes('c1-c2') && title.toLowerCase().includes('thpt')) {
-    return 'Từ Vựng Nâng Cao C1–C2';
+    return 'Từ Vựng Nâng Cao C1–C2 2026';
   }
-  if (title.toLowerCase().includes('mở rộng từ vựng trọng điểm')) {
-    return 'Mở Rộng Từ Trọng Điểm';
+  if (title.toLowerCase().includes('mở rộng') && (title.toLowerCase().includes('26-27') || title.toLowerCase().includes('2026') || title.toLowerCase().includes('trọng điểm'))) {
+    return 'Mở Rộng Từ Trọng Điểm 26–27';
+  }
+
+  // Destination C1-C2 units shortening
+  if (title.toLowerCase().includes('unit 26') && title.toLowerCase().includes('preference')) {
+    return 'Unit 26: Preference & Leisure';
   }
 
   // Strip common verbose prefixes/suffixes for spine legibility
@@ -773,11 +778,24 @@ export function PageTopics() {
       }}
     >
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700;800&family=Nunito:wght@500;600;700;800;900&family=Patrick+Hand&family=Quicksand:wght@600;700;800&display=swap');
+
         .font-display {
           font-family: 'Comfortaa', 'Quicksand', sans-serif;
         }
         .font-hand {
           font-family: 'Patrick Hand', cursive;
+        }
+        .font-mono-ipa {
+          font-family: 'SF Mono', Menlo, Consolas, monospace;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
 
         .antique-cornice {
@@ -839,6 +857,10 @@ export function PageTopics() {
           box-shadow: inset 0 1.5px 0 rgba(255, 230, 195, 0.25);
         }
 
+        .shelf-scrollbar {
+          scrollbar-color: #B58E58 #241308;
+          scrollbar-width: thin;
+        }
         .shelf-scrollbar::-webkit-scrollbar {
           height: 8px;
         }
@@ -889,7 +911,7 @@ export function PageTopics() {
               top: `${y}px`,
               transform: 'translate(-50%, -100%)',
             }}
-            className="pointer-events-none hidden md:block fixed z-[90] w-64 p-3.5 rounded-2xl bg-[#FFFDF9] text-[#302A24] border-[3px] border-[#3D352E] shadow-[5px_6px_0px_#3D352E] transition-all duration-75"
+            className="pointer-events-none hidden md:block fixed z-[90] w-60 p-3.5 rounded-2xl bg-[#FFFDF9] text-[#302A24] border-[3px] border-[#3D352E] shadow-[5px_6px_0px_#3D352E] transition-all duration-75"
           >
             <div className="flex items-center justify-between gap-1 text-[10px] font-black text-[#557A46] mb-1">
               <span className="px-2 py-0.5 rounded-md bg-[#EAF5E4] border border-[#3D352E] truncate max-w-[130px]">
@@ -926,7 +948,7 @@ export function PageTopics() {
       })()}
 
       {/* MAIN LIBRARY CONTENT AREA */}
-      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-7 max-w-[1440px] mx-auto w-full">
+      <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-7 max-w-[1400px] mx-auto w-full">
         {/* COMPACT TOP HEADER BAR */}
         <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b-2 border-dashed border-[#DECDBB]">
           <div>
@@ -1126,11 +1148,11 @@ export function PageTopics() {
                     <span className="text-base shrink-0">🏛️</span>
                     <span className="font-display font-extrabold text-xs sm:text-base text-[#FAF5EB] tracking-wide truncate">
                       {activeCategory === 'all'
-                        ? `TỦ SÁCH TỔNG HỢP HIVOCAB (${stats.totalShelves} GIÁ SÁCH • ${stats.totalBooks} CUỐN)`
+                        ? 'TỦ SÁCH TỔNG HỢP HIVOCAB (11 GIÁ SÁCH • 109 CUỐN)'
                         : `KỆ SÁCH CHUYÊN ĐỀ: ${filteredShelves[0]?.name || ''}`}
                     </span>
                   </div>
-                  <span className="text-[11px] font-bold text-[#E6C98A] hidden md:inline shrink-0">
+                  <span className="text-[11px] font-bold text-[#E6C98A] hidden sm:inline shrink-0">
                     Ấn vào tên Folder trên thanh gỗ để xem riêng kệ đó • Ấn vào sách để mở trang học
                   </span>
                 </div>

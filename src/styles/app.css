@@ -632,6 +632,171 @@
     align-items: center !important;
     min-height: 0 !important;
   }
+
+  /* ─── Classical Antique Bookshelf & Vintage Bookbinding ─────────────── */
+  .font-display {
+    font-family: 'Comfortaa', 'Quicksand', sans-serif;
+  }
+  .font-hand {
+    font-family: 'Patrick Hand', cursive;
+  }
+  .font-mono-ipa {
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  .antique-cornice {
+    background: linear-gradient(180deg, #432714 0%, #684024 45%, #4A2C17 100%);
+    box-shadow: inset 0 2px 0 rgba(255, 235, 200, 0.22);
+  }
+  .antique-folder-beam {
+    background: linear-gradient(180deg, #5C381E 0%, #462915 55%, #341D0E 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.2), 0 4px 10px rgba(15, 8, 3, 0.45);
+  }
+  .antique-dentil-trim {
+    background-image: repeating-linear-gradient(
+      90deg,
+      #341D0E 0px,
+      #341D0E 12px,
+      #754A2B 12px,
+      #754A2B 24px
+    );
+  }
+  .brass-plaque {
+    background: linear-gradient(135deg, #FFF5D6 0%, #EDD07E 52%, #D4AC42 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 2px 0 #241308;
+  }
+  .antique-recess-cavity {
+    background-color: #2A190E;
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 204, 102, 0.20) 0%, rgba(255, 180, 60, 0.05) 50%, transparent 75%),
+      repeating-linear-gradient(
+        90deg,
+        rgba(18, 9, 3, 0.35) 0px,
+        rgba(18, 9, 3, 0.35) 2px,
+        transparent 2px,
+        transparent 64px
+      ),
+      linear-gradient(180deg, #1C1008 0%, #331F12 32%, #422817 100%);
+    box-shadow:
+      inset 0 18px 24px -6px rgba(8, 4, 1, 0.85),
+      inset 14px 0 20px -8px rgba(8, 4, 1, 0.7),
+      inset -14px 0 20px -8px rgba(8, 4, 1, 0.7),
+      inset 0 -6px 14px rgba(8, 4, 1, 0.65);
+    -webkit-overflow-scrolling: touch;
+    padding-top: 40px !important;
+  }
+  .antique-pilaster {
+    background: linear-gradient(90deg, #341D0E 0%, #684024 35%, #7E5030 50%, #56341C 75%, #2E190B 100%);
+  }
+  .antique-pilaster-flute {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 4px,
+      rgba(20, 10, 3, 0.45) 4px,
+      rgba(20, 10, 3, 0.45) 7px
+    );
+  }
+  .antique-shelf-top-plane {
+    background: linear-gradient(180deg, #4B2E19 0%, #744A2C 65%, #8F5E3B 100%);
+  }
+  .antique-shelf-front-plank {
+    background: linear-gradient(180deg, #875836 0%, #633E23 55%, #3E2514 100%);
+    box-shadow: inset 0 1.5px 0 rgba(255, 230, 195, 0.25);
+  }
+
+  .shelf-scrollbar {
+    scrollbar-color: #B58E58 #241308;
+    scrollbar-width: thin;
+  }
+  .shelf-scrollbar::-webkit-scrollbar {
+    height: 8px;
+  }
+  .shelf-scrollbar::-webkit-scrollbar-track {
+    background: #241308;
+  }
+  .shelf-scrollbar::-webkit-scrollbar-thumb {
+    background: #B58E58;
+    border-radius: 9999px;
+    border: 2px solid #241308;
+  }
+  .shelf-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #DFB54B;
+  }
+
+  .book-spine-leaning {
+    transform: rotate(var(--lean-deg, 0deg));
+    transform-origin: bottom center;
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, filter 0.2s ease;
+  }
+  .book-spine-leaning:hover {
+    transform: translateY(-14px) rotate(0deg) scale(1.06);
+    filter: brightness(1.08);
+    z-index: 35;
+  }
+  .book-cover-item {
+    transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+  }
+  .book-cover-item:hover {
+    transform: translateY(-10px) rotate(1deg) scale(1.03);
+    z-index: 35;
+  }
+
+  @keyframes realBookOpen {
+    0% {
+      opacity: 0;
+      transform: perspective(1800px) scale(0.84) rotateX(12deg) rotateY(-18deg);
+    }
+    60% {
+      opacity: 1;
+      transform: perspective(1800px) scale(1.02) rotateX(-2deg) rotateY(3deg);
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(1800px) scale(1) rotateX(0deg) rotateY(0deg);
+    }
+  }
+  .animate-real-book-open {
+    animation: realBookOpen 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  @keyframes pageTurnPulse {
+    0% {
+      opacity: 0.45;
+      transform: perspective(1200px) rotateY(-14deg);
+    }
+    100% {
+      opacity: 1;
+      transform: perspective(1200px) rotateY(0deg);
+    }
+  }
+  .animate-page-turn {
+    animation: pageTurnPulse 0.26s ease-out forwards;
+    transform-origin: left center;
+  }
+
+  .open-book-left-page {
+    background: linear-gradient(90deg, #F3EAD8 0%, #FAF5EB 8%, #FFFDF9 90%, #E8DCC8 100%);
+    box-shadow:
+      -4px 0 0 #FFFDF9,
+      -5px 0 0 #3D352E,
+      -9px 3px 0 #F4EDE2,
+      -10px 3px 0 #3D352E;
+  }
+  .open-book-right-page {
+    background: linear-gradient(90deg, #E5D8C3 0%, #FFFDF9 10%, #FAF5EB 92%, #F3EAD8 100%);
+    box-shadow:
+      4px 0 0 #FFFDF9,
+      5px 0 0 #3D352E,
+      9px 3px 0 #F4EDE2,
+      10px 3px 0 #3D352E;
+  }
+
+  .writing-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+  }
 }
+
 
 

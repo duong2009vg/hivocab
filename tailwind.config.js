@@ -6,6 +6,8 @@ export default {
   content: [
     './*.html',
     './*.js',
+    './*.tsx',
+    './*.jsx',
     './src/**/*.{js,ts,jsx,tsx,html,vue,css}'
   ],
   darkMode: 'class',
@@ -15,12 +17,16 @@ export default {
         'sans': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"SF Pro"', '"Helvetica Neue"', '"Segoe UI"', 'Roboto', 'sans-serif'],
         'sf': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"SF Pro"', 'sans-serif'],
         'mono': ['SF Mono', 'Menlo', 'Monaco', 'Courier New', 'monospace'],
+        'mono-ipa': ['"SF Mono"', 'Menlo', 'Consolas', 'monospace'],
         'inter': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
         'hanken': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"SF Pro Text"', '"Helvetica Neue"', 'sans-serif'],
         'nunito': ['"Nunito"', 'sans-serif'],
         'quicksand': ['"Quicksand"', 'sans-serif'],
-        'heading': ['Comfortaa', 'Quicksand', 'sans-serif'],
-        'body': ['Quicksand', 'sans-serif'],
+        'comfortaa': ['"Comfortaa"', 'cursive', 'sans-serif'],
+        'display': ['"Comfortaa"', '"Quicksand"', 'sans-serif'],
+        'heading': ['"Comfortaa"', '"Quicksand"', 'sans-serif'],
+        'hand': ['"Patrick Hand"', 'cursive', 'sans-serif'],
+        'body': ['"Quicksand"', 'sans-serif'],
         'mali': ['"Mali"', 'cursive', 'sans-serif'],
         'patrick': ['"Patrick Hand"', 'cursive', 'sans-serif'],
         'label-sm': ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', 'sans-serif'],
@@ -35,6 +41,10 @@ export default {
         crayonLg: '4px 6px 0px #3D352E',
         crayonOrange: '0 4px 0 0 #b85135',
         crayonBtn: '2px 3px 0px #382E2B',
+        bookcase: '8px 10px 0px #3D352E',
+        bookSpine: '3px 0px 6px rgba(15,8,3,0.65)',
+        bookCover: '5px 4px 0px #1A0E06',
+        bookSpread: '8px 10px 0px #241308',
       },
       colors: {
         // Crayon Cozy Study Room Palette (Google Stitch & taskbar fix)
