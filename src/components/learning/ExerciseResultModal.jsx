@@ -39,6 +39,13 @@ export default function ExerciseResultModal({
             const u = new SpeechSynthesisUtterance(targetWord);
             u.lang = 'en-US';
             u.rate = 0.9;
+            window._activeUtterance = u;
+            u.onend = () => {
+              if (window._activeUtterance === u) window._activeUtterance = null;
+            };
+            u.onerror = () => {
+              if (window._activeUtterance === u) window._activeUtterance = null;
+            };
             window.speechSynthesis.speak(u);
           }, 30);
         } catch (_) {}
@@ -47,42 +54,38 @@ export default function ExerciseResultModal({
     [word]
   );
 
-  // Reset countdown and state when opened
+  // Reset countdown and state when opened, sequencing audio after chime (850ms)
   useEffect(() => {
     if (isOpen) {
       setCountdown(4);
       setIsPaused(false);
       setIsCollapsed(false);
-      // Auto-play pronunciation once when result appears
+      // Auto-play pronunciation sequenced after sound effects (~800ms) to prevent collision
       const audioTimer = setTimeout(() => {
         handlePlayAudio();
-      }, 200);
+      }, 850);
       return () => clearTimeout(audioTimer);
     }
   }, [isOpen, word, handlePlayAudio]);
 
-  // Countdown timer logic
+  // Decoupled countdown timer logic: ONLY auto-advance when isCorrect is TRUE
+  // When incorrect, timer is inactive so learner can carefully review mistake and pronunciation
   useEffect(() => {
-    if (!isOpen || isPaused) {
-      if (timerRef.current) clearInterval(timerRef.current);
+    if (!isOpen || !isCorrect || isPaused) {
       return;
     }
 
-    timerRef.current = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          onContinue?.();
-          return 0;
-        }
-        return prev - 1;
-      });
+    if (countdown <= 0) {
+      onContinue?.();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown((prev) => Math.max(0, prev - 1));
     }, 1000);
 
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isOpen, isPaused, onContinue]);
+    return () => clearTimeout(timer);
+  }, [isOpen, isCorrect, isPaused, countdown, onContinue]);
 
   // Keyboard shortcut: Space / Enter advances to next question immediately
   useEffect(() => {
@@ -234,34 +237,45 @@ export default function ExerciseResultModal({
           {/* Row 4: Notes / Synonyms */}
           {notes && (
             <div className="text-white/90 text-xs sm:text-sm pl-1 sm:pl-2 flex items-center gap-1.5 font-sans font-medium">
-              <BookOpen className="w-3.5 h-3.5 text-[#3d352e] shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 text-white/90 shrink-0" />
               <span className="truncate">
                 <strong className="font-bold">Ghi chú:</strong> {notes}
               </span>
             </div>
           )}
 
-          {/* Row 5: Action Controls (Pause, Report/Dismiss, Big White Continue Button) */}
+          {/* Row 5: Action Controls (Pause/Audio, Report/Dismiss, Big White Continue Button) */}
           <div className="flex items-center gap-2.5 sm:gap-3 pt-2 sm:pt-3 mt-1">
-            {/* Pause / Resume Auto Countdown */}
-            <button
-              type="button"
-              onClick={() => setIsPaused((p) => !p)}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/60 flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition cursor-pointer shrink-0 ${
-                isPaused ? 'bg-white/30 ring-2 ring-white' : 'bg-white/10'
-              }`}
-              title={isPaused ? 'Tiếp tục tự động đếm ngược' : 'Tạm dừng đếm ngược'}
-            >
-              {isPaused ? (
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-                </svg>
-              )}
-            </button>
+            {/* Pause / Resume Auto Countdown on correct; Replay audio button on incorrect */}
+            {isCorrect ? (
+              <button
+                type="button"
+                onClick={() => setIsPaused((p) => !p)}
+                className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/60 flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition cursor-pointer shrink-0 ${
+                  isPaused ? 'bg-white/30 ring-2 ring-white' : 'bg-white/10'
+                }`}
+                title={isPaused ? 'Tiếp tục tự động đếm ngược' : 'Tạm dừng đếm ngược'}
+              >
+                {isPaused ? (
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                  </svg>
+                )}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handlePlayAudio}
+                className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl border-2 border-white/60 bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition cursor-pointer shrink-0"
+                title="Nghe lại phát âm"
+              >
+                <Volume2 className="w-5 h-5 text-white" />
+              </button>
+            )}
 
             {/* Close / Report Action Button */}
             <button
@@ -272,16 +286,16 @@ export default function ExerciseResultModal({
             >
               {isCorrect ? (
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               ) : (
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
             </button>
 
-            {/* Big White Continue Button with Live Countdown */}
+            {/* Big White Continue Button with Live Countdown (only on correct answers) */}
             <button
               type="button"
               onClick={onContinue}
@@ -291,7 +305,7 @@ export default function ExerciseResultModal({
                   : 'text-[#EF4444] hover:bg-red-50'
               }`}
             >
-              <span>{isPaused ? 'Tiếp tục' : `Tiếp tục (${countdown}s)`}</span>
+              <span>{isCorrect ? (isPaused ? 'Tiếp tục' : `Tiếp tục (${countdown}s)`) : 'Tiếp tục'}</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.8" viewBox="0 0 24 24">
                 <path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

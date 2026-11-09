@@ -23,17 +23,27 @@ function renderSentence(sentence, targetWord) {
   return sentence;
 }
 
+function cleanCharForSlot(raw) {
+  if (!raw) return '';
+  return String(raw)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toUpperCase()
+    .replace(/[^A-Z0-9\-']/g, '');
+}
+
 function getSlotDimensions(maxPartLen) {
   if (maxPartLen <= 4) {
     return {
-      slot: 'w-11 sm:w-14 h-13 sm:h-16 text-xl sm:text-3xl rounded-2xl sm:rounded-[22px]',
+      slot: 'w-11 sm:w-14 h-[52px] sm:h-16 text-xl sm:text-3xl rounded-2xl sm:rounded-[22px]',
       gap: 'gap-2 sm:gap-3',
       gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2.5 sm:gap-y-3',
     };
   }
   if (maxPartLen <= 6) {
     return {
-      slot: 'w-9 sm:w-12 h-11 sm:h-15 text-lg sm:text-2xl rounded-2xl sm:rounded-[20px]',
+      slot: 'w-9 sm:w-12 h-11 sm:h-[60px] text-lg sm:text-2xl rounded-2xl sm:rounded-[20px]',
       gap: 'gap-1.5 sm:gap-2.5',
       gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2 sm:gap-y-2.5',
     };
@@ -47,26 +57,26 @@ function getSlotDimensions(maxPartLen) {
   }
   if (maxPartLen <= 10) {
     return {
-      slot: 'w-7 sm:w-10 h-9 sm:h-13 text-sm sm:text-lg rounded-xl sm:rounded-2xl',
+      slot: 'w-7 sm:w-10 h-9 sm:h-[52px] text-sm sm:text-lg rounded-xl sm:rounded-2xl',
       gap: 'gap-1 sm:gap-1.5',
       gapBetweenWords: 'gap-x-2 gap-y-1.5',
     };
   }
   if (maxPartLen <= 12) {
     return {
-      slot: 'w-6 sm:w-9 h-8.5 sm:h-12 text-xs sm:text-base rounded-xl sm:rounded-2xl',
+      slot: 'w-6 sm:w-9 h-[34px] sm:h-12 text-xs sm:text-base rounded-xl sm:rounded-2xl',
       gap: 'gap-0.5 sm:gap-1',
       gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
     };
   }
   return {
-    slot: 'w-5.5 sm:w-8 h-8 sm:h-11 text-xs sm:text-sm rounded-lg sm:rounded-xl',
+    slot: 'w-[22px] sm:w-8 h-8 sm:h-11 text-xs sm:text-sm rounded-lg sm:rounded-xl',
     gap: 'gap-0.5 sm:gap-1',
     gapBetweenWords: 'gap-x-1 gap-y-1',
   };
 }
 
-export default function ExerciseFill({ item, onSubmit, onNext, onReport, sessionInfo }) {
+export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onReport, sessionInfo }) {
   const d = item?.exerciseData || {};
   const answer = (d.answer || '').trim();
   const answerParts = d.answerParts?.length
@@ -116,10 +126,8 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
       }
       // Paste handling
       if (raw.length > 1) {
-        const chars = raw
-          .toUpperCase()
-          .replace(/[^A-Z0-9\-']/g, '')
-          .split('');
+        const cleaned = cleanCharForSlot(raw);
+        const chars = cleaned.split('');
         setValues((prev) => {
           const n = [...prev];
           chars.forEach((c, i) => {
@@ -130,23 +138,23 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
         const nextIdx = Math.min(flatIdx + chars.length, boxes.length - 1);
         setTimeout(() => {
           inputRefs.current[nextIdx]?.focus();
-          inputRefs.current[nextIdx]?.select();
+          inputRefs.current[nextIdx]?.select?.();
         }, 10);
         return;
       }
-      const char = raw.slice(-1).toUpperCase();
+      const char = cleanCharForSlot(raw.slice(-1));
       setValues((prev) => {
         const n = [...prev];
         n[flatIdx] = char;
         return n;
       });
       if (e.target) e.target.scrollLeft = 0;
-      if (flatIdx < boxes.length - 1) {
+      if (char && flatIdx < boxes.length - 1) {
         setTimeout(() => {
           const next = inputRefs.current[flatIdx + 1];
           if (next) {
             next.focus();
-            next.select();
+            next.select?.();
             next.scrollLeft = 0;
           }
         }, 10);
@@ -158,7 +166,8 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
       if (showResultModal) return;
-      if (e.key === 'Backspace') {
+      const isBackspace = e.key === 'Backspace' || e.keyCode === 8 || e.which === 8 || e.keyCode === 229;
+      if (isBackspace) {
         if (!values[flatIdx] && flatIdx > 0) {
           e.preventDefault();
           setValues((prev) => {
@@ -178,15 +187,15 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
       } else if (e.key === 'ArrowLeft' && flatIdx > 0) {
         e.preventDefault();
         inputRefs.current[flatIdx - 1]?.focus();
-        inputRefs.current[flatIdx - 1]?.select();
+        inputRefs.current[flatIdx - 1]?.select?.();
       } else if (e.key === 'ArrowRight' && flatIdx < boxes.length - 1) {
         e.preventDefault();
         inputRefs.current[flatIdx + 1]?.focus();
-        inputRefs.current[flatIdx + 1]?.select();
+        inputRefs.current[flatIdx + 1]?.select?.();
       } else if ((e.key === ' ' || e.code === 'Space') && flatIdx < boxes.length - 1) {
         e.preventDefault();
         inputRefs.current[flatIdx + 1]?.focus();
-        inputRefs.current[flatIdx + 1]?.select();
+        inputRefs.current[flatIdx + 1]?.select?.();
       } else if (e.key === 'Enter') {
         e.preventDefault();
         handleCheck();
@@ -218,7 +227,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
     setTimeout(() => {
       const nextInp = inputRefs.current[Math.min(hintLevel + 1, boxes.length - 1)];
       nextInp?.focus();
-      nextInp?.select();
+      nextInp?.select?.();
     }, 60);
   }, [submitted, d.answer, hintLevel, boxes.length]);
 
@@ -260,14 +269,28 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
   const playAudio = useCallback(() => {
     const word = d.answer || '';
     if (!word) return;
-    if (window.HiAudio?.playWord) {
+    if (speakWord) {
+      speakWord(word, 0.9);
+    } else if (window.HiAudio?.playWord) {
       window.HiAudio.playWord(word, 0.9);
     } else if ('speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(word);
-      u.lang = 'en-US';
-      window.speechSynthesis.speak(u);
+      try {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        window._activeUtterance = u;
+        u.onend = () => {
+          if (window._activeUtterance === u) window._activeUtterance = null;
+        };
+        u.onerror = () => {
+          if (window._activeUtterance === u) window._activeUtterance = null;
+        };
+        window.speechSynthesis.speak(u);
+      } catch (_) {}
     }
-  }, [d.answer]);
+  }, [d.answer, speakWord]);
 
   let partOffset = 0;
   const firstLetter = (d.answer || '').trim()[0]?.toUpperCase() || 'A';
@@ -286,9 +309,9 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
     .join(' ');
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa my-auto px-2">
+    <div className="w-full flex flex-col items-center justify-start sm:justify-center select-none font-comfortaa my-1 sm:my-auto py-1 sm:py-2 px-2">
       {/* ── Main Big Crayon Card ── */}
-      <div className="w-full max-w-xl bg-white rounded-[24px] sm:rounded-[30px] border-[3px] border-[#342e2b] p-3.5 sm:p-5 md:p-6 shadow-[4px_6px_0px_#2c2523] relative transition-all my-auto">
+      <div className="w-full max-w-xl bg-white rounded-[24px] sm:rounded-[30px] border-[3px] border-[#342e2b] p-3.5 sm:p-5 md:p-6 shadow-[4px_6px_0px_#2c2523] relative transition-all">
         {/* Top Tiger Encouragement & Report Header */}
         <div className="flex items-center justify-between pb-2 mb-2 border-b-2 border-stone-100">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFF5EB] border border-[#E76F51]/40 text-[#D36135] text-[11px] sm:text-xs font-bold">
@@ -466,6 +489,19 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
                             e.target.select?.();
                             e.target.scrollLeft = 0;
                           }}
+                          onBeforeInput={(e) => {
+                            if (e.inputType === 'deleteContentBackward') {
+                              if (!values[flatIdx] && flatIdx > 0) {
+                                e.preventDefault();
+                                setValues((prev) => {
+                                  const n = [...prev];
+                                  n[flatIdx - 1] = '';
+                                  return n;
+                                });
+                                inputRefs.current[flatIdx - 1]?.focus();
+                              }
+                            }
+                          }}
                           onChange={(e) => handleInput(e, flatIdx)}
                           onKeyDown={(e) => handleKeyDown(e, flatIdx)}
                         />
@@ -502,8 +538,8 @@ export default function ExerciseFill({ item, onSubmit, onNext, onReport, session
           <button
             type="button"
             onClick={handleCheck}
-            disabled={!!submitted}
-            className="w-full max-w-sm py-2.5 sm:py-3 px-6 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-sm sm:text-base font-bold rounded-xl sm:rounded-2xl border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            disabled={!!submitted || values.every((v) => !v)}
+            className="w-full max-w-sm min-h-[48px] py-2.5 sm:py-3 px-6 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-sm sm:text-base font-bold rounded-xl sm:rounded-2xl border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] hover:translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />

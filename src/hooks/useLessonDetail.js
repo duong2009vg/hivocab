@@ -173,22 +173,66 @@ export function useLessonDetail() {
 
   const startPractice = useCallback((modeIndex, flashcardMode) => {
     if (typeof window === 'undefined') return;
+
+    const MODE_TYPE_MAP = {
+      0: 'flashcard',
+      1: 'mcq',
+      2: 'fill',
+      3: 'listen',
+    };
+
+    let effectiveFlashcardMode = flashcardMode;
+    if (!effectiveFlashcardMode && typeof window !== 'undefined') {
+      effectiveFlashcardMode = window._flashcardMode;
+    }
+    if (!effectiveFlashcardMode) {
+      try {
+        effectiveFlashcardMode = localStorage.getItem('hivocab_flashcard_mode');
+      } catch (_) {}
+    }
+    effectiveFlashcardMode = (effectiveFlashcardMode === 'vi_en' || effectiveFlashcardMode === 'en_vi')
+      ? effectiveFlashcardMode
+      : 'en_vi';
+
     // Pass current words & mode to PageLearning via window globals
     if (words && words.length > 0) {
       window._currentLessonWords = words;
       window._practiceMode = modeIndex ?? null;
-      if (flashcardMode) {
-        window._flashcardMode = flashcardMode;
+      window._flashcardMode = effectiveFlashcardMode;
+      window._currentTopicId = topicId;
+      window._currentTopicName = topicName;
+      window._currentPassageId = passageId;
+      window._currentLessonIndex = lessonIndex;
+      window._currentLessonName = lessonName;
+
+      // Persist session config into sessionStorage to survive browser refresh
+      try {
+        const sessionConfig = {
+          modeIndex: modeIndex ?? null,
+          allowedType: modeIndex !== null && modeIndex !== undefined ? (MODE_TYPE_MAP[modeIndex] || null) : null,
+          flashcardMode: effectiveFlashcardMode,
+          words,
+          topicId: topicId || null,
+          topicName: topicName || null,
+          passageId: passageId || null,
+          lessonIndex: lessonIndex ?? 0,
+          lessonName: lessonName || null,
+          timestamp: Date.now(),
+        };
+        sessionStorage.setItem('hivocab_study_session_config', JSON.stringify(sessionConfig));
+      } catch (err) {
+        console.warn('[useLessonDetail] Failed to save session config to sessionStorage:', err);
       }
+
       navigateTo('learning');
     } else if (typeof window.startSinglePractice === 'function') {
       // Fallback to legacy bridge if words not yet loaded
-      if (flashcardMode) {
-        window._flashcardMode = flashcardMode;
+      if (effectiveFlashcardMode) {
+        window._flashcardMode = effectiveFlashcardMode;
       }
       window.startSinglePractice(modeIndex);
     }
-  }, [words, navigateTo]);
+  }, [words, topicId, topicName, passageId, lessonIndex, lessonName, navigateTo]);
 
   const startReading = useCallback(() => {
     // Set passageId context for React's useBilingualReading hook to pick up

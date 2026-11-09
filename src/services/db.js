@@ -981,21 +981,124 @@ function getLocalDateString(d = new Date()) {
   return `${y}-${m}-${dd}`;
 }
 
-export async function logStudySession() {
+export async function logStudySession(wordsReviewedCount = 1) {
   const user = await getCurrentUser();
-  if (!user) return;
   const today = getLocalDateString();
-  const { error } = await supabase.rpc('increment_session', {
-    p_user_id: user.id,
-    p_date: today,
-  });
-  if (error) throwRpcError(error, 'Không thể ghi phiên học');
+
+  // 1. Always record in local storage for instant UI reflection & guest resilience
+  try {
+    const localSessions = JSON.parse(localStorage.getItem('hi_study_sessions') || '{}');
+    localSessions[today] = (localSessions[today] || 0) + (wordsReviewedCount || 1);
+    localStorage.setItem('hi_study_sessions', JSON.stringify(localSessions));
+  } catch (err) {
+    console.warn('[db.logStudySession local cache error]:', err);
+  }
+
+  // 2. If guest, dispatch event and return gracefully without throwing
+  if (!user) {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('hivocab:study-session-logged', {
+          detail: { date: today, guest: true, count: wordsReviewedCount },
+        })
+      );
+    }
+    return { success: true, guest: true, date: today };
+  }
+
+  // 3. Authenticated user: sync with Supabase RPC
+  try {
+    const { error } = await supabase.rpc('increment_session', {
+      p_user_id: user.id,
+      p_date: today,
+    });
+    if (error) {
+      console.warn('[db.logStudySession RPC warning]:', error.message || error);
+    }
+  } catch (err) {
+    console.warn('[db.logStudySession network/RPC error]:', err);
+  }
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent('hivocab:study-session-logged', {
+        detail: { date: today, guest: false, userId: user.id },
+      })
+    );
+  }
+
+  return { success: true, guest: false, date: today };
 }
 
 export async function reviewWord(wordId, rating) {
   const user = await getCurrentUser();
-  if (!user) throw new Error('Chưa đăng nhập');
 
+  // ── Guest fallback: Save progress in localStorage without throwing ──
+  if (!user) {
+    const today = getLocalDateString();
+    let guestProgress = {};
+    try {
+      guestProgress = JSON.parse(localStorage.getItem('hi_guest_word_progress') || '{}');
+    } catch (_) {}
+
+    const existing = guestProgress[wordId] || { level: 0, review_count: 0 };
+    const currentLevel = Number(existing.level) || 0;
+    const reviewCount = Number(existing.review_count) || 0;
+
+    let newLevel = currentLevel;
+    if (currentLevel === 0) {
+      newLevel = 1;
+    } else if (rating === 'easy') {
+      newLevel = Math.min(currentLevel + 1, 5);
+    } else if (rating === 'hard') {
+      newLevel = Math.max(currentLevel - 1, 1);
+    } else {
+      newLevel = currentLevel > 0 ? currentLevel : 1;
+    }
+
+    const intervals = {
+      1: 60 * 60 * 1000,           // 1 hour
+      2: 8 * 60 * 60 * 1000,        // 8 hours
+      3: 24 * 60 * 60 * 1000,       // 24 hours
+      4: 6 * 24 * 60 * 60 * 1000,   // 6 days
+      5: 20 * 24 * 60 * 60 * 1000,  // 20 days
+    };
+    const nextReviewAt = new Date(Date.now() + (intervals[newLevel] || 60 * 60 * 1000));
+
+    guestProgress[wordId] = {
+      wordId,
+      level: newLevel,
+      last_reviewed_at: new Date().toISOString(),
+      next_review_at: nextReviewAt.toISOString(),
+      review_count: reviewCount + 1,
+    };
+
+    try {
+      localStorage.setItem('hi_guest_word_progress', JSON.stringify(guestProgress));
+
+      // Increment words_reviewed for today in hi_study_sessions
+      const localSessions = JSON.parse(localStorage.getItem('hi_study_sessions') || '{}');
+      localSessions[today] = (localSessions[today] || 0) + 1;
+      localStorage.setItem('hi_study_sessions', JSON.stringify(localSessions));
+    } catch (_) {}
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('hivocab:word-reviewed', {
+          detail: { wordId, newLevel, guest: true },
+        })
+      );
+    }
+
+    return {
+      newLevel,
+      nextReviewAt,
+      intervalLabel: getIntervalLabel(newLevel),
+      guest: true,
+    };
+  }
+
+  // ── Authenticated user: Proceed with Supabase RPC ──
   const { data, error } = await supabase.rpc('review_word', {
     p_word_id: wordId,
     p_rating: rating,
@@ -1379,10 +1482,35 @@ function calculateStreakFromSessions(sessions) {
 export async function getDashboardStats() {
   const user = await getCurrentUser();
   if (!user) {
+    let guestStreak = 0;
+    try {
+      const localSessions = JSON.parse(localStorage.getItem('hi_study_sessions') || '{}');
+      const sessionList = Object.keys(localSessions)
+        .sort((a, b) => b.localeCompare(a))
+        .map((dateStr) => ({ session_date: dateStr }));
+      guestStreak = calculateStreakFromSessions(sessionList);
+    } catch (_) {}
+
+    const memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
+    let wordsDueCount = 0;
+    try {
+      const guestProgress = JSON.parse(localStorage.getItem('hi_guest_word_progress') || '{}');
+      const now = new Date();
+      Object.values(guestProgress).forEach((p) => {
+        const lv = Number(p?.level) || 0;
+        if (lv >= 0 && lv <= 5) {
+          memoryLevels[`lv${lv}`] = (memoryLevels[`lv${lv}`] || 0) + 1;
+        }
+        if (p?.next_review_at && new Date(p.next_review_at) <= now) {
+          wordsDueCount++;
+        }
+      });
+    } catch (_) {}
+
     return {
-      wordsDueCount: 0,
-      streak: 0,
-      memoryLevels: { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 },
+      wordsDueCount,
+      streak: guestStreak,
+      memoryLevels,
     };
   }
 

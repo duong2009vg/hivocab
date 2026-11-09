@@ -4,7 +4,49 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
-import { reviewWord } from '../services/db.js';
+import { reviewWord, logStudySession } from '../services/db.js';
+
+// ─── Answer Normalization ─────────────────────────────────────────────────────
+
+/**
+ * 11-step comprehensive answer string normalization.
+ * Handles iOS curly quotes, dashes, ligatures, Unicode diacritics (café -> cafe),
+ * zero-width characters, non-breaking spaces, and whitespace collapsing.
+ */
+export function normalizeAnswer(str) {
+  if (str === null || str === undefined) return '';
+  let s = String(str);
+
+  // 1. Remove zero-width characters & BOM
+  s = s.replace(/[\u200B\u200C\u2060\uFEFF]|\u200D/g, '');
+
+  // 2. Normalize smart single quotes / apostrophes to ASCII ' (U+0027)
+  s = s.replace(/[\u2018\u2019\u201A\u201B\u02BC\u02BB`\u00B4]/g, "'");
+
+  // 3. Normalize smart double quotes to ASCII " (U+0022)
+  s = s.replace(/[\u201C\u201D\u201E\u201F\u00AB\u00BB]/g, '"');
+
+  // 4. Normalize dashes/hyphens to ASCII - (U+002D)
+  s = s.replace(/[\u2011\u2012\u2013\u2014\u2015\u2212]/g, '-');
+
+  // 5. Remove soft hyphens (U+00AD)
+  s = s.replace(/\u00AD/g, '');
+
+  // 6. Case folding
+  s = s.toLowerCase();
+
+  // 7. Diacritic / Accent folding (e.g. café -> cafe, naïve -> naive, façade -> facade)
+  s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  // 8. Latin ligature unfolding
+  s = s.replace(/æ/g, 'ae').replace(/œ/g, 'oe');
+
+  // 9. Collapse all whitespace (including non-breaking spaces \u00A0, em-spaces, tabs) to single space
+  s = s.replace(/[\s\u00A0\u2000-\u200A\u202F\u205F\u3000]+/g, ' ');
+
+  // 10. Trim leading and trailing whitespace
+  return s.trim();
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -283,16 +325,19 @@ function createQueueItem(word, forcedType = null, allWords = [], flashcardMode =
 
 export function useStudySession() {
   const [session, setSession] = useState(createInitialState);
+  const sessionLoggedRef = useRef(false);
 
   // Derived values
   const currentItem = session.isActive && session.queueIndex < session.queue.length
     ? session.queue[session.queueIndex]
     : null;
 
-  const isComplete = session.isActive &&
+  const isComplete = Boolean(
+    session.isActive &&
     session.allWords.length > 0 &&
-    ((session.queueIndex >= session.queue.length && session.queue.length > 0) ||
-      session.completed.length >= session.allWords.length);
+    session.queue.length > 0 &&
+    session.queueIndex >= session.queue.length
+  );
 
   const progress = {
     completed: session.completed.length,
@@ -303,13 +348,29 @@ export function useStudySession() {
   };
 
   useEffect(() => {
-    if (isComplete && typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('hivocab:study-session-completed'));
+    if (isComplete && !sessionLoggedRef.current) {
+      sessionLoggedRef.current = true;
+      const count = session.completed.length || session.allWords.length || 1;
+      logStudySession(count).catch(err => {
+        console.warn('[useStudySession] logStudySession error:', err);
+      });
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('hivocab:study-session-completed', {
+            detail: {
+              completedCount: session.completed.length,
+              totalCount: session.allWords.length,
+              date: new Date().toISOString(),
+            },
+          })
+        );
+      }
     }
-  }, [isComplete]);
+  }, [isComplete, session.completed.length, session.allWords.length]);
 
   // ── startSession ────────────────────────────────────────────────────────────
   const startSession = useCallback((words, allowedType = null, flashcardMode = null) => {
+    sessionLoggedRef.current = false;
     if (!words || words.length === 0) return;
     const validWords = words
       .filter(w => w && (w.word || w.meaning))
@@ -356,12 +417,11 @@ export function useStudySession() {
 
       const newItem = { ...item, attempts: item.attempts + 1 };
       const correct = rating !== 'hard';
-
-      // New words always complete regardless of rating
       const isNewWord = item.word.level === 0 || item.word.isNew === true;
 
-      if (isNewWord || correct) {
-        const effectiveRating = isNewWord ? 'good' : rating;
+      // ── Case A: Remembered Card (rating === 'easy' or 'good') ─────────
+      if (correct) {
+        const effectiveRating = isNewWord ? (rating === 'easy' ? 'easy' : 'good') : rating;
         reviewWordInDB(item.word.wordId || item.word.id, effectiveRating);
         return {
           ...prev,
@@ -376,12 +436,33 @@ export function useStudySession() {
         };
       }
 
-      // Hard rating on normal word → change exercise type, push to end of queue
+      // ── Case B: "Cần ôn lại" (rating === 'hard') ──────────────────────
       newItem.failCount = (newItem.failCount || 0) + 1;
+
+      // Guard against runaway retries (cap at 3 failed attempts)
+      if (newItem.failCount >= 3) {
+        reviewWordInDB(item.word.wordId || item.word.id, 'hard');
+        return {
+          ...prev,
+          queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
+          queueIndex: prev.queueIndex + 1,
+          completed: [...prev.completed, {
+            word: item.word,
+            rating: 'hard',
+            attempts: newItem.attempts,
+            skipped: true,
+            isNew: isNewWord,
+          }],
+        };
+      }
+
+      // Rotate exercise type and append to end of queue for review
       const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
       newItem.exerciseType = nextType;
       newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
-      if (!newItem.usedTypes.includes(nextType)) newItem.usedTypes = [...newItem.usedTypes, nextType];
+      if (!newItem.usedTypes.includes(nextType)) {
+        newItem.usedTypes = [...newItem.usedTypes, nextType];
+      }
 
       reviewWordInDB(item.word.wordId || item.word.id, 'hard');
       return {
@@ -427,8 +508,7 @@ export function useStudySession() {
 
     // ── Fill / Listen ─────────────────────────────────────────────────────
     } else {
-      const norm = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
-      correct = norm(userAnswer) === norm(item.exerciseData?.answer);
+      correct = normalizeAnswer(userAnswer) === normalizeAnswer(item.exerciseData?.answer);
       correctAnswer = item.exerciseData?.answer || '';
     }
 
@@ -470,39 +550,46 @@ export function useStudySession() {
   /**
    * Called when user acknowledges the result (clicks "Tiếp tục" in modal).
    * Atomically applies the pending result AND advances queueIndex in ONE setSession call.
-   * This guarantees the user ALWAYS advances to the next question regardless of correct/wrong.
+   * Guarded against double-tap or timer race condition when pending is null.
    */
   const nextQuestion = useCallback(() => {
+    // Fast-path guard: NO-OP if no pending result exists (prevents double-tap skip)
+    const pending = pendingResultRef.current;
+    if (!pending) {
+      return;
+    }
+
+    // Consume pending result synchronously
+    pendingResultRef.current = null;
+
     setSession(prev => {
       if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
-
-      const pending = pendingResultRef.current;
-
-      // If called without a pending result, simply advance queueIndex
-      if (!pending) {
-        return {
-          ...prev,
-          queueIndex: prev.queueIndex + 1,
-        };
-      }
-
-      // Clear pending
-      pendingResultRef.current = null;
 
       const { result, attempts } = pending;
       const current = prev.queue[prev.queueIndex];
       if (!current) {
-        return { ...prev, queueIndex: prev.queueIndex + 1 };
+        return prev;
       }
 
       const updatedItem = { ...current, attempts };
       const isNewWord = current.word?.level === 0 || current.word?.isNew === true;
       const correct = result.correct;
 
-      // ── Case 1: New Word (always completes) ──────────────────────────────
+      // ── Case 1: New Word ─────────────────────────────────────────────────
       if (isNewWord) {
         if (!correct) {
           updatedItem.failCount = (updatedItem.failCount || 0) + 1;
+          if (updatedItem.failCount >= 3) {
+            // Exceeded 3 attempts — skip word to complete session
+            return {
+              ...prev,
+              queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
+              queueIndex: prev.queueIndex + 1,
+              completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, skipped: true, isNew: true }],
+            };
+          }
+
+          // Requeue to end of queue — DO NOT push to completed!
           const nextType = prev.allowedType || pickNextType(updatedItem.usedTypes);
           const requeuedItem = {
             ...updatedItem,
@@ -514,7 +601,6 @@ export function useStudySession() {
             ...prev,
             queue: [...prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q), requeuedItem],
             queueIndex: prev.queueIndex + 1,
-            completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, isNew: true }],
           };
         }
         return {
@@ -638,6 +724,7 @@ export function useStudySession() {
     speakWord,
     endSession,
     setFlashcardMode,
+    normalizeAnswer,
     // Expose for components
     EXERCISE_TYPES,
   };

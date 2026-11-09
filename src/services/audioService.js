@@ -253,6 +253,7 @@ class AudioEngine {
         }
       } catch (_) {}
       this._activeUtterance = null;
+      window._activeUtterance = null;
     }
   }
 
@@ -278,6 +279,9 @@ class AudioEngine {
       }
       const utter = new SpeechSynthesisUtterance(text);
       this._activeUtterance = utter;
+      if (typeof window !== 'undefined') {
+        window._activeUtterance = utter;
+      }
       const targetLang = lang === 'en-GB' || lang === 'uk' ? 'en-GB' : 'en-US';
       utter.lang = targetLang;
       utter.rate = Math.max(0.4, Math.min(1.5, Number(rate) || 0.9));
@@ -297,9 +301,15 @@ class AudioEngine {
 
       utter.onend = () => {
         this._activeUtterance = null;
+        if (typeof window !== 'undefined' && window._activeUtterance === utter) {
+          window._activeUtterance = null;
+        }
       };
       utter.onerror = () => {
         this._activeUtterance = null;
+        if (typeof window !== 'undefined' && window._activeUtterance === utter) {
+          window._activeUtterance = null;
+        }
       };
 
       window.speechSynthesis.speak(utter);

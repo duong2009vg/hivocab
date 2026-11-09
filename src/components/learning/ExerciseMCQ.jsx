@@ -63,9 +63,21 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
     if (window.HiAudio?.playWord) {
       window.HiAudio.playWord(word, 0.9);
     } else if ('speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(word);
-      u.lang = 'en-US';
-      window.speechSynthesis.speak(u);
+      try {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        u.rate = 0.9;
+        window._activeUtterance = u;
+        u.onend = () => {
+          if (window._activeUtterance === u) window._activeUtterance = null;
+        };
+        u.onerror = () => {
+          if (window._activeUtterance === u) window._activeUtterance = null;
+        };
+        window.speechSynthesis.speak(u);
+      } catch (_) {}
     }
   }, [d.word]);
 
@@ -153,7 +165,7 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
 
             // Class styling based on state matching reference screenshots
             let cardClasses =
-              'group relative flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border-2 transition-all cursor-pointer select-none ';
+              'group relative flex items-center justify-between min-h-[48px] px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border-2 transition-all cursor-pointer select-none ';
 
             if (!result) {
               cardClasses +=
@@ -176,9 +188,16 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
               <div
                 key={idx}
                 onClick={() => handleSelect(idx)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleSelect(idx);
+                  }
+                }}
                 className={cardClasses}
                 role="button"
                 tabIndex={0}
+                aria-pressed={isSelected}
               >
                 <div className="flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0 pr-2">
                   {/* Number circular badge */}

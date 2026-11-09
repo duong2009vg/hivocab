@@ -7,7 +7,7 @@ import { useStudySession } from '../../hooks/useStudySession.js';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { getWordsInLesson, getWordsInPassage, getWordsDueForReview } from '../../services/db.js';
-import { Compass, Home, Sparkles } from 'lucide-react';
+import { Compass, Home, Sparkles, AlertTriangle } from 'lucide-react';
 import ExerciseFlashcard  from '../learning/ExerciseFlashcard.jsx';
 import ExerciseMCQ        from '../learning/ExerciseMCQ.jsx';
 import ExerciseFill       from '../learning/ExerciseFill.jsx';
@@ -51,6 +51,7 @@ export function PageLearning() {
   const [soundMuted, setSoundMuted] = useState(false);
   const [isLoadingWords, setIsLoadingWords] = useState(true);
   const [noWordsToStudy, setNoWordsToStudy] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
   const initialized = useRef(false);
 
   // ── Init: load words ────────────────────────────────────────────────────────
@@ -62,23 +63,69 @@ export function PageLearning() {
       setIsLoadingWords(true);
       setNoWordsToStudy(false);
 
-      const modeIndex = typeof window !== 'undefined' ? (window._practiceMode ?? null) : null;
+      // 1. Try reading saved session config from sessionStorage
+      let savedConfig = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = sessionStorage.getItem('hivocab_study_session_config');
+          if (raw) {
+            savedConfig = JSON.parse(raw);
+          }
+        } catch (e) {
+          console.warn('[PageLearning] Failed to parse hivocab_study_session_config:', e);
+        }
+      }
+
+      // 2. Resolve modeIndex (window global has precedence if set; fallback to savedConfig)
+      let modeIndex = null;
+      if (typeof window !== 'undefined' && window._practiceMode !== undefined && window._practiceMode !== null) {
+        modeIndex = window._practiceMode;
+      } else if (savedConfig && savedConfig.modeIndex !== undefined && savedConfig.modeIndex !== null) {
+        modeIndex = savedConfig.modeIndex;
+        if (typeof window !== 'undefined') {
+          window._practiceMode = modeIndex;
+        }
+      }
+
       const allowedType = modeIndex !== null ? (MODE_TYPE_MAP[modeIndex] || null) : null;
 
+      // 3. Resolve flashcardMode
       let mode = typeof window !== 'undefined' ? window._flashcardMode : null;
+      if (!mode && savedConfig?.flashcardMode) {
+        mode = savedConfig.flashcardMode;
+      }
       if (!mode) {
         try { mode = localStorage.getItem('hivocab_flashcard_mode'); } catch (_) {}
       }
       mode = (mode === 'vi_en' || mode === 'en_vi') ? mode : 'en_vi';
+      if (typeof window !== 'undefined') {
+        window._flashcardMode = mode;
+      }
 
+      // 4. Resolve words
       let words = typeof window !== 'undefined'
         ? (window._currentLessonWords || window._currentSessionWords || [])
         : [];
 
+      // Restore words from sessionStorage if window globals were erased by reload
+      if ((!words || words.length === 0) && savedConfig?.words && savedConfig.words.length > 0) {
+        words = savedConfig.words;
+        if (typeof window !== 'undefined') {
+          window._currentLessonWords = words;
+        }
+      }
+
+      // 5. Fallback database fetch if words are still empty
       if (!words || words.length === 0) {
         let topicId = typeof window !== 'undefined' ? window._currentTopicId : null;
         let lessonIdx = typeof window !== 'undefined' ? (window._currentLessonIndex ?? 0) : 0;
         let passageId = typeof window !== 'undefined' ? window._currentPassageId : null;
+
+        if (savedConfig) {
+          if (!topicId && savedConfig.topicId) topicId = savedConfig.topicId;
+          if (!passageId && savedConfig.passageId) passageId = savedConfig.passageId;
+          if (savedConfig.lessonIndex !== undefined) lessonIdx = savedConfig.lessonIndex;
+        }
 
         if (!topicId && !passageId && typeof window !== 'undefined') {
           try {
@@ -104,6 +151,22 @@ export function PageLearning() {
       }
 
       if (words && words.length > 0) {
+        try {
+          sessionStorage.setItem(
+            'hivocab_study_session_config',
+            JSON.stringify({
+              modeIndex,
+              allowedType,
+              flashcardMode: mode,
+              words,
+              topicId: typeof window !== 'undefined' ? window._currentTopicId : (savedConfig?.topicId || null),
+              passageId: typeof window !== 'undefined' ? window._currentPassageId : (savedConfig?.passageId || null),
+              lessonIndex: typeof window !== 'undefined' ? (window._currentLessonIndex ?? 0) : (savedConfig?.lessonIndex ?? 0),
+              timestamp: Date.now(),
+            })
+          );
+        } catch (_) {}
+
         startSession(words, allowedType, mode);
         setIsLoadingWords(false);
       } else {
@@ -147,12 +210,64 @@ export function PageLearning() {
   // ── Go home ─────────────────────────────────────────────────────────────────
   const goHome = useCallback(() => {
     endSession();
+    try {
+      sessionStorage.removeItem('hivocab_study_session_config');
+    } catch (_) {}
     navigateTo('dashboard');
   }, [endSession, navigateTo]);
 
-  // ── Back (to lesson detail or dashboard) ───────────────────────────────────
+  // ── Back (to lesson detail or dashboard) with exit confirmation guard ──────
   const handleClose = useCallback(() => {
+    if (!isComplete && session.isActive) {
+      setShowExitConfirm(true);
+      return;
+    }
     endSession();
+    try {
+      sessionStorage.removeItem('hivocab_study_session_config');
+    } catch (_) {}
+    const hasLessonContext = typeof window !== 'undefined' && (window._currentTopicId || window._currentPassageId);
+    navigateTo(hasLessonContext ? 'lesson-detail' : 'dashboard');
+  }, [isComplete, session.isActive, endSession, navigateTo]);
+
+  const confirmExit = useCallback(() => {
+    setShowExitConfirm(false);
+    endSession();
+    try {
+      sessionStorage.removeItem('hivocab_study_session_config');
+    } catch (_) {}
+    const hasLessonContext = typeof window !== 'undefined' && (window._currentTopicId || window._currentPassageId);
+    navigateTo(hasLessonContext ? 'lesson-detail' : 'dashboard');
+  }, [endSession, navigateTo]);
+
+  const cancelExit = useCallback(() => {
+    setShowExitConfirm(false);
+  }, []);
+
+  const handlePracticeAgain = useCallback(() => {
+    if (session.allWords && session.allWords.length > 0) {
+      startSession(session.allWords, session.allowedType, flashcardMode);
+    } else {
+      goHome();
+    }
+  }, [session.allWords, session.allowedType, flashcardMode, startSession, goHome]);
+
+  const handleReviewFailedWords = useCallback(
+    (failedWords) => {
+      if (failedWords && failedWords.length > 0) {
+        startSession(failedWords, session.allowedType, flashcardMode);
+      } else {
+        handlePracticeAgain();
+      }
+    },
+    [session.allowedType, flashcardMode, startSession, handlePracticeAgain]
+  );
+
+  const handleBackToLesson = useCallback(() => {
+    endSession();
+    try {
+      sessionStorage.removeItem('hivocab_study_session_config');
+    } catch (_) {}
     const hasLessonContext = typeof window !== 'undefined' && (window._currentTopicId || window._currentPassageId);
     navigateTo(hasLessonContext ? 'lesson-detail' : 'dashboard');
   }, [endSession, navigateTo]);
@@ -309,7 +424,7 @@ export function PageLearning() {
             <button
               type="button"
               onClick={handleReport}
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] flex items-center justify-center hover:bg-red-50 text-stone-700 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
+              className="hidden sm:flex w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] items-center justify-center hover:bg-red-50 text-stone-700 hover:text-red-600 active:translate-y-0.5 transition cursor-pointer"
               title="Báo cáo lỗi từ này"
             >
               <svg className="w-4 h-4 sm:w-5 sm:h-5 text-stone-700" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -329,7 +444,12 @@ export function PageLearning() {
           /* ── Completion screen ── */
           <ExerciseCompleted
             completedWords={session.completed}
+            allWords={session.allWords}
+            sessionStartTime={session.startTime}
             onGoHome={goHome}
+            onReviewFailedWords={handleReviewFailedWords}
+            onPracticeAgain={handlePracticeAgain}
+            onBackToLesson={handleBackToLesson}
           />
         ) : currentItem ? (
           /* ── Active exercise ── */
@@ -359,6 +479,7 @@ export function PageLearning() {
                 item={currentItem}
                 onSubmit={submitAnswer}
                 onNext={nextQuestion}
+                speakWord={speakWord}
                 onReport={handleReport}
                 sessionInfo={sessionInfo}
               />
@@ -408,6 +529,39 @@ export function PageLearning() {
           <Sparkles className="w-4 h-4 text-emerald-600 inline shrink-0" />
         </div>
       </footer>
+
+      {/* ── Exit Confirmation Dialog ── */}
+      {showExitConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-fade-in font-comfortaa">
+          <div className="w-full max-w-sm bg-white border-[3px] border-[#2B2523] rounded-[28px] p-5 sm:p-6 shadow-[6px_6px_0px_#2B2523] text-center relative animate-scale-in">
+            <div className="w-14 h-14 rounded-full bg-amber-100 border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] mx-auto mb-3 flex items-center justify-center text-amber-700">
+              <AlertTriangle className="w-7 h-7 text-[#D36135]" />
+            </div>
+            <h3 className="text-lg sm:text-xl font-extrabold text-stone-900 mb-1.5 font-rounded">
+              Dừng bài học tại đây?
+            </h3>
+            <p className="text-xs sm:text-sm text-stone-600 mb-5 leading-relaxed font-quicksand font-semibold">
+              Tiến độ của buổi học này sẽ chưa được lưu trọn vẹn. Bạn có chắc chắn muốn thoát về không?
+            </p>
+            <div className="flex gap-2.5">
+              <button
+                type="button"
+                onClick={cancelExit}
+                className="flex-1 py-2.5 sm:py-3 px-4 bg-[#264653] hover:bg-[#1B353F] active:translate-y-0.5 text-white font-bold text-xs sm:text-sm rounded-xl border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] cursor-pointer transition-all"
+              >
+                Tiếp tục học
+              </button>
+              <button
+                type="button"
+                onClick={confirmExit}
+                className="flex-1 py-2.5 sm:py-3 px-4 bg-[#FAF5EB] hover:bg-[#F2ECE0] active:translate-y-0.5 text-stone-700 hover:text-red-600 font-bold text-xs sm:text-sm rounded-xl border-2 border-[#2B2523] shadow-[2px_2px_0px_#2B2523] cursor-pointer transition-all"
+              >
+                Rời khỏi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

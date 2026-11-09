@@ -6,17 +6,27 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AlertTriangle, Lightbulb, Eye, PenTool } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
+function cleanCharForSlot(raw) {
+  if (!raw) return '';
+  return String(raw)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/gi, 'd')
+    .toUpperCase()
+    .replace(/[^A-Z0-9\-']/g, '');
+}
+
 function getSlotDimensions(maxPartLen) {
   if (maxPartLen <= 4) {
     return {
-      slot: 'w-11 sm:w-14 h-13 sm:h-16 text-xl sm:text-3xl rounded-2xl sm:rounded-[22px]',
+      slot: 'w-11 sm:w-14 h-[52px] sm:h-16 text-xl sm:text-3xl rounded-2xl sm:rounded-[22px]',
       gap: 'gap-2 sm:gap-3',
       gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2.5 sm:gap-y-3',
     };
   }
   if (maxPartLen <= 6) {
     return {
-      slot: 'w-9 sm:w-12 h-11 sm:h-15 text-lg sm:text-2xl rounded-2xl sm:rounded-[20px]',
+      slot: 'w-9 sm:w-12 h-11 sm:h-[60px] text-lg sm:text-2xl rounded-2xl sm:rounded-[20px]',
       gap: 'gap-1.5 sm:gap-2.5',
       gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2 sm:gap-y-2.5',
     };
@@ -30,21 +40,21 @@ function getSlotDimensions(maxPartLen) {
   }
   if (maxPartLen <= 10) {
     return {
-      slot: 'w-7 sm:w-10 h-9 sm:h-13 text-sm sm:text-lg rounded-xl sm:rounded-2xl',
+      slot: 'w-7 sm:w-10 h-9 sm:h-[52px] text-sm sm:text-lg rounded-xl sm:rounded-2xl',
       gap: 'gap-1 sm:gap-1.5',
       gapBetweenWords: 'gap-x-2 gap-y-1.5',
     };
   }
   if (maxPartLen <= 12) {
     return {
-      slot: 'w-6 sm:w-9 h-8.5 sm:h-12 text-xs sm:text-base rounded-xl sm:rounded-2xl',
+      slot: 'w-6 sm:w-9 h-[34px] sm:h-12 text-xs sm:text-base rounded-xl sm:rounded-2xl',
       gap: 'gap-0.5 sm:gap-1',
       gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
     };
   }
   // 13+ letters (fits 14 letters in 300px without overflowing)
   return {
-    slot: 'w-5.5 sm:w-8 h-8 sm:h-11 text-xs sm:text-sm rounded-lg sm:rounded-xl',
+    slot: 'w-[22px] sm:w-8 h-8 sm:h-11 text-xs sm:text-sm rounded-lg sm:rounded-xl',
     gap: 'gap-0.5 sm:gap-1',
     gapBetweenWords: 'gap-x-1 gap-y-1',
   };
@@ -70,6 +80,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
   const [currentSpeed, setCurrentSpeed] = useState(1.0);
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
   const inputRefs = useRef([]);
 
   const currentNum = sessionInfo?.currentNum ?? 1;
@@ -83,24 +94,45 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     setShowResultModal(false);
     setShowMeaning(false);
     setFocusedIdx(0);
-    const t = setTimeout(() => handlePlay(1.0), 350);
+    setAutoplayBlocked(false);
+    const t = setTimeout(() => handlePlay(1.0, true), 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.word?.id || item?.word?.wordId, currentNum]);
 
-  function handlePlay(rate = 1.0) {
+  function handlePlay(rate = 1.0, isAuto = false) {
     setCurrentSpeed(rate);
     setIsPlayingAudio(true);
+    setAutoplayBlocked(false);
     const word = d.wordToSpeak || d.answer || '';
-    if (speakWord) {
-      speakWord(word, rate);
-    } else if (window.HiAudio?.playWord) {
-      window.HiAudio.playWord(word, rate);
-    } else if ('speechSynthesis' in window) {
-      const u = new SpeechSynthesisUtterance(word);
-      u.lang = 'en-US';
-      u.rate = rate;
-      window.speechSynthesis.speak(u);
+    try {
+      if (speakWord) {
+        speakWord(word, rate);
+      } else if (window.HiAudio?.playWord) {
+        const played = window.HiAudio.playWord(word, rate);
+        if (played === false && isAuto) {
+          setAutoplayBlocked(true);
+        }
+      } else if ('speechSynthesis' in window) {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(word);
+        u.lang = 'en-US';
+        u.rate = rate;
+        window._activeUtterance = u;
+        u.onend = () => {
+          setIsPlayingAudio(false);
+          if (window._activeUtterance === u) window._activeUtterance = null;
+        };
+        u.onerror = () => {
+          setIsPlayingAudio(false);
+          if (window._activeUtterance === u) window._activeUtterance = null;
+          if (isAuto) setAutoplayBlocked(true);
+        };
+        window.speechSynthesis.speak(u);
+      }
+    } catch (_) {
+      if (isAuto) setAutoplayBlocked(true);
     }
     setTimeout(() => setIsPlayingAudio(false), 900);
 
@@ -109,7 +141,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
       const firstEmpty = inputRefs.current.find((inp, i) => !values[i]);
       const target = firstEmpty || inputRefs.current[0];
       target?.focus();
-      target?.select();
+      target?.select?.();
     }, 400);
   }
 
@@ -126,10 +158,8 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
         return;
       }
       if (raw.length > 1) {
-        const chars = raw
-          .toUpperCase()
-          .replace(/[^A-Z0-9\-']/g, '')
-          .split('');
+        const cleaned = cleanCharForSlot(raw);
+        const chars = cleaned.split('');
         setValues((prev) => {
           const n = [...prev];
           chars.forEach((c, i) => {
@@ -140,23 +170,23 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
         const nextIdx = Math.min(flatIdx + chars.length, boxes.length - 1);
         setTimeout(() => {
           inputRefs.current[nextIdx]?.focus();
-          inputRefs.current[nextIdx]?.select();
+          inputRefs.current[nextIdx]?.select?.();
         }, 10);
         return;
       }
-      const char = raw.slice(-1).toUpperCase();
+      const char = cleanCharForSlot(raw.slice(-1));
       setValues((prev) => {
         const n = [...prev];
         n[flatIdx] = char;
         return n;
       });
       if (e.target) e.target.scrollLeft = 0;
-      if (flatIdx < boxes.length - 1) {
+      if (char && flatIdx < boxes.length - 1) {
         setTimeout(() => {
           const next = inputRefs.current[flatIdx + 1];
           if (next) {
             next.focus();
-            next.select();
+            next.select?.();
             next.scrollLeft = 0;
           }
         }, 10);
@@ -168,7 +198,8 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
       if (showResultModal) return;
-      if (e.key === 'Backspace') {
+      const isBackspace = e.key === 'Backspace' || e.keyCode === 8 || e.which === 8 || e.keyCode === 229;
+      if (isBackspace) {
         if (!values[flatIdx] && flatIdx > 0) {
           e.preventDefault();
           setValues((prev) => {
@@ -188,11 +219,11 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
       } else if (e.key === 'ArrowLeft' && flatIdx > 0) {
         e.preventDefault();
         inputRefs.current[flatIdx - 1]?.focus();
-        inputRefs.current[flatIdx - 1]?.select();
+        inputRefs.current[flatIdx - 1]?.select?.();
       } else if (e.key === 'ArrowRight' && flatIdx < boxes.length - 1) {
         e.preventDefault();
         inputRefs.current[flatIdx + 1]?.focus();
-        inputRefs.current[flatIdx + 1]?.select();
+        inputRefs.current[flatIdx + 1]?.select?.();
       } else if ((e.key === ' ' || e.code === 'Space') && e.target.tagName === 'INPUT') {
         e.preventDefault();
         inputRefs.current[Math.min(flatIdx + 1, boxes.length - 1)]?.focus();
@@ -300,9 +331,9 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     .join(' ');
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa my-auto px-2">
+    <div className="w-full flex flex-col items-center justify-start sm:justify-center select-none font-comfortaa my-1 sm:my-auto py-1 sm:py-2 px-2">
       {/* ── Main Exercise Card ── */}
-      <div className="w-full max-w-xl bg-white border-[3px] border-[#2B2523] rounded-[24px] sm:rounded-[30px] shadow-[4px_6px_0px_#2B2523] px-3.5 sm:px-6 py-4 sm:py-5 flex flex-col items-center relative my-auto">
+      <div className="w-full max-w-xl bg-white border-[3px] border-[#2B2523] rounded-[24px] sm:rounded-[30px] shadow-[4px_6px_0px_#2B2523] px-3.5 sm:px-6 py-4 sm:py-5 flex flex-col items-center relative">
         {/* Top Tiger Encouragement & Report Header */}
         <div className="w-full flex items-center justify-between pb-2 mb-2 border-b-2 border-stone-100">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-400/50 text-blue-700 text-[11px] sm:text-xs font-bold">
@@ -329,11 +360,24 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
           )}
         </div>
 
+        {/* Visual Fallback Button when autoplay is blocked by browser */}
+        {autoplayBlocked && (
+          <div className="my-1.5 animate-bounce">
+            <button
+              type="button"
+              onClick={() => handlePlay(currentSpeed, false)}
+              className="px-4 py-1.5 bg-amber-100 hover:bg-amber-200 border-2 border-[#2B2523] rounded-full text-amber-900 font-bold text-xs flex items-center gap-1.5 shadow-[2px_2px_0px_#2B2523] cursor-pointer"
+            >
+              <span>🔊 Chạm để nghe phát âm</span>
+            </button>
+          </div>
+        )}
+
         {/* Center Audio Play Button */}
         <div className="relative my-1 flex items-center justify-center">
           <button
             type="button"
-            onClick={() => handlePlay(currentSpeed)}
+            onClick={() => handlePlay(currentSpeed, false)}
             className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-[2.5px] border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all cursor-pointer group ${
               isPlayingAudio ? 'scale-105 ring-4 ring-sky-200' : ''
             }`}
@@ -349,11 +393,11 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
           </button>
         </div>
 
-        {/* Playback Speed Controls */}
+        {/* Playback Speed Controls (0.8x slow / 1.0x normal) */}
         <div className="flex items-center gap-2 my-1.5">
           <button
             type="button"
-            onClick={() => handlePlay(1.0)}
+            onClick={() => handlePlay(1.0, false)}
             className={`px-3 py-0.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1 font-bold text-[11px] sm:text-xs transition-all shadow-[1px_1.5px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
               currentSpeed === 1.0 ? 'bg-blue-50 text-blue-700 border-blue-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
@@ -363,12 +407,12 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
 
           <button
             type="button"
-            onClick={() => handlePlay(0.6)}
+            onClick={() => handlePlay(0.8, false)}
             className={`px-3 py-0.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1 font-bold text-[11px] sm:text-xs transition-all shadow-[1px_1.5px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
-              currentSpeed === 0.6 ? 'bg-amber-50 text-amber-800 border-amber-600' : 'bg-white text-stone-800 hover:bg-stone-50'
+              currentSpeed === 0.8 ? 'bg-amber-50 text-amber-800 border-amber-600' : 'bg-white text-stone-800 hover:bg-stone-50'
             }`}
           >
-            <span>0.6x</span>
+            <span>0.8x</span>
           </button>
         </div>
 
@@ -508,6 +552,19 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
                             e.target.select?.();
                             e.target.scrollLeft = 0;
                           }}
+                          onBeforeInput={(e) => {
+                            if (e.inputType === 'deleteContentBackward') {
+                              if (!values[flatIdx] && flatIdx > 0) {
+                                e.preventDefault();
+                                setValues((prev) => {
+                                  const n = [...prev];
+                                  n[flatIdx - 1] = '';
+                                  return n;
+                                });
+                                inputRefs.current[flatIdx - 1]?.focus();
+                              }
+                            }
+                          }}
                           onChange={(e) => handleInput(e, flatIdx)}
                           onKeyDown={(e) => handleKeyDown(e, flatIdx)}
                         />
@@ -546,8 +603,8 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
           <button
             type="button"
             onClick={handleCheck}
-            disabled={!!submitted}
-            className="w-full py-2.5 sm:py-3 px-6 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            disabled={!!submitted || values.every((v) => !v)}
+            className="w-full min-h-[48px] py-2.5 sm:py-3 px-6 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />

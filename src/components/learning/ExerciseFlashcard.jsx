@@ -5,42 +5,56 @@ import { AlertTriangle, Sparkles, PenTool, Star } from 'lucide-react';
 
 export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo }) {
   const [flipped, setFlipped] = useState(false);
+  const [isRatingPending, setIsRatingPending] = useState(false);
   const d = item?.exerciseData || {};
 
   const currentNum = sessionInfo?.currentNum ?? 1;
   const totalNum = sessionInfo?.totalNum ?? 10;
 
-  // Reset flip state when new card appears
+  // Reset flip state and rating pending when new card appears
   useEffect(() => {
     setFlipped(false);
+    setIsRatingPending(false);
   }, [item]);
 
-  // Keyboard: Space/Enter = flip; 1 = Hard/Cần ôn lại; 2 = Easy/Đã nhớ kỹ
+  const flip = useCallback(() => {
+    setFlipped((f) => !f);
+  }, []);
+
+  const handleRate = useCallback(
+    (rating) => {
+      if (isRatingPending) return;
+      setIsRatingPending(true);
+      onRate?.(rating);
+    },
+    [isRatingPending, onRate]
+  );
+
+  // Keyboard: Space/Enter/ArrowUp/ArrowDown = flip; 1 / ArrowLeft = Hard; 2 / ArrowRight = Easy
   useEffect(() => {
     function handleKey(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === ' ' || e.key === 'Enter') {
+      if (e.repeat) return;
+
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'ArrowUp' || e.key === 'ArrowDown') {
         e.preventDefault();
-        setFlipped((f) => !f);
+        flip();
+        return;
       }
-      if (flipped) {
-        if (e.key === '1') {
+
+      if (flipped && !isRatingPending) {
+        if (e.key === '1' || e.key === 'ArrowLeft') {
           e.preventDefault();
-          onRate('hard');
-        }
-        if (e.key === '2') {
+          handleRate('hard');
+        } else if (e.key === '2' || e.key === 'ArrowRight') {
           e.preventDefault();
-          onRate('easy');
+          handleRate('easy');
         }
       }
     }
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [flipped, onRate]);
-
-  const flip = useCallback(() => {
-    setFlipped((f) => !f);
-  }, []);
+  }, [flipped, isRatingPending, flip, handleRate]);
 
   const playAudio = useCallback(
     (e) => {
@@ -57,6 +71,13 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
             const u = new SpeechSynthesisUtterance(word);
             u.lang = 'en-US';
             u.rate = 0.9;
+            window._activeUtterance = u;
+            u.onend = () => {
+              if (window._activeUtterance === u) window._activeUtterance = null;
+            };
+            u.onerror = () => {
+              if (window._activeUtterance === u) window._activeUtterance = null;
+            };
             window.speechSynthesis.speak(u);
           }, 30);
         } catch (_) {}
@@ -95,14 +116,16 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
           >
             {/* ── FRONT FACE ── */}
             <div
-              className={`w-full min-h-[350px] sm:min-h-[420px] max-h-[72vh] bg-white rounded-[26px] sm:rounded-[32px] border-[3px] border-[#2D2825] shadow-[4px_6px_0px_#2D2825] sm:shadow-[6px_8px_0px_rgba(45,40,37,0.95)] p-4 sm:p-6 md:p-7 flex flex-col justify-between items-center text-center backface-hidden ${
+              className={`w-full min-h-[350px] sm:min-h-[420px] max-h-[72vh] overflow-y-auto bg-white rounded-[26px] sm:rounded-[32px] border-[3px] border-[#2D2825] shadow-[4px_6px_0px_#2D2825] sm:shadow-[6px_8px_0px_rgba(45,40,37,0.95)] p-4 sm:p-6 md:p-7 flex flex-col justify-between items-center text-center backface-hidden ${
                 flipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
               }`}
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
-                transform: 'rotateY(0deg) translateZ(1px)',
-                WebkitTransform: 'rotateY(0deg) translateZ(1px)',
+                transform: 'rotateY(0deg) translate3d(0, 0, 1px)',
+                WebkitTransform: 'rotateY(0deg) translate3d(0, 0, 1px)',
+                willChange: 'transform',
+                WebkitOverflowScrolling: 'touch',
               }}
             >
               {/* Header ribbon inside card */}
@@ -217,7 +240,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                     e.stopPropagation();
                     flip();
                   }}
-                  className="w-full sm:w-4/5 mx-auto py-2.5 sm:py-3 px-6 bg-[#264653] hover:bg-[#1B353F] text-white font-bold text-sm sm:text-base rounded-full border-2 border-[#2D2825] shadow-[0px_3px_0px_#1B353F] flex items-center justify-center gap-2 transition-transform active:translate-y-0.5 cursor-pointer"
+                  className="w-full sm:w-4/5 mx-auto min-h-[48px] py-2.5 sm:py-3 px-6 bg-[#264653] hover:bg-[#1B353F] text-white font-bold text-sm sm:text-base rounded-full border-2 border-[#2D2825] shadow-[0px_3px_0px_#1B353F] flex items-center justify-center gap-2 transition-transform active:translate-y-0.5 cursor-pointer"
                 >
                   <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round" strokeLinejoin="round" />
@@ -230,14 +253,16 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
 
             {/* ── BACK FACE ── */}
             <div
-              className={`absolute inset-0 w-full h-full min-h-[350px] sm:min-h-[420px] max-h-[72vh] bg-white rounded-[26px] sm:rounded-[32px] border-[3px] border-[#2D2825] shadow-[-4px_6px_0px_#2D2825] sm:shadow-[-6px_8px_0px_rgba(45,40,37,0.95)] p-4 sm:p-6 md:p-7 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 ${
+              className={`absolute inset-0 w-full h-full min-h-[350px] sm:min-h-[420px] max-h-[72vh] overflow-y-auto bg-white rounded-[26px] sm:rounded-[32px] border-[3px] border-[#2D2825] shadow-[-4px_6px_0px_#2D2825] sm:shadow-[-6px_8px_0px_rgba(45,40,37,0.95)] p-4 sm:p-6 md:p-7 flex flex-col justify-between items-center text-center backface-hidden rotate-y-180 ${
                 !flipped ? 'pointer-events-none select-none' : 'pointer-events-auto'
               }`}
               style={{
                 backfaceVisibility: 'hidden',
                 WebkitBackfaceVisibility: 'hidden',
-                transform: 'rotateY(180deg) translateZ(1px)',
-                WebkitTransform: 'rotateY(180deg) translateZ(1px)',
+                transform: 'rotateY(180deg) translate3d(0, 0, 1px)',
+                WebkitTransform: 'rotateY(180deg) translate3d(0, 0, 1px)',
+                willChange: 'transform',
+                WebkitOverflowScrolling: 'touch',
               }}
             >
               {/* Header ribbon inside card */}
@@ -358,26 +383,28 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
               <div className="w-full pt-2.5 sm:pt-3 grid grid-cols-2 gap-2 sm:gap-3">
                 <button
                   type="button"
+                  disabled={isRatingPending}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRate('hard');
+                    handleRate('hard');
                   }}
-                  className="py-2.5 sm:py-3 px-3 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#D36135] font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="min-h-[48px] py-2.5 sm:py-3 px-3 bg-[#FAF5EB] hover:bg-[#F2ECE0] disabled:opacity-50 disabled:cursor-not-allowed text-[#D36135] font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <PenTool className="w-4 h-4 shrink-0 inline" />
-                  <span>Cần ôn lại (1)</span>
+                  <span>Cần ôn lại (1 / ←)</span>
                 </button>
 
                 <button
                   type="button"
+                  disabled={isRatingPending}
                   onClick={(e) => {
                     e.stopPropagation();
-                    onRate('easy');
+                    handleRate('easy');
                   }}
-                  className="py-2.5 sm:py-3 px-3 bg-[#609966] hover:bg-[#528357] text-white font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="min-h-[48px] py-2.5 sm:py-3 px-3 bg-[#609966] hover:bg-[#528357] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Star className="w-4 h-4 shrink-0 inline" />
-                  <span>Đã nhớ kỹ (2)</span>
+                  <span>Đã nhớ kỹ (2 / →)</span>
                 </button>
               </div>
             </div>
@@ -387,15 +414,15 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
         {/* Keyboard Shortcuts Hint - Desktop Only */}
         <div className="mt-3 hidden sm:flex flex-wrap items-center justify-center gap-2 text-xs font-semibold text-stone-600">
           <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
-            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[Space]</kbd>
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[Space / ↑ / ↓]</kbd>
             Lật thẻ
           </span>
           <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
-            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[1]</kbd>
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[1 / ←]</kbd>
             Cần ôn lại
           </span>
           <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
-            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[2]</kbd>
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[2 / →]</kbd>
             Đã nhớ kỹ
           </span>
         </div>
