@@ -514,15 +514,20 @@ export function PageThptRoom() {
                       }
                       setReportSending(true);
                       try {
-                        await supabase.from('answer_reports').insert([{
-                          exam_id: session.exam.id,
-                          question_number: reportModal.qNum,
-                          system_answer: reportModal.q.correct_answer,
-                          reported_answer: reportSelAns,
-                          note: reportNote || null,
+                        const { error: insErr } = await supabase.from('answer_reports').insert([{
+                          exam_id: String(session.exam.id),
+                          question_number: Number(reportModal.qNum),
+                          system_answer: reportModal.q?.correct_answer ? String(reportModal.q.correct_answer) : null,
+                          reported_answer: String(reportSelAns),
+                          note: reportNote ? String(reportNote) : null,
                           created_at: new Date().toISOString(),
                         }]);
-                      } catch (_) {}
+                        if (insErr) {
+                          console.warn('[PageThptRoom] answer_reports insert error:', insErr);
+                        }
+                      } catch (err) {
+                        console.error('[PageThptRoom] Answer report exception:', err);
+                      }
                       setReportSending(false);
                       setReportSent(true);
                     }}

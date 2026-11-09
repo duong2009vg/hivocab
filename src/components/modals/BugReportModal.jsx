@@ -88,10 +88,12 @@ export function BugReportModal() {
     try {
       const freshLogs = getBrowserDiagnosticLogs();
       const reportTypeLabel = activeTab === 'feedback' ? 'Góp ý' : 'Báo lỗi';
+      const validUserId = (typeof user?.id === 'string' && user.id.length === 36) ? user.id : null;
+      const userEmailVal = userEmail.trim() || user?.email || null;
 
       const payload = {
-        user_id: user?.id ?? null,
-        user_email: userEmail.trim() || user?.email || null,
+        user_id: validUserId,
+        user_email: userEmailVal,
         report_type: reportTypeLabel,
         feature_context: feature || (activeTab === 'feedback' ? 'Hồ sơ cá nhân / Góp ý' : 'Báo lỗi hệ thống'),
         description: `[${selectedSubtypeObj?.label || subType}] ${text}`,
@@ -109,6 +111,10 @@ export function BugReportModal() {
 
       const { error } = await supabase.from('user_bug_reports').insert(payload);
       if (error) throw error;
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('hivocab:report-submitted', { detail: payload }));
+      }
 
       const successMsg = activeTab === 'feedback'
         ? 'Cảm ơn bạn! Ý kiến đóng góp quý báu đã được gửi tới đội ngũ HiVocab'

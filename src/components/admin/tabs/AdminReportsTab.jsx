@@ -8,7 +8,7 @@ import { useToast } from '../../../context/ToastContext.jsx';
 
 export function AdminReportsTab() {
   const { showToast } = useToast();
-  const [activeTab, setActiveTab] = useState('system_errors'); // 'system_errors' | 'user_bugs' | 'answer_reports'
+  const [activeTab, setActiveTab] = useState('user_bugs'); // Default to 'user_bugs' (Báo lỗi & Góp ý)
   const [userBugFilter, setUserBugFilter] = useState('all'); // 'all' | 'feedback' | 'bug'
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,38 +33,52 @@ export function AdminReportsTab() {
   }, [activeTab]);
 
   // ──────────────────────────────────────────────
-  // 1. Fetch Data
+  // 1. Fetch Data (Fetch ALL categories simultaneously)
   // ──────────────────────────────────────────────
   const fetchAllData = useCallback(async () => {
     setLoading(true);
     try {
-      if (activeTab === 'system_errors') {
-        const { data, error } = await supabase
+      const [sysRes, userBugRes, answerRes] = await Promise.allSettled([
+        supabase
           .from('system_error_logs')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(200);
-
-        if (error) throw error;
-        setErrorLogs(data || []);
-      } else if (activeTab === 'user_bugs') {
-        const { data, error } = await supabase
+          .limit(200),
+        supabase
           .from('user_bug_reports')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (error) throw error;
-        setBugReports(data || []);
-      } else if (activeTab === 'answer_reports') {
-        const { data, error } = await supabase
+          .limit(200),
+        supabase
           .from('answer_reports')
           .select('*')
           .order('created_at', { ascending: false })
-          .limit(100);
+          .limit(150),
+      ]);
 
-        if (error) throw error;
-        setAnswerReports(data || []);
+      if (sysRes.status === 'fulfilled') {
+        if (sysRes.value.error) {
+          console.warn('[AdminReportsTab] system_error_logs warning:', sysRes.value.error.message);
+        } else {
+          setErrorLogs(sysRes.value.data || []);
+        }
+      }
+
+      if (userBugRes.status === 'fulfilled') {
+        if (userBugRes.value.error) {
+          console.warn('[AdminReportsTab] user_bug_reports error:', userBugRes.value.error.message);
+          showToast(`Lỗi tải báo cáo/góp ý: ${userBugRes.value.error.message}`, 'error');
+        } else {
+          setBugReports(userBugRes.value.data || []);
+        }
+      }
+
+      if (answerRes.status === 'fulfilled') {
+        if (answerRes.value.error) {
+          console.warn('[AdminReportsTab] answer_reports warning:', answerRes.value.error.message);
+        } else {
+          setAnswerReports(answerRes.value.data || []);
+        }
       }
     } catch (err) {
       console.error('Error fetching logs/reports:', err);
@@ -72,11 +86,57 @@ export function AdminReportsTab() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, showToast]);
+  }, [showToast]);
 
   useEffect(() => {
     fetchAllData();
   }, [fetchAllData]);
+
+  // Real-time subscription to auto-refresh when new user bug report or error log is created
+  useEffect(() => {
+    let channel = null;
+    try {
+      channel = supabase
+        .channel('admin-reports-live')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'user_bug_reports' },
+          (payload) => {
+            if (payload?.new) {
+              setBugReports((prev) => [payload.new, ...prev.filter((item) => item.id !== payload.new.id)]);
+              showToast('🔔 Có phản hồi/báo lỗi mới từ học viên!', 'info');
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'answer_reports' },
+          (payload) => {
+            if (payload?.new) {
+              setAnswerReports((prev) => [payload.new, ...prev.filter((item) => item.id !== payload.new.id)]);
+            }
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'system_error_logs' },
+          (payload) => {
+            if (payload?.new) {
+              setErrorLogs((prev) => [payload.new, ...prev.filter((item) => item.id !== payload.new.id)]);
+            }
+          }
+        )
+        .subscribe();
+    } catch (e) {
+      console.warn('[AdminReportsTab] Realtime subscribe error:', e);
+    }
+
+    return () => {
+      if (channel) {
+        supabase.removeChannel(channel);
+      }
+    };
+  }, [showToast]);
 
   // ──────────────────────────────────────────────
   // 2. Action: Resolve & DELETE single item from Database
@@ -293,18 +353,6 @@ export function AdminReportsTab() {
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b-2 border-[#EADDC7]">
         <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-full bg-[#FAF5EB] border-2 border-[#3D352E]">
           <button
-            onClick={() => setActiveTab('system_errors')}
-            className={`px-4 py-2 rounded-full text-xs font-black font-quicksand transition-all flex items-center gap-1.5 cursor-pointer ${
-              activeTab === 'system_errors'
-                ? 'bg-[#DE5D53] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
-                : 'text-[#6E5D53] hover:text-[#3D352E]'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[16px]">error</span>
-            <span>Log Lỗi Hệ Thống ({errorLogs.length})</span>
-          </button>
-
-          <button
             onClick={() => setActiveTab('user_bugs')}
             className={`px-4 py-2 rounded-full text-xs font-black font-quicksand transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'user_bugs'
@@ -326,6 +374,18 @@ export function AdminReportsTab() {
           >
             <span className="material-symbols-outlined text-[16px]">rule</span>
             <span>Báo Sai Đáp Án ({answerReports.length})</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('system_errors')}
+            className={`px-4 py-2 rounded-full text-xs font-black font-quicksand transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeTab === 'system_errors'
+                ? 'bg-[#DE5D53] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
+                : 'text-[#6E5D53] hover:text-[#3D352E]'
+            }`}
+          >
+            <span className="material-symbols-outlined text-[16px]">error</span>
+            <span>Log Lỗi Hệ Thống ({errorLogs.length})</span>
           </button>
         </div>
 

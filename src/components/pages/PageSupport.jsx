@@ -3,14 +3,19 @@
 import React, { useState } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useLandingLang } from '../../context/LandingLangContext.jsx';
+import { useAuth } from '../../providers/AuthProvider.jsx';
+import { supabase } from '../../lib/supabaseClient.js';
+import { getBrowserDiagnosticLogs } from '../../utils/browserLogger.js';
 import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
 export function PageSupport() {
   const { navigateTo } = useRoute();
   const { isEn } = useLandingLang();
+  const { user } = useAuth();
 
   const [copied, setCopied] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -31,17 +36,54 @@ export function PageSupport() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const name = formData.name.trim() || (isEn ? 'Friend' : 'Bạn');
-    if (isEn) {
-      alert(`Thank you ${name}! HiVocab has received your message. For urgent assistance, please contact Admin directly via Zalo / WhatsApp at +84 846 407 898!`);
-    } else {
-      alert(`Cảm ơn ${name}! HiVocab đã tiếp nhận thông tin của bạn. Nếu cần xử lý gấp, bạn có thể nhắn tin trực tiếp qua Zalo Admin: 0846 407 898 nhé!`);
+    const contact = formData.contact.trim();
+    const message = formData.message.trim();
+
+    if (!message) return;
+
+    setIsSubmitting(true);
+    try {
+      const validUserId = (typeof user?.id === 'string' && user.id.length === 36) ? user.id : null;
+      const userEmail = contact.includes('@') ? contact : (user?.email || null);
+
+      const payload = {
+        user_id: validUserId,
+        user_email: userEmail,
+        report_type: 'Góp ý',
+        feature_context: 'Trang Hỗ trợ & CSKH (/support)',
+        description: `[Góp ý / CSKH] Họ tên: ${name} | Liên hệ: ${contact}\n\nNội dung: ${message}`,
+        context_data: {
+          fullName: name,
+          contactInfo: contact,
+          source: 'page_support',
+          url: window.location.href,
+        },
+        device_info: getBrowserDiagnosticLogs(),
+        status: 'pending',
+      };
+
+      const { error } = await supabase.from('user_bug_reports').insert(payload);
+      if (error) {
+        console.warn('[PageSupport] Insert error:', error);
+      }
+
+      if (isEn) {
+        alert(`Thank you ${name}! HiVocab has received your message. For urgent assistance, please contact Admin directly via Zalo / WhatsApp at +84 846 407 898!`);
+      } else {
+        alert(`Cảm ơn ${name}! HiVocab đã tiếp nhận thông tin của bạn. Nếu cần xử lý gấp, bạn có thể nhắn tin trực tiếp qua Zalo Admin: 0846 407 898 nhé!`);
+      }
+
+      setFormData({ name: '', contact: '', message: '' });
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err) {
+      console.error('[PageSupport] Submit exception:', err);
+    } finally {
+      setIsSubmitting(false);
     }
-    setFormData({ name: '', contact: '', message: '' });
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000);
   };
 
   return (
@@ -348,10 +390,13 @@ export function PageSupport() {
 
           <button
             type="submit"
-            className="w-full bg-[#557A46] hover:bg-[#476739] text-white font-black py-3.5 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer text-sm"
+            disabled={isSubmitting}
+            className="w-full bg-[#557A46] hover:bg-[#476739] disabled:opacity-60 text-white font-black py-3.5 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-2 mt-2 cursor-pointer text-sm"
           >
-            
-            <span>{isEn ? 'Send to Admin' : 'Gửi thông tin cho Admin'}</span>
+            {isSubmitting && (
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-1"></span>
+            )}
+            <span>{isSubmitting ? (isEn ? 'Sending...' : 'Đang gửi...') : (isEn ? 'Send to Admin' : 'Gửi thông tin cho Admin')}</span>
           </button>
         </form>
       </main>

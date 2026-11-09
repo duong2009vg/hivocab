@@ -42,6 +42,22 @@ export class ErrorBoundary extends React.Component {
         sessionStorage.setItem(retryKey, String(now));
         this.clearCachesAndReload();
       }
+    } else {
+      // Ghi nhận log lỗi runtime vào bảng system_error_logs để Admin theo dõi
+      try {
+        import('../../lib/supabaseClient.js').then(({ supabase }) => {
+          const u = typeof window !== 'undefined' ? window._currentUser : null;
+          const validUserId = (typeof u?.id === 'string' && u.id.length === 36) ? u.id : null;
+          supabase.from('system_error_logs').insert({
+            user_id: validUserId,
+            user_email: u?.email || null,
+            error_message: String(error?.message || error || 'Unknown runtime error'),
+            error_stack: error?.stack ? String(error.stack).slice(0, 2000) : null,
+            component: errorInfo?.componentStack ? String(errorInfo.componentStack).slice(0, 1000) : 'ErrorBoundary',
+            url: typeof window !== 'undefined' ? window.location.href : null,
+          }).then(() => {}).catch(() => {});
+        }).catch(() => {});
+      } catch (_) {}
     }
   }
 

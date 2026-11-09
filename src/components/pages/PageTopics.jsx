@@ -1,7 +1,7 @@
 // src/components/pages/PageTopics.jsx
 // Thư Viện Sách Cổ Kính (Antique 3D Wooden Bookcase & Crayon Folders)
 // Connected to live production Supabase data via useTopics()
-import React, { useState, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   Search,
   Sparkles,
@@ -613,6 +613,67 @@ export function PageTopics() {
   const [soundMuted, setSoundMuted] = useState(false);
   const [floatingTooltip, setFloatingTooltip] = useState(null);
 
+  // Category horizontal scroll & drag state
+  const categoryScrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const isDraggingPills = useRef(false);
+  const dragStartX = useRef(0);
+  const dragScrollLeft = useRef(0);
+  const hasDragged = useRef(false);
+
+  const checkScrollState = useCallback(() => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 6);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 6);
+    setHasOverflow(el.scrollWidth > el.clientWidth + 6);
+  }, []);
+
+  const handleCategoryWheel = useCallback((e) => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    if (e.deltaY !== 0) {
+      el.scrollLeft += e.deltaY;
+    }
+  }, []);
+
+  const scrollCategoryPills = useCallback((direction) => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    const scrollAmount = 240;
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth',
+    });
+  }, []);
+
+  const handleMouseDownPills = useCallback((e) => {
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    isDraggingPills.current = true;
+    hasDragged.current = false;
+    dragStartX.current = e.pageX - el.offsetLeft;
+    dragScrollLeft.current = el.scrollLeft;
+  }, []);
+
+  const handleMouseMovePills = useCallback((e) => {
+    if (!isDraggingPills.current) return;
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - dragStartX.current) * 1.3;
+    if (Math.abs(walk) > 4) {
+      hasDragged.current = true;
+    }
+    el.scrollLeft = dragScrollLeft.current - walk;
+  }, []);
+
+  const handleMouseUpOrLeavePills = useCallback(() => {
+    isDraggingPills.current = false;
+  }, []);
+
   const handleOpenCreateTopic = useCallback(
     (defaultCategory) => {
       if (!user) {
@@ -738,6 +799,26 @@ export function PageTopics() {
     });
     return pills;
   }, [shelves, stats.totalBooks]);
+
+  useEffect(() => {
+    checkScrollState();
+    const el = categoryScrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', checkScrollState, { passive: true });
+    window.addEventListener('resize', checkScrollState, { passive: true });
+    return () => {
+      el.removeEventListener('scroll', checkScrollState);
+      window.removeEventListener('resize', checkScrollState);
+    };
+  }, [checkScrollState, categoryPills]);
+
+  useEffect(() => {
+    if (!categoryScrollRef.current) return;
+    const activeEl = categoryScrollRef.current.querySelector('[data-active-pill="true"]');
+    if (activeEl) {
+      activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }, [activeCategory]);
 
   const handleHoverBook = useCallback((book, shelf, targetEl) => {
     if (!book || !targetEl) {
@@ -959,9 +1040,6 @@ export function PageTopics() {
         <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b-2 border-dashed border-[#DECDBB]">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-display font-extrabold text-xl sm:text-2xl text-[#302A24] tracking-tight">
-                Thư Viện Chủ Đề &amp; Khóa Học HiVocab
-              </h2>
               <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
                 {stats.totalWords > 0 ? (
                   <>
@@ -1005,21 +1083,21 @@ export function PageTopics() {
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Search Input */}
-            <div className="relative w-full sm:w-64 min-w-[200px] flex-1">
-              <Search className="w-4 h-4 text-[#786F66] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="relative flex-1 min-w-[140px] sm:min-w-[180px] sm:max-w-xs">
+              <Search className="w-4 h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm sách (CAM 21, Cô MP, SAT...)"
-                className="w-full min-h-[44px] pl-10 pr-11 py-2.5 rounded-xl bg-white border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] text-sm sm:text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+                className="w-full min-h-[40px] pl-9 pr-9 py-2 rounded-xl bg-white border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
                   aria-label="Xóa tìm kiếm"
-                  className="absolute right-0 top-0 bottom-0 min-w-[44px] min-h-[44px] flex items-center justify-center text-[#786F66] hover:text-[#302A24] cursor-pointer"
+                  className="absolute right-0 top-0 bottom-0 min-w-[36px] min-h-[40px] flex items-center justify-center text-[#786F66] hover:text-[#302A24] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -1030,7 +1108,6 @@ export function PageTopics() {
             <div className="flex items-center bg-[#F4EDE2] p-1 rounded-xl border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E]">
               {[
                 { id: 'spines', label: 'Gáy sách' },
-                { id: 'mixed', label: 'Gáy + Bìa' },
                 { id: 'covers', label: 'Mặt bìa' },
               ].map((m) => (
                 <button
@@ -1040,7 +1117,7 @@ export function PageTopics() {
                     playCrayonSound('page-flip', soundMuted);
                     setBookDisplayStyle(m.id);
                   }}
-                  className={`min-h-[44px] px-3 py-2 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center ${
+                  className={`min-h-[38px] px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
                     bookDisplayStyle === m.id
                       ? 'bg-[#557A46] text-white shadow-sm'
                       : 'text-[#786F66] hover:text-[#302A24]'
@@ -1056,7 +1133,7 @@ export function PageTopics() {
               type="button"
               onClick={() => setSoundMuted((m) => !m)}
               title={soundMuted ? 'Bật âm thanh mở sách thật' : 'Tắt âm thanh mở sách'}
-              className="min-w-[44px] min-h-[44px] p-2.5 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer flex items-center justify-center shrink-0 active:scale-[0.98]"
+              className="w-10 h-10 min-w-[40px] min-h-[40px] p-2 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer flex items-center justify-center shrink-0 active:scale-[0.98]"
             >
               {soundMuted ? (
                 <VolumeX className="w-4 h-4 text-[#786F66]" />
@@ -1069,7 +1146,7 @@ export function PageTopics() {
             <button
               type="button"
               onClick={() => handleOpenCreateTopic(activeCategory)}
-              className="min-h-[44px] py-2 px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+              className="min-h-[40px] py-2 px-3 sm:px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span>Thêm sách mới</span>
