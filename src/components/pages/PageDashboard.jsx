@@ -263,11 +263,6 @@ export function PageDashboard() {
 
           {/* Mascot Review Hero Card */}
           <section className="mb-5 text-center flex flex-col items-center justify-center relative select-none">
-            <div className="inline-flex items-center space-x-2 bg-[#F5EFE0] px-3 py-1 rounded-full border border-[#D9CEBA] shadow-sm mb-1">
-              <span className="text-[11px] font-bold text-[#86756C] uppercase tracking-wider">Lặp lại ngắt quãng SRS</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-[#DE5D53]"></span>
-              <span className="text-xs text-[#DE5D53] font-bold">{wordsDueCount} từ cần ôn</span>
-            </div>
             <div className="my-2 relative flex justify-center items-center">
               <img
                 key={`mobile-mascot-${isAngry ? 'angry' : 'waving'}-${mascotPlaying ? `anim-${mascotPlayKey}` : 'static'}`}
