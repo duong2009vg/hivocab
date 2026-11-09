@@ -8,8 +8,6 @@ import {
   Plus,
   ChevronRight,
   ChevronLeft,
-  Volume2,
-  VolumeX,
   X,
   ArrowLeft,
   Trash2,
@@ -610,7 +608,7 @@ export function PageTopics() {
 
   const [libraryLayout, setLibraryLayout] = useState('shelf'); // 'shelf' | 'folders'
   const [bookDisplayStyle, setBookDisplayStyle] = useState('spines'); // 'spines' | 'mixed' | 'covers'
-  const [soundMuted, setSoundMuted] = useState(false);
+  const soundMuted = false;
   const [floatingTooltip, setFloatingTooltip] = useState(null);
 
   // Category horizontal scroll & drag state
@@ -1037,26 +1035,72 @@ export function PageTopics() {
       {/* MAIN LIBRARY CONTENT AREA */}
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-7 max-w-[1400px] mx-auto w-full">
         {/* COMPACT TOP HEADER BAR */}
-        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-4 border-b-2 border-dashed border-[#DECDBB]">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
-                {stats.totalWords > 0 ? (
-                  <>
-                    Đã thuộc{' '}
-                    <strong className="text-[#557A46]">
-                      {stats.learnedWords.toLocaleString()}
-                    </strong>{' '}
-                    / {stats.totalWords.toLocaleString()} từ vựng trên{' '}
-                    <strong>{stats.totalBooks} cuốn sách</strong>
-                  </>
-                ) : (
-                  <>
-                    Khám phá <strong>{stats.totalBooks} cuốn sách</strong> trên{' '}
-                    <strong>{stats.totalShelves} giá sách chuyên đề</strong>
-                  </>
-                )}
-              </p>
+        <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 sm:pb-4 border-b-2 border-dashed border-[#DECDBB]">
+          <div className="hidden lg:block">
+            <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
+              {stats.totalWords > 0 ? (
+                <>
+                  Đã thuộc{' '}
+                  <strong className="text-[#557A46]">
+                    {stats.learnedWords.toLocaleString()}
+                  </strong>{' '}
+                  / {stats.totalWords.toLocaleString()} từ vựng trên{' '}
+                  <strong>{stats.totalBooks} cuốn sách</strong>
+                </>
+              ) : (
+                <>
+                  Khám phá <strong>{stats.totalBooks} cuốn sách</strong> trên{' '}
+                  <strong>{stats.totalShelves} giá sách chuyên đề</strong>
+                </>
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-1.5 sm:gap-2 w-full lg:w-auto">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[110px] sm:min-w-[160px] max-w-full sm:max-w-xs lg:w-56 lg:flex-initial">
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm sách (CAM 21, Cô MP, SAT...)"
+                className="w-full h-8 sm:h-9 pl-8 sm:pl-9 pr-7 sm:pr-8 py-1 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] sm:shadow-[2px_3px_0px_#3D352E] text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  aria-label="Xóa tìm kiếm"
+                  className="absolute right-0 top-0 bottom-0 min-w-[30px] sm:min-w-[34px] flex items-center justify-center text-[#786F66] hover:text-[#302A24] cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                </button>
+              )}
+            </div>
+
+            {/* Extra-Compact Book Display Mode Switcher (Between search and profiles) */}
+            <div className="flex items-center bg-[#F4EDE2] p-0.5 sm:p-1 rounded-xl border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] sm:shadow-[2px_3px_0px_#3D352E] shrink-0">
+              {[
+                { id: 'spines', label: 'Gáy sách' },
+                { id: 'covers', label: 'Mặt bìa' },
+              ].map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => {
+                    playCrayonSound('page-flip', soundMuted);
+                    setBookDisplayStyle(m.id);
+                  }}
+                  className={`h-7 sm:h-8 px-2 sm:px-2.5 rounded-lg text-[11px] sm:text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
+                    bookDisplayStyle === m.id
+                      ? 'bg-[#557A46] text-white shadow-sm'
+                      : 'text-[#786F66] hover:text-[#302A24]'
+                  }`}
+                >
+                  {m.label}
+                </button>
+              ))}
             </div>
 
             {/* Mobile User Avatar Dropdown Trigger */}
@@ -1065,7 +1109,7 @@ export function PageTopics() {
               data-mobile-avatar="true"
               onClick={() => window.toggleMobileProfileDropdown?.()}
               aria-label="Mở menu tài khoản cá nhân"
-              className="mobile-user-avatar lg:hidden w-11 h-11 min-w-[44px] min-h-[44px] rounded-full border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] bg-[#FEF3C7] text-[#302A24] flex items-center justify-center font-display font-extrabold text-sm cursor-pointer select-none overflow-hidden shrink-0 active:scale-[0.96]"
+              className="mobile-user-avatar lg:hidden w-8 h-8 sm:w-9 sm:h-9 min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px] rounded-full border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] sm:shadow-[2px_3px_0px_#3D352E] bg-[#FEF3C7] text-[#302A24] flex items-center justify-center font-display font-extrabold text-xs cursor-pointer select-none overflow-hidden shrink-0 active:scale-[0.96]"
             >
               {user?.user_metadata?.avatar_url ? (
                 <img
@@ -1079,74 +1123,12 @@ export function PageTopics() {
                 </span>
               )}
             </button>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-[140px] sm:min-w-[180px] sm:max-w-xs">
-              <Search className="w-4 h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm sách (CAM 21, Cô MP, SAT...)"
-                className="w-full min-h-[40px] pl-9 pr-9 py-2 rounded-xl bg-white border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  aria-label="Xóa tìm kiếm"
-                  className="absolute right-0 top-0 bottom-0 min-w-[36px] min-h-[40px] flex items-center justify-center text-[#786F66] hover:text-[#302A24] cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Book Display Mode Switcher */}
-            <div className="flex items-center bg-[#F4EDE2] p-1 rounded-xl border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E]">
-              {[
-                { id: 'spines', label: 'Gáy sách' },
-                { id: 'covers', label: 'Mặt bìa' },
-              ].map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => {
-                    playCrayonSound('page-flip', soundMuted);
-                    setBookDisplayStyle(m.id);
-                  }}
-                  className={`min-h-[38px] px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
-                    bookDisplayStyle === m.id
-                      ? 'bg-[#557A46] text-white shadow-sm'
-                      : 'text-[#786F66] hover:text-[#302A24]'
-                  }`}
-                >
-                  {m.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Sound Toggle */}
-            <button
-              type="button"
-              onClick={() => setSoundMuted((m) => !m)}
-              title={soundMuted ? 'Bật âm thanh mở sách thật' : 'Tắt âm thanh mở sách'}
-              className="w-10 h-10 min-w-[40px] min-h-[40px] p-2 rounded-xl bg-white hover:bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer flex items-center justify-center shrink-0 active:scale-[0.98]"
-            >
-              {soundMuted ? (
-                <VolumeX className="w-4 h-4 text-[#786F66]" />
-              ) : (
-                <Volume2 className="w-4 h-4 text-[#557A46]" />
-              )}
-            </button>
-
-            {/* Create New Topic / Book Button */}
+            {/* Create New Topic / Book Button - visible on desktop */}
             <button
               type="button"
               onClick={() => handleOpenCreateTopic(activeCategory)}
-              className="min-h-[40px] py-2 px-3 sm:px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
+              className="hidden lg:flex h-9 py-1.5 px-3 sm:px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
             >
               <Plus className="w-4 h-4 shrink-0" />
               <span>Thêm sách mới</span>
