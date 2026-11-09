@@ -606,7 +606,13 @@ export function PageTopics() {
   const { user, isPro: isAuthPro } = useAuth();
   const effectiveIsPro = Boolean(isUserPro || isAuthPro);
 
-  const [libraryLayout, setLibraryLayout] = useState('shelf'); // 'shelf' | 'folders'
+  const [libraryLayout, setLibraryLayout] = useState(() => {
+    try {
+      return localStorage.getItem('hivocab_library_layout') || 'shelf';
+    } catch {
+      return 'shelf';
+    }
+  }); // 'shelf' | 'folders'
   const [bookDisplayStyle, setBookDisplayStyle] = useState('spines'); // 'spines' | 'mixed' | 'covers'
   const soundMuted = false;
   const [floatingTooltip, setFloatingTooltip] = useState(null);
@@ -817,6 +823,20 @@ export function PageTopics() {
       activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
     }
   }, [activeCategory]);
+
+  // Sync libraryLayout with Settings changes
+  useEffect(() => {
+    const handleStorage = () => {
+      try {
+        const saved = localStorage.getItem('hivocab_library_layout');
+        if (saved && (saved === 'shelf' || saved === 'folders')) {
+          setLibraryLayout(saved);
+        }
+      } catch (_) {}
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, []);
 
   const handleHoverBook = useCallback((book, shelf, targetEl) => {
     if (!book || !targetEl) {
@@ -1138,114 +1158,82 @@ export function PageTopics() {
 
         {/* FOLDER / CATEGORY PILLS */}
         <section className="mt-4">
-          <div className="flex items-center justify-between gap-2.5 mb-2 w-full min-w-0">
+          <div className="flex items-center gap-1.5 mb-2 w-full min-w-0">
             {/* Scrollable Category Track with Left/Right Navigation */}
-            <div className="flex-1 min-w-0 flex items-center gap-1.5">
-              {hasOverflow && (
-                <button
-                  type="button"
-                  onClick={() => scrollCategoryPills('left')}
-                  disabled={!canScrollLeft}
-                  aria-label="Cuộn sang trái"
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#3D352E] shadow-[1px_2px_0px_#3D352E] flex items-center justify-center shrink-0 transition-all ${
-                    canScrollLeft
-                      ? 'bg-white hover:bg-[#FEF3C7] text-[#302A24] cursor-pointer active:scale-95'
-                      : 'opacity-25 cursor-not-allowed bg-[#EFE8D6] text-[#786F66]'
-                  }`}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-              )}
-
-              <div
-                ref={categoryScrollRef}
-                onWheel={handleCategoryWheel}
-                onMouseDown={handleMouseDownPills}
-                onMouseMove={handleMouseMovePills}
-                onMouseUp={handleMouseUpOrLeavePills}
-                onMouseLeave={handleMouseUpOrLeavePills}
-                className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing select-none"
+            {hasOverflow && (
+              <button
+                type="button"
+                onClick={() => scrollCategoryPills('left')}
+                disabled={!canScrollLeft}
+                aria-label="Cuộn sang trái"
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#3D352E] shadow-[1px_2px_0px_#3D352E] flex items-center justify-center shrink-0 transition-all ${
+                  canScrollLeft
+                    ? 'bg-white hover:bg-[#FEF3C7] text-[#302A24] cursor-pointer active:scale-95'
+                    : 'opacity-25 cursor-not-allowed bg-[#EFE8D6] text-[#786F66]'
+                }`}
               >
-                {categoryPills.map((pill) => {
-                  const active =
-                    activeCategory.toLowerCase() === pill.id.toLowerCase();
-                  return (
-                    <button
-                      key={pill.id}
-                      type="button"
-                      data-active-pill={active ? 'true' : undefined}
-                      onClick={() => {
-                        if (hasDragged.current) return;
-                        playCrayonSound('page-flip', soundMuted);
-                        setActiveCategory(pill.id);
-                      }}
-                      className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-full font-extrabold text-xs whitespace-nowrap border-2 border-[#3D352E] transition-all cursor-pointer flex items-center gap-1.5 select-none shrink-0 ${
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            )}
+
+            <div
+              ref={categoryScrollRef}
+              onWheel={handleCategoryWheel}
+              onMouseDown={handleMouseDownPills}
+              onMouseMove={handleMouseMovePills}
+              onMouseUp={handleMouseUpOrLeavePills}
+              onMouseLeave={handleMouseUpOrLeavePills}
+              className="flex-1 min-w-0 flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar scroll-smooth cursor-grab active:cursor-grabbing select-none"
+            >
+              {categoryPills.map((pill) => {
+                const active =
+                  activeCategory.toLowerCase() === pill.id.toLowerCase();
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    data-active-pill={active ? 'true' : undefined}
+                    onClick={() => {
+                      if (hasDragged.current) return;
+                      playCrayonSound('page-flip', soundMuted);
+                      setActiveCategory(pill.id);
+                    }}
+                    className={`min-h-[38px] px-3 sm:px-3.5 py-1.5 rounded-full font-extrabold text-xs whitespace-nowrap border-2 border-[#3D352E] transition-all cursor-pointer flex items-center gap-1.5 select-none shrink-0 ${
+                      active
+                        ? 'bg-[#557A46] text-white shadow-[2px_3px_0px_#3D352E] -translate-y-0.5'
+                        : 'bg-[#FFFDF9] hover:bg-[#FEF3C7] text-[#302A24]'
+                    }`}
+                  >
+                    <span>{pill.label}</span>
+                    <span
+                      className={`px-1.5 py-0.5 rounded-full text-[10px] font-black border border-[#3D352E] ${
                         active
-                          ? 'bg-[#557A46] text-white shadow-[2px_3px_0px_#3D352E] -translate-y-0.5'
-                          : 'bg-[#FFFDF9] hover:bg-[#FEF3C7] text-[#302A24]'
+                          ? 'bg-[#FEF3C7] text-[#302A24]'
+                          : 'bg-[#F4EDE2] text-[#786F66]'
                       }`}
                     >
-                      <span>{pill.label}</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded-full text-[10px] font-black border border-[#3D352E] ${
-                          active
-                            ? 'bg-[#FEF3C7] text-[#302A24]'
-                            : 'bg-[#F4EDE2] text-[#786F66]'
-                        }`}
-                      >
-                        {pill.count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {hasOverflow && (
-                <button
-                  type="button"
-                  onClick={() => scrollCategoryPills('right')}
-                  disabled={!canScrollRight}
-                  aria-label="Cuộn sang phải"
-                  className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#3D352E] shadow-[1px_2px_0px_#3D352E] flex items-center justify-center shrink-0 transition-all ${
-                    canScrollRight
-                      ? 'bg-white hover:bg-[#FEF3C7] text-[#302A24] cursor-pointer active:scale-95'
-                      : 'opacity-25 cursor-not-allowed bg-[#EFE8D6] text-[#786F66]'
-                  }`}
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              )}
+                      {pill.count}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Compact Library Layout Switcher */}
-            <div className="flex items-center bg-[#F4EDE2] p-1 rounded-xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] shrink-0">
+            {hasOverflow && (
               <button
                 type="button"
-                onClick={() => setLibraryLayout('shelf')}
-                title="Chế độ Giá Sách Gỗ (Kệ 3D)"
-                className={`min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  libraryLayout === 'shelf'
-                    ? 'bg-[#557A46] text-white shadow-sm'
-                    : 'text-[#786F66] hover:text-[#302A24]'
+                onClick={() => scrollCategoryPills('right')}
+                disabled={!canScrollRight}
+                aria-label="Cuộn sang phải"
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#3D352E] shadow-[1px_2px_0px_#3D352E] flex items-center justify-center shrink-0 transition-all ${
+                  canScrollRight
+                    ? 'bg-white hover:bg-[#FEF3C7] text-[#302A24] cursor-pointer active:scale-95'
+                    : 'opacity-25 cursor-not-allowed bg-[#EFE8D6] text-[#786F66]'
                 }`}
               >
-                <span>📚</span>
-                <span className="hidden sm:inline">Kệ 3D</span>
+                <ChevronRight className="w-4 h-4" />
               </button>
-              <button
-                type="button"
-                onClick={() => setLibraryLayout('folders')}
-                title="Chế độ Tủ Folder Sáp Màu"
-                className={`min-h-[34px] px-2.5 py-1 rounded-lg text-xs font-black transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap ${
-                  libraryLayout === 'folders'
-                    ? 'bg-[#557A46] text-white shadow-sm'
-                    : 'text-[#786F66] hover:text-[#302A24]'
-                }`}
-              >
-                <span>📁</span>
-                <span className="hidden sm:inline">Folder</span>
-              </button>
-            </div>
+            )}
           </div>
         </section>
 

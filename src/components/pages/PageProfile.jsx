@@ -7,7 +7,7 @@ import { supabase } from '../../lib/supabaseClient.js';
 import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
 import { CrayonProfileProCard } from '../common/CrayonProfileProCard.jsx';
-import { User, Sparkles, Flame, PenTool, Lock, AlertTriangle, CheckCircle2, LogOut, ArrowRight, MessageSquare } from 'lucide-react';
+import { User, Sparkles, Flame, PenTool, Lock, AlertTriangle, CheckCircle2, LogOut, ArrowRight, MessageSquare, BookOpen } from 'lucide-react';
 
 export function PageProfile() {
   const { user, signOut } = useAuth();
@@ -27,6 +27,27 @@ export function PageProfile() {
   const [pwMsg, setPwMsg] = useState({ text: '', isError: false });
   const [isSubmittingPw, setIsSubmittingPw] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Library Layout Setting ('shelf' | 'folders')
+  const [libraryLayout, setLibraryLayout] = useState(() => {
+    try {
+      return localStorage.getItem('hivocab_library_layout') || 'shelf';
+    } catch {
+      return 'shelf';
+    }
+  });
+
+  const handleSelectLibraryLayout = (layout) => {
+    setLibraryLayout(layout);
+    try {
+      localStorage.setItem('hivocab_library_layout', layout);
+      window.dispatchEvent(new Event('storage'));
+    } catch (_) {}
+    showToast?.(
+      `Đã chuyển chế độ thư viện sang: ${layout === 'shelf' ? 'Giá Sách Gỗ (Kệ 3D)' : 'Tủ Folder Sáp Màu'}`,
+      'success'
+    );
+  };
 
   // Load user data
   useEffect(() => {
@@ -241,6 +262,85 @@ export function PageProfile() {
 
           {/* Settings Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            {/* Card: Library Display Layout Setting */}
+            <section className="bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 flex flex-col justify-between md:col-span-2">
+              <div>
+                <div className="flex items-center gap-2.5 pb-4 border-b-2 border-dashed border-[#E2D9CC] mb-4">
+                  <BookOpen className="w-5 h-5 text-[#302A24] shrink-0" />
+                  <div>
+                    <h3 className="font-bold text-base text-[#302A24] font-heading">
+                      Giao diện Thư viện & Khóa học
+                    </h3>
+                    <p className="text-xs text-[#786F66] mt-0.5 font-medium">
+                      Tùy chọn phong cách hiển thị danh sách sách từ vựng trên trang Thư viện.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                  {/* Option 1: 3D Wooden Shelf */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectLibraryLayout('shelf')}
+                    className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-start gap-3.5 ${
+                      libraryLayout === 'shelf'
+                        ? 'bg-[#FEF3C7] border-[#3D352E] shadow-[3px_4px_0px_#3D352E] -translate-y-0.5'
+                        : 'bg-[#FAF7F0] hover:bg-white border-[#3D352E]/30 text-[#786F66]'
+                    }`}
+                  >
+                    <div className="w-11 h-11 rounded-2xl bg-[#557A46] text-white flex items-center justify-center text-xl shrink-0 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]">
+                      📚
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-display font-extrabold text-sm text-[#302A24]">
+                          Giá Sách Gỗ (Kệ 3D)
+                        </span>
+                        {libraryLayout === 'shelf' && (
+                          <span className="text-[10px] bg-[#557A46] text-white font-black px-2 py-0.5 rounded-full">
+                            Đang chọn
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[#786F66] font-medium mt-1 leading-relaxed">
+                        Sách xếp đứng trên kệ gỗ cổ kính, hiệu ứng gáy sách 3D chân thực, mở trang học sống động.
+                      </p>
+                    </div>
+                  </button>
+
+                  {/* Option 2: Crayon Folder Grid */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectLibraryLayout('folders')}
+                    className={`p-4 rounded-2xl border-2 text-left transition-all cursor-pointer flex items-start gap-3.5 ${
+                      libraryLayout === 'folders'
+                        ? 'bg-[#FEF3C7] border-[#3D352E] shadow-[3px_4px_0px_#3D352E] -translate-y-0.5'
+                        : 'bg-[#FAF7F0] hover:bg-white border-[#3D352E]/30 text-[#786F66]'
+                    }`}
+                  >
+                    <div className="w-11 h-11 rounded-2xl bg-[#DE5D53] text-white flex items-center justify-center text-xl shrink-0 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E]">
+                      📁
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-display font-extrabold text-sm text-[#302A24]">
+                          Tủ Folder Sáp Màu
+                        </span>
+                        {libraryLayout === 'folders' && (
+                          <span className="text-[10px] bg-[#557A46] text-white font-black px-2 py-0.5 rounded-full">
+                            Đang chọn
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[#786F66] font-medium mt-1 leading-relaxed">
+                        Hiển thị dạng thẻ thư mục sáp màu tối giản, phân loại rõ ràng theo từng chủ đề và chứng chỉ.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </section>
             
             {/* Card 1: User Info Form */}
             <section className="bg-white border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] rounded-3xl p-6 flex flex-col justify-between">
