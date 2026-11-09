@@ -1281,16 +1281,8 @@ export function PageTopics() {
             <div className="rounded-t-[26px] rounded-b-[18px] border-[4px] border-[#3D352E] shadow-[8px_10px_0px_#3D352E] overflow-hidden bg-[#341D0E]">
               <div className="antique-cornice border-b-[3px] border-[#3D352E]">
                 <div className="h-2.5 w-full antique-dentil-trim border-b border-[#241308]/80" />
-                <div className="px-5 py-3 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-base shrink-0">🏛️</span>
-                    <span className="font-display font-extrabold text-xs sm:text-base text-[#FAF5EB] tracking-wide truncate">
-                      {activeCategory === 'all'
-                        ? 'TỦ SÁCH TỔNG HỢP HIVOCAB (11 GIÁ SÁCH • 109 CUỐN)'
-                        : `KỆ SÁCH CHUYÊN ĐỀ: ${filteredShelves[0]?.name || ''}`}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-bold text-[#E6C98A] hidden sm:inline shrink-0">
+                <div className="px-5 py-2.5 hidden sm:flex items-center justify-center gap-2">
+                  <span className="text-[11px] font-bold text-[#E6C98A] shrink-0">
                     Ấn vào tên Folder trên thanh gỗ để xem riêng kệ đó • Ấn vào sách để mở trang học
                   </span>
                 </div>
