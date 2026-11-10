@@ -216,7 +216,13 @@ assert(normalizeAnswer(null) === "", 'normalizeAnswer: Null/undefined safely ret
 mockStorage = {};
 const guestSessionResult = await logStudySession(5);
 assert(guestSessionResult && guestSessionResult.guest === true, 'db.logStudySession completes gracefully for guest without error');
-const todayStr = new Date().toISOString().slice(0, 10);
+const todayStr = guestSessionResult?.date || (() => {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${dd}`;
+})();
 const savedSessions = JSON.parse(mockStorage['hi_study_sessions'] || '{}');
 assert(typeof savedSessions === 'object' && savedSessions[todayStr] !== undefined, 'db.logStudySession persists session date in hi_study_sessions');
 
@@ -275,6 +281,13 @@ const { runLessonStudyFlowsTests } = await import('../tests/lesson-study-flows.t
 const flowResults = await runLessonStudyFlowsTests();
 totalTests += flowResults.totalTests;
 passedTests += flowResults.passedTests;
+
+// 9.3 4-Type MCQ Generator & Logic Test Suite
+console.log('\n9.3 Running 4-Type MCQ Generator & Logic Test Suite:');
+const { runQuizTypesLogicTests } = await import('../tests/quiz-types-logic.test.js');
+const quizResults = await runQuizTypesLogicTests();
+totalTests += quizResults.totalTests;
+passedTests += quizResults.passedTests;
 
 // Summary
 console.log('\n=======================================================');

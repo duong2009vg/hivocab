@@ -349,7 +349,7 @@ export function PageLearning() {
   return (
     <div id="page-learning" className="page active min-h-[100dvh] flex flex-col justify-between crayon-paper-pattern selection:bg-orange-200 selection:text-stone-900 font-comfortaa">
       {/* ── Top Navigation Bar with Progress, Exit, Audio & Flag (Full Reliable SVG Icons) ── */}
-      <header className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-2.5 sm:pt-6 pb-1 sm:pb-2 z-30 shrink-0 pwa-safe-top" data-purpose="quiz-top-bar">
+      <header className="w-full max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-2.5 sm:pt-6 pb-2 sm:pb-3 z-30 shrink-0 pwa-safe-top" data-purpose="quiz-top-bar">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Close / Exit Exercise Button */}
           <button
@@ -438,7 +438,7 @@ export function PageLearning() {
       {/* ── Main Exercise Area ── */}
       <main
         id="learning-main"
-        className="flex-1 w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 py-1.5 sm:py-6 flex flex-col justify-center items-center relative overflow-x-hidden"
+        className="flex-1 w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 pt-3 sm:pt-6 pb-2 sm:pb-6 flex flex-col justify-center items-center relative overflow-x-hidden"
       >
         {isComplete ? (
           /* ── Completion screen ── */

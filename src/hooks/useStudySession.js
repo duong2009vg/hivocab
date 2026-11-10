@@ -5,6 +5,14 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 import { reviewWord, logStudySession } from '../services/db.js';
+import {
+  generateMCQQuestion,
+  MCQ_SUBTYPES,
+  MCQ_TYPES,
+  generateInterleavedMCQTypes,
+  rotateMCQType,
+  evaluateMCQAnswer,
+} from '../utils/quizGenerators.js';
 
 // ─── Answer Normalization ─────────────────────────────────────────────────────
 
@@ -160,7 +168,7 @@ function blankAnswerInSentence(sentence, answer) {
 
 // ─── Exercise Data Generation ─────────────────────────────────────────────────
 
-function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi') {
+function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi', mcqSubtype = null) {
   if (!word) {
     return {
       mode: 'en_vi',
@@ -216,27 +224,7 @@ function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi'
     }
 
     case 'mcq': {
-      const correctOption = { text: safeMeaning || 'Nghĩa chính xác', isCorrect: true };
-      const currentWordId = word.id || word.wordId;
-      const others = (allWords || [])
-        .filter(w => (w.id || w.wordId) !== currentWordId && w.meaning)
-        .map(w => String(w.meaning).trim())
-        .filter(m => m && m !== safeMeaning);
-      const fallbackPool = FALLBACK_DISTRACTORS.filter(d => !others.includes(d) && d !== safeMeaning);
-      const padded = [...others];
-      while (padded.length < 3) {
-        padded.push(fallbackPool.shift() || 'Không xác định');
-      }
-      const distractors = shuffle(padded)
-        .slice(0, 3)
-        .map(text => ({ text, isCorrect: false }));
-      return {
-        question: 'Chọn nghĩa đúng của',
-        word: safeWord,
-        phonetic: safePhonetic,
-        pos: safePos,
-        options: shuffle([correctOption, ...distractors]),
-      };
+      return generateMCQQuestion(word, allWords, mcqSubtype);
     }
 
     case 'fill': {
@@ -309,12 +297,15 @@ function createInitialState() {
   };
 }
 
-function createQueueItem(word, forcedType = null, allWords = [], flashcardMode = 'en_vi') {
+function createQueueItem(word, forcedType = null, allWords = [], flashcardMode = 'en_vi', preferredMcqType = null) {
   const exerciseType = forcedType || randomFrom(EXERCISE_TYPES);
+  const mcqType = exerciseType === 'mcq' ? (preferredMcqType || randomFrom(MCQ_SUBTYPES)) : null;
   return {
     word,
     exerciseType,
-    exerciseData: generateExerciseData(word, exerciseType, allWords, flashcardMode),
+    mcqType,
+    usedMcqTypes: mcqType ? [mcqType] : [],
+    exerciseData: generateExerciseData(word, exerciseType, allWords, flashcardMode, mcqType),
     usedTypes: [exerciseType],
     attempts: 0,
     failCount: 0,
@@ -396,7 +387,12 @@ export function useStudySession() {
     mode = (mode === 'vi_en' || mode === 'en_vi') ? mode : 'en_vi';
 
     const shuffled = shuffle(validWords);
-    const queue = shuffled.map(w => createQueueItem(w, allowedType, validWords, mode));
+    const mcqSchedule = allowedType === 'mcq'
+      ? generateInterleavedMCQTypes(shuffled.length)
+      : [];
+    const queue = shuffled.map((w, idx) =>
+      createQueueItem(w, allowedType, validWords, mode, mcqSchedule[idx] || null)
+    );
     setSession({
       allWords: validWords,
       queue,
@@ -502,9 +498,9 @@ export function useStudySession() {
 
     // ── MCQ ──────────────────────────────────────────────────────────────
     if (item.exerciseType === 'mcq') {
-      const selectedOption = item.exerciseData?.options?.[userAnswer];
-      correct = selectedOption?.isCorrect === true;
-      correctAnswer = item.exerciseData?.options?.find(o => o.isCorrect)?.text || '';
+      const evalResult = evaluateMCQAnswer(item.exerciseData, userAnswer);
+      correct = evalResult.correct;
+      correctAnswer = evalResult.correctAnswer;
 
     // ── Fill / Listen ─────────────────────────────────────────────────────
     } else {
@@ -523,9 +519,24 @@ export function useStudySession() {
 
     // Determine result & fire SRS update
     if (isNewWord) {
+      const currentFailCount = (item.failCount || 0) + 1;
+      const isWordCompleted = correct || currentFailCount >= 3;
+      const isSkipped = !correct && currentFailCount >= 3;
       const effectiveRating = correct ? 'good' : 'hard';
-      reviewWordInDB(wordId, effectiveRating);
-      result = { correct, correctAnswer, skipped: false, wordCompleted: true, isNewWord: true, rating: effectiveRating };
+
+      if (isWordCompleted) {
+        reviewWordInDB(wordId, effectiveRating);
+      }
+
+      result = {
+        correct,
+        correctAnswer,
+        skipped: isSkipped,
+        wordCompleted: isWordCompleted,
+        isNewWord: true,
+        failCount: currentFailCount,
+        ...(isWordCompleted ? { rating: effectiveRating } : {}),
+      };
     } else if (!correct) {
       const currentFailCount = (item.failCount || 0) + 1;
       if (currentFailCount >= 3) {
@@ -591,10 +602,19 @@ export function useStudySession() {
 
           // Requeue to end of queue — DO NOT push to completed!
           const nextType = prev.allowedType || pickNextType(updatedItem.usedTypes);
+          let nextMcqSubtype = null;
+          let usedMcqTypes = updatedItem.usedMcqTypes || [];
+          if (nextType === 'mcq') {
+            const currentSubtype = updatedItem.mcqType || updatedItem.exerciseData?.type || updatedItem.exerciseData?.subtype;
+            nextMcqSubtype = rotateMCQType(currentSubtype, usedMcqTypes);
+            usedMcqTypes = [...usedMcqTypes, nextMcqSubtype];
+          }
           const requeuedItem = {
             ...updatedItem,
             exerciseType: nextType,
-            exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode),
+            mcqType: nextMcqSubtype,
+            usedMcqTypes,
+            exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode, nextMcqSubtype),
             usedTypes: updatedItem.usedTypes.includes(nextType) ? updatedItem.usedTypes : [...updatedItem.usedTypes, nextType],
           };
           return {
@@ -626,10 +646,19 @@ export function useStudySession() {
 
         // Requeue to end of queue with another exercise type
         const nextType = prev.allowedType || pickNextType(updatedItem.usedTypes);
+        let nextMcqSubtype = null;
+        let usedMcqTypes = updatedItem.usedMcqTypes || [];
+        if (nextType === 'mcq') {
+          const currentSubtype = updatedItem.mcqType || updatedItem.exerciseData?.type || updatedItem.exerciseData?.subtype;
+          nextMcqSubtype = rotateMCQType(currentSubtype, usedMcqTypes);
+          usedMcqTypes = [...usedMcqTypes, nextMcqSubtype];
+        }
         const requeuedItem = {
           ...updatedItem,
           exerciseType: nextType,
-          exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode),
+          mcqType: nextMcqSubtype,
+          usedMcqTypes,
+          exerciseData: generateExerciseData(updatedItem.word, nextType, prev.allWords, prev.flashcardMode, nextMcqSubtype),
           usedTypes: updatedItem.usedTypes.includes(nextType) ? updatedItem.usedTypes : [...updatedItem.usedTypes, nextType],
         };
 
@@ -725,9 +754,18 @@ export function useStudySession() {
     endSession,
     setFlashcardMode,
     normalizeAnswer,
-    // Expose for components
+    // Expose for components & MCQ expansion
     EXERCISE_TYPES,
+    MCQ_SUBTYPES,
+    generateInterleavedMCQTypes,
   };
 }
+
+export {
+  MCQ_SUBTYPES,
+  MCQ_TYPES,
+  generateInterleavedMCQTypes,
+  rotateMCQType,
+};
 
 export default useStudySession;
