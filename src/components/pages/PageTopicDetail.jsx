@@ -137,6 +137,7 @@ export function PageTopicDetail() {
     if (cat.includes('common')) return 'Common Words';
     if (cat.includes('oxford')) return 'Oxford 3000';
     if (cat.includes('tuvungcuatoi') || cat.includes('cuatoi') || cat === 'personal') return 'Từ vựng của tôi';
+    if (cat.includes('9+') || (cat.includes('thpt') && cat.includes('2027'))) return '9+ THPT Quốc Gia 2027';
     if (cat.includes('thpt') || cat.includes('dgnl')) return 'THPT/ĐGNL';
     if (cat.includes('sat')) return 'SAT 3500';
     if (category && category !== 'general') return category;

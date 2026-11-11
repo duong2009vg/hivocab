@@ -175,6 +175,9 @@ function playCrayonSound(type, muted) {
 function formatShelfDisplayName(folderId, folderLabel, count) {
   const key = String(folderId || '').trim().toLowerCase();
   const suffix = count > 0 ? ` (${count} cuốn)` : '';
+  if (key.includes('9+') || (key.includes('thpt') && key.includes('2027'))) {
+    return `9+ THPT Quốc Gia 2027${suffix}`;
+  }
   if (key.includes('thpt') || key.includes('đgnl') || key.includes('dgnl')) {
     return 'THPT / ĐGNL 2026 (Cô MP)';
   }
@@ -247,6 +250,7 @@ function getShortSpineTitle(rawName, category) {
   return title
     .replace(/^\(Cô MP\)\s*/i, '')
     .replace(/^Chủ đề:\s*/i, '')
+    .replace(/^Ôn thi TN THPT:\s*/i, '')
     .replace(/\s*[-—–]\s*Destination\s*C1[-–]C2$/i, '')
     .replace(/\s*[-—–]\s*Dễ xuất hiện.*$/i, '')
     .trim();
@@ -744,7 +748,7 @@ export function PageTopics() {
   const filteredShelves = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return shelves
-      .filter((shelf) => activeCategory === 'all' || shelf.id.toLowerCase() === activeCategory.toLowerCase())
+      .filter((shelf) => activeCategory === 'all' || shelf.id.trim().toLowerCase() === activeCategory.trim().toLowerCase())
       .map((shelf) => {
         if (!q) return shelf;
         const matchingBooks = shelf.books.filter(

@@ -5,6 +5,7 @@ import { getTopics, getCachedTopics, deleteTopic as apiDeleteTopic, deleteFolder
 import { useRoute } from '../router/RouteContext.jsx';
 
 export const DEFAULT_TOPIC_CATEGORIES = [
+  '9+ THPT Quốc Gia 2027',
   'THPT/ĐGNL',
   'THPT-QG',
   'CAM',
@@ -175,7 +176,7 @@ export function useTopics() {
     });
 
     return list.map(cat => {
-      const catTopics = topics.filter(t => (t.category || '').toLowerCase() === cat.id.toLowerCase());
+      const catTopics = topics.filter(t => String(t.category || '').trim().toLowerCase() === String(cat.id || '').trim().toLowerCase());
       const count = catTopics.length;
       const totalProgress = catTopics.reduce((sum, t) => sum + (t.progress || 0), 0);
       const avgProgress = count > 0 ? Math.round(totalProgress / count) : 0;
@@ -192,7 +193,8 @@ export function useTopics() {
   const filteredTopics = useMemo(() => {
     let result = topics;
     if (activeCategory !== 'all') {
-      result = result.filter(t => (t.category || '').toLowerCase() === activeCategory.toLowerCase());
+      const activeKey = String(activeCategory || '').trim().toLowerCase();
+      result = result.filter(t => String(t.category || '').trim().toLowerCase() === activeKey);
     }
     if (searchQuery.trim()) {
       const query = searchQuery.trim().toLowerCase();
