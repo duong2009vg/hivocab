@@ -56,7 +56,7 @@ export function MainSidebar() {
     },
     {
       id: 'topics',
-      label: 'Chủ đề & Khóa học',
+      label: 'Chủ đề',
       icon: <Folder className="w-5 h-5 shrink-0" />,
       onMouseEnter: () => {
         import('../../services/db.js')
