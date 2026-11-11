@@ -1,9 +1,9 @@
 // src/components/pages/PageExercises.jsx
-// Lộ trình ôn thi THPT Quốc Gia - 3 Quyển sách trên kệ sách
+// Lộ trình ôn thi THPT Quốc Gia - 3 Quyển sách trên Kệ sách
 // Quyển 1: 38 đề THPT trường, sở
 // Quyển 2: Chinh phục 9+ THPT Quốc Gia (29 chuyên đề: lý thuyết + bài tập)
 // Quyển 3: Bộ 10 đề dự đoán THPT
-// Giao diện: kệ sách với 3 cuốn sách thật (bìa, gáy, mép giấy). Bấm vào cuốn nào mới mở nội dung bên trong.
+// Thiết kế: 3 cuốn sách thật trên kệ sách gỗ, nhấp vào sách mới mở nội dung chi tiết bên trong.
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useThptExams } from '../../hooks/useThptExams';
@@ -19,6 +19,9 @@ import {
   AlertTriangle,
   ArrowLeft,
   BookMarked,
+  Sparkles,
+  ChevronRight,
+  Layers,
 } from 'lucide-react';
 import RoadmapChuyenDeView from '../exercises/RoadmapChuyenDeView.jsx';
 
@@ -29,144 +32,48 @@ const BOOKS = [
     id: 'book1',
     number: 'QUYỂN 1',
     title: '38 đề THPT trường, sở',
-    subtitle: 'Đề thi thử các trường chuyên & Sở GD&ĐT cả nước',
-    stat: '38',
-    statLabel: 'đề thi',
+    subtitle: 'Đề thi thử chính thức & khảo sát từ các trường chuyên và Sở GD&ĐT cả nước',
+    stat: '38 ĐỀ THI',
+    statDetail: 'Trường Chuyên & Sở GD&ĐT',
     icon: School,
-    cover: '#4D6B53',
-    coverDark: '#3A5240',
+    cover: '#2D5A3D',
+    coverDark: '#1E3E2A',
+    ribbonColor: '#F59E0B',
+    accentColor: '#86EFAC',
   },
   {
     id: 'book2',
     number: 'QUYỂN 2',
     title: 'Chinh phục 9+ THPT Quốc Gia',
-    subtitle: '29 chuyên đề · Lý thuyết trọng tâm & 1.004 câu hỏi',
-    stat: '29',
-    statLabel: 'chuyên đề',
+    subtitle: '29 chuyên đề học tập · Học lý thuyết & chiến thuật trước, sau đó luyện tập thực chiến',
+    stat: '29 CHUYÊN ĐỀ',
+    statDetail: '1.004 Câu hỏi có giải thích',
     icon: BookOpen,
-    cover: '#B8601F',
-    coverDark: '#8F4814',
+    cover: '#B45309',
+    coverDark: '#78350F',
+    ribbonColor: '#EAB308',
+    accentColor: '#FDE047',
   },
   {
     id: 'book3',
     number: 'QUYỂN 3',
     title: 'Bộ 10 đề dự đoán THPT',
-    subtitle: '10 đề phát triển theo ma trận Bộ GD&ĐT 2026',
-    stat: '10',
-    statLabel: 'đề dự đoán',
+    subtitle: '10 đề phát triển minh họa theo chuẩn ma trận đề thi mới nhất của Bộ GD&ĐT 2026',
+    stat: '10 ĐỀ DỰ ĐOÁN',
+    statDetail: '40 câu / 50 phút chuẩn ma trận',
     icon: Landmark,
-    cover: '#2F4A6B',
-    coverDark: '#223750',
+    cover: '#1E3A8A',
+    coverDark: '#172554',
+    ribbonColor: '#38BDF8',
+    accentColor: '#93C5FD',
   },
 ];
-
-const BOOK_STYLES = `
-  @keyframes rb-open-in {
-    0%   { opacity: 0; transform: translateY(14px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-  .rb-open-in { animation: rb-open-in .45s cubic-bezier(.2,.8,.2,1) both; }
-
-  .rb-book { }
-  .rb-book-body { position: relative; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
-  .rb-book:hover .rb-book-body,
-  .rb-book:focus-visible .rb-book-body { transform: translateY(-10px); }
-
-  .rb-pages {
-    position: absolute; inset: 6px -9px -7px 6px; border-radius: 4px 14px 14px 4px;
-    border: 3px solid #3D352E;
-    background: repeating-linear-gradient(90deg, #FFFDF9 0 3px, #E9DFC9 3px 4px);
-  }
-  .rb-cover {
-    position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column;
-    transform-origin: left bottom; z-index: 2;
-    transition: transform .55s cubic-bezier(.2,.8,.2,1);
-    border-radius: 4px 14px 14px 4px; border: 3px solid #3D352E;
-    box-shadow: 6px 8px 0 #3D352E;
-    overflow: hidden;
-  }
-  .rb-book:hover .rb-cover,
-  .rb-book:focus-visible .rb-cover { transform: rotate(-3deg); box-shadow: 9px 11px 0 rgba(61,53,46,.55); }
-  .rb-spine {
-    position: absolute; left: 0; top: 0; bottom: 0; width: 26px;
-    background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.08) 70%, rgba(255,255,255,.08));
-    border-right: 2px solid rgba(0,0,0,.35);
-  }
-  .rb-spine::before, .rb-spine::after {
-    content: ''; position: absolute; left: 0; right: 0; height: 3px; background: rgba(255,235,180,.55);
-  }
-  .rb-spine::before { top: 22px; box-shadow: 0 6px 0 rgba(255,235,180,.35); }
-  .rb-spine::after  { bottom: 22px; box-shadow: 0 -6px 0 rgba(255,235,180,.35); }
-  .rb-ribbon {
-    position: absolute; right: 22px; top: -3px; width: 20px; height: 54px; background: #E8B84A;
-    border: 2px solid #3D352E; border-top: none;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%);
-  }
-  .rb-shelf-plank {
-    height: 22px; border: 3px solid #3D352E; border-radius: 6px;
-    background: linear-gradient(#A8743F, #8A5B2E); box-shadow: 0 8px 0 #3D352E;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .rb-open-in { animation: none; }
-    .rb-book-body, .rb-cover { transition: none; }
-  }
-`;
-
-function BookCover({ book, onOpen }) {
-  const Icon = book.icon;
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(book.id)}
-      aria-label={`Mở ${book.number}: ${book.title}`}
-      className="rb-book group block w-full max-w-[250px] mx-auto text-left cursor-pointer focus:outline-none"
-    >
-      <div className="rb-book-body" style={{ aspectRatio: '3 / 4' }}>
-        {/* Mép giấy */}
-        <div className="rb-pages" />
-
-        {/* Bìa sách */}
-        <div
-          className="rb-cover absolute inset-0 flex flex-col text-[#FFF6DC]"
-          style={{ background: `linear-gradient(135deg, ${book.cover}, ${book.coverDark})` }}
-        >
-          <div className="rb-spine" />
-          <div className="rb-ribbon" />
-
-          <div className="relative flex-1 flex flex-col pl-10 pr-5 pt-8 pb-5">
-            <span className="text-[10px] font-black tracking-[.2em] text-[#F4D98A]">{book.number}</span>
-
-            <div className="mt-3 w-11 h-11 rounded-full border-2 border-[#F4D98A] flex items-center justify-center bg-black/10">
-              <Icon className="w-5 h-5 text-[#F4D98A]" />
-            </div>
-
-            <h3 className="mt-3 font-heading font-black text-[19px] leading-tight text-[#FFF6DC]">
-              {book.title}
-            </h3>
-
-            <div className="mt-3 h-[2px] w-12 bg-[#F4D98A]/70" />
-            <p className="mt-2 text-[11px] font-semibold leading-relaxed text-[#FFF6DC]/85 line-clamp-3">
-              {book.subtitle}
-            </p>
-
-            <div className="mt-auto flex items-end gap-1.5">
-              <span className="font-heading font-black text-3xl leading-none text-[#F4D98A]">{book.stat}</span>
-              <span className="text-[11px] font-black uppercase tracking-wide text-[#FFF6DC]/80 pb-0.5">
-                {book.statLabel}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-  );
-}
 
 export function PageExercises() {
   const { navigateTo } = useRoute();
   const { allExams, loading, error, bestScores } = useThptExams();
 
-  // Quyển đang mở: null = đang ở kệ sách
+  // Quyển đang mở: null = đang ở kệ sách, 'book1' | 'book2' | 'book3'
   const [openBook, setOpenBook] = useState(() => {
     try {
       const saved = sessionStorage.getItem(RESUME_KEY);
@@ -176,9 +83,12 @@ export function PageExercises() {
     }
   });
 
-  // Chỉ khôi phục quyển đang mở khi quay về từ phòng thi
   useEffect(() => {
-    try { sessionStorage.removeItem(RESUME_KEY); } catch (_) { /* ignore */ }
+    try {
+      sessionStorage.removeItem(RESUME_KEY);
+    } catch (_) {
+      /* ignore */
+    }
   }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -189,28 +99,38 @@ export function PageExercises() {
     setOpenBook(id);
     setSearchQuery('');
     setActiveFilter('all');
-    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   const handleCloseBook = useCallback(() => {
     setOpenBook(null);
-    if (typeof window !== 'undefined') window.scrollTo({ top: 0 });
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const handleStart = useCallback((examId, minutes) => {
-    try { sessionStorage.setItem(RESUME_KEY, openBook || ''); } catch (_) { /* ignore */ }
-    window._thptStartConfig = { examId, minutes };
-    navigateTo('thpt-room', true);
-  }, [navigateTo, openBook]);
+  const handleStart = useCallback(
+    (examId, minutes) => {
+      try {
+        sessionStorage.setItem(RESUME_KEY, openBook || '');
+      } catch (_) {
+        /* ignore */
+      }
+      window._thptStartConfig = { examId, minutes };
+      navigateTo('thpt-room', true);
+    },
+    [navigateTo, openBook]
+  );
 
   const handleOpenCustomTime = useCallback((examId, examTitle) => {
     setCustomTimeModal({ examId, examTitle });
   }, []);
 
-  const handleCustomTimeStart = useCallback((examId, minutes) => {
-    setCustomTimeModal(null);
-    handleStart(examId, minutes);
-  }, [handleStart]);
+  const handleCustomTimeStart = useCallback(
+    (examId, minutes) => {
+      setCustomTimeModal(null);
+      handleStart(examId, minutes);
+    },
+    [handleStart]
+  );
 
   const schoolExams = useMemo(
     () => (allExams || []).filter((e) => !e.id.startsWith('thpt-exam-dev-')),
@@ -255,77 +175,212 @@ export function PageExercises() {
   return (
     <div
       id="page-exercises"
-      className="page active min-h-screen bg-[#FAF5EB] font-sans antialiased text-[#382E2B] lg:pl-[var(--sidebar-w,244px)] pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-10"
+      className="page active min-h-screen bg-[#FAF5EB] font-sans antialiased text-[#382E2B] lg:pl-[var(--sidebar-w,244px)] pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-12"
     >
-      <style>{BOOK_STYLES}</style>
-
       <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
         {!activeBookMeta ? (
-          /* ======================== KỆ SÁCH ======================== */
-          <div className="rb-open-in space-y-8">
-            <div className="space-y-1.5 pb-3 border-b-2 border-[#3D352E]">
-              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#EAF5E4] text-[#557A46] text-xs font-black border border-[#3D352E]">
-                <BookMarked className="w-3.5 h-3.5" />
-                <span>LỘ TRÌNH THPT 2026 - 2027</span>
+          /* ========================================================================= */
+          /* KỆ SÁCH LỘ TRÌNH THPT (3 CUỐN SÁCH THẬT ĐỨNG TRÊN KỆ)                      */
+          /* ========================================================================= */
+          <div className="space-y-6 animate-fadeIn">
+            {/* Top Page Header */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b-2 border-[#3D352E]">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#EAF5E4] text-[#557A46] text-xs font-black border border-[#3D352E]">
+                  <BookMarked className="w-3.5 h-3.5 text-[#557A46]" />
+                  <span>CHƯƠNG TRÌNH TOÀN DIỆN THPT QUỐC GIA 2026 - 2027</span>
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#302A24] tracking-tight">
+                  Lộ trình ôn thi THPT Quốc Gia
+                </h1>
+                <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
+                  Ba cuốn sách lộ trình trên kệ — Bấm vào bìa cuốn sách bất kỳ để mở ra học nhé!
+                </p>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#302A24] tracking-tight">
-                Lộ trình ôn thi THPT Quốc Gia
-              </h1>
-              <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
-                Ba quyển sách trên kệ — chọn một quyển và bấm vào bìa để mở ra học.
-              </p>
+
+              <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
+                <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#FEF3C7] text-[#302A24]">
+                  48 Đề thi
+                </span>
+                <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#EAF5E4] text-[#557A46]">
+                  29 Chuyên đề
+                </span>
+              </div>
             </div>
 
+            {/* 3 REAL HARDCOVER BOOKS ON BOOKSHELF */}
             <section aria-label="Kệ sách lộ trình" className="pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-12 px-2 sm:px-6">
-                {BOOKS.map((book) => (
-                  <BookCover key={book.id} book={book} onOpen={handleOpenBook} />
-                ))}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
+                {BOOKS.map((book) => {
+                  const Icon = book.icon;
+                  return (
+                    <div
+                      key={book.id}
+                      onClick={() => handleOpenBook(book.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          handleOpenBook(book.id);
+                        }
+                      }}
+                      className="group relative flex flex-col justify-between rounded-3xl border-[3.5px] border-[#3D352E] shadow-[6px_8px_0px_#3D352E] hover:shadow-[10px_14px_0px_#3D352E] hover:-translate-y-2.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden select-none"
+                      style={{
+                        background: `linear-gradient(145deg, ${book.cover}, ${book.coverDark})`,
+                        minHeight: '430px',
+                      }}
+                    >
+                      {/* Left Spine Texture Strip (Gáy sách bọc da ép kim) */}
+                      <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-10 bg-black/25 border-r-2 border-black/35 flex flex-col justify-between py-6 items-center pointer-events-none z-10">
+                        <div className="w-4 h-1 bg-[#F4D98A]/80 rounded-full shadow-[0_3px_0_rgba(244,217,138,0.5)]" />
+                        <div className="w-1.5 h-16 bg-[#F4D98A]/30 rounded-full" />
+                        <div className="w-4 h-1 bg-[#F4D98A]/80 rounded-full shadow-[0_-3px_0_rgba(244,217,138,0.5)]" />
+                      </div>
+
+                      {/* Right Paper Edge (Mép trang giấy màu kem dày dặn) */}
+                      <div className="absolute right-0 top-3 bottom-3 w-2.5 bg-[#FAF5EB] border-l border-y border-[#3D352E] rounded-l-sm shadow-inner pointer-events-none z-10" />
+
+                      {/* Bookmark Ribbon Hanging from Top */}
+                      <div
+                        className="absolute right-5 top-0 w-5 h-12 border-x-2 border-b-2 border-[#3D352E] shadow-sm pointer-events-none z-10 group-hover:h-14 transition-all duration-300"
+                        style={{
+                          backgroundColor: book.ribbonColor,
+                          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)',
+                        }}
+                      />
+
+                      {/* Book Front Cover Details */}
+                      <div className="relative pl-11 sm:pl-14 pr-6 pt-7 pb-6 flex-1 flex flex-col justify-between text-[#FFFDF9] z-0">
+                        {/* Top Book Meta */}
+                        <div>
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border border-[#F4D98A]/60 bg-black/20 text-[10px] sm:text-[11px] font-black tracking-widest text-[#F4D98A] uppercase">
+                            <Sparkles className="w-3 h-3 text-[#F4D98A]" />
+                            <span>{book.number}</span>
+                          </div>
+
+                          {/* Emblem Icon */}
+                          <div className="mt-4 w-12 h-12 rounded-2xl border-2 border-[#F4D98A]/70 bg-black/20 flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,0.3)] group-hover:scale-105 transition-transform">
+                            <Icon className="w-6 h-6 text-[#F4D98A]" />
+                          </div>
+
+                          {/* Book Title */}
+                          <h2 className="mt-3.5 font-heading font-black text-xl sm:text-2xl text-[#FFFDF9] leading-tight tracking-tight drop-shadow-sm">
+                            {book.title}
+                          </h2>
+
+                          {/* Golden separator line */}
+                          <div className="mt-2.5 h-[2px] w-14 bg-[#F4D98A]/60 rounded-full" />
+
+                          {/* Subtitle */}
+                          <p className="mt-2.5 text-xs text-[#FFFDF9]/85 font-medium leading-relaxed">
+                            {book.subtitle}
+                          </p>
+                        </div>
+
+                        {/* Bottom Stats & Open Action */}
+                        <div className="mt-6 pt-4 border-t border-white/15 space-y-3">
+                          <div className="flex items-center justify-between text-xs">
+                            <span className="font-heading font-black tracking-wider text-sm" style={{ color: book.accentColor }}>
+                              {book.stat}
+                            </span>
+                            <span className="text-[11px] font-semibold text-white/70">
+                              {book.statDetail}
+                            </span>
+                          </div>
+
+                          {/* Open Book Button */}
+                          <div className="w-full py-2.5 px-3.5 rounded-2xl bg-[#FFFDF9] text-[#302A24] font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] group-hover:bg-[#FEF3C7] transition-colors flex items-center justify-center gap-1.5">
+                            <BookOpen className="w-3.5 h-3.5 text-[#557A46]" />
+                            <span>Mở sách để học ngay</span>
+                            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-              <div className="rb-shelf-plank mt-6 hidden sm:block" />
+
+              {/* Wooden Shelf Plank Underneath */}
+              <div className="mt-4 h-6 sm:h-7 rounded-xl border-[3px] border-[#3D352E] bg-gradient-to-r from-[#8A5B2E] via-[#A8743F] to-[#8A5B2E] shadow-[0_8px_0px_#3D352E] flex items-center justify-between px-4 sm:px-8">
+                <div className="w-8 h-2 rounded-full bg-[#5D3D1E]" />
+                <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#FFF3D6]/80 uppercase">
+                  HIVOCAB THPT ROADMAP BOOKSHELF
+                </span>
+                <div className="w-8 h-2 rounded-full bg-[#5D3D1E]" />
+              </div>
             </section>
 
-            <p className="text-center text-xs font-bold text-[#9C8F85]">
-              Gợi ý: bắt đầu từ Quyển 2 để nắm chắc lý thuyết, rồi thực chiến với Quyển 1 và Quyển 3.
-            </p>
+            {/* Helpful mascot tip */}
+            <div className="rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-4 sm:p-5 flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-[#FEF3C7] border-2 border-[#3D352E] flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-[#D97706]" />
+              </div>
+              <p className="text-xs sm:text-sm font-semibold text-[#786F66] leading-relaxed">
+                <strong className="text-[#302A24]">Gợi ý lộ trình hiệu quả:</strong> Hãy bắt đầu ôn từ{' '}
+                <strong className="text-[#B45309]">Quyển 2 (29 Chuyên đề)</strong> để vững chắc lý thuyết và chiến thuật làm bài, sau đó bứt phá thực chiến cùng{' '}
+                <strong className="text-[#2D5A3D]">Quyển 1 (38 Đề trường sở)</strong> và{' '}
+                <strong className="text-[#1E3A8A]">Quyển 3 (10 Đề dự đoán 2026)</strong> nhé!
+              </p>
+            </div>
           </div>
         ) : (
-          /* ======================== NỘI DUNG BÊN TRONG QUYỂN ======================== */
-          <div key={activeBookMeta.id} className="rb-open-in space-y-5">
+          /* ========================================================================= */
+          /* NỘI DUNG CHI TIẾT BÊN TRONG QUYỂN SÁCH ĐANG MỞ                              */
+          /* ========================================================================= */
+          <div key={activeBookMeta.id} className="space-y-5 animate-fadeIn">
+            {/* Top Navigation & Back-to-Bookshelf Toolbar */}
             <div
-              className="flex items-center gap-3 rounded-2xl border-[3px] border-[#3D352E] shadow-[3px_4px_0px_#3D352E] px-3 sm:px-4 py-2.5 text-[#FFF6DC]"
-              style={{ background: `linear-gradient(135deg, ${activeBookMeta.cover}, ${activeBookMeta.coverDark})` }}
+              className="flex items-center justify-between gap-3 rounded-3xl border-[3.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] px-4 sm:px-6 py-3.5 text-[#FFFDF9]"
+              style={{
+                background: `linear-gradient(135deg, ${activeBookMeta.cover}, ${activeBookMeta.coverDark})`,
+              }}
             >
-              <button
-                type="button"
-                onClick={handleCloseBook}
-                className="min-h-[40px] px-3 rounded-xl bg-[#FFFDF9] text-[#302A24] border-2 border-[#3D352E] text-xs font-black flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-[0.98]"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Kệ sách</span>
-              </button>
-              <div className="min-w-0">
-                <div className="text-[10px] font-black tracking-[.2em] text-[#F4D98A]">{activeBookMeta.number}</div>
-                <div className="font-heading font-black text-sm sm:text-base leading-tight truncate">
-                  {activeBookMeta.title}
+              <div className="flex items-center gap-3 min-w-0">
+                <button
+                  type="button"
+                  onClick={handleCloseBook}
+                  className="min-h-[42px] px-3.5 sm:px-4 rounded-2xl bg-[#FFFDF9] hover:bg-[#FEF3C7] text-[#302A24] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-black flex items-center gap-1.5 shrink-0 cursor-pointer active:translate-y-0.5 transition-all"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>← Kệ sách</span>
+                </button>
+
+                <div className="min-w-0">
+                  <div className="text-[10px] font-black tracking-widest text-[#F4D98A] uppercase">
+                    {activeBookMeta.number}
+                  </div>
+                  <h2 className="font-heading font-black text-base sm:text-lg leading-tight truncate">
+                    {activeBookMeta.title}
+                  </h2>
                 </div>
+              </div>
+
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-black/25 border border-white/20 text-xs font-black">
+                <Layers className="w-3.5 h-3.5" style={{ color: activeBookMeta.accentColor }} />
+                <span style={{ color: activeBookMeta.accentColor }}>{activeBookMeta.stat}</span>
               </div>
             </div>
 
+            {/* Book Body Content */}
             {openBook === 'book2' ? (
+              /* QUYỂN 2: 29 CHUYÊN ĐỀ HỌC TẬP (LÝ THUYẾT + LUYỆN TẬP) */
               <RoadmapChuyenDeView />
             ) : (
+              /* QUYỂN 1 (38 ĐỀ TRƯỜNG SỞ) HOẶC QUYỂN 3 (10 ĐỀ DỰ ĐOÁN) */
               <div className="space-y-5">
+                {/* Search & Filter Bar */}
                 <div className="rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-4 sm:p-6 space-y-4">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
-                      <h2 className="text-lg sm:text-xl font-heading font-black text-[#302A24]">
+                      <h3 className="text-lg sm:text-xl font-heading font-black text-[#302A24]">
                         {openBook === 'book1' ? 'Quyển 1: 38 đề THPT trường, sở' : 'Quyển 3: Bộ 10 đề dự đoán THPT 2026'}
-                      </h2>
+                      </h3>
                       <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
                         {openBook === 'book1'
-                          ? 'Tổng hợp 38 đề thi chính thức & khảo sát chất lượng từ các trường THPT Chuyên và Sở GD&ĐT.'
-                          : 'Bộ 10 đề thi phát triển theo đúng ma trận cấu trúc minh họa mới nhất của Bộ Giáo dục và Đào tạo (40 câu / 50 phút).'}
+                          ? 'Tổng hợp 38 đề thi chính thức & khảo sát chất lượng từ các trường THPT Chuyên và Sở GD&ĐT cả nước.'
+                          : 'Bộ 10 đề thi phát triển theo đúng ma trận cấu trúc minh họa mới nhất của Bộ GD&ĐT (40 câu / 50 phút).'}
                       </p>
                     </div>
                     <div className="px-3 py-1 rounded-2xl bg-[#EAF5E4] text-[#557A46] font-black text-xs border border-[#3D352E] shrink-0">
@@ -333,6 +388,7 @@ export function PageExercises() {
                     </div>
                   </div>
 
+                  {/* Search Input */}
                   <div className="relative w-full">
                     <input
                       type="text"
@@ -357,18 +413,27 @@ export function PageExercises() {
                     )}
                   </div>
 
+                  {/* Filter Pills */}
                   <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
                     <button
                       type="button"
                       onClick={() => setActiveFilter('all')}
-                      className={`${pillBase} ${activeFilter === 'all' ? 'bg-[#3D352E] text-white shadow-[2px_2px_0px_#3D352E]' : 'bg-white text-[#302A24] hover:bg-[#FAF5EB]'}`}
+                      className={`${pillBase} ${
+                        activeFilter === 'all'
+                          ? 'bg-[#3D352E] text-white shadow-[2px_2px_0px_#3D352E]'
+                          : 'bg-white text-[#302A24] hover:bg-[#FAF5EB]'
+                      }`}
                     >
                       Tất cả ({currentBookExams.length})
                     </button>
                     <button
                       type="button"
                       onClick={() => setActiveFilter('free')}
-                      className={`${pillBase} ${activeFilter === 'free' ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]' : 'bg-[#EAF5E4] text-[#4F7D4B] hover:bg-[#dcead4]'}`}
+                      className={`${pillBase} ${
+                        activeFilter === 'free'
+                          ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]'
+                          : 'bg-[#EAF5E4] text-[#4F7D4B] hover:bg-[#dcead4]'
+                      }`}
                     >
                       Miễn phí ({freeCount})
                     </button>
@@ -376,7 +441,11 @@ export function PageExercises() {
                       <button
                         type="button"
                         onClick={() => setActiveFilter('pro')}
-                        className={`${pillBase} ${activeFilter === 'pro' ? 'bg-[#B87C24] text-white shadow-[2px_2px_0px_#3D352E]' : 'bg-[#FFF6E6] text-[#B87C24] hover:bg-[#fceece]'}`}
+                        className={`${pillBase} ${
+                          activeFilter === 'pro'
+                            ? 'bg-[#B87C24] text-white shadow-[2px_2px_0px_#3D352E]'
+                            : 'bg-[#FFF6E6] text-[#B87C24] hover:bg-[#fceece]'
+                        }`}
                       >
                         Gói PRO ({proCount})
                       </button>
@@ -385,7 +454,11 @@ export function PageExercises() {
                       <button
                         type="button"
                         onClick={() => setActiveFilter('completed')}
-                        className={`${pillBase} ${activeFilter === 'completed' ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]' : 'bg-white text-[#302A24]'}`}
+                        className={`${pillBase} ${
+                          activeFilter === 'completed'
+                            ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]'
+                            : 'bg-white text-[#302A24]'
+                        }`}
                       >
                         Đã hoàn thành ({completedCount})
                       </button>
@@ -393,6 +466,7 @@ export function PageExercises() {
                   </div>
                 </div>
 
+                {/* Exam List State */}
                 {loading && (
                   <div className="flex flex-col items-center justify-center py-20 gap-3">
                     <div className="w-10 h-10 border-4 border-[#557A46] border-t-transparent rounded-full animate-spin" />
