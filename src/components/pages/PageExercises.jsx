@@ -62,13 +62,13 @@ const BOOKS = [
 
 const BOOK_STYLES = `
   @keyframes rb-open-in {
-    0%   { opacity: 0; transform: perspective(1400px) rotateX(6deg) translateY(18px) scale(.98); }
-    100% { opacity: 1; transform: perspective(1400px) rotateX(0) translateY(0) scale(1); }
+    0%   { opacity: 0; transform: translateY(14px); }
+    100% { opacity: 1; transform: translateY(0); }
   }
-  .rb-open-in { animation: rb-open-in .45s cubic-bezier(.2,.8,.2,1) both; transform-origin: top center; }
+  .rb-open-in { animation: rb-open-in .45s cubic-bezier(.2,.8,.2,1) both; }
 
-  .rb-book { perspective: 1400px; }
-  .rb-book-body { position: relative; transform-style: preserve-3d; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
+  .rb-book { }
+  .rb-book-body { position: relative; transition: transform .45s cubic-bezier(.2,.8,.2,1); }
   .rb-book:hover .rb-book-body,
   .rb-book:focus-visible .rb-book-body { transform: translateY(-10px); }
 
@@ -78,14 +78,15 @@ const BOOK_STYLES = `
     background: repeating-linear-gradient(90deg, #FFFDF9 0 3px, #E9DFC9 3px 4px);
   }
   .rb-cover {
-    transform-origin: left center; z-index: 2; backface-visibility: hidden;
+    position: absolute; top: 0; right: 0; bottom: 0; left: 0; display: flex; flex-direction: column;
+    transform-origin: left bottom; z-index: 2;
     transition: transform .55s cubic-bezier(.2,.8,.2,1);
     border-radius: 4px 14px 14px 4px; border: 3px solid #3D352E;
     box-shadow: 6px 8px 0 #3D352E;
     overflow: hidden;
   }
   .rb-book:hover .rb-cover,
-  .rb-book:focus-visible .rb-cover { transform: rotateY(-32deg); box-shadow: 10px 10px 0 rgba(61,53,46,.55); }
+  .rb-book:focus-visible .rb-cover { transform: rotate(-3deg); box-shadow: 9px 11px 0 rgba(61,53,46,.55); }
   .rb-spine {
     position: absolute; left: 0; top: 0; bottom: 0; width: 26px;
     background: linear-gradient(90deg, rgba(0,0,0,.28), rgba(0,0,0,.08) 70%, rgba(255,255,255,.08));
