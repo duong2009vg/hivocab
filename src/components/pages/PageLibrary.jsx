@@ -19,7 +19,6 @@ import {
   Flag, 
   Lightbulb, 
   Sparkles, 
-  Bookmark, 
   Award, 
   Flame, 
   ArrowRight, 
@@ -519,57 +518,6 @@ export function PageLibrary() {
           ───────────────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex flex-col min-h-screen lg:pl-[var(--sidebar-w,244px)] w-full">
         
-        {/* Sticky Top Header */}
-        <header className="border-b-2 border-[#2D2824] bg-white/90 backdrop-blur-sm px-6 xl:px-8 py-4 sticky top-0 z-20 shadow-xs">
-          <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5 min-w-0 flex-1">
-              <BookOpen className="w-8 h-8 text-[#E66946] shrink-0" />
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl xl:text-2xl font-black text-[#2D2824] font-quicksand">Thư viện cộng đồng</h1>
-                  <span className="bg-[#E8EFE5] text-[#5A7E56] text-xs font-black px-2.5 py-0.5 rounded-full border border-[#5A7E56] whitespace-nowrap shrink-0">
-                    {lib.topics.length > 0 ? `${lib.topics.length} Bộ từ vựng` : '2,500+ Bộ từ vựng'}
-                  </span>
-                </div>
-                <p className="text-xs font-bold text-[#68594D] mt-0.5 truncate">
-                  Khám phá, chia sẻ và lưu trữ hàng ngàn bộ từ vựng phong phú từ cộng đồng học viên HiVocab.
-                </p>
-              </div>
-            </div>
-
-            {/* Action buttons */}
-            <div className="flex items-center gap-2.5 shrink-0">
-              <button 
-                type="button"
-                onClick={() => lib.setCurrentTab('liked')}
-                className={`px-3.5 py-2 border-2 border-[#2D2824] rounded-2xl text-xs font-black transition-all shadow-[2px_2px_0px_#2D2824] active:translate-y-0.5 flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer ${
-                  lib.currentTab === 'liked' ? 'bg-[#2D2824] text-white' : 'bg-white text-[#2D2824] hover:bg-[#FAF5ED]'
-                }`}
-              >
-                <Bookmark className="w-3.5 h-3.5" />
-                <span>Bộ từ đã lưu</span>
-              </button>
-              <button 
-                type="button"
-                onClick={handleOpenCreate}
-                className="bg-[#E66946] text-white border-2 border-[#2D2824] font-black px-4 xl:px-5 py-2 xl:py-2.5 rounded-2xl shadow-[3px_3px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-1.5 text-xs xl:text-sm whitespace-nowrap shrink-0 cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Tạo &amp; Đóng góp bộ từ</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => window.openBugReportModal?.({ initialType: 'feedback', feature: 'Thư viện cộng đồng', title: 'Góp ý Thư viện' })}
-                className="w-10 h-10 bg-white hover:bg-[#FAF5ED] border-2 border-[#2D2824] rounded-2xl shadow-[2px_2px_0px_#2D2824] text-[#E66946] flex items-center justify-center active:translate-y-0.5 transition-all shrink-0 cursor-pointer"
-                title="Góp ý cho thư viện"
-                aria-label="Góp ý cho thư viện"
-              >
-                <Flag className="w-4 h-4 text-[#E66946]" />
-              </button>
-            </div>
-          </div>
-        </header>
-
         {/* Search & Filter Toolbar */}
         <section className="max-w-[1440px] w-full mx-auto px-6 xl:px-8 pt-5 pb-2 space-y-3.5">
           <div className="flex flex-col md:flex-row items-center gap-3.5">
