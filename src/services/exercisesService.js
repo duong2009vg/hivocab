@@ -102,7 +102,7 @@ export async function getExerciseQuestions(exerciseId) {
   try {
     const { data, error } = await supabase
       .from('exercise_questions')
-      .select('id, exercise_id, prompt, options, answer, hint, order_index')
+      .select('*')
       .eq('exercise_id', exerciseId)
       .order('order_index');
 
