@@ -18,12 +18,16 @@ import {
 
 /** Render arrangement section: one card per question with lettered sentence rows. */
 function buildArrangementSectionHtml(sec, questions) {
-  const secQuestions = questions.filter(
-    (q) => q.number >= sec.startQ && q.number <= sec.endQ,
-  );
+  const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
+  const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
+  const secQuestions = questions.filter((q) => {
+    const num = q.number ?? q.question_number;
+    return num >= startQ && num <= endQ;
+  });
 
   let arrCardsHtml = '';
   secQuestions.forEach((q) => {
+    const qNum = q.number ?? q.question_number;
     const sentences =
       q.arrangement_sentences && q.arrangement_sentences.length > 0
         ? q.arrangement_sentences
@@ -37,7 +41,13 @@ function buildArrangementSectionHtml(sec, questions) {
         letter = item.letter || '';
         text = item.text || '';
       } else if (typeof item === 'string') {
-        text = item;
+        const m = item.match(/^([a-zA-Z0-9]+)\.\s*(.+)$/s);
+        if (m) {
+          letter = m[1];
+          text = m[2];
+        } else {
+          text = item;
+        }
       }
       letter = String(letter || '').trim();
       text = String(text || '').trim();
@@ -55,15 +65,15 @@ function buildArrangementSectionHtml(sec, questions) {
     });
 
     arrCardsHtml += `
-      <div id="passage-q-${q.number}"
+      <div id="passage-q-${qNum}"
            class="passage-q-arr-card p-5 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-3.5 transition-all duration-200">
         <div class="flex items-center justify-between pb-2.5 border-b border-[#EFE8D6]">
           <div class="flex items-center gap-2">
             <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
-              ${q.number}
+              ${qNum}
             </span>
             <span class="font-bold text-xs uppercase tracking-wide text-[#2D2422] font-sans">
-              Câu ${q.number}: Ngữ liệu sắp xếp câu
+              Câu ${qNum}: Ngữ liệu sắp xếp câu
             </span>
           </div>
           <span class="text-[10px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20 font-sans">
@@ -73,7 +83,7 @@ function buildArrangementSectionHtml(sec, questions) {
 
         ${
           q.arrangement_context
-            ? `<div class="font-bold text-[#2D2422] italic pb-1">${escHtml(q.arrangement_context)}</div>`
+            ? `<div class="font-medium text-[#2D2422] italic pb-1 whitespace-pre-line bg-[#FAF5EB]/40 p-2.5 rounded-lg border border-[#EFE8D6]/60">${escHtml(q.arrangement_context)}</div>`
             : ''
         }
 
@@ -102,7 +112,7 @@ function buildArrangementSectionHtml(sec, questions) {
           </h3>
         </div>
         <span class="text-[11px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20 shrink-0">
-          Câu ${sec.startQ} - ${sec.endQ}
+          Câu ${startQ} - ${endQ}
         </span>
       </div>
 
@@ -117,6 +127,8 @@ function buildArrangementSectionHtml(sec, questions) {
 /** Render paragraphs for reading/cloze/etc sections. */
 function buildParagraphsHtml(sec, questions) {
   let { paragraphs, rawText, startQ, endQ, type, title } = sec;
+  startQ = Number(startQ ?? sec.from_question ?? 1);
+  endQ = Number(endQ ?? sec.to_question ?? 40);
 
   // Defensive strip in case sec.paragraphs was passed without prior sanitization
   if (title && title.trim()) {
@@ -205,13 +217,15 @@ function buildParagraphsHtml(sec, questions) {
       </div>`;
   } else {
     // Fall back to first question's passage if available
-    const secQuestions = questions.filter(
-      (q) => q.number >= startQ && q.number <= endQ,
-    );
-    if (secQuestions.length > 0 && secQuestions[0].passage) {
+    const secQuestions = questions.filter((q) => {
+      const num = q.number ?? q.question_number;
+      return num >= startQ && num <= endQ;
+    });
+    const fallbackPassage = secQuestions[0]?.passage || secQuestions[0]?.context_passage;
+    if (fallbackPassage) {
       parasHtml = `
         <div class="text-[#2D2422] leading-relaxed md:leading-loose font-serif q-text-size select-text whitespace-pre-line space-y-2.5">
-          ${formatBlanksInHtml(secQuestions[0].passage, startQ, endQ)}
+          ${formatBlanksInHtml(fallbackPassage, startQ, endQ)}
         </div>`;
     } else {
       parasHtml =
@@ -224,6 +238,8 @@ function buildParagraphsHtml(sec, questions) {
 
 /** Render a reading/cloze section card. */
 function buildReadingSectionHtml(sec, questions) {
+  const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
+  const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
   const parasHtml = buildParagraphsHtml(sec, questions);
 
   const instructionHtml = sec.instruction
@@ -251,7 +267,7 @@ function buildReadingSectionHtml(sec, questions) {
           </h3>
         </div>
         <span class="text-[11px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20 shrink-0">
-          Câu ${sec.startQ} - ${sec.endQ}
+          Câu ${startQ} - ${endQ}
         </span>
       </div>
 
@@ -398,13 +414,15 @@ function applySentenceHighlight(pane, paraIndex) {
 // ---------------------------------------------------------------------------
 
 function buildPillLabel(sec) {
+  const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
+  const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
   const name = sec.name || sec.group || `P.${sec.index}`;
   const shortened = name
     .replace(/^ph[aầ]n\s*/i, 'P.')
     .replace(/^part\s*/i, 'P.')
     .trim();
   const label = shortened.length > 8 ? `P.${sec.index}` : shortened;
-  return `${label} (${sec.startQ}-${sec.endQ})`;
+  return `${label} (${startQ}-${endQ})`;
 }
 
 // ---------------------------------------------------------------------------
@@ -439,11 +457,18 @@ export function ExamPassagePanel({
     const questions = exam.questions;
     return sections
       .map((sec) => {
+        const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
+        const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
         const isArrangement =
           sec.type === 'arrangement' ||
-          questions.some(
-            (q) => q.number >= sec.startQ && q.number <= sec.endQ && q.is_arrangement,
-          );
+          questions.some((q) => {
+            const num = q.number ?? q.question_number;
+            return (
+              num >= startQ &&
+              num <= endQ &&
+              (q.is_arrangement || q.question_type === 'sentence_arrangement')
+            );
+          });
         return isArrangement
           ? buildArrangementSectionHtml(sec, questions)
           : buildReadingSectionHtml(sec, questions);
@@ -485,9 +510,13 @@ export function ExamPassagePanel({
         c.classList.remove('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
       });
 
-      const q = exam.questions[qNum - 1];
+      const q =
+        exam.questions.find((item) => (item.number ?? item.question_number) === qNum) ||
+        exam.questions[qNum - 1];
 
-      if (q && q.is_arrangement) {
+      const isArr = Boolean(q?.is_arrangement || q?.question_type === 'sentence_arrangement');
+
+      if (q && isArr) {
         // Scroll to the specific arrangement card
         const arrCard = pane.querySelector(`#passage-q-${qNum}`);
         if (arrCard) {
@@ -495,16 +524,20 @@ export function ExamPassagePanel({
           arrCard.classList.add('ring-2', 'ring-[#5a7d4d]', 'border-[#5a7d4d]', 'shadow-sm');
         }
         // Highlight the parent section pill
-        const targetSec = sections.find(
-          (s) => qNum >= s.startQ && qNum <= s.endQ,
-        );
+        const targetSec = sections.find((s) => {
+          const sQ = Number(s.startQ ?? s.from_question ?? 1);
+          const eQ = Number(s.endQ ?? s.to_question ?? 40);
+          return qNum >= sQ && qNum <= eQ;
+        });
         if (targetSec) setActiveSecIndex(targetSec.index);
         clearWordHighlights(pane);
       } else {
         // Scroll to the section card
-        const targetSec = sections.find(
-          (s) => qNum >= s.startQ && qNum <= s.endQ,
-        );
+        const targetSec = sections.find((s) => {
+          const sQ = Number(s.startQ ?? s.from_question ?? 1);
+          const eQ = Number(s.endQ ?? s.to_question ?? 40);
+          return qNum >= sQ && qNum <= eQ;
+        });
         if (targetSec) {
           setActiveSecIndex(targetSec.index);
           const card = pane.querySelector(`#passage-sec-${targetSec.index}`);

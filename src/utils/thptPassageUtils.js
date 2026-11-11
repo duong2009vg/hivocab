@@ -91,42 +91,74 @@ export function buildExamSections(exam) {
 
   if (exam.sections && exam.sections.length > 0) {
     return exam.sections.map((s, idx) => {
-      const startQ = s.start_q;
-      const endQ = s.end_q;
-      const secQuestions = questions.filter(
-        (q) => q.number >= startQ && q.number <= endQ,
+      const startQ = Number(
+        s.start_q ?? s.from_question ?? s.from_q ?? s.start ?? (idx * 10 + 1)
       );
+      const endQ = Number(
+        s.end_q ?? s.to_question ?? s.to_q ?? s.end ?? ((idx + 1) * 10)
+      );
+      const secQuestions = questions.filter((q) => {
+        const num = q.number ?? q.question_number;
+        return num >= startQ && num <= endQ;
+      });
       const firstQ = secQuestions[0] || null;
 
-      let title = (s.title || firstQ?.passage_title || '').trim();
+      const groupName = (s.title || s.name || `Phần ${idx + 1}`).trim();
+      let title = (firstQ?.passage_title || s.passage_title || '').trim();
+      if (!title && s.title && !/^Phần\s+\d+/i.test(s.title)) {
+        title = s.title.trim();
+      }
+
       let instruction = (s.instruction || firstQ?.passage_instruction || '').trim();
-      let paragraphs = s.paragraphs || [];
+      let paragraphs = Array.isArray(s.paragraphs) ? [...s.paragraphs] : [];
       let rawText = s.raw_text || '';
 
-      // If section paragraphs is empty or single squashed block, check if first question has richer multi-paragraph passage
-      if (
-        firstQ?.passage &&
-        (!paragraphs || paragraphs.length <= 1) &&
-        firstQ.passage.includes('\n\n')
+      // Determine passage source if section has no paragraphs/rawText
+      const sourcePassage = firstQ?.passage || firstQ?.context_passage || '';
+
+      if (sourcePassage && (!paragraphs || paragraphs.length === 0)) {
+        rawText = sourcePassage;
+        if (sourcePassage.includes('\n\n')) {
+          paragraphs = sourcePassage.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+        } else if (sourcePassage.includes('\n')) {
+          paragraphs = sourcePassage.split(/\n+/).map((p) => p.trim()).filter(Boolean);
+        } else {
+          paragraphs = [sourcePassage.trim()];
+        }
+      } else if (
+        sourcePassage &&
+        paragraphs.length === 1 &&
+        (sourcePassage.includes('\n\n') || sourcePassage.includes('\n'))
       ) {
-        const qParas = firstQ.passage
-          .split(/\n\s*\n/)
-          .map((p) => p.trim())
-          .filter(Boolean);
-        if (qParas.length > (paragraphs?.length || 0)) {
+        const qParas = sourcePassage.includes('\n\n')
+          ? sourcePassage.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+          : sourcePassage.split(/\n+/).map((p) => p.trim()).filter(Boolean);
+        if (qParas.length > paragraphs.length) {
           paragraphs = qParas;
-          if (!rawText) rawText = firstQ.passage;
+          if (!rawText) rawText = sourcePassage;
         }
       }
+
+      // Auto-detect arrangement type
+      const isArrangement =
+        s.type === 'arrangement' ||
+        s.part === 3 ||
+        secQuestions.some(
+          (q) =>
+            q.is_arrangement ||
+            q.question_type === 'sentence_arrangement' ||
+            q.type === 'arrangement'
+        );
+      const type = isArrangement ? 'arrangement' : (s.type || 'reading');
 
       const sanitized = sanitizeSectionText(title, paragraphs, rawText);
 
       return {
         index: s.part || (idx + 1),
         part: s.part || (idx + 1),
-        type: s.type || 'reading',
-        group: s.name || `Phần ${idx + 1}`,
-        name: s.name || `Phần ${idx + 1}`,
+        type,
+        group: groupName,
+        name: groupName,
         startQ,
         endQ,
         instruction,
@@ -141,20 +173,26 @@ export function buildExamSections(exam) {
   const sections = [];
   let currentSec = null;
   questions.forEach((q) => {
+    const qNum = q.number ?? q.question_number;
     const grpName = q.group || 'Ngữ Liệu Đề Thi';
     if (!currentSec || currentSec.group !== grpName) {
+      const isArr =
+        q.is_arrangement ||
+        q.type === 'arrangement' ||
+        q.question_type === 'sentence_arrangement';
       currentSec = {
         index: sections.length + 1,
         group: grpName,
         name: grpName,
-        type: q.is_arrangement || q.type === 'arrangement' ? 'arrangement' : 'reading',
-        startQ: q.number,
-        endQ: q.number,
+        type: isArr ? 'arrangement' : 'reading',
+        startQ: qNum,
+        endQ: qNum,
         instruction: q.passage_instruction || '',
         title: q.passage_title || '',
         paragraphs: q.passage
-          ? q.passage
-              .split(/\n\s*\n/)
+          ? (q.passage.includes('\n\n')
+              ? q.passage.split(/\n\s*\n/)
+              : q.passage.split(/\n+/))
               .map((p) => p.trim())
               .filter(Boolean)
           : [],
@@ -162,7 +200,7 @@ export function buildExamSections(exam) {
       };
       sections.push(currentSec);
     } else {
-      currentSec.endQ = q.number;
+      currentSec.endQ = qNum;
     }
   });
 
