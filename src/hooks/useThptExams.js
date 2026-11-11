@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 
-const EXAMS_CACHE_KEY = 'thpt_exams_summaries_v20261030';
+const EXAMS_CACHE_KEY = 'thpt_exams_summaries_v20261111';
 const BEST_SCORES_KEY = 'thpt_best_scores';
 
 function removeAccents(str) {

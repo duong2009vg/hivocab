@@ -383,8 +383,8 @@ export function PageDashboard() {
             </div>
             <div className="mt-3.5">
               <button onClick={() => navigateTo('exercises')} className="w-full bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2">
-                <span>Vào phòng thi ngay</span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1">38 đề <ArrowRight className="w-3 h-3" /></span>
+                <span>Khám phá lộ trình ngay</span>
+                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1">3 quyển sách <ArrowRight className="w-3 h-3" /></span>
               </button>
             </div>
           </section>
@@ -650,18 +650,18 @@ export function PageDashboard() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-sage text-white text-xs font-extrabold uppercase">HOT</span>
-                      <span className="text-xs font-bold text-softMuted">Mới cập nhật 2026</span>
+                      <span className="text-xs font-bold text-softMuted">Lộ trình 2026 - 2027</span>
                     </div>
-                    <h3 className="text-xl font-black text-crayonText font-quicksand">Phòng Luyện Đề THPT Quốc Gia & Thi Thử CBT</h3>
-                    <p className="text-xs text-softMuted max-w-md">Kho ngân hàng 38+ đề thi chuẩn cấu trúc Bộ Giáo dục, tích hợp bộ đếm giờ tự động 50 phút và giải thích từ vựng chi tiết sau mỗi câu.</p>
+                    <h3 className="text-xl font-black text-crayonText font-quicksand">Lộ trình Ôn Thi THPT Quốc Gia (3 Quyển Sách)</h3>
+                    <p className="text-xs text-softMuted max-w-md">Chương trình toàn diện: 38 đề trường/sở, 29 chuyên đề 9+ (kèm lý thuyết trọng tâm & 1.004 câu hỏi thực chiến), và Bộ 10 đề dự đoán ma trận Bộ GD&ĐT.</p>
                     <div className="flex items-center gap-4 pt-1 text-xs font-bold text-crayonText">
-                      <span className="flex items-center gap-1.5"><i className="fa-regular fa-clock text-terracotta"></i> 50 phút</span>
-                      <span className="flex items-center gap-1.5"><i className="fa-solid fa-file-pen text-sage"></i> 50 câu hỏi</span>
-                      <span className="flex items-center gap-1.5"><i className="fa-solid fa-user-group text-softBlue"></i> 1,420 bạn đang luyện</span>
+                      <span className="flex items-center gap-1.5"><i className="fa-solid fa-book text-sage"></i> 3 quyển lộ trình</span>
+                      <span className="flex items-center gap-1.5"><i className="fa-solid fa-file-pen text-terracotta"></i> 48 đề thi</span>
+                      <span className="flex items-center gap-1.5"><i className="fa-solid fa-graduation-cap text-softBlue"></i> 29 chuyên đề 9+</span>
                     </div>
                   </div>
                   <button onClick={() => navigateTo('exercises')} className="flex-shrink-0 bg-sage hover:bg-sage-dark text-white font-black text-sm px-5 py-3 rounded-2xl crayon-border shadow-crayon active:translate-y-0.5 transition-all flex items-center gap-2">
-                    <span>Vào phòng thi ngay</span>
+                    <span>Mở lộ trình ngay</span>
                     <i className="fa-solid fa-arrow-right text-xs"></i>
                   </button>
                 </section>

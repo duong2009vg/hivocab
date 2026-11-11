@@ -1,381 +1,355 @@
 // src/components/pages/PageExercises.jsx
-// Trang chọn đề thi THPT - Phong cách Cozy Crayon ấm áp (Sáp màu & Bàn học tập)
-// Hỗ trợ tab lọc "Miễn phí" và "Gói PRO" đồng bộ cùng cờ is_pro
+// Lộ trình ôn thi THPT Quốc Gia - 3 Quyển sách lộ trình toàn diện
+// Quyển 1: 38 đề THPT trường, sở
+// Quyển 2: Chinh phục 9+ THPT Quốc Gia (29 chuyên đề: lý thuyết + bài tập)
+// Quyển 3: Bộ 10 đề dự đoán THPT
 
 import React, { useState, useMemo, useCallback } from 'react';
 import { useThptExams } from '../../hooks/useThptExams';
 import { ExamCard } from '../thpt/ExamCard';
 import { ExamCustomTimeModal } from '../thpt/ExamModals';
 import { useRoute } from '../../router/RouteContext.jsx';
-import { GraduationCap, PenTool, Search, X, Crown, Gift, Landmark, School, CheckCircle2, AlertTriangle } from 'lucide-react';
+import {
+  BookOpen,
+  School,
+  Landmark,
+  Compass,
+  Search,
+  X,
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  Gift,
+  Crown
+} from 'lucide-react';
+import RoadmapChuyenDeView from '../exercises/RoadmapChuyenDeView.jsx';
+
+const BOOKS = [
+  {
+    id: 'book1',
+    number: 'Quyển 1',
+    title: '38 đề THPT trường, sở',
+    subtitle: 'Đề thi thử các trường chuyên & Sở GD&ĐT cả nước',
+    badge: '38 đề thi',
+    icon: School,
+    color: '#557A46',
+    activeBg: 'bg-[#557A46] text-white',
+    inactiveBg: 'bg-white text-[#302A24] hover:bg-[#FAF5EB]',
+  },
+  {
+    id: 'book2',
+    number: 'Quyển 2',
+    title: 'Chinh phục 9+ THPT Quốc Gia',
+    subtitle: '29 chuyên đề học tập · Lý thuyết trọng tâm & 1.004 câu hỏi',
+    badge: '29 chuyên đề',
+    icon: BookOpen,
+    color: '#D97706',
+    activeBg: 'bg-[#D97706] text-white',
+    inactiveBg: 'bg-white text-[#302A24] hover:bg-[#FAF5EB]',
+  },
+  {
+    id: 'book3',
+    number: 'Quyển 3',
+    title: 'Bộ 10 đề dự đoán THPT',
+    subtitle: '10 đề phát triển minh họa ma trận Bộ GD&ĐT 2026',
+    badge: '10 đề mới',
+    icon: Landmark,
+    color: '#2563EB',
+    activeBg: 'bg-[#2563EB] text-white',
+    inactiveBg: 'bg-white text-[#302A24] hover:bg-[#FAF5EB]',
+  },
+];
 
 export function PageExercises() {
   const { navigateTo } = useRoute();
-  const { exams, allExams, loading, error, searchQuery, setSearchQuery, bestScores } = useThptExams();
+  const { allExams, loading, error, bestScores } = useThptExams();
 
-  // Tab lọc: 'all' | 'free' | 'pro' | 'qg' | 'provinces' | 'completed'
+  // Tab chọn Quyển sách: 'book1' | 'book2' | 'book3'
+  const [activeBook, setActiveBook] = useState('book1');
+
+  // Bộ lọc cho danh sách đề thi (Quyển 1 & Quyển 3)
+  const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [customTimeModal, setCustomTimeModal] = useState(null);
 
-  // Bắt đầu thi với số phút cho trước
+  // Bắt đầu thi với số phút
   const handleStart = useCallback((examId, minutes) => {
     window._thptStartConfig = { examId, minutes };
     navigateTo('thpt-room', true);
   }, [navigateTo]);
 
-  // Mở modal chọn thời gian tùy chỉnh
+  // Mở modal thời gian tùy chỉnh
   const handleOpenCustomTime = useCallback((examId, examTitle) => {
     setCustomTimeModal({ examId, examTitle });
   }, []);
 
-  // Xác nhận từ custom time modal
   const handleCustomTimeStart = useCallback((examId, minutes) => {
     setCustomTimeModal(null);
     handleStart(examId, minutes);
   }, [handleStart]);
 
-  // Đếm số lượng đề thi theo từng loại
-  const freeCount = useMemo(() => {
-    return (allExams || []).filter((e) => !e.is_pro).length;
+  // Phân chia đề thi theo 2 nhóm đề (Quyển 1 & Quyển 3)
+  const schoolExams = useMemo(() => {
+    return (allExams || []).filter(e => !e.id.startsWith('thpt-exam-dev-'));
   }, [allExams]);
 
-  const proCount = useMemo(() => {
-    return (allExams || []).filter((e) => Boolean(e.is_pro)).length;
+  const predictedExams = useMemo(() => {
+    return (allExams || []).filter(e => e.id.startsWith('thpt-exam-dev-'));
   }, [allExams]);
 
-  const completedCount = useMemo(() => {
-    return Object.keys(bestScores || {}).length;
-  }, [bestScores]);
+  // Lọc theo quyển hiện tại
+  const currentBookExams = useMemo(() => {
+    return activeBook === 'book3' ? predictedExams : schoolExams;
+  }, [activeBook, predictedExams, schoolExams]);
 
-  // Lọc danh sách đề thi theo tab được chọn
+  // Áp dụng bộ lọc tìm kiếm và filter pills cho đề thi
   const filteredExams = useMemo(() => {
-    let list = exams || [];
+    let list = currentBookExams;
     if (activeFilter === 'free') {
       list = list.filter((e) => !e.is_pro);
     } else if (activeFilter === 'pro') {
       list = list.filter((e) => Boolean(e.is_pro));
-    } else if (activeFilter === 'qg') {
-      list = list.filter(
-        (e) =>
-          (e.title || '').toLowerCase().includes('quốc gia') ||
-          (e.title || '').toLowerCase().includes('bộ gd') ||
-          (e.title || '').toLowerCase().includes('chính thức')
-      );
-    } else if (activeFilter === 'provinces') {
-      list = list.filter(
-        (e) =>
-          (e.title || '').toLowerCase().includes('sở') ||
-          (e.title || '').toLowerCase().includes('chuyên') ||
-          (e.title || '').toLowerCase().includes('thử')
-      );
     } else if (activeFilter === 'completed') {
       list = list.filter((e) => Boolean(bestScores[e.id]));
     }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter((e) =>
+        (e.title || '').toLowerCase().includes(q) ||
+        (e.id || '').toLowerCase().includes(q)
+      );
+    }
     return list;
-  }, [exams, activeFilter, bestScores]);
+  }, [currentBookExams, activeFilter, searchQuery, bestScores]);
+
+  const freeCount = useMemo(() => currentBookExams.filter((e) => !e.is_pro).length, [currentBookExams]);
+  const proCount = useMemo(() => currentBookExams.filter((e) => Boolean(e.is_pro)).length, [currentBookExams]);
+  const completedCount = useMemo(() => currentBookExams.filter((e) => Boolean(bestScores[e.id])).length, [currentBookExams, bestScores]);
 
   return (
     <div id="page-exercises" className="page active min-h-screen bg-[#FAF5EB] font-sans antialiased text-[#382E2B]">
-      
-      {/* MOBILE LAYOUT (block lg:hidden) */}
-      <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-3 pwa-safe-top">
-        <section className="space-y-3 pt-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-2xl font-heading font-black tracking-tight text-[#382E2B] flex items-center gap-2">
-                <GraduationCap className="w-6 h-6 text-[#557A46] shrink-0" />
-                Luyện đề THPT
-              </h1>
-              <span className="inline-block px-2.5 py-0.5 text-xs font-black text-[#557A46] bg-[#E5EFE2] border border-[#8FB383] rounded-full rotate-[-2deg]">
-                {allExams.length}+ Đề
-              </span>
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-6">
+        
+        {/* Page Top Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b-2 border-[#3D352E]">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#EAF5E4] text-[#557A46] text-xs font-black border border-[#3D352E]">
+              <Compass className="w-3.5 h-3.5 text-[#557A46]" />
+              <span>CHƯƠNG TRÌNH TOÀN DIỆN THPT 2026 - 2027</span>
             </div>
-            <PenTool className="w-6 h-6 text-[#7D716A] shrink-0" />
+            <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#302A24] tracking-tight">
+              Lộ trình ôn thi THPT Quốc Gia
+            </h1>
+            <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
+              Bộ 3 quyển sách lộ trình: Ôn luyện từ chuyên đề nền tảng, thực chiến 38 đề trường sở đến 10 đề dự đoán mới nhất.
+            </p>
           </div>
 
-          <p className="text-xs text-[#7D716A] font-semibold leading-relaxed -mt-1">
-            Kho đề thi chuẩn ma trận Bộ GD&ĐT · Bấm giờ 50 phút tự động.
-          </p>
-
-          {/* Search bar */}
-          <div className="relative w-full">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm đề thi theo tỉnh, năm..."
-              className="w-full pl-9 pr-9 py-2.5 text-xs sm:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:ring-0 focus:outline-none placeholder:text-[#9C8F85] font-semibold"
-            />
-            <Search className="w-4 h-4 text-[#9C8F85] absolute left-3.5 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-[#7D716A] hover:text-[#382E2B]"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
+          <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
+            <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#FEF3C7] text-[#302A24]">
+              48 Đề thi
+            </span>
+            <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#EAF5E4] text-[#557A46]">
+              29 Chuyên đề
+            </span>
           </div>
+        </div>
 
-          {/* Mobile Filter Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 pb-1">
-            <button
-              type="button"
-              onClick={() => setActiveFilter('all')}
-              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === 'all'
-                  ? 'bg-[#382E2B] text-white shadow-[2px_2px_0px_#382E2B]'
-                  : 'bg-white text-[#382E2B]'
-              }`}
-            >
-              Tất cả ({allExams.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('free')}
-              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === 'free'
-                  ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#382E2B]'
-                  : 'bg-[#E5EFE2] text-[#4F7D4B]'
-              }`}
-            >
-              Miễn phí ({freeCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('pro')}
-              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === 'pro'
-                  ? 'bg-[#B87C24] text-white shadow-[2px_2px_0px_#382E2B]'
-                  : 'bg-[#FFE8C2] text-[#8C5311]'
-              }`}
-            >
-              <span className="inline-flex items-center gap-1"><Crown className="w-3.5 h-3.5 text-[#8C5311] shrink-0" /> Gói PRO ({proCount})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('qg')}
-              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === 'qg'
-                  ? 'bg-[#382E2B] text-white shadow-[2px_2px_0px_#382E2B]'
-                  : 'bg-white text-[#382E2B]'
-              }`}
-            >
-              Bộ GD&ĐT
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('provinces')}
-              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === 'provinces'
-                  ? 'bg-[#382E2B] text-white shadow-[2px_2px_0px_#382E2B]'
-                  : 'bg-white text-[#382E2B]'
-              }`}
-            >
-              Sở & Chuyên
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveFilter('completed')}
-              className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#382E2B] whitespace-nowrap transition-all cursor-pointer ${
-                activeFilter === 'completed'
-                  ? 'bg-[#5a7d4d] text-white shadow-[2px_2px_0px_#382E2B]'
-                  : 'bg-white text-[#382E2B]'
-              }`}
-            >
-              Đã làm ({completedCount})
-            </button>
-          </div>
-        </section>
-
-        {/* Mobile Exam List */}
-        <section className="mt-4 space-y-4">
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="w-10 h-10 border-3 border-[#5a7d4d]/30 border-t-[#5a7d4d] rounded-full animate-spin" />
-              <p className="text-xs font-bold text-[#7D716A]">Đang nạp danh sách đề thi...</p>
-            </div>
-          )}
-
-          {error && !loading && (
-            <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-6 text-center shadow-[3px_3px_0px_#382E2B]">
-              <AlertTriangle className="w-8 h-8 text-[#C85A3F] mx-auto mb-2 shrink-0" />
-              <p className="text-xs font-bold text-[#C85A3F]">{error}</p>
-            </div>
-          )}
-
-          {!loading && !error && filteredExams.length === 0 && (
-            <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-6 text-center shadow-[3px_3px_0px_#382E2B]">
-              <Search className="w-8 h-8 text-[#9C8F85] mx-auto mb-2 shrink-0" />
-              <h4 className="text-sm font-black text-[#382E2B]">Không tìm thấy đề thi</h4>
-              <p className="text-xs text-[#7D716A] mt-1 font-semibold">
-                Thử đổi từ khóa hoặc chọn tab Tất cả nhé!
-              </p>
-            </div>
-          )}
-
-          {!loading &&
-            !error &&
-            filteredExams.map((exam) => (
-              <ExamCard
-                key={exam.id}
-                exam={exam}
-                is_pro={exam.is_pro}
-                bestScore={bestScores[exam.id]}
-                onStart={handleStart}
-                onCustomTime={handleOpenCustomTime}
-              />
-            ))}
-        </section>
-      </div>
-
-      {/* DESKTOP LAYOUT (hidden lg:flex) */}
-      <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
-        <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
-          {/* Desktop Filter Pills & Search Bar */}
-          <div className="flex items-center justify-between gap-4 flex-wrap select-none">
-            <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => setActiveFilter('all')}
-                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
-                  activeFilter === 'all'
-                    ? 'bg-[#382E2B] text-white shadow-[2px_3px_0px_#382E2B]'
-                    : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
+        {/* 3 Books Interactive Selector */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4">
+          {BOOKS.map((book) => {
+            const isActive = activeBook === book.id;
+            const IconComponent = book.icon;
+            return (
+              <div
+                key={book.id}
+                onClick={() => {
+                  setActiveBook(book.id);
+                  setSearchQuery('');
+                  setActiveFilter('all');
+                }}
+                className={`rounded-3xl p-4 sm:p-5 border-[3px] border-[#3D352E] cursor-pointer transition-all flex flex-col justify-between ${
+                  isActive
+                    ? 'bg-[#FFFDF9] shadow-[5px_6px_0px_#3D352E] -translate-y-1 ring-2 ring-[#3D352E]'
+                    : 'bg-[#FFFDF9]/80 hover:bg-[#FFFDF9] shadow-[2px_3px_0px_#3D352E] hover:-translate-y-0.5'
                 }`}
               >
-                Tất cả đề ({allExams.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter('free')}
-                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
-                  activeFilter === 'free'
-                    ? 'bg-[#557A46] text-white shadow-[2px_3px_0px_#382E2B]'
-                    : 'bg-[#E5EFE2] text-[#4F7D4B] hover:bg-[#d8e8d4]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5"><Gift className="w-4 h-4 shrink-0" /> Đề Miễn Phí ({freeCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter('pro')}
-                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
-                  activeFilter === 'pro'
-                    ? 'bg-[#B87C24] text-white shadow-[2px_3px_0px_#382E2B]'
-                    : 'bg-[#FFE8C2] text-[#8C5311] hover:bg-[#fde0b2]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5"><Crown className="w-4 h-4 shrink-0" /> Gói PRO ({proCount})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter('qg')}
-                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
-                  activeFilter === 'qg'
-                    ? 'bg-[#382E2B] text-white shadow-[2px_3px_0px_#382E2B]'
-                    : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5"><Landmark className="w-4 h-4 shrink-0" /> Đề thi Bộ GD&ĐT</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter('provinces')}
-                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
-                  activeFilter === 'provinces'
-                    ? 'bg-[#382E2B] text-white shadow-[2px_3px_0px_#382E2B]'
-                    : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5"><School className="w-4 h-4 shrink-0" /> Đề thi thử Sở & Chuyên</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveFilter('completed')}
-                className={`px-4 py-2 rounded-2xl text-xs xl:text-sm font-black border-2 border-[#382E2B] transition-all cursor-pointer ${
-                  activeFilter === 'completed'
-                    ? 'bg-[#5a7d4d] text-white shadow-[2px_3px_0px_#382E2B]'
-                    : 'bg-white text-[#382E2B] hover:bg-[#FAF5EB]'
-                }`}
-              >
-                <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 shrink-0" /> Đã hoàn thành ({completedCount})</span>
-              </button>
-            </div>
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span
+                      className="px-2.5 py-0.5 rounded-xl text-xs font-black border border-[#3D352E]"
+                      style={{
+                        backgroundColor: isActive ? book.color : '#FAF5EB',
+                        color: isActive ? '#FFFFFF' : '#302A24',
+                      }}
+                    >
+                      {book.number}
+                    </span>
+                    <span className="text-[11px] font-black px-2 py-0.5 rounded-lg bg-[#FAF5EB] text-[#786F66] border border-[#3D352E]/30">
+                      {book.badge}
+                    </span>
+                  </div>
 
-            {/* Thanh tìm kiếm */}
-            <div className="relative w-72 xl:w-80 shrink-0">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm nhanh trường, tỉnh, năm thi..."
-                className="w-full pl-10 pr-9 py-2.5 text-xs xl:text-sm bg-white rounded-full border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] focus:outline-none focus:ring-0 placeholder:text-[#9C8F85] font-semibold transition-all"
-              />
-              <Search className="w-4 h-4 text-[#9C8F85] absolute left-3.5 top-1/2 -translate-y-1/2 shrink-0 pointer-events-none" />
-              {searchQuery && (
+                  <div className="flex items-start gap-2.5 mt-2">
+                    <div
+                      className="w-9 h-9 rounded-2xl border-2 border-[#3D352E] flex items-center justify-center shrink-0 mt-0.5 shadow-[1px_1px_0px_#3D352E]"
+                      style={{ backgroundColor: isActive ? book.color : '#FEF3C7', color: isActive ? '#FFFFFF' : '#302A24' }}
+                    >
+                      <IconComponent className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-black text-base sm:text-lg text-[#302A24] leading-snug">
+                        {book.title}
+                      </h3>
+                      <p className="text-xs font-semibold text-[#786F66] mt-1 line-clamp-2 leading-relaxed">
+                        {book.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-dashed border-[#DECDBB] flex items-center justify-between text-xs font-black">
+                  <span style={{ color: isActive ? book.color : '#786F66' }}>
+                    {isActive ? '• Đang mở quyển này' : 'Bấm để mở quyển'}
+                  </span>
+                  <span className={`w-6 h-6 rounded-full border border-[#3D352E] flex items-center justify-center text-xs ${
+                    isActive ? 'bg-[#3D352E] text-white' : 'bg-white text-[#302A24]'
+                  }`}>
+                    →
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ======================== CONTENT AREA ======================== */}
+
+        {activeBook === 'book2' ? (
+          /* QUYỂN 2: CHINH PHỤC 9+ THPT QUỐC GIA (29 CHUYÊN ĐỀ) */
+          <RoadmapChuyenDeView />
+        ) : (
+          /* QUYỂN 1 (38 ĐỀ TRƯỜNG, SỞ) HOẶC QUYỂN 3 (BỘ 10 ĐỀ DỰ ĐOÁN) */
+          <div className="space-y-5">
+            {/* Book Intro & Search Toolbar */}
+            <div className="rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-4 sm:p-6 space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg sm:text-xl font-heading font-black text-[#302A24]">
+                    {activeBook === 'book1' ? 'Quyển 1: 38 đề THPT trường, sở' : 'Quyển 3: Bộ 10 đề dự đoán THPT 2026'}
+                  </h2>
+                  <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
+                    {activeBook === 'book1'
+                      ? 'Tổng hợp 38 đề thi chính thức & khảo sát chất lượng từ các trường THPT Chuyên và Sở GD&ĐT.'
+                      : 'Bộ 10 đề thi phát triển theo đúng ma trận cấu trúc minh họa mới nhất của Bộ Giáo dục và Đào tạo (40 câu / 50 phút).'}
+                  </p>
+                </div>
+                <div className="px-3 py-1 rounded-2xl bg-[#EAF5E4] text-[#557A46] font-black text-xs border border-[#3D352E] shrink-0">
+                  {currentBookExams.length} Đề thi
+                </div>
+              </div>
+
+              {/* Search Bar */}
+              <div className="relative w-full">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={activeBook === 'book1' ? 'Tìm đề thi theo tỉnh, trường (Hà Nội, Sư Phạm, Chuyên Lam Sơn...)' : 'Tìm theo số đề (Đề 01, Đề 02...)'}
+                  className="w-full pl-9 pr-9 py-2.5 text-xs sm:text-sm bg-white rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] focus:ring-0 focus:outline-none placeholder:text-[#9C8F85] font-semibold text-[#302A24]"
+                />
+                <Search className="w-4 h-4 text-[#9C8F85] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-[#786F66] hover:text-[#302A24]"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-black text-[#766C5F] hover:text-[#382E2B] p-1 cursor-pointer"
+                  onClick={() => setActiveFilter('all')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#3D352E] whitespace-nowrap transition-all cursor-pointer ${
+                    activeFilter === 'all'
+                      ? 'bg-[#3D352E] text-white shadow-[2px_2px_0px_#3D352E]'
+                      : 'bg-white text-[#302A24] hover:bg-[#FAF5EB]'
+                  }`}
                 >
-                  <X className="w-3.5 h-3.5" />
+                  Tất cả ({currentBookExams.length})
                 </button>
-              )}
+                <button
+                  type="button"
+                  onClick={() => setActiveFilter('free')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#3D352E] whitespace-nowrap transition-all cursor-pointer ${
+                    activeFilter === 'free'
+                      ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]'
+                      : 'bg-[#EAF5E4] text-[#4F7D4B] hover:bg-[#dcead4]'
+                  }`}
+                >
+                  Miễn phí ({freeCount})
+                </button>
+                {proCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter('pro')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#3D352E] whitespace-nowrap transition-all cursor-pointer ${
+                      activeFilter === 'pro'
+                        ? 'bg-[#B87C24] text-white shadow-[2px_2px_0px_#3D352E]'
+                        : 'bg-[#FFF6E6] text-[#B87C24] hover:bg-[#fceece]'
+                    }`}
+                  >
+                    Gói PRO ({proCount})
+                  </button>
+                )}
+                {completedCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveFilter('completed')}
+                    className={`px-3 py-1.5 rounded-full text-xs font-black border-2 border-[#3D352E] whitespace-nowrap transition-all cursor-pointer ${
+                      activeFilter === 'completed'
+                        ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]'
+                        : 'bg-white text-[#302A24]'
+                    }`}
+                  >
+                    Đã hoàn thành ({completedCount})
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div className="text-xs font-black text-[#766C5F]">
-            Hiển thị <span className="text-[#D36135]">{filteredExams.length}</span> đề thi phù hợp
-          </div>
-
-          {/* Exam Grid */}
-          <section className="pb-16">
+            {/* Exam Cards Grid */}
             {loading && (
-              <div className="flex flex-col items-center justify-center py-24 gap-4">
-                <div className="w-12 h-12 border-4 border-[#5a7d4d]/30 border-t-[#5a7d4d] rounded-full animate-spin" />
-                <p className="text-sm font-bold text-[#766C5F]">Đang nạp ngân hàng đề thi THPT...</p>
+              <div className="flex flex-col items-center justify-center py-20 gap-3">
+                <div className="w-10 h-10 border-4 border-[#557A46] border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs font-bold text-[#7D716A]">Đang tải danh sách đề thi...</p>
               </div>
             )}
 
             {error && !loading && (
-              <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-12 text-center shadow-[3px_4px_0px_#382E2B] max-w-lg mx-auto">
-                <AlertTriangle className="w-12 h-12 text-[#C85A3F] mx-auto mb-3 shrink-0" />
-                <h3 className="text-base font-black text-[#382E2B]">Không thể tải danh sách đề thi</h3>
-                <p className="text-xs text-[#766C5F] mt-1 font-semibold">{error}</p>
-                <button
-                  type="button"
-                  onClick={() => window.location.reload()}
-                  className="mt-4 px-5 py-2.5 rounded-2xl bg-[#5a7d4d] text-white text-xs font-black border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer"
-                >
-                  Tải lại trang
-                </button>
+              <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-6 text-center shadow-[3px_3px_0px_#382E2B]">
+                <AlertTriangle className="w-8 h-8 text-[#C85A3F] mx-auto mb-2 shrink-0" />
+                <p className="text-xs font-bold text-[#C85A3F]">{error}</p>
               </div>
             )}
 
             {!loading && !error && filteredExams.length === 0 && (
-              <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-12 text-center shadow-[3px_4px_0px_#382E2B] max-w-lg mx-auto">
-                <Search className="w-12 h-12 text-[#9C8F85] mx-auto mb-3 shrink-0" />
-                <h3 className="text-base font-black text-[#382E2B]">Không tìm thấy đề thi phù hợp</h3>
-                <p className="text-xs text-[#766C5F] mt-1 font-semibold">
-                  Không có đề thi nào khớp với bộ lọc đang chọn.
+              <div className="bg-white rounded-3xl border-2 border-[#382E2B] p-8 text-center shadow-[3px_3px_0px_#382E2B]">
+                <Search className="w-8 h-8 text-[#9C8F85] mx-auto mb-2 shrink-0" />
+                <h4 className="text-sm font-black text-[#382E2B]">Không tìm thấy đề thi</h4>
+                <p className="text-xs text-[#7D716A] mt-1 font-semibold">
+                  Thử đổi từ khóa hoặc chọn tab Tất cả nhé!
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearchQuery('');
-                    setActiveFilter('all');
-                  }}
-                  className="mt-4 px-5 py-2 rounded-2xl bg-[#FAF5EB] text-[#382E2B] text-xs font-black border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer"
-                >
-                  Xoá bộ lọc tìm kiếm
-                </button>
               </div>
             )}
 
-            {!loading && !error && filteredExams.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {!loading && !error && (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filteredExams.map((exam) => (
                   <ExamCard
                     key={exam.id}
@@ -388,16 +362,17 @@ export function PageExercises() {
                 ))}
               </div>
             )}
-          </section>
-        </div>
+          </div>
+        )}
+
       </div>
 
+      {/* Modal chỉnh thời gian làm bài */}
       {customTimeModal && (
         <ExamCustomTimeModal
-          examId={customTimeModal.examId}
           examTitle={customTimeModal.examTitle}
-          onStart={handleCustomTimeStart}
-          onCancel={() => setCustomTimeModal(null)}
+          onConfirm={(minutes) => handleCustomTimeStart(customTimeModal.examId, minutes)}
+          onClose={() => setCustomTimeModal(null)}
         />
       )}
     </div>

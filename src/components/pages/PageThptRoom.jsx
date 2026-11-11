@@ -76,7 +76,7 @@ export function PageThptRoom() {
         // A. Kiểm tra metadata đề thi từ cache summaries để xác định cờ is_pro
         let summary = null;
         try {
-          const cachedSummaries = sessionStorage.getItem('thpt_exams_summaries_v20261030');
+          const cachedSummaries = sessionStorage.getItem('thpt_exams_summaries_v20261111');
           if (cachedSummaries) {
             const arr = JSON.parse(cachedSummaries);
             if (Array.isArray(arr)) {
