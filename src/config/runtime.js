@@ -12,7 +12,9 @@ export const SUPABASE_ANON_KEY = String(
   viteEnv.VITE_SUPABASE_ANON_KEY || nodeEnv.VITE_SUPABASE_ANON_KEY || "",
 ).trim();
 export const TURNSTILE_SITE_KEY = String(
-  viteEnv.VITE_TURNSTILE_SITE_KEY || nodeEnv.VITE_TURNSTILE_SITE_KEY || "0x4AAAAAAE9CY0FtESpbO_Cj",
+  viteEnv.VITE_TURNSTILE_SITE_KEY ||
+    nodeEnv.VITE_TURNSTILE_SITE_KEY ||
+    "0x4AAAAAAE9CY0FtESpbO_Cj",
 ).trim();
 
 export function assertClientConfiguration() {

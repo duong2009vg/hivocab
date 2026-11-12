@@ -224,7 +224,7 @@ export function ChapterStudyView({ exercise, onBack }) {
             {paras.map((para, pIdx) => {
               const isTitle = pIdx === 0 && (para.length < 80 || para.startsWith('【') || para.includes('📢') || para.includes('🚀') || para.includes('🚴') || para.includes('CYCLING'));
               const isSource = para.toLowerCase().includes('adapted from') || para.toLowerCase().includes('source');
-              const isBullet = /^[•\-\*🥗📚📢]\s*|^[1-6]\.\s+/.test(para);
+              const isBullet = /^[•\-*🥗📚📢]\s*|^[1-6]\.\s+/u.test(para);
 
               if (isTitle) {
                 return (
