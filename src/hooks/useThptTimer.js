@@ -32,9 +32,9 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
 
     intervalRef.current = setInterval(() => {
       setSecondsLeft(prev => {
-        // Chế độ luyện tập không giới hạn thời gian (initialSeconds === 0): đếm tiến
+        // Chế độ luyện tập không giới hạn thời gian (initialSeconds === 0): hiển thị 99:99 không đếm lùi
         if (initialSeconds === 0) {
-          return prev + 1;
+          return 0;
         }
         if (prev <= 1) {
           clearInterval(intervalRef.current);
@@ -54,6 +54,9 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
 
   // Format mm:ss display
   const displayText = (() => {
+    if (initialSeconds === 0) {
+      return '99:99';
+    }
     const m = Math.floor(secondsLeft / 60);
     const s = secondsLeft % 60;
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;

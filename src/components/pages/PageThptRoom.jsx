@@ -154,17 +154,17 @@ export function PageThptRoom() {
                   index: sections.length + 1,
                   part: sections.length + 1,
                   name: p ? `Bài đọc ${sections.length + 1}` : 'Câu hỏi độc lập',
-                  type: q.is_arrangement ? 'arrangement' : p ? 'reading' : 'theory',
+                  type: q.is_arrangement ? 'arrangement' : p ? 'reading' : 'grammar',
                   startQ: q.number,
                   endQ: q.number,
                   start_q: q.number,
                   end_q: q.number,
                   from_question: q.number,
                   to_question: q.number,
-                  instruction: 'Đọc kỹ ngữ liệu và chọn phương án trả lời đúng.',
-                  passage: p || theoryText || '',
-                  raw_text: p || theoryText || '',
-                  paragraphs: p ? p.split(/\n\s*\n/).filter(Boolean) : [theoryText],
+                  instruction: p ? 'Đọc kỹ ngữ liệu và chọn phương án trả lời đúng.' : 'Chọn phương án trả lời đúng cho từng câu hỏi.',
+                  passage: p || '',
+                  raw_text: p || '',
+                  paragraphs: p ? p.split(/\n\s*\n/).filter(Boolean) : [],
                 };
                 sections.push(currentSec);
               } else {
@@ -174,23 +174,23 @@ export function PageThptRoom() {
               }
             });
           } else {
-            // Không có bài đọc riêng (ngữ pháp / từ vựng) -> Cột trái hiển thị Lý thuyết chuyên đề
+            // Không có bài đọc riêng (ngữ pháp / từ vựng trắc nghiệm thuần túy): tuyệt đối không lôi lý thuyết vào
             sections = [
               {
                 index: 1,
                 part: 1,
-                name: config.exerciseTitle || 'Lý thuyết trọng tâm & Chiến thuật',
-                type: 'theory',
+                name: 'Phần câu hỏi độc lập',
+                type: 'grammar',
                 startQ: 1,
                 endQ: normalizedQuestions.length,
                 start_q: 1,
                 end_q: normalizedQuestions.length,
                 from_question: 1,
                 to_question: normalizedQuestions.length,
-                instruction: 'Ôn tập lý thuyết ở cột bên trái và làm bài tập thực hành ở cột bên phải.',
-                passage: theoryText || '',
-                raw_text: theoryText || '',
-                paragraphs: theoryText ? theoryText.split(/\n\s*\n/).filter(Boolean) : [],
+                instruction: 'Chọn phương án trả lời đúng cho từng câu hỏi trắc nghiệm.',
+                passage: '',
+                raw_text: '',
+                paragraphs: [],
               },
             ];
           }
@@ -229,7 +229,7 @@ export function PageThptRoom() {
         // A. Kiểm tra metadata đề thi từ cache summaries để xác định cờ is_pro
         let summary = null;
         try {
-          const cachedSummaries = sessionStorage.getItem('thpt_exams_summaries_v20261111');
+          const cachedSummaries = sessionStorage.getItem('thpt_exams_summaries_v20261112_v3');
           if (cachedSummaries) {
             const arr = JSON.parse(cachedSummaries);
             if (Array.isArray(arr)) {
@@ -285,7 +285,7 @@ export function PageThptRoom() {
         // Fallback sang tệp JSON tĩnh nếu Supabase không có hoặc offline
         if (!examData) {
           try {
-            const res = await fetch(`data/thpt_exams.json?v=20260929`);
+            const res = await fetch(`data/thpt_exams.json?v=20261112_v3`);
             if (res.ok) {
               const arr = await res.json();
               examData = arr.find((e) => e.id === examId);
@@ -494,8 +494,16 @@ export function PageThptRoom() {
         answeredCount={session.answeredCount}
         isReviewMode={session.isReviewMode}
         results={session.results}
-        timerDisplay={timer.displayText}
-        isTimerWarning={timer.isWarning}
+        timerDisplay={
+          session.exam?.is_exercise || window._thptStartConfig?.isExercise || session.exam?.duration_minutes === 0
+            ? '99:99'
+            : timer.displayText
+        }
+        isTimerWarning={
+          session.exam?.is_exercise || window._thptStartConfig?.isExercise || session.exam?.duration_minutes === 0
+            ? false
+            : timer.isWarning
+        }
         mobileView={session.mobileView}
         onPrev={session.prevQuestion}
         onNext={() => session.nextQuestion(session.exam?.total_questions || 40)}

@@ -17,8 +17,10 @@ import {
   LayoutGrid,
   FileText,
   AlignLeft,
-  GraduationCap
+  GraduationCap,
+  Clock
 } from 'lucide-react';
+import { TheoryContentRenderer } from './TheoryContentRenderer.jsx';
 import { getExerciseTheory, getExerciseQuestions, saveExerciseScore } from '../../services/exercisesService.js';
 import { formatBlanksInHtml, escHtml } from '../../utils/thptPassageUtils.js';
 import { useRoute } from '../../router/RouteContext.jsx';
@@ -117,85 +119,6 @@ export function ChapterStudyView({ exercise, onBack }) {
   const answeredCount = Object.keys(userAnswers).length;
   const correctCount = Object.values(userAnswers).filter(a => a.isCorrect).length;
   const scorePercent = questions.length > 0 ? Math.round((correctCount / questions.length) * 100) : 0;
-
-  // Render formatted theory text cleanly
-  const renderTheoryContent = (text) => {
-    if (!text) {
-      return (
-        <div className="py-12 text-center text-[#786F66]">
-          Chưa có nội dung lý thuyết cho bài học này.
-        </div>
-      );
-    }
-
-    const lines = text.split('\n');
-    return lines.map((line, idx) => {
-      const trimmed = line.trim();
-      if (!trimmed) return <div key={idx} className="h-3" />;
-
-      // Header 1 / Title
-      if (trimmed.startsWith('Dạng câu hỏi') || trimmed.startsWith('CHUYÊN ĐỀ') || trimmed.startsWith('CHIẾN THUẬT')) {
-        return (
-          <h2 key={idx} className="text-lg sm:text-xl font-heading font-black text-[#302A24] mt-5 mb-2 pb-1 border-b-2 border-[#3D352E]">
-            {trimmed}
-          </h2>
-        );
-      }
-
-      // Subheader / Section
-      if (/^\d+\.\d+/.test(trimmed)) {
-        return (
-          <h3 key={idx} className="text-base sm:text-lg font-heading font-extrabold text-[#557A46] mt-4 mb-1.5 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#557A46] shrink-0" />
-            {trimmed}
-          </h3>
-        );
-      }
-
-      // Examples / Highlights
-      if (trimmed.startsWith('🔶') || trimmed.startsWith('Ví dụ') || trimmed.startsWith('Example')) {
-        return (
-          <div key={idx} className="mt-3 p-3 rounded-2xl bg-[#FEF3C7] border-2 border-[#3D352E] font-bold text-xs sm:text-sm text-[#302A24]">
-            {trimmed}
-          </div>
-        );
-      }
-
-      // Notes / Rules Callout
-      if (trimmed.startsWith('🔵') || trimmed.startsWith('Notes:')) {
-        return (
-          <div key={idx} className="mt-2.5 p-3 rounded-2xl bg-[#EAF5E4] border-2 border-[#3D352E] font-medium text-xs sm:text-sm text-[#302A24]">
-            {trimmed}
-          </div>
-        );
-      }
-
-      // Bullet points
-      if (trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
-        return (
-          <li key={idx} className="ml-4 list-disc text-xs sm:text-sm text-[#4A4036] font-medium leading-relaxed my-0.5">
-            {trimmed.replace(/^[-•]\s*/, '')}
-          </li>
-        );
-      }
-
-      // Numbered rule: e.g. "1. Sau to be..."
-      if (/^\d+\.\s/.test(trimmed)) {
-        return (
-          <div key={idx} className="py-1 px-2.5 my-1 rounded-xl bg-white border border-[#3D352E]/30 text-xs sm:text-sm font-semibold text-[#302A24]">
-            {trimmed}
-          </div>
-        );
-      }
-
-      // Normal text
-      return (
-        <p key={idx} className="text-xs sm:text-sm text-[#4A4036] font-medium leading-relaxed my-1">
-          {trimmed}
-        </p>
-      );
-    });
-  };
 
   // Render Left Panel Passage Content
   const renderPassagePanel = () => {
@@ -304,25 +227,33 @@ export function ChapterStudyView({ exercise, onBack }) {
       );
     }
 
-    // Case 3: Standalone Grammar Questions -> Show Chapter Theory & Key Rules Summary!
+    // Case 3: Standalone Grammar Questions -> Show Exam Paper Focus Card (Tuyệt đối không lôi lý thuyết vào làm bài)
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#EFE8D6]">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-xl bg-blue-100 text-blue-800">
-              <GraduationCap className="w-4 h-4" />
-            </span>
-            <span className="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#3D352E]">
-              Lý thuyết & Quy tắc trọng tâm
-            </span>
-          </div>
-          <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
-            Cẩm nang tra cứu
+      <div className="p-6 sm:p-8 rounded-3xl bg-[#FFFDF9] border-2 border-[#DECDBB] shadow-xs text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-[#EAF5E4] text-[#557A46] flex items-center justify-center mx-auto shadow-2xs">
+          <GraduationCap className="w-6 h-6" />
+        </div>
+        <div>
+          <span className="text-[11px] font-black uppercase tracking-wider text-[#557A46] bg-[#EAF5E4] px-3 py-1 rounded-full border border-[#557A46]/20">
+            Chuyên đề 9+ THPT
           </span>
+          <h3 className="font-heading font-black text-base sm:text-lg text-[#302A24] mt-2">
+            Câu hỏi trắc nghiệm độc lập
+          </h3>
+          <p className="text-xs sm:text-sm text-[#786F66] mt-1 max-w-md mx-auto leading-relaxed">
+            Phần này kiểm tra kiến thức độc lập (ngữ pháp, từ vựng, phát âm). Hãy đọc kỹ câu hỏi và chọn 1 trong 4 phương án ở cột bên phải.
+          </p>
         </div>
 
-        <div className="prose max-w-none text-[#302A24] text-xs sm:text-sm">
-          {renderTheoryContent(theoryText)}
+        <div className="pt-3 border-t border-dashed border-[#DECDBB] flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('theory')}
+            className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-bold text-xs border border-[#3D352E]/30 flex items-center gap-1.5 cursor-pointer transition-all"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-[#557A46]" />
+            <span>Mở lại tab Lý thuyết chuyên đề</span>
+          </button>
         </div>
       </div>
     );
@@ -394,35 +325,14 @@ export function ChapterStudyView({ exercise, onBack }) {
           <p className="text-xs font-bold text-[#786F66]">Đang tải nội dung chuyên đề...</p>
         </div>
       ) : activeTab === 'theory' ? (
-        /* ======================== TAB 1: LÝ THUYẾT ======================== */
-        <div className="space-y-6">
-          <div className="rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-5 sm:p-8">
-            <div className="prose max-w-none text-[#302A24]">
-              {renderTheoryContent(theoryText)}
-            </div>
-
-            {/* Bottom Callout to switch to practice */}
-            <div className="mt-8 pt-6 border-t-2 border-dashed border-[#DECDBB] text-center">
-              <div className="max-w-md mx-auto p-4 rounded-2xl bg-[#EAF5E4] border-2 border-[#3D352E] mb-4">
-                <p className="font-heading font-black text-sm text-[#302A24]">
-                  Bạn đã nắm vững toàn bộ kiến thức lý thuyết & ví dụ của chuyên đề này chưa?
-                </p>
-                <p className="text-xs text-[#557A46] font-bold mt-1">
-                  Hãy bắt tay vào luyện tập ngay {questions.length} câu hỏi thực chiến theo đúng format phòng thi THPT!
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleStartPractice}
-                className="py-3 px-8 rounded-2xl bg-[#D97706] hover:bg-[#B45309] text-white font-heading font-black text-sm sm:text-base border-[3px] border-[#3D352E] shadow-[3px_4px_0px_#3D352E] cursor-pointer active:scale-95 transition-all inline-flex items-center gap-2"
-              >
-                <span>Bắt đầu làm bài tập ngay ({questions.length} câu)</span>
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
+        /* ======================== TAB 1: LÝ THUYẾT HIỆN ĐẠI & KHOA HỌC ======================== */
+        <TheoryContentRenderer
+          theoryText={theoryText}
+          chapterTitle={exercise.title}
+          onStartPractice={() => setActiveTab('practice')}
+          onOpenExamRoom={handleStartPractice}
+          questionCount={questions.length}
+        />
       ) : (
         /* ======================== TAB 2: PHÒNG LUYỆN ĐỀ SPLIT FORMAT ======================== */
         <div className="space-y-4">
@@ -465,6 +375,13 @@ export function ChapterStudyView({ exercise, onBack }) {
             </div>
 
             <div className="flex items-center gap-2">
+              <div
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 py-1 rounded-xl bg-[#FFFDF9] text-[#8C5311] border border-[#EFE8D6] font-mono font-bold text-xs shadow-2xs"
+                title="Thời gian làm bài luyện tập không giới hạn"
+              >
+                <Clock className="w-3.5 h-3.5 text-amber-500" />
+                <span className="tabular-nums">99:99</span>
+              </div>
               <div className="px-2.5 py-1 rounded-xl bg-[#EAF5E4] text-[#557A46] font-black text-xs border border-[#3D352E]">
                 Đúng: {correctCount}/{answeredCount} ({scorePercent}%)
               </div>

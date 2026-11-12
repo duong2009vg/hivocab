@@ -74,7 +74,7 @@ export async function getExerciseTheory(exerciseId) {
   // 1. Kiểm tra cache
   if (!EXERCISES_MEM.theories) {
     try {
-      const res = await fetch('/data/hivocab_29_chuyen_de_ly_thuyet.json');
+      const res = await fetch('/data/hivocab_29_chuyen_de_ly_thuyet.json?v=20261112_v3');
       if (res.ok) {
         const json = await res.json();
         EXERCISES_MEM.theories = json.theories || [];

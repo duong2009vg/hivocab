@@ -339,6 +339,40 @@ function buildTheorySectionHtml(sec) {
     </div>`;
 }
 
+/** Render a standalone grammar/vocabulary question section card. */
+function buildStandaloneSectionHtml(sec) {
+  const { startQ, endQ } = getSecRange(sec);
+  return `
+    <div id="passage-sec-${sec.index}"
+         class="passage-sec-card p-6 md:p-8 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-4 font-sans text-center">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D6]">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
+            ${sec.index}
+          </span>
+          <h3 class="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#2D2422]">
+            ${escHtml(sec.name || 'Phần câu hỏi độc lập')}
+          </h3>
+        </div>
+        <span class="text-[11px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20">
+          Câu ${startQ} - ${endQ}
+        </span>
+      </div>
+
+      <div class="py-8 px-4 rounded-xl bg-[#FAF8F5] border border-[#EFE8D6]/80 space-y-2.5">
+        <div class="w-11 h-11 rounded-2xl bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xl flex items-center justify-center mx-auto">
+          ✍️
+        </div>
+        <h4 class="font-heading font-bold text-sm sm:text-base text-[#2D2422]">
+          Câu hỏi trắc nghiệm độc lập
+        </h4>
+        <p class="text-xs text-[#6B5A4E] max-w-sm mx-auto leading-relaxed">
+          ${escHtml(sec.instruction || 'Đọc kỹ câu hỏi và lựa chọn phương án trả lời đúng ở cột câu hỏi bên phải.')}
+        </p>
+      </div>
+    </div>`;
+}
+
 // ---------------------------------------------------------------------------
 // Word / sentence highlight helpers (DOM mutation, no state)
 // ---------------------------------------------------------------------------
@@ -530,7 +564,15 @@ export function ExamPassagePanel({
         if (sec.type === 'theory') {
           return buildTheorySectionHtml(sec);
         }
+        if (sec.type === 'grammar') {
+          return buildStandaloneSectionHtml(sec);
+        }
         const { startQ, endQ } = getSecRange(sec);
+        const hasPassage = Boolean(
+          sec.passage ||
+          sec.rawText ||
+          (Array.isArray(sec.paragraphs) && sec.paragraphs.length > 0)
+        );
         const isArrangement =
           sec.type === 'arrangement' ||
           questions.some((q) => {
@@ -541,9 +583,16 @@ export function ExamPassagePanel({
               (q.is_arrangement || q.question_type === 'sentence_arrangement')
             );
           });
-        return isArrangement
-          ? buildArrangementSectionHtml(sec, questions)
-          : buildReadingSectionHtml(sec, questions);
+        if (isArrangement) {
+          return buildArrangementSectionHtml(sec, questions);
+        }
+        if (!hasPassage && !questions.some((q) => {
+          const num = q.number ?? q.question_number;
+          return num >= startQ && num <= endQ && (q.passage || q.context_passage);
+        })) {
+          return buildStandaloneSectionHtml(sec);
+        }
+        return buildReadingSectionHtml(sec, questions);
       })
       .join('\n');
   }, [sections, exam]);

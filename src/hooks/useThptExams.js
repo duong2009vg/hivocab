@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 
-const EXAMS_CACHE_KEY = 'thpt_exams_summaries_v20261111';
+const EXAMS_CACHE_KEY = 'thpt_exams_summaries_v20261112_v3';
 const BEST_SCORES_KEY = 'thpt_best_scores';
 
 function removeAccents(str) {
@@ -81,7 +81,7 @@ export function useThptExams() {
         }
 
         // 3. Fallback sang tệp JSON tĩnh nếu Supabase gặp lỗi
-        const res = await fetch('data/thpt_exams.json?v=20260929');
+        const res = await fetch('data/thpt_exams.json?v=20261112_v3');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         if (!cancelled) {
