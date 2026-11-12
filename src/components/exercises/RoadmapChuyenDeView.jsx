@@ -41,6 +41,15 @@ export function RoadmapChuyenDeView() {
         if (!cancelled) {
           setExercises(list);
           setScores(getExerciseScores());
+
+          // Khôi phục chuyên đề đang mở nếu người dùng vừa quay lại từ phòng thi THPT
+          const resumeId = sessionStorage.getItem('hv_chuyende_active_id');
+          if (resumeId) {
+            const match = list.find((e) => e.id === resumeId);
+            if (match) {
+              setSelectedExercise(match);
+            }
+          }
         }
       } catch (err) {
         console.error('Error loading exercises:', err);
@@ -78,6 +87,7 @@ export function RoadmapChuyenDeView() {
       <ChapterStudyView
         exercise={selectedExercise}
         onBack={() => {
+          sessionStorage.removeItem('hv_chuyende_active_id');
           setSelectedExercise(null);
           setScores(getExerciseScores());
         }}

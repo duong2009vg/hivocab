@@ -3,6 +3,7 @@
 // answers, flags, currentQIndex, review mode, results, progress save/load
 
 import { useState, useCallback, useRef } from 'react';
+import { saveExerciseScore } from '../services/exercisesService.js';
 
 const BEST_SCORES_KEY = 'thpt_best_scores';
 
@@ -148,7 +149,9 @@ export function useThptSession() {
 
     const totalQ = currentExam.total_questions;
     const score = Math.round((correctCount / totalQ) * 10 * 100) / 100;
-    const timeSpentSeconds = (initialSecondsRef.current || 0) - (currentTimerSecs || 0);
+    const timeSpentSeconds = (initialSecondsRef.current || 0) === 0
+      ? (currentTimerSecs || 0)
+      : Math.max(0, (initialSecondsRef.current || 0) - (currentTimerSecs || 0));
 
     const res = {
       examId: currentExam.id,
@@ -165,6 +168,11 @@ export function useThptSession() {
     };
 
     saveBestScore(currentExam.id, res);
+    if (currentExam.is_exercise) {
+      try {
+        saveExerciseScore(currentExam.id, correctCount, totalQ);
+      } catch (_) {}
+    }
     try {
       localStorage.setItem('thpt_progress_' + currentExam.id, JSON.stringify({
         examId: currentExam.id, submitted: true, results: res,

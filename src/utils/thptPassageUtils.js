@@ -238,9 +238,20 @@ export function extractHighlightTarget(prompt) {
   const mPara = paraPat.exec(prompt);
   const paraIndex = mPara ? (parseInt(mPara[1], 10) - 1) : null;
 
+  // 1. Quoted word/phrase: the word "sensible" in paragraph 2
   const wordPat = /(?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+[\u201c\u201d\u2018\u2019"']([^\u201c\u201d\u2018\u2019"'\n]{1,80})[\u201c\u201d\u2018\u2019"']/i;
   const mWord = wordPat.exec(prompt);
   if (mWord) return { type: 'word', word: mWord[1].trim(), paraIndex };
+
+  // 2. Formatted word/phrase: the word **sensible** in paragraph 2
+  const boldPat = /(?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+\*{1,2}(?:\{\{U\}\})?([^\*\n]{1,80}?)(?:\{\{\/U\}\})?\*{1,2}/i;
+  const mBold = boldPat.exec(prompt);
+  if (mBold) return { type: 'word', word: mBold[1].trim(), paraIndex };
+
+  // 3. Unquoted word/phrase before 'in paragraph': the word sensible in paragraph 2
+  const unquotedPat = /(?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+([a-zA-Z0-9\s\-_’']{1,50})\s+in\s+paragraph/i;
+  const mUnquoted = unquotedPat.exec(prompt);
+  if (mUnquoted) return { type: 'word', word: mUnquoted[1].trim(), paraIndex };
 
   const sentPat = /(?:underlined\s+sentence|câu\s+(?:được\s+)?gạch\s+chân)/i;
   if (sentPat.test(prompt)) return { type: 'sentence', paraIndex };

@@ -331,6 +331,7 @@ function ArrangementPrompt({ qNum, q, fontSizeClass }) {
 
 function QuestionCard({
   q,
+  exam,
   qIndex,
   currentQIndex,
   answers,
@@ -347,6 +348,10 @@ function QuestionCard({
   const isCurrent = qIndex === currentQIndex;
   const userAnswer = answers?.[qNum] ?? null;
   const isFlagged = Boolean(flags?.[qNum]);
+  const isExercise = Boolean(exam?.is_exercise);
+
+  // Ở chế độ luyện tập 29 chuyên đề: hiển thị giải thích và kết quả ngay khi chọn đáp án
+  const showReview = isReviewMode || (isExercise && Boolean(userAnswer));
 
   const correctAnswer = useMemo(() => {
     if (results?.answers) return results.answers[qNum] ?? q.correct_answer ?? null;
@@ -416,7 +421,7 @@ function QuestionCard({
       {isArrangement && <ArrangementPrompt qNum={qNum} q={q} fontSizeClass={fontSizeClass} />}
 
       {/* ── Review banner ───────────────────────────────────────────── */}
-      {isReviewMode && (
+      {showReview && (
         <ReviewBanner
           qNum={qNum}
           userAnswer={userAnswer}
@@ -440,8 +445,8 @@ function QuestionCard({
               letter={letter}
               text={optText}
               userAnswer={userAnswer}
-              correctAnswer={isReviewMode ? correctAnswer : null}
-              isReviewMode={isReviewMode}
+              correctAnswer={showReview ? correctAnswer : null}
+              isReviewMode={showReview}
               qNum={qNum}
               fontSizeClass={fontSizeClass}
               onSelectAnswer={onSelectAnswer}
@@ -451,7 +456,7 @@ function QuestionCard({
       </div>
 
       {/* ── Solution box ────────────────────────────────────────────── */}
-      {isReviewMode && <SolutionBox explanation={q.explanation} fontSizeClass={fontSizeClass} />}
+      {showReview && <SolutionBox explanation={q.explanation} fontSizeClass={fontSizeClass} />}
     </div>
   );
 }
@@ -498,6 +503,7 @@ export function ExamQuestionsPanel({
         <QuestionCard
           key={q.number ?? idx}
           q={q}
+          exam={exam}
           qIndex={idx}
           currentQIndex={currentQIndex}
           answers={answers}

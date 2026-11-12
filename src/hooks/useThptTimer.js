@@ -32,6 +32,10 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
 
     intervalRef.current = setInterval(() => {
       setSecondsLeft(prev => {
+        // Chế độ luyện tập không giới hạn thời gian (initialSeconds === 0): đếm tiến
+        if (initialSeconds === 0) {
+          return prev + 1;
+        }
         if (prev <= 1) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
@@ -46,11 +50,10 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isRunning]);
+  }, [isRunning, initialSeconds]);
 
   // Format mm:ss display
   const displayText = (() => {
-    if (initialSeconds === 0) return 'Không giới hạn';
     const m = Math.floor(secondsLeft / 60);
     const s = secondsLeft % 60;
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;

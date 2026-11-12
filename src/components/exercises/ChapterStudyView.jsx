@@ -21,12 +21,29 @@ import {
 } from 'lucide-react';
 import { getExerciseTheory, getExerciseQuestions, saveExerciseScore } from '../../services/exercisesService.js';
 import { formatBlanksInHtml, escHtml } from '../../utils/thptPassageUtils.js';
+import { useRoute } from '../../router/RouteContext.jsx';
 
 export function ChapterStudyView({ exercise, onBack }) {
+  const { navigateTo } = useRoute();
   const [activeTab, setActiveTab] = useState('theory'); // 'theory' | 'practice'
   const [theoryText, setTheoryText] = useState('');
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Khởi động phòng làm bài thi THPT cho chuyên đề
+  const handleStartPractice = useCallback(() => {
+    sessionStorage.setItem('hv_roadmap_open_book', 'book2');
+    sessionStorage.setItem('hv_chuyende_active_id', exercise.id);
+    window._thptStartConfig = {
+      examId: exercise.id,
+      exerciseId: exercise.id,
+      isExercise: true,
+      exerciseTitle: exercise.title,
+      topicGroup: exercise.topic_group,
+      minutes: 0,
+    };
+    navigateTo('thpt-room', true);
+  }, [exercise, navigateTo]);
 
   // Practice state
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -357,14 +374,14 @@ export function ChapterStudyView({ exercise, onBack }) {
 
           <button
             type="button"
-            onClick={() => setActiveTab('practice')}
+            onClick={handleStartPractice}
             className={`px-4 py-2 rounded-2xl font-black text-xs sm:text-sm border-2 border-[#3D352E] cursor-pointer flex items-center gap-2 transition-all ${
               activeTab === 'practice'
                 ? 'bg-[#D97706] text-white shadow-[2px_3px_0px_#3D352E]'
                 : 'bg-white text-[#786F66] hover:bg-[#FAF5EB]'
             }`}
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-amber-500" />
             <span>Phần 2: Luyện tập thực chiến ({questions.length} câu)</span>
           </button>
         </div>
@@ -397,10 +414,7 @@ export function ChapterStudyView({ exercise, onBack }) {
 
               <button
                 type="button"
-                onClick={() => {
-                  setActiveTab('practice');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
+                onClick={handleStartPractice}
                 className="py-3 px-8 rounded-2xl bg-[#D97706] hover:bg-[#B45309] text-white font-heading font-black text-sm sm:text-base border-[3px] border-[#3D352E] shadow-[3px_4px_0px_#3D352E] cursor-pointer active:scale-95 transition-all inline-flex items-center gap-2"
               >
                 <span>Bắt đầu làm bài tập ngay ({questions.length} câu)</span>
@@ -412,6 +426,30 @@ export function ChapterStudyView({ exercise, onBack }) {
       ) : (
         /* ======================== TAB 2: PHÒNG LUYỆN ĐỀ SPLIT FORMAT ======================== */
         <div className="space-y-4">
+          {/* Banner dẫn vào Phòng luyện đề THPT Chuẩn */}
+          <div className="rounded-2xl bg-gradient-to-r from-amber-600 via-amber-700 to-[#5a7d4d] text-white p-4 sm:p-5 shadow-[3px_4px_0px_#3D352E] border-2 border-[#3D352E] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[11px] font-black backdrop-blur-xs">
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>PHÒNG LUYỆN ĐỀ CHUẨN THPT</span>
+              </div>
+              <h3 className="font-heading font-black text-sm sm:text-base">
+                Luyện tập {questions.length} câu trên giao diện phòng thi THPT Quốc Gia
+              </h3>
+              <p className="text-xs text-white/90">
+                Chia đôi màn hình lý thuyết/ngữ liệu, phóng to/thu nhỏ cỡ chữ, gắn cờ câu khó và xem giải thích chi tiết.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleStartPractice}
+              className="px-5 py-2.5 rounded-xl bg-white text-[#3D352E] hover:bg-amber-50 font-heading font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer shrink-0 active:scale-95 transition-all inline-flex items-center gap-2"
+            >
+              <span>Vào phòng thi làm bài</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
           {/* Top Progress & Score Bar */}
           <div className="rounded-2xl bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] p-3 sm:p-4 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">

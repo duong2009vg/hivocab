@@ -281,6 +281,31 @@ function buildReadingSectionHtml(sec, questions) {
     </div>`;
 }
 
+/** Render a theory/strategy section card for 29 Chuyên đề. */
+function buildTheorySectionHtml(sec) {
+  const content = sec.passage || sec.rawText || (Array.isArray(sec.paragraphs) ? sec.paragraphs.join('\n\n') : '');
+  return `
+    <div id="passage-sec-${sec.index}"
+         class="passage-sec-card p-6 md:p-8 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-4 font-sans">
+      <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D6]">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
+            📖
+          </span>
+          <h3 class="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#2D2422]">
+            ${escHtml(sec.name || 'Lý thuyết trọng tâm & Chiến thuật')}
+          </h3>
+        </div>
+        <span class="text-[11px] font-bold text-[#486b3c] bg-[#5a7d4d]/10 px-2.5 py-0.5 rounded-full border border-[#5a7d4d]/20">
+          Chuyên đề
+        </span>
+      </div>
+      <div class="text-[#2D2422] leading-relaxed select-text font-sans text-sm whitespace-pre-line space-y-3 bg-[#FAF8F5] p-4 rounded-xl border border-[#EFE8D6]/80">
+        ${escHtml(content)}
+      </div>
+    </div>`;
+}
+
 // ---------------------------------------------------------------------------
 // Word / sentence highlight helpers (DOM mutation, no state)
 // ---------------------------------------------------------------------------
@@ -414,6 +439,9 @@ function applySentenceHighlight(pane, paraIndex) {
 // ---------------------------------------------------------------------------
 
 function buildPillLabel(sec) {
+  if (sec.type === 'theory') {
+    return 'Lý thuyết';
+  }
   const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
   const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
   const name = sec.name || sec.group || `P.${sec.index}`;
@@ -457,6 +485,9 @@ export function ExamPassagePanel({
     const questions = exam.questions;
     return sections
       .map((sec) => {
+        if (sec.type === 'theory') {
+          return buildTheorySectionHtml(sec);
+        }
         const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
         const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
         const isArrangement =

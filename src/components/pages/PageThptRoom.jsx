@@ -16,6 +16,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { CrayonLockOverlay } from '../common/CrayonLockOverlay.jsx';
 import { AlertTriangle, Flag, X, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient.js';
+import { getExerciseTheory, getExerciseQuestions } from '../../services/exercisesService.js';
 
 export function PageThptRoom() {
   const { navigateTo } = useRoute();
@@ -51,8 +52,15 @@ export function PageThptRoom() {
 
   const handleExit = useCallback(() => {
     timer.stop();
+    if (session.exam?.is_exercise || window._thptStartConfig?.isExercise) {
+      sessionStorage.setItem('hv_roadmap_open_book', 'book2');
+      const exId = session.exam?.id || window._thptStartConfig?.exerciseId || window._thptStartConfig?.examId;
+      if (exId) {
+        sessionStorage.setItem('hv_chuyende_active_id', exId);
+      }
+    }
     navigateTo('exercises', false);
-  }, [timer, navigateTo]);
+  }, [timer, navigateTo, session.exam]);
 
   // ──────────────────────────────────────────────
   // 1. Kiểm tra quyền PRO & Nạp đề thi
@@ -73,6 +81,151 @@ export function PageThptRoom() {
       try {
         setInitError(null);
 
+        // ========================================================
+        // 1. CHẾ ĐỘ 29 CHUYÊN ĐỀ HỌC TẬP THPT (Luyện tập chuyên đề)
+        // ========================================================
+        const isExercise = Boolean(
+          config?.isExercise ||
+          config?.exerciseId ||
+          (examId && String(examId).startsWith('c0000000-'))
+        );
+        const exerciseId = config?.exerciseId || examId;
+
+        if (isExercise) {
+          if (!cancelled) {
+            setIsLocked(false);
+          }
+
+          const [theoryText, rawQuestions] = await Promise.all([
+            getExerciseTheory(exerciseId),
+            getExerciseQuestions(exerciseId),
+          ]);
+
+          if (!rawQuestions || rawQuestions.length === 0) {
+            throw new Error('Chuyên đề chưa có câu hỏi luyện tập.');
+          }
+
+          const normalizedQuestions = rawQuestions.map((q, idx) => {
+            let opts = {};
+            if (Array.isArray(q.options)) {
+              const letters = ['A', 'B', 'C', 'D', 'E'];
+              q.options.forEach((opt, oIdx) => {
+                const letter = letters[oIdx] || 'A';
+                const cleanText = typeof opt === 'string'
+                  ? opt.replace(/^[A-E]\.\s*/, '').trim()
+                  : String(opt || '');
+                opts[letter] = cleanText;
+              });
+            } else if (q.options && typeof q.options === 'object') {
+              opts = { ...q.options };
+            }
+
+            return {
+              id: q.id,
+              number: idx + 1,
+              question_number: idx + 1,
+              prompt: q.prompt,
+              options: opts,
+              correct_answer: (q.answer || '').toUpperCase().trim(),
+              explanation: q.hint || '',
+              passage: q.passage || '',
+              context_passage: q.passage || '',
+              is_arrangement: Boolean(q.is_arrangement),
+              arrangement_sentences: q.arrangement_sentences || [],
+              type: q.is_arrangement ? 'arrangement' : 'multiple_choice',
+              question_type: q.question_type || (q.is_arrangement ? 'sentence_arrangement' : 'multiple_choice'),
+            };
+          });
+
+          // Xây dựng sections cho bài tập chuyên đề
+          const hasPassages = normalizedQuestions.some(
+            (q) => q.passage && q.passage.trim().length > 0
+          );
+          let sections = [];
+
+          if (hasPassages) {
+            let currentPassage = null;
+            let currentSec = null;
+            normalizedQuestions.forEach((q) => {
+              const p = (q.passage || '').trim();
+              if (p !== currentPassage || !currentSec) {
+                currentPassage = p;
+                currentSec = {
+                  index: sections.length + 1,
+                  part: sections.length + 1,
+                  name: p ? `Bài đọc ${sections.length + 1}` : 'Câu hỏi độc lập',
+                  type: q.is_arrangement ? 'arrangement' : p ? 'reading' : 'theory',
+                  startQ: q.number,
+                  endQ: q.number,
+                  start_q: q.number,
+                  end_q: q.number,
+                  from_question: q.number,
+                  to_question: q.number,
+                  instruction: 'Đọc kỹ ngữ liệu và chọn phương án trả lời đúng.',
+                  passage: p || theoryText || '',
+                  raw_text: p || theoryText || '',
+                  paragraphs: p ? p.split(/\n\s*\n/).filter(Boolean) : [theoryText],
+                };
+                sections.push(currentSec);
+              } else {
+                currentSec.endQ = q.number;
+                currentSec.end_q = q.number;
+                currentSec.to_question = q.number;
+              }
+            });
+          } else {
+            // Không có bài đọc riêng (ngữ pháp / từ vựng) -> Cột trái hiển thị Lý thuyết chuyên đề
+            sections = [
+              {
+                index: 1,
+                part: 1,
+                name: config.exerciseTitle || 'Lý thuyết trọng tâm & Chiến thuật',
+                type: 'theory',
+                startQ: 1,
+                endQ: normalizedQuestions.length,
+                start_q: 1,
+                end_q: normalizedQuestions.length,
+                from_question: 1,
+                to_question: normalizedQuestions.length,
+                instruction: 'Ôn tập lý thuyết ở cột bên trái và làm bài tập thực hành ở cột bên phải.',
+                passage: theoryText || '',
+                raw_text: theoryText || '',
+                paragraphs: theoryText ? theoryText.split(/\n\s*\n/).filter(Boolean) : [],
+              },
+            ];
+          }
+
+          const examData = {
+            id: exerciseId,
+            title: config.exerciseTitle || 'Chuyên đề THPT',
+            is_exercise: true,
+            total_questions: normalizedQuestions.length,
+            duration_minutes: 0,
+            theory: theoryText,
+            questions: normalizedQuestions,
+            sections,
+          };
+
+          if (cancelled) return;
+
+          setExamMetadata({
+            id: exerciseId,
+            title: examData.title,
+            total_questions: examData.total_questions,
+            is_pro: false,
+          });
+
+          const savedProgress = session.loadSavedProgress(exerciseId);
+          const { restoredSeconds } = session.startExam(examData, 0, savedProgress);
+          session.initialSecondsRef.current = restoredSeconds;
+          session.timerSecondsRef.current = restoredSeconds;
+          timer.start(restoredSeconds);
+          return;
+        }
+
+        // ========================================================
+        // 2. CHẾ ĐỘ THI THỬ THPT (Mock Exams)
+        // ========================================================
         // A. Kiểm tra metadata đề thi từ cache summaries để xác định cờ is_pro
         let summary = null;
         try {
