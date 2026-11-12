@@ -21,17 +21,17 @@ export function formatBlanksInHtml(text, startQ, endQ) {
   if (!text) return '';
   let escaped = escHtml(text);
 
-  // 1. **bold** → amber highlighted bold
-  escaped = escaped.replace(/\*\*(.+?)\*\*/g,
-    '<strong class="thpt-bold-word font-bold text-slate-900 bg-amber-100/70 border-b-2 border-amber-500 px-1 py-0.5 rounded-xs shadow-2xs">$1</strong>');
+  // 1. **bold** → amber highlighted bold (support 2 or more asterisks)
+  escaped = escaped.replace(/\*{2,}(.+?)\*{2,}/g,
+    '<strong class="thpt-bold-word font-extrabold text-slate-900 bg-amber-200/90 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">$1</strong>');
 
   // 2. {{U}}sentence{{/U}} → blue underline
   escaped = escaped.replace(/\{\{U\}\}(.+?)\{\{\/U\}\}/g,
-    '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-semibold text-slate-900 bg-blue-50/70 px-1 py-0.5 rounded-xs">$1</u>');
+    '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">$1</u>');
 
   // 3. [I], [II], [III], [IV], [V] insertion markers
   escaped = escaped.replace(/\[(I{1,3}|IV|V)\]/g,
-    '<span class="inline-flex items-center justify-center min-w-[22px] h-5 px-1 rounded bg-slate-200 text-slate-800 font-black text-[11px] mx-1 select-none border border-slate-300 shadow-2xs">[$1]</span>');
+    '<span class="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded bg-slate-200 text-slate-800 font-black text-xs mx-1 select-none border border-slate-300 shadow-2xs">[$1]</span>');
 
   // 4. Blank references: (18), _____(18)_____, etc.
   escaped = escaped.replace(/(?:[=_~-]*_{1,}[=_~-]*\s*)*\(\s*([1-3][0-9]|40|[1-9])\s*\)(?:\s*(?:_{1,}|\.{2,}|[-=_~]{1,}))*/g, (match, p1) => {
@@ -41,6 +41,37 @@ export function formatBlanksInHtml(text, startQ, endQ) {
     }
     return match;
   });
+
+  return escaped;
+}
+
+/**
+ * Format question prompt: bold, underline, target vocabulary terms, underlined sentence references
+ * Returns HTML string for question stem in ExamQuestionsPanel
+ */
+export function formatPromptHtml(text) {
+  if (!text) return '';
+  let escaped = escHtml(text);
+
+  // 1. **bold** or **{{U}}word{{/U}}**
+  escaped = escaped.replace(/\*{2,}(.+?)\*{2,}/g,
+    '<strong class="thpt-bold-word thpt-target-term font-extrabold text-slate-900 bg-amber-200/95 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">$1</strong>');
+
+  // 2. {{U}}word{{/U}}
+  escaped = escaped.replace(/\{\{U\}\}(.+?)\{\{\/U\}\}/g,
+    '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">$1</u>');
+
+  // 3. Highlight quoted target terms: The word "synthetic" in paragraph 3
+  escaped = escaped.replace(
+    /((?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+)(?:&quot;|"|“|‘)([^"&”’\n]{1,80})(?:&quot;|"|”|’)(\s+in\s+paragraph)/gi,
+    '$1<strong class="thpt-bold-word thpt-target-term font-extrabold text-slate-900 bg-amber-200/95 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">$2</strong>$3'
+  );
+
+  // 4. Highlight "underlined sentence" if mentioned in question
+  escaped = escaped.replace(
+    /\b(underlined\s+sentence|câu\s+(?:được\s+)?gạch\s+chân)\b/gi,
+    '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">$1</u>'
+  );
 
   return escaped;
 }
@@ -92,10 +123,10 @@ export function buildExamSections(exam) {
   if (exam.sections && exam.sections.length > 0) {
     return exam.sections.map((s, idx) => {
       const startQ = Number(
-        s.start_q ?? s.from_question ?? s.from_q ?? s.start ?? (idx * 10 + 1)
+        s.startQ ?? s.start_q ?? s.from_question ?? s.from_q ?? s.start ?? (idx * 10 + 1)
       );
       const endQ = Number(
-        s.end_q ?? s.to_question ?? s.to_q ?? s.end ?? ((idx + 1) * 10)
+        s.endQ ?? s.end_q ?? s.to_question ?? s.to_q ?? s.end ?? ((idx + 1) * 10)
       );
       const secQuestions = questions.filter((q) => {
         const num = q.number ?? q.question_number;

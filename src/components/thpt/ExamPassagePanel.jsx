@@ -16,10 +16,20 @@ import {
 // Helper: build raw HTML string for one section card
 // ---------------------------------------------------------------------------
 
+function getSecRange(sec) {
+  const rawStart = sec.startQ ?? sec.start_q ?? sec.from_question ?? sec.from_q ?? 1;
+  const rawEnd = sec.endQ ?? sec.end_q ?? sec.to_question ?? sec.to_q ?? 40;
+  const s = Number(rawStart);
+  const e = Number(rawEnd);
+  return {
+    startQ: !isNaN(s) && s > 0 ? s : 1,
+    endQ: !isNaN(e) && e > 0 ? e : 40,
+  };
+}
+
 /** Render arrangement section: one card per question with lettered sentence rows. */
 function buildArrangementSectionHtml(sec, questions) {
-  const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
-  const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
+  const { startQ, endQ } = getSecRange(sec);
   const secQuestions = questions.filter((q) => {
     const num = q.number ?? q.question_number;
     return num >= startQ && num <= endQ;
@@ -126,9 +136,8 @@ function buildArrangementSectionHtml(sec, questions) {
 
 /** Render paragraphs for reading/cloze/etc sections. */
 function buildParagraphsHtml(sec, questions) {
-  let { paragraphs, rawText, startQ, endQ, type, title } = sec;
-  startQ = Number(startQ ?? sec.from_question ?? 1);
-  endQ = Number(endQ ?? sec.to_question ?? 40);
+  let { paragraphs, rawText, type, title } = sec;
+  const { startQ, endQ } = getSecRange(sec);
 
   // Defensive strip in case sec.paragraphs was passed without prior sanitization
   if (title && title.trim()) {
@@ -238,8 +247,7 @@ function buildParagraphsHtml(sec, questions) {
 
 /** Render a reading/cloze section card. */
 function buildReadingSectionHtml(sec, questions) {
-  const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
-  const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
+  const { startQ, endQ } = getSecRange(sec);
   const parasHtml = buildParagraphsHtml(sec, questions);
 
   const instructionHtml = sec.instruction
@@ -442,8 +450,7 @@ function buildPillLabel(sec) {
   if (sec.type === 'theory') {
     return 'Lý thuyết';
   }
-  const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
-  const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
+  const { startQ, endQ } = getSecRange(sec);
   const name = sec.name || sec.group || `P.${sec.index}`;
   const shortened = name
     .replace(/^ph[aầ]n\s*/i, 'P.')
@@ -488,8 +495,7 @@ export function ExamPassagePanel({
         if (sec.type === 'theory') {
           return buildTheorySectionHtml(sec);
         }
-        const startQ = Number(sec.startQ ?? sec.from_question ?? 1);
-        const endQ = Number(sec.endQ ?? sec.to_question ?? 40);
+        const { startQ, endQ } = getSecRange(sec);
         const isArrangement =
           sec.type === 'arrangement' ||
           questions.some((q) => {
@@ -556,18 +562,16 @@ export function ExamPassagePanel({
         }
         // Highlight the parent section pill
         const targetSec = sections.find((s) => {
-          const sQ = Number(s.startQ ?? s.from_question ?? 1);
-          const eQ = Number(s.endQ ?? s.to_question ?? 40);
-          return qNum >= sQ && qNum <= eQ;
+          const { startQ, endQ } = getSecRange(s);
+          return qNum >= startQ && qNum <= endQ;
         });
         if (targetSec) setActiveSecIndex(targetSec.index);
         clearWordHighlights(pane);
       } else {
         // Scroll to the section card
         const targetSec = sections.find((s) => {
-          const sQ = Number(s.startQ ?? s.from_question ?? 1);
-          const eQ = Number(s.endQ ?? s.to_question ?? 40);
-          return qNum >= sQ && qNum <= eQ;
+          const { startQ, endQ } = getSecRange(s);
+          return qNum >= startQ && qNum <= endQ;
         });
         if (targetSec) {
           setActiveSecIndex(targetSec.index);

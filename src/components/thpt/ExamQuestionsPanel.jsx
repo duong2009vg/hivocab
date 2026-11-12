@@ -13,6 +13,7 @@ import {
   XCircle,
   HelpCircle,
 } from 'lucide-react';
+import { formatPromptHtml } from '../../utils/thptPassageUtils';
 
 const LETTERS = ['A', 'B', 'C', 'D'];
 
@@ -383,9 +384,8 @@ function QuestionCard({
           </button>
           <span
             className={`font-bold text-[#2D2422] leading-snug font-sans ${fontSizeClass ?? 'text-sm sm:text-base'}`}
-          >
-            {q.prompt || q.question || ''}
-          </span>
+            dangerouslySetInnerHTML={{ __html: formatPromptHtml(q.prompt || q.question || '') }}
+          />
         </div>
 
         {/* Action buttons */}

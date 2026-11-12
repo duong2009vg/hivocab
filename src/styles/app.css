@@ -803,5 +803,49 @@
   }
 }
 
+/* =========================================================================
+ * THPT Exam Paper Focus Mode Typography & Formatting
+ * Highlight styles matching Ministry & Provincial exams 100%
+ * ========================================================================= */
+.thpt-bold-word,
+strong.thpt-bold-word {
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  background-color: #FEF08A !important; /* Amber yellow highlight */
+  border-bottom: 2px solid #F59E0B !important;
+  padding: 0.125rem 0.35rem !important;
+  border-radius: 0.25rem !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+  display: inline-block;
+  line-height: 1.25;
+}
+
+.thpt-underlined-sentence,
+u.thpt-underlined-sentence {
+  text-decoration: underline !important;
+  text-decoration-color: #2563EB !important;
+  text-decoration-thickness: 2.5px !important;
+  text-underline-offset: 4px !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  background-color: rgba(219, 234, 254, 0.85) !important;
+  padding: 0.1rem 0.35rem !important;
+  border-radius: 0.25rem !important;
+  display: inline;
+}
+
+.thpt-bold-word .thpt-underlined-sentence,
+strong.thpt-bold-word u.thpt-underlined-sentence {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+.thpt-target-term {
+  background-color: #FEF08A !important;
+  border-bottom: 2px solid #F59E0B !important;
+  font-weight: 800 !important;
+}
+
+
 
 
