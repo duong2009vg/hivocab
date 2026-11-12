@@ -807,17 +807,18 @@
  * THPT Exam Paper Focus Mode Typography & Formatting
  * Highlight styles matching Ministry & Provincial exams 100%
  * ========================================================================= */
+/* Từ/cụm mục tiêu: in đậm + gạch chân trong Word → amber nhạt + gạch chân xanh */
 .thpt-bold-word,
 strong.thpt-bold-word {
   font-weight: 800 !important;
   color: #0f172a !important;
-  background-color: #FEF08A !important; /* Amber yellow highlight */
+  background-color: #FEF3C7 !important;
   border-bottom: 2px solid #F59E0B !important;
-  padding: 0.125rem 0.35rem !important;
+  padding: 0.05rem 0.3rem !important;
   border-radius: 0.25rem !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
-  display: inline-block;
-  line-height: 1.25;
+  display: inline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
 .thpt-underlined-sentence,
@@ -828,24 +829,46 @@ u.thpt-underlined-sentence {
   text-underline-offset: 4px !important;
   font-weight: 700 !important;
   color: #0f172a !important;
-  background-color: rgba(219, 234, 254, 0.85) !important;
-  padding: 0.1rem 0.35rem !important;
+  background-color: rgba(219, 234, 254, 0.7) !important;
+  padding: 0.05rem 0.3rem !important;
   border-radius: 0.25rem !important;
   display: inline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 
+/* u lồng trong strong: chỉ giữ gạch chân, không nhân đôi nền */
 .thpt-bold-word .thpt-underlined-sentence,
 strong.thpt-bold-word u.thpt-underlined-sentence {
   background-color: transparent !important;
+  padding: 0 !important;
   color: inherit !important;
 }
 
+/* Trong câu hỏi: từ mục tiêu */
 .thpt-target-term {
-  background-color: #FEF08A !important;
+  background-color: #FDE68A !important;
   border-bottom: 2px solid #F59E0B !important;
   font-weight: 800 !important;
 }
 
+/* Mục tiêu của CÂU HỎI ĐANG MỞ: nổi bật hơn hẳn các định dạng còn lại */
+.thpt-bold-word.thpt-active-target,
+.thpt-underlined-sentence.thpt-active-target {
+  background-color: #FDE047 !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.55) !important;
+  animation: thptTargetPulse 1.4s ease-out 1;
+}
 
+.thpt-bold-word.thpt-active-target .thpt-underlined-sentence {
+  background-color: transparent !important;
+}
 
+mark.thpt-word-highlight {
+  box-decoration-break: clone;
+}
 
+@keyframes thptTargetPulse {
+  0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.85); }
+  100% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.55); }
+}

@@ -25,6 +25,10 @@ export function formatBlanksInHtml(text, startQ, endQ) {
   escaped = escaped.replace(/\*{2,}(.+?)\*{2,}/g,
     '<strong class="thpt-bold-word font-extrabold text-slate-900 bg-amber-200/90 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">$1</strong>');
 
+  // 1b. {{B}}text{{/B}} → bold thường (tiêu đề / lead-in, không phải mục tiêu)
+  escaped = escaped.replace(/\{\{B\}\}(.+?)\{\{\/B\}\}/g,
+    '<strong class="font-extrabold text-[#2D2422]">$1</strong>');
+
   // 2. {{U}}sentence{{/U}} → blue underline
   escaped = escaped.replace(/\{\{U\}\}(.+?)\{\{\/U\}\}/g,
     '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">$1</u>');
@@ -57,6 +61,10 @@ export function formatPromptHtml(text) {
   escaped = escaped.replace(/\*{2,}(.+?)\*{2,}/g,
     '<strong class="thpt-bold-word thpt-target-term font-extrabold text-slate-900 bg-amber-200/95 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">$1</strong>');
 
+  // 1b. {{B}}text{{/B}} → bold thường
+  escaped = escaped.replace(/\{\{B\}\}(.+?)\{\{\/B\}\}/g,
+    '<strong class="font-extrabold text-[#2D2422]">$1</strong>');
+
   // 2. {{U}}word{{/U}}
   escaped = escaped.replace(/\{\{U\}\}(.+?)\{\{\/U\}\}/g,
     '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">$1</u>');
@@ -67,10 +75,21 @@ export function formatPromptHtml(text) {
     '$1<strong class="thpt-bold-word thpt-target-term font-extrabold text-slate-900 bg-amber-200/95 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">$2</strong>$3'
   );
 
-  // 4. Highlight "underlined sentence" if mentioned in question
+  // 4. Highlight unquoted target terms: The word synthetic in paragraph 3
   escaped = escaped.replace(
-    /\b(underlined\s+sentence|câu\s+(?:được\s+)?gạch\s+chân)\b/gi,
-    '<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">$1</u>'
+    /((?:the|what\s+does\s+the)\s+(?:underlined\s+|italicized\s+|bold(?:ed)?\s+)?(?:word|phrase|expression|term)\s+)([a-zA-Z0-9\s\-_’']{1,50})(\s+in\s+paragraph)/gi,
+    (match, p1, p2, p3) => {
+      if (p2.includes('<strong') || p2.includes('<u') || p2.includes('class=')) return match;
+      return `${p1}<strong class="thpt-bold-word thpt-target-term font-extrabold text-slate-900 bg-amber-200/95 border-b-2 border-amber-500 px-1.5 py-0.5 rounded shadow-2xs">${p2.trim()}</strong>${p3}`;
+    }
+  );
+
+  // 5. Underlined sentence in prompt
+  escaped = escaped.replace(
+    /(underlined\s+sentence|câu\s+(?:được\s+)?gạch\s+chân)/gi,
+    (match, p1) => {
+      return `<u class="thpt-underlined-sentence underline decoration-blue-600 decoration-2 underline-offset-4 font-bold text-slate-900 bg-blue-100/80 px-1.5 py-0.5 rounded shadow-2xs">${p1}</u>`;
+    }
   );
 
   return escaped;

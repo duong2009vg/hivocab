@@ -100,6 +100,17 @@ function buildArrangementSectionHtml(sec, questions) {
         <div class="space-y-2">
           ${sHtml}
         </div>
+
+        ${
+          q.arrangement_closing
+            ? `<div class="font-medium text-[#2D2422] italic whitespace-pre-line pl-1 pt-1">${escHtml(q.arrangement_closing)}</div>`
+            : ''
+        }
+        ${
+          q.arrangement_source
+            ? `<div class="text-right text-xs text-[#8C827A] italic font-serif">${escHtml(q.arrangement_source)}</div>`
+            : ''
+        }
       </div>`;
   });
 
@@ -165,27 +176,40 @@ function buildParagraphsHtml(sec, questions) {
     type === 'reading' && Array.isArray(paragraphs) && paragraphs.length > 1;
 
   let parasHtml = '';
+  let blockNo = 0;
 
   if (paragraphs && Array.isArray(paragraphs) && paragraphs.length > 0) {
-    paragraphs.forEach((rawP, pIdx) => {
+    paragraphs.forEach((rawP) => {
       const p = (typeof rawP === 'string' ? rawP : String(rawP || '')).trim();
       if (!p) return;
 
-      const isBullet = /^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s+/.test(p);
+      const plainP = p.replace(/\{\{\/?[BU]\}\}|\*\*/g, '').trim();
+      const isBoldHeader =
+        /^\{\{B\}\}[\s\S]+\{\{\/B\}\}$/.test(p) && p.split('{{B}}').length === 2;
+      // Bullet chỉ khi mở đầu bằng ký hiệu bullet thật (KHÔNG coi "**" là bullet)
+      const isBullet = /^(?:[\u2022\u25cf\u2605]\s*|-\s+)/.test(p);
+      const isNumberedHeading =
+        /^\d\.\s+/.test(plainP) && plainP.length < 70 && !/[.!?]$/.test(plainP);
       const isHeader =
-        !isBullet &&
-        p.length < 60 &&
-        (p.endsWith(':') || p.endsWith('?') || p.endsWith('!') || p === p.toUpperCase());
+        isBoldHeader ||
+        isNumberedHeading ||
+        (!isBullet &&
+          plainP.length < 60 &&
+          !p.includes('\n') &&
+          (plainP.endsWith(':') ||
+            plainP.endsWith('?') ||
+            plainP.endsWith('!') ||
+            plainP === plainP.toUpperCase()));
       const isSource =
-        /^\((?:Adapted|Source)[^)]*\)$/i.test(p) ||
-        /^(?:Adapted|Source)\s+from/i.test(p);
+        /^\((?:Adapted|Source)[^)]*\)$/i.test(plainP) ||
+        /^(?:Adapted|Source)\s+from/i.test(plainP);
 
       if (isBullet) {
         parasHtml += `
           <div class="flex items-start gap-2.5 text-[#2D2422] my-2 pl-2 leading-relaxed font-serif">
             <span class="w-1.5 h-1.5 rounded-full bg-[#5a7d4d] shrink-0 mt-2.5"></span>
-            <div class="flex-1">${formatBlanksInHtml(
-              p.replace(/^[\u2022\u25cf\u2605\-\*]\s*|^[1-6]\.\s*/, ''),
+            <div class="flex-1 whitespace-pre-line">${formatBlanksInHtml(
+              p.replace(/^(?:[\u2022\u25cf\u2605]\s*|-\s+)/, ''),
               startQ,
               endQ,
             )}</div>
@@ -193,28 +217,29 @@ function buildParagraphsHtml(sec, questions) {
       } else if (isSource) {
         parasHtml += `
           <div class="text-right text-xs text-[#8C827A] italic mt-3 font-serif select-text">
-            ${formatBlanksInHtml(p, startQ, endQ)}
+            ${formatBlanksInHtml(plainP, startQ, endQ)}
           </div>`;
       } else if (isHeader) {
         parasHtml += `
-          <div class="font-bold text-[#2D2422] text-xs uppercase tracking-wider mt-4 mb-2 font-sans">
-            ${formatBlanksInHtml(p, startQ, endQ)}
+          <div class="font-bold text-[#2D2422] text-sm tracking-wide mt-5 mb-1.5 font-sans select-text">
+            ${formatBlanksInHtml(isBoldHeader ? plainP : p, startQ, endQ)}
           </div>`;
       } else if (isReadingComprehension) {
+        blockNo += 1;
         parasHtml += `
-          <div class="reading-para-block my-4 select-text">
+          <div class="reading-para-block my-4 select-text" data-para-no="${blockNo}">
             <div class="flex items-center gap-1.5 mb-1.5 select-none">
               <span class="inline-flex items-center text-[10px] font-black uppercase tracking-wider text-[#486b3c] bg-[#5a7d4d]/10 border border-[#5a7d4d]/20 px-2 py-0.5 rounded-md">
-                Đoạn ${pIdx + 1}
+                Đoạn ${blockNo}
               </span>
             </div>
-            <p class="text-justify text-[#2D2422] leading-relaxed md:leading-loose select-text font-serif">
+            <p class="text-justify text-[#2D2422] leading-relaxed md:leading-loose select-text font-serif whitespace-pre-line">
               ${formatBlanksInHtml(p, startQ, endQ)}
             </p>
           </div>`;
       } else {
         parasHtml += `
-          <p class="text-justify text-[#2D2422] leading-relaxed md:leading-loose indent-6 my-3 font-serif">
+          <p class="text-justify text-[#2D2422] leading-relaxed md:leading-loose indent-6 my-3 font-serif whitespace-pre-line select-text">
             ${formatBlanksInHtml(p, startQ, endQ)}
           </p>`;
       }
@@ -318,9 +343,13 @@ function buildTheorySectionHtml(sec) {
 // Word / sentence highlight helpers (DOM mutation, no state)
 // ---------------------------------------------------------------------------
 
+const ACTIVE_CLS = 'thpt-active-target';
+const FALLBACK_CLS = 'thpt-word-highlight';
+
 function clearWordHighlights(pane) {
   if (!pane) return;
-  pane.querySelectorAll('.thpt-word-highlight').forEach((el) => {
+  pane.querySelectorAll(`.${ACTIVE_CLS}`).forEach((el) => el.classList.remove(ACTIVE_CLS));
+  pane.querySelectorAll(`.${FALLBACK_CLS}`).forEach((el) => {
     if (el.tagName === 'MARK') {
       const parent = el.parentNode;
       if (parent) {
@@ -328,118 +357,124 @@ function clearWordHighlights(pane) {
         parent.normalize();
       }
     } else {
-      el.classList.remove('thpt-word-highlight');
+      el.classList.remove(FALLBACK_CLS);
     }
   });
 }
 
+/** Chuẩn hoá để so khớp: bỏ dấu câu, hạ chữ thường, gộp khoảng trắng. */
+function normTerm(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[^\p{L}\p{N}\s'-]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Lấy khối đoạn văn theo số "paragraph N" (1-based) trong đề. */
+function getParaBlock(pane, paraIndex) {
+  if (paraIndex === null || paraIndex === undefined || paraIndex < 0) return null;
+  const blocks = pane.querySelectorAll('.reading-para-block');
+  return blocks.length > paraIndex ? blocks[paraIndex] : null;
+}
+
+/** Các phần tử "mục tiêu" đã được in đậm/gạch chân từ đề gốc (chỉ lấy phần tử ngoài cùng). */
+function getTargetElements(root) {
+  const all = Array.from(root.querySelectorAll('.thpt-bold-word, .thpt-underlined-sentence'));
+  return all.filter((el) => !all.some((o) => o !== el && o.contains(el)));
+}
+
+function scrollToEl(el) {
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/**
+ * Làm nổi bật ĐÚNG phần tử mục tiêu của câu hỏi hiện tại:
+ *  1. Ưu tiên phần tử in đậm/gạch chân có sẵn trong đoạn "paragraph N" khớp từ/cụm cần tìm.
+ *  2. Nếu đề không có sẵn định dạng thì chỉ đánh dấu lần xuất hiện ĐẦU TIÊN trong đoạn N.
+ *  Không bao giờ tô mọi lần xuất hiện của từ (tránh tô nhầm "it", "them"…).
+ */
 function applyWordHighlight(pane, word, paraIndex) {
   clearWordHighlights(pane);
   if (!pane || !word) return false;
 
-  let targetContainers = [];
-  if (paraIndex !== null && paraIndex >= 0) {
-    const paraBlocks = pane.querySelectorAll('.reading-para-block');
-    if (paraBlocks.length > paraIndex) {
-      targetContainers = [paraBlocks[paraIndex]];
+  const block = getParaBlock(pane, paraIndex);
+  // Ưu tiên tìm trong đúng đoạn paraIndex trước; nếu không thấy (do lệch số đoạn trong đề gốc), fallback tìm trong toàn bộ bài đọc (pane)
+  const roots = block ? [block, pane] : [pane];
+  const want = normTerm(word);
+
+  for (const root of roots) {
+    const hit = getTargetElements(root).find((el) => normTerm(el.textContent) === want);
+    if (hit) {
+      hit.classList.add(ACTIVE_CLS);
+      scrollToEl(hit);
+      return true;
     }
   }
-  if (targetContainers.length === 0) {
-    targetContainers = Array.from(
-      pane.querySelectorAll(
-        '.reading-para-block p, .reading-para-block, p.text-justify, .passage-sec-card p',
-      ),
-    );
-  }
-  if (targetContainers.length === 0) {
-    targetContainers = [pane];
-  }
 
+  // Fallback: không có định dạng sẵn → chỉ tô lần xuất hiện đầu tiên trong ĐÚNG đoạn
+  if (!block) return false;
   const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const wordRegex = new RegExp(`\\b(${escapedWord})\\b`, 'gi');
-
-  let found = false;
-  let firstMatch = null;
-
-  targetContainers.forEach((container) => {
-    const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
-      acceptNode(node) {
-        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
-        let parent = node.parentNode;
-        while (parent && parent !== container) {
-          if (
-            parent.tagName === 'BUTTON' ||
-            parent.classList.contains('thpt-word-highlight')
-          ) {
-            return NodeFilter.FILTER_REJECT;
-          }
-          parent = parent.parentNode;
+  const wordRegex = new RegExp(`(^|[^\\p{L}\\p{N}])(${escapedWord})(?![\\p{L}\\p{N}])`, 'iu');
+  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      let parent = node.parentNode;
+      while (parent && parent !== block) {
+        if (parent.tagName === 'BUTTON' || parent.classList?.contains(FALLBACK_CLS)) {
+          return NodeFilter.FILTER_REJECT;
         }
-        return NodeFilter.FILTER_ACCEPT;
-      },
-    });
-
-    const textNodes = [];
-    let currentNode;
-    while ((currentNode = walker.nextNode())) {
-      textNodes.push(currentNode);
-    }
-
-    textNodes.forEach((textNode) => {
-      const text = textNode.nodeValue;
-      wordRegex.lastIndex = 0;
-      if (!wordRegex.test(text)) return;
-
-      const frag = document.createDocumentFragment();
-      let lastIdx = 0;
-      let match;
-      wordRegex.lastIndex = 0;
-      while ((match = wordRegex.exec(text)) !== null) {
-        if (match.index > lastIdx) {
-          frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
-        }
-        const mark = document.createElement('mark');
-        mark.className =
-          'thpt-word-highlight bg-[#FEF08A] text-[#1E293B] rounded px-1 py-0.5 font-bold shadow-2xs';
-        mark.textContent = match[1];
-        frag.appendChild(mark);
-        if (!firstMatch) firstMatch = mark;
-        found = true;
-        lastIdx = wordRegex.lastIndex;
+        parent = parent.parentNode;
       }
-      if (lastIdx < text.length) {
-        frag.appendChild(document.createTextNode(text.slice(lastIdx)));
-      }
-      textNode.parentNode.replaceChild(frag, textNode);
-    });
+      return NodeFilter.FILTER_ACCEPT;
+    },
   });
-
-  if (firstMatch) {
-    firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  let node;
+  while ((node = walker.nextNode())) {
+    const m = wordRegex.exec(node.nodeValue);
+    if (!m) continue;
+    const start = m.index + m[1].length;
+    const end = start + m[2].length;
+    const frag = document.createDocumentFragment();
+    if (start > 0) frag.appendChild(document.createTextNode(node.nodeValue.slice(0, start)));
+    const mark = document.createElement('mark');
+    mark.className = `${FALLBACK_CLS} bg-[#FEF08A] text-[#1E293B] rounded px-1 py-0.5 font-bold shadow-2xs`;
+    mark.textContent = node.nodeValue.slice(start, end);
+    frag.appendChild(mark);
+    if (end < node.nodeValue.length) {
+      frag.appendChild(document.createTextNode(node.nodeValue.slice(end)));
+    }
+    node.parentNode.replaceChild(frag, node);
+    scrollToEl(mark);
+    return true;
   }
-  return found;
+  return false;
 }
 
+/** Câu gạch chân: chỉ đánh dấu câu được gạch chân trong đúng đoạn "paragraph N". */
 function applySentenceHighlight(pane, paraIndex) {
   clearWordHighlights(pane);
   if (!pane) return;
 
-  let el = null;
-  if (paraIndex !== null && paraIndex >= 0) {
-    const paraBlocks = pane.querySelectorAll('.reading-para-block');
-    if (paraBlocks.length > paraIndex) {
-      el =
-        paraBlocks[paraIndex].querySelector('.thpt-underlined-sentence') ||
-        paraBlocks[paraIndex].querySelector('u');
-    }
+  const block = getParaBlock(pane, paraIndex);
+  let pool = [];
+  if (block) {
+    const sents = getTargetElements(block).filter(
+      (el) => normTerm(el.textContent).split(' ').length >= 4,
+    );
+    if (sents.length) pool = sents;
   }
-  if (!el) {
-    el = pane.querySelector('.thpt-underlined-sentence') || pane.querySelector('u');
+  // Fallback nếu không có câu gạch chân trong đoạn chỉ định
+  if (!pool.length) {
+    const sents = getTargetElements(pane).filter(
+      (el) => normTerm(el.textContent).split(' ').length >= 4,
+    );
+    pool = sents.length ? sents : Array.from(pane.querySelectorAll('.thpt-underlined-sentence, u'));
   }
-  if (el) {
-    el.classList.add('thpt-word-highlight');
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
+  if (!pool.length) return;
+  pool.forEach((el) => el.classList.add(ACTIVE_CLS));
+  scrollToEl(pool[0]);
 }
 
 // ---------------------------------------------------------------------------

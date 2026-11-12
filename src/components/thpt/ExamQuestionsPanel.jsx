@@ -383,7 +383,7 @@ function QuestionCard({
             <span>Câu {qNum}</span>
           </button>
           <span
-            className={`font-bold text-[#2D2422] leading-snug font-sans ${fontSizeClass ?? 'text-sm sm:text-base'}`}
+            className={`font-bold text-[#2D2422] leading-snug font-sans whitespace-pre-line ${fontSizeClass ?? 'text-sm sm:text-base'}`}
             dangerouslySetInnerHTML={{ __html: formatPromptHtml(q.prompt || q.question || '') }}
           />
         </div>
