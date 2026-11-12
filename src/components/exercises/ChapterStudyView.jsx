@@ -227,36 +227,8 @@ export function ChapterStudyView({ exercise, onBack }) {
       );
     }
 
-    // Case 3: Standalone Grammar Questions -> Show Exam Paper Focus Card (Tuyệt đối không lôi lý thuyết vào làm bài)
-    return (
-      <div className="p-6 sm:p-8 rounded-3xl bg-[#FFFDF9] border-2 border-[#DECDBB] shadow-xs text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-[#EAF5E4] text-[#557A46] flex items-center justify-center mx-auto shadow-2xs">
-          <GraduationCap className="w-6 h-6" />
-        </div>
-        <div>
-          <span className="text-[11px] font-black uppercase tracking-wider text-[#557A46] bg-[#EAF5E4] px-3 py-1 rounded-full border border-[#557A46]/20">
-            Chuyên đề 9+ THPT
-          </span>
-          <h3 className="font-heading font-black text-base sm:text-lg text-[#302A24] mt-2">
-            Câu hỏi trắc nghiệm độc lập
-          </h3>
-          <p className="text-xs sm:text-sm text-[#786F66] mt-1 max-w-md mx-auto leading-relaxed">
-            Phần này kiểm tra kiến thức độc lập (ngữ pháp, từ vựng, phát âm). Hãy đọc kỹ câu hỏi và chọn 1 trong 4 phương án ở cột bên phải.
-          </p>
-        </div>
-
-        <div className="pt-3 border-t border-dashed border-[#DECDBB] flex flex-wrap items-center justify-center gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab('theory')}
-            className="px-3.5 py-1.5 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-bold text-xs border border-[#3D352E]/30 flex items-center gap-1.5 cursor-pointer transition-all"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-[#557A46]" />
-            <span>Mở lại tab Lý thuyết chuyên đề</span>
-          </button>
-        </div>
-      </div>
-    );
+    // Case 3: Standalone Grammar Questions -> Không hiển thị bảng giới thiệu
+    return null;
   };
 
   return (
@@ -433,15 +405,20 @@ export function ChapterStudyView({ exercise, onBack }) {
             </div>
           )}
 
-          {/* TWO-COLUMN SPLIT PANEL FORMAT (EXACT THPT EXAM ROOM FEEL) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-            {/* LEFT COLUMN: Passage / Theory Reference */}
-            <div className="lg:col-span-6 rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-5 sm:p-7 max-h-[720px] overflow-y-auto">
-              {renderPassagePanel()}
-            </div>
+          {/* SPLIT PANEL WHEN PASSAGE/ARRANGEMENT EXISTS, FULL-WIDTH QUESTION ONLY OTHERWISE */}
+          {(() => {
+            const leftPanelContent = renderPassagePanel();
+            const hasLeftPanel = Boolean(leftPanelContent);
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                {hasLeftPanel && (
+                  <div className="lg:col-span-6 rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-5 sm:p-7 max-h-[720px] overflow-y-auto">
+                    {leftPanelContent}
+                  </div>
+                )}
 
-            {/* RIGHT COLUMN: Question & Multiple Choices */}
-            <div className="lg:col-span-6 rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-5 sm:p-7 space-y-5">
+                {/* Question & Multiple Choices */}
+                <div className={`${hasLeftPanel ? 'lg:col-span-6' : 'lg:col-span-8 lg:col-start-3'} rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-5 sm:p-7 space-y-5`}>
               {currentQ && (
                 <>
                   {/* Question Stem */}
@@ -577,7 +554,9 @@ export function ChapterStudyView({ exercise, onBack }) {
                 </>
               )}
             </div>
-          </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

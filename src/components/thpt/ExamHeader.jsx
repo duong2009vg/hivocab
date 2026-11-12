@@ -26,6 +26,7 @@ export function ExamHeader({
   timerDisplay,
   isTimerWarning,
   mobileView,
+  showPassagePanel = true,
   onPrev,
   onNext,
   onChangeFontSize,
@@ -146,22 +147,24 @@ export function ExamHeader({
       {/* ── Right: Bộ điều khiển & Nộp bài ──────────────────────────── */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         {/* Bộ chuyển đổi view trên điện thoại */}
-        <div className="flex md:hidden items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl text-[10px] sm:text-[11px] font-bold">
-          {['passage', 'both', 'questions'].map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => onSetMobileView(mode)}
-              className={`px-1.5 py-1 sm:px-2 rounded-lg transition-colors min-h-[30px] flex items-center justify-center ${
-                mobileView === mode
-                  ? 'bg-[#5a7d4d] text-white shadow-2xs'
-                  : 'text-[#6B5A4E] hover:text-[#2D2422]'
-              }`}
-            >
-              {mode === 'passage' ? 'Đọc' : mode === 'both' ? '2 bên' : 'Câu'}
-            </button>
-          ))}
-        </div>
+        {showPassagePanel && (
+          <div className="flex md:hidden items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl text-[10px] sm:text-[11px] font-bold">
+            {['passage', 'both', 'questions'].map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => onSetMobileView(mode)}
+                className={`px-1.5 py-1 sm:px-2 rounded-lg transition-colors min-h-[30px] flex items-center justify-center ${
+                  mobileView === mode
+                    ? 'bg-[#5a7d4d] text-white shadow-2xs'
+                    : 'text-[#6B5A4E] hover:text-[#2D2422]'
+                }`}
+              >
+                {mode === 'passage' ? 'Đọc' : mode === 'both' ? '2 bên' : 'Câu'}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Cỡ chữ */}
         <div className="hidden lg:flex items-center bg-[#FAF5EB] border border-[#EFE8D6] p-0.5 rounded-xl">

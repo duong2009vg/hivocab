@@ -2,7 +2,7 @@
 // Bottom bar: Thanh điều hướng 40 câu hỏi, hỗ trợ lọc nhanh câu chưa làm / gắn cờ và mở lưới tổng quan.
 // Chuẩn phong cách HiVocab Exam Focus Mode: công thái học cao, tương phản rõ nét.
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
   LayoutGrid,
   Flag,
@@ -23,6 +23,21 @@ export function ExamPalette({
 }) {
   const [showGridModal, setShowGridModal] = useState(false);
   const [filterMode, setFilterMode] = useState('all'); // 'all' | 'unanswered' | 'flagged'
+  const paletteRef = useRef(null);
+
+  useEffect(() => {
+    const container = paletteRef.current;
+    if (!container) return;
+    const activeNum = (currentQIndex ?? 0) + 1;
+    if (activeNum === 1) {
+      container.scrollTo({ left: 0, behavior: 'smooth' });
+      return;
+    }
+    const btn = container.querySelector(`[data-palette-q="${activeNum}"]`);
+    if (btn) {
+      btn.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+    }
+  }, [currentQIndex]);
 
   if (!exam) return null;
 
@@ -86,6 +101,7 @@ export function ExamPalette({
       <button
         key={i}
         type="button"
+        data-palette-q={!isLarge ? i : undefined}
         className={cls}
         title={title}
         onClick={() => {
@@ -157,6 +173,7 @@ export function ExamPalette({
         {/* ── Center: Dãy nút 40 câu hỏi co giãn tối ưu ──────────────── */}
         <div
           id="exam-palette-container"
+          ref={paletteRef}
           className="flex-1 flex items-center gap-1 overflow-x-auto scrollbar-hide py-1 px-0.5"
         >
           {questionNumbers.map((i) => renderQuestionBtn(i, false))}

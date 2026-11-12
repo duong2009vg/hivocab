@@ -362,7 +362,7 @@ function QuestionCard({
   const isArrangement = q.type === 'arrangement' || Boolean(q.is_arrangement);
 
   let cardCls =
-    'question-card mb-4 p-4 sm:p-6 rounded-2xl bg-white border transition-all duration-200 shadow-xs';
+    'question-card scroll-mt-4 mb-4 p-4 sm:p-6 rounded-2xl bg-white border transition-all duration-200 shadow-xs';
   if (isCurrent) {
     cardCls += ' ring-2 ring-[#5a7d4d]/30 border-[#5a7d4d] shadow-sm';
   } else {
@@ -473,6 +473,7 @@ export function ExamQuestionsPanel({
   isReviewMode,
   results,
   fontSizeClass,
+  isFullWidth = false,
   questionsPaneRef,
   onSelectAnswer,
   onToggleFlag,
@@ -485,38 +486,44 @@ export function ExamQuestionsPanel({
 
   useEffect(() => {
     if (currentQIndex == null || currentQIndex < 0 || currentQIndex >= questions.length) return;
+    if (currentQIndex === 0 && questionsPaneRef?.current) {
+      questionsPaneRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
     const q = questions[currentQIndex];
     if (!q) return;
-    const qNum = q.number;
+    const qNum = q.number ?? q.question_number ?? (currentQIndex + 1);
     const el = document.getElementById(`q-card-${qNum}`);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-  }, [currentQIndex, questions]);
+  }, [currentQIndex, questions, questionsPaneRef]);
 
   return (
     <div
       ref={questionsPaneRef}
-      className="questions-panel h-full overflow-y-auto px-3 sm:px-5 py-4 space-y-4"
+      className="questions-panel h-full overflow-y-auto px-3 sm:px-5 py-4"
     >
-      {questions.map((q, idx) => (
-        <QuestionCard
-          key={q.number ?? idx}
-          q={q}
-          exam={exam}
-          qIndex={idx}
-          currentQIndex={currentQIndex}
-          answers={answers}
-          flags={flags}
-          isReviewMode={isReviewMode}
-          results={results}
-          fontSizeClass={fontSizeClass}
-          onSelectAnswer={onSelectAnswer}
-          onToggleFlag={onToggleFlag}
-          onJumpToQuestion={onJumpToQuestion}
-          onReportAnswer={onReportAnswer}
-        />
-      ))}
+      <div className={isFullWidth ? 'max-w-4xl mx-auto w-full space-y-4' : 'space-y-4'}>
+        {questions.map((q, idx) => (
+          <QuestionCard
+            key={q.number ?? idx}
+            q={q}
+            exam={exam}
+            qIndex={idx}
+            currentQIndex={currentQIndex}
+            answers={answers}
+            flags={flags}
+            isReviewMode={isReviewMode}
+            results={results}
+            fontSizeClass={fontSizeClass}
+            onSelectAnswer={onSelectAnswer}
+            onToggleFlag={onToggleFlag}
+            onJumpToQuestion={onJumpToQuestion}
+            onReportAnswer={onReportAnswer}
+          />
+        ))}
+      </div>
     </div>
   );
 }

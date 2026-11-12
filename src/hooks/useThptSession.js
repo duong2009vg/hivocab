@@ -65,7 +65,7 @@ export function useThptSession() {
 
   // ---------- START EXAM ----------
   const startExam = useCallback((examData, minutes, savedProgress) => {
-    const secs = (minutes || 50) * 60;
+    const secs = (minutes === 0 ? 0 : (minutes || 50)) * 60;
     initialSecondsRef.current = secs;
 
     setExam(examData);
@@ -80,8 +80,9 @@ export function useThptSession() {
     if (savedProgress && !savedProgress.submitted) {
       setAnswers(savedProgress.answers || {});
       setFlags(savedProgress.flags || {});
-      timerSecondsRef.current = savedProgress.timeRemaining ?? secs;
-      return { restoredSeconds: savedProgress.timeRemaining ?? secs };
+      const restored = secs === 0 ? 0 : (savedProgress.timeRemaining ?? secs);
+      timerSecondsRef.current = restored;
+      return { restoredSeconds: restored };
     } else {
       setAnswers({});
       setFlags({});

@@ -28,7 +28,19 @@ export function PageThptRoom() {
   const [initError, setInitError] = useState(null);
 
   const session = useThptSession();
-  const splitPanel = useSplitPanel(Boolean(session.exam && !isLocked));
+  const currentQuestion = session.exam?.questions?.[session.currentQIndex] || null;
+  const showPassagePanel = Boolean(
+    session.exam && (
+      !session.exam.is_exercise ||
+      (currentQuestion && (
+        (currentQuestion.passage && currentQuestion.passage.trim().length > 0) ||
+        (currentQuestion.context_passage && currentQuestion.context_passage.trim().length > 0) ||
+        currentQuestion.is_arrangement ||
+        currentQuestion.question_type === 'sentence_arrangement'
+      ))
+    )
+  );
+  const splitPanel = useSplitPanel(Boolean(session.exam && !isLocked && showPassagePanel));
 
   // Report modal state (answer report)
   const [reportModal, setReportModal] = useState(null); // { qNum, q }
@@ -37,9 +49,10 @@ export function PageThptRoom() {
   const [reportSent, setReportSent] = useState(false);
   const [reportSending, setReportSending] = useState(false);
 
-  // Timer — onTimeUp auto-submits
+  // Timer — onTimeUp auto-submits (chỉ áp dụng cho đề thi thật có giới hạn thời gian)
   const handleTimeUp = useCallback(() => {
     if (!session.exam) return;
+    if (session.exam.is_exercise || session.exam.duration_minutes === 0) return;
     window.alert?.('Hết giờ làm bài! Hệ thống đang tự động nộp bài thi của bạn.');
     session.submitExam(session.answers, session.exam, 0);
     session.setShowResultsModal(true);
@@ -137,63 +150,49 @@ export function PageThptRoom() {
             };
           });
 
-          // Xây dựng sections cho bài tập chuyên đề
-          const hasPassages = normalizedQuestions.some(
-            (q) => q.passage && q.passage.trim().length > 0
-          );
-          let sections = [];
+          // Xây dựng sections cho bài tập chuyên đề: CHỈ tạo section cho câu hỏi có ngữ liệu (bài đọc/sắp xếp câu)
+          // Tuyệt đối không tạo bảng giới thiệu "Câu hỏi độc lập" hay lôi lý thuyết vào phòng luyện
+          const sections = [];
+          let currentKey = null;
+          let currentSec = null;
 
-          if (hasPassages) {
-            let currentPassage = null;
-            let currentSec = null;
-            normalizedQuestions.forEach((q) => {
-              const p = (q.passage || '').trim();
-              if (p !== currentPassage || !currentSec) {
-                currentPassage = p;
-                currentSec = {
-                  index: sections.length + 1,
-                  part: sections.length + 1,
-                  name: p ? `Bài đọc ${sections.length + 1}` : 'Câu hỏi độc lập',
-                  type: q.is_arrangement ? 'arrangement' : p ? 'reading' : 'grammar',
-                  startQ: q.number,
-                  endQ: q.number,
-                  start_q: q.number,
-                  end_q: q.number,
-                  from_question: q.number,
-                  to_question: q.number,
-                  instruction: p ? 'Đọc kỹ ngữ liệu và chọn phương án trả lời đúng.' : 'Chọn phương án trả lời đúng cho từng câu hỏi.',
-                  passage: p || '',
-                  raw_text: p || '',
-                  paragraphs: p ? p.split(/\n\s*\n/).filter(Boolean) : [],
-                };
-                sections.push(currentSec);
-              } else {
-                currentSec.endQ = q.number;
-                currentSec.end_q = q.number;
-                currentSec.to_question = q.number;
-              }
-            });
-          } else {
-            // Không có bài đọc riêng (ngữ pháp / từ vựng trắc nghiệm thuần túy): tuyệt đối không lôi lý thuyết vào
-            sections = [
-              {
-                index: 1,
-                part: 1,
-                name: 'Phần câu hỏi độc lập',
-                type: 'grammar',
-                startQ: 1,
-                endQ: normalizedQuestions.length,
-                start_q: 1,
-                end_q: normalizedQuestions.length,
-                from_question: 1,
-                to_question: normalizedQuestions.length,
-                instruction: 'Chọn phương án trả lời đúng cho từng câu hỏi trắc nghiệm.',
-                passage: '',
-                raw_text: '',
-                paragraphs: [],
-              },
-            ];
-          }
+          normalizedQuestions.forEach((q) => {
+            const p = (q.passage || '').trim();
+            const isArr = Boolean(q.is_arrangement || q.question_type === 'sentence_arrangement');
+            if (!p && !isArr) {
+              currentKey = null;
+              currentSec = null;
+              return;
+            }
+
+            const key = isArr ? '__arrangement__' : p;
+            if (key !== currentKey || !currentSec) {
+              currentKey = key;
+              currentSec = {
+                index: sections.length + 1,
+                part: sections.length + 1,
+                name: isArr ? 'Sắp xếp câu / hội thoại / đoạn văn' : `Bài đọc ${sections.length + 1}`,
+                type: isArr ? 'arrangement' : 'reading',
+                startQ: q.number,
+                endQ: q.number,
+                start_q: q.number,
+                end_q: q.number,
+                from_question: q.number,
+                to_question: q.number,
+                instruction: isArr
+                  ? 'Đọc kỹ ngữ liệu sắp xếp câu và chọn phương án trả lời đúng.'
+                  : 'Đọc kỹ ngữ liệu và chọn phương án trả lời đúng.',
+                passage: p,
+                raw_text: p,
+                paragraphs: p ? p.split(/\n\s*\n/).filter(Boolean) : [],
+              };
+              sections.push(currentSec);
+            } else {
+              currentSec.endQ = q.number;
+              currentSec.end_q = q.number;
+              currentSec.to_question = q.number;
+            }
+          });
 
           const examData = {
             id: exerciseId,
@@ -480,11 +479,13 @@ export function PageThptRoom() {
     both:      'w-full md:w-1/2 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full transition-all',
   }[session.mobileView] || 'w-full md:w-1/2 flex flex-col bg-white overflow-hidden min-h-0 h-1/2 md:h-full';
 
-  const rightColClass = {
-    passage:   'hidden md:flex w-full md:w-1/2 flex-col bg-[#FAF9F6] overflow-hidden min-h-0 md:h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
-    questions: 'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
-    both:      'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-1/2 md:h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
-  }[session.mobileView] || 'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-1/2 md:h-full';
+  const rightColClass = !showPassagePanel
+    ? 'w-full flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full transition-all'
+    : ({
+        passage:   'hidden md:flex w-full md:w-1/2 flex-col bg-[#FAF9F6] overflow-hidden min-h-0 md:h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
+        questions: 'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
+        both:      'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-1/2 md:h-full transition-all border-l border-[#EFE8D6] md:border-l-0',
+      }[session.mobileView] || 'w-full md:w-1/2 flex flex-col bg-[#FAF9F6] overflow-hidden min-h-0 h-1/2 md:h-full');
 
   return (
     <div id="page-thpt-room" className="page active fixed inset-0 z-[100] bg-[#FAF9F6] flex flex-col h-[100dvh] min-h-[100dvh] w-screen overflow-hidden">
@@ -505,6 +506,7 @@ export function PageThptRoom() {
             : timer.isWarning
         }
         mobileView={session.mobileView}
+        showPassagePanel={showPassagePanel}
         onPrev={session.prevQuestion}
         onNext={() => session.nextQuestion(session.exam?.total_questions || 40)}
         onChangeFontSize={session.changeFontSize}
@@ -522,21 +524,25 @@ export function PageThptRoom() {
       />
 
       <div ref={splitPanel.containerRef} className="flex-1 flex flex-col md:flex-row min-h-0 overflow-hidden relative">
-        <div ref={splitPanel.leftRef} className={leftColClass}>
-          <ExamPassagePanel
-            exam={session.exam}
-            currentQIndex={session.currentQIndex}
-            fontSizeClass={session.fontSizeClass}
-            onJumpToQuestion={handleJumpToQuestion}
-            passagePaneRef={splitPanel.passagePaneRef}
-          />
-        </div>
+        {showPassagePanel && (
+          <div ref={splitPanel.leftRef} className={leftColClass}>
+            <ExamPassagePanel
+              exam={session.exam}
+              currentQIndex={session.currentQIndex}
+              fontSizeClass={session.fontSizeClass}
+              onJumpToQuestion={handleJumpToQuestion}
+              passagePaneRef={splitPanel.passagePaneRef}
+            />
+          </div>
+        )}
 
-        <div
-          ref={splitPanel.dividerRef}
-          className="hidden md:block w-2 bg-[#EFE8D6] hover:bg-[#5a7d4d] cursor-col-resize shrink-0 transition-colors z-10 select-none"
-          title="Kéo sang trái/phải để thay đổi kích thước hai cột"
-        />
+        {showPassagePanel && (
+          <div
+            ref={splitPanel.dividerRef}
+            className="hidden md:block w-2 bg-[#EFE8D6] hover:bg-[#5a7d4d] cursor-col-resize shrink-0 transition-colors z-10 select-none"
+            title="Kéo sang trái/phải để thay đổi kích thước hai cột"
+          />
+        )}
 
         <div ref={splitPanel.rightRef} className={rightColClass}>
           <ExamQuestionsPanel
@@ -547,6 +553,7 @@ export function PageThptRoom() {
             isReviewMode={session.isReviewMode}
             results={session.results}
             fontSizeClass={session.fontSizeClass}
+            isFullWidth={!showPassagePanel}
             questionsPaneRef={splitPanel.questionsPaneRef}
             onSelectAnswer={handleSelectAnswer}
             onToggleFlag={handleToggleFlag}

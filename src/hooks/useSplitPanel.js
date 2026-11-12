@@ -30,6 +30,13 @@ export function useSplitPanel(isReady = true) {
     }
   }, []);
 
+  // Reset right column width when split mode is inactive (full-width questions mode)
+  useEffect(() => {
+    if (!isReady && rightRef.current) {
+      rightRef.current.style.width = '';
+    }
+  }, [isReady]);
+
   // Drag divider
   useEffect(() => {
     if (!isReady) return;
