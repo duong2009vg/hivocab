@@ -132,7 +132,7 @@ function parseTheorySections(rawText) {
       trimmed.startsWith('❖ Ví dụ:') ||
       /^Ví dụ\s+\d+[:.]/i.test(trimmed)
     ) {
-      let exTitle = trimmed.replace(/^[>💡📌📍❖\s*]+/, '').replace(/\*\*/g, '').trim();
+      let exTitle = trimmed.replace(/^[>💡📌📍❖\s*]+/u, '').replace(/\*\*/g, '').trim();
       let exLines = [];
       i++;
       while (
@@ -171,7 +171,7 @@ function parseTheorySections(rawText) {
       trimmed.startsWith('Notes:') ||
       trimmed.startsWith('Lưu ý:')
     ) {
-      const noteTitle = trimmed.replace(/^[>💡☞★\s*]+/, '').replace(/\*\*/g, '').trim();
+      const noteTitle = trimmed.replace(/^[>💡☞★\s*]+/u, '').replace(/\*\*/g, '').trim();
       let noteBody = '';
       i++;
       while (i < rawLines.length && rawLines[i].trim() && !rawLines[i].trim().startsWith('###') && !rawLines[i].trim().startsWith('|')) {
@@ -581,7 +581,7 @@ export function TheoryContentRenderer({
                 }
 
                 // 5. Regular text / bullet
-                const isBullet = /^[•\-\*]\s+/.test(block.text) || /^[a-z]\)\s+/.test(block.text);
+                const isBullet = /^[•\-*]\s+/.test(block.text) || /^[a-z]\)\s+/.test(block.text);
                 return (
                   <p
                     key={bIdx}
