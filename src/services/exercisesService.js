@@ -70,27 +70,53 @@ export async function getExercises() {
   return [];
 }
 
-export async function getExerciseTheory(exerciseId) {
-  // 1. Kiểm tra cache
+async function loadTheoriesList() {
   if (!EXERCISES_MEM.theories) {
     try {
-      const res = await fetch('/data/hivocab_29_chuyen_de_ly_thuyet.json?v=20261112_v3');
+      const res = await fetch('/data/hivocab_29_chuyen_de_ly_thuyet.json?v=20261114_v4');
       if (res.ok) {
         const json = await res.json();
         EXERCISES_MEM.theories = json.theories || [];
       }
     } catch (_) {}
   }
+  return EXERCISES_MEM.theories || [];
+}
 
-  if (EXERCISES_MEM.theories) {
-    const match = EXERCISES_MEM.theories.find(t => t.exercise_id === exerciseId);
-    if (match) return match.theory_and_strategy;
+export async function getExerciseTheoryMetaMap() {
+  const list = await loadTheoriesList();
+  const map = {};
+  for (const item of list) {
+    if (!item?.exercise_id) continue;
+    map[item.exercise_id] = {
+      questions_count: item.questions_count || 0,
+      examples_count: Array.isArray(item.examples) ? item.examples.length : 0,
+    };
+  }
+  return map;
+}
+
+export async function getExerciseTheoryData(exerciseId) {
+  const list = await loadTheoriesList();
+  const match = list.find(t => t.exercise_id === exerciseId);
+  if (match) {
+    return {
+      theory_and_strategy: match.theory_and_strategy || '',
+      examples: Array.isArray(match.examples) ? match.examples : [],
+    };
   }
 
-  // 2. Fallback từ exercises description
   const all = await getExercises();
   const ex = all.find(e => e.id === exerciseId);
-  return ex?.description || '';
+  return {
+    theory_and_strategy: ex?.description || '',
+    examples: [],
+  };
+}
+
+export async function getExerciseTheory(exerciseId) {
+  const data = await getExerciseTheoryData(exerciseId);
+  return data.theory_and_strategy;
 }
 
 export async function getExerciseQuestions(exerciseId) {

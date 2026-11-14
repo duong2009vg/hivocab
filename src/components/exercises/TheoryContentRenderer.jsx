@@ -1,33 +1,295 @@
 // src/components/exercises/TheoryContentRenderer.jsx
-// HiVocab Scientific Theory Renderer: giao diện học lý thuyết & cẩm nang tra cứu 29 Chuyên đề 9+ THPT
-// Thiết kế khoa học, chia section tabs, tìm kiếm tức thì, bảng so sánh responsive & ví dụ thực chiến
-
+// Renderer Lý thuyết 29 Chuyên đề chuẩn 100% format DOCX gốc + Luyện tập thử tương tác cho Ví dụ minh họa
 import React, { useState, useMemo, useRef } from 'react';
-import {
-  BookOpen,
-  Search,
-  X,
-  Sparkles,
-  Lightbulb,
-  CheckCircle2,
-  ArrowRight,
-  ListFilter,
-  GraduationCap,
-  Layers,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Play
-} from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 
 /**
- * Helper parse raw markdown into structured sections:
- * - Table of contents (headers)
- * - Markdown tables
- * - Example cards (Ví dụ thực chiến)
- * - Steps / Pipelines (BƯỚC 01, 02...)
- * - Notes & Tips callouts
- * - Regular text paragraphs
+ * Render text containing:
+ * - <br/> line breaks
+ * - **bold** spans
+ * - {{U}}underline{{/U}} spans
+ * - Optional searchQuery highlight
+ */
+function highlightFragment(text, searchQuery, keyPrefix) {
+  if (!searchQuery || !text) return text;
+  const q = searchQuery.trim();
+  if (!q) return text;
+  const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(${escaped})`, 'gi');
+  const parts = String(text).split(re);
+  if (parts.length === 1) return text;
+  return parts.map((part, idx) =>
+    part.toLowerCase() === q.toLowerCase() ? (
+      <mark key={`${keyPrefix}-m-${idx}`} className="bg-amber-200 text-slate-900 rounded px-0.5 font-semibold">
+        {part}
+      </mark>
+    ) : (
+      <React.Fragment key={`${keyPrefix}-t-${idx}`}>{part}</React.Fragment>
+    )
+  );
+}
+
+function renderInlineMarkup(text, searchQuery, keyPrefix = 'seg') {
+  if (!text) return null;
+  // Split on **bold** first, then inside each chunk parse {{U}}underline{{/U}}
+  const boldParts = String(text).split(/(\*\*[\s\S]*?\*\*)/g);
+  return boldParts.map((bPart, bIdx) => {
+    const isBold = bPart.startsWith('**') && bPart.endsWith('**') && bPart.length > 4;
+    const inner = isBold ? bPart.slice(2, -2) : bPart;
+
+    const underParts = inner.split(/(\{\{U\}\}[\s\S]*?\{\{\/U\}\})/g);
+    const renderedChildren = underParts.map((uPart, uIdx) => {
+      const isUnder = uPart.startsWith('{{U}}') && uPart.endsWith('{{/U}}');
+      const leaf = isUnder ? uPart.slice(5, -6) : uPart;
+      if (!leaf) return null;
+      const content = highlightFragment(leaf, searchQuery, `${keyPrefix}-${bIdx}-${uIdx}`);
+      if (isUnder) {
+        return (
+          <span
+            key={`${keyPrefix}-u-${bIdx}-${uIdx}`}
+            className="underline decoration-2 underline-offset-2 decoration-[#3D352E]/80"
+          >
+            {content}
+          </span>
+        );
+      }
+      return <React.Fragment key={`${keyPrefix}-n-${bIdx}-${uIdx}`}>{content}</React.Fragment>;
+    });
+
+    if (isBold) {
+      return (
+        <strong key={`${keyPrefix}-b-${bIdx}`} className="font-bold text-[#1F1A17]">
+          {renderedChildren}
+        </strong>
+      );
+    }
+    return <React.Fragment key={`${keyPrefix}-p-${bIdx}`}>{renderedChildren}</React.Fragment>;
+  });
+}
+
+function FormattedText({ text, searchQuery = '', className = '' }) {
+  if (!text) return null;
+  const lines = String(text).split(/<br\s*\/?>|\n/g);
+  return (
+    <span className={className}>
+      {lines.map((line, idx) => (
+        <React.Fragment key={idx}>
+          {renderInlineMarkup(line, searchQuery, `ln-${idx}`)}
+          {idx < lines.length - 1 && <br />}
+        </React.Fragment>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Component "Luyện tập thử" tương tác ngay tại phần Ví dụ minh họa trong Lý thuyết
+ */
+function InteractiveExampleCard({ example, searchQuery }) {
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [expandedSolutions, setExpandedSolutions] = useState({});
+
+  if (!example) return null;
+  const subQuestions = Array.isArray(example.questions) ? example.questions : [];
+
+  const handleSelectOption = (qIdx, letter) => {
+    setSelectedAnswers((prev) => ({ ...prev, [qIdx]: letter }));
+    setExpandedSolutions((prev) => ({ ...prev, [qIdx]: true }));
+  };
+
+  const handleReset = (qIdx) => {
+    setSelectedAnswers((prev) => {
+      const copy = { ...prev };
+      delete copy[qIdx];
+      return copy;
+    });
+    setExpandedSolutions((prev) => ({ ...prev, [qIdx]: false }));
+  };
+
+  const handleToggleSolution = (qIdx) => {
+    setExpandedSolutions((prev) => ({ ...prev, [qIdx]: !prev[qIdx] }));
+  };
+
+  return (
+    <div className="rounded-2xl bg-[#FFFDF9] border border-[#C9B9A6] shadow-xs my-4 overflow-hidden">
+      {/* Header bar */}
+      <div className="px-4 py-2.5 bg-[#FAF5EB] border-b border-[#E5D9C8] flex items-center justify-between gap-2">
+        <span className="font-heading font-black text-xs uppercase tracking-wide text-[#3D352E]">
+          {example.title || 'Ví dụ minh họa'}
+        </span>
+        <span className="text-[11px] font-bold text-[#557A46] bg-[#EAF5E4] px-2.5 py-0.5 rounded-full border border-[#557A46]/30">
+          Luyện tập thử
+        </span>
+      </div>
+
+      <div className="p-4 sm:p-5 space-y-5">
+        {/* Shared reading passage if present */}
+        {example.passage && (
+          <div className="p-3.5 sm:p-4 rounded-xl bg-[#FAF8F4] border border-[#E5D9C8] font-serif text-sm sm:text-[15px] text-[#2B241E] leading-relaxed space-y-2.5">
+            {example.passage.split('\n').filter(Boolean).map((para, pIdx) => (
+              <p key={pIdx} className="leading-relaxed">
+                <FormattedText text={para} searchQuery={searchQuery} />
+              </p>
+            ))}
+          </div>
+        )}
+
+        {/* Sub-questions list */}
+        <div className="space-y-6">
+          {subQuestions.map((q, qIdx) => {
+            const optionsObj = q.options || {};
+            const optionKeys = ['A', 'B', 'C', 'D'].filter((k) => Boolean(optionsObj[k]));
+            const chosen = selectedAnswers[qIdx] || null;
+            const correct = (q.correctAnswer || '').toUpperCase();
+            const isCorrect = Boolean(chosen && correct && chosen === correct);
+            const showSol = Boolean(expandedSolutions[qIdx]);
+
+            return (
+              <div
+                key={qIdx}
+                className={qIdx > 0 ? 'pt-5 border-t border-dashed border-[#DECDBB] space-y-3.5' : 'space-y-3.5'}
+              >
+                {/* Prompt & Source */}
+                <div className="space-y-1.5">
+                  {subQuestions.length > 1 && q.label && (
+                    <span className="inline-block text-[11px] font-black uppercase tracking-wider text-[#3D352E] bg-[#EFE8D6] px-2 py-0.5 rounded">
+                      {q.label}
+                    </span>
+                  )}
+
+                  {q.stem && (
+                    <div className="font-serif text-sm sm:text-[15px] text-[#1F1A17] leading-relaxed space-y-1.5">
+                      {q.stem.split('\n').filter(Boolean).map((line, lIdx) => (
+                        <p key={lIdx} className="leading-relaxed">
+                          <FormattedText text={line} searchQuery={searchQuery} />
+                        </p>
+                      ))}
+                    </div>
+                  )}
+
+                  {q.source && (
+                    <p className="text-xs italic text-[#786F66] text-right">
+                      <FormattedText text={q.source} searchQuery={searchQuery} />
+                    </p>
+                  )}
+                </div>
+
+                {/* Clickable Options A B C D */}
+                {optionKeys.length > 0 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {optionKeys.map((letter) => {
+                      const optVal = optionsObj[letter];
+                      const isThisChosen = chosen === letter;
+                      const isThisRight = correct === letter;
+
+                      let cardCls =
+                        'bg-white hover:bg-[#FAF5EB] text-[#302A24] border-[#DECDBB] hover:border-[#3D352E]';
+                      let badgeCls = 'bg-[#FAF5EB] text-[#3D352E] border-[#C9B9A6]';
+
+                      if (chosen) {
+                        if (isThisRight) {
+                          cardCls = 'bg-[#EAF5E4] border-[#557A46] text-[#1F3A19] font-semibold ring-1 ring-[#557A46]';
+                          badgeCls = 'bg-[#557A46] text-white border-[#557A46]';
+                        } else if (isThisChosen) {
+                          cardCls = 'bg-rose-50 border-rose-500 text-rose-900 font-semibold ring-1 ring-rose-500';
+                          badgeCls = 'bg-rose-500 text-white border-rose-500';
+                        } else {
+                          cardCls = 'bg-white/60 border-[#E8DFD3] text-[#8C827A] opacity-75';
+                        }
+                      }
+
+                      return (
+                        <button
+                          key={letter}
+                          type="button"
+                          onClick={() => handleSelectOption(qIdx, letter)}
+                          className={`w-full p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-2.5 ${cardCls}`}
+                        >
+                          <span
+                            className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 border ${badgeCls}`}
+                          >
+                            {letter}
+                          </span>
+                          <span className="text-xs sm:text-sm leading-snug pt-0.5 flex-1">
+                            <FormattedText text={optVal} searchQuery={searchQuery} />
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Feedback & Controls */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                  <div className="flex items-center gap-2">
+                    {chosen && (
+                      <span
+                        className={`text-xs font-black px-2.5 py-1 rounded-lg border ${
+                          isCorrect
+                            ? 'bg-[#EAF5E4] text-[#2F5224] border-[#557A46]/40'
+                            : 'bg-rose-50 text-rose-700 border-rose-300'
+                        }`}
+                      >
+                        {isCorrect
+                          ? `Chính xác (${correct})`
+                          : `Chưa đúng — Đáp án đúng là ${correct}`}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {chosen && (
+                      <button
+                        type="button"
+                        onClick={() => handleReset(qIdx)}
+                        className="px-2.5 py-1 rounded-lg text-xs font-bold text-[#786F66] hover:text-[#302A24] bg-white border border-[#DECDBB] hover:bg-[#FAF5EB] cursor-pointer transition-all"
+                      >
+                        Thử lại
+                      </button>
+                    )}
+
+                    {Array.isArray(q.explanation) && q.explanation.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleToggleSolution(qIdx)}
+                        className="px-3 py-1 rounded-lg text-xs font-bold text-[#3D352E] bg-[#FAF5EB] hover:bg-[#EFE8D6] border border-[#C9B9A6] cursor-pointer transition-all"
+                      >
+                        {showSol ? 'Ẩn lời giải chi tiết' : 'Xem lời giải chi tiết'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Collapsible Detailed Explanation */}
+                {showSol && Array.isArray(q.explanation) && q.explanation.length > 0 && (
+                  <div className="p-3.5 sm:p-4 rounded-xl bg-[#F5F9F3] border border-[#557A46]/30 text-xs sm:text-[13px] text-[#2E2722] space-y-1.5 leading-relaxed">
+                    <div className="font-heading font-black text-xs uppercase tracking-wider text-[#466839] pb-1 border-b border-[#557A46]/20">
+                      Lời giải chi tiết
+                    </div>
+                    {q.explanation.map((line, eIdx) => (
+                      <p key={eIdx} className="leading-relaxed">
+                        <FormattedText text={line} searchQuery={searchQuery} />
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Parse raw DOCX-extracted markdown text into structured sections:
+ * - Headings (### ...)
+ * - Markdown tables (|...|)
+ * - Interactive example placeholders ({{EXAMPLE_CARD:index}})
+ * - Strategy steps (BƯỚC 01, Bước 1...)
+ * - Note / Ghi chú blocks (Notes: / Lưu ý:)
+ * - Paragraphs & bullets
  */
 function parseTheorySections(rawText) {
   if (!rawText) return [];
@@ -36,32 +298,28 @@ function parseTheorySections(rawText) {
   const sections = [];
   let currentSec = {
     id: 'sec-0',
-    title: 'Tổng quan & Giới thiệu',
+    title: 'Tổng quan & Trọng tâm',
     blocks: [],
   };
 
   let i = 0;
   while (i < rawLines.length) {
-    const line = rawLines[i];
-    const trimmed = line.trim();
+    const trimmed = rawLines[i].trim();
+    const plain = trimmed.replace(/\*\*|\{\{\/?U\}\}/g, '').trim();
 
-    // 1. Detect Header (### or Numbered Section Title)
+    if (!trimmed) {
+      i++;
+      continue;
+    }
+
+    // 1. Heading
     const isHeading =
       trimmed.startsWith('###') ||
       trimmed.startsWith('##') ||
-      trimmed.startsWith('Dạng câu hỏi') ||
-      trimmed.startsWith('CHIẾN THUẬT') ||
-      trimmed.startsWith('CHUYÊN ĐỀ') ||
-      /^[I|V|X]+\.\s+/.test(trimmed) ||
-      /^\d+\.\d+\.?\s+/.test(trimmed);
+      /^(?:\d+\.\d+(?:\.\d+)?\.?\s+|I{1,3}V?\.\s+DẠNG|Phần\s+\d+\.\d+\s*-|Dạng câu hỏi về|TIPS LÀM BÀI)/i.test(plain);
 
-    if (isHeading && (trimmed.length < 120 || trimmed.startsWith('###'))) {
-      const cleanTitle = trimmed
-        .replace(/^#{1,4}\s*/, '')
-        .replace(/^[I|V|X]+\.\s+/, '')
-        .replace(/\*\*/g, '')
-        .trim();
-
+    if (isHeading && (trimmed.length < 160 || trimmed.startsWith('###'))) {
+      const cleanTitle = plain.replace(/^#{1,4}\s*/, '').trim();
       if (currentSec.blocks.length > 0 || currentSec.id !== 'sec-0') {
         sections.push(currentSec);
       }
@@ -74,7 +332,18 @@ function parseTheorySections(rawText) {
       continue;
     }
 
-    // 2. Detect Markdown Table
+    // 2. Interactive Example Card placeholder
+    const exMatch = trimmed.match(/^\{\{EXAMPLE_CARD:(\d+)\}\}$/);
+    if (exMatch) {
+      currentSec.blocks.push({
+        type: 'example_card',
+        exampleIndex: Number(exMatch[1]),
+      });
+      i++;
+      continue;
+    }
+
+    // 3. Markdown Table
     if (trimmed.startsWith('|') && trimmed.endsWith('|') && trimmed.includes('|', 1)) {
       const tableLines = [];
       while (i < rawLines.length && rawLines[i].trim().startsWith('|') && rawLines[i].trim().endsWith('|')) {
@@ -82,18 +351,9 @@ function parseTheorySections(rawText) {
         i++;
       }
       if (tableLines.length >= 2) {
-        const headerRow = tableLines[0]
-          .split('|')
-          .slice(1, -1)
-          .map((c) => c.trim());
-        // Skip separator row (|---|---|)
+        const headerRow = tableLines[0].split('|').slice(1, -1).map((c) => c.trim());
         const rowStart = tableLines[1].includes('---') ? 2 : 1;
-        const rows = tableLines.slice(rowStart).map((r) =>
-          r
-            .split('|')
-            .slice(1, -1)
-            .map((c) => c.trim())
-        );
+        const rows = tableLines.slice(rowStart).map((r) => r.split('|').slice(1, -1).map((c) => c.trim()));
         currentSec.blocks.push({
           type: 'table',
           headers: headerRow,
@@ -103,97 +363,62 @@ function parseTheorySections(rawText) {
       }
     }
 
-    // 3. Detect Steps / Process (BƯỚC 01, BƯỚC 02...)
-    if (/^BƯỚC\s+\d+/i.test(trimmed)) {
-      const stepNumMatch = trimmed.match(/^BƯỚC\s+(\d+)/i);
+    // 4. Steps (BƯỚC 01 / Bước 1:)
+    if (/^BƯỚC\s+\d+\b/i.test(plain)) {
+      const stepNumMatch = plain.match(/^BƯỚC\s+(\d+)/i);
       const stepNum = stepNumMatch ? stepNumMatch[1] : '1';
-      // Look ahead for step content
-      let stepContent = '';
+      let stepLines = [];
       i++;
-      while (i < rawLines.length && rawLines[i].trim() && !/^BƯỚC\s+\d+/i.test(rawLines[i].trim()) && !rawLines[i].trim().startsWith('###')) {
-        stepContent += (stepContent ? ' ' : '') + rawLines[i].trim();
+      while (
+        i < rawLines.length &&
+        rawLines[i].trim() &&
+        !/^BƯỚC\s+\d+\b/i.test(rawLines[i].trim().replace(/\*\*|\{\{\/?U\}\}/g, '')) &&
+        !rawLines[i].trim().startsWith('###') &&
+        !rawLines[i].trim().startsWith('|') &&
+        !/^\{\{EXAMPLE_CARD:\d+\}\}$/.test(rawLines[i].trim())
+      ) {
+        stepLines.push(rawLines[i].trim());
         i++;
       }
       currentSec.blocks.push({
         type: 'step',
         number: stepNum,
         title: trimmed,
-        content: stepContent,
+        lines: stepLines,
       });
       continue;
     }
 
-    // 4. Detect Example Block (> 📝 or 💡 **Ví dụ or Ví dụ 1:)
-    if (
-      trimmed.startsWith('> 📝') ||
-      trimmed.startsWith('💡 **Ví dụ') ||
-      trimmed.startsWith('💡 **📌 Ví dụ') ||
-      trimmed.startsWith('💡 **📍Ví dụ') ||
-      trimmed.startsWith('❖ Ví dụ:') ||
-      /^Ví dụ\s+\d+[:.]/i.test(trimmed)
-    ) {
-      let exTitle = trimmed.replace(/^[>💡📌📍❖\s*]+/u, '').replace(/\*\*/g, '').trim();
-      let exLines = [];
+    // 5. Note / Lưu ý blocks
+    if (/^(?:Notes|Lưu ý(?:\s+\d+)?)\s*:/i.test(plain)) {
+      const noteTitle = trimmed;
+      const noteLines = [];
       i++;
       while (
         i < rawLines.length &&
+        rawLines[i].trim() &&
         !rawLines[i].trim().startsWith('###') &&
         !rawLines[i].trim().startsWith('|') &&
-        !/^BƯỚC\s+\d+/i.test(rawLines[i].trim()) &&
-        !rawLines[i].trim().startsWith('💡 **Ví dụ') &&
-        !rawLines[i].trim().startsWith('> 📝')
+        !/^\{\{EXAMPLE_CARD:\d+\}\}$/.test(rawLines[i].trim()) &&
+        !/^(?:Notes|Lưu ý(?:\s+\d+)?)\s*:/i.test(rawLines[i].trim().replace(/\*\*|\{\{\/?U\}\}/g, ''))
       ) {
-        const nextT = rawLines[i].trim();
-        // Stop if empty line followed by new major section
-        if (!nextT && i + 1 < rawLines.length && rawLines[i + 1].trim().startsWith('###')) {
-          break;
-        }
-        if (nextT) {
-          exLines.push(nextT);
-        }
-        i++;
-      }
-
-      currentSec.blocks.push({
-        type: 'example',
-        title: exTitle || 'Ví dụ thực chiến',
-        contentLines: exLines,
-      });
-      continue;
-    }
-
-    // 5. Detect Note / Tip (> 💡 or 💡 Lưu ý or Lưu ý: or ☞)
-    if (
-      trimmed.startsWith('> 💡') ||
-      trimmed.startsWith('💡 Lưu ý') ||
-      trimmed.startsWith('☞') ||
-      trimmed.startsWith('★') ||
-      trimmed.startsWith('Notes:') ||
-      trimmed.startsWith('Lưu ý:')
-    ) {
-      const noteTitle = trimmed.replace(/^[>💡☞★\s*]+/u, '').replace(/\*\*/g, '').trim();
-      let noteBody = '';
-      i++;
-      while (i < rawLines.length && rawLines[i].trim() && !rawLines[i].trim().startsWith('###') && !rawLines[i].trim().startsWith('|')) {
-        noteBody += (noteBody ? '\n' : '') + rawLines[i].trim();
+        noteLines.push(rawLines[i].trim());
         i++;
       }
       currentSec.blocks.push({
         type: 'note',
         title: noteTitle,
-        content: noteBody,
+        lines: noteLines,
       });
       continue;
     }
 
-    // 6. Regular paragraph / List item
-    if (trimmed) {
-      currentSec.blocks.push({
-        type: 'paragraph',
-        text: trimmed,
-      });
-    }
-
+    // 6. Regular paragraph / list line
+    currentSec.blocks.push({
+      type: 'paragraph',
+      text: trimmed,
+      plain,
+    });
     i++;
   }
 
@@ -206,8 +431,8 @@ function parseTheorySections(rawText) {
 
 export function TheoryContentRenderer({
   theoryText,
+  theoryExamples = [],
   chapterTitle = '',
-  onStartPractice,
   onOpenExamRoom,
   questionCount = 0,
 }) {
@@ -215,17 +440,8 @@ export function TheoryContentRenderer({
   const [activeSecId, setActiveSecId] = useState(null);
   const containerRef = useRef(null);
 
-  // Parse sections
   const sections = useMemo(() => parseTheorySections(theoryText), [theoryText]);
 
-  // Estimate read time (words / 180 words per min)
-  const readTimeMin = useMemo(() => {
-    if (!theoryText) return 2;
-    const words = theoryText.trim().split(/\s+/).length;
-    return Math.max(2, Math.round(words / 160));
-  }, [theoryText]);
-
-  // Filter sections if search query is entered
   const filteredSections = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return sections;
@@ -240,17 +456,24 @@ export function TheoryContentRenderer({
               b.rows.some((row) => row.some((cell) => cell.toLowerCase().includes(q)))
             );
           }
-          if (b.type === 'example') {
+          if (b.type === 'example_card') {
+            const ex = theoryExamples[b.exampleIndex];
+            if (!ex) return false;
             return (
-              b.title.toLowerCase().includes(q) ||
-              b.contentLines.some((l) => l.toLowerCase().includes(q))
+              (ex.title || '').toLowerCase().includes(q) ||
+              (ex.passage || '').toLowerCase().includes(q) ||
+              (ex.questions || []).some(
+                (qu) =>
+                  (qu.stem || '').toLowerCase().includes(q) ||
+                  Object.values(qu.options || {}).some((o) => String(o).toLowerCase().includes(q))
+              )
             );
           }
-          if (b.type === 'note') {
-            return b.title.toLowerCase().includes(q) || (b.content && b.content.toLowerCase().includes(q));
-          }
-          if (b.type === 'step') {
-            return b.title.toLowerCase().includes(q) || (b.content && b.content.toLowerCase().includes(q));
+          if (b.type === 'note' || b.type === 'step') {
+            return (
+              b.title.toLowerCase().includes(q) ||
+              (b.lines || []).some((l) => l.toLowerCase().includes(q))
+            );
           }
           if (b.type === 'paragraph') {
             return b.text.toLowerCase().includes(q);
@@ -267,9 +490,8 @@ export function TheoryContentRenderer({
         return null;
       })
       .filter(Boolean);
-  }, [sections, searchQuery]);
+  }, [sections, searchQuery, theoryExamples]);
 
-  // Jump to section
   const handleJumpTo = (secId) => {
     setActiveSecId(secId);
     const el = document.getElementById(secId);
@@ -281,7 +503,6 @@ export function TheoryContentRenderer({
   if (!theoryText || sections.length === 0) {
     return (
       <div className="py-16 text-center text-[#786F66] bg-[#FFFDF9] rounded-3xl border-2 border-dashed border-[#DECDBB] p-8">
-        <BookOpen className="w-10 h-10 mx-auto text-[#DECDBB] mb-3" />
         <p className="font-bold text-sm">Chưa có nội dung lý thuyết cho chuyên đề này.</p>
       </div>
     );
@@ -289,57 +510,45 @@ export function TheoryContentRenderer({
 
   return (
     <div ref={containerRef} className="space-y-6 select-text">
-      {/* ── Toolbar: Quick Search & Section Navigation Chips ─────────── */}
-      <div className="sticky top-2 z-20 bg-[#FFFDF9]/95 backdrop-blur-md rounded-2xl border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] p-3 sm:p-4 space-y-3 transition-all">
+      {/* Toolbar: Tra cứu & Chuyển trang Luyện tập THPT */}
+      <div className="sticky top-2 z-20 bg-[#FFFDF9]/95 backdrop-blur-md rounded-2xl border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] p-3 sm:p-4 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
-          {/* Search Input */}
           <div className="relative flex-1 min-w-[200px] max-w-md">
-            <Search className="w-4 h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tra cứu nhanh cấu trúc, từ vựng, quy tắc..."
-              className="w-full pl-9 pr-8 py-2 rounded-xl bg-white border border-[#DECDBB] text-xs sm:text-sm font-medium text-[#302A24] placeholder:text-[#A89F91] focus:outline-none focus:border-[#557A46] focus:ring-2 focus:ring-[#557A46]/20 transition-all"
+              className="w-full pl-3.5 pr-8 py-2 rounded-xl bg-white border border-[#DECDBB] text-xs sm:text-sm font-medium text-[#302A24] placeholder:text-[#A89F91] focus:outline-none focus:border-[#557A46] focus:ring-2 focus:ring-[#557A46]/20 transition-all"
             />
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#786F66] hover:text-[#302A24] p-0.5 rounded-full hover:bg-[#FAF5EB]"
+                aria-label="Xóa từ khóa tìm kiếm"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#786F66] hover:text-[#302A24] p-0.5 rounded-full hover:bg-[#FAF5EB] cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </div>
 
-          {/* Quick Metrics & Start Action */}
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-bold text-[#786F66] bg-[#FAF5EB] px-2.5 py-1.5 rounded-xl border border-[#DECDBB]">
-              <Clock className="w-3.5 h-3.5 text-[#557A46]" />
-              <span>Đọc ~{readTimeMin} phút</span>
-            </span>
-
-            {onStartPractice && (
-              <button
-                type="button"
-                onClick={onStartPractice}
-                className="px-3.5 py-1.5 rounded-xl bg-[#557A46] hover:bg-[#486b3c] text-white font-black text-xs flex items-center gap-1.5 shadow-[2px_2px_0px_#3D352E] border border-[#3D352E] cursor-pointer active:scale-95 transition-all"
-              >
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>Luyện tập ({questionCount})</span>
-              </button>
-            )}
-          </div>
+          {onOpenExamRoom && (
+            <button
+              type="button"
+              onClick={onOpenExamRoom}
+              className="px-4 py-2 rounded-xl bg-[#557A46] hover:bg-[#486b3c] text-white font-black text-xs sm:text-sm flex items-center gap-1.5 shadow-[2px_2px_0px_#3D352E] border border-[#3D352E] cursor-pointer active:scale-95 transition-all"
+            >
+              <span>Làm bài tập THPT ({questionCount} câu)</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Section Quick Jump Chips */}
         {sections.length > 1 && !searchQuery && (
           <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#A89F91] shrink-0 mr-1 flex items-center gap-1">
-              <ListFilter className="w-3 h-3" />
-              Mục:
-            </span>
+            <span className="text-[11px] font-bold text-[#8C827A] shrink-0 mr-1">Mục lục:</span>
             {sections.map((sec, idx) => {
               const isActive = activeSecId === sec.id;
               return (
@@ -349,12 +558,12 @@ export function TheoryContentRenderer({
                   onClick={() => handleJumpTo(sec.id)}
                   className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#3D352E] text-white border-[#3D352E] shadow-2xs'
+                      ? 'bg-[#3D352E] text-white border-[#3D352E]'
                       : 'bg-white hover:bg-[#FAF5EB] text-[#6B5A4E] border-[#DECDBB]'
                   }`}
                 >
-                  <span className="mr-1 text-[10px] opacity-75 font-mono">{idx + 1}.</span>
-                  <span>{sec.title.length > 25 ? `${sec.title.slice(0, 25)}...` : sec.title}</span>
+                  <span className="mr-1 opacity-75 font-mono">{idx + 1}.</span>
+                  <span>{sec.title.length > 32 ? `${sec.title.slice(0, 32)}...` : sec.title}</span>
                 </button>
               );
             })}
@@ -362,10 +571,12 @@ export function TheoryContentRenderer({
         )}
       </div>
 
-      {/* Search results summary */}
+      {/* Search banner */}
       {searchQuery && (
         <div className="text-xs font-semibold text-[#557A46] bg-[#EAF5E4] border border-[#557A46]/30 px-3.5 py-2 rounded-xl flex items-center justify-between">
-          <span>Tìm thấy kết quả phù hợp cho từ khóa: <strong>"{searchQuery}"</strong></span>
+          <span>
+            Kết quả cho từ khóa: <strong>"{searchQuery}"</strong>
+          </span>
           <button
             type="button"
             onClick={() => setSearchQuery('')}
@@ -376,87 +587,70 @@ export function TheoryContentRenderer({
         </div>
       )}
 
-      {/* ── Main Theory Content Sections ─────────────────────────────── */}
-      <div className="space-y-6">
+      {/* Main Content Sections */}
+      <div className="space-y-5">
         {filteredSections.map((sec, sIdx) => (
           <section
             key={sec.id}
             id={sec.id}
-            className="rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E]/30 p-5 sm:p-7 shadow-xs hover:border-[#3D352E] transition-all space-y-4"
+            className="rounded-3xl bg-[#FFFDF9] border-2 border-[#3D352E]/25 p-5 sm:p-7 shadow-xs space-y-4"
           >
-            {/* Section Header */}
-            <div className="flex items-center gap-2.5 pb-3 border-b-2 border-dashed border-[#DECDBB]">
-              <span className="w-7 h-7 rounded-xl bg-[#557A46] text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs font-mono">
+            {/* Clean Section Heading */}
+            <div className="flex items-center gap-3 pb-3 border-b border-dashed border-[#DECDBB]">
+              <span className="w-7 h-7 rounded-lg bg-[#FAF5EB] border border-[#C9B9A6] text-[#3D352E] font-mono font-black text-xs flex items-center justify-center shrink-0">
                 {sIdx + 1}
               </span>
-              <h2 className="font-heading font-black text-base sm:text-lg text-[#302A24] leading-snug">
+              <h2 className="font-heading font-black text-base sm:text-lg text-[#2D241E] leading-snug">
                 {sec.title}
               </h2>
             </div>
 
-            {/* Section Content Blocks */}
-            <div className="space-y-4 text-xs sm:text-sm text-[#302A24] leading-relaxed">
+            {/* Section Blocks */}
+            <div className="space-y-3 text-sm text-[#2D241E] leading-relaxed">
               {sec.blocks.map((block, bIdx) => {
                 // 1. Table
                 if (block.type === 'table') {
                   return (
                     <div
                       key={bIdx}
-                      className="overflow-hidden rounded-2xl border-2 border-[#DECDBB] bg-white shadow-xs my-3"
+                      className="overflow-hidden rounded-xl border border-[#C9B9A6] bg-white my-3"
                     >
                       <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse text-xs sm:text-sm">
                           <thead>
-                            <tr className="bg-[#FAF5EB] border-b-2 border-[#DECDBB] text-[#3D352E]">
+                            <tr className="bg-[#FAF5EB] border-b border-[#C9B9A6] text-[#2D241E]">
                               {block.headers.map((h, hIdx) => (
                                 <th
                                   key={hIdx}
-                                  className="px-3.5 py-2.5 font-heading font-black uppercase tracking-wider text-[11px] sm:text-xs text-[#302A24]"
+                                  className="px-3.5 py-2.5 font-heading font-bold uppercase tracking-wide text-[11px] sm:text-xs"
                                 >
-                                  {h}
+                                  <FormattedText text={h} searchQuery={searchQuery} />
                                 </th>
                               ))}
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-[#EFE8D6]">
-                            {block.rows.map((row, rIdx) => {
-                              const isZebra = rIdx % 2 === 1;
-                              return (
-                                <tr
-                                  key={rIdx}
-                                  className={`transition-colors hover:bg-[#F5EFE6] ${
-                                    isZebra ? 'bg-[#FCFAF7]' : 'bg-white'
-                                  }`}
-                                >
-                                  {row.map((cell, cIdx) => {
-                                    const isSTT = cIdx === 0 && cell.length <= 4 && !isNaN(Number(cell));
-                                    const isHighlight =
-                                      searchQuery &&
-                                      cell.toLowerCase().includes(searchQuery.toLowerCase());
-                                    return (
-                                      <td
-                                        key={cIdx}
-                                        className={`px-3.5 py-2.5 align-top ${
-                                          isSTT
-                                            ? 'font-mono font-bold text-center text-[#786F66] w-12'
-                                            : cIdx === 1
-                                            ? 'font-bold text-[#302A24]'
-                                            : 'text-[#4A3E38]'
-                                        }`}
-                                      >
-                                        {isHighlight ? (
-                                          <mark className="bg-amber-200 text-slate-900 rounded px-1 font-bold">
-                                            {cell}
-                                          </mark>
-                                        ) : (
-                                          cell
-                                        )}
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
-                              );
-                            })}
+                            {block.rows.map((row, rIdx) => (
+                              <tr
+                                key={rIdx}
+                                className={rIdx % 2 === 1 ? 'bg-[#FCFBF8]' : 'bg-white'}
+                              >
+                                {row.map((cell, cIdx) => {
+                                  const plainCell = cell.replace(/\*\*|\{\{\/?U\}\}/g, '').trim();
+                                  const isSTT = cIdx === 0 && plainCell.length <= 4 && !isNaN(Number(plainCell));
+                                  return (
+                                    <td
+                                      key={cIdx}
+                                      className={`px-3.5 py-2.5 align-top leading-relaxed ${
+                                        isSTT ? 'font-mono font-bold text-center text-[#786F66] w-14' : 'text-[#302A24]'
+                                      }`}
+                                    >
+                                      <FormattedText text={cell} searchQuery={searchQuery} />
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            ))}
                           </tbody>
                         </table>
                       </div>
@@ -464,134 +658,90 @@ export function TheoryContentRenderer({
                   );
                 }
 
-                // 2. Example Card (Ví dụ thực chiến)
-                if (block.type === 'example') {
+                // 2. Interactive Example Card
+                if (block.type === 'example_card') {
                   return (
-                    <div
+                    <InteractiveExampleCard
                       key={bIdx}
-                      className="rounded-2xl bg-[#FFFDF9] border-2 border-[#D97706]/40 p-4 sm:p-5 shadow-xs my-3 space-y-3"
-                    >
-                      <div className="flex items-center justify-between gap-2 pb-2 border-b border-[#D97706]/20">
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-300 font-heading font-black text-xs uppercase tracking-wide">
-                          <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                          <span>{block.title || 'Ví dụ thực chiến'}</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100/60 px-2 py-0.5 rounded-full">
-                          Đề thi THPT chuẩn
-                        </span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {block.contentLines.map((line, lIdx) => {
-                          const isSolution =
-                            line.startsWith('Hướng dẫn giải:') ||
-                            line.startsWith('⤷') ||
-                            line.startsWith('Giải thích:') ||
-                            line.startsWith('Tạm dịch:');
-
-                          if (isSolution) {
-                            return (
-                              <div
-                                key={lIdx}
-                                className="p-3 rounded-xl bg-[#EAF5E4]/80 border border-[#557A46]/30 text-xs text-[#302A24] space-y-1 font-sans"
-                              >
-                                <span className="font-bold text-[#557A46] flex items-center gap-1">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-[#557A46]" />
-                                  Lời giải chi tiết & Tạm dịch:
-                                </span>
-                                <p className="leading-relaxed pl-4">
-                                  {line.replace(/^(?:Hướng dẫn giải:|⤷|Giải thích:)\s*/i, '')}
-                                </p>
-                              </div>
-                            );
-                          }
-
-                          // Option lines (A. B. C. D.)
-                          const isOption = /^[A-D]\.\s+/i.test(line);
-                          if (isOption) {
-                            return (
-                              <div
-                                key={lIdx}
-                                className="p-2 sm:p-2.5 rounded-xl bg-white border border-[#DECDBB] font-medium text-xs text-[#302A24] flex items-start gap-2 shadow-2xs"
-                              >
-                                <span className="w-5 h-5 rounded-md bg-[#FAF5EB] font-black text-[11px] flex items-center justify-center shrink-0 text-[#3D352E] border border-[#3D352E]/30">
-                                  {line.slice(0, 1)}
-                                </span>
-                                <span className="pt-0.5">{line.slice(2).trim()}</span>
-                              </div>
-                            );
-                          }
-
-                          return (
-                            <p
-                              key={lIdx}
-                              className="font-serif leading-relaxed text-[#2D2422] whitespace-pre-line select-text"
-                            >
-                              {line}
-                            </p>
-                          );
-                        })}
-                      </div>
-                    </div>
+                      example={theoryExamples[block.exampleIndex]}
+                      searchQuery={searchQuery}
+                    />
                   );
                 }
 
-                // 3. Step / Pipeline (BƯỚC 01, 02...)
+                // 3. Step block
                 if (block.type === 'step') {
                   return (
                     <div
                       key={bIdx}
-                      className="p-3.5 sm:p-4 rounded-2xl bg-white border border-[#557A46]/30 shadow-xs flex items-start gap-3 my-2"
+                      className="p-3.5 sm:p-4 rounded-xl bg-white border border-[#DECDBB] flex items-start gap-3 my-2"
                     >
-                      <span className="w-8 h-8 rounded-xl bg-[#EAF5E4] text-[#557A46] font-black text-xs flex items-center justify-center shrink-0 border border-[#557A46]/30">
+                      <span className="px-2 py-1 rounded-md bg-[#FAF5EB] text-[#3D352E] font-mono font-bold text-xs shrink-0 border border-[#DECDBB]">
                         {block.number}
                       </span>
                       <div className="flex-1 space-y-1">
-                        <h4 className="font-heading font-black text-xs uppercase tracking-wide text-[#3D352E]">
-                          {block.title}
-                        </h4>
-                        {block.content && (
-                          <p className="text-xs text-[#6B5A4E] leading-relaxed">
-                            {block.content}
+                        <div className="font-heading font-bold text-xs sm:text-sm text-[#2D241E]">
+                          <FormattedText text={block.title} searchQuery={searchQuery} />
+                        </div>
+                        {(block.lines || []).map((l, lIdx) => (
+                          <p key={lIdx} className="text-xs sm:text-sm text-[#4A3E38] leading-relaxed">
+                            <FormattedText text={l} searchQuery={searchQuery} />
                           </p>
-                        )}
+                        ))}
                       </div>
                     </div>
                   );
                 }
 
-                // 4. Note & Tips Callout
+                // 4. Note block
                 if (block.type === 'note') {
                   return (
                     <div
                       key={bIdx}
-                      className="rounded-2xl bg-[#FEF3C7]/40 border-2 border-amber-300 p-4 sm:p-4.5 text-xs text-[#302A24] space-y-1.5 my-3 shadow-xs"
+                      className="rounded-xl bg-[#FAF5EB]/70 border border-[#DECDBB] p-3.5 sm:p-4 text-xs sm:text-sm text-[#302A24] space-y-1.5 my-2.5"
                     >
-                      <div className="flex items-center gap-1.5 font-heading font-black text-xs text-amber-900 uppercase tracking-wide">
-                        <Lightbulb className="w-4 h-4 text-amber-600 shrink-0" />
-                        <span>{block.title}</span>
+                      <div className="font-heading font-bold text-xs sm:text-sm text-[#3D352E]">
+                        <FormattedText text={block.title} searchQuery={searchQuery} />
                       </div>
-                      {block.content && (
-                        <p className="text-[#5C4524] leading-relaxed whitespace-pre-line pl-5">
-                          {block.content}
+                      {(block.lines || []).map((l, lIdx) => (
+                        <p key={lIdx} className="text-[#4A3E38] leading-relaxed">
+                          <FormattedText text={l} searchQuery={searchQuery} />
                         </p>
-                      )}
+                      ))}
                     </div>
                   );
                 }
 
-                // 5. Regular text / bullet
-                const isBullet = /^[•\-*]\s+/.test(block.text) || /^[a-z]\)\s+/.test(block.text);
+                // 5. Paragraph / Subsection / Bullet
+                const plain = block.plain || '';
+                const isSubHeader = /^[a-d]\)\s+/i.test(plain) && plain.length < 110;
+                const isBullet = /^[•\-*]\s+/.test(plain);
+
+                if (isSubHeader) {
+                  return (
+                    <h3
+                      key={bIdx}
+                      className="font-heading font-bold text-sm sm:text-[15px] text-[#3D352E] pt-2"
+                    >
+                      <FormattedText text={block.text} searchQuery={searchQuery} />
+                    </h3>
+                  );
+                }
+
+                if (isBullet) {
+                  return (
+                    <p
+                      key={bIdx}
+                      className="pl-3.5 border-l-2 border-[#DECDBB] py-0.5 leading-relaxed text-[#302A24]"
+                    >
+                      <FormattedText text={block.text} searchQuery={searchQuery} />
+                    </p>
+                  );
+                }
+
                 return (
-                  <p
-                    key={bIdx}
-                    className={`leading-relaxed ${
-                      isBullet
-                        ? 'pl-3 border-l-2 border-[#557A46]/40 py-0.5 my-1.5 font-medium'
-                        : 'my-2 select-text'
-                    }`}
-                  >
-                    {block.text}
+                  <p key={bIdx} className="leading-relaxed text-[#302A24]">
+                    <FormattedText text={block.text} searchQuery={searchQuery} />
                   </p>
                 );
               })}
@@ -600,39 +750,27 @@ export function TheoryContentRenderer({
         ))}
       </div>
 
-      {/* ── Bottom Call to Action ───────────────────────────────────── */}
-      <div className="rounded-3xl bg-gradient-to-r from-[#FAF5EB] to-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-6 text-center space-y-3">
-        <GraduationCap className="w-10 h-10 mx-auto text-[#557A46]" />
-        <h3 className="font-heading font-black text-lg text-[#302A24]">
-          Đã nắm vững lý thuyết chuyên đề?
-        </h3>
-        <p className="text-xs sm:text-sm text-[#786F66] max-w-md mx-auto">
-          Thực hành ngay {questionCount} câu hỏi trắc nghiệm thực chiến trích từ các kỳ thi THPT chính thức & minh họa!
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-          {onStartPractice && (
-            <button
-              type="button"
-              onClick={onStartPractice}
-              className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#486b3c] text-white font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
-            >
-              <Play className="w-4 h-4 fill-current" />
-              <span>Luyện tập ngay tại đây</span>
-            </button>
-          )}
-
-          {onOpenExamRoom && (
+      {/* Bottom Mandatory THPT Practice CTA */}
+      {onOpenExamRoom && (
+        <div className="rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] p-6 text-center space-y-3">
+          <h3 className="font-heading font-black text-base sm:text-lg text-[#302A24]">
+            Luyện tập thực chiến trên Phòng thi THPT
+          </h3>
+          <p className="text-xs sm:text-sm text-[#786F66] max-w-lg mx-auto">
+            Làm trọn bộ {questionCount} câu hỏi của chuyên đề <strong className="text-[#302A24]">{chapterTitle}</strong> trực tiếp tại Phòng Luyện đề THPT Quốc Gia.
+          </p>
+          <div className="pt-1">
             <button
               type="button"
               onClick={onOpenExamRoom}
-              className="px-5 py-2.5 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#302A24] font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
+              className="px-6 py-3 rounded-2xl bg-[#557A46] hover:bg-[#486b3c] text-white font-black text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] inline-flex items-center gap-2 cursor-pointer active:scale-95 transition-all"
             >
-              <BookOpen className="w-4 h-4 text-[#557A46]" />
-              <span>Vào Phòng luyện đề chuẩn THPT</span>
+              <span>Vào trang Luyện tập THPT ({questionCount} câu)</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
