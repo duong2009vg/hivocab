@@ -18,7 +18,6 @@ import {
   X,
   AlertTriangle,
   ArrowLeft,
-  BookMarked,
   Sparkles,
   ChevronRight,
   Layers,
@@ -185,19 +184,6 @@ export function PageExercises() {
           <div className="space-y-6 animate-fadeIn">
             {/* Top Page Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-3 border-b-2 border-[#3D352E]">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-[#EAF5E4] text-[#557A46] text-xs font-black border border-[#3D352E]">
-                  <BookMarked className="w-3.5 h-3.5 text-[#557A46]" />
-                  <span>CHƯƠNG TRÌNH TOÀN DIỆN THPT QUỐC GIA 2026 - 2027</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-heading font-black text-[#302A24] tracking-tight">
-                  Lộ trình ôn thi THPT Quốc Gia
-                </h1>
-                <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
-                  Ba cuốn sách lộ trình trên kệ — Bấm vào bìa cuốn sách bất kỳ để mở ra học nhé!
-                </p>
-              </div>
-
               <div className="inline-flex items-center gap-2 p-1.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
                 <span className="text-xs font-black px-2.5 py-1 rounded-xl bg-[#FEF3C7] text-[#302A24]">
                   48 Đề thi
