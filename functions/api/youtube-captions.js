@@ -1,7 +1,8 @@
 // functions/api/youtube-captions.js
 // Cloudflare Pages Function — YouTube timedtext caption & Vietnamese translation extractor
-import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
+import { checkRateLimit } from '../_rateLimit.js';
 
+const SERVER_BUSY_MSG = 'Server đang quá tải, vui lòng thử lại sau.';
 const WATCH_URL = 'https://www.youtube.com/watch';
 const EMBED_URL = 'https://www.youtube.com/embed';
 const INNERTUBE_API_URL = 'https://www.youtube.com/youtubei/v1/player';
@@ -177,7 +178,7 @@ function checkPlayability(playerJson) {
   const reason = String(playerJson?.playabilityStatus?.reason || '').trim();
   if (status === 'LOGIN_REQUIRED') {
     if (/sign in to confirm you.?re not a bot/i.test(reason)) {
-      return { ok: false, code: 'REQUEST_BLOCKED', detail: 'YouTube tạm giới hạn IP máy chủ này (kiểm tra bot). Vui lòng thử lại sau ít phút.' };
+      return { ok: false, code: 'REQUEST_BLOCKED', detail: SERVER_BUSY_MSG };
     }
     return { ok: false, code: 'VIDEO_UNAVAILABLE', detail: 'Video yêu cầu đăng nhập hoặc bị giới hạn độ tuổi.' };
   }
@@ -273,6 +274,9 @@ async function fetchPlayerData(videoId) {
   if (direct.hadPlayableOkWithoutCaptions) {
     throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
   }
+  if (direct.lastBlockError?.code === 'REQUEST_BLOCKED') {
+    throw { status: 503, detail: SERVER_BUSY_MSG };
+  }
 
   let lastBlockError = direct.lastBlockError;
   let videoTitle = direct.videoTitle || '';
@@ -363,16 +367,16 @@ async function fetchPlayerData(videoId) {
   }
 
   if (sawRecaptcha) {
-    throw { status: 429, detail: 'YouTube yêu cầu xác minh (reCAPTCHA). Vui lòng thử lại sau ít phút.' };
+    throw { status: 503, detail: SERVER_BUSY_MSG };
   }
   if (lastBlockError) {
     throw {
       status: lastBlockError.code === 'REQUEST_BLOCKED' ? 503 : 404,
-      detail: lastBlockError.detail,
+      detail: lastBlockError.code === 'REQUEST_BLOCKED' ? SERVER_BUSY_MSG : lastBlockError.detail,
     };
   }
-  if (lastPageStatus === 429) {
-    throw { status: 503, detail: 'YouTube đang tạm giới hạn IP truy cập (HTTP 429). Vui lòng thử lại sau ít phút.' };
+  if (lastPageStatus === 429 || lastPageStatus === 403) {
+    throw { status: 503, detail: SERVER_BUSY_MSG };
   }
   throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
 }
@@ -770,7 +774,13 @@ export async function onRequestPost(context) {
   const corsHeaders = getCorsHeaders(request);
 
   const rateLimit = await checkRateLimit({ request, env, ruleName: 'public' });
-  if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
+  if (!rateLimit.allowed) {
+    return jsonResponse(
+      { ok: false, detail: SERVER_BUSY_MSG, error: SERVER_BUSY_MSG },
+      rateLimit.unavailable ? 503 : 429,
+      { ...corsHeaders, 'Retry-After': String(rateLimit.retryAfter || 60) }
+    );
+  }
 
   let body = {};
   try {
@@ -826,9 +836,11 @@ export async function onRequestPost(context) {
 
   if (enSettled.status !== 'fulfilled') {
     const err = enSettled.reason;
+    const msg = String(err?.message || '');
+    const isThrottled = /\b(429|403|503)\b/.test(msg);
     return jsonResponse(
-      { detail: `Lỗi tải file phụ đề tiếng Anh từ YouTube (${err?.message || 'network'}).` },
-      502,
+      { detail: isThrottled ? SERVER_BUSY_MSG : `Lỗi tải file phụ đề tiếng Anh từ YouTube (${msg || 'network'}).` },
+      isThrottled ? 503 : 502,
       corsHeaders
     );
   }
