@@ -455,6 +455,142 @@ export function buildWordHighlightPlan(word, report, expectedPhones = []) {
   return { segments, unknown };
 }
 
+const PHONEME_PAIR_TIPS = Object.freeze({
+  'iː|ɪ': 'Âm /iː/ cần kéo dài hơn, khóe miệng hơi kéo ngang và nâng cao lưỡi (khác với /ɪ/ ngắn trong "ship").',
+  'i|ɪ': 'Giữ lưỡi cao và căng hơn cho âm /iː/, tránh đọc thành /ɪ/ ngắn.',
+  'ɪ|iː': 'Thả lỏng môi lưỡi và đọc ngắn dứt khoát âm /ɪ/, tránh kéo dài thành /iː/.',
+  'ɪ|i': 'Thả lỏng môi lưỡi và đọc ngắn dứt khoát âm /ɪ/, tránh kéo dài thành /i/.',
+  'θ|t': 'Đặt nhẹ đầu lưỡi giữa hai hàm răng và thổi hơi đều cho /θ/; không bật lưỡi như /t/.',
+  'θ|s': 'Với /θ/, đầu lưỡi cần chạm nhẹ mép răng trên để hơi đi qua khe răng, tránh xì thành /s/.',
+  'ð|d': 'Đặt đầu lưỡi giữa hai răng và rung dây thanh cho /ð/; đừng chặn hơi hoàn toàn thành /d/.',
+  'ð|z': 'Với /ð/, dùng đầu lưỡi kẹp nhẹ giữa hai răng và rung thanh quản thay vì đọc /z/.',
+  's|ʃ': 'Âm /s/ khép đầu lưỡi gần lợi và giữ môi phẳng; tránh tròn môi đẩy lưỡi lùi thành /ʃ/.',
+  'ʃ|s': 'Chu nhẹ môi và đưa lưỡi lùi về vòm cứng cho /ʃ/ (như "she"), tránh đọc mỏng thành /s/.',
+  'tʃ|ʃ': 'Âm /tʃ/ cần chặn hơi ở đầu lưỡi trước rồi mới bật ra "ch", tránh trượt thẳng thành /ʃ/.',
+  'tʃ|t': 'Thêm luồng xát sau khi bật âm /t/ để tạo đúng âm /tʃ/ (tránh cụt thành /t/).',
+  'dʒ|z': 'Đẩy mặt lưỡi chạm ngạc cứng rồi bật rung cho /dʒ/, tránh chỉ xì nhẹ thành /z/.',
+  'dʒ|ʒ': 'Khởi đầu bằng điểm chặn lưỡi rõ trước khi rung thành /dʒ/.',
+  'l|ɹ': 'Âm /l/ cần đầu lưỡi chạm hẳn vào lợi sau răng cửa trên; khác với /ɹ/ cong lưỡi không chạm.',
+  'ɹ|l': 'Cuộn nhẹ đầu lưỡi vào trong và KHÔNG chạm vòm miệng khi đọc /ɹ/.',
+  'r|l': 'Cuộn nhẹ đầu lưỡi vào trong và KHÔNG chạm vòm miệng khi đọc /r/.',
+  'æ|ɛ': 'Hạ hàm dưới mở rộng miệng theo chiều dọc để đọc rõ nguyên âm /æ/ (như "cat"), tránh khép thành /e/.',
+  'æ|e': 'Hạ hàm mở rộng miệng hơn cho âm /æ/, tránh đọc hẹp thành /e/.',
+  'ʌ|ɑ': 'Thả lỏng lưỡi ở vị trí trung tâm, đọc ngắn gọn âm /ʌ/.',
+  'ɑ|ʌ': 'Mở rộng khoang miệng sâu về phía sau hơn cho nguyên âm /ɑ/.',
+  'v|b': 'Đưa nhẹ răng cửa trên chạm môi dưới và rung khi thổi hơi cho /v/, không mím hai môi thành /b/.',
+  'v|w': 'Răng trên chạm môi dưới cho âm /v/; tròn hai môi là khẩu hình của /w/.',
+  'f|p': 'Răng trên chạm nhẹ môi dưới để thổi hơi liên tục cho âm /f/, tránh mím môi bật /p/.',
+  'z|s': 'Âm /z/ cần rung dây thanh quản liên tục (sờ cổ thấy rung), không đọc vô thanh thành /s/.',
+  'ŋ|n': 'Nâng cuống lưỡi chạm ngạc mềm để hơi thoát qua mũi cho âm /ŋ/, không đưa đầu lưỡi lên lợi như /n/.',
+  'ɚ|ə': 'Uốn nhẹ đầu lưỡi lên phía sau khi đọc nguyên âm cuối để tạo màu âm /ɚ/ ("er/or/ur").',
+});
+
+const PHONEME_CLASS_DESCRIPTIONS = Object.freeze({
+  endingStops: new Set(['p', 't', 'k', 'b', 'd', 'g', 'tʃ', 'dʒ']),
+  fricatives: new Set(['s', 'z', 'ʃ', 'ʒ', 'θ', 'ð', 'f', 'v']),
+  nasals: new Set(['m', 'n', 'ŋ']),
+});
+
+/**
+ * Return concise Vietnamese articulation guidance for a mismatched/omitted phoneme pair.
+ */
+export function getPhonemeCoachingTip(expected, heard) {
+  const exp = String(expected || '').normalize('NFC').trim();
+  const act = typeof heard === 'string' ? heard.normalize('NFC').trim() : '';
+  if (!exp) return '';
+
+  if (!act) {
+    if (PHONEME_CLASS_DESCRIPTIONS.endingStops.has(exp)) {
+      return `Bạn đang bị nuốt hoặc chưa bật rõ âm /${exp}/. Hãy giữ hơi nhẹ rồi bật dứt khoát âm cuối /${exp}/.`;
+    }
+    if (PHONEME_CLASS_DESCRIPTIONS.fricatives.has(exp)) {
+      return `Chưa nghe thấy luồng hơi xát của âm /${exp}/. Hãy giữ luồng hơi ra rõ thêm ~0.1s.`;
+    }
+    if (PHONEME_CLASS_DESCRIPTIONS.nasals.has(exp)) {
+      return `Chưa nghe rõ độ ngân mũi của âm /${exp}/. Khép nhẹ điểm chạm lưỡi/môi để vang âm mũi.`;
+    }
+    return `Âm /${exp}/ bị thiếu hoặc lướt quá nhanh. Hãy đọc tách bạch từng âm tiết của từ này.`;
+  }
+
+  const pairKey = `${exp}|${act}`;
+  if (PHONEME_PAIR_TIPS[pairKey]) {
+    return PHONEME_PAIR_TIPS[pairKey];
+  }
+  const basePairKey = `${phoneNorm(exp)}|${phoneNorm(act)}`;
+  if (PHONEME_PAIR_TIPS[basePairKey]) {
+    return PHONEME_PAIR_TIPS[basePairKey];
+  }
+  return `Âm mục tiêu /${exp}/ bị AI nghe lệch thành /${act}/. Nghe kỹ lại đoạn video mẫu và điều chỉnh khẩu hình.`;
+}
+
+function summarizeSentencePhonemes(wordViews) {
+  let totalPhones = 0;
+  let matchedPhones = 0;
+  let nearPhones = 0;
+  let badPhones = 0;
+  let omittedPhones = 0;
+  const issueMap = new Map();
+
+  for (const wv of wordViews) {
+    const phones = Array.isArray(wv.phones) ? wv.phones : [];
+    for (const p of phones) {
+      if (!p?.expected) continue;
+      totalPhones += 1;
+      const sev = getPhonemeSeverity(p);
+      if (sev === 'good') {
+        matchedPhones += 1;
+        continue;
+      }
+      if (sev === 'near') {
+        nearPhones += 1;
+      } else if (sev === 'bad') {
+        badPhones += 1;
+        if (!p.heard || !String(p.heard).trim()) {
+          omittedPhones += 1;
+        }
+      } else {
+        continue;
+      }
+
+      const heardClean = typeof p.heard === 'string' ? p.heard.trim() : '';
+      const key = `${p.expected}=>${heardClean}`;
+      const existing = issueMap.get(key);
+      if (existing) {
+        existing.count += 1;
+        if (!existing.words.includes(wv.word)) existing.words.push(wv.word);
+        if (sev === 'bad') existing.severity = 'bad';
+      } else {
+        issueMap.set(key, {
+          expected: p.expected,
+          heard: heardClean,
+          severity: sev,
+          count: 1,
+          words: [wv.word],
+          tip: getPhonemeCoachingTip(p.expected, heardClean),
+        });
+      }
+    }
+  }
+
+  const topPhonemeIssues = Array.from(issueMap.values()).sort((a, b) => {
+    const rank = { bad: 2, near: 1 };
+    const sevDiff = (rank[b.severity] || 0) - (rank[a.severity] || 0);
+    if (sevDiff !== 0) return sevDiff;
+    return b.count - a.count;
+  });
+
+  return {
+    phonemeSummary: {
+      totalPhones,
+      matchedPhones,
+      nearPhones,
+      badPhones,
+      omittedPhones,
+    },
+    topPhonemeIssues,
+  };
+}
+
 export function buildSentencePronunciationView(data, target) {
   if (!data || typeof data !== 'object' || !data.differences || !Number.isFinite(Number(data.score))) {
     return null;
@@ -580,6 +716,33 @@ export function buildSentencePronunciationView(data, target) {
   const nearCount = wordViews.filter((w) => w.wordLevel === 'near').length;
   const badCount = wordViews.filter((w) => w.wordLevel === 'bad').length;
 
+  const acousticDistanceRaw = Number(data.acoustic_distance);
+  const acousticDistance = Number.isFinite(acousticDistanceRaw) ? acousticDistanceRaw : null;
+  const acousticScore =
+    acousticDistance !== null
+      ? Math.round(Math.max(0, Math.min(100, 100 * (1 - (acousticDistance - 6.0) / 9.0))))
+      : null;
+  const werNum = Number(diff.word_error_rate);
+  const perNum = Number(diff.phoneme_error_rate);
+  const wordScore = Number.isFinite(werNum) ? Math.round(Math.max(0, Math.min(100, (1 - werNum) * 100))) : null;
+  const phonemeScore = Number.isFinite(perNum) ? Math.round(Math.max(0, Math.min(100, (1 - perNum) * 100))) : null;
+
+  const heardConfidence = Array.isArray(diff.heard_phones_confidence)
+    ? diff.heard_phones_confidence.map(Number).filter(Number.isFinite)
+    : [];
+  const meanConfidencePct = heardConfidence.length
+    ? Math.round((heardConfidence.reduce((sum, v) => sum + v, 0) / heardConfidence.length) * 100)
+    : null;
+
+  const expectedVector = Array.isArray(diff.expected_vector)
+    ? diff.expected_vector.map(Number).filter(Number.isFinite)
+    : [];
+  const transcribedVector = Array.isArray(diff.transcribed_vector)
+    ? diff.transcribed_vector.map(Number).filter(Number.isFinite)
+    : [];
+
+  const { phonemeSummary, topPhonemeIssues } = summarizeSentencePhonemes(wordViews);
+
   return {
     score: Math.max(0, Math.min(100, Number(data.score))),
     target: String(target || ''),
@@ -592,9 +755,20 @@ export function buildSentencePronunciationView(data, target) {
     wordViews,
     expectedPhones,
     heardPhones,
+    heardConfidence,
+    meanConfidencePct,
+    expectedVector,
+    transcribedVector,
     prosody: data.prosody || {},
     phonemeErrorRate: diff.phoneme_error_rate,
     wordErrorRate: diff.word_error_rate,
+    acousticDistance,
+    acousticScore,
+    phonemeScore,
+    wordScore,
+    phonemeSummary,
+    topPhonemeIssues,
+    feedback: String(data.feedback || diff.feedback || ''),
     engine: data.engine || 'modal-ai',
   };
 }

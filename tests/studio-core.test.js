@@ -12,6 +12,7 @@ import {
   buildSentencePronunciationView,
   wordToApproxPhones,
   buildLocalPronunciationResult,
+  getPhonemeCoachingTip,
 } from '../src/utils/studioCore.js';
 
 export async function runStudioCoreTests() {
@@ -167,6 +168,39 @@ export async function runStudioCoreTests() {
       skippedView.wordViews[3].wordLevel === 'bad' &&
       skippedView.badCount === 3,
     'buildSentencePronunciationView: classifies substituted (>2 dist) and skipped words as "bad"'
+  );
+
+  // 6. Deep AI pronunciation diagnostics (acoustic_distance, heard_phones_confidence, coaching tips)
+  const deepAiView = buildSentencePronunciationView(
+    {
+      ...mockPronounce,
+      acoustic_distance: 7.8,
+      differences: {
+        ...mockPronounce.differences,
+        heard_phones_confidence: [0.95, 0.91, 0.62, 0.9, 0.88],
+        phoneme_error_rate: 0.14,
+        word_error_rate: 0.33,
+      },
+    },
+    'the ship sailed'
+  );
+  assert(
+    deepAiView.acousticScore === 80 &&
+      deepAiView.phonemeScore === 86 &&
+      deepAiView.wordScore === 67 &&
+      deepAiView.meanConfidencePct === 85,
+    'buildSentencePronunciationView: extracts acoustic, phoneme, word scores and CTC confidence cleanly'
+  );
+  assert(
+    deepAiView.phonemeSummary.matchedPhones >= 4 &&
+      deepAiView.topPhonemeIssues.length === 1 &&
+      deepAiView.topPhonemeIssues[0].expected === 'ʃ' &&
+      deepAiView.topPhonemeIssues[0].heard === 's',
+    'buildSentencePronunciationView: aggregates mismatched phonemes with Vietnamese coaching tips'
+  );
+  assert(
+    getPhonemeCoachingTip('ʃ', 's').includes('/ʃ/') && getPhonemeCoachingTip('k', '').includes('/k/'),
+    'getPhonemeCoachingTip: provides concrete guidance for substituted and omitted phonemes'
   );
 
   return { totalTests, passedTests };

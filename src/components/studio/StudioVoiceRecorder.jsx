@@ -478,8 +478,11 @@ export function StudioVoiceRecorder({
           data={result}
           targetText={expectedText}
           voice={voice}
+          recordedUrl={recordedUrl}
           onPlaySample={isCustomSampleMode ? onPlaySample : undefined}
           samplePlaying={effectiveSamplePlaying}
+          onRequestDeepAi={() => handleScoreModal()}
+          scoringDeepAi={scoring}
         />
       )}
     </div>
