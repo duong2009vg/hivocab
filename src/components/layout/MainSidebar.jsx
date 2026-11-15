@@ -86,7 +86,7 @@ export function MainSidebar() {
     },
     {
       id: 'studio',
-      label: 'Nghe & Nói Studio',
+      label: 'Shadowing & Dictation',
       badge: 'Mới',
       icon: <Mic className="w-5 h-5 shrink-0" />,
     },
