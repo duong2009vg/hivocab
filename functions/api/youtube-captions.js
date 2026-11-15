@@ -176,8 +176,8 @@ function checkPlayability(playerJson) {
   if (!status || status === 'OK') return { ok: true };
   const reason = String(playerJson?.playabilityStatus?.reason || '').trim();
   if (status === 'LOGIN_REQUIRED') {
-    if (reason.includes("Sign in to confirm you're not a bot")) {
-      return { ok: false, code: 'REQUEST_BLOCKED', detail: 'YouTube tạm giới hạn truy cập từ máy chủ này. Vui lòng thử lại sau ít phút.' };
+    if (/sign in to confirm you.?re not a bot/i.test(reason)) {
+      return { ok: false, code: 'REQUEST_BLOCKED', detail: 'YouTube tạm giới hạn IP máy chủ này (kiểm tra bot). Vui lòng thử lại sau ít phút.' };
     }
     return { ok: false, code: 'VIDEO_UNAVAILABLE', detail: 'Video yêu cầu đăng nhập hoặc bị giới hạn độ tuổi.' };
   }
