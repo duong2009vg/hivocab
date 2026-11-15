@@ -10,7 +10,7 @@ const RouteContext = createContext({
   isExerciseDetail: false,
 });
 
-export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'dictionary', 'settings', 'profile'];
+export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'studio', 'dictionary', 'settings', 'profile'];
 
 function normalizeRoute(raw) {
   if (!raw) return 'landing';
@@ -19,6 +19,7 @@ function normalizeRoute(raw) {
     return 'library';
   }
   if (clean === 'thpt') return 'exercises';
+  if (clean === 'shadowing' || clean === 'dictation' || clean === 'pronunciation') return 'studio';
   if (clean === 'game') return 'dashboard';
   if (clean === 'settings') return 'profile';
   return clean || 'landing';
@@ -144,6 +145,7 @@ export function RouteProvider({ children }) {
         case 'vocabulary':
         case 'dictionary':
         case 'bilingual-reading':
+        case 'studio':
           // Owned 100% by pure React components and reactive hooks
           break;
         case 'library':

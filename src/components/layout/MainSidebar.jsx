@@ -1,7 +1,7 @@
 // src/components/layout/MainSidebar.jsx
 // 100% Pixel-Perfect match to taskbar fix design (code.html & screen.png)
 import React from 'react';
-import { BookOpen, User, LogIn, Crown, Flame, Folder } from 'lucide-react';
+import { BookOpen, User, LogIn, Crown, Flame, Folder, Mic } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
@@ -83,6 +83,12 @@ export function MainSidebar() {
         </svg>
       ),
       badge: '3 quyển',
+    },
+    {
+      id: 'studio',
+      label: 'Nghe & Nói Studio',
+      badge: 'Mới',
+      icon: <Mic className="w-5 h-5 shrink-0" />,
     },
     {
       id: 'library',

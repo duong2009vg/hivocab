@@ -1,0 +1,1438 @@
+{
+  "version": 1,
+  "locale": "en-US",
+  "notice": "Curated near-sounding English words, not exact homophones. IPA uses general US dictionary-style pronunciation.",
+  "categories": [
+    {
+      "id": "all",
+      "label": "Tất cả nhóm âm"
+    },
+    {
+      "id": "long-short",
+      "label": "Nguyên âm dài / ngắn"
+    },
+    {
+      "id": "vowel",
+      "label": "Nguyên âm dễ nhầm"
+    },
+    {
+      "id": "consonant",
+      "label": "Phụ âm đầu"
+    },
+    {
+      "id": "ending",
+      "label": "Phụ âm cuối"
+    }
+  ],
+  "groups": [
+    {
+      "id": "long-short-001",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "ship",
+          "ipa": "/ʃɪp/"
+        },
+        {
+          "text": "sheep",
+          "ipa": "/ʃiːp/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-002",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "sit",
+          "ipa": "/sɪt/"
+        },
+        {
+          "text": "seat",
+          "ipa": "/siːt/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-003",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "bit",
+          "ipa": "/bɪt/"
+        },
+        {
+          "text": "beat",
+          "ipa": "/biːt/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-004",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "fill",
+          "ipa": "/fɪl/"
+        },
+        {
+          "text": "feel",
+          "ipa": "/fiːl/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-005",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "lick",
+          "ipa": "/lɪk/"
+        },
+        {
+          "text": "leak",
+          "ipa": "/liːk/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-006",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "fit",
+          "ipa": "/fɪt/"
+        },
+        {
+          "text": "feet",
+          "ipa": "/fiːt/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-007",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "bin",
+          "ipa": "/bɪn/"
+        },
+        {
+          "text": "bean",
+          "ipa": "/biːn/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-008",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "pill",
+          "ipa": "/pɪl/"
+        },
+        {
+          "text": "peel",
+          "ipa": "/piːl/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-009",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "sleep",
+          "ipa": "/sliːp/"
+        },
+        {
+          "text": "slip",
+          "ipa": "/slɪp/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-010",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "reach",
+          "ipa": "/riːtʃ/"
+        },
+        {
+          "text": "rich",
+          "ipa": "/rɪtʃ/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-011",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "ship",
+          "ipa": "/ʃɪp/"
+        },
+        {
+          "text": "sheep",
+          "ipa": "/ʃiːp/"
+        },
+        {
+          "text": "shape",
+          "ipa": "/ʃeɪp/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-012",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "sit",
+          "ipa": "/sɪt/"
+        },
+        {
+          "text": "seat",
+          "ipa": "/siːt/"
+        },
+        {
+          "text": "set",
+          "ipa": "/sɛt/"
+        }
+      ]
+    },
+    {
+      "id": "long-short-013",
+      "category": "long-short",
+      "tip": "/ɪ/ là nguyên âm ngắn; /iː/ dài hơn và vị trí lưỡi cao hơn.",
+      "words": [
+        {
+          "text": "fill",
+          "ipa": "/fɪl/"
+        },
+        {
+          "text": "feel",
+          "ipa": "/fiːl/"
+        },
+        {
+          "text": "fell",
+          "ipa": "/fɛl/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-014",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "bed",
+          "ipa": "/bɛd/"
+        },
+        {
+          "text": "bad",
+          "ipa": "/bæd/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-015",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "pen",
+          "ipa": "/pɛn/"
+        },
+        {
+          "text": "pan",
+          "ipa": "/pæn/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-016",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "men",
+          "ipa": "/mɛn/"
+        },
+        {
+          "text": "man",
+          "ipa": "/mæn/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-017",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "bet",
+          "ipa": "/bɛt/"
+        },
+        {
+          "text": "bat",
+          "ipa": "/bæt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-018",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "head",
+          "ipa": "/hɛd/"
+        },
+        {
+          "text": "had",
+          "ipa": "/hæd/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-019",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "said",
+          "ipa": "/sɛd/"
+        },
+        {
+          "text": "sad",
+          "ipa": "/sæd/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-020",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "cup",
+          "ipa": "/kʌp/"
+        },
+        {
+          "text": "cap",
+          "ipa": "/kæp/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-021",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "cut",
+          "ipa": "/kʌt/"
+        },
+        {
+          "text": "cat",
+          "ipa": "/kæt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-022",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "luck",
+          "ipa": "/lʌk/"
+        },
+        {
+          "text": "lock",
+          "ipa": "/lɑk/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-023",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "hat",
+          "ipa": "/hæt/"
+        },
+        {
+          "text": "hot",
+          "ipa": "/hɑt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-024",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "full",
+          "ipa": "/fʊl/"
+        },
+        {
+          "text": "fool",
+          "ipa": "/fuːl/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-025",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "pull",
+          "ipa": "/pʊl/"
+        },
+        {
+          "text": "pool",
+          "ipa": "/puːl/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-026",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "coat",
+          "ipa": "/koʊt/"
+        },
+        {
+          "text": "cot",
+          "ipa": "/kɑt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-027",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "road",
+          "ipa": "/roʊd/"
+        },
+        {
+          "text": "rod",
+          "ipa": "/rɑd/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-028",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "pin",
+          "ipa": "/pɪn/"
+        },
+        {
+          "text": "pen",
+          "ipa": "/pɛn/"
+        },
+        {
+          "text": "pan",
+          "ipa": "/pæn/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-029",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "bat",
+          "ipa": "/bæt/"
+        },
+        {
+          "text": "bet",
+          "ipa": "/bɛt/"
+        },
+        {
+          "text": "bit",
+          "ipa": "/bɪt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-030",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "bad",
+          "ipa": "/bæd/"
+        },
+        {
+          "text": "bed",
+          "ipa": "/bɛd/"
+        },
+        {
+          "text": "bud",
+          "ipa": "/bʌd/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-031",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "cat",
+          "ipa": "/kæt/"
+        },
+        {
+          "text": "cut",
+          "ipa": "/kʌt/"
+        },
+        {
+          "text": "cot",
+          "ipa": "/kɑt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-032",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "hat",
+          "ipa": "/hæt/"
+        },
+        {
+          "text": "hot",
+          "ipa": "/hɑt/"
+        },
+        {
+          "text": "hut",
+          "ipa": "/hʌt/"
+        }
+      ]
+    },
+    {
+      "id": "vowel-033",
+      "category": "vowel",
+      "tip": "Nghe sự khác nhau giữa các nguyên âm ngắn: độ mở miệng và vị trí lưỡi.",
+      "words": [
+        {
+          "text": "pool",
+          "ipa": "/puːl/"
+        },
+        {
+          "text": "pull",
+          "ipa": "/pʊl/"
+        },
+        {
+          "text": "pole",
+          "ipa": "/poʊl/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-034",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "thin",
+          "ipa": "/θɪn/"
+        },
+        {
+          "text": "tin",
+          "ipa": "/tɪn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-035",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "three",
+          "ipa": "/θriː/"
+        },
+        {
+          "text": "tree",
+          "ipa": "/triː/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-036",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "thank",
+          "ipa": "/θæŋk/"
+        },
+        {
+          "text": "tank",
+          "ipa": "/tæŋk/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-037",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "then",
+          "ipa": "/ðɛn/"
+        },
+        {
+          "text": "den",
+          "ipa": "/dɛn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-038",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "those",
+          "ipa": "/ðoʊz/"
+        },
+        {
+          "text": "doze",
+          "ipa": "/doʊz/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-039",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "right",
+          "ipa": "/raɪt/"
+        },
+        {
+          "text": "light",
+          "ipa": "/laɪt/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-040",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "road",
+          "ipa": "/roʊd/"
+        },
+        {
+          "text": "load",
+          "ipa": "/loʊd/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-041",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "rice",
+          "ipa": "/raɪs/"
+        },
+        {
+          "text": "lice",
+          "ipa": "/laɪs/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-042",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "rock",
+          "ipa": "/rɑk/"
+        },
+        {
+          "text": "lock",
+          "ipa": "/lɑk/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-043",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "fan",
+          "ipa": "/fæn/"
+        },
+        {
+          "text": "van",
+          "ipa": "/væn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-044",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "fine",
+          "ipa": "/faɪn/"
+        },
+        {
+          "text": "vine",
+          "ipa": "/vaɪn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-045",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "sip",
+          "ipa": "/sɪp/"
+        },
+        {
+          "text": "ship",
+          "ipa": "/ʃɪp/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-046",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "see",
+          "ipa": "/siː/"
+        },
+        {
+          "text": "she",
+          "ipa": "/ʃiː/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-047",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "sell",
+          "ipa": "/sɛl/"
+        },
+        {
+          "text": "shell",
+          "ipa": "/ʃɛl/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-048",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "cheap",
+          "ipa": "/tʃiːp/"
+        },
+        {
+          "text": "sheep",
+          "ipa": "/ʃiːp/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-049",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "chip",
+          "ipa": "/tʃɪp/"
+        },
+        {
+          "text": "ship",
+          "ipa": "/ʃɪp/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-050",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "cheer",
+          "ipa": "/tʃɪr/"
+        },
+        {
+          "text": "sheer",
+          "ipa": "/ʃɪr/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-051",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "share",
+          "ipa": "/ʃɛr/"
+        },
+        {
+          "text": "chair",
+          "ipa": "/tʃɛr/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-052",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "pay",
+          "ipa": "/peɪ/"
+        },
+        {
+          "text": "bay",
+          "ipa": "/beɪ/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-053",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "pin",
+          "ipa": "/pɪn/"
+        },
+        {
+          "text": "bin",
+          "ipa": "/bɪn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-054",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "coat",
+          "ipa": "/koʊt/"
+        },
+        {
+          "text": "goat",
+          "ipa": "/ɡoʊt/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-055",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "cap",
+          "ipa": "/kæp/"
+        },
+        {
+          "text": "gap",
+          "ipa": "/ɡæp/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-056",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "seal",
+          "ipa": "/siːl/"
+        },
+        {
+          "text": "zeal",
+          "ipa": "/ziːl/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-057",
+      "category": "consonant",
+      "tip": "Tập trung vào phụ âm đầu, nhất là /θ/, /ð/, /r/, /l/, /ʃ/ và /tʃ/.",
+      "words": [
+        {
+          "text": "sip",
+          "ipa": "/sɪp/"
+        },
+        {
+          "text": "ship",
+          "ipa": "/ʃɪp/"
+        },
+        {
+          "text": "chip",
+          "ipa": "/tʃɪp/"
+        }
+      ]
+    },
+    {
+      "id": "ending-058",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "back",
+          "ipa": "/bæk/"
+        },
+        {
+          "text": "bag",
+          "ipa": "/bæɡ/"
+        }
+      ]
+    },
+    {
+      "id": "ending-059",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "pick",
+          "ipa": "/pɪk/"
+        },
+        {
+          "text": "pig",
+          "ipa": "/pɪɡ/"
+        }
+      ]
+    },
+    {
+      "id": "ending-060",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "cap",
+          "ipa": "/kæp/"
+        },
+        {
+          "text": "cab",
+          "ipa": "/kæb/"
+        }
+      ]
+    },
+    {
+      "id": "ending-061",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "bet",
+          "ipa": "/bɛt/"
+        },
+        {
+          "text": "bed",
+          "ipa": "/bɛd/"
+        }
+      ]
+    },
+    {
+      "id": "ending-062",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "rope",
+          "ipa": "/roʊp/"
+        },
+        {
+          "text": "robe",
+          "ipa": "/roʊb/"
+        }
+      ]
+    },
+    {
+      "id": "ending-063",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "leak",
+          "ipa": "/liːk/"
+        },
+        {
+          "text": "league",
+          "ipa": "/liːɡ/"
+        }
+      ]
+    },
+    {
+      "id": "ending-064",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "seat",
+          "ipa": "/siːt/"
+        },
+        {
+          "text": "seed",
+          "ipa": "/siːd/"
+        }
+      ]
+    },
+    {
+      "id": "ending-065",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "rice",
+          "ipa": "/raɪs/"
+        },
+        {
+          "text": "rise",
+          "ipa": "/raɪz/"
+        }
+      ]
+    },
+    {
+      "id": "ending-066",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "bus",
+          "ipa": "/bʌs/"
+        },
+        {
+          "text": "buzz",
+          "ipa": "/bʌz/"
+        }
+      ]
+    },
+    {
+      "id": "ending-067",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "face",
+          "ipa": "/feɪs/"
+        },
+        {
+          "text": "phase",
+          "ipa": "/feɪz/"
+        }
+      ]
+    },
+    {
+      "id": "ending-068",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "rate",
+          "ipa": "/reɪt/"
+        },
+        {
+          "text": "raid",
+          "ipa": "/reɪd/"
+        }
+      ]
+    },
+    {
+      "id": "ending-069",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "lock",
+          "ipa": "/lɑk/"
+        },
+        {
+          "text": "log",
+          "ipa": "/lɑɡ/"
+        }
+      ]
+    },
+    {
+      "id": "ending-070",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "safe",
+          "ipa": "/seɪf/"
+        },
+        {
+          "text": "save",
+          "ipa": "/seɪv/"
+        }
+      ]
+    },
+    {
+      "id": "ending-071",
+      "category": "ending",
+      "tip": "Tập trung vào phụ âm cuối: âm vô thanh và hữu thanh có thể khác nhau rất nhẹ.",
+      "words": [
+        {
+          "text": "leaf",
+          "ipa": "/liːf/"
+        },
+        {
+          "text": "leave",
+          "ipa": "/liːv/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-00",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "cap",
+          "ipa": "/kæp/"
+        },
+        {
+          "text": "cab",
+          "ipa": "/kæb/"
+        },
+        {
+          "text": "cat",
+          "ipa": "/kæt/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-01",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "back",
+          "ipa": "/bæk/"
+        },
+        {
+          "text": "bag",
+          "ipa": "/bæɡ/"
+        },
+        {
+          "text": "bat",
+          "ipa": "/bæt/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-02",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "rope",
+          "ipa": "/roʊp/"
+        },
+        {
+          "text": "robe",
+          "ipa": "/roʊb/"
+        },
+        {
+          "text": "road",
+          "ipa": "/roʊd/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-03",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "rice",
+          "ipa": "/raɪs/"
+        },
+        {
+          "text": "rise",
+          "ipa": "/raɪz/"
+        },
+        {
+          "text": "right",
+          "ipa": "/raɪt/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-04",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "leaf",
+          "ipa": "/liːf/"
+        },
+        {
+          "text": "leave",
+          "ipa": "/liːv/"
+        },
+        {
+          "text": "leak",
+          "ipa": "/liːk/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-05",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "rate",
+          "ipa": "/reɪt/"
+        },
+        {
+          "text": "raid",
+          "ipa": "/reɪd/"
+        },
+        {
+          "text": "rake",
+          "ipa": "/reɪk/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-06",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "bet",
+          "ipa": "/bɛt/"
+        },
+        {
+          "text": "bed",
+          "ipa": "/bɛd/"
+        },
+        {
+          "text": "beg",
+          "ipa": "/bɛɡ/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-07",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "seat",
+          "ipa": "/siːt/"
+        },
+        {
+          "text": "seed",
+          "ipa": "/siːd/"
+        },
+        {
+          "text": "seek",
+          "ipa": "/siːk/"
+        }
+      ]
+    },
+    {
+      "id": "ending-trio-08",
+      "category": "ending",
+      "tip": "Nghe phần kết thúc của từ: phụ âm cuối có thể nhẹ và dễ bỏ sót.",
+      "words": [
+        {
+          "text": "bus",
+          "ipa": "/bʌs/"
+        },
+        {
+          "text": "buzz",
+          "ipa": "/bʌz/"
+        },
+        {
+          "text": "bud",
+          "ipa": "/bʌd/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-09",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "right",
+          "ipa": "/raɪt/"
+        },
+        {
+          "text": "light",
+          "ipa": "/laɪt/"
+        },
+        {
+          "text": "night",
+          "ipa": "/naɪt/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-10",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "fan",
+          "ipa": "/fæn/"
+        },
+        {
+          "text": "van",
+          "ipa": "/væn/"
+        },
+        {
+          "text": "pan",
+          "ipa": "/pæn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-11",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "share",
+          "ipa": "/ʃɛr/"
+        },
+        {
+          "text": "chair",
+          "ipa": "/tʃɛr/"
+        },
+        {
+          "text": "care",
+          "ipa": "/kɛr/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-12",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "thin",
+          "ipa": "/θɪn/"
+        },
+        {
+          "text": "tin",
+          "ipa": "/tɪn/"
+        },
+        {
+          "text": "sin",
+          "ipa": "/sɪn/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-13",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "see",
+          "ipa": "/siː/"
+        },
+        {
+          "text": "she",
+          "ipa": "/ʃiː/"
+        },
+        {
+          "text": "key",
+          "ipa": "/kiː/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-14",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "rice",
+          "ipa": "/raɪs/"
+        },
+        {
+          "text": "lice",
+          "ipa": "/laɪs/"
+        },
+        {
+          "text": "nice",
+          "ipa": "/naɪs/"
+        }
+      ]
+    },
+    {
+      "id": "consonant-trio-15",
+      "category": "consonant",
+      "tip": "Để ý phụ âm đầu, không dựa vào chữ viết để đoán.",
+      "words": [
+        {
+          "text": "road",
+          "ipa": "/roʊd/"
+        },
+        {
+          "text": "load",
+          "ipa": "/loʊd/"
+        },
+        {
+          "text": "toad",
+          "ipa": "/toʊd/"
+        }
+      ]
+    }
+  ]
+}

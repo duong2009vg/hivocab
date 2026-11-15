@@ -52,6 +52,11 @@ export function MobileBottomNav() {
       icon: 'menu_book',
     },
     {
+      id: 'studio',
+      label: 'Studio',
+      icon: 'mic',
+    },
+    {
       id: 'dictionary',
       label: 'Tra từ',
       icon: 'search',
@@ -95,7 +100,7 @@ export function MobileBottomNav() {
             aria-label={tab.label}
             onClick={() => navigateTo(tab.id)}
             onTouchStart={tab.onTouchPrefetch}
-            className="w-11 h-11 flex items-center justify-center text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer"
+            className="w-9 sm:w-10 h-10 flex items-center justify-center text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[23px]">
               {tab.icon}
@@ -134,7 +139,7 @@ export function MobileBottomNav() {
         <a
           aria-label="Tài khoản Bé Hổ Churbito"
           onClick={() => navigateTo('profile')}
-          className="relative w-11 h-11 flex items-center justify-center active:scale-90 transition-all duration-150 cursor-pointer"
+          className="relative w-9 sm:w-10 h-10 flex items-center justify-center active:scale-90 transition-all duration-150 cursor-pointer"
         >
           <div className="w-8 h-8 rounded-full overflow-hidden bg-[#faf2ec] border-2 border-white/80 shadow-sm flex items-center justify-center">
             <img

@@ -289,6 +289,13 @@ const quizResults = await runQuizTypesLogicTests();
 totalTests += quizResults.totalTests;
 passedTests += quizResults.passedTests;
 
+// 9.4 PeakFour Studio Core Algorithms Test Suite (Shadowing, Dictation, OpenPronounce)
+console.log('\n9.4 Running PeakFour Studio Core Algorithms Test Suite:');
+const { runStudioCoreTests } = await import('../tests/studio-core.test.js');
+const studioResults = await runStudioCoreTests();
+totalTests += studioResults.totalTests;
+passedTests += studioResults.passedTests;
+
 // Summary
 console.log('\n=======================================================');
 console.log(`📊 INTEGRATION TEST RESULTS: ${passedTests}/${totalTests} PASSED`);

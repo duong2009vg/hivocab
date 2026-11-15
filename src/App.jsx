@@ -43,6 +43,7 @@ const PageExercises = lazy(() => import('./components/pages/PageExercises.jsx'))
 const PageThptRoom = lazy(() => import('./components/pages/PageThptRoom.jsx'));
 const PageVocabulary = lazy(() => import('./components/pages/PageVocabulary.jsx'));
 const PageDictionary = lazy(() => import('./components/pages/PageDictionary.jsx'));
+const PageStudio = lazy(() => import('./components/pages/PageStudio.jsx'));
 const PageSettings = lazy(() => import('./components/pages/PageSettings.jsx'));
 const PageProfile = lazy(() => import('./components/pages/PageProfile.jsx'));
 const PageBilingualReading = lazy(() => import('./components/pages/PageBilingualReading.jsx'));
@@ -125,6 +126,8 @@ function AppRoutes() {
         return <PageThptRoom />;
       case 'vocabulary':
         return <PageVocabulary />;
+      case 'studio':
+        return <PageStudio />;
       case 'dictionary':
         return <PageDictionary />;
       case 'settings':
