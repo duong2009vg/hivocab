@@ -153,6 +153,22 @@ export function useDictionary() {
     [query, refreshRecent]
   );
 
+  // Consume pending dictionary lookup triggered from other pages (e.g. Dashboard search / Word of the Day)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const consumePending = () => {
+      const pending = window._pendingDictionaryQuery;
+      if (pending && typeof pending === 'string' && pending.trim()) {
+        const term = pending.trim();
+        delete window._pendingDictionaryQuery;
+        searchWord(term);
+      }
+    };
+    consumePending();
+    window.addEventListener('hivocab:dict-lookup', consumePending);
+    return () => window.removeEventListener('hivocab:dict-lookup', consumePending);
+  }, [searchWord]);
+
   const clearInput = useCallback(() => {
     setQuery('');
     setSuggestions([]);
