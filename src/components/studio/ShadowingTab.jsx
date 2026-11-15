@@ -109,7 +109,6 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
   // Add custom YouTube video state
   const [showAddForm, setShowAddForm] = useState(false);
   const [ytUrlInput, setYtUrlInput] = useState('');
-  const [ytTitleInput, setYtTitleInput] = useState('');
   const [importingYt, setImportingYt] = useState(false);
   const [importError, setImportError] = useState('');
 
@@ -335,10 +334,11 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     }
   };
 
-  const handleImportYoutube = async (e) => {
-    e.preventDefault();
+  const importYoutubeByUrl = async (rawUrl) => {
+    if (importingYt) return;
     setImportError('');
-    const videoId = extractYoutubeVideoId(ytUrlInput);
+    const trimmedUrl = String(rawUrl || '').trim();
+    const videoId = extractYoutubeVideoId(trimmedUrl);
     if (!videoId) {
       setImportError('Link hoặc ID YouTube không hợp lệ (ví dụ: https://www.youtube.com/watch?v=...).');
       return;
@@ -347,8 +347,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     setImportingYt(true);
     try {
       const res = await fetchYoutubeCaptionsPreview({
-        youtubeUrl: ytUrlInput.trim(),
-        title: ytTitleInput.trim(),
+        youtubeUrl: trimmedUrl,
       });
       const fetchedClip = {
         ...res.clip,
@@ -361,12 +360,24 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
       setSelectedClipId(fetchedClip.id);
       setShowAddForm(false);
       setYtUrlInput('');
-      setYtTitleInput('');
     } catch (err) {
       setImportError(err?.message || 'Không lấy được phụ đề tự động từ YouTube.');
     } finally {
       setImportingYt(false);
     }
+  };
+
+  const handleImportYoutube = async (e) => {
+    e.preventDefault();
+    await importYoutubeByUrl(ytUrlInput);
+  };
+
+  const handleYoutubeUrlPaste = (e) => {
+    const pasted = e.clipboardData?.getData('text')?.trim() || '';
+    if (!pasted || !extractYoutubeVideoId(pasted) || importingYt) return;
+    e.preventDefault();
+    setYtUrlInput(pasted);
+    void importYoutubeByUrl(pasted);
   };
 
   const filteredClips = useMemo(() => {
@@ -439,52 +450,46 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                 onSubmit={handleImportYoutube}
                 className="bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3 sm:p-4 space-y-3"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <label className="space-y-1">
-                    <span className="text-xs font-extrabold text-[#2E2823]">Link YouTube *</span>
+                <label className="block space-y-1">
+                  <span className="text-xs font-extrabold text-[#2E2823]">
+                    Dán link YouTube (tự động lấy tiêu đề, phụ đề Anh &amp; dịch tiếng Việt)
+                  </span>
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <input
                       type="text"
+                      autoFocus
+                      disabled={importingYt}
                       value={ytUrlInput}
                       onChange={(e) => setYtUrlInput(e.target.value)}
-                      placeholder="https://www.youtube.com/watch?v=..."
-                      className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
+                      onPaste={handleYoutubeUrlPaste}
+                      placeholder="https://www.youtube.com/watch?v=... hoặc youtu.be/..."
+                      className="flex-1 px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none disabled:opacity-60"
                     />
-                  </label>
-                  <label className="space-y-1">
-                    <span className="text-xs font-extrabold text-[#2E2823]">Tên bài học (tùy chọn)</span>
-                    <input
-                      type="text"
-                      value={ytTitleInput}
-                      onChange={(e) => setYtTitleInput(e.target.value)}
-                      placeholder="Ví dụ: TED Talk - Habit Building"
-                      className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
-                    />
-                  </label>
-                </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="submit"
+                        disabled={importingYt}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-60"
+                      >
+                        {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                        <span>{importingYt ? 'Đang lấy phụ đề...' : 'Thêm video'}</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddForm(false)}
+                        className="px-3 py-2 rounded-xl bg-white text-xs font-bold border-2 border-[#3D352E] cursor-pointer"
+                      >
+                        Đóng
+                      </button>
+                    </div>
+                  </div>
+                </label>
 
                 {importError && (
                   <p className="text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2">
                     {importError}
                   </p>
                 )}
-
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="submit"
-                    disabled={importingYt}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-60"
-                  >
-                    {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                    <span>Lấy phụ đề YouTube tự động</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddForm(false)}
-                    className="px-3 py-2 rounded-xl bg-white text-xs font-bold border-2 border-[#3D352E] cursor-pointer"
-                  >
-                    Đóng
-                  </button>
-                </div>
               </form>
             )}
           </div>

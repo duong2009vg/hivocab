@@ -834,7 +834,25 @@ export async function onRequestPost(context) {
   }
   const translatedCuesCount = cues.filter((c) => Boolean(c.vietnamese_translation)).length;
   const clipId = await computeGuestClipId(videoId);
-  const finalTitle = userTitle || playerData.title || `YouTube ${videoId}`;
+  let resolvedTitle = userTitle || playerData.title;
+  let resolvedAuthor = userAuthor || playerData.author;
+  if (!resolvedTitle) {
+    try {
+      const oembedRes = await fetchWithTimeout(
+        `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${videoId}`)}&format=json`,
+        {},
+        5000
+      );
+      if (oembedRes.ok) {
+        const meta = await oembedRes.json().catch(() => null);
+        if (meta?.title) resolvedTitle = cleanCaptionText(meta.title);
+        if (!resolvedAuthor && meta?.author_name) resolvedAuthor = cleanCaptionText(meta.author_name);
+      }
+    } catch {
+      // Ignore oEmbed metadata failure
+    }
+  }
+  const finalTitle = resolvedTitle || `YouTube ${videoId}`;
   const startSeconds = cues[0]?.start || 0;
   const endSeconds = cues[cues.length - 1]?.end || 0;
 
@@ -846,7 +864,7 @@ export async function onRequestPost(context) {
         id: clipId,
         title: finalTitle,
         origin: 'YouTube',
-        author: userAuthor || playerData.author || 'YouTube',
+        author: resolvedAuthor || 'YouTube',
         provider: 'youtube',
         youtube_video_id: videoId,
         content_kind: 'education',
