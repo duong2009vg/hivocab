@@ -3,12 +3,14 @@
 // Powered by cloned PeakFour core algorithms & datasets + Modal.com OpenPronounce/Kokoro API
 
 import React, { useState, useEffect } from 'react';
-import { Mic, Video, Keyboard, Volume2, Server, Sparkles, Loader2, CheckCircle2 } from 'lucide-react';
+import { Mic, Video, Keyboard, Volume2, Server, Sparkles, Loader2, CheckCircle2, Zap } from 'lucide-react';
 import {
   getStudioApiUrl,
   checkStudioBackendStatus,
   getPreferredStudioVoice,
   setPreferredStudioVoice,
+  getStudioCreditSaver,
+  setStudioCreditSaver,
   stopStudioAudio,
 } from '../../services/studioService.js';
 import ShadowingTab from '../studio/ShadowingTab.jsx';
@@ -28,6 +30,7 @@ export function PageStudio() {
   const [voicesList, setVoicesList] = useState([]);
 
   const [selectedVoice, setSelectedVoice] = useState(() => getPreferredStudioVoice());
+  const [creditSaver, setCreditSaver] = useState(() => getStudioCreditSaver());
   const [backendStatus, setBackendStatus] = useState(() => ({
     configured: Boolean(getStudioApiUrl()),
     online: false,
@@ -75,7 +78,8 @@ export function PageStudio() {
 
     loadDatasets();
 
-    if (getStudioApiUrl()) {
+    // When Credit Saver is ON, skip eager cold-start ping so browsing costs $0 Modal credits
+    if (getStudioApiUrl() && !getStudioCreditSaver()) {
       checkStudioBackendStatus().then((res) => {
         if (active) setBackendStatus(res);
       });
@@ -92,15 +96,38 @@ export function PageStudio() {
     setPreferredStudioVoice(nextVoice);
   };
 
+  const handleToggleCreditSaver = () => {
+    const next = setStudioCreditSaver(!creditSaver);
+    setCreditSaver(next);
+    if (!next && getStudioApiUrl() && !backendStatus.online) {
+      checkStudioBackendStatus().then((res) => {
+        setBackendStatus(res);
+      });
+    }
+  };
+
   const tabs = [
-    { id: 'shadowing', label: 'Shadowing Video', badge: shadowingClips.length || 12, icon: Video },
+    {
+      id: 'shadowing',
+      label: 'Shadowing Video',
+      shortLabel: 'Shadowing',
+      badge: shadowingClips.length || 12,
+      icon: Video,
+    },
     {
       id: 'dictation',
       label: 'Dictation Hội thoại',
+      shortLabel: 'Dictation',
       badge: dictationCatalog?.lessons?.length || 139,
       icon: Keyboard,
     },
-    { id: 'ipa', label: 'IPA & Phát âm AI', badge: '44 âm', icon: Sparkles },
+    {
+      id: 'ipa',
+      label: 'IPA & Phát âm AI',
+      shortLabel: 'IPA & AI',
+      badge: '44 âm',
+      icon: Sparkles,
+    },
   ];
 
   return (
@@ -109,42 +136,56 @@ export function PageStudio() {
       className="page active min-h-screen text-[#2E2823] bg-[#FFF9F0] font-['Quicksand',sans-serif]"
     >
       <div className="w-full min-w-0 lg:pl-[var(--sidebar-w,244px)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 xl:px-8 pt-4 lg:pt-6 pb-28 lg:pb-12 space-y-5 pwa-safe-top">
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-6 xl:px-8 pt-3 sm:pt-4 lg:pt-6 pb-24 lg:pb-12 space-y-4 sm:space-y-5 pwa-safe-top">
           {/* Header matching HiVocab Crayon Cream Paper Design */}
-          <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] flex items-center justify-center text-white shrink-0">
-                <Mic className="w-6 h-6" />
+          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] flex items-center justify-center text-white shrink-0">
+                <Mic className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl xl:text-3xl font-black text-[#2E2823] tracking-tight">
+                  <h1 className="text-lg sm:text-2xl xl:text-3xl font-black text-[#2E2823] tracking-tight truncate">
                     Luyện Nghe & Nói Studio
                   </h1>
-                  <span className="text-[11px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] px-2.5 py-0.5 rounded-full shadow-[1.5px_1.5px_0px_#3D352E]">
+                  <span className="hidden sm:inline-block text-[11px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] px-2.5 py-0.5 rounded-full shadow-[1.5px_1.5px_0px_#3D352E]">
                     Shadowing · Dictation · IPA
                   </span>
                 </div>
-                <p className="text-xs sm:text-sm font-semibold text-[#786F66] truncate">
-                  Nhại giọng YouTube, nghe chép chính tả 139 hội thoại & chấm phát âm AI
+                <p className="text-[11px] sm:text-sm font-semibold text-[#786F66] truncate">
+                  Nhại giọng YouTube, nghe chép 139 hội thoại & chấm phát âm AI
                 </p>
               </div>
             </div>
 
-            {/* Voice Selector + Modal.com AI Server Status */}
-            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            {/* Credit Saver + Voice Selector + Modal.com AI Server Status */}
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={handleToggleCreditSaver}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-black cursor-pointer active:translate-y-0.5 transition-all ${
+                  creditSaver
+                    ? 'bg-[#EEF5EC] text-[#355A3B]'
+                    : 'bg-[#FFF3D1] text-[#8C5311]'
+                }`}
+                title="Khi BẬT: Ưu tiên phát âm thanh HiVocab & chấm giọng trình duyệt ($0 Modal credit). Chỉ gọi Modal khi bấm Chấm Sâu IPA."
+              >
+                <Zap className="w-3.5 h-3.5 shrink-0" />
+                <span>{creditSaver ? 'Tiết kiệm Credit: BẬT' : 'Tiết kiệm Credit: TẮT (Kokoro)'}</span>
+              </button>
+
               {voicesList.length > 0 && (
-                <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-xs font-bold">
+                <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[180px] sm:max-w-none">
                   <Volume2 className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
                   <select
                     value={selectedVoice}
                     onChange={(e) => handleVoiceChange(e.target.value)}
                     aria-label="Chọn giọng đọc Kokoro"
-                    className="bg-transparent font-extrabold text-[#2E2823] focus:outline-none cursor-pointer"
+                    className="bg-transparent font-extrabold text-[#2E2823] focus:outline-none cursor-pointer truncate"
                   >
                     {voicesList.map((v) => (
                       <option key={v.id} value={v.id}>
-                        {v.name} ({v.accent} · {v.gender})
+                        {v.name} ({v.accent})
                       </option>
                     ))}
                   </select>
@@ -154,30 +195,32 @@ export function PageStudio() {
               <button
                 type="button"
                 onClick={() => setSetupOpen(true)}
-                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-black cursor-pointer active:translate-y-0.5 transition-all ${
-                  backendStatus.online
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-black cursor-pointer active:translate-y-0.5 transition-all ${
+                  backendStatus.online || (backendStatus.configured && creditSaver)
                     ? 'bg-[#EEF5EC] text-[#355A3B]'
                     : 'bg-[#FFF3D1] text-[#8C5311]'
                 }`}
               >
-                {backendStatus.online ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#4D6B53]" />
+                {backendStatus.online || (backendStatus.configured && creditSaver) ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
                 ) : (
-                  <Server className="w-3.5 h-3.5 text-[#D96B43]" />
+                  <Server className="w-3.5 h-3.5 text-[#D96B43] shrink-0" />
                 )}
                 <span>
                   {backendStatus.online
                     ? 'Modal AI: Đã kết nối'
+                    : backendStatus.configured && creditSaver
+                    ? 'Modal AI: Sẵn sàng'
                     : backendStatus.configured
-                    ? 'Modal AI: Ngoại tuyến'
-                    : 'Gắn AI Server (Modal)'}
+                    ? 'Modal AI: Chờ kết nối'
+                    : 'Gắn AI Server'}
                 </span>
               </button>
             </div>
           </header>
 
-          {/* Main Mode Switcher Pills */}
-          <nav className="flex flex-wrap gap-2.5" aria-label="Chế độ luyện tập Studio">
+          {/* Main Mode Switcher Pills: 3-col compact grid on mobile, inline flex on desktop */}
+          <nav className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 sm:gap-2.5" aria-label="Chế độ luyện tập Studio">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -186,16 +229,19 @@ export function PageStudio() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-[#3D352E] text-xs sm:text-sm font-black transition-all cursor-pointer active:translate-y-0.5 ${
+                  className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl border-2 border-[#3D352E] text-[11px] sm:text-sm font-black transition-all cursor-pointer active:translate-y-0.5 min-w-0 ${
                     isActive
                       ? 'bg-[#4D6B53] text-white shadow-[2.5px_2.5px_0px_#3D352E]'
                       : 'bg-[#fffcf7] text-[#554D42] hover:bg-white shadow-[1.5px_1.5px_0px_#3D352E]'
                   }`}
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{tab.label}</span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Icon className="w-4 h-4 shrink-0" />
+                    <span className="sm:hidden truncate">{tab.shortLabel}</span>
+                    <span className="hidden sm:inline truncate">{tab.label}</span>
+                  </div>
                   <span
-                    className={`px-2 py-0.5 rounded-full text-[10px] font-black border ${
+                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black border leading-none ${
                       isActive
                         ? 'bg-[#F4E3B4] text-[#3D352E] border-[#3D352E]'
                         : 'bg-[#FAF5EB] text-[#786F66] border-[#E8DEC8]'

@@ -8,12 +8,16 @@ import { HiAudio } from './audioService.js';
 const DEFAULT_STUDIO_API_URL = 'https://duong2009vg--hivocab-peakfour-studio-fastapi-app.modal.run';
 const STUDIO_URL_STORAGE_KEY = 'hivocab_studio_api_url';
 const STUDIO_VOICE_STORAGE_KEY = 'hivocab_studio_voice';
+const STUDIO_CREDIT_SAVER_KEY = 'hivocab_studio_credit_saver';
 const STUDIO_PROGRESS_KEY = 'hivocab_studio_progress_v1';
 const STUDIO_GUEST_CLIPS_KEY = 'hivocab_studio_guest_clips_v1';
+const TTS_CACHE_NAME = 'hivocab-kokoro-tts-v1';
 const MAX_GUEST_CLIPS = 12;
 const MAX_TTS_CACHE = 40;
+const MAX_SCORE_CACHE = 30;
 
 const ttsBlobUrlCache = new Map();
+const pronunciationScoreCache = new Map();
 let activeStudioAudio = null;
 
 function normalizeBaseUrl(raw) {
@@ -66,6 +70,27 @@ export function setPreferredStudioVoice(voiceId) {
       window.localStorage.setItem(STUDIO_VOICE_STORAGE_KEY, String(voiceId));
     } catch (_) {}
   }
+}
+
+export function getStudioCreditSaver() {
+  if (typeof window === 'undefined') return true;
+  try {
+    const raw = window.localStorage.getItem(STUDIO_CREDIT_SAVER_KEY);
+    if (raw === null) return true; // Default ON to protect Modal.com credits
+    return raw !== '0' && raw !== 'false';
+  } catch (_) {
+    return true;
+  }
+}
+
+export function setStudioCreditSaver(enabled) {
+  const next = Boolean(enabled);
+  if (typeof window !== 'undefined') {
+    try {
+      window.localStorage.setItem(STUDIO_CREDIT_SAVER_KEY, next ? '1' : '0');
+    } catch (_) {}
+  }
+  return next;
 }
 
 export function stopStudioAudio() {
@@ -144,33 +169,60 @@ function cacheTtsUrl(cacheKey, blob) {
   return objectUrl;
 }
 
+async function readPersistentTtsCache(cacheKey) {
+  if (typeof window === 'undefined' || !window.caches) return null;
+  try {
+    const cache = await window.caches.open(TTS_CACHE_NAME);
+    const hit = await cache.match(`https://hivocab-tts.local/${encodeURIComponent(cacheKey)}`);
+    return hit ? await hit.blob() : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+async function writePersistentTtsCache(cacheKey, blob) {
+  if (typeof window === 'undefined' || !window.caches) return;
+  try {
+    const cache = await window.caches.open(TTS_CACHE_NAME);
+    await cache.put(
+      `https://hivocab-tts.local/${encodeURIComponent(cacheKey)}`,
+      new Response(blob.slice(0), { headers: { 'Content-Type': blob.type || 'audio/wav' } })
+    );
+  } catch (_) {}
+}
+
 /**
- * Play English text using Kokoro on Modal.com if connected, falling back smoothly
- * to HiVocab's HiAudio (/api/tts + Web Speech) when offline or unconfigured.
+ * Play English text using free local HiAudio when Credit Saver is active ($0 Modal credits),
+ * or Kokoro AI on Modal.com with persistent browser Cache Storage when requested.
  */
-export async function playStudioTts({ text, voice = 'af_heart', speed = 1.0, onEnded } = {}) {
+export async function playStudioTts({ text, voice = 'af_heart', speed = 1.0, forceKokoro = false, onEnded } = {}) {
   const cleanText = String(text || '').trim();
   if (!cleanText) return { engine: 'none', error: 'Thiếu nội dung để đọc' };
 
   stopStudioAudio();
   const safeSpeed = Math.max(0.5, Math.min(1.5, Number(speed) || 1.0));
   const baseUrl = getStudioApiUrl();
+  const useKokoro = Boolean(baseUrl) && (forceKokoro || !getStudioCreditSaver());
 
-  if (baseUrl) {
+  if (useKokoro) {
     const cacheKey = `${baseUrl}::${voice}::${cleanText}`;
     try {
       let audioUrl = ttsBlobUrlCache.get(cacheKey);
       if (!audioUrl) {
-        const body = new FormData();
-        body.append('text', cleanText.slice(0, 950));
-        body.append('lang', 'en');
-        body.append('voice', voice || 'af_heart');
-        const res = await fetchWithTimeout(`${baseUrl}/tts`, { method: 'POST', body }, 45000);
-        if (!res.ok) {
-          throw new Error(`Kokoro HTTP ${res.status}`);
+        let blob = await readPersistentTtsCache(cacheKey);
+        if (!blob || blob.size < 100) {
+          const body = new FormData();
+          body.append('text', cleanText.slice(0, 950));
+          body.append('lang', 'en');
+          body.append('voice', voice || 'af_heart');
+          const res = await fetchWithTimeout(`${baseUrl}/tts`, { method: 'POST', body }, 45000);
+          if (!res.ok) {
+            throw new Error(`Kokoro HTTP ${res.status}`);
+          }
+          blob = await res.blob();
+          if (!blob || blob.size < 100) throw new Error('Empty audio response');
+          await writePersistentTtsCache(cacheKey, blob);
         }
-        const blob = await res.blob();
-        if (!blob || blob.size < 100) throw new Error('Empty audio response');
         audioUrl = cacheTtsUrl(cacheKey, blob);
       }
 
@@ -194,6 +246,7 @@ export async function playStudioTts({ text, voice = 'af_heart', speed = 1.0, onE
 
 /**
  * Send recorded microphone audio to OpenPronounce on Modal.com for phoneme scoring.
+ * Caches identical audio blobs in memory to avoid billing Modal twice on repeat clicks.
  */
 export async function scorePronunciation({ blob, filename = 'recording.webm', expectedText, lang = 'en' } = {}) {
   const baseUrl = getStudioApiUrl();
@@ -207,9 +260,15 @@ export async function scorePronunciation({ blob, filename = 'recording.webm', ex
     throw new Error('Thiếu câu mục tiêu để chấm phát âm.');
   }
 
+  const trimmedTarget = expectedText.trim();
+  const scoreKey = `${baseUrl}::${blob.size}::${blob.type || 'audio'}::${lang}::${trimmedTarget}`;
+  if (pronunciationScoreCache.has(scoreKey)) {
+    return pronunciationScoreCache.get(scoreKey);
+  }
+
   const body = new FormData();
   body.append('file', blob, filename);
-  body.append('expected_text', expectedText.trim());
+  body.append('expected_text', trimmedTarget);
   body.append('lang', lang);
 
   const res = await fetchWithTimeout(`${baseUrl}/pronunciation`, { method: 'POST', body }, 60000);
@@ -226,7 +285,13 @@ export async function scorePronunciation({ blob, filename = 'recording.webm', ex
   if (!data || typeof data.score !== 'number' || !Number.isFinite(data.score) || !data.differences) {
     throw new Error('Dữ liệu chấm phát âm trả về không hợp lệ.');
   }
-  return data;
+  const tagged = { ...data, engine: data.engine || 'modal-ai' };
+  if (pronunciationScoreCache.size >= MAX_SCORE_CACHE) {
+    const oldestKey = pronunciationScoreCache.keys().next().value;
+    pronunciationScoreCache.delete(oldestKey);
+  }
+  pronunciationScoreCache.set(scoreKey, tagged);
+  return tagged;
 }
 
 /**

@@ -10,6 +10,8 @@ import {
   resolveActiveCueIndex,
   compareShadowingWords,
   buildSentencePronunciationView,
+  wordToApproxPhones,
+  buildLocalPronunciationResult,
 } from '../src/utils/studioCore.js';
 
 export async function runStudioCoreTests() {
@@ -118,6 +120,30 @@ export async function runStudioCoreTests() {
   assert(
     view.wordViews[1].segments.some((s) => s.text === 'sh' && s.level === 'bad'),
     'buildSentencePronunciationView: highlights "sh" in "ship" as bad phoneme match'
+  );
+
+  // 5. Zero-credit local browser speech scorer
+  const approxPhones = wordToApproxPhones('ship');
+  assert(
+    approxPhones[0] === 'ʃ' && approxPhones.includes('p'),
+    'wordToApproxPhones: maps digraph "sh" to IPA /ʃ/ cleanly'
+  );
+
+  const localExact = buildLocalPronunciationResult('The ship sailed fast', 'the ship sailed fast');
+  assert(
+    localExact.score === 100 && localExact.engine === 'local-browser' && localExact.differences.errors.length === 0,
+    'buildLocalPronunciationResult: returns 100 and local-browser engine for exact transcript'
+  );
+
+  const localPartial = buildLocalPronunciationResult('The ship sailed fast', 'the sip failed fast');
+  assert(
+    localPartial.score > 0 && localPartial.score < 100 && localPartial.differences.words_with_errors.includes('ship'),
+    'buildLocalPronunciationResult: flags mispronounced word and builds valid highlight view'
+  );
+  const localView = buildSentencePronunciationView(localPartial, 'The ship sailed fast');
+  assert(
+    localView !== null && localView.engine === 'local-browser' && localView.mismatchedCount >= 1,
+    'buildSentencePronunciationView: renders local-browser pronunciation result cleanly'
   );
 
   return { totalTests, passedTests };

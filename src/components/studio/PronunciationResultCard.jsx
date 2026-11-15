@@ -51,12 +51,20 @@ export function PronunciationResultCard({ data, targetText, voice = 'af_heart', 
             </span>
             <span className="text-[10px] font-bold opacity-80">/ 100</span>
           </div>
-          <div>
-            <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wide text-[#786F66]">
-              <Sparkles className="w-3.5 h-3.5 text-[#D96B43]" />
-              <span>OpenPronounce · Phân tích âm vị IPA</span>
+          <div className="min-w-0">
+            <div className="flex items-center flex-wrap gap-1.5 text-[11px] font-extrabold uppercase tracking-wide text-[#786F66]">
+              <Sparkles className="w-3.5 h-3.5 text-[#D96B43] shrink-0" />
+              {view.engine === 'local-browser' ? (
+                <span className="px-2 py-0.5 rounded-full bg-[#EEF5EC] text-[#355A3B] border border-[#4D6B53]/30">
+                  Chấm Nhanh (0s · Free)
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E]/30">
+                  OpenPronounce AI (IPA)
+                </span>
+              )}
             </div>
-            <h4 className="text-sm sm:text-base font-extrabold text-[#2E2823]">
+            <h4 className="text-sm sm:text-base font-extrabold text-[#2E2823] mt-0.5">
               {!view.hasVoice
                 ? 'Chưa nhận diện được giọng nói rõ ràng'
                 : view.mismatchedCount > 0
@@ -132,9 +140,9 @@ export function PronunciationResultCard({ data, targetText, voice = 'af_heart', 
 
       {/* Selected Word Phoneme Inspector Drawer */}
       {selectedWord && (
-        <div className="mt-2 bg-white border-2 border-[#3D352E] rounded-2xl p-3.5 shadow-[2px_2px_0px_#3D352E] space-y-2.5">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+        <div className="mt-2 bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2px_2px_0px_#3D352E] space-y-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2 min-w-0">
               <span className="text-base font-black text-[#2E2823]">{selectedWord.word}</span>
               {selectedWord.expectedPhones.length > 0 && (
                 <span className="text-xs font-mono font-bold bg-[#EEF5EC] text-[#4D6B53] px-2 py-0.5 rounded-lg border border-[#4D6B53]/30">
@@ -144,13 +152,13 @@ export function PronunciationResultCard({ data, targetText, voice = 'af_heart', 
               <button
                 type="button"
                 onClick={() => playStudioTts({ text: selectedWord.word, voice, speed: 0.9 })}
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#4D6B53] text-white text-xs font-bold border border-[#3D352E] hover:bg-[#3e5843] cursor-pointer"
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#4D6B53] text-white text-xs font-bold border border-[#3D352E] hover:bg-[#3e5843] cursor-pointer min-h-[36px]"
               >
                 <Volume2 className="w-3.5 h-3.5" />
                 <span>Nghe mẫu</span>
               </button>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 ml-auto">
               <button
                 type="button"
                 disabled={selectedWord.index <= 0}

@@ -1,8 +1,14 @@
 // src/components/studio/StudioVoiceRecorder.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Trash2, Sparkles, Loader2, Server } from 'lucide-react';
+import { Mic, Square, Trash2, Sparkles, Loader2, Server, Zap } from 'lucide-react';
 import { scorePronunciation, getStudioApiUrl } from '../../services/studioService.js';
+import { buildLocalPronunciationResult } from '../../utils/studioCore.js';
 import PronunciationResultCard from './PronunciationResultCard.jsx';
+
+function getSpeechRecognitionCtor() {
+  if (typeof window === 'undefined') return null;
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
 
 export function StudioVoiceRecorder({
   expectedText,
@@ -15,20 +21,47 @@ export function StudioVoiceRecorder({
   const [seconds, setSeconds] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [recordedUrl, setRecordedUrl] = useState('');
+  const [liveTranscript, setLiveTranscript] = useState('');
   const [scoring, setScoring] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
 
   const mediaRecorderRef = useRef(null);
+  const recognitionRef = useRef(null);
   const streamRef = useRef(null);
   const chunksRef = useRef([]);
   const timerRef = useRef(null);
+  const finalizeTimerRef = useRef(null);
   const discardRef = useRef(false);
+  const liveTranscriptRef = useRef('');
+  const expectedTextRef = useRef(expectedText);
+
+  useEffect(() => {
+    expectedTextRef.current = expectedText;
+  }, [expectedText]);
+
+  const stopSpeechRecognition = () => {
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (_) {}
+    }
+  };
 
   const cleanupRecording = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
+    }
+    if (finalizeTimerRef.current) {
+      clearTimeout(finalizeTimerRef.current);
+      finalizeTimerRef.current = null;
+    }
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (_) {}
+      recognitionRef.current = null;
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       discardRef.current = true;
@@ -49,6 +82,8 @@ export function StudioVoiceRecorder({
   useEffect(() => {
     setResult(null);
     setError('');
+    setLiveTranscript('');
+    liveTranscriptRef.current = '';
   }, [expectedText]);
 
   useEffect(() => {
@@ -70,17 +105,100 @@ export function StudioVoiceRecorder({
     }
     setRecordedBlob(null);
     setRecordedUrl('');
+    setLiveTranscript('');
+    liveTranscriptRef.current = '';
     setResult(null);
     setError('');
+  };
+
+  const runLocalScore = (transcriptText) => {
+    const target = expectedTextRef.current;
+    if (!target) return null;
+    const data = buildLocalPronunciationResult(target, transcriptText);
+    setResult(data);
+    if (typeof onScored === 'function') {
+      onScored(data);
+    }
+    return data;
+  };
+
+  const handleScoreModal = async (blobOverride = null) => {
+    const targetBlob = blobOverride || recordedBlob;
+    if (!targetBlob || !expectedTextRef.current) return;
+    if (!getStudioApiUrl()) {
+      if (onOpenSetup) onOpenSetup();
+      setError('Chưa gắn URL Modal.com AI Server. Bấm "Cài đặt AI Server" để chấm IPA sâu.');
+      return;
+    }
+    setScoring(true);
+    setError('');
+    try {
+      const data = await scorePronunciation({
+        blob: targetBlob,
+        expectedText: expectedTextRef.current,
+        lang: 'en',
+      });
+      setResult(data);
+      if (typeof onScored === 'function') {
+        onScored(data);
+      }
+    } catch (err) {
+      setError(err?.message || 'Chấm phát âm AI thất bại.');
+    } finally {
+      setScoring(false);
+    }
   };
 
   const startRecording = async () => {
     setError('');
     setResult(null);
+    setLiveTranscript('');
+    liveTranscriptRef.current = '';
+    if (finalizeTimerRef.current) {
+      clearTimeout(finalizeTimerRef.current);
+      finalizeTimerRef.current = null;
+    }
+
     if (!navigator?.mediaDevices?.getUserMedia) {
       setError('Trình duyệt không hỗ trợ ghi âm micro (yêu cầu HTTPS hoặc localhost).');
       return;
     }
+
+    const SpeechCtor = getSpeechRecognitionCtor();
+    const recLang = String(voice || '').startsWith('b') ? 'en-GB' : 'en-US';
+    let recognitionActive = false;
+
+    if (SpeechCtor) {
+      try {
+        const rec = new SpeechCtor();
+        rec.lang = recLang;
+        rec.continuous = true;
+        rec.interimResults = true;
+        rec.maxAlternatives = 1;
+
+        rec.onresult = (event) => {
+          let combined = '';
+          for (let i = 0; i < event.results.length; i++) {
+            const seg = event.results[i]?.[0]?.transcript || '';
+            if (seg) combined += (combined ? ' ' : '') + seg.trim();
+          }
+          if (combined) {
+            liveTranscriptRef.current = combined.trim();
+            setLiveTranscript(liveTranscriptRef.current);
+          }
+        };
+        rec.onerror = () => {};
+        rec.onend = () => {
+          recognitionRef.current = null;
+        };
+        rec.start();
+        recognitionRef.current = rec;
+        recognitionActive = true;
+      } catch (_) {
+        recognitionRef.current = null;
+      }
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: { echoCancellation: true, noiseSuppression: true },
@@ -107,6 +225,7 @@ export function StudioVoiceRecorder({
           clearInterval(timerRef.current);
           timerRef.current = null;
         }
+        stopSpeechRecognition();
         try {
           stream.getTracks().forEach((t) => t.stop());
         } catch (_) {}
@@ -123,6 +242,18 @@ export function StudioVoiceRecorder({
         const url = URL.createObjectURL(blob);
         setRecordedBlob(blob);
         setRecordedUrl(url);
+
+        // Give Web Speech API 220ms to flush its final result, then score instantly ($0, 0.1s)
+        finalizeTimerRef.current = setTimeout(() => {
+          finalizeTimerRef.current = null;
+          const captured = liveTranscriptRef.current.trim();
+          if (captured) {
+            runLocalScore(captured);
+          } else if (!recognitionActive && getStudioApiUrl()) {
+            // Browser lacks Web Speech API (e.g. Firefox / iOS WebView) -> auto score via Modal
+            handleScoreModal(blob);
+          }
+        }, 220);
       };
 
       recorder.start();
@@ -130,7 +261,7 @@ export function StudioVoiceRecorder({
       setSeconds(0);
       timerRef.current = setInterval(() => {
         setSeconds((prev) => {
-          if (prev >= 45) {
+          if (prev >= 20) {
             stopRecording();
             return prev;
           }
@@ -138,108 +269,107 @@ export function StudioVoiceRecorder({
         });
       }, 1000);
     } catch (err) {
+      stopSpeechRecognition();
       setError(err?.message || 'Không thể truy cập micro. Hãy cấp quyền micro cho trình duyệt.');
     }
   };
 
   const stopRecording = () => {
+    stopSpeechRecognition();
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       discardRef.current = false;
       mediaRecorderRef.current.stop();
     }
   };
 
-  const handleScore = async () => {
-    if (!recordedBlob || !expectedText) return;
-    if (!getStudioApiUrl()) {
-      if (onOpenSetup) onOpenSetup();
-      setError('Chưa gắn URL Modal.com AI Server. Bấm "Cài đặt AI Server" để kết nối OpenPronounce.');
-      return;
-    }
-    setScoring(true);
-    setError('');
-    try {
-      const data = await scorePronunciation({
-        blob: recordedBlob,
-        expectedText,
-        lang: 'en',
-      });
-      setResult(data);
-      if (typeof onScored === 'function') {
-        onScored(data);
-      }
-    } catch (err) {
-      setError(err?.message || 'Chấm phát âm thất bại.');
-    } finally {
-      setScoring(false);
-    }
-  };
-
   const hasServer = Boolean(getStudioApiUrl());
+  const supportsSpeech = Boolean(getSpeechRecognitionCtor());
 
   return (
-    <div className={`space-y-3 ${compact ? '' : 'bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3.5'}`}>
-      {/* Recorder Controls */}
-      <div className="flex flex-wrap items-center gap-2">
+    <div className={`space-y-3 ${compact ? '' : 'bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5'}`}>
+      {/* Recorder Controls (Mobile-first grid, Desktop flex) */}
+      <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2">
         {!isRecording ? (
           <button
             type="button"
             onClick={startRecording}
             disabled={!expectedText}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 min-h-[44px] sm:min-h-0"
           >
-            <Mic className="w-4 h-4" />
+            <Mic className="w-4 h-4 shrink-0" />
             <span>{recordedBlob ? 'Ghi âm lại' : 'Ghi âm giọng nói'}</span>
           </button>
         ) : (
           <button
             type="button"
             onClick={stopRecording}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2E2823] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] animate-pulse cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl bg-[#2E2823] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] animate-pulse cursor-pointer min-h-[44px] sm:min-h-0"
           >
-            <Square className="w-3.5 h-3.5 fill-current" />
-            <span>Dừng ghi ({seconds}s)</span>
+            <Square className="w-3.5 h-3.5 fill-current shrink-0" />
+            <span>Dừng ghi ({seconds}s) · Tự động chấm</span>
           </button>
         )}
 
         {recordedBlob && !isRecording && (
-          <>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
+            {supportsSpeech && liveTranscript.trim() && (
+              <button
+                type="button"
+                onClick={() => runLocalScore(liveTranscript)}
+                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#EEF5EC] hover:bg-[#dfeedc] text-[#355A3B] text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer min-h-[42px] sm:min-h-0"
+                title="Chấm tức thì trên trình duyệt, không tốn credit Modal"
+              >
+                <Zap className="w-4 h-4 text-[#4D6B53] shrink-0" />
+                <span>Chấm Nhanh (0s · Free)</span>
+              </button>
+            )}
+
             <button
               type="button"
-              onClick={handleScore}
+              onClick={() => handleScoreModal()}
               disabled={scoring}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] hover:bg-[#3f5844] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-60"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#4D6B53] hover:bg-[#3f5844] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-60 min-h-[42px] sm:min-h-0"
+              title="Phân tích âm vị IPA sâu bằng mô hình Wav2Vec2 trên Modal.com"
             >
-              {scoring ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-              <span>{scoring ? 'Đang chấm IPA…' : 'Chấm phát âm AI'}</span>
+              {scoring ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Sparkles className="w-4 h-4 shrink-0" />}
+              <span>{scoring ? 'Đang chấm IPA…' : 'Chấm Sâu IPA (AI Modal · ~3s)'}</span>
             </button>
 
             <button
               type="button"
               onClick={clearAudio}
-              className="inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-white hover:bg-[#FBECE7] text-[#3D352E] text-xs font-bold border-2 border-[#3D352E] cursor-pointer"
+              className="inline-flex items-center justify-center px-3 py-2 rounded-xl bg-white hover:bg-[#FBECE7] text-[#3D352E] text-xs font-bold border-2 border-[#3D352E] cursor-pointer min-h-[42px] sm:min-h-0"
               title="Xóa bản ghi âm"
+              aria-label="Xóa bản ghi âm"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </button>
-          </>
+          </div>
         )}
 
         {!hasServer && (
           <button
             type="button"
             onClick={onOpenSetup}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4E3B4] hover:bg-[#edd79d] text-[#3D352E] text-xs font-bold border-2 border-[#3D352E] cursor-pointer ml-auto"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-[#F4E3B4] hover:bg-[#edd79d] text-[#3D352E] text-xs font-bold border-2 border-[#3D352E] cursor-pointer sm:ml-auto"
           >
             <Server className="w-3.5 h-3.5" />
-            <span>Gắn AI Modal.com để chấm điểm</span>
+            <span>Gắn AI Modal để chấm IPA sâu</span>
           </button>
         )}
       </div>
 
+      {/* Live Web Speech preview while recording */}
+      {isRecording && liveTranscript && (
+        <div className="text-xs font-bold text-[#4D6B53] bg-[#EEF5EC] border border-[#4D6B53]/40 rounded-xl px-3 py-2">
+          <span className="uppercase text-[10px] tracking-wide font-black mr-1.5">Đang nghe:</span>
+          <span className="italic">"{liveTranscript}"</span>
+        </div>
+      )}
+
       {/* Playback of User's Own Voice ($0 local feature) */}
       {recordedUrl && (
-        <div className="flex items-center gap-2 bg-white border border-[#E8DEC8] rounded-xl px-3 py-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 bg-white border border-[#E8DEC8] rounded-xl px-3 py-2">
           <span className="text-[11px] font-bold text-[#786F66] shrink-0">Bản thu của bạn:</span>
           <audio controls src={recordedUrl} className="w-full h-8" />
         </div>

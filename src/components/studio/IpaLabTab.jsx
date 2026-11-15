@@ -1,5 +1,5 @@
 // src/components/studio/IpaLabTab.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Volume2, Sparkles } from 'lucide-react';
 import { playStudioTts } from '../../services/studioService.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
@@ -18,8 +18,18 @@ export function IpaLabTab({ phonemeData, minimalPairsData, voice, onOpenSetup })
   const [customSentence, setCustomSentence] = useState(
     'The three thoughtful scholars thoroughly reviewed the theory.'
   );
+  const detailCardRef = useRef(null);
 
   const activeSound = selectedSound || sounds[0] || null;
+
+  const handleSelectSound = (sound) => {
+    setSelectedSound(sound);
+    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+      requestAnimationFrame(() => {
+        detailCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
+  };
 
   const filteredSounds = useMemo(() => {
     if (kindFilter === 'all') return sounds;
@@ -98,22 +108,22 @@ export function IpaLabTab({ phonemeData, minimalPairsData, voice, onOpenSetup })
             </div>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-1.5 sm:gap-2">
             {filteredSounds.map((sound) => {
               const isSelected = activeSound?.id === sound.id;
               return (
                 <button
                   key={sound.id}
                   type="button"
-                  onClick={() => setSelectedSound(sound)}
-                  className={`p-2.5 rounded-2xl border-2 text-center transition-all cursor-pointer ${
+                  onClick={() => handleSelectSound(sound)}
+                  className={`p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border-2 text-center transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#F4E3B4] border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
                       : 'bg-white border-[#E8DEC8] hover:border-[#3D352E]'
                   }`}
                 >
-                  <div className="text-lg font-mono font-black text-[#2E2823]">/{sound.ipa}/</div>
-                  <div className="text-[11px] font-bold text-[#4D6B53] truncate">{sound.example}</div>
+                  <div className="text-base sm:text-lg font-mono font-black text-[#2E2823]">/{sound.ipa}/</div>
+                  <div className="text-[10px] sm:text-[11px] font-bold text-[#4D6B53] truncate">{sound.example}</div>
                 </button>
               );
             })}
@@ -121,7 +131,7 @@ export function IpaLabTab({ phonemeData, minimalPairsData, voice, onOpenSetup })
         </div>
 
         {/* Selected IPA Practice Detail */}
-        <div className="lg:col-span-5 space-y-4">
+        <div ref={detailCardRef} className="lg:col-span-5 space-y-4 scroll-mt-4">
           {activeSound && (
             <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-3xl p-4 shadow-[2.5px_2.5px_0px_#3D352E] space-y-3">
               <div className="flex items-center justify-between gap-2">

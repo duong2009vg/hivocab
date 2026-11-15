@@ -558,5 +558,276 @@ export function buildSentencePronunciationView(data, target) {
     prosody: data.prosody || {},
     phonemeErrorRate: diff.phoneme_error_rate,
     wordErrorRate: diff.word_error_rate,
+    engine: data.engine || 'modal-ai',
+  };
+}
+
+// --- Zero-credit local browser speech scorer (for instant 0s feedback) ---
+
+const APPROX_GRAPHEME_RULES = [
+  ['tch', 'tʃ'],
+  ['dge', 'dʒ'],
+  ['igh', 'aɪ'],
+  ['sh', 'ʃ'],
+  ['ch', 'tʃ'],
+  ['th', 'θ'],
+  ['ph', 'f'],
+  ['ng', 'ŋ'],
+  ['qu', 'kw'],
+  ['ee', 'i'],
+  ['ea', 'i'],
+  ['oo', 'u'],
+  ['ou', 'aʊ'],
+  ['ow', 'aʊ'],
+  ['ai', 'eɪ'],
+  ['ay', 'eɪ'],
+  ['oi', 'ɔɪ'],
+  ['oy', 'ɔɪ'],
+  ['oa', 'oʊ'],
+  ['er', 'ɚ'],
+  ['ir', 'ɚ'],
+  ['ur', 'ɚ'],
+  ['or', 'ɔ'],
+  ['ar', 'ɑ'],
+  ['aw', 'ɔ'],
+  ['ck', 'k'],
+];
+
+const SINGLE_CHAR_PHONES = {
+  a: 'æ',
+  b: 'b',
+  c: 'k',
+  d: 'd',
+  e: 'ɛ',
+  f: 'f',
+  g: 'g',
+  h: 'h',
+  i: 'ɪ',
+  j: 'dʒ',
+  k: 'k',
+  l: 'l',
+  m: 'm',
+  n: 'n',
+  o: 'ɑ',
+  p: 'p',
+  q: 'k',
+  r: 'ɹ',
+  s: 's',
+  t: 't',
+  u: 'ʌ',
+  v: 'v',
+  w: 'w',
+  x: 'ks',
+  y: 'j',
+  z: 'z',
+};
+
+export function wordToApproxPhones(word) {
+  let clean = normWord(word).replace(/'/g, '');
+  if (!clean) return [];
+  if (clean.length > 3 && clean.endsWith('e') && !clean.endsWith('ee')) {
+    clean = clean.slice(0, -1);
+  }
+  const phones = [];
+  let i = 0;
+  while (i < clean.length) {
+    let matchedRule = null;
+    for (const [pat, ipa] of APPROX_GRAPHEME_RULES) {
+      if (clean.startsWith(pat, i)) {
+        matchedRule = [pat, ipa];
+        break;
+      }
+    }
+    if (matchedRule) {
+      if (matchedRule[1] === 'kw') {
+        phones.push('k', 'w');
+      } else {
+        phones.push(matchedRule[1]);
+      }
+      i += matchedRule[0].length;
+      continue;
+    }
+    const ch = clean[i];
+    if (i > 0 && ch === clean[i - 1]) {
+      i += 1;
+      continue;
+    }
+    if (SINGLE_CHAR_PHONES[ch] === 'ks') {
+      phones.push('k', 's');
+    } else if (SINGLE_CHAR_PHONES[ch]) {
+      phones.push(SINGLE_CHAR_PHONES[ch]);
+    }
+    i += 1;
+  }
+  return phones;
+}
+
+function charLevenshtein(a, b) {
+  const n = a.length;
+  const m = b.length;
+  if (!n) return m;
+  if (!m) return n;
+  let prev = Array.from({ length: m + 1 }, (_, j) => j);
+  for (let i = 1; i <= n; i++) {
+    const curr = [i];
+    for (let j = 1; j <= m; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+    }
+    prev = curr;
+  }
+  return prev[m];
+}
+
+export function buildLocalPronunciationResult(expectedText, transcriptText) {
+  const expectedWords = wordsOf(expectedText);
+  const actualWords = wordsOf(transcriptText);
+  const expNorm = expectedWords.map(normWord);
+  const actNorm = actualWords.map(normWord);
+
+  // Align expected words to actual spoken words using DP (supports substitutions, skips, extras)
+  const n = expNorm.length;
+  const m = actNorm.length;
+  const dp = Array.from({ length: n + 1 }, () => new Float32Array(m + 1));
+  const trace = Array.from({ length: n + 1 }, () => new Uint8Array(m + 1)); // 1=diag, 2=up(del), 3=left(ins)
+
+  for (let i = 1; i <= n; i++) {
+    dp[i][0] = i;
+    trace[i][0] = 2;
+  }
+  for (let j = 1; j <= m; j++) {
+    dp[0][j] = j * 0.7;
+    trace[0][j] = 3;
+  }
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      let subCost = 1.25;
+      if (expNorm[i - 1] === actNorm[j - 1]) {
+        subCost = 0;
+      } else {
+        const dist = charLevenshtein(expNorm[i - 1], actNorm[j - 1]);
+        const maxLen = Math.max(expNorm[i - 1].length, actNorm[j - 1].length, 1);
+        const ratio = dist / maxLen;
+        if (ratio <= 0.6) subCost = ratio;
+      }
+      const diag = dp[i - 1][j - 1] + subCost;
+      const del = dp[i - 1][j] + 1.0;
+      const ins = dp[i][j - 1] + 0.7;
+      if (diag <= del && diag <= ins) {
+        dp[i][j] = diag;
+        trace[i][j] = 1;
+      } else if (del <= ins) {
+        dp[i][j] = del;
+        trace[i][j] = 2;
+      } else {
+        dp[i][j] = ins;
+        trace[i][j] = 3;
+      }
+    }
+  }
+
+  const alignedActForExp = new Array(n).fill(null);
+  let ci = n;
+  let cj = m;
+  while (ci > 0 || cj > 0) {
+    const move = trace[ci][cj];
+    if (move === 1) {
+      alignedActForExp[ci - 1] = actualWords[cj - 1];
+      ci -= 1;
+      cj -= 1;
+    } else if (move === 2) {
+      ci -= 1;
+    } else {
+      cj -= 1;
+    }
+  }
+
+  const expectedPhonesAll = [];
+  const heardPhonesFlat = [];
+  const wordAlignments = [];
+  const errors = [];
+  const wordsWithErrors = [];
+  let totalPhones = 0;
+  let errorPhones = 0;
+  let wrongWordCount = 0;
+
+  for (let i = 0; i < n; i++) {
+    const word = expectedWords[i];
+    const expPhones = wordToApproxPhones(word);
+    expectedPhonesAll.push(expPhones);
+    totalPhones += Math.max(1, expPhones.length);
+
+    const matchedActual = alignedActForExp[i];
+    const isExact = matchedActual && normWord(matchedActual) === expNorm[i];
+    const actPhones = matchedActual ? wordToApproxPhones(matchedActual) : [];
+
+    if (matchedActual) {
+      heardPhonesFlat.push(...actPhones);
+    }
+
+    const phoneRows = expPhones.map((ep, pIdx) => {
+      if (isExact) {
+        return { expected: ep, heard: ep, confidence: 0 };
+      }
+      if (!matchedActual) {
+        errorPhones += 1;
+        return { expected: ep, heard: null, confidence: 0.9 };
+      }
+      const ap = actPhones[pIdx] || actPhones[actPhones.length - 1] || null;
+      const dist = charLevenshtein(expNorm[i], normWord(matchedActual));
+      const near = ap === ep || dist <= 2;
+      if (ap === ep) {
+        return { expected: ep, heard: ap, confidence: 0 };
+      }
+      errorPhones += near ? 0.5 : 1;
+      return { expected: ep, heard: ap, confidence: near ? 0.55 : 0.9 };
+    });
+
+    if (!isExact) {
+      wrongWordCount += 1;
+      wordsWithErrors.push(word);
+      errors.push({
+        position: i,
+        word,
+        expected: expPhones.join(''),
+        actual: actPhones.join(''),
+        actual_word: matchedActual || '',
+      });
+    }
+
+    wordAlignments.push({
+      position: i,
+      word,
+      expected: expPhones,
+      actual: actPhones,
+      phones: phoneRows,
+      accepted_variant: false,
+    });
+  }
+
+  const wer = n > 0 ? Math.min(1, wrongWordCount / n) : 1;
+  const per = totalPhones > 0 ? Math.min(1, errorPhones / totalPhones) : 1;
+  const rawScore = actualWords.length === 0 ? 0 : Math.round(Math.max(0, Math.min(100, (1 - 0.55 * wer - 0.45 * per) * 100)));
+
+  return {
+    score: rawScore,
+    engine: 'local-browser',
+    transcribe: String(transcriptText || '').trim(),
+    language: 'en',
+    differences: {
+      errors,
+      words_with_errors: wordsWithErrors,
+      word_error_rate: Number(wer.toFixed(4)),
+      phoneme_error_rate: Number(per.toFixed(4)),
+      expected_phones: expectedPhonesAll,
+      heard_phones: heardPhonesFlat,
+      word_alignments: wordAlignments,
+      feedback:
+        wordsWithErrors.length === 0 && actualWords.length > 0
+          ? 'Chấm nhanh trên trình duyệt: Đọc rõ và khớp từ tốt!'
+          : `Cần chú ý các từ: ${wordsWithErrors.join(', ')}`,
+    },
+    prosody: { f0: [], energy: [] },
   };
 }
