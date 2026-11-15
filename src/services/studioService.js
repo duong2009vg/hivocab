@@ -475,6 +475,28 @@ export async function fetchYoutubeCaptionsPreview({ youtubeUrl, title = '', auth
   return data;
 }
 
+/**
+ * Background batch-translate missing Vietnamese cues for long guest clips via /api/translate.
+ */
+export async function translateShadowingTexts(texts = []) {
+  const clean = (Array.isArray(texts) ? texts : []).map((t) => String(t || '').trim()).slice(0, 24);
+  if (!clean.length) return [];
+  const res = await fetchWithTimeout(
+    '/api/translate',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts: clean, from: 'en', to: 'vi' }),
+    },
+    10000
+  );
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  const data = await res.json().catch(() => ({}));
+  return Array.isArray(data?.translations) ? data.translations : [];
+}
+
 // --- Local Progress & Custom Clips Persistence ---
 
 export function loadStudioProgress() {
@@ -533,19 +555,37 @@ export function saveShadowingCueScore(clipId, cueIndex, score) {
   return current;
 }
 
+function normalizeGuestClip(clip) {
+  if (!clip || typeof clip !== 'object') return clip;
+  const cues = Array.isArray(clip.cues) ? clip.cues : [];
+  const startSec = Number(clip.start_seconds || 0);
+  // Fix legacy guest clips where start_seconds mirrored cues[0].start while cues remained video-absolute.
+  if (clip.guest && startSec > 0 && cues.length > 0 && Number(cues[0]?.start || 0) >= startSec) {
+    return {
+      ...clip,
+      start_seconds: 0,
+      end_seconds: Math.max(Number(clip.end_seconds || 0), Math.ceil(Number(cues[cues.length - 1]?.end || 0) + 1)),
+    };
+  }
+  return clip;
+}
+
 export function getCustomGuestClips() {
   if (typeof window === 'undefined') return [];
   try {
     const rows = JSON.parse(window.localStorage.getItem(STUDIO_GUEST_CLIPS_KEY) || '[]');
-    return Array.isArray(rows) ? rows.slice(0, MAX_GUEST_CLIPS) : [];
+    return Array.isArray(rows) ? rows.slice(0, MAX_GUEST_CLIPS).map(normalizeGuestClip) : [];
   } catch (_) {
     return [];
   }
 }
 
 export function saveCustomGuestClip(clipEntry) {
-  const existing = getCustomGuestClips().filter((x) => x.id !== clipEntry.id && x.youtube_video_id !== clipEntry.youtube_video_id);
-  const next = [clipEntry, ...existing].slice(0, MAX_GUEST_CLIPS);
+  const normalized = normalizeGuestClip(clipEntry);
+  const existing = getCustomGuestClips().filter(
+    (x) => x.id !== normalized.id && x.youtube_video_id !== normalized.youtube_video_id
+  );
+  const next = [normalized, ...existing].slice(0, MAX_GUEST_CLIPS);
   if (typeof window !== 'undefined') {
     window.localStorage.setItem(STUDIO_GUEST_CLIPS_KEY, JSON.stringify(next));
   }

@@ -414,21 +414,56 @@ function parseTimedtextJson3(rawText) {
   for (let i = 0; i < events.length; i++) {
     const ev = events[i];
     if (!Array.isArray(ev?.segs) || typeof ev?.tStartMs !== 'number') continue;
-    const raw = ev.segs.map((s) => String(s?.utf8 || '')).join('');
-    const text = cleanCaptionText(raw);
-    if (!text) continue;
 
-    const start = Math.max(0, ev.tStartMs / 1000);
-    let dur = typeof ev.dDurationMs === 'number' && ev.dDurationMs > 0 ? ev.dDurationMs / 1000 : 0;
-    if (dur <= 0) {
+    // Collect non-empty token slices with exact millisecond start timestamps
+    const tokens = [];
+    for (const seg of ev.segs) {
+      const tokText = cleanCaptionText(seg?.utf8 || '');
+      if (!tokText) continue;
+      const offsetMs = typeof seg?.tOffsetMs === 'number' && seg.tOffsetMs >= 0 ? seg.tOffsetMs : 0;
+      tokens.push({ startMs: ev.tStartMs + offsetMs, text: tokText });
+    }
+    if (!tokens.length) continue;
+
+    let evEndMs =
+      typeof ev.dDurationMs === 'number' && ev.dDurationMs > 0
+        ? ev.tStartMs + ev.dDurationMs
+        : 0;
+    if (evEndMs <= ev.tStartMs) {
       const nextEv = events[i + 1];
       if (nextEv && typeof nextEv.tStartMs === 'number' && nextEv.tStartMs > ev.tStartMs) {
-        dur = Math.min(8, (nextEv.tStartMs - ev.tStartMs) / 1000);
+        evEndMs = ev.tStartMs + Math.min(8000, nextEv.tStartMs - ev.tStartMs);
       } else {
-        dur = 2;
+        evEndMs = ev.tStartMs + 2000;
       }
     }
-    items.push({ start, dur, text });
+
+    // Split mid-event whenever word-level timing has a clear sentence boundary
+    let buf = [];
+    let bufStartMs = tokens[0].startMs;
+    for (let t = 0; t < tokens.length; t++) {
+      const tok = tokens[t];
+      if (!buf.length) bufStartMs = tok.startMs;
+      buf.push(tok.text);
+
+      const nextTok = tokens[t + 1];
+      const isSentenceEnd = /[.?!]["'”’)\]]*$/.test(tok.text);
+      if (isSentenceEnd && nextTok && nextTok.startMs > bufStartMs) {
+        items.push({
+          start: Math.max(0, bufStartMs / 1000),
+          dur: Math.max(0.35, (nextTok.startMs - bufStartMs) / 1000),
+          text: buf.join(' ').trim(),
+        });
+        buf = [];
+      }
+    }
+    if (buf.length) {
+      items.push({
+        start: Math.max(0, bufStartMs / 1000),
+        dur: Math.max(0.35, (evEndMs - bufStartMs) / 1000),
+        text: buf.join(' ').trim(),
+      });
+    }
   }
   return items;
 }
@@ -545,10 +580,10 @@ function groupSnippets(snippets) {
       const prevEndsSentence = /[.?!]$/.test(prev[2]);
 
       const shouldFlush =
-        gap > 2.2
+        gap > 1.8
         || joinedText.length + text.length + 1 > hard
         || curDur >= target
-        || (prevEndsSentence && (joinedText.length >= 45 || prev[1] - curStart >= target * 0.7));
+        || (prevEndsSentence && (joinedText.length >= 25 || prev[1] - curStart >= target * 0.65));
 
       if (shouldFlush) {
         grouped.push([curStart, prev[1], joinedText.slice(0, MAX_CUE_CHARS)]);
@@ -566,13 +601,13 @@ function groupSnippets(snippets) {
   };
 
   const thresholds = [
-    [10, 250],
+    [4.8, 120],
+    [6.5, 165],
+    [9, 220],
     [13, 300],
-    [16, 360],
-    [20, 440],
-    [28, 540],
-    [40, 620],
-    [60, 680],
+    [18, 400],
+    [28, 520],
+    [45, 650],
   ];
   for (const [target, hard] of thresholds) {
     const g = attempt(target, hard);
@@ -588,7 +623,8 @@ function alignVietnameseCues(groupedEn, viSnippets) {
       if (ve <= start) continue;
       if (vs >= end) break;
       const overlap = Math.min(end, ve) - Math.max(start, vs);
-      if (overlap > 0.08 && (!parts.length || parts[parts.length - 1] !== vt)) {
+      const minOverlap = Math.min(0.28, Math.max(0.08, (ve - vs) * 0.3));
+      if (overlap > minOverlap && (!parts.length || parts[parts.length - 1] !== vt)) {
         parts.push(vt);
       }
     }
@@ -635,7 +671,7 @@ async function translateBatchViaGoogle(lines) {
   ];
   for (const url of endpoints) {
     try {
-      const res = await fetchWithTimeout(url, {}, 7000);
+      const res = await fetchWithTimeout(url, {}, 4000);
       if (!res.ok) continue;
       const data = await res.json().catch(() => null);
       if (!Array.isArray(data?.[0])) continue;
@@ -693,10 +729,11 @@ async function translateGroupedCuesFallback(groupedEn, env) {
   }
   if (curBatch.length) batches.push(curBatch);
 
-  // Run in waves of 3 concurrent batches (gentle against gtx 429, within Workers subrequest budget)
-  const cappedBatches = batches.slice(0, 22);
-  for (let w = 0; w < cappedBatches.length; w += 3) {
-    const wave = cappedBatches.slice(w, w + 3);
+  // Translate upfront in up to 2 fast waves (~10 batches = ~80-120 cues) so adding a video stays snappy;
+  // any remaining cues on long videos are progressively translated on the client via /api/translate.
+  const cappedBatches = batches.slice(0, 10);
+  for (let w = 0; w < cappedBatches.length; w += 5) {
+    const wave = cappedBatches.slice(w, w + 5);
     await Promise.all(
       wave.map(async (batch) => {
         try {
@@ -769,16 +806,33 @@ export async function onRequestPost(context) {
     return jsonResponse({ detail: 'Video này không có phụ đề tiếng Anh (cc).' }, 404, corsHeaders);
   }
 
-  let rawEnItems = [];
-  try {
-    rawEnItems = await fetchTimedtextItems(enTrack.baseUrl);
-  } catch (err) {
+  const canAutoTranslate = enTrack.isTranslatable !== false;
+  const viPromise = !includeVi
+    ? Promise.resolve({ items: [], status: 'unavailable' })
+    : viTrack?.baseUrl
+      ? fetchTimedtextItems(viTrack.baseUrl)
+          .then((items) => ({ items, status: 'youtube_vi_track_unreviewed' }))
+          .catch(() => ({ items: [], status: 'unavailable' }))
+      : canAutoTranslate
+        ? fetchTimedtextItems(enTrack.baseUrl, { tlang: 'vi' })
+            .then((items) => ({ items, status: 'youtube_auto_translation_unreviewed' }))
+            .catch(() => ({ items: [], status: 'unavailable' }))
+        : Promise.resolve({ items: [], status: 'unavailable' });
+
+  const [enSettled, viSettled] = await Promise.allSettled([
+    fetchTimedtextItems(enTrack.baseUrl),
+    viPromise,
+  ]);
+
+  if (enSettled.status !== 'fulfilled') {
+    const err = enSettled.reason;
     return jsonResponse(
       { detail: `Lỗi tải file phụ đề tiếng Anh từ YouTube (${err?.message || 'network'}).` },
       502,
       corsHeaders
     );
   }
+  const rawEnItems = enSettled.value;
 
   const { snippets: enSnippets, truncated: durTruncated } = buildSnippets(rawEnItems);
   if (!enSnippets.length) {
@@ -792,31 +846,22 @@ export async function onRequestPost(context) {
   let viSnippets = [];
   let translationStatus = 'unavailable';
 
-  if (includeVi) {
-    if (viTrack?.baseUrl) {
-      try {
-        const rawVi = await fetchTimedtextItems(viTrack.baseUrl);
-        viSnippets = buildSnippets(rawVi).snippets;
-        if (viSnippets.length > 0) {
-          translationStatus = 'youtube_vi_track_unreviewed';
-        }
-      } catch {
-        viSnippets = [];
-      }
+  if (includeVi && viSettled.status === 'fulfilled' && viSettled.value?.items?.length) {
+    viSnippets = buildSnippets(viSettled.value.items).snippets;
+    if (viSnippets.length > 0) {
+      translationStatus = viSettled.value.status;
     }
+  }
 
-    const canAutoTranslate = enTrack.isTranslatable !== false;
-
-    if (!viSnippets.length && canAutoTranslate) {
-      try {
-        const rawAutoVi = await fetchTimedtextItems(enTrack.baseUrl, { tlang: 'vi' });
-        viSnippets = buildSnippets(rawAutoVi).snippets;
-        if (viSnippets.length > 0) {
-          translationStatus = 'youtube_auto_translation_unreviewed';
-        }
-      } catch {
-        viSnippets = [];
+  if (includeVi && !viSnippets.length && viTrack?.baseUrl && canAutoTranslate) {
+    try {
+      const rawAutoVi = await fetchTimedtextItems(enTrack.baseUrl, { tlang: 'vi' });
+      viSnippets = buildSnippets(rawAutoVi).snippets;
+      if (viSnippets.length > 0) {
+        translationStatus = 'youtube_auto_translation_unreviewed';
       }
+    } catch {
+      viSnippets = [];
     }
   }
 
@@ -853,8 +898,9 @@ export async function onRequestPost(context) {
     }
   }
   const finalTitle = resolvedTitle || `YouTube ${videoId}`;
-  const startSeconds = cues[0]?.start || 0;
-  const endSeconds = cues[cues.length - 1]?.end || 0;
+  // Cues use video-absolute timestamps starting from 0:00 of the YouTube video.
+  const startSeconds = 0;
+  const endSeconds = Math.ceil((cues[cues.length - 1]?.end || 0) + 1);
 
   return jsonResponse(
     {

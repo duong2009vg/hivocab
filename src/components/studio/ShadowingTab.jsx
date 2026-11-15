@@ -34,6 +34,7 @@ import {
   loadStudioProgress,
   saveShadowingCueScore,
   stopStudioAudio,
+  translateShadowingTexts,
 } from '../../services/studioService.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 
@@ -271,7 +272,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
               }
             }
           } catch (_) {}
-        }, 140);
+        }, 65);
       })
       .catch((err) => {
         if (!cancelled) setYtError(err?.message || 'Không tải được trình phát YouTube.');
@@ -288,6 +289,48 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
       }
     };
   }, [selectedClip?.id, selectedClip?.youtube_video_id]);
+
+  // Background-fill remaining untranslated cues on long guest videos so import stays fast
+  useEffect(() => {
+    if (!selectedClip?.guest || !Array.isArray(selectedClip.cues)) return;
+    const missingIndices = selectedClip.cues
+      .map((c, idx) => (!c.vietnamese_translation && c.text ? idx : -1))
+      .filter((idx) => idx >= 0);
+    if (!missingIndices.length) return;
+
+    let cancelled = false;
+    (async () => {
+      let workingClip = selectedClip;
+      for (let offset = 0; offset < missingIndices.length; offset += 20) {
+        if (cancelled) return;
+        const chunkIndices = missingIndices.slice(offset, offset + 20);
+        const texts = chunkIndices.map((idx) => workingClip.cues[idx]?.text || '');
+        try {
+          const translated = await translateShadowingTexts(texts);
+          if (cancelled || !translated.length) return;
+          const updatedCues = [...workingClip.cues];
+          let changed = false;
+          chunkIndices.forEach((cueIdx, k) => {
+            const viText = String(translated[k] || '').trim();
+            if (viText && updatedCues[cueIdx] && !updatedCues[cueIdx].vietnamese_translation) {
+              updatedCues[cueIdx] = { ...updatedCues[cueIdx], vietnamese_translation: viText };
+              changed = true;
+            }
+          });
+          if (changed) {
+            workingClip = { ...workingClip, cues: updatedCues };
+            setCustomClips(saveCustomGuestClip(workingClip));
+          }
+        } catch {
+          return;
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedClip?.id]);
 
   const handleRateChange = (rate) => {
     setPlaybackRate(rate);
