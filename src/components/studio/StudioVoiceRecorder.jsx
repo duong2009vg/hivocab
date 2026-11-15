@@ -1,6 +1,6 @@
 // src/components/studio/StudioVoiceRecorder.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Trash2, Sparkles, Loader2, Server, Zap, Volume2 } from 'lucide-react';
+import { Mic, Square, Trash2, Sparkles, Loader2, Server, Volume2 } from 'lucide-react';
 import {
   scorePronunciation,
   getStudioApiUrl,
@@ -45,6 +45,8 @@ export function StudioVoiceRecorder({
   const timerRef = useRef(null);
   const finalizeTimerRef = useRef(null);
   const discardRef = useRef(false);
+  const speechSettledRef = useRef(true);
+  const pendingAutoScoreRef = useRef(null);
   const liveTranscriptRef = useRef('');
   const expectedTextRef = useRef(expectedText);
 
@@ -69,6 +71,8 @@ export function StudioVoiceRecorder({
       clearTimeout(finalizeTimerRef.current);
       finalizeTimerRef.current = null;
     }
+    pendingAutoScoreRef.current = null;
+    speechSettledRef.current = true;
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -100,6 +104,9 @@ export function StudioVoiceRecorder({
     if (!isCustomSampleMode) {
       stopStudioAudio();
     }
+    pendingAutoScoreRef.current = null;
+    setRecordedBlob(null);
+    setRecordedUrl('');
     setResult(null);
     setError('');
     setLiveTranscript('');
@@ -224,7 +231,8 @@ export function StudioVoiceRecorder({
 
     const SpeechCtor = getSpeechRecognitionCtor();
     const recLang = String(voice || '').startsWith('b') ? 'en-GB' : 'en-US';
-    let recognitionActive = false;
+    speechSettledRef.current = true;
+    pendingAutoScoreRef.current = null;
 
     if (SpeechCtor) {
       try {
@@ -245,15 +253,24 @@ export function StudioVoiceRecorder({
             setLiveTranscript(liveTranscriptRef.current);
           }
         };
-        rec.onerror = () => {};
+        rec.onerror = () => {
+          speechSettledRef.current = true;
+        };
         rec.onend = () => {
           recognitionRef.current = null;
+          speechSettledRef.current = true;
+          if (typeof pendingAutoScoreRef.current === 'function') {
+            const fn = pendingAutoScoreRef.current;
+            pendingAutoScoreRef.current = null;
+            fn();
+          }
         };
         rec.start();
         recognitionRef.current = rec;
-        recognitionActive = true;
+        speechSettledRef.current = false;
       } catch (_) {
         recognitionRef.current = null;
+        speechSettledRef.current = true;
       }
     }
 
@@ -301,17 +318,23 @@ export function StudioVoiceRecorder({
         setRecordedBlob(blob);
         setRecordedUrl(url);
 
-        // Give Web Speech API 220ms to flush its final result, then score instantly ($0, 0.1s)
-        finalizeTimerRef.current = setTimeout(() => {
-          finalizeTimerRef.current = null;
-          const captured = liveTranscriptRef.current.trim();
-          if (captured) {
-            runLocalScore(captured);
-          } else if (!recognitionActive && getStudioApiUrl()) {
-            // Browser lacks Web Speech API (e.g. Firefox / iOS WebView) -> auto score via Modal
-            handleScoreModal(blob);
+        // Auto-score Free ($0, 0s) as soon as speech recognition flushes its final result.
+        // Never auto-spend Modal AI credits unless the user explicitly clicks "Chấm sâu AI".
+        const runAutoFreeScore = () => {
+          if (finalizeTimerRef.current) {
+            clearTimeout(finalizeTimerRef.current);
+            finalizeTimerRef.current = null;
           }
-        }, 220);
+          pendingAutoScoreRef.current = null;
+          runLocalScore(liveTranscriptRef.current.trim());
+        };
+
+        if (speechSettledRef.current) {
+          runAutoFreeScore();
+        } else {
+          pendingAutoScoreRef.current = runAutoFreeScore;
+          finalizeTimerRef.current = setTimeout(runAutoFreeScore, 550);
+        }
       };
 
       recorder.start();
@@ -341,7 +364,6 @@ export function StudioVoiceRecorder({
   };
 
   const hasServer = Boolean(getStudioApiUrl());
-  const supportsSpeech = Boolean(getSpeechRecognitionCtor());
 
   return (
     <div className={`space-y-3 ${compact ? '' : 'bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5'}`}>
@@ -364,7 +386,7 @@ export function StudioVoiceRecorder({
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl bg-[#2E2823] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] animate-pulse cursor-pointer min-h-[44px] sm:min-h-0"
           >
             <Square className="w-3.5 h-3.5 fill-current shrink-0" />
-            <span>Dừng ghi ({seconds}s) · Tự động chấm</span>
+            <span>Hoàn thành ghi ({seconds}s) · Tự động chấm Free</span>
           </button>
         )}
 
@@ -394,27 +416,15 @@ export function StudioVoiceRecorder({
 
         {recordedBlob && !isRecording && (
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
-            {supportsSpeech && liveTranscript.trim() && (
-              <button
-                type="button"
-                onClick={() => runLocalScore(liveTranscript)}
-                className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#EEF5EC] hover:bg-[#dfeedc] text-[#355A3B] text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer min-h-[42px] sm:min-h-0"
-                title="Chấm tức thì trên trình duyệt, không tốn credit Modal"
-              >
-                <Zap className="w-4 h-4 text-[#4D6B53] shrink-0" />
-                <span>Chấm Nhanh (0s · Free)</span>
-              </button>
-            )}
-
             <button
               type="button"
               onClick={() => handleScoreModal()}
               disabled={scoring}
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#4D6B53] hover:bg-[#3f5844] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-60 min-h-[42px] sm:min-h-0"
-              title="Phân tích âm vị IPA sâu bằng mô hình Wav2Vec2 trên Modal.com"
+              title="Phân tích âm vị IPA chi tiết bằng AI"
             >
               {scoring ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Sparkles className="w-4 h-4 shrink-0" />}
-              <span>{scoring ? 'Đang chấm IPA…' : 'Chấm Sâu IPA (AI Modal · ~3s)'}</span>
+              <span>{scoring ? 'Đang chấm sâu AI…' : 'Chấm sâu AI'}</span>
             </button>
 
             <button

@@ -162,7 +162,10 @@ export function PronunciationResultCard({
       {!view.hasVoice && (
         <div className="flex items-center gap-2 text-xs font-semibold text-[#9A5B13] bg-[#FFF4DE] border border-[#D9822B]/40 rounded-xl px-3 py-2">
           <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>Hãy nói gần micro hơn một chút rồi bấm ghi âm lại nhé.</span>
+          <span>
+            Chế độ chấm Free chưa nhận diện được giọng nói rõ ràng — bạn có thể bấm{' '}
+            <strong className="font-black">Chấm sâu AI</strong> để phân tích trực tiếp từ file ghi âm hoặc nói gần micro hơn.
+          </span>
         </div>
       )}
 
