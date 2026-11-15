@@ -13,21 +13,8 @@ const INNERTUBE_CLIENTS = [
   },
   {
     name: 'IOS',
-    userAgent: 'com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 17_5 like Mac OS X)',
-    context: { client: { clientName: 'IOS', clientVersion: '19.45.4', hl: 'en' } },
-  },
-  {
-    name: 'TV_EMBEDDED',
-    userAgent:
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    context: {
-      client: {
-        clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
-        clientVersion: '2.0',
-        hl: 'en',
-      },
-      thirdParty: { embedUrl: 'https://www.youtube.com/' },
-    },
+    userAgent: 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3 like Mac OS X)',
+    context: { client: { clientName: 'IOS', clientVersion: '20.10.4', hl: 'en' } },
   },
 ];
 
@@ -615,21 +602,80 @@ function alignVietnameseCues(groupedEn, viSnippets) {
   });
 }
 
+async function translateBatchViaDeepL(lines, apiKey) {
+  const res = await fetchWithTimeout(
+    'https://api-free.deepl.com/v2/translate',
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `DeepL-Auth-Key ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: lines,
+        source_lang: 'EN',
+        target_lang: 'VI',
+      }),
+    },
+    10000
+  );
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  const translated = Array.isArray(data?.translations) ? data.translations.map((t) => String(t?.text || '').trim()) : null;
+  return translated && translated.length === lines.length ? translated : null;
+}
+
 async function translateBatchViaGoogle(lines) {
   const joined = lines.map((l) => String(l || '').replace(/\r?\n/g, ' ').trim()).join('\n');
   if (!joined) return lines.map(() => '');
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(joined)}`;
-  const res = await fetchWithTimeout(url, {}, 7000);
-  if (!res.ok) return null;
-  const data = await res.json().catch(() => null);
-  if (!Array.isArray(data?.[0])) return null;
-  const fullTranslated = data[0].map((seg) => String(seg?.[0] || '')).join('');
-  const splitLines = fullTranslated.split('\n').map((s) => s.trim());
-  if (splitLines.length !== lines.length) return null;
-  return splitLines;
+  const encoded = encodeURIComponent(joined);
+  const endpoints = [
+    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encoded}`,
+    `https://clients5.google.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encoded}`,
+  ];
+  for (const url of endpoints) {
+    try {
+      const res = await fetchWithTimeout(url, {}, 7000);
+      if (!res.ok) continue;
+      const data = await res.json().catch(() => null);
+      if (!Array.isArray(data?.[0])) continue;
+      const fullTranslated = data[0].map((seg) => String(seg?.[0] || '')).join('');
+      const splitLines = fullTranslated.split('\n').map((s) => s.trim());
+      if (splitLines.length === lines.length) return splitLines;
+    } catch {
+      // Try next host
+    }
+  }
+  return null;
 }
 
-async function translateGroupedCuesFallback(groupedEn) {
+async function translateGroupedCuesFallback(groupedEn, env) {
+  const deeplKey = String(env?.DEEPL_API_KEY || '').trim();
+  const translations = new Array(groupedEn.length).fill('');
+
+  if (deeplKey) {
+    const chunkSize = 40;
+    const chunks = [];
+    for (let i = 0; i < groupedEn.length; i += chunkSize) {
+      chunks.push({ offset: i, lines: groupedEn.slice(i, i + chunkSize).map((g) => g[2]) });
+    }
+    let deeplWorked = false;
+    for (let w = 0; w < chunks.length; w += 4) {
+      await Promise.all(
+        chunks.slice(w, w + 4).map(async (chunk) => {
+          const out = await translateBatchViaDeepL(chunk.lines, deeplKey).catch(() => null);
+          if (out) {
+            deeplWorked = true;
+            for (let k = 0; k < out.length; k++) {
+              translations[chunk.offset + k] = String(out[k] || '').slice(0, MAX_VI_CHARS);
+            }
+          }
+        })
+      );
+    }
+    if (deeplWorked) return translations;
+  }
+
   const batches = [];
   let curBatch = [];
   let curChars = 0;
@@ -637,7 +683,7 @@ async function translateGroupedCuesFallback(groupedEn) {
   for (let i = 0; i < groupedEn.length; i++) {
     const text = groupedEn[i][2];
     const nextLen = text.length + 1;
-    if (curBatch.length > 0 && (curBatch.length >= 24 || curChars + nextLen > 2800)) {
+    if (curBatch.length > 0 && (curBatch.length >= 16 || curChars + nextLen > 1450)) {
       batches.push(curBatch);
       curBatch = [];
       curChars = 0;
@@ -647,11 +693,10 @@ async function translateGroupedCuesFallback(groupedEn) {
   }
   if (curBatch.length) batches.push(curBatch);
 
-  const translations = new Array(groupedEn.length).fill('');
-  // Run in waves of 5 concurrent batches (caps total subrequests well under Workers 50 limit)
-  const cappedBatches = batches.slice(0, 35);
-  for (let w = 0; w < cappedBatches.length; w += 5) {
-    const wave = cappedBatches.slice(w, w + 5);
+  // Run in waves of 3 concurrent batches (gentle against gtx 429, within Workers subrequest budget)
+  const cappedBatches = batches.slice(0, 22);
+  for (let w = 0; w < cappedBatches.length; w += 3) {
+    const wave = cappedBatches.slice(w, w + 3);
     await Promise.all(
       wave.map(async (batch) => {
         try {
@@ -777,7 +822,7 @@ export async function onRequestPost(context) {
 
   let cues = alignVietnameseCues(groupedEn, viSnippets);
   if (includeVi && !viSnippets.length) {
-    const fallbackVi = await translateGroupedCuesFallback(groupedEn);
+    const fallbackVi = await translateGroupedCuesFallback(groupedEn, env);
     const hasAnyFallback = fallbackVi.some(Boolean);
     if (hasAnyFallback) {
       translationStatus = 'cloud_auto_translation_unreviewed';
