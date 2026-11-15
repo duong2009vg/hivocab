@@ -405,7 +405,14 @@ export async function scorePronunciation({ blob, filename = 'recording.webm', ex
   }
 
   const uploadBlob = await convertBlobTo16kMonoWav(blob);
-  const uploadName = uploadBlob !== blob && uploadBlob.type === 'audio/wav' ? 'recording.wav' : filename;
+  const uploadType = String(uploadBlob?.type || '').toLowerCase();
+  const uploadName = uploadType.includes('wav')
+    ? 'recording.wav'
+    : uploadType.includes('mp4') || uploadType.includes('aac') || uploadType.includes('m4a')
+    ? 'recording.mp4'
+    : uploadType.includes('ogg')
+    ? 'recording.ogg'
+    : filename;
 
   const body = new FormData();
   body.append('file', uploadBlob, uploadName);

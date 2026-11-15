@@ -41,6 +41,45 @@ function encodeMonoPcm16Wav(samples, sampleRate) {
 }
 
 /**
+ * Downsample and encode captured mono Float32 PCM chunks directly to a 16 kHz WAV Blob.
+ * Ideal for iOS Safari / WKWebView where MediaRecorder MP4 blobs can lack container headers.
+ */
+export function encodeFloat32ChunksTo16kMonoWav(chunks, inputSampleRate, targetSr = DEFAULT_TARGET_SR) {
+  if (!Array.isArray(chunks) || chunks.length === 0) return null;
+  let totalLength = 0;
+  for (const chunk of chunks) {
+    if (chunk && chunk.length) totalLength += chunk.length;
+  }
+  if (totalLength === 0) return null;
+
+  const merged = new Float32Array(totalLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    if (!chunk || !chunk.length) continue;
+    merged.set(chunk, offset);
+    offset += chunk.length;
+  }
+
+  const srcRate = Number(inputSampleRate) > 0 ? Number(inputSampleRate) : targetSr;
+  if (srcRate === targetSr) {
+    return encodeMonoPcm16Wav(merged, targetSr);
+  }
+
+  const ratio = srcRate / targetSr;
+  const outLength = Math.max(1, Math.round(merged.length / ratio));
+  const resampled = new Float32Array(outLength);
+  for (let i = 0; i < outLength; i++) {
+    const pos = i * ratio;
+    const idx = Math.floor(pos);
+    const frac = pos - idx;
+    const s0 = merged[idx] || 0;
+    const s1 = idx + 1 < merged.length ? merged[idx + 1] : s0;
+    resampled[i] = s0 + (s1 - s0) * frac;
+  }
+  return encodeMonoPcm16Wav(resampled, targetSr);
+}
+
+/**
  * Downmix and resample any browser audio Blob into a 16 kHz mono WAV Blob.
  * Falls back cleanly to the original Blob if Web Audio APIs are unavailable.
  */

@@ -8,8 +8,32 @@ import {
   playStudioTts,
   stopStudioAudio,
 } from '../../services/studioService.js';
+import { convertBlobTo16kMonoWav, encodeFloat32ChunksTo16kMonoWav } from '../../utils/audioWavEncoder.js';
 import { buildLocalPronunciationResult } from '../../utils/studioCore.js';
 import PronunciationResultCard from './PronunciationResultCard.jsx';
+
+const RECORDER_MIME_CANDIDATES = [
+  'audio/webm;codecs=opus',
+  'audio/webm',
+  'audio/mp4;codecs=mp4a.40.2',
+  'audio/mp4',
+  'audio/aac',
+  'audio/ogg;codecs=opus',
+];
+
+function isIosBrowser() {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent || '';
+  if (/iPad|iPhone|iPod/i.test(ua)) return true;
+  return navigator.platform === 'MacIntel' && Number(navigator.maxTouchPoints || 0) > 1;
+}
+
+function pickSupportedRecorderMimeType() {
+  if (typeof MediaRecorder === 'undefined' || typeof MediaRecorder.isTypeSupported !== 'function') {
+    return '';
+  }
+  return RECORDER_MIME_CANDIDATES.find((m) => MediaRecorder.isTypeSupported(m)) || '';
+}
 
 function getSpeechRecognitionCtor() {
   if (typeof window === 'undefined') return null;
@@ -47,13 +71,53 @@ export function StudioVoiceRecorder({
   const finalizeTimerRef = useRef(null);
   const discardRef = useRef(false);
   const speechSettledRef = useRef(true);
+  const speechUsedRef = useRef(false);
   const pendingAutoScoreRef = useRef(null);
   const liveTranscriptRef = useRef('');
   const expectedTextRef = useRef(expectedText);
 
+  // Direct Web Audio PCM WAV capture (immune to iOS Safari MediaRecorder container bugs)
+  const usingPcmModeRef = useRef(false);
+  const pcmCtxRef = useRef(null);
+  const pcmSourceRef = useRef(null);
+  const pcmProcessorRef = useRef(null);
+  const pcmGainRef = useRef(null);
+  const pcmChunksRef = useRef([]);
+  const pcmSampleRateRef = useRef(16000);
+
   useEffect(() => {
     expectedTextRef.current = expectedText;
   }, [expectedText]);
+
+  const teardownPcmNodes = () => {
+    if (pcmProcessorRef.current) {
+      try {
+        pcmProcessorRef.current.onaudioprocess = null;
+        pcmProcessorRef.current.disconnect();
+      } catch (_) {}
+      pcmProcessorRef.current = null;
+    }
+    if (pcmSourceRef.current) {
+      try {
+        pcmSourceRef.current.disconnect();
+      } catch (_) {}
+      pcmSourceRef.current = null;
+    }
+    if (pcmGainRef.current) {
+      try {
+        pcmGainRef.current.disconnect();
+      } catch (_) {}
+      pcmGainRef.current = null;
+    }
+    if (pcmCtxRef.current) {
+      try {
+        if (pcmCtxRef.current.state !== 'closed') {
+          pcmCtxRef.current.close().catch(() => {});
+        }
+      } catch (_) {}
+      pcmCtxRef.current = null;
+    }
+  };
 
   const stopSpeechRecognition = () => {
     if (recognitionRef.current) {
@@ -74,6 +138,10 @@ export function StudioVoiceRecorder({
     }
     pendingAutoScoreRef.current = null;
     speechSettledRef.current = true;
+    speechUsedRef.current = false;
+    usingPcmModeRef.current = false;
+    pcmChunksRef.current = [];
+    teardownPcmNodes();
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
@@ -152,6 +220,11 @@ export function StudioVoiceRecorder({
   useEffect(() => {
     return () => {
       cleanupRecording();
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
       if (recordedUrl) {
         try {
           URL.revokeObjectURL(recordedUrl);
@@ -212,6 +285,78 @@ export function StudioVoiceRecorder({
     }
   };
 
+  const finalizeRecordedBlob = async (rawBlob) => {
+    if (!(rawBlob instanceof Blob) || rawBlob.size <= 0) {
+      setError('Không thu được âm thanh từ micro. Vui lòng kiểm tra quyền micro và thử lại.');
+      return;
+    }
+
+    // Ensure every browser playback URL uses universal WAV when decodable (fixes iOS Safari <audio> errors).
+    let playbackBlob = rawBlob;
+    if (!String(rawBlob.type || '').toLowerCase().includes('wav')) {
+      const converted = await convertBlobTo16kMonoWav(rawBlob);
+      if (converted instanceof Blob && converted.size > 44 && converted.type === 'audio/wav') {
+        playbackBlob = converted;
+      }
+    }
+
+    if (recordedUrl) {
+      try {
+        URL.revokeObjectURL(recordedUrl);
+      } catch (_) {}
+    }
+    const url = URL.createObjectURL(playbackBlob);
+    setRecordedBlob(playbackBlob);
+    setRecordedUrl(url);
+
+    // Only auto-score Free ($0, 0s) when SpeechRecognition was active on supported browsers.
+    // On iOS, SpeechRecognition conflicts with getUserMedia AVAudioSession so user runs "Chấm sâu AI" directly.
+    if (!speechUsedRef.current) return;
+
+    const runAutoFreeScore = () => {
+      if (finalizeTimerRef.current) {
+        clearTimeout(finalizeTimerRef.current);
+        finalizeTimerRef.current = null;
+      }
+      pendingAutoScoreRef.current = null;
+      runLocalScore(liveTranscriptRef.current.trim());
+    };
+
+    if (speechSettledRef.current) {
+      runAutoFreeScore();
+    } else {
+      pendingAutoScoreRef.current = runAutoFreeScore;
+      finalizeTimerRef.current = setTimeout(runAutoFreeScore, 550);
+    }
+  };
+
+  const finishPcmRecording = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    stopSpeechRecognition();
+    teardownPcmNodes();
+    if (streamRef.current) {
+      try {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+      } catch (_) {}
+      streamRef.current = null;
+    }
+    usingPcmModeRef.current = false;
+    setIsRecording(false);
+
+    if (discardRef.current) {
+      pcmChunksRef.current = [];
+      return;
+    }
+    const chunks = pcmChunksRef.current;
+    const srcRate = pcmSampleRateRef.current;
+    pcmChunksRef.current = [];
+    const wavBlob = encodeFloat32ChunksTo16kMonoWav(chunks, srcRate, 16000);
+    finalizeRecordedBlob(wavBlob);
+  };
+
   const startRecording = async () => {
     prewarmStudioBackend();
     sampleTokenRef.current += 1;
@@ -231,9 +376,30 @@ export function StudioVoiceRecorder({
       return;
     }
 
-    const SpeechCtor = getSpeechRecognitionCtor();
+    const ios = isIosBrowser();
+    const supportedMime = pickSupportedRecorderMimeType();
+    const preferPcmWav = ios || !supportedMime || !supportedMime.includes('webm');
+
+    // Synchronously unlock AudioContext inside user gesture for reliable iOS capture
+    let preUnlockedCtx = null;
+    if (preferPcmWav && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        try {
+          preUnlockedCtx = new AudioCtx();
+          if (preUnlockedCtx.state === 'suspended' && typeof preUnlockedCtx.resume === 'function') {
+            preUnlockedCtx.resume().catch(() => {});
+          }
+        } catch (_) {
+          preUnlockedCtx = null;
+        }
+      }
+    }
+
+    const SpeechCtor = !ios ? getSpeechRecognitionCtor() : null;
     const recLang = String(voice || '').startsWith('b') ? 'en-GB' : 'en-US';
     speechSettledRef.current = true;
+    speechUsedRef.current = false;
     pendingAutoScoreRef.current = null;
 
     if (SpeechCtor) {
@@ -270,9 +436,11 @@ export function StudioVoiceRecorder({
         rec.start();
         recognitionRef.current = rec;
         speechSettledRef.current = false;
+        speechUsedRef.current = true;
       } catch (_) {
         recognitionRef.current = null;
         speechSettledRef.current = true;
+        speechUsedRef.current = false;
       }
     }
 
@@ -281,14 +449,62 @@ export function StudioVoiceRecorder({
         audio: { echoCancellation: true, noiseSuppression: true },
       });
       streamRef.current = stream;
-      chunksRef.current = [];
       discardRef.current = false;
 
-      const mimeType =
-        typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm')
-          ? 'audio/webm'
-          : '';
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      if (preferPcmWav && preUnlockedCtx && typeof preUnlockedCtx.createScriptProcessor === 'function') {
+        try {
+          if (preUnlockedCtx.state === 'suspended' && typeof preUnlockedCtx.resume === 'function') {
+            await preUnlockedCtx.resume().catch(() => {});
+          }
+          pcmChunksRef.current = [];
+          pcmSampleRateRef.current = preUnlockedCtx.sampleRate || 44100;
+          const source = preUnlockedCtx.createMediaStreamSource(stream);
+          const processor = preUnlockedCtx.createScriptProcessor(4096, 1, 1);
+          const silentGain = preUnlockedCtx.createGain();
+          silentGain.gain.value = 0;
+
+          processor.onaudioprocess = (ev) => {
+            const input = ev.inputBuffer?.getChannelData?.(0);
+            if (input && input.length > 0) {
+              pcmChunksRef.current.push(new Float32Array(input));
+            }
+          };
+
+          source.connect(processor);
+          processor.connect(silentGain);
+          silentGain.connect(preUnlockedCtx.destination);
+
+          pcmCtxRef.current = preUnlockedCtx;
+          pcmSourceRef.current = source;
+          pcmProcessorRef.current = processor;
+          pcmGainRef.current = silentGain;
+          usingPcmModeRef.current = true;
+
+          setIsRecording(true);
+          setSeconds(0);
+          let elapsed = 0;
+          timerRef.current = setInterval(() => {
+            elapsed += 1;
+            setSeconds(elapsed);
+            if (elapsed >= 20) {
+              stopRecording();
+            }
+          }, 1000);
+          return;
+        } catch (_) {
+          teardownPcmNodes();
+          usingPcmModeRef.current = false;
+        }
+      }
+
+      if (preUnlockedCtx && preUnlockedCtx.state !== 'closed') {
+        try {
+          preUnlockedCtx.close().catch(() => {});
+        } catch (_) {}
+      }
+
+      chunksRef.current = [];
+      const recorder = supportedMime ? new MediaRecorder(stream, { mimeType: supportedMime }) : new MediaRecorder(stream);
       mediaRecorderRef.current = recorder;
 
       recorder.ondataavailable = (ev) => {
@@ -310,54 +526,42 @@ export function StudioVoiceRecorder({
         setIsRecording(false);
 
         if (discardRef.current || !chunksRef.current.length) return;
-        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || 'audio/webm' });
-        if (recordedUrl) {
-          try {
-            URL.revokeObjectURL(recordedUrl);
-          } catch (_) {}
-        }
-        const url = URL.createObjectURL(blob);
-        setRecordedBlob(blob);
-        setRecordedUrl(url);
-
-        // Auto-score Free ($0, 0s) as soon as speech recognition flushes its final result.
-        // Never auto-spend Modal AI credits unless the user explicitly clicks "Chấm sâu AI".
-        const runAutoFreeScore = () => {
-          if (finalizeTimerRef.current) {
-            clearTimeout(finalizeTimerRef.current);
-            finalizeTimerRef.current = null;
-          }
-          pendingAutoScoreRef.current = null;
-          runLocalScore(liveTranscriptRef.current.trim());
-        };
-
-        if (speechSettledRef.current) {
-          runAutoFreeScore();
-        } else {
-          pendingAutoScoreRef.current = runAutoFreeScore;
-          finalizeTimerRef.current = setTimeout(runAutoFreeScore, 550);
-        }
+        const firstTypedChunk = chunksRef.current.find((c) => c && c.type);
+        const resolvedMime =
+          recorder.mimeType || firstTypedChunk?.type || supportedMime || (ios ? 'audio/mp4' : 'audio/webm');
+        const blob = new Blob(chunksRef.current, { type: resolvedMime });
+        finalizeRecordedBlob(blob);
       };
 
-      recorder.start();
+      recorder.start(500);
       setIsRecording(true);
       setSeconds(0);
+      let elapsed = 0;
       timerRef.current = setInterval(() => {
-        setSeconds((prev) => {
-          if (prev >= 20) {
-            stopRecording();
-            return prev;
-          }
-          return prev + 1;
-        });
+        elapsed += 1;
+        setSeconds(elapsed);
+        if (elapsed >= 20) {
+          stopRecording();
+        }
       }, 1000);
     } catch (err) {
+      if (preUnlockedCtx && preUnlockedCtx.state !== 'closed') {
+        try {
+          preUnlockedCtx.close().catch(() => {});
+        } catch (_) {}
+      }
+      teardownPcmNodes();
       stopSpeechRecognition();
       setError(err?.message || 'Không thể truy cập micro. Hãy cấp quyền micro cho trình duyệt.');
     }
   };
 
   const stopRecording = () => {
+    if (usingPcmModeRef.current) {
+      discardRef.current = false;
+      finishPcmRecording();
+      return;
+    }
     stopSpeechRecognition();
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
       discardRef.current = false;
@@ -388,7 +592,11 @@ export function StudioVoiceRecorder({
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 rounded-xl bg-[#2E2823] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] animate-pulse cursor-pointer min-h-[44px] sm:min-h-0"
           >
             <Square className="w-3.5 h-3.5 fill-current shrink-0" />
-            <span>Hoàn thành ghi ({seconds}s) · Tự động chấm Free</span>
+            <span>
+              {speechUsedRef.current
+                ? `Hoàn thành ghi (${seconds}s) · Tự động chấm Free`
+                : `Hoàn thành ghi (${seconds}s)`}
+            </span>
           </button>
         )}
 
@@ -465,7 +673,9 @@ export function StudioVoiceRecorder({
       {recordedUrl && (
         <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 bg-white border border-[#E8DEC8] rounded-xl px-3 py-2">
           <span className="text-[11px] font-bold text-[#786F66] shrink-0">Bản thu của bạn:</span>
-          <audio controls src={recordedUrl} className="w-full h-8" />
+          <audio key={recordedUrl} controls playsInline preload="auto" className="w-full h-8">
+            <source src={recordedUrl} type={recordedBlob?.type || 'audio/wav'} />
+          </audio>
         </div>
       )}
 

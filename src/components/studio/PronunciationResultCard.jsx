@@ -204,6 +204,16 @@ export function PronunciationResultCard({
   }, [selectedWordIdx, view]);
 
   useEffect(() => {
+    if (userAudioRef.current) {
+      try {
+        userAudioRef.current.pause();
+      } catch (_) {}
+      userAudioRef.current = null;
+    }
+    setPlayingUserClip(false);
+  }, [recordedUrl]);
+
+  useEffect(() => {
     return () => {
       if (userAudioRef.current) {
         try {
@@ -263,7 +273,12 @@ export function PronunciationResultCard({
       return;
     }
     if (!userAudioRef.current || userAudioRef.current.src !== recordedUrl) {
-      userAudioRef.current = new Audio(recordedUrl);
+      const nextAudio = new Audio();
+      nextAudio.playsInline = true;
+      nextAudio.preload = 'auto';
+      nextAudio.src = recordedUrl;
+      nextAudio.load();
+      userAudioRef.current = nextAudio;
     }
     const audio = userAudioRef.current;
     audio.onended = () => setPlayingUserClip(false);
