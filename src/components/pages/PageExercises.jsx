@@ -194,9 +194,9 @@ export function PageExercises() {
               </div>
             </div>
 
-            {/* 3 REAL HARDCOVER BOOKS ON BOOKSHELF */}
-            <section aria-label="Kệ sách lộ trình" className="pt-2">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
+            {/* 3 COMPACT HARDCOVER BOOKS (Topics Book Cover Format, No Bookshelf) */}
+            <section aria-label="Bộ sách luyện thi THPT" className="pt-2">
+              <div className="flex flex-wrap items-stretch justify-center gap-5 sm:gap-7">
                 {BOOKS.map((book) => {
                   const Icon = book.icon;
                   return (
@@ -211,90 +211,51 @@ export function PageExercises() {
                           handleOpenBook(book.id);
                         }
                       }}
-                      className="group relative flex flex-col justify-between rounded-3xl border-[3.5px] border-[#3D352E] shadow-[6px_8px_0px_#3D352E] hover:shadow-[10px_14px_0px_#3D352E] hover:-translate-y-2.5 active:translate-y-0 transition-all duration-300 cursor-pointer overflow-hidden select-none"
+                      className="book-cover-item group relative w-full max-w-[238px] sm:w-[224px] min-h-[268px] rounded-r-xl rounded-l-sm border-[2.5px] border-[#3D352E] shadow-[5px_4px_0px_#1A0E06] hover:shadow-[7px_6px_0px_#1A0E06] cursor-pointer flex flex-col justify-between p-3.5 text-[#FAF5EB] select-none shrink-0"
                       style={{
-                        background: `linear-gradient(145deg, ${book.cover}, ${book.coverDark})`,
-                        minHeight: '430px',
+                        background: `linear-gradient(155deg, ${book.cover}, ${book.coverDark})`,
                       }}
                     >
-                      {/* Left Spine Texture Strip (Gáy sách bọc da ép kim) */}
-                      <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-10 bg-black/25 border-r-2 border-black/35 flex flex-col justify-between py-6 items-center pointer-events-none z-10">
-                        <div className="w-4 h-1 bg-[#F4D98A]/80 rounded-full shadow-[0_3px_0_rgba(244,217,138,0.5)]" />
-                        <div className="w-1.5 h-16 bg-[#F4D98A]/30 rounded-full" />
-                        <div className="w-4 h-1 bg-[#F4D98A]/80 rounded-full shadow-[0_-3px_0_rgba(244,217,138,0.5)]" />
+                      {/* Left Spine Crease */}
+                      <div className="absolute left-0 top-0 bottom-0 w-3 border-r border-[#3D352E]/60 bg-black/20 pointer-events-none" />
+
+                      {/* Top Book Meta */}
+                      <div className="pl-2.5 flex items-center justify-between gap-1.5 text-[10px] font-bold tracking-wider uppercase text-[#E6C98A]">
+                        <span className="truncate">{book.number}</span>
+                        <span
+                          className="px-1.5 py-0.5 rounded bg-black/25 border border-[#E6C98A]/35 text-[9px] font-black shrink-0"
+                          style={{ color: book.accentColor }}
+                        >
+                          {book.stat}
+                        </span>
                       </div>
 
-                      {/* Right Paper Edge (Mép trang giấy màu kem dày dặn) */}
-                      <div className="absolute right-0 top-3 bottom-3 w-2.5 bg-[#FAF5EB] border-l border-y border-[#3D352E] rounded-l-sm shadow-inner pointer-events-none z-10" />
-
-                      {/* Bookmark Ribbon Hanging from Top */}
-                      <div
-                        className="absolute right-5 top-0 w-5 h-12 border-x-2 border-b-2 border-[#3D352E] shadow-sm pointer-events-none z-10 group-hover:h-14 transition-all duration-300"
-                        style={{
-                          backgroundColor: book.ribbonColor,
-                          clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)',
-                        }}
-                      />
-
-                      {/* Book Front Cover Details */}
-                      <div className="relative pl-11 sm:pl-14 pr-6 pt-7 pb-6 flex-1 flex flex-col justify-between text-[#FFFDF9] z-0">
-                        {/* Top Book Meta */}
-                        <div>
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border border-[#F4D98A]/60 bg-black/20 text-[10px] sm:text-[11px] font-black tracking-widest text-[#F4D98A] uppercase">
-                            <Sparkles className="w-3 h-3 text-[#F4D98A]" />
-                            <span>{book.number}</span>
+                      {/* Center Framed Book Title & Description */}
+                      <div className="pl-2.5 my-auto py-3 border-y border-[#E6C98A]/35 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <div className="w-7 h-7 rounded-lg border border-[#E6C98A]/50 bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
+                            <Icon className="w-3.5 h-3.5 text-[#E6C98A]" />
                           </div>
-
-                          {/* Emblem Icon */}
-                          <div className="mt-4 w-12 h-12 rounded-2xl border-2 border-[#F4D98A]/70 bg-black/20 flex items-center justify-center shadow-[2px_2px_0px_rgba(0,0,0,0.3)] group-hover:scale-105 transition-transform">
-                            <Icon className="w-6 h-6 text-[#F4D98A]" />
-                          </div>
-
-                          {/* Book Title */}
-                          <h2 className="mt-3.5 font-heading font-black text-xl sm:text-2xl text-[#FFFDF9] leading-tight tracking-tight drop-shadow-sm">
+                          <h2 className="font-heading font-bold text-sm sm:text-[15px] leading-snug text-[#FAF5EB]">
                             {book.title}
                           </h2>
-
-                          {/* Golden separator line */}
-                          <div className="mt-2.5 h-[2px] w-14 bg-[#F4D98A]/60 rounded-full" />
-
-                          {/* Subtitle */}
-                          <p className="mt-2.5 text-xs text-[#FFFDF9]/85 font-medium leading-relaxed">
-                            {book.subtitle}
-                          </p>
                         </div>
+                        <p className="text-[11px] text-[#FAF5EB]/80 font-medium leading-snug line-clamp-3">
+                          {book.subtitle}
+                        </p>
+                      </div>
 
-                        {/* Bottom Stats & Open Action */}
-                        <div className="mt-6 pt-4 border-t border-white/15 space-y-3">
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="font-heading font-black tracking-wider text-sm" style={{ color: book.accentColor }}>
-                              {book.stat}
-                            </span>
-                            <span className="text-[11px] font-semibold text-white/70">
-                              {book.statDetail}
-                            </span>
-                          </div>
-
-                          {/* Open Book Button */}
-                          <div className="w-full py-2.5 px-3.5 rounded-2xl bg-[#FFFDF9] text-[#302A24] font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] group-hover:bg-[#FEF3C7] transition-colors flex items-center justify-center gap-1.5">
-                            <BookOpen className="w-3.5 h-3.5 text-[#557A46]" />
-                            <span>Mở sách để học ngay</span>
-                            <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
-                          </div>
-                        </div>
+                      {/* Bottom Footer Meta & Open Cue */}
+                      <div className="pl-2.5 flex items-center justify-between gap-2 text-[10px] text-[#E6C98A]/95 font-semibold">
+                        <span className="truncate">{book.statDetail}</span>
+                        <span className="inline-flex items-center gap-0.5 font-black text-[#FEF3C7] shrink-0">
+                          <span>Mở sách</span>
+                          <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        </span>
                       </div>
                     </div>
                   );
                 })}
-              </div>
-
-              {/* Wooden Shelf Plank Underneath */}
-              <div className="mt-4 h-6 sm:h-7 rounded-xl border-[3px] border-[#3D352E] bg-gradient-to-r from-[#8A5B2E] via-[#A8743F] to-[#8A5B2E] shadow-[0_8px_0px_#3D352E] flex items-center justify-between px-4 sm:px-8">
-                <div className="w-8 h-2 rounded-full bg-[#5D3D1E]" />
-                <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#FFF3D6]/80 uppercase">
-                  HIVOCAB THPT ROADMAP BOOKSHELF
-                </span>
-                <div className="w-8 h-2 rounded-full bg-[#5D3D1E]" />
               </div>
             </section>
 
