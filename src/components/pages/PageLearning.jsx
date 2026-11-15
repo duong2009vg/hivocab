@@ -468,7 +468,11 @@ export function PageLearning() {
       {/* ── Main Exercise Area ── */}
       <main
         id="learning-main"
-        className="flex-1 min-h-0 w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-8 py-2 sm:py-3 flex flex-col justify-start items-center relative overflow-y-auto overflow-x-hidden"
+        className={`flex-1 min-h-0 w-full mx-auto flex flex-col justify-start items-center relative overflow-y-auto overflow-x-hidden ${
+          currentItem?.exerciseType === 'hangman'
+            ? 'max-w-6xl px-1.5 sm:px-5 lg:px-8 py-1.5 sm:py-3'
+            : 'max-w-5xl px-2 sm:px-6 lg:px-8 py-2 sm:py-3'
+        }`}
       >
         {isComplete ? (
           /* ── Completion screen ── */

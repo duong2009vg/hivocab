@@ -878,3 +878,129 @@ mark.thpt-word-highlight {
   0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.85); }
   100% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.55); }
 }
+
+/* ─── Hangman Crayon Sketchbook Animations ────────────────────────────── */
+@keyframes hangmanStrokeDraw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes hangmanPopIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.45);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.16);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hangmanWrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px) rotate(-0.6deg); }
+  45% { transform: translateX(5px) rotate(0.6deg); }
+  70% { transform: translateX(-3px); }
+  85% { transform: translateX(2px); }
+}
+
+@keyframes hangmanPendulum {
+  0% { transform: rotate(0deg); }
+  18% { transform: rotate(5deg); }
+  38% { transform: rotate(-4deg); }
+  58% { transform: rotate(2.5deg); }
+  78% { transform: rotate(-1.2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes hangmanCloudFloat {
+  0%, 100% { transform: translateX(0px) translateY(0px); }
+  50% { transform: translateX(5px) translateY(-2px); }
+}
+
+@keyframes hangmanSparklePop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-25deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.22) rotate(8deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.hangman-stroke {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: hangmanStrokeDraw 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hangman-stroke-fast {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: hangmanStrokeDraw 0.24s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hangman-stroke-head {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: hangmanStrokeDraw 0.44s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hangman-letter-pop {
+  display: inline-block;
+  animation: hangmanPopIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.hangman-wrong-shake {
+  animation: hangmanWrongShake 0.34s ease-in-out;
+}
+
+.hangman-pendulum-sway {
+  transform-box: view-box;
+  transform-origin: 136px 29px;
+  animation: hangmanPendulum 1.5s cubic-bezier(0.37, 0, 0.63, 1) 0.15s both;
+}
+
+.hangman-cloud-a {
+  animation: hangmanCloudFloat 7s ease-in-out infinite;
+}
+
+.hangman-cloud-b {
+  animation: hangmanCloudFloat 9s ease-in-out infinite reverse;
+}
+
+.hangman-sparkle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hangmanSparklePop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hangman-stroke,
+  .hangman-stroke-fast,
+  .hangman-stroke-head {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+  .hangman-letter-pop,
+  .hangman-wrong-shake,
+  .hangman-pendulum-sway,
+  .hangman-cloud-a,
+  .hangman-cloud-b,
+  .hangman-sparkle {
+    animation: none;
+  }
+}
