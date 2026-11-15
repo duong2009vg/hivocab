@@ -102,70 +102,6 @@ function buildBlankPlaceholder(answer) {
     .join(' ');
 }
 
-function escapeRegex(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-function getAnswerPartForms(part) {
-  const word = String(part || '').trim();
-  if (!word) return [];
-  const forms = new Set([word]);
-  if (!/^[A-Za-z]+$/.test(word)) return Array.from(forms);
-  const lower = word.toLowerCase();
-  forms.add(lower);
-  forms.add(`${lower}s`);
-  forms.add(`${lower}es`);
-  forms.add(`${lower}ed`);
-  forms.add(`${lower}ing`);
-  if (lower.endsWith('e')) {
-    forms.add(`${lower}d`);
-    forms.add(`${lower.slice(0, -1)}ing`);
-  }
-  if (/[^aeiou]y$/.test(lower)) {
-    forms.add(`${lower.slice(0, -1)}ies`);
-    forms.add(`${lower.slice(0, -1)}ied`);
-  }
-  if (/[aeiou][^aeiouwxy]$/.test(lower)) {
-    forms.add(`${lower}${lower.slice(-1)}ed`);
-    forms.add(`${lower}${lower.slice(-1)}ing`);
-  }
-  return Array.from(forms).sort((a, b) => b.length - a.length);
-}
-
-function buildAnswerPhraseRegex(answer) {
-  const parts = splitAnswerParts(answer);
-  if (!parts.length) return null;
-  const phrase = parts
-    .map(p => `(?:${getAnswerPartForms(p).map(escapeRegex).join('|')})`)
-    .join('\\s+');
-  try {
-    return new RegExp(`(^|[^\\p{L}\\p{N}_])(${phrase})(?=$|[^\\p{L}\\p{N}_])`, 'giu');
-  } catch {
-    try {
-      return new RegExp(`(^|[^a-zA-Z0-9_])(${phrase})(?=$|[^a-zA-Z0-9_])`, 'gi');
-    } catch {
-      return null;
-    }
-  }
-}
-
-function blankAnswerInSentence(sentence, answer) {
-  const phraseRegex = buildAnswerPhraseRegex(answer);
-  if (!phraseRegex) return null;
-  let matchedAnswer = null;
-  const source = String(sentence || '');
-  const blankedSentence = source.replace(phraseRegex, (match, prefix, matched) => {
-    matchedAnswer = matched;
-    return `${prefix}${buildBlankPlaceholder(matched)}`;
-  });
-  if (!matchedAnswer) return null;
-  return {
-    sentence: blankedSentence,
-    answer: matchedAnswer,
-    placeholder: buildBlankPlaceholder(matchedAnswer),
-  };
-}
-
 // ─── Exercise Data Generation ─────────────────────────────────────────────────
 
 function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi', mcqSubtype = null) {
@@ -228,20 +164,11 @@ function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi'
     }
 
     case 'fill': {
-      let sentence = null;
-      let answerText = safeWord;
-      let blankPlaceholder = buildBlankPlaceholder(answerText);
-      if (safeExample) {
-        const blanked = blankAnswerInSentence(safeExample, safeWord);
-        if (blanked) {
-          sentence = blanked.sentence;
-          answerText = blanked.answer;
-          blankPlaceholder = blanked.placeholder;
-        }
-      }
+      const answerText = safeWord;
       return {
-        sentence,
-        blankPlaceholder,
+        sentence: null,
+        blankPlaceholder: buildBlankPlaceholder(answerText),
+        meaning: safeMeaning,
         meaningHint: `Điền từ tiếng Anh có nghĩa: "${safeMeaning}"`,
         answer: answerText,
         baseAnswer: safeWord,

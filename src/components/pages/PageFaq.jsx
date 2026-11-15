@@ -68,7 +68,7 @@ export function PageFaq() {
         },
         {
           q: 'HiVocab có những chế độ luyện tập nào?',
-          a: 'Bạn có thể linh hoạt chuyển đổi giữa 5 chế độ: Flashcard lật thẻ 3D thông minh, Trắc nghiệm 4 đáp án (Quiz) rèn phản xạ, Điền từ vào ngữ cảnh (Type-in) chuẩn chính tả, Nghe chép chính tả (Dictation) luyện tai nghe với giọng chuẩn bản ngữ, và Trò chơi phiêu lưu từ vựng vượt ải thú vị.',
+          a: 'Bạn có thể linh hoạt chuyển đổi giữa 5 chế độ: Flashcard lật thẻ 3D thông minh, Trắc nghiệm 4 đáp án (Quiz) rèn phản xạ, Điền từ theo nghĩa tiếng Việt (Type-in) chuẩn chính tả, Nghe chép chính tả (Dictation) luyện tai nghe với giọng chuẩn bản ngữ, và Trò chơi phiêu lưu từ vựng vượt ải thú vị.',
         },
         {
           q: 'Tôi có thể dùng HiVocab trên điện thoại hay cài như app không?',

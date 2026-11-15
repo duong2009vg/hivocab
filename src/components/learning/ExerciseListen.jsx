@@ -1,9 +1,11 @@
 // src/components/learning/ExerciseListen.jsx
-// Listen & type exercise — Compact Crayon card (PC/Mobile fit, safe above-the-fold layout)
+// Listen & type exercise — Compact Crayon card + separated multi-word trays
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AlertTriangle, Lightbulb, Eye, RotateCcw, Volume2 } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
+import WordSlotsGrid from './WordSlotsGrid.jsx';
+import { buildTypedAnswerForParts, formatTypedDisplayForParts } from './letterSlotUtils.js';
 
 function cleanCharForSlot(raw) {
   if (!raw) return '';
@@ -19,43 +21,42 @@ function getSlotDimensions(maxPartLen) {
   if (maxPartLen <= 4) {
     return {
       slot: 'w-10 sm:w-12 h-11 sm:h-[52px] text-lg sm:text-2xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1.5 sm:gap-2.5',
-      gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2 sm:gap-y-2.5',
+      gap: 'gap-1 sm:gap-2',
+      gapBetweenWords: 'gap-x-5 sm:gap-x-8 gap-y-2.5 sm:gap-y-3',
     };
   }
   if (maxPartLen <= 6) {
     return {
       slot: 'w-9 sm:w-11 h-10 sm:h-12 text-base sm:text-xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1.5 sm:gap-2',
-      gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2',
+      gap: 'gap-1 sm:gap-1.5',
+      gapBetweenWords: 'gap-x-4 sm:gap-x-7 gap-y-2.5',
     };
   }
   if (maxPartLen <= 8) {
     return {
       slot: 'w-8 sm:w-10 h-9 sm:h-11 text-sm sm:text-lg rounded-xl',
       gap: 'gap-1 sm:gap-1.5',
-      gapBetweenWords: 'gap-x-2 sm:gap-x-3 gap-y-2',
+      gapBetweenWords: 'gap-x-4 sm:gap-x-6 gap-y-2.5',
     };
   }
   if (maxPartLen <= 10) {
     return {
       slot: 'w-7 sm:w-9 h-9 sm:h-10 text-xs sm:text-base rounded-lg sm:rounded-xl',
-      gap: 'gap-1 sm:gap-1.5',
-      gapBetweenWords: 'gap-x-2 gap-y-1.5',
+      gap: 'gap-0.5 sm:gap-1',
+      gapBetweenWords: 'gap-x-3.5 sm:gap-x-5 gap-y-2',
     };
   }
   if (maxPartLen <= 12) {
     return {
       slot: 'w-6 sm:w-8 h-8 sm:h-9 text-xs sm:text-sm rounded-lg sm:rounded-xl',
       gap: 'gap-0.5 sm:gap-1',
-      gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
+      gapBetweenWords: 'gap-x-3 sm:gap-x-5 gap-y-2',
     };
   }
-  // 13+ letters (fits 14 letters on narrow mobile without overflowing)
   return {
     slot: 'w-[22px] sm:w-7 h-7 sm:h-9 text-xs rounded-lg',
     gap: 'gap-0.5 sm:gap-1',
-    gapBetweenWords: 'gap-x-1 gap-y-1',
+    gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2',
   };
 }
 
@@ -212,7 +213,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     if (hintLevel >= maxHint) return;
 
     const latestVals = valuesRef.current;
-    let targetIdx = answerChars.findIndex(
+    const targetIdx = answerChars.findIndex(
       (ch, idx) => cleanCharForSlot(latestVals[idx]) !== cleanCharForSlot(ch)
     );
     if (targetIdx === -1) return;
@@ -239,20 +240,20 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
 
   const handleCheck = useCallback(() => {
     if (submitted) return;
-    const ans = d.answer || '';
-    let letterIdx = 0;
-    const typed = ans
-      .split('')
-      .map((char) => {
-        if (char === ' ') return ' ';
-        return values[letterIdx++] || '_';
-      })
-      .join('');
-
+    const typed = buildTypedAnswerForParts(answerParts, values);
     const r = onSubmit(typed);
     setSubmitted(r);
     setShowResultModal(true);
-  }, [submitted, d.answer, values, onSubmit]);
+  }, [submitted, answerParts, values, onSubmit]);
+
+  const handleBackspaceEmpty = useCallback((flatIdx) => {
+    setValues((prev) => {
+      const n = [...prev];
+      n[flatIdx - 1] = '';
+      return n;
+    });
+    inputRefs.current[flatIdx - 1]?.focus();
+  }, []);
 
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
@@ -261,12 +262,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
       if (isBackspace) {
         if (!values[flatIdx] && flatIdx > 0) {
           e.preventDefault();
-          setValues((prev) => {
-            const n = [...prev];
-            n[flatIdx - 1] = '';
-            return n;
-          });
-          inputRefs.current[flatIdx - 1]?.focus();
+          handleBackspaceEmpty(flatIdx);
         } else if (values[flatIdx]) {
           e.preventDefault();
           setValues((prev) => {
@@ -285,15 +281,22 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
         inputRefs.current[flatIdx + 1]?.select?.();
       } else if ((e.key === ' ' || e.code === 'Space') && !e.ctrlKey && !e.metaKey && e.target.tagName === 'INPUT') {
         e.preventDefault();
-        inputRefs.current[Math.min(flatIdx + 1, boxes.length - 1)]?.focus();
+        const box = boxes[flatIdx];
+        if (box && box.partIdx > 0 && box.letterIdx === 0 && !values[flatIdx]) {
+          return;
+        }
+        if (flatIdx < boxes.length - 1) {
+          inputRefs.current[flatIdx + 1]?.focus();
+          inputRefs.current[flatIdx + 1]?.select?.();
+        }
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (!values.every((v) => !v)) {
+        if (values.some(Boolean)) {
           handleCheck();
         }
       }
     },
-    [values, boxes.length, showResultModal, handleCheck]
+    [values, boxes, showResultModal, handleCheck, handleBackspaceEmpty]
   );
 
   // PC keyboard shortcuts (works inside or outside input boxes cleanly without double firing)
@@ -334,7 +337,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
       } else if (e.key === '2') {
         e.preventDefault();
         setShowMeaning((m) => !m);
-      } else if (e.key === 'Enter' && !submitted && !values.every((v) => !v)) {
+      } else if (e.key === 'Enter' && !submitted && values.some(Boolean)) {
         e.preventDefault();
         handleCheck();
       }
@@ -362,8 +365,8 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     }, 50);
   }, [submitted, boxes]);
 
-  let partOffset = 0;
-  const userTyped = values.join('');
+  const userTypedDisplay = formatTypedDisplayForParts(answerParts, values);
+  const hasAnyInput = values.some(Boolean);
   const maxPartLetters = Math.max(...answerParts.map((p) => p.length), 1);
   const dims = getSlotDimensions(maxPartLetters);
   const canHint =
@@ -388,7 +391,11 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
                 }}
               />
             </span>
-            <span className="truncate">Churbito: Nghe &amp; gõ lại từng chữ cái ({totalLetters} ký tự)</span>
+            <span className="truncate">
+              {answerParts.length > 1
+                ? `Churbito: Nghe & gõ ${answerParts.length} từ (${answerParts.map((p) => p.length).join(' + ')} chữ)`
+                : `Churbito: Nghe & gõ lại từng chữ cái (${totalLetters} ký tự)`}
+            </span>
           </div>
 
           {onReport && (
@@ -457,7 +464,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
                   {item?.word?.pos || d.pos}
                 </span>
               )}
-              <span>{answerParts.length > 1 ? `${answerParts.length} từ ghép` : 'Bấm loa để nghe'}</span>
+              <span>{answerParts.length > 1 ? `Cụm ${answerParts.length} từ tách rời` : 'Bấm loa để nghe'}</span>
             </div>
           </div>
 
@@ -517,7 +524,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
             <span>{showMeaning ? 'Ẩn nghĩa' : 'Xem nghĩa'}</span>
           </button>
 
-          {userTyped && !submitted && (
+          {hasAnyInput && !submitted && (
             <button
               type="button"
               onClick={handleClearAll}
@@ -537,110 +544,23 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
           </div>
         )}
 
-        {/* ── Letters Input Box Row (Compact & Responsive) ── */}
-        <div
-          className="w-full max-w-full overflow-x-auto py-1 mb-2.5 no-scrollbar"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-          onClick={(e) => {
-            if (e.target.tagName !== 'INPUT') {
-              const firstEmpty = inputRefs.current.find((inp, i) => !values[i]);
-              const target = firstEmpty || inputRefs.current[inputRefs.current.length - 1];
-              target?.focus();
-              target?.select?.();
-            }
-          }}
-        >
-          <div className={`flex flex-wrap items-center justify-center ${dims.gapBetweenWords} min-w-min mx-auto px-1`}>
-            {answerParts.map((part, pi) => {
-              const startOffset = partOffset;
-              partOffset += part.length;
-
-              return (
-                <div key={pi} className={`inline-flex items-center ${dims.gap} flex-nowrap shrink-0`}>
-                  {[...part].map((_, li) => {
-                    const flatIdx = startOffset + li;
-                    const isFilled = !!values[flatIdx];
-                    const isActive = focusedIdx === flatIdx && !submitted;
-                    const isPulsed = hintPulseIdx === flatIdx;
-
-                    let slotClass = `${dims.slot} flex items-center justify-center font-mono font-black transition-all duration-150 shrink-0 select-none `;
-
-                    if (!submitted) {
-                      if (isPulsed) {
-                        slotClass +=
-                          'border-[3px] border-[#3884DD] bg-[#E8F2FF] text-[#1D5CA8] shadow-[2px_3px_0px_#2B2523] scale-110 z-10';
-                      } else if (isActive) {
-                        slotClass +=
-                          'border-[3px] border-[#2B4566] bg-[#F1F7FF] text-[#2B4566] shadow-[2px_3px_0px_#2B2523] ring-3 ring-sky-300/60 scale-105 z-10';
-                      } else if (isFilled) {
-                        slotClass +=
-                          'border-2 border-[#2B2523] bg-white text-stone-900 shadow-[1.5px_2px_0px_#2B2523] hover:border-stone-800';
-                      } else {
-                        slotClass +=
-                          'border-2 border-stone-300 border-dashed text-stone-400 bg-white/70 shadow-2xs hover:bg-stone-50';
-                      }
-                    } else {
-                      if (submitted.correct) {
-                        slotClass +=
-                          'border-[2.5px] border-[#3D7A46] bg-[#EEF8EC] text-[#2B6135] shadow-[2px_2.5px_0px_#2B6135]';
-                      } else {
-                        slotClass +=
-                          'border-[2.5px] border-[#D34E36] bg-[#FDF0ED] text-[#B83822] shadow-[2px_2.5px_0px_#B83822]';
-                      }
-                    }
-
-                    return (
-                      <div key={flatIdx} className={slotClass}>
-                        <input
-                          ref={(el) => (inputRefs.current[flatIdx] = el)}
-                          type="text"
-                          maxLength={2}
-                          value={values[flatIdx]}
-                          disabled={!!submitted}
-                          data-listen-index={flatIdx}
-                          className="w-full h-full text-center bg-transparent focus:outline-none uppercase caret-transparent p-0 font-bold"
-                          autoComplete="off"
-                          autoCorrect="off"
-                          autoCapitalize="characters"
-                          spellCheck={false}
-                          onFocus={(e) => {
-                            setFocusedIdx(flatIdx);
-                            e.target.select?.();
-                            e.target.scrollLeft = 0;
-                            e.target.scrollIntoView?.({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                          }}
-                          onBlur={(e) => {
-                            e.target.scrollLeft = 0;
-                          }}
-                          onClick={(e) => {
-                            setFocusedIdx(flatIdx);
-                            e.target.select?.();
-                            e.target.scrollLeft = 0;
-                          }}
-                          onBeforeInput={(e) => {
-                            if (e.inputType === 'deleteContentBackward') {
-                              if (!values[flatIdx] && flatIdx > 0) {
-                                e.preventDefault();
-                                setValues((prev) => {
-                                  const n = [...prev];
-                                  n[flatIdx - 1] = '';
-                                  return n;
-                                });
-                                inputRefs.current[flatIdx - 1]?.focus();
-                              }
-                            }
-                          }}
-                          onChange={(e) => handleInput(e, flatIdx)}
-                          onKeyDown={(e) => handleKeyDown(e, flatIdx)}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* ── Multi-Word Separated Letter Boxes ── */}
+        <WordSlotsGrid
+          answerParts={answerParts}
+          totalBoxes={boxes.length}
+          values={values}
+          dims={dims}
+          submitted={submitted}
+          focusedIdx={focusedIdx}
+          hintPulseIdx={hintPulseIdx}
+          pulseSlotClass="border-[3px] border-[#3884DD] bg-[#E8F2FF] text-[#1D5CA8] shadow-[2px_3px_0px_#2B2523] scale-110 z-10"
+          inputRefs={inputRefs}
+          dataAttrName="data-listen-index"
+          onFocusSlot={setFocusedIdx}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
+          onBackspaceEmpty={handleBackspaceEmpty}
+        />
 
         {/* Compact 1-Line Keyboard Shortcuts - Desktop Only */}
         <p className="hidden sm:flex text-[11px] font-semibold text-stone-500 text-center mb-3 items-center flex-wrap justify-center gap-1.5 font-quicksand">
@@ -678,7 +598,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
           <button
             type="button"
             onClick={handleCheck}
-            disabled={!!submitted || values.every((v) => !v)}
+            disabled={!!submitted || !hasAnyInput}
             className="w-full min-h-[44px] py-2 sm:py-2.5 px-6 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -699,7 +619,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
         meaning={d.meaning || d.meaningHint}
         exampleSentence={item?.word?.example_sentence || item?.word?.exampleSentence || d.sentence}
         notes={item?.word?.notes || d.notes}
-        userAnswer={userTyped}
+        userAnswer={userTypedDisplay}
         onContinue={handleModalContinue}
         onReport={onReport}
       />

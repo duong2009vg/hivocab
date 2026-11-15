@@ -515,9 +515,9 @@ export function PageLessonDetail() {
                   Ghi nhớ
                 </span>
               </div>
-              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Điền Từ Khuyết</h3>
+              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Điền Từ</h3>
               <p className="text-xs text-[#78726b] font-medium leading-snug">
-                Nhập chữ cái đúng chuẩn ngữ pháp &amp; phát âm.
+                Nhìn nghĩa tiếng Việt &amp; gõ lại từ tiếng Anh chuẩn xác.
               </p>
             </button>
 

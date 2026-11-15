@@ -1,26 +1,11 @@
 // src/components/learning/ExerciseFill.jsx
-// Fill-in-the-blank letter boxes — Compact Crayon card synced with ExerciseListen
+// Fill-in-the-blank letter boxes — Vietnamese-meaning prompt only + separated multi-word trays
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { AlertTriangle, Lightbulb, RotateCcw } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
-
-function renderSentence(sentence, targetWord) {
-  if (!sentence) return null;
-  if (sentence.includes('___') || sentence.includes('---')) {
-    const parts = sentence.split(/_{2,}|-{2,}/);
-    return (
-      <>
-        {parts[0]}
-        <span className="inline-block px-2.5 sm:px-3.5 py-0.5 mx-1 sm:mx-1.5 bg-sky-50 text-[#3b6e8c] font-bold rounded-xl border-2 border-[#3b6e8c] crayon-blank-highlight shadow-xs align-baseline">
-          {targetWord || '____'}
-        </span>
-        {parts[1] || ''}
-      </>
-    );
-  }
-  return sentence;
-}
+import WordSlotsGrid from './WordSlotsGrid.jsx';
+import { buildTypedAnswerForParts, formatTypedDisplayForParts } from './letterSlotUtils.js';
 
 function cleanCharForSlot(raw) {
   if (!raw) return '';
@@ -36,42 +21,42 @@ function getSlotDimensions(maxPartLen) {
   if (maxPartLen <= 4) {
     return {
       slot: 'w-10 sm:w-12 h-11 sm:h-[52px] text-lg sm:text-2xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1.5 sm:gap-2.5',
-      gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2 sm:gap-y-2.5',
+      gap: 'gap-1 sm:gap-2',
+      gapBetweenWords: 'gap-x-5 sm:gap-x-8 gap-y-2.5 sm:gap-y-3',
     };
   }
   if (maxPartLen <= 6) {
     return {
       slot: 'w-9 sm:w-11 h-10 sm:h-12 text-base sm:text-xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1.5 sm:gap-2',
-      gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2',
+      gap: 'gap-1 sm:gap-1.5',
+      gapBetweenWords: 'gap-x-4 sm:gap-x-7 gap-y-2.5',
     };
   }
   if (maxPartLen <= 8) {
     return {
       slot: 'w-8 sm:w-10 h-9 sm:h-11 text-sm sm:text-lg rounded-xl',
       gap: 'gap-1 sm:gap-1.5',
-      gapBetweenWords: 'gap-x-2 sm:gap-x-3 gap-y-2',
+      gapBetweenWords: 'gap-x-4 sm:gap-x-6 gap-y-2.5',
     };
   }
   if (maxPartLen <= 10) {
     return {
       slot: 'w-7 sm:w-9 h-9 sm:h-10 text-xs sm:text-base rounded-lg sm:rounded-xl',
-      gap: 'gap-1 sm:gap-1.5',
-      gapBetweenWords: 'gap-x-2 gap-y-1.5',
+      gap: 'gap-0.5 sm:gap-1',
+      gapBetweenWords: 'gap-x-3.5 sm:gap-x-5 gap-y-2',
     };
   }
   if (maxPartLen <= 12) {
     return {
       slot: 'w-6 sm:w-8 h-8 sm:h-9 text-xs sm:text-sm rounded-lg sm:rounded-xl',
       gap: 'gap-0.5 sm:gap-1',
-      gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
+      gapBetweenWords: 'gap-x-3 sm:gap-x-5 gap-y-2',
     };
   }
   return {
     slot: 'w-[22px] sm:w-7 h-7 sm:h-9 text-xs rounded-lg',
     gap: 'gap-0.5 sm:gap-1',
-    gapBetweenWords: 'gap-x-1 gap-y-1',
+    gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2',
   };
 }
 
@@ -205,20 +190,20 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
 
   const handleCheck = useCallback(() => {
     if (submitted) return;
-    const ans = d.answer || '';
-    let letterIdx = 0;
-    const typed = ans
-      .split('')
-      .map((char) => {
-        if (char === ' ') return ' ';
-        return values[letterIdx++] || '_';
-      })
-      .join('');
-
+    const typed = buildTypedAnswerForParts(answerParts, values);
     const r = onSubmit(typed);
     setSubmitted(r);
     setShowResultModal(true);
-  }, [submitted, d.answer, values, onSubmit]);
+  }, [submitted, answerParts, values, onSubmit]);
+
+  const handleBackspaceEmpty = useCallback((flatIdx) => {
+    setValues((prev) => {
+      const n = [...prev];
+      n[flatIdx - 1] = '';
+      return n;
+    });
+    inputRefs.current[flatIdx - 1]?.focus();
+  }, []);
 
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
@@ -227,12 +212,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
       if (isBackspace) {
         if (!values[flatIdx] && flatIdx > 0) {
           e.preventDefault();
-          setValues((prev) => {
-            const n = [...prev];
-            n[flatIdx - 1] = '';
-            return n;
-          });
-          inputRefs.current[flatIdx - 1]?.focus();
+          handleBackspaceEmpty(flatIdx);
         } else if (values[flatIdx]) {
           e.preventDefault();
           setValues((prev) => {
@@ -249,18 +229,25 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
         e.preventDefault();
         inputRefs.current[flatIdx + 1]?.focus();
         inputRefs.current[flatIdx + 1]?.select?.();
-      } else if ((e.key === ' ' || e.code === 'Space') && flatIdx < boxes.length - 1) {
+      } else if ((e.key === ' ' || e.code === 'Space') && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
-        inputRefs.current[flatIdx + 1]?.focus();
-        inputRefs.current[flatIdx + 1]?.select?.();
+        // If cursor already auto-advanced to first empty slot of next word, keep it there
+        const box = boxes[flatIdx];
+        if (box && box.partIdx > 0 && box.letterIdx === 0 && !values[flatIdx]) {
+          return;
+        }
+        if (flatIdx < boxes.length - 1) {
+          inputRefs.current[flatIdx + 1]?.focus();
+          inputRefs.current[flatIdx + 1]?.select?.();
+        }
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        if (!values.every((v) => !v)) {
+        if (values.some(Boolean)) {
           handleCheck();
         }
       }
     },
-    [values, boxes.length, showResultModal, handleCheck]
+    [values, boxes, showResultModal, handleCheck, handleBackspaceEmpty]
   );
 
   // Keyboard shortcuts: Alt+H for hint, Enter to check outside input
@@ -273,7 +260,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
         return;
       }
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-      if (e.key === 'Enter' && !submitted && !values.every((v) => !v)) {
+      if (e.key === 'Enter' && !submitted && values.some(Boolean)) {
         e.preventDefault();
         handleCheck();
       }
@@ -326,11 +313,16 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
     }
   }, [d.answer, speakWord]);
 
-  let partOffset = 0;
   const firstLetter = (d.answer || '').trim()[0]?.toUpperCase() || 'A';
-  const userTyped = values.join('');
+  const userTypedDisplay = formatTypedDisplayForParts(answerParts, values);
+  const hasAnyInput = values.some(Boolean);
   const maxPartLetters = Math.max(...answerParts.map((p) => p.length), 1);
   const dims = getSlotDimensions(maxPartLetters);
+  const wordPos = item?.word?.pos || d.pos;
+  const vietnameseMeaning =
+    d.meaning ||
+    item?.word?.meaning ||
+    (d.meaningHint ? d.meaningHint.replace(/^Điền từ tiếng Anh có nghĩa:\s*"|"$/g, '') : '');
   const canHint =
     !submitted &&
     hintLevel < Math.max(1, totalLetters - 1) &&
@@ -341,7 +333,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
       {/* ── Main Compact Crayon Card ── */}
       <div className="w-full max-w-xl bg-white rounded-[24px] sm:rounded-[28px] border-[3px] border-[#342e2b] px-3.5 sm:px-6 py-3.5 sm:py-4 shadow-[4px_6px_0px_#2c2523] relative transition-all">
         {/* Top Mascot Hint & Report Header */}
-        <div className="flex items-center justify-between gap-2 pb-2 mb-2 border-b-2 border-stone-100">
+        <div className="flex items-center justify-between gap-2 pb-2 mb-2.5 border-b-2 border-stone-100">
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFF5EB] border border-[#E76F51]/40 text-[#D36135] text-[11px] sm:text-xs font-bold min-w-0">
             <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center shrink-0">
               <img
@@ -354,7 +346,9 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
               />
             </span>
             <span className="truncate">
-              Churbito gợi ý: Từ gồm {totalLetters} ký tự, bắt đầu &apos;{firstLetter}&apos;
+              {answerParts.length > 1
+                ? `Churbito gợi ý: Cụm ${answerParts.length} từ (${answerParts.map((p) => p.length).join(' + ')} chữ), bắt đầu '${firstLetter}'`
+                : `Churbito gợi ý: Từ gồm ${totalLetters} ký tự, bắt đầu '${firstLetter}'`}
             </span>
           </div>
 
@@ -373,17 +367,30 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
           )}
         </div>
 
-        {/* Sub-header with Audio Trigger */}
-        <div className="flex items-center justify-center gap-2 mb-1.5">
-          <span className="text-stone-700 font-semibold text-xs sm:text-sm">
-            Điền từ tiếng Anh thích hợp:
-          </span>
+        {/* ── Vietnamese Meaning Prompt Card (Fill by Vietnamese meaning only) ── */}
+        <div className="w-full max-w-md mx-auto bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 mb-2.5 shadow-[2px_3px_0px_#2B2523] flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                Nghĩa tiếng Việt
+              </span>
+              {wordPos && (
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-stone-700 border border-stone-300">
+                  {wordPos}
+                </span>
+              )}
+            </div>
+            <p className="text-sm sm:text-base font-bold text-[#1e1b17] leading-snug select-text">
+              {vietnameseMeaning || 'Điền từ tiếng Anh thích hợp'}
+            </p>
+          </div>
+
           <button
             type="button"
             onClick={playAudio}
             aria-label="Phát âm từ vựng"
-            className="w-9 h-9 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-stone-800 text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-2xs cursor-pointer shrink-0"
-            title="Nghe phát âm từ cần điền"
+            className="w-10 h-10 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-[#2B2523] text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-[1.5px_2px_0px_#2B2523] cursor-pointer shrink-0"
+            title="Nghe phát âm gợi ý"
           >
             <svg className="w-4 h-4 text-sky-800" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
               <path
@@ -393,17 +400,6 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
               />
             </svg>
           </button>
-        </div>
-
-        {/* Passage Sentence with Highlighted Blank Word */}
-        <div className="text-center font-crayon leading-relaxed text-sm sm:text-lg text-stone-800 max-w-xl mx-auto tracking-wide mb-2.5 px-1">
-          {d.sentence ? (
-            renderSentence(d.sentence, submitted ? d.answer : values.join('') || '_____')
-          ) : (
-            <p className="text-sm sm:text-base font-bold text-stone-800">
-              &quot;{d.meaningHint || d.meaning || '...'}&quot;
-            </p>
-          )}
         </div>
 
         {/* Compact Action Toolbar: Hint + Clear */}
@@ -419,7 +415,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
           </button>
 
-          {userTyped && !submitted && (
+          {hasAnyInput && !submitted && (
             <button
               type="button"
               onClick={handleClearAll}
@@ -432,110 +428,23 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
           )}
         </div>
 
-        {/* ── Letters Input Box Row (Compact & Responsive) ── */}
-        <div
-          className="w-full max-w-full overflow-x-auto py-1 mb-2.5 no-scrollbar"
-          style={{ WebkitOverflowScrolling: 'touch' }}
-          onClick={(e) => {
-            if (e.target.tagName !== 'INPUT') {
-              const firstEmpty = inputRefs.current.find((inp, i) => !values[i]);
-              const target = firstEmpty || inputRefs.current[inputRefs.current.length - 1];
-              target?.focus();
-              target?.select?.();
-            }
-          }}
-        >
-          <div className={`flex flex-wrap items-center justify-center ${dims.gapBetweenWords} min-w-min mx-auto px-1`}>
-            {answerParts.map((part, pi) => {
-              const startOffset = partOffset;
-              partOffset += part.length;
-
-              return (
-                <div key={pi} className={`inline-flex items-center ${dims.gap} flex-nowrap shrink-0`}>
-                  {[...part].map((_, li) => {
-                    const flatIdx = startOffset + li;
-                    const isFilled = !!values[flatIdx];
-                    const isActive = focusedIdx === flatIdx && !submitted;
-                    const isPulsed = hintPulseIdx === flatIdx;
-
-                    let slotClass = `${dims.slot} flex items-center justify-center font-mono font-black transition-all duration-150 shrink-0 select-none `;
-
-                    if (!submitted) {
-                      if (isPulsed) {
-                        slotClass +=
-                          'border-[3px] border-[#3b6e8c] bg-sky-100 text-[#1D5CA8] shadow-[2px_3px_0px_#2B2523] scale-110 z-10';
-                      } else if (isActive) {
-                        slotClass +=
-                          'border-[3px] border-[#2B4566] bg-[#F1F7FF] text-[#2B4566] shadow-[2px_3px_0px_#2B2523] ring-3 ring-sky-300/60 scale-105 z-10';
-                      } else if (isFilled) {
-                        slotClass +=
-                          'border-2 border-[#2B2523] bg-white text-stone-900 shadow-[1.5px_2px_0px_#2B2523] hover:border-stone-800';
-                      } else {
-                        slotClass +=
-                          'border-2 border-stone-300 border-dashed text-stone-400 bg-white/70 shadow-2xs hover:bg-stone-50';
-                      }
-                    } else {
-                      if (submitted.correct) {
-                        slotClass +=
-                          'border-[2.5px] border-[#3D7A46] bg-[#EEF8EC] text-[#2B6135] shadow-[2px_2.5px_0px_#2B6135]';
-                      } else {
-                        slotClass +=
-                          'border-[2.5px] border-[#D34E36] bg-[#FDF0ED] text-[#B83822] shadow-[2px_2.5px_0px_#B83822]';
-                      }
-                    }
-
-                    return (
-                      <div key={flatIdx} className={slotClass}>
-                        <input
-                          ref={(el) => (inputRefs.current[flatIdx] = el)}
-                          type="text"
-                          maxLength={2}
-                          value={values[flatIdx]}
-                          disabled={!!submitted}
-                          data-fill-index={flatIdx}
-                          className="w-full h-full text-center bg-transparent focus:outline-none uppercase caret-transparent p-0 font-bold"
-                          autoComplete="off"
-                          autoCorrect="off"
-                          autoCapitalize="characters"
-                          spellCheck={false}
-                          onFocus={(e) => {
-                            setFocusedIdx(flatIdx);
-                            e.target.select?.();
-                            e.target.scrollLeft = 0;
-                            e.target.scrollIntoView?.({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                          }}
-                          onBlur={(e) => {
-                            e.target.scrollLeft = 0;
-                          }}
-                          onClick={(e) => {
-                            setFocusedIdx(flatIdx);
-                            e.target.select?.();
-                            e.target.scrollLeft = 0;
-                          }}
-                          onBeforeInput={(e) => {
-                            if (e.inputType === 'deleteContentBackward') {
-                              if (!values[flatIdx] && flatIdx > 0) {
-                                e.preventDefault();
-                                setValues((prev) => {
-                                  const n = [...prev];
-                                  n[flatIdx - 1] = '';
-                                  return n;
-                                });
-                                inputRefs.current[flatIdx - 1]?.focus();
-                              }
-                            }
-                          }}
-                          onChange={(e) => handleInput(e, flatIdx)}
-                          onKeyDown={(e) => handleKeyDown(e, flatIdx)}
-                        />
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {/* ── Multi-Word Separated Letter Boxes ── */}
+        <WordSlotsGrid
+          answerParts={answerParts}
+          totalBoxes={boxes.length}
+          values={values}
+          dims={dims}
+          submitted={submitted}
+          focusedIdx={focusedIdx}
+          hintPulseIdx={hintPulseIdx}
+          pulseSlotClass="border-[3px] border-[#3b6e8c] bg-sky-100 text-[#1D5CA8] shadow-[2px_3px_0px_#2B2523] scale-110 z-10"
+          inputRefs={inputRefs}
+          dataAttrName="data-fill-index"
+          onFocusSlot={setFocusedIdx}
+          onInput={handleInput}
+          onKeyDown={handleKeyDown}
+          onBackspaceEmpty={handleBackspaceEmpty}
+        />
 
         {/* Keyboard Navigation Instructions - Compact Desktop Line */}
         <div className="hidden sm:flex text-center font-quicksand text-[11px] text-stone-500 font-medium mb-3 items-center justify-center gap-1.5 flex-wrap">
@@ -568,7 +477,7 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
           <button
             type="button"
             onClick={handleCheck}
-            disabled={!!submitted || values.every((v) => !v)}
+            disabled={!!submitted || !hasAnyInput}
             className="w-full max-w-sm min-h-[44px] py-2 sm:py-2.5 px-6 bg-[#3b6e8c] hover:bg-[#34617c] active:bg-[#2b5168] text-white font-crayon text-sm sm:text-base font-bold rounded-xl sm:rounded-2xl border-2 border-stone-800 shadow-[2px_3px_0px_#2c2523] hover:-translate-y-0.5 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -585,11 +494,11 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
         isCorrect={!!submitted?.correct}
         word={d.answer}
         phonetic={d.phonetic}
-        pos={item?.word?.pos || d.pos}
-        meaning={d.meaning || d.meaningHint}
-        exampleSentence={item?.word?.example_sentence || item?.word?.exampleSentence || d.sentence}
+        pos={wordPos}
+        meaning={d.meaning || item?.word?.meaning || d.meaningHint}
+        exampleSentence={item?.word?.example_sentence || item?.word?.exampleSentence || ''}
         notes={item?.word?.notes || d.notes}
-        userAnswer={userTyped}
+        userAnswer={userTypedDisplay}
         onContinue={handleModalContinue}
         onReport={onReport}
       />

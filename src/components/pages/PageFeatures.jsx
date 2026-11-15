@@ -91,7 +91,7 @@ export function PageFeatures() {
           tagColor: 'bg-[#F3E8FF] text-[#8B5CF6] border-[#8B5CF6]/40',
           iconType: 'game',
           title: '5 Chế độ Luyện tập Đa dạng',
-          desc: 'Tự do đổi gió với Flashcard lật mặt 3D, Trắc nghiệm 4 đáp án (Quiz) phản xạ, Điền từ ngữ cảnh (Type-in), Nghe chép chính tả (Dictation) chuẩn giọng bản ngữ và Trò chơi phiêu lưu vượt ải sinh động.',
+          desc: 'Tự do đổi gió với Flashcard lật mặt 3D, Trắc nghiệm 4 đáp án (Quiz) phản xạ, Điền từ theo nghĩa (Type-in), Nghe chép chính tả (Dictation) chuẩn giọng bản ngữ và Trò chơi phiêu lưu vượt ải sinh động.',
           highlight: 'Học không chán, nhớ bền lâu',
         },
         {

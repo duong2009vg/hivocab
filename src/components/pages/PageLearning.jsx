@@ -26,7 +26,7 @@ const MODE_TYPE_MAP = {
 const ACTIVITY_TITLE_MAP = {
   flashcard: 'BÀI TẬP: THẺ GHI NHỚ',
   mcq: 'BÀI TẬP: TRẮC NGHIỆM TỪ VỰNG',
-  fill: 'BÀI TẬP: ĐIỀN VÀO CHỖ TRỐNG',
+  fill: 'BÀI TẬP: ĐIỀN TỪ',
   listen: 'BÀI TẬP: LUYỆN NGHE & ĐIỀN TỪ',
 };
 
