@@ -16,6 +16,7 @@ const AdminContentGatingTab = lazy(() => import('./tabs/AdminContentGatingTab.js
 const AdminUsersTab = lazy(() => import('./tabs/AdminUsersTab.jsx'));
 const AdminThptTab = lazy(() => import('./tabs/AdminThptTab.jsx'));
 const AdminReadingTab = lazy(() => import('./tabs/AdminReadingTab.jsx'));
+const AdminShadowingDictationTab = lazy(() => import('./tabs/AdminShadowingDictationTab.jsx'));
 const AdminWordsTab = lazy(() => import('./tabs/AdminWordsTab.jsx'));
 const AdminFoldersTab = lazy(() => import('./tabs/AdminFoldersTab.jsx'));
 const AdminBulkImportTab = lazy(() => import('./tabs/AdminBulkImportTab.jsx'));
@@ -30,6 +31,7 @@ const TAB_TITLES = {
   folders: 'Quản lý Thư mục & Khóa học Public',
   thpt: 'Ngân hàng Đề thi THPT Quốc Gia',
   reading: 'Bài đọc Song ngữ Cambridge IELTS',
+  shadowing_dictation: 'Shadowing & Dictation Studio (AI & Credit)',
   words: 'Cơ sở Dữ liệu 66k Từ vựng',
   import: 'Nhập Từ vựng Hàng loạt CSV/JSON',
   users: 'Quản lý Tài khoản & Phân quyền',
@@ -192,6 +194,8 @@ export function PageAdmin() {
         return <AdminThptTab />;
       case 'reading':
         return <AdminReadingTab />;
+      case 'shadowing_dictation':
+        return <AdminShadowingDictationTab />;
       case 'words':
         return <AdminWordsTab />;
       case 'import':

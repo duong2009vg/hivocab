@@ -127,7 +127,7 @@ export function StudioVoiceRecorder({
     if (!targetBlob || !expectedTextRef.current) return;
     if (!getStudioApiUrl()) {
       if (onOpenSetup) onOpenSetup();
-      setError('Chưa gắn URL Modal.com AI Server. Bấm "Cài đặt AI Server" để chấm IPA sâu.');
+      setError('Chưa gắn URL Modal.com AI Server. Vui lòng thiết lập tại Admin → Shadowing & Dictation.');
       return;
     }
     setScoring(true);
@@ -347,7 +347,7 @@ export function StudioVoiceRecorder({
           </div>
         )}
 
-        {!hasServer && (
+        {!hasServer && onOpenSetup && (
           <button
             type="button"
             onClick={onOpenSetup}

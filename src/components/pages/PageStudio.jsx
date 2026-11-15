@@ -3,20 +3,15 @@
 // Powered by cloned PeakFour core algorithms & datasets + Modal.com OpenPronounce/Kokoro API
 
 import React, { useState, useEffect } from 'react';
-import { Mic, Video, Keyboard, Volume2, Server, Sparkles, Loader2, CheckCircle2, Zap } from 'lucide-react';
+import { Mic, Video, Keyboard, Volume2, Sparkles, Loader2 } from 'lucide-react';
 import {
-  getStudioApiUrl,
-  checkStudioBackendStatus,
   getPreferredStudioVoice,
   setPreferredStudioVoice,
-  getStudioCreditSaver,
-  setStudioCreditSaver,
   stopStudioAudio,
 } from '../../services/studioService.js';
 import ShadowingTab from '../studio/ShadowingTab.jsx';
 import DictationTab from '../studio/DictationTab.jsx';
 import IpaLabTab from '../studio/IpaLabTab.jsx';
-import ModalSetupModal from '../studio/ModalSetupModal.jsx';
 
 export function PageStudio() {
   const [activeTab, setActiveTab] = useState('shadowing'); // 'shadowing' | 'dictation' | 'ipa'
@@ -30,13 +25,6 @@ export function PageStudio() {
   const [voicesList, setVoicesList] = useState([]);
 
   const [selectedVoice, setSelectedVoice] = useState(() => getPreferredStudioVoice());
-  const [creditSaver, setCreditSaver] = useState(() => getStudioCreditSaver());
-  const [backendStatus, setBackendStatus] = useState(() => ({
-    configured: Boolean(getStudioApiUrl()),
-    online: false,
-    kokoroReady: false,
-  }));
-  const [setupOpen, setSetupOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -78,13 +66,6 @@ export function PageStudio() {
 
     loadDatasets();
 
-    // When Credit Saver is ON, skip eager cold-start ping so browsing costs $0 Modal credits
-    if (getStudioApiUrl() && !getStudioCreditSaver()) {
-      checkStudioBackendStatus().then((res) => {
-        if (active) setBackendStatus(res);
-      });
-    }
-
     return () => {
       active = false;
       stopStudioAudio();
@@ -94,16 +75,6 @@ export function PageStudio() {
   const handleVoiceChange = (nextVoice) => {
     setSelectedVoice(nextVoice);
     setPreferredStudioVoice(nextVoice);
-  };
-
-  const handleToggleCreditSaver = () => {
-    const next = setStudioCreditSaver(!creditSaver);
-    setCreditSaver(next);
-    if (!next && getStudioApiUrl() && !backendStatus.online) {
-      checkStudioBackendStatus().then((res) => {
-        setBackendStatus(res);
-      });
-    }
   };
 
   const tabs = [
@@ -158,24 +129,10 @@ export function PageStudio() {
               </div>
             </div>
 
-            {/* Credit Saver + Voice Selector + Modal.com AI Server Status */}
-            <div className="flex flex-wrap items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={handleToggleCreditSaver}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-black cursor-pointer active:translate-y-0.5 transition-all ${
-                  creditSaver
-                    ? 'bg-[#EEF5EC] text-[#355A3B]'
-                    : 'bg-[#FFF3D1] text-[#8C5311]'
-                }`}
-                title="Khi BẬT: Ưu tiên phát âm thanh HiVocab & chấm giọng trình duyệt ($0 Modal credit). Chỉ gọi Modal khi bấm Chấm Sâu IPA."
-              >
-                <Zap className="w-3.5 h-3.5 shrink-0" />
-                <span>{creditSaver ? 'Tiết kiệm Credit: BẬT' : 'Tiết kiệm Credit: TẮT (Kokoro)'}</span>
-              </button>
-
-              {voicesList.length > 0 && (
-                <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[180px] sm:max-w-none">
+            {/* Voice Selector */}
+            {voicesList.length > 0 && (
+              <div className="flex items-center shrink-0">
+                <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[200px] sm:max-w-none">
                   <Volume2 className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
                   <select
                     value={selectedVoice}
@@ -190,33 +147,8 @@ export function PageStudio() {
                     ))}
                   </select>
                 </label>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setSetupOpen(true)}
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-black cursor-pointer active:translate-y-0.5 transition-all ${
-                  backendStatus.online || (backendStatus.configured && creditSaver)
-                    ? 'bg-[#EEF5EC] text-[#355A3B]'
-                    : 'bg-[#FFF3D1] text-[#8C5311]'
-                }`}
-              >
-                {backendStatus.online || (backendStatus.configured && creditSaver) ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
-                ) : (
-                  <Server className="w-3.5 h-3.5 text-[#D96B43] shrink-0" />
-                )}
-                <span>
-                  {backendStatus.online
-                    ? 'Modal AI: Đã kết nối'
-                    : backendStatus.configured && creditSaver
-                    ? 'Modal AI: Sẵn sàng'
-                    : backendStatus.configured
-                    ? 'Modal AI: Chờ kết nối'
-                    : 'Gắn AI Server'}
-                </span>
-              </button>
-            </div>
+              </div>
+            )}
           </header>
 
           {/* Main Mode Switcher Pills: 3-col compact grid on mobile, inline flex on desktop */}
@@ -270,14 +202,12 @@ export function PageStudio() {
                 <ShadowingTab
                   clips={shadowingClips}
                   voice={selectedVoice}
-                  onOpenSetup={() => setSetupOpen(true)}
                 />
               )}
               {activeTab === 'dictation' && (
                 <DictationTab
                   catalog={dictationCatalog}
                   voice={selectedVoice}
-                  onOpenSetup={() => setSetupOpen(true)}
                 />
               )}
               {activeTab === 'ipa' && (
@@ -285,19 +215,12 @@ export function PageStudio() {
                   phonemeData={phonemeData}
                   minimalPairsData={minimalPairsData}
                   voice={selectedVoice}
-                  onOpenSetup={() => setSetupOpen(true)}
                 />
               )}
             </>
           )}
         </div>
       </div>
-
-      <ModalSetupModal
-        open={setupOpen}
-        onClose={() => setSetupOpen(false)}
-        onStatusUpdated={(res) => setBackendStatus(res)}
-      />
     </div>
   );
 }

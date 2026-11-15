@@ -25,6 +25,7 @@ export const ADMIN_GROUPS = [
       { id: 'folders', label: 'Thư mục & Khóa học', icon: 'folder_open' },
       { id: 'thpt', label: 'Đề thi THPT Quốc Gia', icon: 'school' },
       { id: 'reading', label: 'Đọc Song ngữ IELTS', icon: 'menu_book' },
+      { id: 'shadowing_dictation', label: 'Shadowing & Dictation', icon: 'record_voice_over' },
       { id: 'words', label: 'Từ điển 66k Từ', icon: 'translate' },
       { id: 'import', label: 'Nhập liệu CSV/JSON', icon: 'upload_file' },
     ],
