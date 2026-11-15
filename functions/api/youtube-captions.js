@@ -664,7 +664,7 @@ export async function onRequestPost(context) {
     return jsonResponse({ detail }, status, corsHeaders);
   }
 
-  const { enTrack, viTrack, translationLanguages } = selectCaptionTracks(playerData.renderer);
+  const { enTrack, viTrack } = selectCaptionTracks(playerData.renderer);
   if (!enTrack || !enTrack.baseUrl) {
     return jsonResponse({ detail: 'Video này không có phụ đề tiếng Anh (cc).' }, 404, corsHeaders);
   }
@@ -705,9 +705,7 @@ export async function onRequestPost(context) {
       }
     }
 
-    const canAutoTranslate =
-      enTrack.isTranslatable !== false
-      && (!translationLanguages.length || translationLanguages.includes('vi'));
+    const canAutoTranslate = enTrack.isTranslatable !== false;
 
     if (!viSnippets.length && canAutoTranslate) {
       try {
