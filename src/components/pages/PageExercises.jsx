@@ -194,9 +194,9 @@ export function PageExercises() {
               </div>
             </div>
 
-            {/* 3 COMPACT HARDCOVER BOOKS (Topics Book Cover Format, No Bookshelf) */}
-            <section aria-label="Bộ sách luyện thi THPT" className="pt-2">
-              <div className="flex flex-wrap items-stretch justify-center gap-5 sm:gap-7">
+            {/* 3 COMPACT HARDCOVER BOOKS (Topics Book Cover Format, Left-Aligned) */}
+            <section aria-label="Bộ sách luyện thi THPT" className="pt-1">
+              <div className="flex flex-wrap items-stretch justify-start gap-3.5 sm:gap-4">
                 {BOOKS.map((book) => {
                   const Icon = book.icon;
                   return (
@@ -211,19 +211,19 @@ export function PageExercises() {
                           handleOpenBook(book.id);
                         }
                       }}
-                      className="book-cover-item group relative w-full max-w-[238px] sm:w-[224px] min-h-[268px] rounded-r-xl rounded-l-sm border-[2.5px] border-[#3D352E] shadow-[5px_4px_0px_#1A0E06] hover:shadow-[7px_6px_0px_#1A0E06] cursor-pointer flex flex-col justify-between p-3.5 text-[#FAF5EB] select-none shrink-0"
+                      className="book-cover-item group relative w-[162px] sm:w-[176px] min-h-[208px] rounded-r-xl rounded-l-sm border-[2.5px] border-[#3D352E] shadow-[4px_4px_0px_#1A0E06] hover:shadow-[6px_5px_0px_#1A0E06] cursor-pointer flex flex-col justify-between p-2.5 sm:p-3 text-[#FAF5EB] select-none shrink-0"
                       style={{
                         background: `linear-gradient(155deg, ${book.cover}, ${book.coverDark})`,
                       }}
                     >
                       {/* Left Spine Crease */}
-                      <div className="absolute left-0 top-0 bottom-0 w-3 border-r border-[#3D352E]/60 bg-black/20 pointer-events-none" />
+                      <div className="absolute left-0 top-0 bottom-0 w-2.5 border-r border-[#3D352E]/60 bg-black/20 pointer-events-none" />
 
                       {/* Top Book Meta */}
-                      <div className="pl-2.5 flex items-center justify-between gap-1.5 text-[10px] font-bold tracking-wider uppercase text-[#E6C98A]">
+                      <div className="pl-2 flex items-center justify-between gap-1 text-[9px] font-bold tracking-wider uppercase text-[#E6C98A]">
                         <span className="truncate">{book.number}</span>
                         <span
-                          className="px-1.5 py-0.5 rounded bg-black/25 border border-[#E6C98A]/35 text-[9px] font-black shrink-0"
+                          className="px-1 py-0.5 rounded bg-black/25 border border-[#E6C98A]/35 text-[8px] font-black shrink-0 leading-none"
                           style={{ color: book.accentColor }}
                         >
                           {book.stat}
@@ -231,26 +231,26 @@ export function PageExercises() {
                       </div>
 
                       {/* Center Framed Book Title & Description */}
-                      <div className="pl-2.5 my-auto py-3 border-y border-[#E6C98A]/35 space-y-2">
-                        <div className="flex items-start gap-2">
-                          <div className="w-7 h-7 rounded-lg border border-[#E6C98A]/50 bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
-                            <Icon className="w-3.5 h-3.5 text-[#E6C98A]" />
+                      <div className="pl-2 my-auto py-2 border-y border-[#E6C98A]/35 space-y-1.5">
+                        <div className="flex items-start gap-1.5">
+                          <div className="w-6 h-6 rounded-md border border-[#E6C98A]/50 bg-black/20 flex items-center justify-center shrink-0 mt-0.5">
+                            <Icon className="w-3 h-3 text-[#E6C98A]" />
                           </div>
-                          <h2 className="font-heading font-bold text-sm sm:text-[15px] leading-snug text-[#FAF5EB]">
+                          <h2 className="font-heading font-bold text-xs sm:text-[13px] leading-snug text-[#FAF5EB]">
                             {book.title}
                           </h2>
                         </div>
-                        <p className="text-[11px] text-[#FAF5EB]/80 font-medium leading-snug line-clamp-3">
+                        <p className="text-[10px] text-[#FAF5EB]/80 font-medium leading-snug line-clamp-2">
                           {book.subtitle}
                         </p>
                       </div>
 
                       {/* Bottom Footer Meta & Open Cue */}
-                      <div className="pl-2.5 flex items-center justify-between gap-2 text-[10px] text-[#E6C98A]/95 font-semibold">
+                      <div className="pl-2 flex items-center justify-between gap-1 text-[9px] text-[#E6C98A]/95 font-semibold">
                         <span className="truncate">{book.statDetail}</span>
                         <span className="inline-flex items-center gap-0.5 font-black text-[#FEF3C7] shrink-0">
-                          <span>Mở sách</span>
-                          <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                          <span>Mở</span>
+                          <ChevronRight className="w-2.5 h-2.5 group-hover:translate-x-0.5 transition-transform" />
                         </span>
                       </div>
                     </div>
