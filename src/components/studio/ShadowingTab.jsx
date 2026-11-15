@@ -554,91 +554,66 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
       {/* Main Workspace: Large Video + Below-Video Scoring (Left 7-8 cols) | Description + Transcript (Right 4-5 cols) */}
       {selectedClip && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
-          {/* LEFT MAIN COLUMN: Unified YouTube Player + Controls + Shadowing/Dictation Workspace */}
+          {/* LEFT MAIN COLUMN: Top Taskbar + YouTube Player + Subtitle + Shadowing/Dictation All On One Screen */}
           <div className="lg:col-span-7 xl:col-span-8">
             <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[3px_3px_0px_#3D352E]">
-              <div className="aspect-video w-full bg-[#1E1B17] relative">
-                <div ref={playerContainerRef} className="w-full h-full" />
-                {ytError && (
-                  <div className="absolute inset-0 flex items-center justify-center p-4 bg-[#1E1B17]/90 text-white text-xs sm:text-sm font-bold text-center">
-                    {ytError}
-                  </div>
-                )}
-              </div>
-
-              {/* Unified Subtitle + Playback Controls Strip */}
-              <div className="px-3 py-2.5 sm:px-4 sm:py-3 bg-[#FAF5EB] border-t-2 border-[#3D352E] space-y-2">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex flex-wrap items-center gap-1.5 text-[11px] sm:text-xs font-extrabold text-[#786F66]">
-                    <span className="px-2 py-0.5 rounded-full bg-white border border-[#3D352E]/30 text-[#2E2823] font-black">
-                      Câu {activeCueIdx + 1} / {cues.length}
+              {/* Single Compact Horizontal Taskbar Above Video (Full Controls) */}
+              <div className="px-2.5 sm:px-3 py-1.5 bg-[#FAF5EB] border-b-2 border-[#3D352E] flex items-center justify-between gap-1.5 overflow-x-auto no-scrollbar">
+                {/* Cue Meta + Prev / Play / Next */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="px-2 py-0.5 rounded-lg bg-white border border-[#3D352E]/40 text-[11px] font-black text-[#2E2823] whitespace-nowrap">
+                    {activeCueIdx + 1}/{cues.length}
+                    {activeCue ? ` · ${formatCueTime(activeCue.start)}` : ''}
+                  </span>
+                  {activeCue?.speaker && (
+                    <span className="hidden xl:inline text-[11px] font-black text-[#4D6B53] truncate max-w-[96px]">
+                      {activeCue.speaker}
                     </span>
-                    {activeCue && <span>{formatCueTime(activeCue.start)}</span>}
-                    {activeCue?.speaker && (
-                      <span className="text-[#4D6B53] font-black truncate max-w-[120px] sm:max-w-none">
-                        · {activeCue.speaker}
-                      </span>
-                    )}
-                  </div>
+                  )}
 
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="flex items-center gap-0.5">
                     <button
                       type="button"
                       disabled={activeCueIdx <= 0}
                       onClick={() => seekToCue(activeCueIdx - 1, true)}
-                      className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-xl bg-white border border-[#3D352E] text-[11px] sm:text-xs font-extrabold text-[#2E2823] hover:bg-[#F4E3B4] disabled:opacity-40 cursor-pointer min-h-[32px]"
+                      title="Câu trước"
+                      aria-label="Câu trước"
+                      className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white border border-[#3D352E] text-[#2E2823] hover:bg-[#F4E3B4] disabled:opacity-40 cursor-pointer"
                     >
                       <ChevronLeft className="w-3.5 h-3.5" />
-                      <span>Câu trước</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => seekToCue(activeCueIdx, true)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#F4E3B4] text-[#3D352E] text-[11px] sm:text-xs font-extrabold border border-[#3D352E] cursor-pointer min-h-[32px]"
-                      title="Phát lại câu này trên video"
+                      title="Phát câu hiện tại trên video"
+                      className="inline-flex items-center gap-1 px-2 h-7 rounded-lg bg-[#F4E3B4] hover:bg-[#edd79d] text-[#3D352E] text-[11px] font-black border border-[#3D352E] cursor-pointer whitespace-nowrap"
                     >
                       <Play className="w-3 h-3 fill-current" />
-                      <span>Phát câu</span>
+                      <span>Phát</span>
                     </button>
                     <button
                       type="button"
                       disabled={activeCueIdx >= cues.length - 1}
                       onClick={() => seekToCue(activeCueIdx + 1, true)}
-                      className="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-xl bg-white border border-[#3D352E] text-[11px] sm:text-xs font-extrabold text-[#2E2823] hover:bg-[#F4E3B4] disabled:opacity-40 cursor-pointer min-h-[32px]"
+                      title="Câu sau"
+                      aria-label="Câu sau"
+                      className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white border border-[#3D352E] text-[#2E2823] hover:bg-[#F4E3B4] disabled:opacity-40 cursor-pointer"
                     >
-                      <span>Câu sau</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 </div>
 
-                {!showSubtitle ? (
-                  <p className="text-xs font-bold italic text-[#786F66] py-0.5">
-                    Phụ đề đang ẩn để luyện nghe chủ động (Blind Listening). Bấm &ldquo;Hiện thoại&rdquo; khi cần đối chiếu.
-                  </p>
-                ) : activeCue ? (
-                  <div className="space-y-0.5">
-                    <p className="text-sm sm:text-base font-black text-[#2E2823] leading-snug">
-                      {activeCue.text}
-                    </p>
-                    {showTranslation && activeCue.vietnamese_translation && (
-                      <p className="text-xs font-semibold text-[#4D6B53]">
-                        {activeCue.vietnamese_translation}
-                      </p>
-                    )}
-                  </div>
-                ) : (
-                  <p className="text-xs font-semibold text-[#786F66]">Chưa có lời thoại cho video này.</p>
-                )}
-
-                <div className="pt-0.5 flex flex-wrap items-center gap-1.5">
-                  <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-xl border border-[#3D352E]/40">
+                {/* Playback Speed + Loop + Subtitle + Translation */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-0.5 bg-white p-0.5 rounded-lg border border-[#3D352E]/40">
                     {[0.75, 1, 1.25].map((rate) => (
                       <button
                         key={rate}
                         type="button"
                         onClick={() => handleRateChange(rate)}
-                        className={`px-2 py-0.5 rounded-lg text-[11px] font-black cursor-pointer min-h-[26px] ${
+                        title={`Tốc độ ${rate}x`}
+                        className={`px-1.5 h-6 rounded-md text-[10px] font-black cursor-pointer whitespace-nowrap ${
                           playbackRate === rate
                             ? 'bg-[#2E2823] text-white'
                             : 'text-[#554D42] hover:bg-[#FAF5EB]'
@@ -652,43 +627,84 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                   <button
                     type="button"
                     onClick={() => setLoopActiveCue((v) => !v)}
-                    className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-extrabold border cursor-pointer transition-all min-h-[30px] ${
+                    title={loopActiveCue ? 'Tắt lặp câu' : 'Bật lặp lại câu hiện tại'}
+                    className={`inline-flex items-center gap-1 px-2 h-7 rounded-lg text-[11px] font-extrabold border cursor-pointer transition-all whitespace-nowrap ${
                       loopActiveCue
-                        ? 'bg-[#D96B43] text-white border-[#3D352E] shadow-[1px_1px_0px_#3D352E]'
-                        : 'bg-white text-[#3D352E] border-[#3D352E]'
+                        ? 'bg-[#D96B43] text-white border-[#3D352E]'
+                        : 'bg-white text-[#3D352E] border-[#3D352E] hover:bg-[#FAF5EB]'
                     }`}
                   >
-                    <Repeat className="w-3 h-3" />
-                    <span>{loopActiveCue ? 'Đang lặp câu' : 'Lặp câu'}</span>
+                    <Repeat className="w-3 h-3 shrink-0" />
+                    <span>{loopActiveCue ? 'Đang lặp' : 'Lặp'}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setShowSubtitle((v) => !v)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-extrabold bg-white text-[#3D352E] border border-[#3D352E] cursor-pointer min-h-[30px]"
+                    title={showSubtitle ? 'Ẩn lời thoại tiếng Anh' : 'Hiện lời thoại tiếng Anh'}
+                    className={`inline-flex items-center gap-1 px-2 h-7 rounded-lg text-[11px] font-extrabold border border-[#3D352E] cursor-pointer whitespace-nowrap ${
+                      showSubtitle ? 'bg-[#EEF5EC] text-[#355A3B]' : 'bg-white text-[#786F66]'
+                    }`}
                   >
-                    {showSubtitle ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                    <span>{showSubtitle ? 'Ẩn thoại' : 'Hiện thoại'}</span>
+                    {showSubtitle ? <Eye className="w-3 h-3 shrink-0" /> : <EyeOff className="w-3 h-3 shrink-0" />}
+                    <span>Thoại</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setShowTranslation((v) => !v)}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-extrabold bg-white text-[#3D352E] border border-[#3D352E] cursor-pointer min-h-[30px]"
+                    title={showTranslation ? 'Ẩn dịch tiếng Việt' : 'Hiện dịch tiếng Việt'}
+                    className={`inline-flex items-center gap-1 px-2 h-7 rounded-lg text-[11px] font-extrabold border border-[#3D352E] cursor-pointer whitespace-nowrap ${
+                      showTranslation ? 'bg-[#EEF5EC] text-[#355A3B]' : 'bg-white text-[#786F66]'
+                    }`}
                   >
-                    <Languages className="w-3 h-3" />
-                    <span>{showTranslation ? 'Ẩn dịch VI' : 'Hiện dịch VI'}</span>
+                    <Languages className="w-3 h-3 shrink-0" />
+                    <span>Dịch VI</span>
                   </button>
                 </div>
               </div>
 
-              {/* Unified Shadowing & Dictation Workspace Directly Inside the Video Card */}
-              <div className="px-3 py-2.5 sm:px-4 sm:py-3.5 bg-[#fffcf7] border-t border-[#E8DEC8] space-y-2.5">
-                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+              {/* Video Player Frame (bounded max-height on huge screens so practice popup stays visible together) */}
+              <div className="w-full bg-[#1E1B17]">
+                <div className="aspect-video w-full max-h-[360px] xl:max-h-[385px] mx-auto relative">
+                  <div ref={playerContainerRef} className="w-full h-full" />
+                  {ytError && (
+                    <div className="absolute inset-0 flex items-center justify-center p-4 bg-[#1E1B17]/90 text-white text-xs sm:text-sm font-bold text-center">
+                      {ytError}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Compact Active Subtitle Strip Below Video */}
+              <div className="px-3 py-2 sm:px-4 bg-[#FAF5EB] border-t-2 border-[#3D352E]">
+                {!showSubtitle ? (
+                  <p className="text-xs font-bold italic text-[#786F66]">
+                    Phụ đề đang ẩn để luyện nghe chủ động. Bấm &ldquo;Thoại&rdquo; trên thanh tác vụ khi cần đối chiếu.
+                  </p>
+                ) : activeCue ? (
+                  <div className="space-y-0.5">
+                    <p className="text-xs sm:text-sm font-black text-[#2E2823] leading-snug">
+                      {activeCue.text}
+                    </p>
+                    {showTranslation && activeCue.vietnamese_translation && (
+                      <p className="text-[11px] sm:text-xs font-semibold text-[#4D6B53] leading-snug">
+                        {activeCue.vietnamese_translation}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-xs font-semibold text-[#786F66]">Chưa có lời thoại cho video này.</p>
+                )}
+              </div>
+
+              {/* Unified Shadowing & Dictation Workspace Directly Visible With Video */}
+              <div className="px-3 py-2 sm:px-4 sm:py-2.5 bg-[#fffcf7] border-t border-[#E8DEC8] space-y-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
                     onClick={() => setPracticeMode('shadowing')}
-                    className={`inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-black border-2 border-[#3D352E] cursor-pointer transition-all ${
+                    className={`inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-black border-2 border-[#3D352E] cursor-pointer transition-all ${
                       practiceMode === 'shadowing'
                         ? 'bg-[#4D6B53] text-white shadow-[1.5px_1.5px_0px_#3D352E]'
                         : 'bg-white text-[#554D42] hover:bg-[#FAF5EB]'
@@ -700,7 +716,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                   <button
                     type="button"
                     onClick={() => setPracticeMode('dictation')}
-                    className={`inline-flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl text-xs font-black border-2 border-[#3D352E] cursor-pointer transition-all ${
+                    className={`inline-flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl text-xs font-black border-2 border-[#3D352E] cursor-pointer transition-all ${
                       practiceMode === 'dictation'
                         ? 'bg-[#4D6B53] text-white shadow-[1.5px_1.5px_0px_#3D352E]'
                         : 'bg-white text-[#554D42] hover:bg-[#FAF5EB]'
@@ -731,9 +747,9 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                     />
                   ) : null
                 ) : activeCue ? (
-                  <div className="space-y-2.5">
+                  <div className="space-y-2">
                     {dictHinted[activeCueIdx] && (
-                      <p className="text-xs font-bold text-[#8C5311] bg-[#FFF3D1] rounded-xl px-3 py-1.5 border border-[#D9822B]/30">
+                      <p className="text-xs font-bold text-[#8C5311] bg-[#FFF3D1] rounded-xl px-3 py-1 border border-[#D9822B]/30">
                         Từ đầu tiên: <span className="font-black">{activeCue.text.split(/\s+/)[0]}…</span>
                       </p>
                     )}
@@ -745,7 +761,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                         setDictInputs((prev) => ({ ...prev, [activeCueIdx]: e.target.value }))
                       }
                       placeholder="Vừa xem video vừa gõ chính xác câu bạn nghe được..."
-                      className="w-full px-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-sm font-bold text-[#2E2823] focus:outline-none focus:ring-2 focus:ring-[#4D6B53]/40"
+                      className="w-full px-3 py-2 rounded-2xl bg-white border-2 border-[#3D352E] text-xs sm:text-sm font-bold text-[#2E2823] focus:outline-none focus:ring-2 focus:ring-[#4D6B53]/40"
                     />
 
                     <div className="flex flex-wrap items-center justify-between gap-2">
@@ -756,7 +772,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                             const rep = compareShadowingWords(activeCue.text, activeDictValue);
                             setDictChecked((prev) => ({ ...prev, [activeCueIdx]: rep }));
                           }}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] cursor-pointer min-h-[36px]"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] cursor-pointer min-h-[34px]"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>Kiểm tra</span>
@@ -766,7 +782,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                           onClick={() =>
                             setDictHinted((prev) => ({ ...prev, [activeCueIdx]: true }))
                           }
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white text-xs font-extrabold border border-[#3D352E] cursor-pointer min-h-[36px]"
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white text-xs font-extrabold border border-[#3D352E] cursor-pointer min-h-[34px]"
                         >
                           <HelpCircle className="w-3.5 h-3.5" />
                           <span>Gợi ý</span>
@@ -778,7 +794,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                           type="button"
                           disabled={activeCueIdx <= 0}
                           onClick={() => seekToCue(activeCueIdx - 1, true)}
-                          className="px-2.5 py-1.5 rounded-xl bg-white border border-[#3D352E] text-xs font-bold disabled:opacity-40 cursor-pointer min-h-[34px]"
+                          className="px-2.5 py-1 rounded-xl bg-white border border-[#3D352E] text-xs font-bold disabled:opacity-40 cursor-pointer min-h-[32px]"
                         >
                           ← Câu trước
                         </button>
@@ -786,7 +802,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                           type="button"
                           disabled={activeCueIdx >= cues.length - 1}
                           onClick={() => seekToCue(activeCueIdx + 1, true)}
-                          className="px-2.5 py-1.5 rounded-xl bg-white border border-[#3D352E] text-xs font-bold disabled:opacity-40 cursor-pointer min-h-[34px]"
+                          className="px-2.5 py-1 rounded-xl bg-white border border-[#3D352E] text-xs font-bold disabled:opacity-40 cursor-pointer min-h-[32px]"
                         >
                           Câu sau →
                         </button>
