@@ -3,7 +3,7 @@
 // Powered by cloned PeakFour core algorithms & datasets + Modal.com OpenPronounce/Kokoro API
 
 import React, { useState, useEffect } from 'react';
-import { Mic, Video, Keyboard, Volume2, Sparkles, Loader2 } from 'lucide-react';
+import { Video, Keyboard, Volume2, Sparkles, Loader2 } from 'lucide-react';
 import {
   getPreferredStudioVoice,
   setPreferredStudioVoice,
@@ -107,32 +107,47 @@ export function PageStudio() {
       className="page active min-h-screen text-[#2E2823] bg-[#FFF9F0] font-['Quicksand',sans-serif]"
     >
       <div className="w-full min-w-0 lg:pl-[var(--sidebar-w,244px)]">
-        <div className="max-w-[1440px] mx-auto px-3 sm:px-6 xl:px-8 pt-3 sm:pt-4 lg:pt-6 pb-24 lg:pb-12 space-y-4 sm:space-y-5 pwa-safe-top">
-          {/* Header matching HiVocab Crayon Cream Paper Design */}
-          <header className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] flex items-center justify-center text-white shrink-0">
-                <Mic className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-lg sm:text-2xl xl:text-3xl font-black text-[#2E2823] tracking-tight truncate">
-                    Luyện Nghe & Nói Studio
-                  </h1>
-                  <span className="hidden sm:inline-block text-[11px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] px-2.5 py-0.5 rounded-full shadow-[1.5px_1.5px_0px_#3D352E]">
-                    Shadowing · Dictation · IPA
-                  </span>
-                </div>
-                <p className="text-[11px] sm:text-sm font-semibold text-[#786F66] truncate">
-                  Nhại giọng YouTube, nghe chép 139 hội thoại & chấm phát âm AI
-                </p>
-              </div>
-            </div>
+        <div className="max-w-[1440px] mx-auto px-3 sm:px-6 xl:px-8 pt-3 sm:pt-4 lg:pt-5 pb-24 lg:pb-12 space-y-3 sm:space-y-4 pwa-safe-top">
+          {/* Compact Top Bar: Mode Switcher Pills + Voice Selector */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+            <nav className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 sm:gap-2.5" aria-label="Chế độ luyện tập Studio">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl border-2 border-[#3D352E] text-[11px] sm:text-sm font-black transition-all cursor-pointer active:translate-y-0.5 min-w-0 ${
+                      isActive
+                        ? 'bg-[#4D6B53] text-white shadow-[2.5px_2.5px_0px_#3D352E]'
+                        : 'bg-[#fffcf7] text-[#554D42] hover:bg-white shadow-[1.5px_1.5px_0px_#3D352E]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="sm:hidden truncate">{tab.shortLabel}</span>
+                      <span className="hidden sm:inline truncate">{tab.label}</span>
+                    </div>
+                    <span
+                      className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black border leading-none ${
+                        isActive
+                          ? 'bg-[#F4E3B4] text-[#3D352E] border-[#3D352E]'
+                          : 'bg-[#FAF5EB] text-[#786F66] border-[#E8DEC8]'
+                      }`}
+                    >
+                      {tab.badge}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
 
             {/* Voice Selector */}
             {voicesList.length > 0 && (
-              <div className="flex items-center shrink-0">
-                <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[200px] sm:max-w-none">
+              <div className="flex items-center sm:ml-auto shrink-0">
+                <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[210px] sm:max-w-none">
                   <Volume2 className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
                   <select
                     value={selectedVoice}
@@ -149,42 +164,7 @@ export function PageStudio() {
                 </label>
               </div>
             )}
-          </header>
-
-          {/* Main Mode Switcher Pills: 3-col compact grid on mobile, inline flex on desktop */}
-          <nav className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 sm:gap-2.5" aria-label="Chế độ luyện tập Studio">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl border-2 border-[#3D352E] text-[11px] sm:text-sm font-black transition-all cursor-pointer active:translate-y-0.5 min-w-0 ${
-                    isActive
-                      ? 'bg-[#4D6B53] text-white shadow-[2.5px_2.5px_0px_#3D352E]'
-                      : 'bg-[#fffcf7] text-[#554D42] hover:bg-white shadow-[1.5px_1.5px_0px_#3D352E]'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Icon className="w-4 h-4 shrink-0" />
-                    <span className="sm:hidden truncate">{tab.shortLabel}</span>
-                    <span className="hidden sm:inline truncate">{tab.label}</span>
-                  </div>
-                  <span
-                    className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black border leading-none ${
-                      isActive
-                        ? 'bg-[#F4E3B4] text-[#3D352E] border-[#3D352E]'
-                        : 'bg-[#FAF5EB] text-[#786F66] border-[#E8DEC8]'
-                    }`}
-                  >
-                    {tab.badge}
-                  </span>
-                </button>
-              );
-            })}
-          </nav>
+          </div>
 
           {/* Main Content */}
           {loading ? (
