@@ -615,6 +615,61 @@ function alignVietnameseCues(groupedEn, viSnippets) {
   });
 }
 
+async function translateBatchViaGoogle(lines) {
+  const joined = lines.map((l) => String(l || '').replace(/\r?\n/g, ' ').trim()).join('\n');
+  if (!joined) return lines.map(() => '');
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(joined)}`;
+  const res = await fetchWithTimeout(url, {}, 7000);
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => null);
+  if (!Array.isArray(data?.[0])) return null;
+  const fullTranslated = data[0].map((seg) => String(seg?.[0] || '')).join('');
+  const splitLines = fullTranslated.split('\n').map((s) => s.trim());
+  if (splitLines.length !== lines.length) return null;
+  return splitLines;
+}
+
+async function translateGroupedCuesFallback(groupedEn) {
+  const batches = [];
+  let curBatch = [];
+  let curChars = 0;
+
+  for (let i = 0; i < groupedEn.length; i++) {
+    const text = groupedEn[i][2];
+    const nextLen = text.length + 1;
+    if (curBatch.length > 0 && (curBatch.length >= 24 || curChars + nextLen > 2800)) {
+      batches.push(curBatch);
+      curBatch = [];
+      curChars = 0;
+    }
+    curBatch.push({ idx: i, text });
+    curChars += nextLen;
+  }
+  if (curBatch.length) batches.push(curBatch);
+
+  const translations = new Array(groupedEn.length).fill('');
+  // Run in waves of 5 concurrent batches (caps total subrequests well under Workers 50 limit)
+  const cappedBatches = batches.slice(0, 35);
+  for (let w = 0; w < cappedBatches.length; w += 5) {
+    const wave = cappedBatches.slice(w, w + 5);
+    await Promise.all(
+      wave.map(async (batch) => {
+        try {
+          const out = await translateBatchViaGoogle(batch.map((b) => b.text));
+          if (out) {
+            for (let k = 0; k < batch.length; k++) {
+              translations[batch[k].idx] = String(out[k] || '').slice(0, MAX_VI_CHARS);
+            }
+          }
+        } catch {
+          // Leave failed batch empty without failing whole request
+        }
+      })
+    );
+  }
+  return translations;
+}
+
 async function computeGuestClipId(videoId) {
   const bytes = new TextEncoder().encode(`guest:${videoId}`);
   const digest = await crypto.subtle.digest('SHA-256', bytes);
@@ -720,7 +775,18 @@ export async function onRequestPost(context) {
     }
   }
 
-  const cues = alignVietnameseCues(groupedEn, viSnippets);
+  let cues = alignVietnameseCues(groupedEn, viSnippets);
+  if (includeVi && !viSnippets.length) {
+    const fallbackVi = await translateGroupedCuesFallback(groupedEn);
+    const hasAnyFallback = fallbackVi.some(Boolean);
+    if (hasAnyFallback) {
+      translationStatus = 'cloud_auto_translation_unreviewed';
+      cues = cues.map((cue, idx) => ({
+        ...cue,
+        vietnamese_translation: fallbackVi[idx] || '',
+      }));
+    }
+  }
   const translatedCuesCount = cues.filter((c) => Boolean(c.vietnamese_translation)).length;
   const clipId = await computeGuestClipId(videoId);
   const finalTitle = userTitle || playerData.title || `YouTube ${videoId}`;
