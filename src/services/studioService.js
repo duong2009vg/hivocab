@@ -95,7 +95,7 @@ export async function checkStudioBackendStatus(overrideUrl) {
     return { configured: false, online: false, kokoroReady: false, voices: [], error: 'Chưa cấu hình URL Modal.com' };
   }
   try {
-    const res = await fetchWithTimeout(`${baseUrl}/voices`, { method: 'GET', cache: 'no-store' }, 10000);
+    const res = await fetchWithTimeout(`${baseUrl}/voices`, { method: 'GET', cache: 'no-store' }, 35000);
     if (!res.ok) {
       return {
         configured: true,
@@ -107,7 +107,7 @@ export async function checkStudioBackendStatus(overrideUrl) {
     }
     const data = await res.json();
     const voices = Array.isArray(data?.voices) ? data.voices : [];
-    const kokoroReady = Boolean(data?.status?.ready);
+    const kokoroReady = Boolean(data?.status?.ready || voices.length > 0);
     return {
       configured: true,
       online: true,
@@ -165,7 +165,7 @@ export async function playStudioTts({ text, voice = 'af_heart', speed = 1.0, onE
         body.append('text', cleanText.slice(0, 950));
         body.append('lang', 'en');
         body.append('voice', voice || 'af_heart');
-        const res = await fetchWithTimeout(`${baseUrl}/tts`, { method: 'POST', body }, 25000);
+        const res = await fetchWithTimeout(`${baseUrl}/tts`, { method: 'POST', body }, 45000);
         if (!res.ok) {
           throw new Error(`Kokoro HTTP ${res.status}`);
         }
