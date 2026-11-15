@@ -456,33 +456,33 @@ export function buildWordHighlightPlan(word, report, expectedPhones = []) {
 }
 
 const PHONEME_PAIR_TIPS = Object.freeze({
-  'iː|ɪ': 'Âm /iː/ cần kéo dài hơn, khóe miệng hơi kéo ngang và nâng cao lưỡi (khác với /ɪ/ ngắn trong "ship").',
-  'i|ɪ': 'Giữ lưỡi cao và căng hơn cho âm /iː/, tránh đọc thành /ɪ/ ngắn.',
-  'ɪ|iː': 'Thả lỏng môi lưỡi và đọc ngắn dứt khoát âm /ɪ/, tránh kéo dài thành /iː/.',
-  'ɪ|i': 'Thả lỏng môi lưỡi và đọc ngắn dứt khoát âm /ɪ/, tránh kéo dài thành /i/.',
-  'θ|t': 'Đặt nhẹ đầu lưỡi giữa hai hàm răng và thổi hơi đều cho /θ/; không bật lưỡi như /t/.',
-  'θ|s': 'Với /θ/, đầu lưỡi cần chạm nhẹ mép răng trên để hơi đi qua khe răng, tránh xì thành /s/.',
-  'ð|d': 'Đặt đầu lưỡi giữa hai răng và rung dây thanh cho /ð/; đừng chặn hơi hoàn toàn thành /d/.',
-  'ð|z': 'Với /ð/, dùng đầu lưỡi kẹp nhẹ giữa hai răng và rung thanh quản thay vì đọc /z/.',
-  's|ʃ': 'Âm /s/ khép đầu lưỡi gần lợi và giữ môi phẳng; tránh tròn môi đẩy lưỡi lùi thành /ʃ/.',
-  'ʃ|s': 'Chu nhẹ môi và đưa lưỡi lùi về vòm cứng cho /ʃ/ (như "she"), tránh đọc mỏng thành /s/.',
-  'tʃ|ʃ': 'Âm /tʃ/ cần chặn hơi ở đầu lưỡi trước rồi mới bật ra "ch", tránh trượt thẳng thành /ʃ/.',
-  'tʃ|t': 'Thêm luồng xát sau khi bật âm /t/ để tạo đúng âm /tʃ/ (tránh cụt thành /t/).',
-  'dʒ|z': 'Đẩy mặt lưỡi chạm ngạc cứng rồi bật rung cho /dʒ/, tránh chỉ xì nhẹ thành /z/.',
-  'dʒ|ʒ': 'Khởi đầu bằng điểm chặn lưỡi rõ trước khi rung thành /dʒ/.',
-  'l|ɹ': 'Âm /l/ cần đầu lưỡi chạm hẳn vào lợi sau răng cửa trên; khác với /ɹ/ cong lưỡi không chạm.',
-  'ɹ|l': 'Cuộn nhẹ đầu lưỡi vào trong và KHÔNG chạm vòm miệng khi đọc /ɹ/.',
-  'r|l': 'Cuộn nhẹ đầu lưỡi vào trong và KHÔNG chạm vòm miệng khi đọc /r/.',
-  'æ|ɛ': 'Hạ hàm dưới mở rộng miệng theo chiều dọc để đọc rõ nguyên âm /æ/ (như "cat"), tránh khép thành /e/.',
-  'æ|e': 'Hạ hàm mở rộng miệng hơn cho âm /æ/, tránh đọc hẹp thành /e/.',
-  'ʌ|ɑ': 'Thả lỏng lưỡi ở vị trí trung tâm, đọc ngắn gọn âm /ʌ/.',
-  'ɑ|ʌ': 'Mở rộng khoang miệng sâu về phía sau hơn cho nguyên âm /ɑ/.',
-  'v|b': 'Đưa nhẹ răng cửa trên chạm môi dưới và rung khi thổi hơi cho /v/, không mím hai môi thành /b/.',
-  'v|w': 'Răng trên chạm môi dưới cho âm /v/; tròn hai môi là khẩu hình của /w/.',
-  'f|p': 'Răng trên chạm nhẹ môi dưới để thổi hơi liên tục cho âm /f/, tránh mím môi bật /p/.',
-  'z|s': 'Âm /z/ cần rung dây thanh quản liên tục (sờ cổ thấy rung), không đọc vô thanh thành /s/.',
-  'ŋ|n': 'Nâng cuống lưỡi chạm ngạc mềm để hơi thoát qua mũi cho âm /ŋ/, không đưa đầu lưỡi lên lợi như /n/.',
-  'ɚ|ə': 'Uốn nhẹ đầu lưỡi lên phía sau khi đọc nguyên âm cuối để tạo màu âm /ɚ/ ("er/or/ur").',
+  'iː|ɪ': 'Kéo dài âm /iː/ ra một chút và hơi mỉm cười ngang miệng (khác với âm /ɪ/ ngắn trong "ship").',
+  'i|ɪ': 'Kéo dài và căng môi hơn cho âm /iː/, đừng đọc quá ngắn thành /ɪ/.',
+  'ɪ|iː': 'Thả lỏng miệng và đọc ngắn dứt khoát âm /ɪ/, đừng kéo dài thành chữ "i".',
+  'ɪ|i': 'Thả lỏng miệng và đọc ngắn dứt khoát âm /ɪ/, đừng kéo dài thành chữ "i".',
+  'θ|t': 'Đưa nhẹ đầu lưỡi ra giữa hai hàm răng rồi thổi hơi cho âm /θ/, đừng đọc thành chữ /t/.',
+  'θ|s': 'Chạm nhẹ đầu lưỡi vào mép răng trên để hơi lọt qua kẽ răng cho /θ/, tránh đọc thành /s/.',
+  'ð|d': 'Đặt nhẹ đầu lưỡi giữa hai răng và làm rung cổ họng cho âm /ð/, đừng bật mạnh thành /d/.',
+  'ð|z': 'Đặt đầu lưỡi giữa hai răng và rung cổ họng cho /ð/, tránh đọc thành /z/.',
+  's|ʃ': 'Giữ môi phẳng và thổi nhẹ qua kẽ răng cho /s/; tránh chu môi thành "s nặng" (/ʃ/).',
+  'ʃ|s': 'Hơi chu môi và đẩy hơi mạnh giống như khi ra hiệu "suỵt" cho /ʃ/, tránh đọc nhẹ thành /s/.',
+  'tʃ|ʃ': 'Đọc dứt khoát giống chữ "ch" mạnh (/tʃ/) chứ đừng kéo thành âm "s" (/ʃ/).',
+  'tʃ|t': 'Bật thành tiếng "ch" rõ (/tʃ/), đừng bỏ phần đuôi thành chữ /t/.',
+  'dʒ|z': 'Đặt lưỡi chạm vòm trên rồi bật rung như âm "gi/d" (/dʒ/), không chỉ đọc thành /z/.',
+  'dʒ|ʒ': 'Bật đầu âm rõ thành /dʒ/ trước khi rung giọng.',
+  'l|ɹ': 'Chạm đầu lưỡi lên lợi sau răng trên để ra âm /l/, khác với /ɹ/ cần cong lưỡi.',
+  'ɹ|l': 'Cong nhẹ đầu lưỡi vào trong và KHÔNG chạm vào lợi hay vòm miệng khi đọc /ɹ/.',
+  'r|l': 'Cong nhẹ đầu lưỡi vào trong và KHÔNG chạm vào lợi hay vòm miệng khi đọc /r/.',
+  'æ|ɛ': 'Mở rộng miệng xuống dưới như giữa "a" và "e" cho âm /æ/ (như từ "cat"), đừng đọc hẹp thành "e".',
+  'æ|e': 'Mở rộng miệng xuống dưới cho âm /æ/, tránh đọc hẹp thành chữ "e".',
+  'ʌ|ɑ': 'Thả lỏng lưỡi và miệng tự nhiên, đọc ngắn gọn âm /ʌ/.',
+  'ɑ|ʌ': 'Mở rộng khoang miệng sâu hơn khi đọc âm /ɑ/.',
+  'v|b': 'Đặt răng trên chạm nhẹ môi dưới rồi rung thành /v/, đừng mím hai môi thành /b/.',
+  'v|w': 'Răng trên chạm môi dưới cho âm /v/; nếu tròn hai môi sẽ biến thành /w/.',
+  'f|p': 'Răng trên chạm nhẹ môi dưới để thổi hơi thành /f/, không mím hai môi bật thành /p/.',
+  'z|s': 'Khi đọc /z/ cần làm rung cổ họng (sờ tay lên cổ thấy rung), đừng đọc thành /s/ không rung.',
+  'ŋ|n': 'Đưa âm lên mũi (giống vần "ng" cuối từ trong tiếng Việt) cho /ŋ/, đừng đẩy đầu lưỡi ra như /n/.',
+  'ɚ|ə': 'Hơi uốn cong nhẹ đầu lưỡi lên ở cuối âm để tạo tiếng "ơ" có màu chữ "r" (/ɚ/).',
 });
 
 const PHONEME_CLASS_DESCRIPTIONS = Object.freeze({
@@ -492,7 +492,7 @@ const PHONEME_CLASS_DESCRIPTIONS = Object.freeze({
 });
 
 /**
- * Return concise Vietnamese articulation guidance for a mismatched/omitted phoneme pair.
+ * Return concise, easy-to-understand Vietnamese pronunciation coaching for any mismatched or omitted sound.
  */
 export function getPhonemeCoachingTip(expected, heard) {
   const exp = String(expected || '').normalize('NFC').trim();
@@ -501,15 +501,15 @@ export function getPhonemeCoachingTip(expected, heard) {
 
   if (!act) {
     if (PHONEME_CLASS_DESCRIPTIONS.endingStops.has(exp)) {
-      return `Bạn đang bị nuốt hoặc chưa bật rõ âm /${exp}/. Hãy giữ hơi nhẹ rồi bật dứt khoát âm cuối /${exp}/.`;
+      return `Bạn đang bị nuốt mất âm đuôi /${exp}/. Hãy giữ hơi nhẹ rồi bật rõ tiếng /${exp}/ ở cuối từ.`;
     }
     if (PHONEME_CLASS_DESCRIPTIONS.fricatives.has(exp)) {
-      return `Chưa nghe thấy luồng hơi xát của âm /${exp}/. Hãy giữ luồng hơi ra rõ thêm ~0.1s.`;
+      return `Bạn đọc thiếu tiếng thổi hơi /${exp}/. Hãy giữ hơi nhẹ rõ thêm một nhịp.`;
     }
     if (PHONEME_CLASS_DESCRIPTIONS.nasals.has(exp)) {
-      return `Chưa nghe rõ độ ngân mũi của âm /${exp}/. Khép nhẹ điểm chạm lưỡi/môi để vang âm mũi.`;
+      return `Chưa nghe rõ tiếng mũi của âm /${exp}/. Khép nhẹ miệng/lưỡi cuối từ để âm vang lên mũi.`;
     }
-    return `Âm /${exp}/ bị thiếu hoặc lướt quá nhanh. Hãy đọc tách bạch từng âm tiết của từ này.`;
+    return `Bạn đọc thiếu hoặc lướt quá nhanh âm /${exp}/. Thử đọc chậm và rõ từng phần của từ này.`;
   }
 
   const pairKey = `${exp}|${act}`;
@@ -520,7 +520,7 @@ export function getPhonemeCoachingTip(expected, heard) {
   if (PHONEME_PAIR_TIPS[basePairKey]) {
     return PHONEME_PAIR_TIPS[basePairKey];
   }
-  return `Âm mục tiêu /${exp}/ bị AI nghe lệch thành /${act}/. Nghe kỹ lại đoạn video mẫu và điều chỉnh khẩu hình.`;
+  return `Bạn đọc /${exp}/ hơi giống sang âm /${act}/. Hãy nghe lại video mẫu để chỉnh miệng cho đúng âm /${exp}/.`;
 }
 
 function summarizeSentencePhonemes(wordViews) {

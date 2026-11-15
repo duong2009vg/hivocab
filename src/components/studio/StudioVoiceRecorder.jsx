@@ -421,7 +421,7 @@ export function StudioVoiceRecorder({
               onClick={() => handleScoreModal()}
               disabled={scoring}
               className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#4D6B53] hover:bg-[#3f5844] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-60 min-h-[42px] sm:min-h-0"
-              title="Phân tích âm vị IPA chi tiết bằng AI"
+              title="AI nghe kỹ từng âm để chỉ ra lỗi sai và hướng dẫn cách sửa miệng/lưỡi"
             >
               {scoring ? <Loader2 className="w-4 h-4 animate-spin shrink-0" /> : <Sparkles className="w-4 h-4 shrink-0" />}
               <span>{scoring ? 'Đang chấm sâu AI…' : 'Chấm sâu AI'}</span>

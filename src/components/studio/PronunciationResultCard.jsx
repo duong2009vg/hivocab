@@ -30,7 +30,7 @@ const WORD_CARD_STYLE = {
     base: 'bg-[#E9F6E6] text-[#28532F] border-[#4D6B53] hover:bg-[#dff0dc]',
     selected: 'bg-[#DFF0DC] text-[#1F4425] border-[#3D352E] ring-2 ring-[#4D6B53]/40 shadow-[2px_2px_0px_#3D352E]',
     badgeClass: 'bg-[#4D6B53] text-white',
-    label: 'Khớp âm',
+    label: 'Đọc đúng',
     symbol: '✓',
   },
   near: {
@@ -44,7 +44,7 @@ const WORD_CARD_STYLE = {
     base: 'bg-[#FDECE8] text-[#A8321F] border-[#D96B43] hover:bg-[#fbdad2]',
     selected: 'bg-[#FADAD2] text-[#8F2413] border-[#3D352E] ring-2 ring-[#D96B43]/40 shadow-[2px_2px_0px_#3D352E]',
     badgeClass: 'bg-[#D96B43] text-white',
-    label: 'Lệch rõ',
+    label: 'Đọc sai',
     symbol: '!',
   },
   neutral: {
@@ -74,7 +74,7 @@ const PHONEME_CARD_STYLE = {
   good: {
     card: 'bg-[#F0F8EE] border-[#4D6B53]/50 text-[#28532F]',
     pill: 'bg-[#4D6B53] text-white',
-    label: 'Khớp âm',
+    label: 'Đọc đúng',
   },
   near: {
     card: 'bg-[#FFF5DC] border-[#D9822B]/60 text-[#8A4F0B]',
@@ -84,7 +84,7 @@ const PHONEME_CARD_STYLE = {
   bad: {
     card: 'bg-[#FDECE8] border-[#D96B43]/60 text-[#A8321F]',
     pill: 'bg-[#D96B43] text-white',
-    label: 'Lệch rõ',
+    label: 'Đọc sai',
   },
 };
 
@@ -350,7 +350,7 @@ export function PronunciationResultCard({
               <div className="flex flex-wrap items-center justify-between gap-2 bg-[#FAF5EB] border border-[#E8DEC8] rounded-2xl p-3">
                 <div className="space-y-1">
                   <div className="text-[10px] font-extrabold uppercase tracking-wide text-[#786F66]">
-                    Phiên âm IPA chuẩn từng âm vị
+                    Cách đọc chuẩn (từng âm trong từ)
                   </div>
                   {selectedWord.expectedPhones.length > 0 ? (
                     <div className="flex flex-wrap items-center gap-1 font-mono text-sm font-black">
@@ -381,7 +381,7 @@ export function PronunciationResultCard({
                       <span className="text-[#786F66]">/</span>
                     </div>
                   ) : (
-                    <span className="text-xs font-bold text-[#786F66]">Chưa có IPA</span>
+                    <span className="text-xs font-bold text-[#786F66]">Chưa có phiên âm</span>
                   )}
                 </div>
 
@@ -422,7 +422,7 @@ export function PronunciationResultCard({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 <div className="rounded-xl bg-white border border-[#E8DEC8] px-3 py-2 space-y-0.5">
                   <div className="font-extrabold text-[#786F66] uppercase text-[10px]">
-                    Chuẩn mục tiêu
+                    Từ đọc chuẩn
                   </div>
                   <div className="font-black text-sm text-[#2E2823]">{selectedWord.word}</div>
                   {selectedWord.expectedPhones.length > 0 && (
@@ -442,16 +442,16 @@ export function PronunciationResultCard({
                   }`}
                 >
                   <div className="font-extrabold uppercase text-[10px] opacity-80">
-                    {isDeepAi ? 'Wav2Vec2 AI nghe từ bạn' : 'Hệ thống nghe được'}
+                    {isDeepAi ? 'AI nghe bạn đọc' : 'Máy nghe bạn đọc'}
                   </div>
                   <div className="font-black text-sm">
                     {selectedWord.actualWord
                       ? `"${selectedWord.actualWord}"`
                       : selectedWord.actualPhones.length > 0
-                      ? '(Nhận diện theo chuỗi âm vị)'
+                      ? '(Nghe theo âm ghép)'
                       : selectedWord.wordLevel === 'good'
                       ? `"${selectedWord.word}"`
-                      : '(Bỏ sót / chưa rõ)'}
+                      : '(Bị nuốt / chưa rõ)'}
                   </div>
                   <div className="font-mono font-bold">
                     {selectedWord.actualPhones.length > 0
@@ -465,13 +465,13 @@ export function PronunciationResultCard({
 
               {/* Detailed Phoneme-by-Phoneme Diagnosis Cards */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <h4 className="text-xs font-extrabold uppercase tracking-wide text-[#554D42]">
-                    Phân tích từng âm vị &amp; Cách chỉnh khẩu hình
+                    Từng âm trong từ &amp; Mẹo sửa
                   </h4>
                   {!isDeepAi && (
                     <span className="text-[10px] font-bold text-[#786F66]">
-                      Ước lượng trình duyệt · dùng Chấm sâu AI để đo Wav2Vec2
+                      Chấm Free · bấm Chấm sâu AI để nghe chuẩn từng âm hơn
                     </span>
                   )}
                 </div>
@@ -488,7 +488,7 @@ export function PronunciationResultCard({
                           : PHONEME_CARD_STYLE.bad;
                       const heardClean = typeof p.heard === 'string' ? p.heard.trim() : '';
                       const statusLabel = !heardClean
-                        ? 'Bỏ sót âm'
+                        ? 'Quên đọc âm này'
                         : cardStyle.label;
                       const confPct = Number.isFinite(Number(p.confidence))
                         ? Math.round(Number(p.confidence) * 100)
@@ -515,7 +515,7 @@ export function PronunciationResultCard({
                             <div className="flex items-center gap-1.5">
                               {isDeepAi && sev !== 'good' && confPct !== null && (
                                 <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white/80 border border-current/25">
-                                  Độ lệch AI: {confPct}%
+                                  Mức độ lệch: {confPct}%
                                 </span>
                               )}
                               <span
@@ -539,8 +539,8 @@ export function PronunciationResultCard({
                 ) : (
                   <p className="text-xs font-semibold text-[#786F66] bg-[#FAF5EB] border border-[#E8DEC8] rounded-xl px-3 py-2.5">
                     {selectedWord.acceptedVariant
-                      ? 'Biến thể phát âm tự nhiên được chấp nhận cho từ này trong ngữ cảnh câu.'
-                      : 'Từ này chưa có bảng căn chỉnh âm vị chi tiết.'}
+                      ? 'Cách đọc lướt tự nhiên này hoàn toàn đúng và được chấp nhận trong câu.'
+                      : 'Từ này chưa có phân tích chi tiết từng âm.'}
                   </p>
                 )}
               </div>
@@ -569,20 +569,20 @@ export function PronunciationResultCard({
                 <Sparkles className="w-3.5 h-3.5 text-[#D96B43] shrink-0" />
                 {!isDeepAi ? (
                   <span className="px-2 py-0.5 rounded-full bg-[#EEF5EC] text-[#355A3B] border border-[#4D6B53]/30">
-                    Chấm Free (0s · Trình duyệt)
+                    Chấm miễn phí · Tức thì
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full bg-[#3D352E] text-[#F4E3B4] border border-[#3D352E]">
-                    Chấm sâu AI · OpenPronounce Wav2Vec2
+                    Chấm sâu AI · Soi từng âm
                   </span>
                 )}
               </div>
               <h4 className="text-sm sm:text-base font-extrabold text-[#2E2823] mt-0.5">
                 {!view.hasVoice
-                  ? 'Chưa nhận diện được giọng nói rõ ràng'
+                  ? 'Chưa nghe rõ giọng nói của bạn'
                   : issueCount > 0
-                  ? `${view.goodCount}/${view.wordViews.length} từ khớp chuẩn · ${view.nearCount} gần đúng · ${view.badCount} lệch/thiếu`
-                  : 'Phát âm chuẩn 100% các từ trong câu!'}
+                  ? `${view.goodCount}/${view.wordViews.length} từ đọc đúng · ${view.nearCount} gần đúng · ${view.badCount} đọc sai`
+                  : 'Tuyệt vời — bạn đọc đúng 100% các từ!'}
               </h4>
             </div>
           </div>
@@ -591,7 +591,7 @@ export function PronunciationResultCard({
           <div className="flex flex-wrap items-center gap-1.5 text-[11px] font-extrabold">
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#E9F6E6] text-[#28532F] border border-[#4D6B53]">
               <span>✓</span>
-              <span>Khớp âm ({view.goodCount})</span>
+              <span>Đọc đúng ({view.goodCount})</span>
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFF3D6] text-[#8A4F0B] border border-[#D9822B]">
               <span>≈</span>
@@ -599,7 +599,7 @@ export function PronunciationResultCard({
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FDECE8] text-[#A8321F] border border-[#D96B43]">
               <span>!</span>
-              <span>Lệch rõ ({view.badCount})</span>
+              <span>Đọc sai ({view.badCount})</span>
             </span>
           </div>
         </div>
@@ -608,39 +608,35 @@ export function PronunciationResultCard({
         {isDeepAi && view.hasVoice && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
             <MetricPillCard
-              label="Chuẩn Âm vị IPA"
+              label="Độ chuẩn từng âm"
               value={view.phonemeScore !== null ? `${view.phonemeScore}%` : '—'}
               sub={
                 phonemeSummary.totalPhones > 0
-                  ? `${phonemeSummary.matchedPhones}/${phonemeSummary.totalPhones} âm vị khớp${
+                  ? `${phonemeSummary.matchedPhones}/${phonemeSummary.totalPhones} âm đọc đúng${
                       phonemeSummary.omittedPhones > 0
                         ? ` · thiếu ${phonemeSummary.omittedPhones} âm`
                         : ''
                     }`
-                  : 'Phân tích âm vị trực tiếp'
+                  : 'So từng âm một trong câu'
               }
               accent={metricAccent(view.phonemeScore)}
             />
             <MetricPillCard
-              label="Âm học Wav2Vec2"
+              label="Giọng tự nhiên"
               value={view.acousticScore !== null ? `${view.acousticScore}%` : '—'}
-              sub={
-                view.acousticDistance !== null
-                  ? `Khoảng cách DTW: ${view.acousticDistance}`
-                  : 'Độ tự nhiên âm sắc'
-              }
+              sub="Mức độ giống giọng bản xứ"
               accent={metricAccent(view.acousticScore)}
             />
             <MetricPillCard
-              label="Khớp Từ vựng"
+              label="Đọc đúng đủ từ"
               value={view.wordScore !== null ? `${view.wordScore}%` : '—'}
-              sub={`Tỷ lệ sai từ: ${Math.round(Number(view.wordErrorRate || 0) * 100)}%`}
+              sub={`Sai hoặc sót ${Math.round(Number(view.wordErrorRate || 0) * 100)}% số từ`}
               accent={metricAccent(view.wordScore)}
             />
             <MetricPillCard
-              label="Độ rõ tín hiệu AI"
+              label="Độ rõ tiếng nói"
               value={view.meanConfidencePct !== null ? `${view.meanConfidencePct}%` : '—'}
-              sub={`${view.heardPhones.length} âm vị nhận diện từ audio`}
+              sub={`AI nghe rõ ${view.heardPhones.length} âm`}
               accent={metricAccent(view.meanConfidencePct)}
             />
           </div>
@@ -649,8 +645,8 @@ export function PronunciationResultCard({
         {!isDeepAi && view.hasVoice && typeof onRequestDeepAi === 'function' && (
           <div className="flex flex-wrap items-center justify-between gap-2 bg-[#FAF5EB] border border-[#D96B43]/35 rounded-xl px-3 py-2 text-xs">
             <span className="font-semibold text-[#554D42]">
-              Đây là kết quả <strong className="font-black text-[#2E2823]">Chấm Free</strong> (ước lượng theo chữ). Bấm{' '}
-              <strong className="font-black text-[#4D6B53]">Chấm sâu AI</strong> để phân tích sóng âm Wav2Vec2, biết chính xác bạn lệch ở âm IPA nào &amp; cách sửa khẩu hình.
+              Đây là kết quả <strong className="font-black text-[#2E2823]">Chấm Free</strong> (ước lượng nhanh). Bấm{' '}
+              <strong className="font-black text-[#4D6B53]">Chấm sâu AI</strong> để AI nghe kỹ từng âm, chỉ rõ bạn sai âm nào &amp; hướng dẫn cách sửa miệng/lưỡi.
             </span>
             <button
               type="button"
@@ -668,8 +664,8 @@ export function PronunciationResultCard({
           <div className="flex items-center gap-2 text-xs font-semibold text-[#9A5B13] bg-[#FFF4DE] border border-[#D9822B]/40 rounded-xl px-3 py-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>
-              Chế độ chấm Free chưa nhận diện được giọng nói rõ ràng — bạn có thể bấm{' '}
-              <strong className="font-black">Chấm sâu AI</strong> để phân tích trực tiếp từ file ghi âm hoặc nói gần micro hơn.
+              Chế độ chấm Free chưa nghe rõ giọng bạn — hãy bấm{' '}
+              <strong className="font-black">Chấm sâu AI</strong> để AI phân tích trực tiếp từ file ghi âm, hoặc nói gần micro hơn.
             </span>
           </div>
         )}
@@ -679,8 +675,8 @@ export function PronunciationResultCard({
           <div className="flex items-center justify-between text-[11px] font-bold text-[#786F66]">
             <span>
               {isDeepAi
-                ? 'Chi tiết từng từ & từng âm vị IPA (bấm vào từ để mở pop-up luyện phát âm):'
-                : 'Nhấn vào từng từ để mở pop-up xem chi tiết âm vị:'}
+                ? 'Kết quả từng từ & từng âm (bấm vào từ để xem cách sửa):'
+                : 'Bấm vào từng từ để xem chi tiết đúng/sai:'}
             </span>
           </div>
 
@@ -755,9 +751,9 @@ export function PronunciationResultCard({
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 text-xs font-black text-[#2E2823]">
                 <Lightbulb className="w-4 h-4 text-[#D96B43] shrink-0" />
-                <span>Chẩn đoán AI: Các âm lệch cần chỉnh ngay ({topPhonemeIssues.length})</span>
+                <span>Các âm bạn hay đọc lệch — cần chỉnh ngay ({topPhonemeIssues.length})</span>
               </div>
-              <span className="text-[10px] font-bold text-[#786F66]">Bấm vào tên từ để mở pop-up</span>
+              <span className="text-[10px] font-bold text-[#786F66]">Bấm vào tên từ để mở chi tiết</span>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -780,7 +776,7 @@ export function PronunciationResultCard({
                             isBad ? 'bg-[#D96B43]' : 'bg-[#D9822B]'
                           }`}
                         >
-                          {issue.heard ? `! Lệch` : 'Thiếu âm'}
+                          {issue.heard ? 'Đọc nhầm' : 'Bị mất âm'}
                         </span>
                         <span>/{issue.expected}/</span>
                         <span>→</span>
@@ -815,7 +811,7 @@ export function PronunciationResultCard({
         {view.transcription && (
           <p className="text-xs font-semibold text-[#786F66] bg-[#FAF5EB] rounded-xl px-3 py-2 border border-[#E8DEC8]">
             <span className="font-extrabold text-[#3D352E]">
-              {isDeepAi ? 'Wav2Vec2 AI nghe được:' : 'Trình duyệt nghe bạn đọc:'}
+              {isDeepAi ? 'AI nghe bạn đọc là:' : 'Máy nghe bạn đọc là:'}
             </span>{' '}
             <span className="italic">"{view.transcription}"</span>
           </p>
@@ -831,7 +827,7 @@ export function PronunciationResultCard({
             >
               <span className="inline-flex items-center gap-1.5">
                 <Activity className="w-4 h-4 text-[#4D6B53]" />
-                <span>Phân tích âm vị toàn câu, độ rõ âm CTC &amp; biểu đồ khớp DTW</span>
+                <span>Xem chi tiết dải âm cả câu &amp; biểu đồ giọng nói</span>
               </span>
               {showAdvancedCharts ? (
                 <ChevronUp className="w-4 h-4 text-[#786F66]" />
@@ -846,13 +842,13 @@ export function PronunciationResultCard({
                 <div className="bg-white border border-[#E8DEC8] rounded-xl p-3 space-y-2 text-xs">
                   <div className="flex items-center gap-1.5 font-extrabold text-[#3D352E]">
                     <AudioLines className="w-4 h-4 text-[#4D6B53]" />
-                    <span>Đối chiếu chuỗi IPA toàn câu (Chuẩn vs Âm AI nghe từ giọng bạn)</span>
+                    <span>So sánh cách đọc chuẩn và âm AI nghe được cả câu</span>
                   </div>
 
                   <div className="space-y-1.5 font-mono">
                     <div className="flex flex-wrap items-center gap-1 bg-[#FAF5EB] rounded-lg px-2.5 py-1.5">
                       <span className="text-[10px] font-sans font-extrabold uppercase text-[#786F66] mr-1">
-                        IPA chuẩn:
+                        Âm chuẩn:
                       </span>
                       {view.wordViews.map((wv, idx) => (
                         <span key={idx} className="text-[#28532F] font-bold">
@@ -864,7 +860,7 @@ export function PronunciationResultCard({
                     {view.heardPhones.length > 0 && (
                       <div className="flex flex-wrap items-center gap-1 bg-[#fffcf7] border border-[#E8DEC8] rounded-lg px-2.5 py-1.5">
                         <span className="text-[10px] font-sans font-extrabold uppercase text-[#786F66] mr-1">
-                          Âm AI nghe:
+                          AI nghe:
                         </span>
                         {view.heardPhones.map((hp, idx) => {
                           const conf = view.heardConfidence[idx];
@@ -881,7 +877,7 @@ export function PronunciationResultCard({
                             <span
                               key={idx}
                               className={`px-1 py-0.5 rounded font-bold text-[11px] ${badgeTone}`}
-                              title={pct !== null ? `Độ tự tin nhận diện âm /${hp}/: ${pct}%` : undefined}
+                              title={pct !== null ? `AI nghe rõ âm /${hp}/ khoảng ${pct}%` : undefined}
                             >
                               {hp}
                               {pct !== null && (
@@ -900,7 +896,7 @@ export function PronunciationResultCard({
                   {hasDtwVectors && (
                     <div className="bg-white border border-[#E8DEC8] rounded-xl p-3 space-y-1">
                       <div className="flex items-center justify-between text-[11px] font-extrabold text-[#3D352E]">
-                        <span>Đường khớp chuỗi âm vị DTW</span>
+                        <span>Nhịp nối âm cả câu</span>
                         <span className="font-bold text-[10px] text-[#786F66]">
                           <span className="text-[#4D6B53]">--- Chuẩn</span> ·{' '}
                           <span className="text-[#D96B43]">— Bạn đọc</span>
@@ -913,7 +909,7 @@ export function PronunciationResultCard({
                   {(hasProsodyF0 || hasProsodyEnergy) && (
                     <div className="bg-white border border-[#E8DEC8] rounded-xl p-3 space-y-1">
                       <div className="flex items-center justify-between text-[11px] font-extrabold text-[#3D352E]">
-                        <span>{hasProsodyF0 ? 'Biểu đồ ngữ điệu Pitch (F0 Hz)' : 'Năng lượng phát âm (Energy)'}</span>
+                        <span>{hasProsodyF0 ? 'Biểu đồ lên xuống giọng (ngữ điệu)' : 'Độ lớn & lực hơi khi nói'}</span>
                       </div>
                       {renderCompactSparklineSvg(hasProsodyF0 ? view.prosody.f0 : view.prosody.energy)}
                     </div>
