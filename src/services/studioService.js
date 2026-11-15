@@ -4,6 +4,7 @@
 // YouTube guest caption preview, and local browser progress/clip storage.
 
 import { HiAudio } from './audioService.js';
+import { convertBlobTo16kMonoWav } from '../utils/audioWavEncoder.js';
 
 const DEFAULT_STUDIO_API_URL = 'https://duong2009vg--hivocab-peakfour-studio-fastapi-app.modal.run';
 const STUDIO_URL_STORAGE_KEY = 'hivocab_studio_api_url';
@@ -20,6 +21,25 @@ const ttsBlobUrlCache = new Map();
 const pronunciationScoreCache = new Map();
 let activeStudioAudio = null;
 let activeSampleEndTimer = null;
+let lastPrewarmAt = 0;
+
+const PREWARM_COOLDOWN_MS = 45000;
+
+/**
+ * Quietly wake the Modal container (throttled) when the learner starts recording so
+ * the container is already warm by the time they click "Chấm sâu AI".
+ */
+export function prewarmStudioBackend() {
+  if (typeof window === 'undefined') return;
+  const baseUrl = getStudioApiUrl();
+  if (!baseUrl) return;
+  const now = Date.now();
+  if (now - lastPrewarmAt < PREWARM_COOLDOWN_MS) return;
+  lastPrewarmAt = now;
+  try {
+    fetch(`${baseUrl}/health`, { method: 'GET', cache: 'no-store', keepalive: true }).catch(() => {});
+  } catch (_) {}
+}
 
 function normalizeBaseUrl(raw) {
   return String(raw || '')
@@ -384,8 +404,11 @@ export async function scorePronunciation({ blob, filename = 'recording.webm', ex
     return pronunciationScoreCache.get(scoreKey);
   }
 
+  const uploadBlob = await convertBlobTo16kMonoWav(blob);
+  const uploadName = uploadBlob !== blob && uploadBlob.type === 'audio/wav' ? 'recording.wav' : filename;
+
   const body = new FormData();
-  body.append('file', blob, filename);
+  body.append('file', uploadBlob, uploadName);
   body.append('expected_text', trimmedTarget);
   body.append('lang', lang);
 

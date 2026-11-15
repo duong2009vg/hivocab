@@ -4,6 +4,7 @@ import { Mic, Square, Trash2, Sparkles, Loader2, Server, Volume2 } from 'lucide-
 import {
   scorePronunciation,
   getStudioApiUrl,
+  prewarmStudioBackend,
   playStudioTts,
   stopStudioAudio,
 } from '../../services/studioService.js';
@@ -212,6 +213,7 @@ export function StudioVoiceRecorder({
   };
 
   const startRecording = async () => {
+    prewarmStudioBackend();
     sampleTokenRef.current += 1;
     setSamplePlaying(false);
     stopStudioAudio();
