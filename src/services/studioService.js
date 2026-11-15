@@ -443,15 +443,12 @@ export async function scorePronunciation({ blob, filename = 'recording.webm', ex
 }
 
 /**
- * Fetch timed captions for a YouTube URL via PeakFour's guest preview endpoint on Modal.
+ * Fetch timed captions (and Vietnamese translation track) for a YouTube URL
+ * via Cloudflare Pages Function (/api/youtube-captions).
  */
 export async function fetchYoutubeCaptionsPreview({ youtubeUrl, title = '', author = 'YouTube' } = {}) {
-  const baseUrl = getStudioApiUrl();
-  if (!baseUrl) {
-    throw new Error('Cần kết nối Modal.com AI Server để tự động tách phụ đề từ link YouTube mới.');
-  }
   const res = await fetchWithTimeout(
-    `${baseUrl}/api/v1/shadowing/guest/preview`,
+    '/api/youtube-captions',
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -467,7 +464,13 @@ export async function fetchYoutubeCaptionsPreview({ youtubeUrl, title = '', auth
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(typeof data?.detail === 'string' ? data.detail : `HTTP ${res.status}`);
+    throw new Error(
+      typeof data?.detail === 'string'
+        ? data.detail
+        : typeof data?.error === 'string'
+          ? data.error
+          : `HTTP ${res.status}`
+    );
   }
   return data;
 }

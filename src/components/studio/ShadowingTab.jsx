@@ -34,7 +34,6 @@ import {
   loadStudioProgress,
   saveShadowingCueScore,
   stopStudioAudio,
-  getStudioApiUrl,
 } from '../../services/studioService.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 
@@ -69,43 +68,6 @@ function loadYouTubeIframeAPI() {
   });
 
   return window.__hiYtLoaderPromise;
-}
-
-function parseManualTranscript(rawText) {
-  const lines = String(rawText || '')
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
-  const cues = [];
-  let cursor = 0;
-
-  for (const line of lines) {
-    const tsMatch = line.match(/^\[?(\d{1,2}):(\d{2})(?:\.\d+)?\]?\s+(.+)$/);
-    if (tsMatch) {
-      const start = Number(tsMatch[1]) * 60 + Number(tsMatch[2]);
-      const text = tsMatch[3].trim();
-      if (cues.length && cues[cues.length - 1].end <= cues[cues.length - 1].start) {
-        cues[cues.length - 1].end = Math.max(cues[cues.length - 1].start + 2, start);
-      }
-      if (cues.length && cues[cues.length - 1].end > start) {
-        cues[cues.length - 1].end = Math.max(cues[cues.length - 1].start + 0.5, start);
-      }
-      cues.push({ start, end: start + 5, speaker: 'YouTube', text, vietnamese_translation: '' });
-      cursor = start + 5;
-    } else {
-      const start = cursor;
-      const dur = Math.max(3, Math.min(8, Math.ceil(line.split(/\s+/).length * 0.55)));
-      cues.push({
-        start,
-        end: start + dur,
-        speaker: 'YouTube',
-        text: line,
-        vietnamese_translation: '',
-      });
-      cursor += dur;
-    }
-  }
-  return cues;
 }
 
 export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
@@ -148,7 +110,6 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [ytUrlInput, setYtUrlInput] = useState('');
   const [ytTitleInput, setYtTitleInput] = useState('');
-  const [manualScriptInput, setManualScriptInput] = useState('');
   const [importingYt, setImportingYt] = useState(false);
   const [importError, setImportError] = useState('');
 
@@ -383,44 +344,6 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
       return;
     }
 
-    if (manualScriptInput.trim()) {
-      const parsedCues = parseManualTranscript(manualScriptInput);
-      if (!parsedCues.length) {
-        setImportError('Vui lòng nhập ít nhất 1 dòng transcript.');
-        return;
-      }
-      const lastEnd = parsedCues[parsedCues.length - 1].end;
-      const newClip = {
-        id: `custom-${videoId}-${Date.now()}`,
-        title: ytTitleInput.trim() || `YouTube · ${videoId}`,
-        genre: 'Video cá nhân (Tự nhập)',
-        origin: 'YouTube · Tùy chỉnh',
-        youtube_video_id: videoId,
-        provider: 'youtube',
-        start_seconds: 0,
-        end_seconds: Math.max(10, Math.ceil(lastEnd + 2)),
-        level: 'Custom',
-        tags: ['custom', 'youtube'],
-        status: 'published',
-        guest: true,
-        cues: parsedCues,
-      };
-      setCustomClips(saveCustomGuestClip(newClip));
-      setSelectedClipId(newClip.id);
-      setShowAddForm(false);
-      setYtUrlInput('');
-      setYtTitleInput('');
-      setManualScriptInput('');
-      return;
-    }
-
-    if (!getStudioApiUrl()) {
-      setImportError(
-        'Chưa gắn AI Server Modal.com để tự tách phụ đề YouTube. Bạn có thể dán transcript vào ô dưới để học ngay ($0), hoặc bấm "Gắn AI Server".'
-      );
-      return;
-    }
-
     setImportingYt(true);
     try {
       const res = await fetchYoutubeCaptionsPreview({
@@ -539,19 +462,6 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                   </label>
                 </div>
 
-                <label className="block space-y-1">
-                  <span className="text-xs font-extrabold text-[#2E2823]">
-                    Transcript tự nhập (tùy chọn — bỏ trống nếu muốn lấy phụ đề tự động qua Modal.com)
-                  </span>
-                  <textarea
-                    rows={3}
-                    value={manualScriptInput}
-                    onChange={(e) => setManualScriptInput(e.target.value)}
-                    placeholder={'Dán từng câu mỗi dòng, hoặc kèm mốc thời gian:\n00:05 Hello everyone, welcome back.\n00:10 Today we are going to talk about English pronunciation.'}
-                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-semibold focus:outline-none"
-                  />
-                </label>
-
                 {importError && (
                   <p className="text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2">
                     {importError}
@@ -565,7 +475,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                     className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-60"
                   >
                     {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                    <span>{manualScriptInput.trim() ? 'Lưu bài YouTube' : 'Lấy phụ đề YouTube tự động'}</span>
+                    <span>Lấy phụ đề YouTube tự động</span>
                   </button>
                   <button
                     type="button"
