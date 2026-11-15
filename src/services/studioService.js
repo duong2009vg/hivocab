@@ -19,6 +19,7 @@ const MAX_SCORE_CACHE = 30;
 const ttsBlobUrlCache = new Map();
 const pronunciationScoreCache = new Map();
 let activeStudioAudio = null;
+let activeSampleEndTimer = null;
 
 function normalizeBaseUrl(raw) {
   return String(raw || '')
@@ -94,14 +95,79 @@ export function setStudioCreditSaver(enabled) {
 }
 
 export function stopStudioAudio() {
+  if (activeSampleEndTimer) {
+    clearTimeout(activeSampleEndTimer);
+    activeSampleEndTimer = null;
+  }
   if (activeStudioAudio) {
     try {
+      activeStudioAudio.onended = null;
+      activeStudioAudio.onerror = null;
       activeStudioAudio.pause();
       activeStudioAudio.currentTime = 0;
     } catch (_) {}
     activeStudioAudio = null;
   }
   HiAudio.stop();
+}
+
+function sanitizeStudioSentenceForTts(text) {
+  return String(text || '')
+    .replace(/\.{2,}/g, ' ')
+    .replace(/[/_—–-]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function speakStudioWithWebSpeech(text, speed, lang, onFinish) {
+  if (typeof window === 'undefined' || !window.speechSynthesis) {
+    onFinish();
+    return false;
+  }
+  try {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = lang;
+    utter.rate = Math.max(0.5, Math.min(1.5, Number(speed) || 1.0));
+    utter.pitch = 1.0;
+
+    const voices = window.speechSynthesis.getVoices() || [];
+    const targetPrefix = lang.slice(0, 5).toLowerCase();
+    const preferred =
+      voices.find(
+        (v) =>
+          v.lang?.toLowerCase() === targetPrefix &&
+          (v.name.includes('Google') || v.name.includes('Natural') || !v.localService)
+      ) ||
+      voices.find((v) => v.lang?.toLowerCase() === targetPrefix) ||
+      voices.find((v) => v.lang?.toLowerCase().startsWith('en'));
+    if (preferred) utter.voice = preferred;
+
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      if (activeSampleEndTimer) {
+        clearTimeout(activeSampleEndTimer);
+        activeSampleEndTimer = null;
+      }
+      onFinish();
+    };
+    utter.onend = done;
+    utter.onerror = done;
+    window.speechSynthesis.speak(utter);
+
+    // Safety fallback timer in case mobile Safari/WebView drops speech.onend
+    const estMs = Math.max(2500, Math.min(25000, Math.round((text.length / 11) * 1000 / utter.rate) + 2500));
+    activeSampleEndTimer = setTimeout(done, estMs);
+    return true;
+  } catch (err) {
+    console.warn('[StudioTTS] Web Speech error:', err);
+    onFinish();
+    return false;
+  }
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 15000) {
@@ -197,10 +263,22 @@ async function writePersistentTtsCache(cacheKey, blob) {
  */
 export async function playStudioTts({ text, voice = 'af_heart', speed = 1.0, forceKokoro = false, onEnded } = {}) {
   const cleanText = String(text || '').trim();
-  if (!cleanText) return { engine: 'none', error: 'Thiếu nội dung để đọc' };
+  if (!cleanText) {
+    if (typeof onEnded === 'function') onEnded();
+    return { engine: 'none', error: 'Thiếu nội dung để đọc' };
+  }
 
   stopStudioAudio();
   const safeSpeed = Math.max(0.5, Math.min(1.5, Number(speed) || 1.0));
+  const finishOnce = (() => {
+    let called = false;
+    return () => {
+      if (called) return;
+      called = true;
+      if (typeof onEnded === 'function') onEnded();
+    };
+  })();
+
   const baseUrl = getStudioApiUrl();
   const useKokoro = Boolean(baseUrl) && (forceKokoro || !getStudioCreditSaver());
 
@@ -229,19 +307,59 @@ export async function playStudioTts({ text, voice = 'af_heart', speed = 1.0, for
       const audio = new Audio(audioUrl);
       audio.playbackRate = safeSpeed;
       activeStudioAudio = audio;
-      if (typeof onEnded === 'function') {
-        audio.addEventListener('ended', onEnded, { once: true });
-      }
+      audio.onended = finishOnce;
+      audio.onerror = finishOnce;
       await audio.play();
       return { engine: 'kokoro', voice };
     } catch (err) {
-      console.warn('[StudioTTS] Falling back to HiAudio:', err?.message || err);
+      console.warn('[StudioTTS] Falling back to local TTS:', err?.message || err);
     }
   }
 
   const fallbackLang = String(voice || '').startsWith('b') ? 'en-GB' : 'en-US';
-  HiAudio.playWord(cleanText, safeSpeed, fallbackLang);
-  return { engine: 'fallback', voice };
+  const speechText = sanitizeStudioSentenceForTts(cleanText);
+  if (!speechText) {
+    finishOnce();
+    return { engine: 'none', voice };
+  }
+
+  // Google Translate TTS (/api/tts) rejects queries longer than ~200 chars;
+  // use Web Speech directly for long sentences and /api/tts -> Web Speech fallback for shorter ones.
+  if (speechText.length <= 185 && typeof Audio !== 'undefined') {
+    const proxyLang = fallbackLang === 'en-GB' ? 'en-GB' : 'en';
+    const ttsUrl = `/api/tts?text=${encodeURIComponent(speechText)}&tl=${encodeURIComponent(proxyLang)}`;
+    try {
+      const audio = new Audio(ttsUrl);
+      audio.playbackRate = safeSpeed;
+      activeStudioAudio = audio;
+      let fellBack = false;
+      const fallbackToSpeech = () => {
+        if (fellBack || activeStudioAudio !== audio) return;
+        fellBack = true;
+        activeStudioAudio = null;
+        speakStudioWithWebSpeech(speechText, safeSpeed, fallbackLang, finishOnce);
+      };
+      audio.onended = () => {
+        if (activeStudioAudio === audio) activeStudioAudio = null;
+        finishOnce();
+      };
+      audio.onerror = fallbackToSpeech;
+      await audio.play();
+      return { engine: 'api-tts', voice };
+    } catch (err) {
+      if (err?.name === 'AbortError') {
+        finishOnce();
+        return { engine: 'aborted', voice };
+      }
+      activeStudioAudio = null;
+    }
+  }
+
+  const ok = speakStudioWithWebSpeech(speechText, safeSpeed, fallbackLang, finishOnce);
+  if (!ok) {
+    HiAudio.playWord(speechText, safeSpeed, fallbackLang);
+  }
+  return { engine: 'speech', voice };
 }
 
 /**

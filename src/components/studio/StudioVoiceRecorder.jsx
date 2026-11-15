@@ -1,7 +1,12 @@
 // src/components/studio/StudioVoiceRecorder.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Trash2, Sparkles, Loader2, Server, Zap } from 'lucide-react';
-import { scorePronunciation, getStudioApiUrl } from '../../services/studioService.js';
+import { Mic, Square, Trash2, Sparkles, Loader2, Server, Zap, Volume2 } from 'lucide-react';
+import {
+  scorePronunciation,
+  getStudioApiUrl,
+  playStudioTts,
+  stopStudioAudio,
+} from '../../services/studioService.js';
 import { buildLocalPronunciationResult } from '../../utils/studioCore.js';
 import PronunciationResultCard from './PronunciationResultCard.jsx';
 
@@ -14,6 +19,8 @@ export function StudioVoiceRecorder({
   expectedText,
   voice = 'af_heart',
   compact = false,
+  showSampleButton = false,
+  onBeforePlaySample,
   onScored,
   onOpenSetup,
 }) {
@@ -23,8 +30,11 @@ export function StudioVoiceRecorder({
   const [recordedUrl, setRecordedUrl] = useState('');
   const [liveTranscript, setLiveTranscript] = useState('');
   const [scoring, setScoring] = useState(false);
+  const [samplePlaying, setSamplePlaying] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+
+  const sampleTokenRef = useRef(0);
 
   const mediaRecorderRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -80,11 +90,45 @@ export function StudioVoiceRecorder({
   };
 
   useEffect(() => {
+    sampleTokenRef.current += 1;
+    setSamplePlaying(false);
+    stopStudioAudio();
     setResult(null);
     setError('');
     setLiveTranscript('');
     liveTranscriptRef.current = '';
   }, [expectedText]);
+
+  const handleToggleSample = async () => {
+    if (!expectedText) return;
+    if (samplePlaying) {
+      sampleTokenRef.current += 1;
+      stopStudioAudio();
+      setSamplePlaying(false);
+      return;
+    }
+    if (typeof onBeforePlaySample === 'function') {
+      onBeforePlaySample();
+    }
+    const token = ++sampleTokenRef.current;
+    setSamplePlaying(true);
+    try {
+      await playStudioTts({
+        text: expectedText,
+        voice,
+        speed: 0.92,
+        onEnded: () => {
+          if (sampleTokenRef.current === token) {
+            setSamplePlaying(false);
+          }
+        },
+      });
+    } catch (_) {
+      if (sampleTokenRef.current === token) {
+        setSamplePlaying(false);
+      }
+    }
+  };
 
   useEffect(() => {
     return () => {
@@ -150,6 +194,9 @@ export function StudioVoiceRecorder({
   };
 
   const startRecording = async () => {
+    sampleTokenRef.current += 1;
+    setSamplePlaying(false);
+    stopStudioAudio();
     setError('');
     setResult(null);
     setLiveTranscript('');
@@ -307,6 +354,22 @@ export function StudioVoiceRecorder({
           >
             <Square className="w-3.5 h-3.5 fill-current shrink-0" />
             <span>Dừng ghi ({seconds}s) · Tự động chấm</span>
+          </button>
+        )}
+
+        {showSampleButton && expectedText && !isRecording && (
+          <button
+            type="button"
+            onClick={handleToggleSample}
+            className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer min-h-[44px] sm:min-h-0 ${
+              samplePlaying
+                ? 'bg-[#EEF5EC] text-[#355A3B]'
+                : 'bg-white hover:bg-[#FAF5EB] text-[#2E2823]'
+            }`}
+            title="Nghe câu mẫu để nhại giọng theo"
+          >
+            <Volume2 className={`w-4 h-4 shrink-0 ${samplePlaying ? 'animate-pulse text-[#4D6B53]' : ''}`} />
+            <span>{samplePlaying ? 'Đang đọc mẫu…' : 'Đọc mẫu'}</span>
           </button>
         )}
 

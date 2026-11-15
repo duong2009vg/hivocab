@@ -11,7 +11,6 @@ import {
   Trash2,
   Mic,
   Keyboard,
-  Volume2,
   CheckCircle2,
   Loader2,
   HelpCircle,
@@ -33,7 +32,6 @@ import {
   removeCustomGuestClip,
   loadStudioProgress,
   saveShadowingCueScore,
-  playStudioTts,
   getStudioApiUrl,
 } from '../../services/studioService.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
@@ -681,17 +679,6 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                     <Languages className="w-3 h-3" />
                     <span>{showTranslation ? 'Ẩn dịch VI' : 'Hiện dịch VI'}</span>
                   </button>
-
-                  {activeCue?.text && (
-                    <button
-                      type="button"
-                      onClick={() => playStudioTts({ text: activeCue.text, voice, speed: 0.9 })}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white text-[#3D352E] text-[11px] font-extrabold border border-[#3D352E] cursor-pointer min-h-[30px]"
-                    >
-                      <Volume2 className="w-3 h-3" />
-                      <span>Đọc mẫu</span>
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -730,6 +717,12 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
                       expectedText={activeCue.text}
                       voice={voice}
                       compact
+                      showSampleButton
+                      onBeforePlaySample={() => {
+                        try {
+                          ytPlayerRef.current?.pauseVideo?.();
+                        } catch (_) {}
+                      }}
                       onOpenSetup={onOpenSetup}
                       onScored={(data) => {
                         const updated = saveShadowingCueScore(selectedClip.id, activeCueIdx, Math.round(data.score));
