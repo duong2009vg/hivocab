@@ -1,9 +1,8 @@
 // src/components/learning/ExerciseListen.jsx
-// 100% Pixel-Perfect match to Google Stitch design (both Desktop & Mobile)
-// Listen & type exercise — Pure React with Pop-up Result Notification and Full SVG Icons.
+// Listen & type exercise — Compact Crayon card (PC/Mobile fit, safe above-the-fold layout)
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AlertTriangle, Lightbulb, Eye, PenTool } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { AlertTriangle, Lightbulb, Eye, RotateCcw, Volume2 } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 
 function cleanCharForSlot(raw) {
@@ -19,42 +18,42 @@ function cleanCharForSlot(raw) {
 function getSlotDimensions(maxPartLen) {
   if (maxPartLen <= 4) {
     return {
-      slot: 'w-11 sm:w-14 h-[52px] sm:h-16 text-xl sm:text-3xl rounded-2xl sm:rounded-[22px]',
-      gap: 'gap-2 sm:gap-3',
-      gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2.5 sm:gap-y-3',
+      slot: 'w-10 sm:w-12 h-11 sm:h-[52px] text-lg sm:text-2xl rounded-xl sm:rounded-2xl',
+      gap: 'gap-1.5 sm:gap-2.5',
+      gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2 sm:gap-y-2.5',
     };
   }
   if (maxPartLen <= 6) {
     return {
-      slot: 'w-9 sm:w-12 h-11 sm:h-[60px] text-lg sm:text-2xl rounded-2xl sm:rounded-[20px]',
-      gap: 'gap-1.5 sm:gap-2.5',
-      gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2 sm:gap-y-2.5',
+      slot: 'w-9 sm:w-11 h-10 sm:h-12 text-base sm:text-xl rounded-xl sm:rounded-2xl',
+      gap: 'gap-1.5 sm:gap-2',
+      gapBetweenWords: 'gap-x-2.5 sm:gap-x-3.5 gap-y-2',
     };
   }
   if (maxPartLen <= 8) {
     return {
-      slot: 'w-8 sm:w-11 h-10 sm:h-14 text-base sm:text-xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1 sm:gap-2',
+      slot: 'w-8 sm:w-10 h-9 sm:h-11 text-sm sm:text-lg rounded-xl',
+      gap: 'gap-1 sm:gap-1.5',
       gapBetweenWords: 'gap-x-2 sm:gap-x-3 gap-y-2',
     };
   }
   if (maxPartLen <= 10) {
     return {
-      slot: 'w-7 sm:w-10 h-9 sm:h-[52px] text-sm sm:text-lg rounded-xl sm:rounded-2xl',
+      slot: 'w-7 sm:w-9 h-9 sm:h-10 text-xs sm:text-base rounded-lg sm:rounded-xl',
       gap: 'gap-1 sm:gap-1.5',
       gapBetweenWords: 'gap-x-2 gap-y-1.5',
     };
   }
   if (maxPartLen <= 12) {
     return {
-      slot: 'w-6 sm:w-9 h-[34px] sm:h-12 text-xs sm:text-base rounded-xl sm:rounded-2xl',
+      slot: 'w-6 sm:w-8 h-8 sm:h-9 text-xs sm:text-sm rounded-lg sm:rounded-xl',
       gap: 'gap-0.5 sm:gap-1',
       gapBetweenWords: 'gap-x-1.5 gap-y-1.5',
     };
   }
-  // 13+ letters (fits 14 letters in 300px without overflowing)
+  // 13+ letters (fits 14 letters on narrow mobile without overflowing)
   return {
-    slot: 'w-[22px] sm:w-8 h-8 sm:h-11 text-xs sm:text-sm rounded-lg sm:rounded-xl',
+    slot: 'w-[22px] sm:w-7 h-7 sm:h-9 text-xs rounded-lg',
     gap: 'gap-0.5 sm:gap-1',
     gapBetweenWords: 'gap-x-1 gap-y-1',
   };
@@ -63,13 +62,16 @@ function getSlotDimensions(maxPartLen) {
 export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onReport, sessionInfo }) {
   const d = item?.exerciseData || {};
   const answer = (d.answer || '').trim();
-  const answerParts = d.answerParts?.length
-    ? d.answerParts
-    : answer.split(/\s+/).filter(Boolean);
-  const totalLetters = d.letters || answerParts.join('').length;
+  const answerParts = useMemo(
+    () => (d.answerParts?.length ? d.answerParts : answer.split(/\s+/).filter(Boolean)),
+    [d.answerParts, answer]
+  );
+  const answerChars = useMemo(() => answerParts.join('').split(''), [answerParts]);
+  const totalLetters = d.letters || answerChars.length;
 
-  const boxes = answerParts.flatMap((part, pi) =>
-    [...part].map((_, li) => ({ partIdx: pi, letterIdx: li }))
+  const boxes = useMemo(
+    () => answerParts.flatMap((part, pi) => [...part].map((_, li) => ({ partIdx: pi, letterIdx: li }))),
+    [answerParts]
   );
 
   const [values, setValues] = useState(() => boxes.map(() => ''));
@@ -81,20 +83,25 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
   const [focusedIdx, setFocusedIdx] = useState(0);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+  const [hintPulseIdx, setHintPulseIdx] = useState(null);
   const inputRefs = useRef([]);
+  const valuesRef = useRef(values);
+  valuesRef.current = values;
 
   const currentNum = sessionInfo?.currentNum ?? 1;
-  const totalNum = sessionInfo?.totalNum ?? 10;
 
   // Auto-play audio on new item
   useEffect(() => {
-    setValues(boxes.map(() => ''));
+    const empty = boxes.map(() => '');
+    setValues(empty);
+    valuesRef.current = empty;
     setHintLevel(0);
     setSubmitted(null);
     setShowResultModal(false);
     setShowMeaning(false);
     setFocusedIdx(0);
     setAutoplayBlocked(false);
+    setHintPulseIdx(null);
     const t = setTimeout(() => handlePlay(1.0, true), 350);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -136,13 +143,16 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     }
     setTimeout(() => setIsPlayingAudio(false), 900);
 
-    // Focus current or first empty input after audio
+    // Focus first empty input only if user is not currently typing inside one of the boxes
     setTimeout(() => {
-      const firstEmpty = inputRefs.current.find((inp, i) => !values[i]);
-      const target = firstEmpty || inputRefs.current[0];
+      const activeEl = typeof document !== 'undefined' ? document.activeElement : null;
+      if (activeEl && activeEl.dataset?.listenIndex !== undefined) return;
+      const latestVals = valuesRef.current || [];
+      const firstEmptyIdx = boxes.findIndex((_, i) => !latestVals[i]);
+      const target = inputRefs.current[firstEmptyIdx >= 0 ? firstEmptyIdx : 0];
       target?.focus();
       target?.select?.();
-    }, 400);
+    }, 380);
   }
 
   const handleInput = useCallback(
@@ -195,6 +205,55 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
     [submitted, boxes.length]
   );
 
+  // Smart hint: fills the first empty or mismatched slot instead of overwriting already-correct letters
+  const handleRevealHint = useCallback(() => {
+    if (submitted || answerChars.length === 0) return;
+    const maxHint = Math.max(1, answerChars.length - 1);
+    if (hintLevel >= maxHint) return;
+
+    const latestVals = valuesRef.current;
+    let targetIdx = answerChars.findIndex(
+      (ch, idx) => cleanCharForSlot(latestVals[idx]) !== cleanCharForSlot(ch)
+    );
+    if (targetIdx === -1) return;
+
+    const revealedChar = cleanCharForSlot(answerChars[targetIdx]) || (answerChars[targetIdx] || '').toUpperCase();
+    const nextValues = [...latestVals];
+    nextValues[targetIdx] = revealedChar;
+    setValues(nextValues);
+    setHintLevel((h) => h + 1);
+    setHintPulseIdx(targetIdx);
+    setTimeout(() => setHintPulseIdx((curr) => (curr === targetIdx ? null : curr)), 450);
+
+    setTimeout(() => {
+      const nextEmpty = answerChars.findIndex(
+        (ch, idx) => idx > targetIdx && cleanCharForSlot(nextValues[idx]) !== cleanCharForSlot(ch)
+      );
+      const focusTargetIdx =
+        nextEmpty >= 0 ? nextEmpty : Math.min(targetIdx + 1, Math.max(0, boxes.length - 1));
+      const nextInp = inputRefs.current[focusTargetIdx];
+      nextInp?.focus();
+      nextInp?.select?.();
+    }, 50);
+  }, [submitted, answerChars, hintLevel, boxes.length]);
+
+  const handleCheck = useCallback(() => {
+    if (submitted) return;
+    const ans = d.answer || '';
+    let letterIdx = 0;
+    const typed = ans
+      .split('')
+      .map((char) => {
+        if (char === ' ') return ' ';
+        return values[letterIdx++] || '_';
+      })
+      .join('');
+
+    const r = onSubmit(typed);
+    setSubmitted(r);
+    setShowResultModal(true);
+  }, [submitted, d.answer, values, onSubmit]);
+
   const handleKeyDown = useCallback(
     (e, flatIdx) => {
       if (showResultModal) return;
@@ -224,78 +283,66 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
         e.preventDefault();
         inputRefs.current[flatIdx + 1]?.focus();
         inputRefs.current[flatIdx + 1]?.select?.();
-      } else if ((e.key === ' ' || e.code === 'Space') && e.target.tagName === 'INPUT') {
+      } else if ((e.key === ' ' || e.code === 'Space') && !e.ctrlKey && !e.metaKey && e.target.tagName === 'INPUT') {
         e.preventDefault();
         inputRefs.current[Math.min(flatIdx + 1, boxes.length - 1)]?.focus();
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        handleCheck();
+        if (!values.every((v) => !v)) {
+          handleCheck();
+        }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [values, boxes.length, showResultModal]
+    [values, boxes.length, showResultModal, handleCheck]
   );
 
-  // Space on non-input = replay sound
+  // PC keyboard shortcuts (works inside or outside input boxes cleanly without double firing)
   useEffect(() => {
     function onKey(e) {
       if (showResultModal) return;
+
+      // Global inside & outside input: Tab = 0.8x slow listen, Ctrl+Space = replay current speed
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        handlePlay(0.8, false);
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === ' ' || e.code === 'Space')) {
+        e.preventDefault();
+        handlePlay(currentSpeed, false);
+        return;
+      }
+      if (e.altKey && (e.key === 'h' || e.key === 'H')) {
+        e.preventDefault();
+        handleRevealHint();
+        return;
+      }
+      if (e.altKey && (e.key === 'm' || e.key === 'M')) {
+        e.preventDefault();
+        setShowMeaning((m) => !m);
+        return;
+      }
+
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
       if (e.key === ' ' || e.code === 'Space') {
         e.preventDefault();
-        handlePlay(currentSpeed);
-      }
-      if (e.key === 'Enter' && !submitted) {
+        handlePlay(currentSpeed, false);
+      } else if (e.key === '1') {
+        e.preventDefault();
+        handleRevealHint();
+      } else if (e.key === '2') {
+        e.preventDefault();
+        setShowMeaning((m) => !m);
+      } else if (e.key === 'Enter' && !submitted && !values.every((v) => !v)) {
+        e.preventDefault();
         handleCheck();
       }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submitted, currentSpeed, values, showResultModal]);
-
-  const handleRevealHint = useCallback(() => {
-    if (submitted) return;
-    const answerChars = (d.answer || '').replace(/\s+/g, '').split('');
-    const maxHint = Math.max(1, answerChars.length - 1);
-    if (hintLevel >= maxHint) return;
-
-    setValues((prev) => {
-      const n = [...prev];
-      n[hintLevel] = (answerChars[hintLevel] || '').toUpperCase();
-      return n;
-    });
-
-    const el = inputRefs.current[hintLevel];
-    if (el) {
-      el.classList.add('border-[#3884DD]', 'bg-[#F1F7FF]', 'scale-110');
-      setTimeout(() => el.classList.remove('scale-110'), 200);
-    }
-    setHintLevel((h) => h + 1);
-
-    setTimeout(() => {
-      const nextInp = inputRefs.current[Math.min(hintLevel + 1, boxes.length - 1)];
-      nextInp?.focus();
-      nextInp?.select();
-    }, 60);
-  }, [submitted, d.answer, hintLevel, boxes.length]);
-
-  const handleCheck = useCallback(() => {
-    if (submitted) return;
-    const ans = d.answer || '';
-    let letterIdx = 0;
-    const typed = ans
-      .split('')
-      .map((char) => {
-        if (char === ' ') return ' ';
-        return values[letterIdx++] || '_';
-      })
-      .join('');
-
-    const r = onSubmit(typed);
-    setSubmitted(r);
-    setShowResultModal(true);
-  }, [submitted, d.answer, values, onSubmit]);
+  }, [submitted, currentSpeed, values, showResultModal, handleRevealHint, handleCheck]);
 
   const handleModalContinue = useCallback(() => {
     setShowResultModal(false);
@@ -317,173 +364,182 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
 
   let partOffset = 0;
   const userTyped = values.join('');
-
-  // Calculate dynamic dimensions for mobile fit
   const maxPartLetters = Math.max(...answerParts.map((p) => p.length), 1);
   const dims = getSlotDimensions(maxPartLetters);
-
-  // Formatted preview of user typing with spaces between words
-  const userTypedPreview = answerParts
-    .map((part, pi) => {
-      const start = answerParts.slice(0, pi).reduce((acc, p) => acc + p.length, 0);
-      return [...part].map((_, li) => values[start + li] || '_').join('');
-    })
-    .join(' ');
+  const canHint =
+    !submitted &&
+    hintLevel < Math.max(1, totalLetters - 1) &&
+    answerChars.some((ch, idx) => cleanCharForSlot(values[idx]) !== cleanCharForSlot(ch));
 
   return (
-    <div className="w-full flex flex-col items-center justify-start sm:justify-center select-none font-comfortaa my-1 sm:my-auto py-1 sm:py-2 px-2">
-      {/* ── Main Exercise Card ── */}
-      <div className="w-full max-w-xl bg-white border-[3px] border-[#2B2523] rounded-[24px] sm:rounded-[30px] shadow-[4px_6px_0px_#2B2523] px-3.5 sm:px-6 py-4 sm:py-5 flex flex-col items-center relative">
-        {/* Top Tiger Encouragement & Report Header */}
-        <div className="w-full flex items-center justify-between pb-2 mb-2 border-b-2 border-stone-100">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-400/50 text-blue-700 text-[11px] sm:text-xs font-bold">
-            <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center">
+    <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa py-1 px-2">
+      {/* ── Main Compact Crayon Exercise Card ── */}
+      <div className="w-full max-w-xl bg-white border-[3px] border-[#2B2523] rounded-[24px] sm:rounded-[28px] shadow-[4px_6px_0px_#2B2523] px-3.5 sm:px-6 py-3.5 sm:py-4 flex flex-col items-center relative">
+        {/* Top Mascot Guidance & Report Header */}
+        <div className="w-full flex items-center justify-between gap-2 pb-2 mb-2.5 border-b-2 border-stone-100">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-400/50 text-blue-700 text-[11px] sm:text-xs font-bold min-w-0">
+            <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center shrink-0">
               <img
                 src="/mascot/mascot_cozy.png"
                 alt="Bé hổ"
                 className="w-full h-full object-contain mix-blend-multiply"
-                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
               />
             </span>
-            <span>Churbito: Lắng nghe kỹ & điền từng chữ cái nhé!</span>
+            <span className="truncate">Churbito: Nghe &amp; gõ lại từng chữ cái ({totalLetters} ký tự)</span>
           </div>
 
           {onReport && (
             <button
               type="button"
               onClick={onReport}
-              className="text-stone-400 hover:text-stone-700 text-xs transition cursor-pointer p-1"
+              className="text-stone-400 hover:text-stone-700 text-xs transition cursor-pointer px-1.5 py-0.5 rounded-lg hover:bg-stone-50 shrink-0"
               title="Báo cáo câu hỏi"
             >
-              <span className="inline-flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Báo lỗi</span>
+              <span className="inline-flex items-center gap-1">
+                <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Báo lỗi
+              </span>
             </button>
           )}
         </div>
 
-        {/* Visual Fallback Button when autoplay is blocked by browser */}
+        {/* Visual Fallback Button when browser autoplay is blocked */}
         {autoplayBlocked && (
-          <div className="my-1.5 animate-bounce">
+          <div className="mb-2 animate-bounce">
             <button
               type="button"
               onClick={() => handlePlay(currentSpeed, false)}
-              className="px-4 py-1.5 bg-amber-100 hover:bg-amber-200 border-2 border-[#2B2523] rounded-full text-amber-900 font-bold text-xs flex items-center gap-1.5 shadow-[2px_2px_0px_#2B2523] cursor-pointer"
+              className="px-3.5 py-1 bg-amber-100 hover:bg-amber-200 border-2 border-[#2B2523] rounded-full text-amber-900 font-bold text-xs flex items-center gap-1.5 shadow-[2px_2px_0px_#2B2523] cursor-pointer"
             >
-              <span>🔊 Chạm để nghe phát âm</span>
+              <Volume2 className="w-3.5 h-3.5 shrink-0" />
+              <span>Chạm để nghe phát âm</span>
             </button>
           </div>
         )}
 
-        {/* Center Audio Play Button */}
-        <div className="relative my-1 flex items-center justify-center">
+        {/* ── Compact Audio Studio Pod (Speaker + IPA + Speed Controls in one row) ── */}
+        <div className="w-full max-w-md bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 mb-2.5 shadow-[2px_3px_0px_#2B2523] flex items-center justify-between gap-2.5">
+          {/* Left: Play Speaker Button */}
           <button
             type="button"
             onClick={() => handlePlay(currentSpeed, false)}
-            className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-[2.5px] border-[#2B2523] shadow-[2px_3px_0px_#2B2523] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all cursor-pointer group ${
+            className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-2 border-[#2B2523] shadow-[1.5px_2px_0px_#2B2523] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 group ${
               isPlayingAudio ? 'scale-105 ring-4 ring-sky-200' : ''
             }`}
-            title="Bấm hoặc nhấn Space để nghe"
+            title="Bấm để nghe phát âm"
+            aria-label="Phát âm từ vựng"
           >
             <svg
-              className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
+              className="w-5 h-5 sm:w-6 sm:h-6 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
               fill="currentColor"
               viewBox="0 0 24 24"
             >
               <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4a2 2 0 00-2 2v5a2 2 0 002 2h2.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12A6.49 6.49 0 0017 7.75a1 1 0 10-1.414 1.414A4.49 4.49 0 0116.5 12c0 1.2-.47 2.29-1.236 3.107a1 1 0 101.442 1.386A6.49 6.49 0 0018.5 12zm3 0c0-3.32-1.72-6.24-4.32-7.9a1 1 0 10-1.08 1.68 7.48 7.48 0 013.4 6.22c0 2.54-1.26 4.79-3.18 6.13a1 1 0 101.16 1.63A9.48 9.48 0 0021.5 12z" />
             </svg>
           </button>
-        </div>
 
-        {/* Playback Speed Controls (0.8x slow / 1.0x normal) */}
-        <div className="flex items-center gap-2 my-1.5">
-          <button
-            type="button"
-            onClick={() => handlePlay(1.0, false)}
-            className={`px-3 py-0.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1 font-bold text-[11px] sm:text-xs transition-all shadow-[1px_1.5px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
-              currentSpeed === 1.0 ? 'bg-blue-50 text-blue-700 border-blue-600' : 'bg-white text-stone-800 hover:bg-stone-50'
-            }`}
-          >
-            <span>1.0x</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handlePlay(0.8, false)}
-            className={`px-3 py-0.5 rounded-full border-2 border-[#2B2523] flex items-center gap-1 font-bold text-[11px] sm:text-xs transition-all shadow-[1px_1.5px_0px_#2B2523] active:translate-y-0.5 cursor-pointer ${
-              currentSpeed === 0.8 ? 'bg-amber-50 text-amber-800 border-amber-600' : 'bg-white text-stone-800 hover:bg-stone-50'
-            }`}
-          >
-            <span>0.8x</span>
-          </button>
-        </div>
-
-        {/* IPA Phonetic Display */}
-        {d.phonetic && (
-          <div className="text-sm sm:text-xl font-semibold tracking-widest text-stone-600 font-mono mb-2 select-text">
-            /{d.phonetic}/
+          {/* Center: Phonetic + POS */}
+          <div className="flex-1 min-w-0 text-center">
+            {d.phonetic ? (
+              <div className="text-sm sm:text-base font-bold tracking-wider text-stone-800 font-mono truncate select-text">
+                /{d.phonetic}/
+              </div>
+            ) : (
+              <div className="text-xs sm:text-sm font-bold text-stone-700 truncate">
+                Nghe &amp; gõ chính xác
+              </div>
+            )}
+            <div className="flex items-center justify-center gap-1.5 mt-0.5 text-[11px] font-semibold text-stone-500">
+              {(item?.word?.pos || d.pos) && (
+                <span className="px-1.5 py-0.2 bg-white border border-stone-300 rounded-md text-stone-700 font-bold">
+                  {item?.word?.pos || d.pos}
+                </span>
+              )}
+              <span>{answerParts.length > 1 ? `${answerParts.length} từ ghép` : 'Bấm loa để nghe'}</span>
+            </div>
           </div>
-        )}
 
-        {/* Hint and Definition Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4 flex-wrap justify-center">
+          {/* Right: 1.0x / 0.8x Segmented Speed Controls */}
+          <div className="flex items-center gap-1 bg-white p-1 rounded-xl border-2 border-[#2B2523] shrink-0">
+            <button
+              type="button"
+              onClick={() => handlePlay(1.0, false)}
+              className={`px-2 py-1 rounded-lg font-bold text-[11px] sm:text-xs transition-all cursor-pointer ${
+                currentSpeed === 1.0
+                  ? 'bg-[#3A82EE] text-white shadow-2xs'
+                  : 'text-stone-700 hover:bg-stone-100'
+              }`}
+              title="Tốc độ chuẩn 1.0x"
+            >
+              1.0x
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePlay(0.8, false)}
+              className={`px-2 py-1 rounded-lg font-bold text-[11px] sm:text-xs transition-all cursor-pointer ${
+                currentSpeed === 0.8
+                  ? 'bg-amber-500 text-white shadow-2xs'
+                  : 'text-stone-700 hover:bg-stone-100'
+              }`}
+              title="Đọc chậm 0.8x (Phím Tab)"
+            >
+              0.8x
+            </button>
+          </div>
+        </div>
+
+        {/* ── Unified Action Toolbar (Hint + Meaning + Clear) ── */}
+        <div className="flex items-center justify-center gap-2 flex-wrap mb-2.5">
           <button
             type="button"
             onClick={handleRevealHint}
-            disabled={hintLevel >= Math.max(1, totalLetters - 1) || !!submitted}
-            className="px-3 sm:px-4 py-1 sm:py-1.5 bg-amber-50 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs sm:text-sm text-amber-900 shadow-[1.5px_1.5px_0px_#2B2523] hover:bg-amber-100 cursor-pointer active:translate-y-0.5 disabled:opacity-40"
+            disabled={!canHint}
+            title="Điền chữ cái kế tiếp còn thiếu/sai (Alt+H)"
+            className="px-3 py-1 bg-amber-50 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs text-amber-900 shadow-[1.5px_1.5px_0px_#2B2523] hover:bg-amber-100 cursor-pointer active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <Lightbulb className="w-4 h-4 inline shrink-0" />
+            <Lightbulb className="w-3.5 h-3.5 inline shrink-0" />
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setShowMeaning((m) => !m)}
-            className="px-3 sm:px-4 py-1 sm:py-1.5 bg-stone-50 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs sm:text-sm text-stone-700 shadow-[1.5px_1.5px_0px_#2B2523] hover:bg-stone-100 cursor-pointer active:translate-y-0.5"
+            title="Ẩn/hiện nghĩa tiếng Việt (Alt+M)"
+            className={`px-3 py-1 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs shadow-[1.5px_1.5px_0px_#2B2523] cursor-pointer active:translate-y-0.5 transition-colors ${
+              showMeaning
+                ? 'bg-sky-100 text-sky-900'
+                : 'bg-stone-50 text-stone-700 hover:bg-stone-100'
+            }`}
           >
-            <Eye className="w-4 h-4 inline shrink-0" />
+            <Eye className="w-3.5 h-3.5 inline shrink-0" />
             <span>{showMeaning ? 'Ẩn nghĩa' : 'Xem nghĩa'}</span>
           </button>
+
+          {userTyped && !submitted && (
+            <button
+              type="button"
+              onClick={handleClearAll}
+              title="Xóa toàn bộ chữ đã nhập"
+              className="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs text-stone-700 shadow-[1.5px_1.5px_0px_#2B2523] cursor-pointer active:translate-y-0.5"
+            >
+              <RotateCcw className="w-3.5 h-3.5 inline shrink-0" />
+              <span>Xóa hết</span>
+            </button>
+          )}
         </div>
 
         {/* Meaning dropdown box if active */}
         {showMeaning && (
-          <div className="mb-3 px-4 py-2 bg-amber-50/90 border-2 border-dashed border-amber-400 rounded-2xl text-xs sm:text-sm text-stone-800 text-center font-quicksand font-bold animate-fade-in max-w-md w-full">
-            Nghĩa tiếng Việt: <span className="text-[#3b6e8c]">{d.meaning || d.meaningHint || '...'}</span>
+          <div className="mb-2.5 px-3.5 py-1.5 bg-amber-50/90 border-2 border-dashed border-amber-400 rounded-xl text-xs sm:text-sm text-stone-800 text-center font-quicksand font-bold animate-fade-in max-w-md w-full">
+            Nghĩa: <span className="text-[#3b6e8c]">{d.meaning || d.meaningHint || '...'}</span>
           </div>
         )}
 
-        {/* ── Live Word Preview Bar (Always Fits & Crystal Clear on Mobile) ── */}
-        <div className="w-full max-w-md mx-auto mb-3.5 px-1">
-          <div className="bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl sm:rounded-full py-2 px-3.5 sm:px-5 shadow-[2px_2.5px_0px_#2B2523] flex items-center justify-between gap-2.5">
-            <div className="flex items-center gap-1.5 text-xs font-black text-[#6E5F52] shrink-0">
-              <PenTool className="w-4 h-4 text-[#3d352e] inline shrink-0" />
-              <span className="hidden xs:inline">Từ đang gõ:</span>
-            </div>
-            <div className="flex-1 text-center font-mono font-black text-sm sm:text-lg text-[#2B4566] tracking-wider truncate px-1">
-              {userTyped ? (
-                <span className="text-stone-900 font-black tracking-widest bg-white px-3.5 py-0.5 rounded-full border border-stone-200 shadow-2xs inline-block">
-                  {userTypedPreview}
-                </span>
-              ) : (
-                <span className="text-stone-400 font-medium italic text-xs">Chạm ô bên dưới để gõ từng chữ cái...</span>
-              )}
-            </div>
-            {userTyped && !submitted && (
-              <button
-                type="button"
-                onClick={handleClearAll}
-                className="px-2.5 py-1 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs font-bold shrink-0 transition active:scale-95 cursor-pointer shadow-2xs"
-                title="Xóa hết để nhập lại"
-              >
-                Xóa
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ── Letters Input Box Row (Responsive & Mobile-Fit with Word Wrapping) ── */}
+        {/* ── Letters Input Box Row (Compact & Responsive) ── */}
         <div
-          className="w-full max-w-full overflow-x-auto py-1.5 mb-3 sm:mb-4 no-scrollbar"
+          className="w-full max-w-full overflow-x-auto py-1 mb-2.5 no-scrollbar"
           style={{ WebkitOverflowScrolling: 'touch' }}
           onClick={(e) => {
             if (e.target.tagName !== 'INPUT') {
@@ -505,22 +561,31 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
                     const flatIdx = startOffset + li;
                     const isFilled = !!values[flatIdx];
                     const isActive = focusedIdx === flatIdx && !submitted;
+                    const isPulsed = hintPulseIdx === flatIdx;
 
                     let slotClass = `${dims.slot} flex items-center justify-center font-mono font-black transition-all duration-150 shrink-0 select-none `;
 
                     if (!submitted) {
-                      if (isActive) {
-                        slotClass += 'border-[3px] border-[#2B4566] bg-[#F1F7FF] text-[#2B4566] shadow-[2.5px_3.5px_0px_#2B2523] ring-4 ring-sky-300/60 scale-105 z-10';
+                      if (isPulsed) {
+                        slotClass +=
+                          'border-[3px] border-[#3884DD] bg-[#E8F2FF] text-[#1D5CA8] shadow-[2px_3px_0px_#2B2523] scale-110 z-10';
+                      } else if (isActive) {
+                        slotClass +=
+                          'border-[3px] border-[#2B4566] bg-[#F1F7FF] text-[#2B4566] shadow-[2px_3px_0px_#2B2523] ring-3 ring-sky-300/60 scale-105 z-10';
                       } else if (isFilled) {
-                        slotClass += 'border-2 border-[#2B2523] bg-white text-stone-900 shadow-[1.5px_2px_0px_#2B2523] hover:border-stone-800';
+                        slotClass +=
+                          'border-2 border-[#2B2523] bg-white text-stone-900 shadow-[1.5px_2px_0px_#2B2523] hover:border-stone-800';
                       } else {
-                        slotClass += 'border-2 border-stone-300 border-dashed text-stone-400 bg-white/70 shadow-2xs hover:bg-stone-50';
+                        slotClass +=
+                          'border-2 border-stone-300 border-dashed text-stone-400 bg-white/70 shadow-2xs hover:bg-stone-50';
                       }
                     } else {
                       if (submitted.correct) {
-                        slotClass += 'border-[2.5px] border-[#3D7A46] bg-[#EEF8EC] text-[#2B6135] shadow-[2px_2.5px_0px_#2B6135]';
+                        slotClass +=
+                          'border-[2.5px] border-[#3D7A46] bg-[#EEF8EC] text-[#2B6135] shadow-[2px_2.5px_0px_#2B6135]';
                       } else {
-                        slotClass += 'border-[2.5px] border-[#D34E36] bg-[#FDF0ED] text-[#B83822] shadow-[2px_2.5px_0px_#B83822]';
+                        slotClass +=
+                          'border-[2.5px] border-[#D34E36] bg-[#FDF0ED] text-[#B83822] shadow-[2px_2.5px_0px_#B83822]';
                       }
                     }
 
@@ -577,24 +642,34 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
           </div>
         </div>
 
-        {/* Typing Guidance Tip - Desktop Only */}
-        <p className="hidden sm:flex text-xs md:text-sm font-semibold text-stone-500 text-center mb-5 sm:mb-6 items-center flex-wrap justify-center gap-1.5 font-quicksand">
-          <span>Gõ ký tự sẽ tự chuyển ô</span>
-          <span className="text-stone-300">•</span>
+        {/* Compact 1-Line Keyboard Shortcuts - Desktop Only */}
+        <p className="hidden sm:flex text-[11px] font-semibold text-stone-500 text-center mb-3 items-center flex-wrap justify-center gap-1.5 font-quicksand">
           <span>
-            Nhấn{' '}
-            <kbd className="px-2 py-0.5 bg-stone-100 border border-stone-400 rounded text-[11px] font-mono text-stone-700 shadow-2xs">
-              Space
+            <kbd className="px-1.5 py-0.2 bg-stone-100 border border-stone-400 rounded text-[10px] font-mono text-stone-700">
+              Tab
             </kbd>{' '}
-            để nghe lại
+            nghe chậm 0.8x
           </span>
           <span className="text-stone-300">•</span>
           <span>
-            Nhấn{' '}
-            <kbd className="px-2 py-0.5 bg-stone-100 border border-stone-400 rounded text-[11px] font-mono text-stone-700 shadow-2xs">
-              Backspace
+            <kbd className="px-1.5 py-0.2 bg-stone-100 border border-stone-400 rounded text-[10px] font-mono text-stone-700">
+              Ctrl+Space
             </kbd>{' '}
-            để lùi
+            nghe lại
+          </span>
+          <span className="text-stone-300">•</span>
+          <span>
+            <kbd className="px-1.5 py-0.2 bg-stone-100 border border-stone-400 rounded text-[10px] font-mono text-stone-700">
+              Alt+H
+            </kbd>{' '}
+            gợi ý
+          </span>
+          <span className="text-stone-300">•</span>
+          <span>
+            <kbd className="px-1.5 py-0.2 bg-stone-100 border border-stone-400 rounded text-[10px] font-mono text-stone-700">
+              Enter
+            </kbd>{' '}
+            kiểm tra
           </span>
         </p>
 
@@ -604,7 +679,7 @@ export default function ExerciseListen({ item, onSubmit, onNext, speakWord, onRe
             type="button"
             onClick={handleCheck}
             disabled={!!submitted || values.every((v) => !v)}
-            className="w-full min-h-[48px] py-2.5 sm:py-3 px-6 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full min-h-[44px] py-2 sm:py-2.5 px-6 bg-[#243A5E] hover:bg-[#1C2F4D] text-white font-crayon font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl border-2 border-[#2B2523] shadow-[2px_3px_0px_#2B2523] hover:-translate-y-0.5 active:translate-y-1 active:shadow-[1px_2px_0px_#2B2523] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
               <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" />
