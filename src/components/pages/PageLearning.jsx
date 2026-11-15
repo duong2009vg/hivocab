@@ -12,6 +12,7 @@ import ExerciseFlashcard  from '../learning/ExerciseFlashcard.jsx';
 import ExerciseMCQ        from '../learning/ExerciseMCQ.jsx';
 import ExerciseFill       from '../learning/ExerciseFill.jsx';
 import ExerciseListen     from '../learning/ExerciseListen.jsx';
+import ExerciseHangman    from '../learning/ExerciseHangman.jsx';
 import ExerciseCompleted  from '../learning/ExerciseCompleted.jsx';
 
 // Mode index → allowedType mapping
@@ -20,6 +21,7 @@ const MODE_TYPE_MAP = {
   1: 'mcq',
   2: 'fill',
   3: 'listen',
+  4: 'hangman',
 };
 
 // Activity title mapping
@@ -28,6 +30,7 @@ const ACTIVITY_TITLE_MAP = {
   mcq: 'BÀI TẬP: TRẮC NGHIỆM TỪ VỰNG',
   fill: 'BÀI TẬP: ĐIỀN TỪ',
   listen: 'BÀI TẬP: LUYỆN NGHE & ĐIỀN TỪ',
+  hangman: 'GAME: HANGMAN ĐOÁN TỪ',
 };
 
 export function PageLearning() {
@@ -52,7 +55,33 @@ export function PageLearning() {
   const [isLoadingWords, setIsLoadingWords] = useState(true);
   const [noWordsToStudy, setNoWordsToStudy] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [hangmanStreak, setHangmanStreak] = useState(0);
+  const [hangmanBestStreak, setHangmanBestStreak] = useState(() => {
+    try {
+      return Number(localStorage.getItem('hivocab_hangman_best_streak') || 0) || 0;
+    } catch (_) {
+      return 0;
+    }
+  });
   const initialized = useRef(false);
+
+  const handleHangmanStreakResult = useCallback((won) => {
+    if (won) {
+      setHangmanStreak((prev) => {
+        const next = prev + 1;
+        setHangmanBestStreak((best) => {
+          const updatedBest = Math.max(best, next);
+          try {
+            localStorage.setItem('hivocab_hangman_best_streak', String(updatedBest));
+          } catch (_) {}
+          return updatedBest;
+        });
+        return next;
+      });
+    } else {
+      setHangmanStreak(0);
+    }
+  }, []);
 
   // ── Init: load words ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -245,6 +274,7 @@ export function PageLearning() {
   }, []);
 
   const handlePracticeAgain = useCallback(() => {
+    setHangmanStreak(0);
     if (session.allWords && session.allWords.length > 0) {
       startSession(session.allWords, session.allowedType, flashcardMode);
     } else {
@@ -493,6 +523,19 @@ export function PageLearning() {
                 speakWord={speakWord}
                 onReport={handleReport}
                 sessionInfo={sessionInfo}
+              />
+            )}
+            {currentItem.exerciseType === 'hangman' && (
+              <ExerciseHangman
+                key={`${currentItem.word?.wordId || currentItem.word?.id}-${session.queueIndex}`}
+                item={currentItem}
+                onSubmit={submitAnswer}
+                onNext={nextQuestion}
+                speakWord={speakWord}
+                onReport={handleReport}
+                streak={hangmanStreak}
+                bestStreak={hangmanBestStreak}
+                onStreakResult={handleHangmanStreakResult}
               />
             )}
           </div>

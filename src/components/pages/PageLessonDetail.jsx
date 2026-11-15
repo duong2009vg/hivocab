@@ -13,6 +13,7 @@ import {
   ArrowRight,
   BarChart2,
   Sparkles,
+  Gamepad2,
 } from 'lucide-react';
 import { useLessonDetail } from '../../hooks/useLessonDetail.js';
 import { useModal } from '../../context/ModalContext.jsx';
@@ -85,6 +86,7 @@ export function PageLessonDetail() {
         1: 'Trắc nghiệm',
         2: 'Điền từ',
         3: 'Nghe chính tả',
+        4: 'Hangman Đoán Từ',
       };
       const name = modeNames[modeIndex] || 'Luyện tập';
       openModal('requireLogin', {
@@ -203,13 +205,13 @@ export function PageLessonDetail() {
           </div>
         </section>
 
-        {/* Study Modes: 4 Buttons */}
+        {/* Study Modes: 4 Buttons + Hangman Game */}
         <section className="mb-4">
           <div className="flex items-center justify-between mb-2 px-0.5">
             <h3 className="text-xs font-bold text-[#1e1b17] uppercase tracking-wide">CHẾ ĐỘ HỌC</h3>
-            <span className="text-xs text-[#4b6540] font-bold">4 bài tập</span>
+            <span className="text-xs text-[#4b6540] font-bold">4 bài tập • 1 game</span>
           </div>
-          <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+          <div className="grid grid-cols-4 gap-1.5 sm:gap-2 mb-2.5">
             <button
               onClick={handleOpenFlashcard}
               className="bg-white rounded-2xl p-2 min-h-[76px] flex flex-col items-center justify-center gap-1.5 border-2 border-[#3d352e] shadow-[2px_2px_0px_#3d352e] active:scale-95 transition-all text-center cursor-pointer hover:bg-[#fff2ec]"
@@ -239,6 +241,30 @@ export function PageLessonDetail() {
               <span className="text-[11px] font-bold text-[#1e1b17] leading-tight">Nghe chính tả</span>
             </button>
           </div>
+
+          {/* Mobile Hangman Game Entry */}
+          <button
+            onClick={() => handleStartPractice(4)}
+            className="w-full bg-[#FBF4FF] hover:bg-[#F5E8FF] rounded-2xl px-3.5 py-2.5 border-2 border-[#3d352e] shadow-[2px_3px_0px_#3d352e] active:scale-[0.99] transition-all flex items-center justify-between gap-2.5 cursor-pointer text-left"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 rounded-xl bg-[#8B5A96] border-2 border-[#3d352e] flex items-center justify-center text-white shrink-0">
+                <Gamepad2 className="w-5 h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-extrabold text-[#1e1b17]">Game Hangman</span>
+                  <span className="text-[9px] font-black uppercase px-1.5 py-0.2 rounded-full bg-amber-300 text-[#1e1b17] border border-[#3d352e]">
+                    Mini Game
+                  </span>
+                </div>
+                <p className="text-[11px] font-semibold text-[#6b635b] truncate">
+                  Đoán từng chữ cái trước khi hết 10 lượt!
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="w-4 h-4 text-[#8B5A96] shrink-0" />
+          </button>
         </section>
 
         {/* Search & Status Filters */}
@@ -458,18 +484,18 @@ export function PageLessonDetail() {
           </div>
         </section>
 
-        {/* Learning Modes Section (4 Cards Grid) */}
+        {/* Learning Modes Section (4 Study Cards + Hangman Game Card) */}
         <section className="mb-7">
           <div className="flex items-center justify-between mb-3.5">
             <h2 className="text-base font-bold uppercase tracking-wider text-[#322e2b] flex items-center gap-2">
               <PenTool className="w-4 h-4 text-[#799b6e] shrink-0" /> Chế Độ Học Tập
             </h2>
             <span className="text-xs font-bold text-[#78726b] bg-[#f4ede4] px-2.5 py-1 rounded-full border border-[#322e2b]/30">
-              4 dạng bài tập rèn luyện
+              4 dạng bài tập + 1 Mini Game
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
             {/* Flashcard */}
             <button
               onClick={handleOpenFlashcard}
@@ -535,6 +561,23 @@ export function PageLessonDetail() {
               <h3 className="font-bold text-sm text-[#322e2b] mb-1">Nghe Chính Tả</h3>
               <p className="text-xs text-[#78726b] font-medium leading-snug">
                 Luyện tai nghe phát âm chuẩn giọng Anh - Mỹ.
+              </p>
+            </button>
+
+            {/* Game Hangman */}
+            <button
+              onClick={() => handleStartPractice(4)}
+              className="group p-4 bg-[#FBF4FF] hover:bg-[#F3E5FA] rounded-[16px] border-2 border-[#322e2b] shadow-[3px_4px_0px_#322e2b] text-left transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <Gamepad2 className="w-8 h-8 text-[#8B5A96] group-hover:scale-110 transition-transform shrink-0" />
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-amber-300 text-[#322e2b] rounded-full border border-[#322e2b]">
+                  Game mới
+                </span>
+              </div>
+              <h3 className="font-bold text-sm text-[#322e2b] mb-1">Hangman Đoán Từ</h3>
+              <p className="text-xs text-[#78726b] font-medium leading-snug">
+                Đoán từng chữ cái trước khi hết 10 lượt!
               </p>
             </button>
           </div>

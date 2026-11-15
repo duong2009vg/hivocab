@@ -194,6 +194,15 @@ function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi'
       };
     }
 
+    case 'hangman': {
+      return {
+        answer: safeWord,
+        meaning: safeMeaning,
+        phonetic: safePhonetic,
+        pos: safePos,
+      };
+    }
+
     default:
       return generateExerciseData(word, 'flashcard', allWords, flashcardMode);
   }

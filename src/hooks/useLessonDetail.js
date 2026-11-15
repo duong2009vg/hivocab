@@ -179,6 +179,7 @@ export function useLessonDetail() {
       1: 'mcq',
       2: 'fill',
       3: 'listen',
+      4: 'hangman',
     };
 
     let effectiveFlashcardMode = flashcardMode;
