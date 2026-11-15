@@ -3,18 +3,23 @@
 import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
 
 const WATCH_URL = 'https://www.youtube.com/watch';
+const EMBED_URL = 'https://www.youtube.com/embed';
 const INNERTUBE_API_URL = 'https://www.youtube.com/youtubei/v1/player';
 const INNERTUBE_CLIENTS = [
   {
     name: 'ANDROID',
+    userAgent: 'com.google.android.youtube/20.10.38 (Linux; U; Android 14)',
     context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38', hl: 'en' } },
   },
   {
     name: 'IOS',
+    userAgent: 'com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 17_5 like Mac OS X)',
     context: { client: { clientName: 'IOS', clientVersion: '19.45.4', hl: 'en' } },
   },
   {
     name: 'TV_EMBEDDED',
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
     context: {
       client: {
         clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
@@ -199,122 +204,178 @@ function extractCaptionRenderer(playerJson) {
   return playerJson?.captions?.playerCaptionsTracklistRenderer || null;
 }
 
-async function fetchPlayerData(videoId) {
-  const watchUrl = `${WATCH_URL}?v=${encodeURIComponent(videoId)}&hl=en&bpctr=9999999999&has_verified=1`;
-  const watchRes = await fetchWithTimeout(
-    watchUrl,
-    {
-      headers: {
-        'User-Agent': BROWSER_USER_AGENT,
-        'Accept-Language': 'en-US,en;q=0.9',
-        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-    },
-    12000
-  );
-
-  if (!watchRes.ok) {
-    throw { status: 502, detail: `Không truy cập được trang YouTube (HTTP ${watchRes.status}).` };
-  }
-
-  let html = decodeHtmlEntities(await watchRes.text());
-  if (html.includes('action="https://consent.youtube.com/s"')) {
-    const vMatch = html.match(/name="v"\s+value="(.*?)"/);
-    const consentCookie = vMatch ? `CONSENT=YES+${vMatch[1]}` : 'CONSENT=YES+cb.20210328-17-p0.en+FX+999';
-    const retryRes = await fetchWithTimeout(
-      watchUrl,
-      {
-        headers: {
-          'User-Agent': BROWSER_USER_AGENT,
-          'Accept-Language': 'en-US,en;q=0.9',
-          Cookie: consentCookie,
-        },
-      },
-      12000
-    );
-    if (retryRes.ok) {
-      html = decodeHtmlEntities(await retryRes.text());
-    }
-  }
-
-  const htmlTitle = extractHtmlTitle(html);
-  const embeddedPlayer =
-    extractBalancedJsonObject(html, 'var ytInitialPlayerResponse =')
-    || extractBalancedJsonObject(html, 'ytInitialPlayerResponse =');
-
-  const apiKeyMatch = html.match(/"INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)"/);
-  const apiKey = apiKeyMatch ? apiKeyMatch[1] : '';
-
+async function tryInnertubeClients(videoId, apiKey = '') {
   let lastBlockError = null;
-  let videoTitle = embeddedPlayer?.videoDetails?.title || htmlTitle || '';
-  let videoAuthor = embeddedPlayer?.videoDetails?.author || '';
+  let videoTitle = '';
+  let videoAuthor = '';
+  let hadPlayableOkWithoutCaptions = false;
+  let lastHttpStatus = 0;
 
-  if (apiKey) {
-    for (const clientSpec of INNERTUBE_CLIENTS) {
-      try {
-        const playerRes = await fetchWithTimeout(
-          `${INNERTUBE_API_URL}?key=${encodeURIComponent(apiKey)}`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept-Language': 'en-US,en;q=0.9',
-            },
-            body: JSON.stringify({
-              context: clientSpec.context,
-              videoId,
-              racyCheckOk: true,
-              contentCheckOk: true,
-            }),
+  const endpoint = apiKey
+    ? `${INNERTUBE_API_URL}?key=${encodeURIComponent(apiKey)}&prettyPrint=false`
+    : `${INNERTUBE_API_URL}?prettyPrint=false`;
+
+  for (const clientSpec of INNERTUBE_CLIENTS) {
+    try {
+      const playerRes = await fetchWithTimeout(
+        endpoint,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'User-Agent': clientSpec.userAgent || BROWSER_USER_AGENT,
           },
-          10000
-        );
-        if (!playerRes.ok) continue;
-        const playerJson = await playerRes.json().catch(() => null);
-        if (!playerJson) continue;
+          body: JSON.stringify({
+            context: clientSpec.context,
+            videoId,
+            racyCheckOk: true,
+            contentCheckOk: true,
+          }),
+        },
+        10000
+      );
+      lastHttpStatus = playerRes.status;
+      if (!playerRes.ok) continue;
+      const playerJson = await playerRes.json().catch(() => null);
+      if (!playerJson) continue;
 
-        if (!videoTitle && playerJson?.videoDetails?.title) {
-          videoTitle = String(playerJson.videoDetails.title);
-        }
-        if (!videoAuthor && playerJson?.videoDetails?.author) {
-          videoAuthor = String(playerJson.videoDetails.author);
-        }
+      if (!videoTitle && playerJson?.videoDetails?.title) {
+        videoTitle = String(playerJson.videoDetails.title);
+      }
+      if (!videoAuthor && playerJson?.videoDetails?.author) {
+        videoAuthor = String(playerJson.videoDetails.author);
+      }
 
-        const renderer = extractCaptionRenderer(playerJson);
-        if (renderer && Array.isArray(renderer.captionTracks) && renderer.captionTracks.length > 0) {
-          return {
+      const renderer = extractCaptionRenderer(playerJson);
+      if (renderer && Array.isArray(renderer.captionTracks) && renderer.captionTracks.length > 0) {
+        return {
+          found: {
             renderer,
             title: cleanCaptionText(videoTitle),
             author: cleanCaptionText(videoAuthor),
+          },
+        };
+      }
+
+      const playability = checkPlayability(playerJson);
+      if (playability.ok) {
+        hadPlayableOkWithoutCaptions = true;
+      } else {
+        lastBlockError = playability;
+      }
+    } catch {
+      // Try next InnerTube client
+    }
+  }
+
+  return {
+    found: null,
+    lastBlockError,
+    videoTitle,
+    videoAuthor,
+    hadPlayableOkWithoutCaptions,
+    lastHttpStatus,
+  };
+}
+
+async function fetchPlayerData(videoId) {
+  // Primary path: direct InnerTube /youtubei/v1/player (avoids /watch HTML 429 rate limits on Workers)
+  const direct = await tryInnertubeClients(videoId, '');
+  if (direct.found) return direct.found;
+  if (direct.hadPlayableOkWithoutCaptions) {
+    throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
+  }
+
+  let lastBlockError = direct.lastBlockError;
+  let videoTitle = direct.videoTitle || '';
+  let videoAuthor = direct.videoAuthor || '';
+
+  // Secondary fallback: try embed page, then watch page for INNERTUBE_API_KEY / ytInitialPlayerResponse
+  const fallbackUrls = [
+    `${EMBED_URL}/${encodeURIComponent(videoId)}?hl=en`,
+    `${WATCH_URL}?v=${encodeURIComponent(videoId)}&hl=en&bpctr=9999999999&has_verified=1`,
+  ];
+
+  let lastPageStatus = direct.lastHttpStatus || 502;
+  let sawRecaptcha = false;
+
+  for (const pageUrl of fallbackUrls) {
+    try {
+      const res = await fetchWithTimeout(
+        pageUrl,
+        {
+          headers: {
+            'User-Agent': BROWSER_USER_AGENT,
+            'Accept-Language': 'en-US,en;q=0.9',
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+        },
+        10000
+      );
+      lastPageStatus = res.status;
+      if (!res.ok) continue;
+
+      let html = decodeHtmlEntities(await res.text());
+      if (html.includes('action="https://consent.youtube.com/s"')) {
+        const vMatch = html.match(/name="v"\s+value="(.*?)"/);
+        const consentCookie = vMatch ? `CONSENT=YES+${vMatch[1]}` : 'CONSENT=YES+cb.20210328-17-p0.en+FX+999';
+        const retryRes = await fetchWithTimeout(
+          pageUrl,
+          {
+            headers: {
+              'User-Agent': BROWSER_USER_AGENT,
+              'Accept-Language': 'en-US,en;q=0.9',
+              Cookie: consentCookie,
+            },
+          },
+          10000
+        );
+        if (retryRes.ok) {
+          html = decodeHtmlEntities(await retryRes.text());
+        }
+      }
+
+      if (html.includes('class="g-recaptcha"')) {
+        sawRecaptcha = true;
+      }
+
+      if (!videoTitle) {
+        videoTitle = extractHtmlTitle(html);
+      }
+
+      const embeddedPlayer =
+        extractBalancedJsonObject(html, 'var ytInitialPlayerResponse =')
+        || extractBalancedJsonObject(html, 'ytInitialPlayerResponse =');
+
+      if (embeddedPlayer) {
+        const renderer = extractCaptionRenderer(embeddedPlayer);
+        if (renderer && Array.isArray(renderer.captionTracks) && renderer.captionTracks.length > 0) {
+          return {
+            renderer,
+            title: cleanCaptionText(embeddedPlayer?.videoDetails?.title || videoTitle),
+            author: cleanCaptionText(embeddedPlayer?.videoDetails?.author || videoAuthor),
           };
         }
-
-        const playability = checkPlayability(playerJson);
-        if (!playability.ok) {
-          lastBlockError = playability;
-        }
-      } catch {
-        // Try next InnerTube client
+        const playability = checkPlayability(embeddedPlayer);
+        if (!playability.ok) lastBlockError = playability;
       }
+
+      const apiKeyMatch = html.match(/"INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)"/);
+      if (apiKeyMatch?.[1]) {
+        const keyed = await tryInnertubeClients(videoId, apiKeyMatch[1]);
+        if (keyed.found) return keyed.found;
+        if (keyed.hadPlayableOkWithoutCaptions) {
+          throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
+        }
+        if (keyed.lastBlockError) lastBlockError = keyed.lastBlockError;
+      }
+    } catch (err) {
+      if (err?.status && err?.detail) throw err;
     }
   }
 
-  if (embeddedPlayer) {
-    const renderer = extractCaptionRenderer(embeddedPlayer);
-    if (renderer && Array.isArray(renderer.captionTracks) && renderer.captionTracks.length > 0) {
-      return {
-        renderer,
-        title: cleanCaptionText(videoTitle),
-        author: cleanCaptionText(videoAuthor),
-      };
-    }
-    const playability = checkPlayability(embeddedPlayer);
-    if (!playability.ok) {
-      lastBlockError = playability;
-    }
-  }
-
-  if (html.includes('class="g-recaptcha"')) {
+  if (sawRecaptcha) {
     throw { status: 429, detail: 'YouTube yêu cầu xác minh (reCAPTCHA). Vui lòng thử lại sau ít phút.' };
   }
   if (lastBlockError) {
@@ -322,6 +383,9 @@ async function fetchPlayerData(videoId) {
       status: lastBlockError.code === 'REQUEST_BLOCKED' ? 503 : 404,
       detail: lastBlockError.detail,
     };
+  }
+  if (lastPageStatus === 429) {
+    throw { status: 503, detail: 'YouTube đang tạm giới hạn IP truy cập (HTTP 429). Vui lòng thử lại sau ít phút.' };
   }
   throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
 }
