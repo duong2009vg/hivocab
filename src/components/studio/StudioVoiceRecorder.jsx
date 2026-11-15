@@ -21,6 +21,8 @@ export function StudioVoiceRecorder({
   compact = false,
   showSampleButton = false,
   onBeforePlaySample,
+  onPlaySample,
+  externalSamplePlaying = false,
   onScored,
   onOpenSetup,
 }) {
@@ -89,18 +91,27 @@ export function StudioVoiceRecorder({
     setIsRecording(false);
   };
 
+  const isCustomSampleMode = typeof onPlaySample === 'function';
+  const effectiveSamplePlaying = isCustomSampleMode ? Boolean(externalSamplePlaying) : samplePlaying;
+
   useEffect(() => {
     sampleTokenRef.current += 1;
     setSamplePlaying(false);
-    stopStudioAudio();
+    if (!isCustomSampleMode) {
+      stopStudioAudio();
+    }
     setResult(null);
     setError('');
     setLiveTranscript('');
     liveTranscriptRef.current = '';
-  }, [expectedText]);
+  }, [expectedText, isCustomSampleMode]);
 
   const handleToggleSample = async () => {
     if (!expectedText) return;
+    if (isCustomSampleMode) {
+      onPlaySample();
+      return;
+    }
     if (samplePlaying) {
       sampleTokenRef.current += 1;
       stopStudioAudio();
@@ -362,14 +373,22 @@ export function StudioVoiceRecorder({
             type="button"
             onClick={handleToggleSample}
             className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer min-h-[44px] sm:min-h-0 ${
-              samplePlaying
+              effectiveSamplePlaying
                 ? 'bg-[#EEF5EC] text-[#355A3B]'
                 : 'bg-white hover:bg-[#FAF5EB] text-[#2E2823]'
             }`}
-            title="Nghe câu mẫu để nhại giọng theo"
+            title={isCustomSampleMode ? 'Nghe đoạn mẫu trực tiếp từ video YouTube' : 'Nghe câu mẫu để nhại giọng theo'}
           >
-            <Volume2 className={`w-4 h-4 shrink-0 ${samplePlaying ? 'animate-pulse text-[#4D6B53]' : ''}`} />
-            <span>{samplePlaying ? 'Đang đọc mẫu…' : 'Đọc mẫu'}</span>
+            <Volume2 className={`w-4 h-4 shrink-0 ${effectiveSamplePlaying ? 'animate-pulse text-[#4D6B53]' : ''}`} />
+            <span>
+              {isCustomSampleMode
+                ? effectiveSamplePlaying
+                  ? 'Dừng mẫu video'
+                  : 'Nghe mẫu video'
+                : effectiveSamplePlaying
+                ? 'Đang đọc mẫu…'
+                : 'Đọc mẫu'}
+            </span>
           </button>
         )}
 
@@ -445,7 +464,13 @@ export function StudioVoiceRecorder({
       )}
 
       {result && (
-        <PronunciationResultCard data={result} targetText={expectedText} voice={voice} />
+        <PronunciationResultCard
+          data={result}
+          targetText={expectedText}
+          voice={voice}
+          onPlaySample={isCustomSampleMode ? onPlaySample : undefined}
+          samplePlaying={effectiveSamplePlaying}
+        />
       )}
     </div>
   );

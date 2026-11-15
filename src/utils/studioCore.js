@@ -364,11 +364,18 @@ export const PHONE_SPELLINGS = Object.freeze({
 });
 
 export function getPhonemeSeverity(p) {
-  if (!p?.expected || typeof p.heard !== 'string' || !p.heard.trim()) return null;
-  if (String(p.expected).normalize('NFC').trim() === String(p.heard).normalize('NFC').trim()) {
+  if (!p?.expected) return null;
+  const heard = typeof p.heard === 'string' ? p.heard.normalize('NFC').trim() : '';
+  const c = Number(p.confidence);
+  if (!heard) {
+    if (!Number.isFinite(c)) return 'bad';
+    if (c >= 0.7) return 'bad';
+    if (c >= 0.25) return 'near';
+    return 'bad';
+  }
+  if (String(p.expected).normalize('NFC').trim() === heard) {
     return 'good';
   }
-  const c = Number(p.confidence);
   if (!Number.isFinite(c) || c < 0.25) return null;
   return c >= 0.7 ? 'bad' : 'near';
 }
@@ -487,6 +494,7 @@ export function buildSentencePronunciationView(data, target) {
       continue;
     }
     alignments.set(row.position, {
+      actualWord: typeof row.actual_word === 'string' ? row.actual_word.trim() : '',
       expected: Array.isArray(row.expected) ? row.expected.map(String) : [],
       actual: Array.isArray(row.actual) ? row.actual.map(String) : [],
       phones: Array.isArray(row.phones)
@@ -512,12 +520,17 @@ export function buildSentencePronunciationView(data, target) {
   const wordViews = words.map((word, idx) => {
     const aligned = alignments.get(idx);
     const err = errors.get(idx);
+    const actualWord =
+      aligned?.actualWord ||
+      (typeof err?.actual_word === 'string' ? err.actual_word.trim() : '') ||
+      (typeof err?.actualWord === 'string' ? err.actualWord.trim() : '') ||
+      '';
     const expPhones =
       Array.isArray(expectedPhones[idx]) && expectedPhones[idx].length
         ? expectedPhones[idx]
         : aligned?.expected || [];
     let report = null;
-    if (hasVoice && heardPhones.length) {
+    if (hasVoice && (heardPhones.length || aligned?.phones?.length || err)) {
       if (aligned?.phones?.length) {
         report = { phones: aligned.phones };
       } else if (err) {
@@ -525,26 +538,47 @@ export function buildSentencePronunciationView(data, target) {
       }
     }
     const plan = buildWordHighlightPlan(word, report, expPhones);
-    const hasIssue = Boolean(
-      aligned?.phones?.some((p) => {
-        const s = getPhonemeSeverity(p);
-        return s === 'bad' || s === 'near';
-      }) || err
-    );
+    const phoneRows = aligned?.phones || [];
+    const badPhoneCount = phoneRows.filter((p) => getPhonemeSeverity(p) === 'bad').length;
+    const nearPhoneCount = phoneRows.filter((p) => getPhonemeSeverity(p) === 'near').length;
+    const hasIssue = Boolean(badPhoneCount > 0 || nearPhoneCount > 0 || err);
+
+    let wordLevel = 'neutral';
+    if (hasVoice) {
+      if (aligned?.acceptedVariant) {
+        wordLevel = 'good';
+      } else if (badPhoneCount > 0) {
+        wordLevel = 'bad';
+      } else if (nearPhoneCount > 0) {
+        wordLevel = 'near';
+      } else if (err) {
+        wordLevel = err.type === 'omitted' || (!actualWord && !phoneRows.length) ? 'bad' : 'near';
+      } else if (!heardPhones.length && !aligned) {
+        wordLevel = 'bad';
+      } else {
+        wordLevel = 'good';
+      }
+    }
+
     return {
       index: idx,
       word,
+      actualWord,
       expectedPhones: expPhones,
       actualPhones: aligned?.actual || err?.actual || [],
-      phones: aligned?.phones || [],
+      phones: phoneRows,
       error: err || null,
       acceptedVariant: aligned?.acceptedVariant || false,
       hasIssue,
+      wordLevel,
       ...plan,
     };
   });
 
   const mismatchedCount = wordViews.filter((w) => w.hasIssue).length;
+  const goodCount = wordViews.filter((w) => w.wordLevel === 'good').length;
+  const nearCount = wordViews.filter((w) => w.wordLevel === 'near').length;
+  const badCount = wordViews.filter((w) => w.wordLevel === 'bad').length;
 
   return {
     score: Math.max(0, Math.min(100, Number(data.score))),
@@ -552,6 +586,9 @@ export function buildSentencePronunciationView(data, target) {
     transcription,
     hasVoice,
     mismatchedCount,
+    goodCount,
+    nearCount,
+    badCount,
     wordViews,
     expectedPhones,
     heardPhones,
@@ -774,7 +811,7 @@ export function buildLocalPronunciationResult(expectedText, transcriptText) {
         errorPhones += 1;
         return { expected: ep, heard: null, confidence: 0.9 };
       }
-      const ap = actPhones[pIdx] || actPhones[actPhones.length - 1] || null;
+      const ap = actPhones[pIdx] || null;
       const dist = charLevenshtein(expNorm[i], normWord(matchedActual));
       const near = ap === ep || dist <= 2;
       if (ap === ep) {
@@ -788,6 +825,7 @@ export function buildLocalPronunciationResult(expectedText, transcriptText) {
       wrongWordCount += 1;
       wordsWithErrors.push(word);
       errors.push({
+        type: matchedActual ? 'substituted' : 'omitted',
         position: i,
         word,
         expected: expPhones.join(''),
@@ -799,6 +837,7 @@ export function buildLocalPronunciationResult(expectedText, transcriptText) {
     wordAlignments.push({
       position: i,
       word,
+      actual_word: matchedActual || '',
       expected: expPhones,
       actual: actPhones,
       phones: phoneRows,

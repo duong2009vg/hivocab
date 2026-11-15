@@ -165,8 +165,8 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
               })}
             </nav>
 
-            {/* Voice Selector */}
-            {voicesList.length > 0 && (
+            {/* Voice Selector (only needed for TTS tabs: Dictation & IPA) */}
+            {activeTab !== 'shadowing' && voicesList.length > 0 && (
               <div className="flex items-center sm:ml-auto shrink-0">
                 <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[210px] sm:max-w-none">
                   <Volume2 className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />

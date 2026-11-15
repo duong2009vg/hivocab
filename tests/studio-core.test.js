@@ -145,6 +145,29 @@ export async function runStudioCoreTests() {
     localView !== null && localView.engine === 'local-browser' && localView.mismatchedCount >= 1,
     'buildSentencePronunciationView: renders local-browser pronunciation result cleanly'
   );
+  assert(
+    localView.wordViews[0].wordLevel === 'good' &&
+      localView.wordViews[1].wordLevel === 'near' &&
+      localView.wordViews[2].wordLevel === 'near' &&
+      localView.wordViews[3].wordLevel === 'good',
+    'buildSentencePronunciationView: assigns clear 3-state wordLevel per word ("good" vs "near")'
+  );
+  assert(
+    localView.goodCount === 2 && localView.nearCount === 2 && localView.badCount === 0,
+    'buildSentencePronunciationView: tracks goodCount, nearCount, badCount accurately'
+  );
+
+  // Skipped or completely wrong words must clearly receive wordLevel === "bad"
+  const localSkipped = buildLocalPronunciationResult('The giant beanstalk grew', 'the banana');
+  const skippedView = buildSentencePronunciationView(localSkipped, 'The giant beanstalk grew');
+  assert(
+    skippedView.wordViews[0].wordLevel === 'good' &&
+      skippedView.wordViews[1].wordLevel === 'bad' &&
+      skippedView.wordViews[2].wordLevel === 'bad' &&
+      skippedView.wordViews[3].wordLevel === 'bad' &&
+      skippedView.badCount === 3,
+    'buildSentencePronunciationView: classifies substituted (>2 dist) and skipped words as "bad"'
+  );
 
   return { totalTests, passedTests };
 }

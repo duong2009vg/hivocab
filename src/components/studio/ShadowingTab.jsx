@@ -141,6 +141,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
   const [showTranslation, setShowTranslation] = useState(true);
   const [practiceMode, setPracticeMode] = useState('shadowing'); // 'shadowing' | 'dictation'
   const [mobileCuesOpen, setMobileCuesOpen] = useState(false);
+  const [samplePlaying, setSamplePlaying] = useState(false);
   const [progress, setProgress] = useState(() => loadStudioProgress());
 
   // Add custom YouTube video state
@@ -160,6 +161,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
   const activeCueIdxRef = useRef(activeCueIdx);
   const cuesRef = useRef(cues);
   const clipRef = useRef(selectedClip);
+  const sampleEndRef = useRef(null);
 
   useEffect(() => {
     loopRef.current = loopActiveCue;
@@ -183,6 +185,8 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     setYtError('');
     setDictInputs({});
     setDictChecked({});
+    sampleEndRef.current = null;
+    setSamplePlaying(false);
     setDictHinted({});
   }, [selectedClip?.id]);
 
@@ -254,6 +258,14 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                 e.target.setPlaybackRate(playbackRate);
               } catch (_) {}
             },
+            onStateChange: (e) => {
+              if (cancelled) return;
+              // 0 = ended, 2 = paused -> clear active single-cue video sample playback state
+              if ((e.data === 0 || e.data === 2) && sampleEndRef.current !== null) {
+                sampleEndRef.current = null;
+                setSamplePlaying(false);
+              }
+            },
             onError: () => {
               if (!cancelled) {
                 setYtError('Video YouTube này không cho phép nhúng hoặc tạm thời không phát được.');
@@ -271,25 +283,35 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
             const absTime = player.getCurrentTime();
             const localTime = Math.max(0, absTime - Number(clip.start_seconds || 0));
             const pinnedCue = currentCues[activeCueIdxRef.current];
+            const playerState = player.getPlayerState?.();
+
+            if (sampleEndRef.current !== null && playerState === 1) {
+              if (localTime >= Number(sampleEndRef.current) - 0.06) {
+                sampleEndRef.current = null;
+                setSamplePlaying(false);
+                player.pauseVideo?.();
+              }
+              return;
+            }
 
             if (
               loopRef.current &&
               pinnedCue &&
-              player.getPlayerState?.() === 1 &&
+              playerState === 1 &&
               localTime >= Number(pinnedCue.end) - 0.08
             ) {
               player.seekTo(Number(clip.start_seconds || 0) + Number(pinnedCue.start), true);
               return;
             }
 
-            if (!loopRef.current && player.getPlayerState?.() === 1) {
+            if (!loopRef.current && playerState === 1) {
               const found = resolveActiveCueIndex(localTime, clip, currentCues);
               if (found >= 0 && found !== activeCueIdxRef.current) {
                 setActiveCueIdx(found);
               }
             }
           } catch (_) {}
-        }, 180);
+        }, 140);
       })
       .catch((err) => {
         if (!cancelled) setYtError(err?.message || 'Không tải được trình phát YouTube.');
@@ -318,12 +340,38 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     if (idx < 0 || idx >= cues.length) return;
     const cue = cues[idx];
     if (!cue || !selectedClip) return;
+    sampleEndRef.current = null;
+    setSamplePlaying(false);
     setActiveCueIdx(idx);
     try {
       const targetSec = Number(selectedClip.start_seconds || 0) + Number(cue.start || 0);
       ytPlayerRef.current?.seekTo?.(targetSec, true);
       if (autoPlay) ytPlayerRef.current?.playVideo?.();
     } catch (_) {}
+  };
+
+  const handleToggleCueVideoSample = () => {
+    const cue = cues[activeCueIdx];
+    if (!cue || !selectedClip || !ytPlayerRef.current) return;
+    if (samplePlaying) {
+      sampleEndRef.current = null;
+      setSamplePlaying(false);
+      try {
+        ytPlayerRef.current.pauseVideo?.();
+      } catch (_) {}
+      return;
+    }
+    const startSec = Number(selectedClip.start_seconds || 0) + Number(cue.start || 0);
+    const cueEnd = Math.max(Number(cue.start || 0) + 0.6, Number(cue.end || Number(cue.start || 0) + 4));
+    sampleEndRef.current = cueEnd;
+    setSamplePlaying(true);
+    try {
+      ytPlayerRef.current.seekTo?.(startSec, true);
+      ytPlayerRef.current.playVideo?.();
+    } catch (_) {
+      sampleEndRef.current = null;
+      setSamplePlaying(false);
+    }
   };
 
   const handleImportYoutube = async (e) => {
@@ -831,11 +879,8 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                       voice={voice}
                       compact
                       showSampleButton
-                      onBeforePlaySample={() => {
-                        try {
-                          ytPlayerRef.current?.pauseVideo?.();
-                        } catch (_) {}
-                      }}
+                      onPlaySample={handleToggleCueVideoSample}
+                      externalSamplePlaying={samplePlaying}
                       onOpenSetup={onOpenSetup}
                       onScored={(data) => {
                         const updated = saveShadowingCueScore(selectedClip.id, activeCueIdx, Math.round(data.score));
