@@ -96,6 +96,14 @@ function AppRoutes() {
     }
   }, []);
 
+  const [studioVideoFocused, setStudioVideoFocused] = React.useState(false);
+
+  React.useEffect(() => {
+    if (currentRoute !== 'studio') {
+      setStudioVideoFocused(false);
+    }
+  }, [currentRoute]);
+
   const renderActivePage = () => {
     switch (currentRoute) {
       case 'landing':
@@ -127,7 +135,7 @@ function AppRoutes() {
       case 'vocabulary':
         return <PageVocabulary />;
       case 'studio':
-        return <PageStudio />;
+        return <PageStudio onWorkspaceModeChange={setStudioVideoFocused} />;
       case 'dictionary':
         return <PageDictionary />;
       case 'settings':
@@ -145,8 +153,11 @@ function AppRoutes() {
     }
   };
 
+  const hideSidebarForStudio = currentRoute === 'studio' && studioVideoFocused;
+
   const shouldShowSidebar =
     (isMainTab || isTopicDetail) &&
+    !hideSidebarForStudio &&
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
     currentRoute !== 'bilingual-reading' &&
@@ -156,6 +167,7 @@ function AppRoutes() {
 
   const shouldShowBottomNav =
     (isMainTab || isTopicDetail) &&
+    !hideSidebarForStudio &&
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
     currentRoute !== 'bilingual-reading' &&
@@ -166,7 +178,7 @@ function AppRoutes() {
     <div id="app-root" className="desktop-density-compact min-h-screen bg-background text-on-background font-sans antialiased">
       {/* Conditionally render Layout components only when needed */}
       {shouldShowSidebar && <MainSidebar />}
-      {(isMainTab || isTopicDetail) && <MobileProfileDropdown />}
+      {(isMainTab || isTopicDetail) && !hideSidebarForStudio && <MobileProfileDropdown />}
       {shouldShowBottomNav && <MobileBottomNav />}
 
       {/* Render active page inside ErrorBoundary and Suspense to prevent blank screen */}

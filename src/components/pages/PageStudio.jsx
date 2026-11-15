@@ -13,8 +13,9 @@ import ShadowingTab from '../studio/ShadowingTab.jsx';
 import DictationTab from '../studio/DictationTab.jsx';
 import IpaLabTab from '../studio/IpaLabTab.jsx';
 
-export function PageStudio() {
+export function PageStudio({ onWorkspaceModeChange } = {}) {
   const [activeTab, setActiveTab] = useState('shadowing'); // 'shadowing' | 'dictation' | 'ipa'
+  const [shadowingVideoOpen, setShadowingVideoOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
@@ -72,6 +73,22 @@ export function PageStudio() {
     };
   }, []);
 
+  const isExpandedView = activeTab === 'shadowing' && shadowingVideoOpen;
+
+  useEffect(() => {
+    if (typeof onWorkspaceModeChange === 'function') {
+      onWorkspaceModeChange(isExpandedView);
+    }
+  }, [isExpandedView, onWorkspaceModeChange]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof onWorkspaceModeChange === 'function') {
+        onWorkspaceModeChange(false);
+      }
+    };
+  }, [onWorkspaceModeChange]);
+
   const handleVoiceChange = (nextVoice) => {
     setSelectedVoice(nextVoice);
     setPreferredStudioVoice(nextVoice);
@@ -106,8 +123,12 @@ export function PageStudio() {
       id="page-studio"
       className="page active min-h-screen text-[#2E2823] bg-[#FFF9F0] font-['Quicksand',sans-serif]"
     >
-      <div className="w-full min-w-0 lg:pl-[var(--sidebar-w,244px)]">
-        <div className="max-w-[1440px] mx-auto px-3 sm:px-6 xl:px-8 pt-3 sm:pt-4 lg:pt-5 pb-24 lg:pb-12 space-y-3 sm:space-y-4 pwa-safe-top">
+      <div className={`w-full min-w-0 ${isExpandedView ? 'pl-0' : 'lg:pl-[var(--sidebar-w,244px)]'}`}>
+        <div
+          className={`mx-auto px-3 sm:px-6 xl:px-8 pt-3 sm:pt-4 lg:pt-5 space-y-3 sm:space-y-4 pwa-safe-top ${
+            isExpandedView ? 'max-w-[1600px] pb-12 lg:pb-10' : 'max-w-[1440px] pb-24 lg:pb-12'
+          }`}
+        >
           {/* Compact Top Bar: Mode Switcher Pills + Voice Selector */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
             <nav className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 sm:gap-2.5" aria-label="Chế độ luyện tập Studio">
@@ -182,6 +203,7 @@ export function PageStudio() {
                 <ShadowingTab
                   clips={shadowingClips}
                   voice={selectedVoice}
+                  onVideoOpenChange={setShadowingVideoOpen}
                 />
               )}
               {activeTab === 'dictation' && (

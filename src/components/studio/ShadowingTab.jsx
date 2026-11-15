@@ -18,6 +18,7 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
 } from 'lucide-react';
 import {
   extractYoutubeVideoId,
@@ -32,6 +33,7 @@ import {
   removeCustomGuestClip,
   loadStudioProgress,
   saveShadowingCueScore,
+  stopStudioAudio,
   getStudioApiUrl,
 } from '../../services/studioService.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
@@ -106,22 +108,22 @@ function parseManualTranscript(rawText) {
   return cues;
 }
 
-export function ShadowingTab({ clips, voice, onOpenSetup }) {
+export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
   const [customClips, setCustomClips] = useState(() => getCustomGuestClips());
   const allClips = useMemo(() => [...customClips, ...(clips || [])], [customClips, clips]);
-  const [selectedClipId, setSelectedClipId] = useState(() => allClips[0]?.id || '');
+  const [selectedClipId, setSelectedClipId] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
 
   const selectedClip = useMemo(
-    () => allClips.find((c) => c.id === selectedClipId) || allClips[0] || null,
+    () => (selectedClipId ? allClips.find((c) => c.id === selectedClipId) || null : null),
     [allClips, selectedClipId]
   );
 
   useEffect(() => {
-    if (!selectedClipId && allClips.length > 0) {
-      setSelectedClipId(allClips[0].id);
+    if (typeof onVideoOpenChange === 'function') {
+      onVideoOpenChange(Boolean(selectedClip));
     }
-  }, [allClips, selectedClipId]);
+  }, [selectedClip, onVideoOpenChange]);
 
   const cues = useMemo(() => (Array.isArray(selectedClip?.cues) ? selectedClip.cues : []), [selectedClip]);
 
@@ -202,7 +204,15 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
   // Initialize & clean up YouTube IFrame Player
   useEffect(() => {
     const videoId = selectedClip?.youtube_video_id;
-    if (!videoId) return;
+    if (!videoId) {
+      if (ytPlayerRef.current) {
+        try {
+          ytPlayerRef.current.destroy();
+        } catch (_) {}
+        ytPlayerRef.current = null;
+      }
+      return;
+    }
 
     let cancelled = false;
     let pollTimer = null;
@@ -404,156 +414,243 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
   const practicedCount = Object.keys(clipScores).length;
   const progressPct = cues.length > 0 ? Math.min(100, Math.round((practicedCount / cues.length) * 100)) : 0;
 
+  const handleClosePlayer = () => {
+    stopStudioAudio();
+    if (ytPlayerRef.current) {
+      try {
+        ytPlayerRef.current.stopVideo?.();
+      } catch (_) {}
+    }
+    setSelectedClipId('');
+  };
+
   return (
     <div className="space-y-4">
-      {/* Catalog Strip & Add YouTube Button */}
-      <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-[2.5px_2.5px_0px_#3D352E] space-y-2.5 sm:space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-            <span className="text-[11px] sm:text-xs font-black uppercase tracking-wide text-[#786F66] shrink-0 mr-1">
-              Kho video ({filteredClips.length}):
-            </span>
-            {['all', 'A2', 'B1', 'B2', 'Custom'].map((lvl) => (
+      {/* STEP 1: YouTube Thumbnail Video Library Grid (shown when no video is opened) */}
+      {!selectedClip ? (
+        <div className="space-y-4">
+          {/* Library Toolbar & Add YouTube Button */}
+          <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-[2.5px_2.5px_0px_#3D352E] space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+                <span className="text-[11px] sm:text-xs font-black uppercase tracking-wide text-[#786F66] shrink-0 mr-1">
+                  Thư viện Video ({filteredClips.length}):
+                </span>
+                {['all', 'A2', 'B1', 'B2', 'Custom'].map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setLevelFilter(lvl)}
+                    className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
+                      levelFilter === lvl
+                        ? 'bg-[#4D6B53] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
+                        : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
+                    }`}
+                  >
+                    {lvl === 'all' ? 'Tất cả' : lvl}
+                  </button>
+                ))}
+              </div>
+
               <button
-                key={lvl}
                 type="button"
-                onClick={() => setLevelFilter(lvl)}
-                className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
-                  levelFilter === lvl
-                    ? 'bg-[#4D6B53] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
-                    : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
-                }`}
+                onClick={() => setShowAddForm((prev) => !prev)}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 cursor-pointer shrink-0"
               >
-                {lvl === 'all' ? 'Tất cả' : lvl}
+                <Plus className="w-4 h-4" />
+                <span>Thêm video YouTube bất kỳ</span>
               </button>
-            ))}
+            </div>
+
+            {/* Add Custom YouTube Form */}
+            {showAddForm && (
+              <form
+                onSubmit={handleImportYoutube}
+                className="bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3 sm:p-4 space-y-3"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <label className="space-y-1">
+                    <span className="text-xs font-extrabold text-[#2E2823]">Link YouTube *</span>
+                    <input
+                      type="text"
+                      value={ytUrlInput}
+                      onChange={(e) => setYtUrlInput(e.target.value)}
+                      placeholder="https://www.youtube.com/watch?v=..."
+                      className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-xs font-extrabold text-[#2E2823]">Tên bài học (tùy chọn)</span>
+                    <input
+                      type="text"
+                      value={ytTitleInput}
+                      onChange={(e) => setYtTitleInput(e.target.value)}
+                      placeholder="Ví dụ: TED Talk - Habit Building"
+                      className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
+                    />
+                  </label>
+                </div>
+
+                <label className="block space-y-1">
+                  <span className="text-xs font-extrabold text-[#2E2823]">
+                    Transcript tự nhập (tùy chọn — bỏ trống nếu muốn lấy phụ đề tự động qua Modal.com)
+                  </span>
+                  <textarea
+                    rows={3}
+                    value={manualScriptInput}
+                    onChange={(e) => setManualScriptInput(e.target.value)}
+                    placeholder={'Dán từng câu mỗi dòng, hoặc kèm mốc thời gian:\n00:05 Hello everyone, welcome back.\n00:10 Today we are going to talk about English pronunciation.'}
+                    className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-semibold focus:outline-none"
+                  />
+                </label>
+
+                {importError && (
+                  <p className="text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2">
+                    {importError}
+                  </p>
+                )}
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="submit"
+                    disabled={importingYt}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-60"
+                  >
+                    {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                    <span>{manualScriptInput.trim() ? 'Lưu bài YouTube' : 'Lấy phụ đề YouTube tự động'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddForm(false)}
+                    className="px-3 py-2 rounded-xl bg-white text-xs font-bold border-2 border-[#3D352E] cursor-pointer"
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowAddForm((prev) => !prev)}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 cursor-pointer shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Thêm video YouTube bất kỳ</span>
-          </button>
+          {/* YouTube Thumbnail Video Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredClips.map((clip) => {
+              const clipScoreCount = Object.keys(progress.shadowingChecked?.[clip.id] || {}).length;
+              const totalClipCues = clip.cues?.length || 0;
+              const thumbUrl = clip.youtube_video_id
+                ? `https://i.ytimg.com/vi/${clip.youtube_video_id}/hqdefault.jpg`
+                : '';
+
+              return (
+                <div
+                  key={clip.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setSelectedClipId(clip.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedClipId(clip.id);
+                    }
+                  }}
+                  className="group bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl overflow-hidden shadow-[3px_3px_0px_#3D352E] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#3D352E] transition-all cursor-pointer flex flex-col text-left focus:outline-none focus:ring-2 focus:ring-[#4D6B53]"
+                >
+                  {/* YouTube Thumbnail */}
+                  <div className="aspect-video w-full bg-[#1E1B17] relative overflow-hidden border-b-2 border-[#3D352E]">
+                    {thumbUrl && (
+                      <img
+                        src={thumbUrl}
+                        alt={clip.title}
+                        loading="lazy"
+                        onError={(e) => {
+                          const img = e.currentTarget;
+                          if (!img.dataset.fallback && clip.youtube_video_id) {
+                            img.dataset.fallback = '1';
+                            img.src = `https://i.ytimg.com/vi/${clip.youtube_video_id}/mqdefault.jpg`;
+                          }
+                        }}
+                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-black/15 group-hover:bg-black/25 transition-colors flex items-center justify-center">
+                      <div className="w-11 h-11 rounded-full bg-[#D96B43]/95 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-white flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      </div>
+                    </div>
+
+                    {/* Top-left Level badge */}
+                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] shadow-[1px_1px_0px_#3D352E]">
+                      {clip.level || 'Story'}
+                    </span>
+
+                    {/* Top-right Remove button for user clips */}
+                    {clip.guest && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setCustomClips(removeCustomGuestClip(clip.id));
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-xl bg-white/95 hover:bg-[#FDECE8] text-[#B53D2A] border border-[#3D352E] cursor-pointer"
+                        title="Xóa video cá nhân"
+                        aria-label="Xóa video cá nhân"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    {/* Bottom-right cue & progress pill */}
+                    <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg text-[10px] font-black bg-[#2E2823]/90 text-white border border-white/20">
+                      {clipScoreCount > 0 ? `${clipScoreCount}/${totalClipCues} câu` : `${totalClipCues} câu`}
+                    </span>
+                  </div>
+
+                  {/* Title & Meta Below Thumbnail */}
+                  <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between gap-2">
+                    <h3 className="text-sm font-black text-[#2E2823] leading-snug line-clamp-2 group-hover:text-[#4D6B53] transition-colors">
+                      {clip.title}
+                    </h3>
+                    <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-[#786F66]">
+                      <span className="truncate">{clip.genre || clip.origin || 'YouTube'}</span>
+                      <span className="shrink-0 px-2 py-0.5 rounded-lg bg-[#EEF5EC] text-[#355A3B] font-black border border-[#4D6B53]/30">
+                        Luyện ngay
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-
-        {/* Add Custom YouTube Form */}
-        {showAddForm && (
-          <form
-            onSubmit={handleImportYoutube}
-            className="bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3 sm:p-4 space-y-3"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <label className="space-y-1">
-                <span className="text-xs font-extrabold text-[#2E2823]">Link YouTube *</span>
-                <input
-                  type="text"
-                  value={ytUrlInput}
-                  onChange={(e) => setYtUrlInput(e.target.value)}
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
-                />
-              </label>
-              <label className="space-y-1">
-                <span className="text-xs font-extrabold text-[#2E2823]">Tên bài học (tùy chọn)</span>
-                <input
-                  type="text"
-                  value={ytTitleInput}
-                  onChange={(e) => setYtTitleInput(e.target.value)}
-                  placeholder="Ví dụ: TED Talk - Habit Building"
-                  className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
-                />
-              </label>
-            </div>
-
-            <label className="block space-y-1">
-              <span className="text-xs font-extrabold text-[#2E2823]">
-                Transcript tự nhập (tùy chọn — bỏ trống nếu muốn lấy phụ đề tự động qua Modal.com)
-              </span>
-              <textarea
-                rows={3}
-                value={manualScriptInput}
-                onChange={(e) => setManualScriptInput(e.target.value)}
-                placeholder={'Dán từng câu mỗi dòng, hoặc kèm mốc thời gian:\n00:05 Hello everyone, welcome back.\n00:10 Today we are going to talk about English pronunciation.'}
-                className="w-full px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-semibold focus:outline-none"
-              />
-            </label>
-
-            {importError && (
-              <p className="text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2">
-                {importError}
-              </p>
-            )}
-
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="submit"
-                disabled={importingYt}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-60"
-              >
-                {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                <span>{manualScriptInput.trim() ? 'Lưu bài YouTube' : 'Lấy phụ đề YouTube tự động'}</span>
-              </button>
+      ) : (
+        /* STEP 2: Full-width Shadowing & Dictation Workspace (Left MainSidebar hidden) */
+        <div className="space-y-3">
+          {/* Compact Top Return-to-Library Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-2 bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl px-3 py-2 shadow-[2px_2px_0px_#3D352E]">
+            <div className="flex items-center gap-2.5 min-w-0">
               <button
                 type="button"
-                onClick={() => setShowAddForm(false)}
-                className="px-3 py-2 rounded-xl bg-white text-xs font-bold border-2 border-[#3D352E] cursor-pointer"
+                onClick={handleClosePlayer}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#F4E3B4] text-[#2E2823] text-xs font-black border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] cursor-pointer shrink-0 active:translate-y-0.5 transition-all"
               >
-                Đóng
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Thư viện Video</span>
               </button>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] shrink-0">
+                {selectedClip.level || 'Story'}
+              </span>
+              <h2 className="text-xs sm:text-sm font-black text-[#2E2823] truncate">
+                {selectedClip.title}
+              </h2>
             </div>
-          </form>
-        )}
 
-        {/* Horizontal Clip Cards */}
-        <div className="flex gap-2.5 overflow-x-auto pb-1 no-scrollbar">
-          {filteredClips.map((clip) => {
-            const isSelected = selectedClip?.id === clip.id;
-            return (
-              <div
-                key={clip.id}
-                onClick={() => setSelectedClipId(clip.id)}
-                className={`min-w-[195px] sm:min-w-[225px] max-w-[250px] shrink-0 rounded-2xl p-2.5 sm:p-3 border-2 cursor-pointer transition-all flex flex-col justify-between gap-1 ${
-                  isSelected
-                    ? 'bg-[#EEF5EC] border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
-                    : 'bg-white border-[#E8DEC8] hover:border-[#3D352E]'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E]">
-                    {clip.level || 'Story'}
-                  </span>
-                  {clip.guest && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setCustomClips(removeCustomGuestClip(clip.id));
-                      }}
-                      className="text-[#786F66] hover:text-[#B53D2A]"
-                      title="Xóa video cá nhân"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-                <div className="text-xs sm:text-sm font-black text-[#2E2823] line-clamp-2">
-                  {clip.title}
-                </div>
-                <div className="text-[11px] font-semibold text-[#786F66] truncate">
-                  {clip.genre || clip.origin} · {clip.cues?.length || 0} câu
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+            {selectedClip.genre && (
+              <span className="hidden md:inline-block text-[11px] font-bold text-[#786F66] shrink-0">
+                {selectedClip.genre}
+              </span>
+            )}
+          </div>
 
-      {/* Main Workspace: Large Video + Below-Video Scoring (Left 7-8 cols) | Description + Transcript (Right 4-5 cols) */}
-      {selectedClip && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5 items-start">
           {/* LEFT MAIN COLUMN: Top Taskbar + YouTube Player + Subtitle + Shadowing/Dictation All On One Screen */}
           <div className="lg:col-span-7 xl:col-span-8">
             <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl overflow-hidden shadow-[3px_3px_0px_#3D352E]">
@@ -934,6 +1031,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
               </div>
             </div>
           </aside>
+          </div>
         </div>
       )}
     </div>
