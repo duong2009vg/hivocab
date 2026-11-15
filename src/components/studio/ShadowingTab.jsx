@@ -19,7 +19,6 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  Info,
 } from 'lucide-react';
 import {
   extractYoutubeVideoId,
@@ -405,9 +404,6 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
     [progress, selectedClip]
   );
   const practicedCount = Object.keys(clipScores).length;
-  const clipDuration = selectedClip
-    ? Math.max(0, Math.round(Number(selectedClip.end_seconds || 0) - Number(selectedClip.start_seconds || 0)))
-    : 0;
   const progressPct = cues.length > 0 ? Math.min(100, Math.round((practicedCount / cues.length) * 100)) : 0;
 
   return (
@@ -872,66 +868,21 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
             </div>
           </div>
 
-          {/* RIGHT SIDEBAR COLUMN: Video Description & Overview + Synchronized Transcript Beside Video */}
-          <aside className="lg:col-span-5 xl:col-span-4 space-y-4 lg:sticky lg:top-4">
-            {/* Video Description & Progress Card */}
-            <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl p-4 shadow-[2.5px_2.5px_0px_#3D352E] space-y-3">
-              <div className="flex items-start justify-between gap-2">
-                <div className="space-y-1 min-w-0">
-                  <div className="flex items-center flex-wrap gap-1.5">
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E]">
-                      {selectedClip.level || 'Story'}
-                    </span>
-                    {selectedClip.genre && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#EEF5EC] text-[#4D6B53] border border-[#4D6B53]/30">
-                        {selectedClip.genre}
-                      </span>
-                    )}
-                    {clipDuration > 0 && (
-                      <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#FAF5EB] text-[#786F66] border border-[#E8DEC8]">
-                        {formatCueTime(clipDuration)}
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-base sm:text-lg font-black text-[#2E2823] leading-snug">
-                    {selectedClip.title}
-                  </h2>
-                </div>
-                <Info className="w-4 h-4 text-[#786F66] shrink-0 mt-1" />
+          {/* RIGHT SIDEBAR COLUMN: Compact Progress Bar + Synchronized Transcript Beside Video */}
+          <aside className="lg:col-span-5 xl:col-span-4 space-y-3 lg:sticky lg:top-4">
+            {/* Compact Progress Card */}
+            <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl p-3.5 shadow-[2.5px_2.5px_0px_#3D352E] space-y-1.5">
+              <div className="flex items-center justify-between text-[11px] sm:text-xs font-extrabold">
+                <span className="text-[#786F66]">Tiến độ đã chấm phát âm</span>
+                <span className="text-[#4D6B53]">
+                  {practicedCount}/{cues.length} câu ({progressPct}%)
+                </span>
               </div>
-
-              <p className="text-xs font-semibold text-[#554D42] leading-relaxed bg-[#FAF5EB] rounded-2xl p-3 border border-[#E8DEC8]">
-                {selectedClip.description ||
-                  `Nguồn: ${selectedClip.origin || 'YouTube'} · Đoạn hội thoại luyện Shadowing gồm ${cues.length} câu kèm phụ đề song ngữ Anh–Việt đồng bộ theo video.`}
-              </p>
-
-              {Array.isArray(selectedClip.tags) && selectedClip.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedClip.tags.slice(0, 6).map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-0.5 rounded-lg bg-white border border-[#E8DEC8] text-[10px] font-extrabold text-[#786F66]"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              {/* Practiced cues progress */}
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between text-[11px] font-extrabold">
-                  <span className="text-[#786F66]">Tiến độ đã chấm phát âm</span>
-                  <span className="text-[#4D6B53]">
-                    {practicedCount}/{cues.length} câu ({progressPct}%)
-                  </span>
-                </div>
-                <div className="w-full h-2.5 rounded-full bg-[#FAF5EB] border border-[#3D352E]/40 overflow-hidden">
-                  <div
-                    className="h-full bg-[#4D6B53] transition-all duration-300"
-                    style={{ width: `${progressPct}%` }}
-                  />
-                </div>
+              <div className="w-full h-2.5 rounded-full bg-[#FAF5EB] border border-[#3D352E]/40 overflow-hidden">
+                <div
+                  className="h-full bg-[#4D6B53] transition-all duration-300"
+                  style={{ width: `${progressPct}%` }}
+                />
               </div>
             </div>
 
@@ -960,7 +911,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup }) {
               </div>
               <div
                 ref={cueListRef}
-                className="relative max-h-[380px] lg:max-h-[680px] overflow-y-auto space-y-2 pr-1"
+                className="relative max-h-[420px] lg:max-h-[780px] overflow-y-auto space-y-2 pr-1"
               >
                 {cues.map((cue, idx) => {
                   const isActive = idx === activeCueIdx;
