@@ -940,40 +940,6 @@ export function PageDashboard() {
             </button>
           </section>
 
-          {/* Mobile Quick Dictionary Search Bar */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleLookupWord(searchQuery);
-            }}
-            className="mb-3 flex items-center gap-2 bg-white border-2 border-[#382E2B] rounded-full px-3 py-1.5 shadow-[1.5px_2px_0px_#382E2B]"
-          >
-            <Search className="w-4 h-4 text-[#7A6B62] shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tra nhanh từ vựng Tiếng Anh..."
-              className="w-full bg-transparent text-xs font-bold text-[#382E2B] placeholder:text-[#9E8E84] focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                aria-label="Xóa từ tìm kiếm"
-                className="p-1 text-[#7A6B62] hover:text-[#382E2B]"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-            <button
-              type="submit"
-              className="px-3 py-1 rounded-full bg-[#382E2B] text-white text-[11px] font-black shrink-0 active:scale-95 transition-transform"
-            >
-              Tra
-            </button>
-          </form>
-
           {/* Mascot Review Hero Card */}
           <section className="mb-5 text-center flex flex-col items-center justify-center relative select-none">
             <div className="my-1.5 relative flex justify-center items-center">
