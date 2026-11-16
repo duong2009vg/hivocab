@@ -282,36 +282,30 @@ export default function ExerciseMCQ({ item, onSubmit, onNext, onReport, sessionI
             </div>
           )}
 
-          {/* Subtype 2: Audio -> English Word (Word masked as "???", Replay Button & Speed Toggles) */}
+          {/* Subtype 2: Audio -> English Word (Minimalist Centered Replay Button & Speed Toggles) */}
           {subtype === 'audio_to_word' && (
             <div className="flex flex-col items-center justify-center my-1 sm:my-2">
-              <div className="flex items-center justify-center gap-3">
+              <div className="flex flex-col items-center justify-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => playPromptAudio(audioSpeed)}
-                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-[2.5px] border-[#292524] shadow-[2px_3px_0px_#292524] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all cursor-pointer group shrink-0 min-h-[44px] min-w-[44px] ${
+                  className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full bg-gradient-to-b from-sky-400 via-[#3A82EE] to-blue-600 border-[2.5px] border-[#292524] shadow-[2px_3px_0px_#292524] flex items-center justify-center text-white hover:scale-105 active:scale-95 transition-all cursor-pointer group shrink-0 min-h-[44px] min-w-[44px] ${
                     isPlayingPromptAudio ? 'scale-105 ring-4 ring-sky-200' : ''
                   }`}
                   title="Bấm hoặc nhấn Space để nghe lại"
                   aria-label="Nghe lại phát âm"
                 >
                   <svg
-                    className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
+                    className="w-8 h-8 sm:w-9 sm:h-9 text-white drop-shadow-sm group-hover:scale-110 transition-transform"
                     fill="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path d="M13.5 4.06c0-1.336-1.616-2.005-2.56-1.06l-4.5 4.5H4a2 2 0 00-2 2v5a2 2 0 002 2h2.44l4.5 4.5c.944.945 2.56.276 2.56-1.06V4.06zM18.5 12A6.49 6.49 0 0017 7.75a1 1 0 10-1.414 1.414A4.49 4.49 0 0116.5 12c0 1.2-.47 2.29-1.236 3.107a1 1 0 101.442 1.386A6.49 6.49 0 0018.5 12zm3 0c0-3.32-1.72-6.24-4.32-7.9a1 1 0 10-1.08 1.68 7.48 7.48 0 013.4 6.22c0 2.54-1.26 4.79-3.18 6.13a1 1 0 101.16 1.63A9.48 9.48 0 0021.5 12z" />
                   </svg>
                 </button>
-
-                <div className="flex flex-col items-start justify-center">
-                  <span className="text-2xl sm:text-3xl font-extrabold tracking-widest text-stone-800 font-mono">
-                    🔊 "???"
-                  </span>
-                  <span className="text-[11px] sm:text-xs text-stone-500 font-crayon">
-                    Nhấn nút hoặc phím [Space]
-                  </span>
-                </div>
+                <span className="text-[11px] sm:text-xs text-stone-500 font-crayon">
+                  Nhấn nút hoặc phím [Space]
+                </span>
               </div>
 
               {/* Speed controls */}
