@@ -494,6 +494,7 @@ export function PageDashboard() {
     refresh,
   } = useDashboardStats();
 
+  const wordsDueCount = stats.wordsDueCount || 0;
   const [searchQuery, setSearchQuery] = useState('');
   const [isIeltsModalOpen, setIsIeltsModalOpen] = useState(false);
   const [dailyWordOffset, setDailyWordOffset] = useState(0);
@@ -742,7 +743,6 @@ export function PageDashboard() {
     return 'Chào buổi tối';
   }, []);
   const streak = stats.streak || 0;
-  const wordsDueCount = stats.wordsDueCount || 0;
   const total =
     stats.totalWordsLearned ??
     stats.totalWordsCount ??
