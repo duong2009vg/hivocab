@@ -1,18 +1,68 @@
 // src/components/layout/MainSidebar.jsx
 // 100% Pixel-Perfect match to taskbar fix design (code.html & screen.png)
-import React from 'react';
-import { BookOpen, User, LogIn, Crown, Flame, Folder, Mic } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {
+  User,
+  LogIn,
+  LogOut,
+  Crown,
+  Flame,
+  Folder,
+  Mic,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Settings,
+  MessageSquare,
+} from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useProfileStats } from '../../hooks/useProfileStats.js';
 import { getMasteryBadge } from '../../utils/masteryBadge.js';
 
+const SIDEBAR_COLLAPSED_STORAGE_KEY = 'hivocab_sidebar_collapsed';
+
 export function MainSidebar() {
   const { user, signOut, isPaidPro: isPro } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const { openModal } = useModal();
   const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined;
+    const root = document.getElementById('app-root');
+    if (root) {
+      root.classList.toggle('sidebar-collapsed', collapsed);
+    }
+    try {
+      window.localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, collapsed ? '1' : '0');
+    } catch (_) {
+      // Ignore storage access errors in private browsing modes
+    }
+    return () => {
+      if (root) root.classList.remove('sidebar-collapsed');
+    };
+  }, [collapsed]);
+
+  const openFeedbackModal = () => {
+    if (openModal) {
+      openModal('bugReport', {
+        initialType: 'feedback',
+        feature: 'Sidebar Menu',
+        title: 'Góp ý phát triển HiVocab',
+      });
+    } else if (window.openBugReportModal) {
+      window.openBugReportModal({ initialType: 'feedback', feature: 'Sidebar Menu' });
+    }
+  };
 
   const activeTab =
     currentRoute === 'topic-detail' || currentRoute === 'lesson-detail'
@@ -117,23 +167,47 @@ export function MainSidebar() {
     >
       {/* Top Section: Brand & Nav Links */}
       <div className="flex flex-col shrink-0">
-        {/* Brand Logo - HI Crayon Cream Paper */}
+        {/* Brand Logo + Collapse Toggle */}
         <div
-          onClick={() => navigateTo('dashboard')}
-          className="px-1.5 mb-4 shrink-0 cursor-pointer group select-none flex items-center"
-          title="Trang chủ HiVocab"
+          className="px-1.5 mb-4 shrink-0 select-none flex items-center justify-between gap-2"
           data-purpose="sidebar-brand"
         >
-          <div
-            className="w-14 h-14 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] overflow-hidden bg-[#F7F0DE] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
-            data-purpose="sidebar-logo-box"
+          <button
+            type="button"
+            onClick={() => navigateTo('dashboard')}
+            className="cursor-pointer group flex items-center justify-center shrink-0 focus:outline-none"
+            title="Trang chủ HiVocab"
+            aria-label="Trang chủ HiVocab"
           >
-            <img
-              src="/logo-hi-cream.png"
-              alt="Logo HiVocab"
-              className="w-full h-full object-cover"
-            />
-          </div>
+            <div
+              className="w-14 h-14 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] overflow-hidden bg-[#F7F0DE] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
+              data-purpose="sidebar-logo-box"
+            >
+              <img
+                src="/logo-hi-cream.png"
+                alt="Logo HiVocab"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCollapsed((prev) => !prev)}
+            className={`${
+              collapsed ? 'w-10 h-7 rounded-lg' : 'w-8 h-8 rounded-xl'
+            } bg-white hover:bg-[#F4E3B4] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer shrink-0`}
+            title={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn chỉ hiện icon'}
+            aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn chỉ hiện icon'}
+            aria-expanded={!collapsed}
+            data-purpose="sidebar-collapse-toggle"
+          >
+            {collapsed ? (
+              <PanelLeftOpen className="w-4 h-4 shrink-0" />
+            ) : (
+              <PanelLeftClose className="w-4 h-4 shrink-0" />
+            )}
+          </button>
         </div>
 
         {/* Navigation Menu */}
@@ -145,27 +219,33 @@ export function MainSidebar() {
                 key={item.id}
                 onClick={() => navigateTo(item.id)}
                 onMouseEnter={item.onMouseEnter}
-                className={`flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-2xl cursor-pointer transition-all shrink-0 ${
+                title={item.label}
+                aria-label={item.label}
+                className={`flex items-center ${
+                  collapsed ? 'justify-center px-0' : 'justify-between gap-2 px-3.5 py-2.5'
+                } rounded-2xl cursor-pointer transition-all shrink-0 ${
                   isActive
                     ? 'font-bold text-white bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
                     : 'font-semibold text-[#786F66] hover:bg-white/80 hover:text-[#302A24] border border-transparent'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 min-w-0'}`}>
                   {item.emoji ? (
                     <span className="text-lg leading-none shrink-0">{item.emoji}</span>
                   ) : (
                     item.icon
                   )}
-                  <span className={`truncate whitespace-nowrap text-sm ${isActive ? 'font-heading' : ''}`}>
-                    {item.label}
-                  </span>
+                  {!collapsed && (
+                    <span className={`truncate whitespace-nowrap text-sm ${isActive ? 'font-heading' : ''}`}>
+                      {item.label}
+                    </span>
+                  )}
                 </div>
 
-                {isActive && (
+                {!collapsed && isActive && (
                   <span className="w-2.5 h-2.5 rounded-full bg-amber-300 ring-2 ring-white shrink-0"></span>
                 )}
-                {!isActive && item.badge != null && (
+                {!collapsed && !isActive && item.badge != null && (
                   <span className="px-2 py-0.5 text-xs font-bold bg-[#F4E3B4] text-[#3D352E] rounded-full border border-[#3D352E] shrink-0">
                     {item.badge}
                   </span>
@@ -183,26 +263,94 @@ export function MainSidebar() {
       >
         {/* User Profile Pill or Guest CTA */}
         {!user ? (
-          <div
-            className="bg-[#FAF3E7] rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2"
-            data-purpose="sidebar-profile-card"
-          >
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
-                <User className="w-4 h-4 text-[#8A796F]" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="text-xs font-black text-[#302A24] truncate">Khách trải nghiệm</div>
-                <div className="text-[10px] text-[#786F66] truncate">Chưa đăng nhập</div>
-              </div>
-            </div>
+          collapsed ? (
             <button
               type="button"
               onClick={() => navigateTo('login')}
-              className="w-full py-1.5 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+              title="Đăng nhập / Đăng ký"
+              aria-label="Đăng nhập / Đăng ký"
+              className="w-11 h-11 rounded-2xl bg-[#D96B43] hover:bg-[#C85A3F] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer"
+              data-purpose="sidebar-profile-card"
             >
-              <span>Đăng nhập / Đăng ký</span>
-              <LogIn className="w-3.5 h-3.5 shrink-0" />
+              <LogIn className="w-4 h-4 shrink-0" />
+            </button>
+          ) : (
+            <div
+              className="bg-[#FAF3E7] rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2"
+              data-purpose="sidebar-profile-card"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
+                  <User className="w-4 h-4 text-[#8A796F]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs font-black text-[#302A24] truncate">Khách trải nghiệm</div>
+                  <div className="text-[10px] text-[#786F66] truncate">Chưa đăng nhập</div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => navigateTo('login')}
+                className="w-full py-1.5 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+              >
+                <span>Đăng nhập / Đăng ký</span>
+                <LogIn className="w-3.5 h-3.5 shrink-0" />
+              </button>
+            </div>
+          )
+        ) : collapsed ? (
+          <div className="flex flex-col items-center gap-1">
+            <button
+              type="button"
+              onClick={() => navigateTo('profile')}
+              className={`relative w-9 h-9 rounded-full border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center justify-center overflow-visible cursor-pointer transition-all ${
+                activeTab === 'profile' ? 'ring-2 ring-[#4D6B53]' : ''
+              }`}
+              title={`${userName} • ${userRank} • ${displayStreak} ngày streak`}
+              aria-label={`Hồ sơ ${userName}`}
+            >
+              <div className="w-full h-full rounded-full bg-[#FFE8C2] flex items-center justify-center overflow-hidden">
+                {user?.user_metadata?.avatar_url ? (
+                  <img
+                    src={user.user_metadata.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User className="w-4 h-4 text-[#302A24]" />
+                )}
+              </div>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => navigateTo('profile')}
+              title="Cài đặt"
+              aria-label="Cài đặt"
+              className="w-8 h-8 rounded-xl text-[#786F66] hover:bg-white/80 hover:text-[#302A24] flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <Settings className="w-4 h-4 shrink-0" />
+            </button>
+
+            <button
+              type="button"
+              onClick={openFeedbackModal}
+              title="Góp ý"
+              aria-label="Góp ý"
+              className="w-8 h-8 rounded-xl text-[#786F66] hover:bg-white/80 hover:text-[#302A24] flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <MessageSquare className="w-4 h-4 shrink-0" />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Đăng xuất"
+              aria-label="Đăng xuất"
+              className="w-8 h-8 rounded-xl text-[#786F66] hover:bg-[#FBECE7] hover:text-[#C85A3F] flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <LogOut className="w-4 h-4 shrink-0" />
             </button>
           </div>
         ) : (
@@ -263,17 +411,7 @@ export function MainSidebar() {
               </a>
               <span>•</span>
               <a
-                onClick={() => {
-                  if (openModal) {
-                    openModal('bugReport', {
-                      initialType: 'feedback',
-                      feature: 'Sidebar Menu',
-                      title: 'Góp ý phát triển HiVocab',
-                    });
-                  } else if (window.openBugReportModal) {
-                    window.openBugReportModal({ initialType: 'feedback', feature: 'Sidebar Menu' });
-                  }
-                }}
+                onClick={openFeedbackModal}
                 className="hover:text-[#302A24] transition cursor-pointer"
               >
                 Góp ý
