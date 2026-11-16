@@ -17,6 +17,7 @@ export function ModalProvider({ children }) {
     authError:      { open: false, desc: '' },
     ieltsGoal:      { open: false },
     flashcardMode:  { open: false, onSelect: null },
+    reviewLauncher: { open: false, wordsDueCount: 0 },
     requireLogin:   { open: false, title: '', message: '', actionName: '' },
   });
 
@@ -57,6 +58,8 @@ export function ModalProvider({ children }) {
     window.closeIELTSGoalModal = () => closeModal('ieltsGoal');
     window.openFlashcardModeModal = (onSelect) => openModal('flashcardMode', { onSelect });
     window.closeFlashcardModeModal = () => closeModal('flashcardMode');
+    window.openReviewLauncherModal = (wordsDueCount = 0) => openModal('reviewLauncher', { wordsDueCount });
+    window.closeReviewLauncherModal = () => closeModal('reviewLauncher');
     window.openRequireLoginModal = (message, title, actionName) => openModal('requireLogin', { message, title, actionName });
     window.closeRequireLoginModal = () => closeModal('requireLogin');
     window.openBugReportModal = (data = {}) => openModal('bugReport', data);
@@ -65,6 +68,8 @@ export function ModalProvider({ children }) {
 
     return () => {
       delete window.__modalContext;
+      delete window.openReviewLauncherModal;
+      delete window.closeReviewLauncherModal;
       delete window.openBugReportModal;
       delete window.closeBugReportModal;
       delete window.openFeedbackModal;

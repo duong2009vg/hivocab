@@ -569,25 +569,22 @@ export function PageDashboard() {
       });
       return;
     }
+    if (wordsDueCount > 0) {
+      openModal('reviewLauncher', { wordsDueCount });
+      return;
+    }
     try {
-      const dueWords = await getWordsDueForReview(50);
+      const dueWords = await getWordsDueForReview(1);
       if (dueWords && dueWords.length > 0) {
-        if (typeof window !== 'undefined') {
-          window._currentSessionWords = dueWords;
-          window._currentLessonWords = dueWords;
-          window._practiceMode = null;
-        }
-        navigateTo('learning');
-      } else {
-        if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
-          window.showHiToast('Hiện không có từ vựng nào đến hạn ôn tập hôm nay.', 'info');
-        }
+        openModal('reviewLauncher', { wordsDueCount: dueWords.length });
+      } else if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
+        window.showHiToast('Hiện không có từ vựng nào đến hạn ôn tập hôm nay.', 'info');
       }
     } catch (err) {
       console.warn('[Dashboard] handleStartReview error:', err);
-      navigateTo('learning');
+      openModal('reviewLauncher', { wordsDueCount: 0 });
     }
-  }, [user, navigateTo, openModal]);
+  }, [user, wordsDueCount, openModal]);
 
   useEffect(() => {
     window.startSession = handleStartReview;
@@ -1031,15 +1028,22 @@ export function PageDashboard() {
             </div>
             <div className="mt-3.5 flex flex-wrap items-center justify-center gap-2.5">
               {heroState === 'ready' && wordsDueCount > 0 ? (
-                <button
-                  type="button"
-                  onClick={handleStartReview}
-                  className="inline-flex items-center justify-center space-x-2 px-6 py-2.5 bg-[#759864] hover:bg-[#6A8B5A] text-white text-base font-bold rounded-full border-[2.5px] border-[#382E2B] shadow-[2px_3px_0px_#382E2B] transition-transform active:scale-95"
-                >
-                  <Play className="w-4 h-4 fill-white shrink-0" />
-                  <span>Ôn tập ngay ({wordsDueCount} từ)</span>
-                  <ArrowRight className="w-4 h-4 shrink-0" />
-                </button>
+                <div className="flex flex-col items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={handleStartReview}
+                    className="inline-flex items-center justify-center space-x-2 px-6 py-2.5 bg-[#759864] hover:bg-[#6A8B5A] text-white text-base font-bold rounded-full border-[2.5px] border-[#382E2B] shadow-[2px_3px_0px_#382E2B] transition-transform active:scale-95 cursor-pointer"
+                  >
+                    <Play className="w-4 h-4 fill-white shrink-0" />
+                    <span>Ôn tập ngay ({wordsDueCount} từ)</span>
+                    <ArrowRight className="w-4 h-4 shrink-0" />
+                  </button>
+                  <span className="text-[11px] font-semibold text-[#786F66]">
+                    {wordsDueCount > 15
+                      ? `Gợi ý phiên nhanh ~5 phút (15/${wordsDueCount} từ)`
+                      : `Mất tầm ~${Math.max(1, Math.round(wordsDueCount * 0.35))} phút`}
+                  </span>
+                </div>
               ) : (
                 <>
                   <button
@@ -1574,7 +1578,9 @@ export function PageDashboard() {
                               <span>Ôn tập ngay ({wordsDueCount} từ SRS)</span>
                             </button>
                             <span className="text-xs font-semibold text-softMuted whitespace-nowrap">
-                              Mất tầm ~{Math.max(3, Math.round(wordsDueCount * 0.4))} phút
+                              {wordsDueCount > 15
+                                ? `Gợi ý phiên nhanh ~5 phút (15/${wordsDueCount} từ)`
+                                : `Mất tầm ~${Math.max(1, Math.round(wordsDueCount * 0.35))} phút`}
                             </span>
                           </>
                         ) : (

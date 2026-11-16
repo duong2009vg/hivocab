@@ -26,6 +26,7 @@ const PricingModal = lazy(() => import('./components/modals/PricingModal.jsx'));
 const ForgotPasswordModal = lazy(() => import('./components/modals/ForgotPasswordModal.jsx'));
 const AuthErrorModal = lazy(() => import('./components/modals/AuthErrorModal.jsx'));
 const FlashcardModeModal = lazy(() => import('./components/modals/FlashcardModeModal.jsx'));
+const ReviewLauncherModal = lazy(() => import('./components/modals/ReviewLauncherModal.jsx'));
 const RequireLoginModal = lazy(() => import('./components/modals/RequireLoginModal.jsx'));
 const VisualInspector = lazy(() => import('./components/common/VisualInspector.jsx'));
 const PageLanding = lazy(() => import('./components/pages/PageLanding.jsx'));
@@ -199,6 +200,7 @@ function AppRoutes() {
         <ForgotPasswordModal />
         <AuthErrorModal />
         <FlashcardModeModal />
+        <ReviewLauncherModal />
         <RequireLoginModal />
         <VisualInspector />
       </Suspense>
