@@ -268,7 +268,7 @@ export function PageThptRoom() {
 
         let examData = null;
 
-        // Thử nạp từ Supabase thpt_exams table (bảo vệ bằng RLS)
+        // Nạp từ Supabase thpt_exams table (bảo vệ bằng RLS — tuyệt đối không fallback sang file tĩnh)
         try {
           const { data: supaExam, error: err } = await supabase
             .from('thpt_exams')
@@ -281,19 +281,12 @@ export function PageThptRoom() {
           }
         } catch (_) {}
 
-        // Fallback sang tệp JSON tĩnh nếu Supabase không có hoặc offline
         if (!examData) {
-          try {
-            const res = await fetch(`data/thpt_exams.json?v=20261112_v3`);
-            if (res.ok) {
-              const arr = await res.json();
-              examData = arr.find((e) => e.id === examId);
-            }
-          } catch (_) {}
-        }
-
-        if (!examData) {
-          throw new Error(`Không tìm được nội dung câu hỏi cho đề thi id: ${examId}`);
+          throw new Error(
+            isExamPro
+              ? 'Đề thi này dành riêng cho tài khoản PRO. Vui lòng nâng cấp để mở khóa.'
+              : `Không tìm được nội dung câu hỏi cho đề thi id: ${examId}`
+          );
         }
 
         if (cancelled) return;

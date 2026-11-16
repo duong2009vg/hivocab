@@ -22,29 +22,8 @@ function copyStaticAssetsPlugin() {
         console.log('[copy-assets] Copied css/ directory');
       }
 
-      // 2. Copy functions/ recursively
-      function copyDirRecursive(src, dest) {
-        if (!fs.existsSync(src)) return;
-        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
-        for (const item of fs.readdirSync(src)) {
-          const sPath = resolve(src, item);
-          const dPath = resolve(dest, item);
-          if (fs.statSync(sPath).isDirectory()) {
-            copyDirRecursive(sPath, dPath);
-          } else {
-            fs.copyFileSync(sPath, dPath);
-          }
-        }
-      }
-
-      const functionsSrc = resolve(__dirname, 'functions');
-      const functionsDest = resolve(outDir, 'functions');
-      if (fs.existsSync(functionsSrc)) {
-        copyDirRecursive(functionsSrc, functionsDest);
-        console.log('[copy-assets] Copied functions/ recursively');
-      }
-
-      // 3. Copy standalone static HTML pages that don't need Vite processing
+      // 2. Copy standalone static HTML pages that don't need Vite processing
+      // Note: Do NOT copy functions/ into dist/ (Cloudflare Pages deploys functions/ from repo root)
       const staticPages = ['privacy.html', 'terms.html'];
       for (const page of staticPages) {
         const src = resolve(__dirname, page);
@@ -103,6 +82,31 @@ function ttsDevPlugin() {
   };
 }
 
+function corpusDevPlugin() {
+  return {
+    name: 'corpus-dev-plugin',
+    configureServer(server) {
+      server.middlewares.use('/api/corpus', async (req, res) => {
+        try {
+          const url = new URL(req.url, 'http://localhost');
+          const { onRequestGet } = await server.ssrLoadModule('/functions/api/corpus.js');
+          const webReq = new Request(`http://localhost/api/corpus${url.search}`, {
+            method: req.method || 'GET',
+            headers: req.headers,
+          });
+          const webRes = await onRequestGet({ request: webReq, env: { ALLOW_LOCAL_RATE_LIMIT: 'true' } });
+          res.statusCode = webRes.status;
+          webRes.headers.forEach((v, k) => res.setHeader(k, v));
+          res.end(await webRes.text());
+        } catch (e) {
+          res.statusCode = 500;
+          res.end(JSON.stringify({ ok: false, error: e.message }));
+        }
+      });
+    },
+  };
+}
+
 function spaRoutesPlugin() {
   return {
     name: 'spa-routes-plugin',
@@ -121,7 +125,7 @@ function spaRoutesPlugin() {
 }
 
 export default defineConfig({
-  plugins: [react(), spaRoutesPlugin(), ttsDevPlugin(), copyStaticAssetsPlugin()],
+  plugins: [react(), spaRoutesPlugin(), ttsDevPlugin(), corpusDevPlugin(), copyStaticAssetsPlugin()],
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),

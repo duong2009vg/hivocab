@@ -321,6 +321,7 @@ export function useTopicDetail() {
   const startReading = useCallback((passageId) => {
     // Set passageId context for React's useBilingualReading hook to pick up
     if (passageId && typeof window !== 'undefined') {
+      window._bilingualEntryOrigin = 'topic';
       window._currentPassageId = passageId;
     }
     // Navigate via React router (safe for React DOM) instead of legacy window fn

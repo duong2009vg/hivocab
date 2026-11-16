@@ -5,7 +5,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { Sparkles, Bug, AlertTriangle, Pin } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-import { getBrowserDiagnosticLogs } from '../../utils/browserLogger.js';
+import { getBrowserDiagnosticLogs, getSanitizedCurrentUrl } from '../../utils/browserLogger.js';
 
 const FEEDBACK_SUBTYPES = [
   { id: 'feature_request', label: 'Gợi ý tính năng mới', desc: 'Ý tưởng bạn muốn HiVocab phát triển' },
@@ -103,7 +103,7 @@ export function BugReportModal() {
           subTypeLabel: selectedSubtypeObj?.label,
           modalTitle: title,
           targetWord: contextData?.word || null,
-          targetUrl: window.location.href,
+          targetUrl: getSanitizedCurrentUrl(),
         },
         device_info: freshLogs,
         status: 'pending',

@@ -82,7 +82,7 @@ export function AdminProtectedRoute({ children }) {
         }
       }
 
-      if (!captchaToken && typeof window !== 'undefined' && typeof window.turnstile !== 'undefined') {
+      if (TURNSTILE_SITE_KEY && !captchaToken) {
         setErrorMsg('Vui lòng hoàn thành xác thực bảo mật Cloudflare (tích chọn vào ô CAPTCHA) trước khi đăng nhập!');
         return;
       }

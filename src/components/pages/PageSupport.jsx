@@ -5,7 +5,7 @@ import { useRoute } from '../../router/RouteContext.jsx';
 import { useLandingLang } from '../../context/LandingLangContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
-import { getBrowserDiagnosticLogs } from '../../utils/browserLogger.js';
+import { getBrowserDiagnosticLogs, getSanitizedCurrentUrl } from '../../utils/browserLogger.js';
 import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
 
 export function PageSupport() {
@@ -59,7 +59,7 @@ export function PageSupport() {
           fullName: name,
           contactInfo: contact,
           source: 'page_support',
-          url: window.location.href,
+          url: getSanitizedCurrentUrl(),
         },
         device_info: getBrowserDiagnosticLogs(),
         status: 'pending',

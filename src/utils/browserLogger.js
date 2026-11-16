@@ -66,6 +66,25 @@ function detectBrowser() {
   return 'Trình duyệt khác';
 }
 
+export function getSanitizedCurrentUrl() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const parsed = new URL(window.location.href);
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    return window.location.pathname || '/';
+  }
+}
+
+export function getSanitizedHash() {
+  if (typeof window === 'undefined') return '';
+  const raw = String(window.location.hash || '');
+  if (!raw || /(access_token|refresh_token|provider_token|token_hash|code=|type=recovery)/i.test(raw)) {
+    return '';
+  }
+  return raw.split('?')[0];
+}
+
 export function getBrowserDiagnosticLogs() {
   if (typeof window === 'undefined') return {};
 
@@ -73,9 +92,9 @@ export function getBrowserDiagnosticLogs() {
   const scr = typeof window.screen !== 'undefined' ? window.screen : {};
 
   return {
-    url: window.location.href,
+    url: getSanitizedCurrentUrl(),
     pathname: window.location.pathname,
-    hash: window.location.hash || '',
+    hash: getSanitizedHash(),
     os: detectOS(),
     browser: detectBrowser(),
     userAgent: nav.userAgent || 'Unknown',

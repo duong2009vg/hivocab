@@ -98,10 +98,14 @@ function AppRoutes() {
   }, []);
 
   const [studioVideoFocused, setStudioVideoFocused] = React.useState(false);
+  const [bilingualReadingFocused, setBilingualReadingFocused] = React.useState(false);
 
   React.useEffect(() => {
     if (currentRoute !== 'studio') {
       setStudioVideoFocused(false);
+    }
+    if (currentRoute !== 'bilingual-reading') {
+      setBilingualReadingFocused(false);
     }
   }, [currentRoute]);
 
@@ -144,7 +148,7 @@ function AppRoutes() {
       case 'profile':
         return <ProtectedRoute><PageProfile /></ProtectedRoute>;
       case 'bilingual-reading':
-        return <PageBilingualReading />;
+        return <PageBilingualReading onReadingModeChange={setBilingualReadingFocused} />;
       case 'learning':
         return <PageLearning />;
       case 'admin':
@@ -155,13 +159,14 @@ function AppRoutes() {
   };
 
   const hideSidebarForStudio = currentRoute === 'studio' && studioVideoFocused;
+  const hideSidebarForReading = currentRoute === 'bilingual-reading' && bilingualReadingFocused;
 
   const shouldShowSidebar =
     (isMainTab || isTopicDetail) &&
     !hideSidebarForStudio &&
+    !hideSidebarForReading &&
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
-    currentRoute !== 'bilingual-reading' &&
     currentRoute !== 'thpt-room' &&
     currentRoute !== 'admin' &&
     currentRoute !== 'login';
@@ -169,9 +174,9 @@ function AppRoutes() {
   const shouldShowBottomNav =
     (isMainTab || isTopicDetail) &&
     !hideSidebarForStudio &&
+    !hideSidebarForReading &&
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
-    currentRoute !== 'bilingual-reading' &&
     currentRoute !== 'thpt-room' &&
     currentRoute !== 'admin';
 
@@ -183,7 +188,7 @@ function AppRoutes() {
       {shouldShowBottomNav && <MobileBottomNav />}
 
       {/* Render active page inside ErrorBoundary and Suspense to prevent blank screen */}
-      <ErrorBoundary>
+      <ErrorBoundary resetKey={currentRoute}>
         <Suspense fallback={<RouteLoadingFallback />}>
           {renderActivePage()}
         </Suspense>

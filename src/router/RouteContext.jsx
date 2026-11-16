@@ -10,7 +10,7 @@ const RouteContext = createContext({
   isExerciseDetail: false,
 });
 
-export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'studio', 'dictionary', 'settings', 'profile'];
+export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'bilingual-reading', 'studio', 'dictionary', 'settings', 'profile'];
 
 function normalizeRoute(raw) {
   if (!raw) return 'landing';
@@ -19,6 +19,7 @@ function normalizeRoute(raw) {
     return 'library';
   }
   if (clean === 'thpt') return 'exercises';
+  if (clean === 'bilingual' || clean === 'reading') return 'bilingual-reading';
   if (clean === 'shadowing' || clean === 'dictation' || clean === 'pronunciation') return 'studio';
   if (clean === 'game') return 'dashboard';
   if (clean === 'settings') return 'profile';
@@ -179,11 +180,11 @@ export function RouteProvider({ children }) {
       // browser is still on a guarded deep-link such as /app. Keep the URL in
       // sync even when React is already rendering the target route.
       if (!preserveHash && typeof window !== 'undefined') {
-        if (target === 'landing' && (window.location.pathname !== '/' || window.location.hash)) {
+        if (target === 'landing' && (window.location.pathname !== '/' || window.location.hash || window.location.search)) {
           window.history.replaceState({ page: 'landing' }, '', '/');
-        } else if (target === 'login' && window.location.pathname !== '/login') {
+        } else if (target === 'login' && (window.location.pathname !== '/login' || window.location.hash || window.location.search)) {
           window.history.replaceState({ page: 'login' }, '', '/login');
-        } else if (target === 'dashboard' && window.location.pathname !== '/app') {
+        } else if (target === 'dashboard' && (window.location.pathname !== '/app' || window.location.hash || window.location.search)) {
           window.history.replaceState({ page: 'dashboard' }, '', '/app');
         }
       }
@@ -221,7 +222,7 @@ export function RouteProvider({ children }) {
           window.history.pushState({ page: 'login' }, '', '/login');
         }
       } else if (target === 'dashboard') {
-        if (window.location.pathname !== '/app' && window.location.hash !== '#dashboard') {
+        if (window.location.pathname !== '/app' || (window.location.hash && window.location.hash !== '#dashboard') || window.location.search) {
           window.history.pushState({ page: 'dashboard' }, '', '/app');
         }
       } else {

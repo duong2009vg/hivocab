@@ -80,23 +80,12 @@ export function useThptExams() {
           }
         }
 
-        // 3. Fallback sang tệp JSON tĩnh nếu Supabase gặp lỗi
-        const res = await fetch('data/thpt_exams.json?v=20261112_v3');
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
+        if (supaErr) {
+          throw new Error(supaErr.message || 'Không tải được danh sách đề thi từ máy chủ');
+        }
         if (!cancelled) {
-          const fallbackNormalized = (data || []).map((e) => ({
-            ...e,
-            duration_minutes: e.duration_minutes || e.time_limit || 50,
-            time_limit: e.duration_minutes || e.time_limit || 50,
-            is_pro: Boolean(e.is_pro),
-          }));
-
-          setExams(fallbackNormalized);
+          setExams([]);
           setLoading(false);
-          try {
-            sessionStorage.setItem(EXAMS_CACHE_KEY, JSON.stringify(fallbackNormalized));
-          } catch (_) {}
         }
       } catch (err) {
         if (!cancelled) {

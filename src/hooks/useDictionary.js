@@ -12,9 +12,6 @@ import {
 } from '../services/dictionaryService.js';
 import { playWordAudio } from '../services/audioService.js';
 
-const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU';
-const SB_URL = 'https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/words';
-
 const suggestCache = new Map();
 
 export function useDictionary() {
@@ -58,29 +55,19 @@ export function useDictionary() {
 
     try {
       let list = [];
-      const { data, error } = await supabase
-        .from('words')
-        .select('word, meaning, pos')
-        .ilike('word', `${cleanQ}%`)
-        .order('word')
-        .limit(8);
+      const rpcRes = await supabase.rpc('search_dictionary_suggestions', { p_prefix: cleanQ });
+      if (!rpcRes.error && Array.isArray(rpcRes.data)) {
+        list = rpcRes.data;
+      } else {
+        const { data, error } = await supabase
+          .from('words')
+          .select('word, meaning, pos')
+          .ilike('word', `${cleanQ}%`)
+          .order('word')
+          .limit(8);
 
-      if (!error && Array.isArray(data)) {
-        list = data;
-      }
-
-      if (list.length === 0) {
-        const res = await fetch(
-          `${SB_URL}?word=ilike.${encodeURIComponent(cleanQ)}%25&select=word,meaning,pos&order=word&limit=8`,
-          {
-            headers: {
-              apikey: SB_ANON_KEY,
-              Authorization: `Bearer ${SB_ANON_KEY}`,
-            },
-          }
-        );
-        if (res.ok) {
-          list = await res.json();
+        if (!error && Array.isArray(data)) {
+          list = data;
         }
       }
 

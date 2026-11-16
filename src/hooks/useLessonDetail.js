@@ -238,6 +238,7 @@ export function useLessonDetail() {
   const startReading = useCallback(() => {
     // Set passageId context for React's useBilingualReading hook to pick up
     if (passageId && typeof window !== 'undefined') {
+      window._bilingualEntryOrigin = 'lesson';
       window._currentPassageId = passageId;
     }
     // Navigate via React router (safe for React DOM) instead of legacy window fn

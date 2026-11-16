@@ -85,7 +85,7 @@ export function PageLogin() {
 
     setIsSubmitting(true);
 
-    // Get Turnstile token if available
+    // Get Turnstile token and fail closed when TURNSTILE_SITE_KEY is configured
     let captchaToken = '';
     if (typeof window !== 'undefined' && typeof window.turnstile !== 'undefined') {
       try {
@@ -97,6 +97,12 @@ export function PageLogin() {
       if (hiddenInput && hiddenInput.value) {
         captchaToken = hiddenInput.value;
       }
+    }
+
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setIsSubmitting(false);
+      setErrorMessage('Vui lòng hoàn thành xác thực bảo mật Cloudflare CAPTCHA trước khi tiếp tục.');
+      return;
     }
 
     try {
@@ -161,12 +167,6 @@ export function PageLogin() {
     navigateTo('landing');
     if (typeof window !== 'undefined' && typeof window.navigateTo === 'function') {
       window.navigateTo('landing');
-    }
-  };
-
-  const handleToggleDevMode = () => {
-    if (typeof window !== 'undefined' && typeof window.toggleDevMode === 'function') {
-      window.toggleDevMode();
     }
   };
 
@@ -527,19 +527,6 @@ export function PageLogin() {
               🔒 Dữ liệu cá nhân của bạn được mã hóa an toàn theo Luật Bảo vệ DLCN 91/2025/QH15 & Nghị định 356/2025/NĐ-CP.
             </p>
           )}
-
-          {/* Dev mode toggle */}
-          <div className="mt-4 pt-3 border-t border-[#DECDBB]/60 text-center">
-            <button
-              type="button"
-              onClick={handleToggleDevMode}
-              id="dev-mode-btn"
-              className="text-[11px] font-bold text-[#8A796F] hover:text-[#302A24] transition-colors px-3 py-1 rounded-xl hover:bg-[#FAF5EB] cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[13px] align-middle mr-1">developer_mode</span>
-              <span id="dev-mode-label">Chế độ Demo (offline)</span>
-            </button>
-          </div>
         </div>
       </main>
 

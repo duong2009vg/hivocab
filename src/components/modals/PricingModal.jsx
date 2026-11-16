@@ -603,7 +603,7 @@ export function PricingModal({ onSuccess: propOnSuccess }) {
                           className="w-52 h-52 sm:w-56 sm:h-56 object-contain rounded-lg"
                         />
                       </div>
-                      {orderData.checkoutUrl && (
+                      {/^https:\/\//i.test(String(orderData.checkoutUrl || '')) && (
                         <a
                           href={orderData.checkoutUrl}
                           target="_blank"

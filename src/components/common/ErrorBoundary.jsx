@@ -1,6 +1,7 @@
 // src/components/common/ErrorBoundary.jsx
 // Catches unhandled runtime rendering errors and displays a user-friendly UI instead of blank screen
 import React from 'react';
+import { getSanitizedCurrentUrl } from '../../utils/browserLogger.js';
 
 export class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -15,9 +16,16 @@ export class ErrorBoundary extends React.Component {
       msg.includes('Loading chunk') ||
       msg.includes('ChunkLoadError') ||
       msg.includes('MIME type') ||
+      msg.includes("reading 'default'") ||
       error?.name === 'ChunkLoadError'
     );
     return { hasError: true, error, isChunkMismatch };
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.state.hasError && this.props.resetKey !== undefined && prevProps.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null, errorInfo: null, isChunkMismatch: false });
+    }
   }
 
   componentDidCatch(error, errorInfo) {
@@ -30,6 +38,7 @@ export class ErrorBoundary extends React.Component {
       msg.includes('Loading chunk') ||
       msg.includes('ChunkLoadError') ||
       msg.includes('MIME type') ||
+      msg.includes("reading 'default'") ||
       error?.name === 'ChunkLoadError'
     );
 
@@ -54,7 +63,7 @@ export class ErrorBoundary extends React.Component {
             error_message: String(error?.message || error || 'Unknown runtime error'),
             error_stack: error?.stack ? String(error.stack).slice(0, 2000) : null,
             component: errorInfo?.componentStack ? String(errorInfo.componentStack).slice(0, 1000) : 'ErrorBoundary',
-            url: typeof window !== 'undefined' ? window.location.href : null,
+            url: getSanitizedCurrentUrl(),
           }).then(() => {}).catch(() => {});
         }).catch(() => {});
       } catch (_) {}

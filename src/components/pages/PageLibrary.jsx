@@ -28,6 +28,33 @@ import {
 import { useLibrary } from '../../hooks/useLibrary';
 import { useModal } from '../../context/ModalContext';
 
+const TRUSTED_AVATAR_HOST_SUFFIXES = [
+  '.googleusercontent.com',
+  '.supabase.co',
+  '.r2.dev',
+  '.r2.cloudflarestorage.com',
+  'avatars.githubusercontent.com',
+  'hivocab.site',
+  '.hivocab.site',
+];
+
+function getSafeAvatarUrl(rawUrl) {
+  if (!rawUrl || typeof rawUrl !== 'string') return '';
+  const trimmed = rawUrl.trim();
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//')) return trimmed;
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'https:') return '';
+    const host = parsed.hostname.toLowerCase();
+    const ok = TRUSTED_AVATAR_HOST_SUFFIXES.some((s) =>
+      s.startsWith('.') ? host.endsWith(s) : host === s
+    );
+    return ok ? parsed.toString() : '';
+  } catch {
+    return '';
+  }
+}
+
 function formatTimeAgo(dateString) {
   if (!dateString) return '';
   const date = new Date(dateString);
@@ -168,8 +195,8 @@ function CommentsDrawer({ lib }) {
             lib.comments.map(c => (
               <div key={c.id} className="flex gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center bg-[#E8EFE5] border border-[#2D2824] text-[#5A7E56] font-black text-xs shrink-0 mt-0.5 shadow-sm">
-                  {c.author_avatar ? (
-                    <img src={c.author_avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                  {getSafeAvatarUrl(c.author_avatar) ? (
+                    <img src={getSafeAvatarUrl(c.author_avatar)} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" />
                   ) : (
                     getInitials(c.author_name)
                   )}
@@ -366,8 +393,8 @@ function ThreadDetailModal({ lib }) {
               {/* Author & Header info */}
               <div className="flex gap-4 items-start bg-white border-2 border-[#2D2824] rounded-3xl p-5 shadow-[3px_3px_0px_#2D2824]">
                 <div className="w-14 h-14 rounded-2xl flex items-center justify-center bg-[#E8EFE5] border-2 border-[#2D2824] text-[#5A7E56] font-black text-lg shrink-0 shadow-[2px_2px_0px_#2D2824]">
-                  {detail.author_avatar ? (
-                    <img src={detail.author_avatar} alt="" className="w-full h-full rounded-2xl object-cover" />
+                  {getSafeAvatarUrl(detail.author_avatar) ? (
+                    <img src={getSafeAvatarUrl(detail.author_avatar)} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-2xl object-cover" />
                   ) : (
                     getInitials(detail.author_name)
                   )}
@@ -715,8 +742,8 @@ export function PageLibrary() {
                       <div className="flex items-center gap-3">
                         <div className="relative">
                           <div className="w-12 h-12 rounded-full bg-[#E8EFE5] border-2 border-[#2D2824] flex items-center justify-center font-black text-sm text-[#5A7E56] shadow-[2px_2px_0px_#2D2824]">
-                            {topic.author_avatar ? (
-                              <img src={topic.author_avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                            {getSafeAvatarUrl(topic.author_avatar) ? (
+                              <img src={getSafeAvatarUrl(topic.author_avatar)} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" />
                             ) : (
                               getInitials(topic.author_name)
                             )}
@@ -1113,8 +1140,8 @@ export function PageLibrary() {
                   <div className="flex items-center gap-3">
                     <div className="relative">
                       <div className="w-11 h-11 rounded-full bg-[#CCE8FF] text-[#001E2C] flex items-center justify-center font-black text-sm border-2 border-[#2D2824] shadow-[1.5px_2px_0px_rgba(51,48,44,0.85)]">
-                        {topic.author_avatar ? (
-                          <img src={topic.author_avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                        {getSafeAvatarUrl(topic.author_avatar) ? (
+                          <img src={getSafeAvatarUrl(topic.author_avatar)} alt="" referrerPolicy="no-referrer" className="w-full h-full rounded-full object-cover" />
                         ) : (
                           getInitials(topic.author_name)
                         )}

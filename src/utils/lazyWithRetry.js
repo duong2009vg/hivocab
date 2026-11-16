@@ -8,7 +8,11 @@ import { lazy } from 'react';
 export function lazyWithRetry(factory) {
   return lazy(async () => {
     try {
-      return await factory();
+      const mod = await factory();
+      if (!mod || !mod.default) {
+        throw new Error('ChunkLoadError: Loaded module is missing default export');
+      }
+      return mod;
     } catch (err) {
       const msg = String(err?.message || '');
       const isDynamicImportError = (
@@ -16,7 +20,8 @@ export function lazyWithRetry(factory) {
         msg.includes('Loading chunk') ||
         msg.includes('ChunkLoadError') ||
         msg.includes('MIME type') ||
-        msg.includes('Failed to fetch')
+        msg.includes('Failed to fetch') ||
+        msg.includes("reading 'default'")
       );
 
       if (isDynamicImportError) {

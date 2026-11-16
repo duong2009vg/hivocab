@@ -39,6 +39,22 @@ export function MobileBottomNav() {
       },
     },
     {
+      id: 'bilingual-reading',
+      label: 'Song ngữ',
+      icon: 'auto_stories',
+      onClick: () => {
+        if (typeof window !== 'undefined') {
+          window._bilingualEntryOrigin = 'hub';
+          window._currentPassageId = null;
+          window.dispatchEvent(new CustomEvent('hi:bilingual-open-hub'));
+        }
+        navigateTo('bilingual-reading');
+      },
+      onTouchPrefetch: () => {
+        import('../pages/PageBilingualReading.jsx').catch(() => {});
+      },
+    },
+    {
       id: 'library',
       label: 'Thư viện',
       icon: 'public',
@@ -68,7 +84,7 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile Navigation"
-      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-4 right-4 max-w-[390px] mx-auto z-50 flex items-center justify-between px-2.5 sm:px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)] lg:hidden select-none"
+      className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[430px] mx-auto z-50 flex items-center justify-between px-2 sm:px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)] lg:hidden select-none"
     >
       {regularTabs.map((tab) => {
         const isActive = activeTab === tab.id;
@@ -77,17 +93,17 @@ export function MobileBottomNav() {
             <a
               key={tab.id}
               aria-label={tab.label}
-              onClick={() => navigateTo(tab.id)}
+              onClick={() => (tab.onClick ? tab.onClick() : navigateTo(tab.id))}
               onTouchStart={tab.onTouchPrefetch}
-              className="flex flex-col items-center justify-center py-1 px-3.5 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
+              className="flex flex-col items-center justify-center py-1 px-2.5 sm:px-3 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer shrink-0"
             >
               <span
-                className="material-symbols-outlined text-[19px] leading-none mb-0.5"
+                className="material-symbols-outlined text-[18px] leading-none mb-0.5"
                 style={{ fontVariationSettings: "'FILL' 1" }}
               >
                 {tab.icon}
               </span>
-              <span className="text-[10px] font-bold leading-none tracking-tight">
+              <span className="text-[10px] font-bold leading-none tracking-tight whitespace-nowrap">
                 {tab.label}
               </span>
             </a>
@@ -98,11 +114,11 @@ export function MobileBottomNav() {
           <a
             key={tab.id}
             aria-label={tab.label}
-            onClick={() => navigateTo(tab.id)}
+            onClick={() => (tab.onClick ? tab.onClick() : navigateTo(tab.id))}
             onTouchStart={tab.onTouchPrefetch}
-            className="w-9 sm:w-10 h-10 flex items-center justify-center text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer"
+            className="w-8 sm:w-9 h-9 flex items-center justify-center text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer shrink-0"
           >
-            <span className="material-symbols-outlined text-[23px]">
+            <span className="material-symbols-outlined text-[21px] sm:text-[22px]">
               {tab.icon}
             </span>
           </a>

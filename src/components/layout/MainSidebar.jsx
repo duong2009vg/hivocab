@@ -8,6 +8,7 @@ import {
   Crown,
   Flame,
   Folder,
+  BookOpenText,
   Mic,
   PanelLeftClose,
   PanelLeftOpen,
@@ -135,6 +136,23 @@ export function MainSidebar() {
       badge: '3 quyển',
     },
     {
+      id: 'bilingual-reading',
+      label: 'Đọc song ngữ',
+      badge: 'IELTS',
+      icon: <BookOpenText className="w-5 h-5 shrink-0" />,
+      onClick: () => {
+        if (typeof window !== 'undefined') {
+          window._bilingualEntryOrigin = 'hub';
+          window._currentPassageId = null;
+          window.dispatchEvent(new CustomEvent('hi:bilingual-open-hub'));
+        }
+        navigateTo('bilingual-reading');
+      },
+      onMouseEnter: () => {
+        import('../pages/PageBilingualReading.jsx').catch(() => {});
+      },
+    },
+    {
       id: 'studio',
       label: 'Shadowing & Dictation',
       badge: 'Mới',
@@ -217,7 +235,7 @@ export function MainSidebar() {
             return (
               <a
                 key={item.id}
-                onClick={() => navigateTo(item.id)}
+                onClick={() => (item.onClick ? item.onClick() : navigateTo(item.id))}
                 onMouseEnter={item.onMouseEnter}
                 title={item.label}
                 aria-label={item.label}

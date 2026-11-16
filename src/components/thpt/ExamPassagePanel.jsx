@@ -121,12 +121,12 @@ function buildArrangementSectionHtml(sec, questions) {
     : '';
 
   return `
-    <div id="passage-sec-${sec.index}"
+    <div id="passage-sec-${escHtml(String(sec.index ?? ''))}"
          class="passage-sec-card p-6 md:p-8 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-4 transition-all duration-300 font-sans">
       <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D6] gap-2">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
-            ${sec.index}
+            ${escHtml(String(sec.index ?? ''))}
           </span>
           <h3 class="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#2D2422] truncate">
             ${escHtml(sec.name || sec.group || '')}
@@ -288,12 +288,12 @@ function buildReadingSectionHtml(sec, questions) {
     : '';
 
   return `
-    <div id="passage-sec-${sec.index}"
+    <div id="passage-sec-${escHtml(String(sec.index ?? ''))}"
          class="passage-sec-card p-6 md:p-8 rounded-2xl bg-white border border-[#EFE8D6] shadow-xs space-y-4 transition-all duration-300 font-sans">
       <div class="flex items-center justify-between pb-3 border-b border-[#EFE8D6] gap-2">
         <div class="flex items-center gap-2 min-w-0">
           <span class="w-6 h-6 rounded-lg bg-[#5a7d4d]/10 text-[#486b3c] font-black text-xs flex items-center justify-center shrink-0">
-            ${sec.index}
+            ${escHtml(String(sec.index ?? ''))}
           </span>
           <h3 class="font-heading font-black text-xs sm:text-sm uppercase tracking-wide text-[#2D2422] truncate">
             ${escHtml(sec.name || sec.group || '')}

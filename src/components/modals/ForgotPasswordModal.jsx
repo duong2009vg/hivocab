@@ -1,9 +1,10 @@
 // src/components/modals/ForgotPasswordModal.jsx
 // 100% Pure React Modal for Forgot Password via Supabase Auth
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
+import { TURNSTILE_SITE_KEY } from '../../config/runtime.js';
 
 export function ForgotPasswordModal() {
   const { modals, closeModal } = useModal();
@@ -15,6 +16,46 @@ export function ForgotPasswordModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    if (!isOpen || !TURNSTILE_SITE_KEY) return;
+    let intervalId = null;
+    let attempts = 0;
+
+    const renderWidget = () => {
+      attempts++;
+      if (typeof window === 'undefined') return true;
+      const el = document.getElementById('turnstile-forgot-password');
+      if (!el) return false;
+
+      if (window.turnstile && typeof window.turnstile.render === 'function') {
+        if (!el.hasChildNodes()) {
+          try {
+            window.turnstile.render('#turnstile-forgot-password', {
+              sitekey: TURNSTILE_SITE_KEY,
+              theme: 'auto',
+            });
+            return true;
+          } catch (err) {
+            console.warn('[ForgotPasswordModal] Turnstile render error:', err);
+          }
+        } else {
+          return true;
+        }
+      }
+      return attempts > 30;
+    };
+
+    if (!renderWidget()) {
+      intervalId = setInterval(() => {
+        if (renderWidget()) clearInterval(intervalId);
+      }, 150);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -32,14 +73,30 @@ export function ForgotPasswordModal() {
       return;
     }
 
+    let captchaToken = '';
+    if (typeof window !== 'undefined' && typeof window.turnstile !== 'undefined') {
+      try {
+        captchaToken = window.turnstile.getResponse('#turnstile-forgot-password') || window.turnstile.getResponse();
+      } catch (_) {}
+    }
+    if (!captchaToken && typeof document !== 'undefined') {
+      const hiddenInput = document.querySelector('#turnstile-forgot-password [name="cf-turnstile-response"]');
+      if (hiddenInput?.value) captchaToken = hiddenInput.value;
+    }
+
+    if (TURNSTILE_SITE_KEY && !captchaToken) {
+      setErrorMessage('Vui lòng hoàn thành xác thực Cloudflare CAPTCHA trước khi gửi!');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage('');
 
     try {
       const redirectUrl = typeof window !== 'undefined' ? `${window.location.origin}/#reset-password` : '';
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: redirectUrl,
-      });
+      const resetOptions = { redirectTo: redirectUrl };
+      if (captchaToken) resetOptions.captchaToken = captchaToken;
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), resetOptions);
 
       if (error) throw error;
 
@@ -114,6 +171,12 @@ export function ForgotPasswordModal() {
                 className="w-full bg-surface-container-low border border-outline-variant/30 focus:border-primary px-4 py-2.5 rounded-xl outline-none text-on-surface text-sm transition-colors"
               />
             </div>
+
+            {TURNSTILE_SITE_KEY && (
+              <div className="flex justify-center pt-1">
+                <div id="turnstile-forgot-password"></div>
+              </div>
+            )}
 
             {errorMessage && (
               <div className="p-3 rounded-xl bg-error-container text-error text-xs font-semibold flex items-center gap-1.5">

@@ -45,10 +45,24 @@ export class RateLimiter {
   }
 }
 
+function timingSafeEqual(a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') return false;
+  const enc = new TextEncoder();
+  const ab = enc.encode(a);
+  const bb = enc.encode(b);
+  const len = Math.max(ab.length, bb.length);
+  let diff = ab.length ^ bb.length;
+  for (let i = 0; i < len; i++) {
+    diff |= (ab[i] || 0) ^ (bb[i] || 0);
+  }
+  return diff === 0;
+}
+
 export default {
   async fetch(request, env) {
     const secret = String(env.RATE_LIMITER_INTERNAL_SECRET || '');
-    if (!secret || request.headers.get('X-Rate-Limit-Secret') !== secret) {
+    const provided = String(request.headers.get('X-Rate-Limit-Secret') || '');
+    if (!secret || !timingSafeEqual(provided, secret)) {
       return Response.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
     }
 

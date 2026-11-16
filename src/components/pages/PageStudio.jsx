@@ -9,6 +9,7 @@ import {
   setPreferredStudioVoice,
   stopStudioAudio,
 } from '../../services/studioService.js';
+import { supabase } from '../../lib/supabaseClient.js';
 import ShadowingTab from '../studio/ShadowingTab.jsx';
 import DictationTab from '../studio/DictationTab.jsx';
 import IpaLabTab from '../studio/IpaLabTab.jsx';
@@ -34,12 +35,20 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
       setLoading(true);
       setLoadError('');
       try {
+        let authHeaders = {};
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.access_token) {
+            authHeaders = { Authorization: `Bearer ${data.session.access_token}` };
+          }
+        } catch (_) {}
+
         const [shRes, dicRes, ipaRes, mpRes, vRes] = await Promise.all([
-          fetch('/data/studio/shadowing-catalog.json'),
-          fetch('/data/studio/dictation-lessons.json'),
-          fetch('/data/studio/phoneme-study.json'),
-          fetch('/data/studio/minimal-pairs.json'),
-          fetch('/data/studio/kokoro-voices.json'),
+          fetch('/api/corpus?name=studio-shadowing', { headers: authHeaders }),
+          fetch('/api/corpus?name=studio-dictation', { headers: authHeaders }),
+          fetch('/api/corpus?name=studio-phoneme', { headers: authHeaders }),
+          fetch('/api/corpus?name=studio-minimal-pairs', { headers: authHeaders }),
+          fetch('/api/corpus?name=studio-voices', { headers: authHeaders }),
         ]);
         if (!shRes.ok || !dicRes.ok || !ipaRes.ok || !mpRes.ok) {
           throw new Error('Không thể tải dữ liệu học liệu Studio.');

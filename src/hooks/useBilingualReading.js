@@ -12,11 +12,12 @@ function escapeRegex(string) {
   return (string || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-export function useBilingualReading(initialPassageId = null) {
+export function useBilingualReading(initialPassageId = null, options = {}) {
+  const { skipAutoResolve = false } = options || {};
   const [passageId, setPassageId] = useState(initialPassageId || null);
   const [passage, setPassage] = useState(null);
   const [words, setWords] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(initialPassageId));
   const [error, setError] = useState(null);
 
   // Tabs & Views
@@ -35,9 +36,21 @@ export function useBilingualReading(initialPassageId = null) {
   const [currentGapIndex, setCurrentGapIndex] = useState(0);
   const completeSoundPlayedRef = useRef(false);
 
-  // Determine target passageId on mount if not provided
+  // Sync external initialPassageId updates (e.g. selecting/exiting passage from Hub)
   useEffect(() => {
-    if (passageId) return;
+    setPassageId(initialPassageId || null);
+    if (!initialPassageId) {
+      setPassage(null);
+      setWords([]);
+      setError(null);
+      setLoading(false);
+      setActiveTooltip(null);
+    }
+  }, [initialPassageId]);
+
+  // Determine target passageId on mount if not provided and auto-resolve is enabled
+  useEffect(() => {
+    if (passageId || skipAutoResolve) return;
 
     let target = null;
     if (typeof window !== 'undefined') {
@@ -60,7 +73,7 @@ export function useBilingualReading(initialPassageId = null) {
       setLoading(false);
       setError('Chưa chọn bài đọc song ngữ');
     }
-  }, [passageId]);
+  }, [passageId, skipAutoResolve]);
 
   // Load passage and words whenever passageId changes
   useEffect(() => {
@@ -449,11 +462,15 @@ export function useBilingualReading(initialPassageId = null) {
   }, []);
 
   // Switch passage inside component
-  const switchPassage = useCallback((newId) => {
-    if (newId && typeof window !== 'undefined') {
-      window._currentPassageId = newId;
+  const switchPassage = useCallback((newId, nextTab) => {
+    if (typeof window !== 'undefined') {
+      window._currentPassageId = newId || null;
     }
-    setPassageId(newId);
+    setActiveTooltip(null);
+    if (nextTab === 'reading' || nextTab === 'gap-fill') {
+      setActiveTab(nextTab);
+    }
+    setPassageId(newId || null);
   }, []);
 
   return {

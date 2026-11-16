@@ -1,10 +1,12 @@
 // src/components/pages/PageBilingualReading.jsx
-// Trang Đọc Song Ngữ & Đục Lỗ Ngữ Cảnh - Phong cách Cozy Crayon ấm áp
+// Trang Đọc Song Ngữ & Đục Lỗ Ngữ Cảnh - Hỗ trợ Hub trên Taskbar chính & Đọc trực tiếp từ Bài học
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { AlertTriangle, X } from 'lucide-react';
 import { useBilingualReading } from '../../hooks/useBilingualReading.js';
+import { useBilingualHub, saveLastBilingualReading } from '../../hooks/useBilingualHub.js';
+import { BilingualHubView } from '../bilingual/BilingualHubView.jsx';
 import { BilingualHeader } from '../bilingual/BilingualHeader.jsx';
 import { BilingualReadingView } from '../bilingual/BilingualReadingView.jsx';
 import { BilingualGapFillView } from '../bilingual/BilingualGapFillView.jsx';
@@ -12,9 +14,36 @@ import { BilingualVocabTooltip } from '../bilingual/BilingualVocabTooltip.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { CrayonLockOverlay } from '../common/CrayonLockOverlay.jsx';
 
-export function PageBilingualReading() {
+function resolveInitialEntry() {
+  if (typeof window === 'undefined') {
+    return { origin: 'hub', passageId: null };
+  }
+  const explicitOrigin = window._bilingualEntryOrigin;
+  const candidatePassageId =
+    window._currentPassageId && window._currentPassageId !== '__unlinked__'
+      ? window._currentPassageId
+      : null;
+
+  if (explicitOrigin === 'hub') {
+    return { origin: 'hub', passageId: null };
+  }
+  if (candidatePassageId) {
+    return { origin: explicitOrigin || 'lesson', passageId: candidatePassageId };
+  }
+  return { origin: 'hub', passageId: null };
+}
+
+export function PageBilingualReading({ onReadingModeChange }) {
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
+
+  const [initialEntry] = useState(resolveInitialEntry);
+  const [entryOrigin, setEntryOrigin] = useState(initialEntry.origin);
+  const [selectedPassageId, setSelectedPassageId] = useState(initialEntry.passageId);
+
+  const isViewingHub = !selectedPassageId;
+
+  const hub = useBilingualHub(isViewingHub);
 
   const {
     passage,
@@ -50,7 +79,49 @@ export function PageBilingualReading() {
     prevGapItem,
     setCurrentGapIndex,
     switchPassage,
-  } = useBilingualReading();
+  } = useBilingualReading(selectedPassageId, { skipAutoResolve: true });
+
+  // Notify App.jsx whether reader full-width focus mode is active (hides desktop sidebar & mobile bottom nav)
+  useEffect(() => {
+    if (typeof onReadingModeChange === 'function') {
+      onReadingModeChange(!isViewingHub);
+    }
+  }, [isViewingHub, onReadingModeChange]);
+
+  useEffect(() => {
+    return () => {
+      if (typeof onReadingModeChange === 'function') {
+        onReadingModeChange(false);
+      }
+    };
+  }, [onReadingModeChange]);
+
+  // Listen to explicit hub reset events from sidebar / bottom nav / dashboard
+  useEffect(() => {
+    const handleOpenHub = () => {
+      setEntryOrigin('hub');
+      setSelectedPassageId(null);
+      switchPassage(null);
+      hub.refreshLastReading();
+      if (typeof window !== 'undefined') window.scrollTo(0, 0);
+    };
+    window.addEventListener('hi:bilingual-open-hub', handleOpenHub);
+    return () => window.removeEventListener('hi:bilingual-open-hub', handleOpenHub);
+  }, [switchPassage, hub]);
+
+  // Persist last opened passage metadata once loaded cleanly
+  useEffect(() => {
+    if (!passage?.id || loading || error) return;
+    saveLastBilingualReading({
+      passageId: passage.id,
+      topicId: typeof window !== 'undefined' ? window._currentTopicId : null,
+      topicName: passage.topicName,
+      testName: passage.testName,
+      passageNumber: passage.passageNumber,
+      title: passage.title,
+      topicLabel: passage.topicLabel,
+    });
+  }, [passage, loading, error]);
 
   const isProLocked = Boolean(
     error?.includes('Pro') ||
@@ -59,7 +130,89 @@ export function PageBilingualReading() {
     (!loading && error && error.toLowerCase().includes('pro'))
   );
 
+  const handleOpenPassageFromHub = useCallback(
+    (item, test, initialTab = 'reading') => {
+      if (!item?.id) return;
+      if (typeof window !== 'undefined') {
+        window._bilingualEntryOrigin = 'hub';
+        window._currentTopicId = hub.selectedBook?.id || null;
+        window._currentTopicName = hub.selectedBook?.name || 'IELTS Actual Tests';
+        window._currentTestId = test?.id || null;
+        window._currentTestName = test?.name || 'Test';
+        window._currentPassageId = item.id;
+        window._currentPassageIsPro = Boolean(item.isPro || test?.isPro || hub.selectedBook?.is_pro);
+        window._camHierarchy = hub.hierarchy || null;
+      }
+
+      saveLastBilingualReading({
+        passageId: item.id,
+        topicId: hub.selectedBook?.id || null,
+        topicName: hub.selectedBook?.name || 'IELTS Actual Tests',
+        testId: test?.id || null,
+        testName: test?.name || 'Test',
+        passageNumber: item.passageNumber,
+        title: item.title,
+        topicLabel: item.topicLabel,
+      });
+
+      setEntryOrigin('hub');
+      setSelectedPassageId(item.id);
+      switchPassage(item.id, initialTab);
+      if (typeof window !== 'undefined') window.scrollTo(0, 0);
+    },
+    [hub.selectedBook, hub.hierarchy, switchPassage]
+  );
+
+  const handleResumeLastReading = useCallback(() => {
+    const last = hub.lastReading;
+    if (!last?.passageId) return;
+    if (typeof window !== 'undefined') {
+      window._bilingualEntryOrigin = 'hub';
+      window._currentTopicId = last.topicId || hub.selectedBook?.id || null;
+      window._currentTopicName = last.topicName || 'IELTS Actual Tests';
+      window._currentTestId = last.testId || null;
+      window._currentTestName = last.testName || 'Test';
+      window._currentPassageId = last.passageId;
+      window._currentPassageIsPro = false;
+      window._camHierarchy = last.topicId && last.topicId === hub.selectedBookId ? hub.hierarchy : null;
+    }
+    setEntryOrigin('hub');
+    setSelectedPassageId(last.passageId);
+    switchPassage(last.passageId, 'reading');
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  }, [hub.lastReading, hub.selectedBook, hub.selectedBookId, hub.hierarchy, switchPassage]);
+
+  const handleOpenProModalFromHub = useCallback(
+    (item) => {
+      openModal('pricing', {
+        source: 'bilingual-hub',
+        passageTitle: item?.title || 'Đọc Song Ngữ IELTS PRO',
+      });
+    },
+    [openModal]
+  );
+
+  const handleSwitchPassageInReader = useCallback(
+    (newId) => {
+      if (!newId) return;
+      setSelectedPassageId(newId);
+      switchPassage(newId);
+    },
+    [switchPassage]
+  );
+
   const handleClose = useCallback(() => {
+    if (entryOrigin === 'hub') {
+      setSelectedPassageId(null);
+      switchPassage(null);
+      hub.refreshLastReading();
+      if (typeof window !== 'undefined') {
+        window._currentPassageId = null;
+        window.scrollTo(0, 0);
+      }
+      return;
+    }
+
     if (typeof window !== 'undefined') {
       if (window._currentPassageId && window._currentPassageId !== '__unlinked__') {
         navigateTo('lesson-detail');
@@ -71,7 +224,7 @@ export function PageBilingualReading() {
       }
     }
     navigateTo('topics');
-  }, [navigateTo]);
+  }, [entryOrigin, switchPassage, hub, navigateTo]);
 
   const handleReportError = useCallback(() => {
     openModal('bugReport', {
@@ -88,6 +241,34 @@ export function PageBilingualReading() {
     });
   }, [passage, activeTab, openModal]);
 
+  if (isViewingHub) {
+    return (
+      <BilingualHubView
+        books={hub.books}
+        booksLoading={hub.booksLoading}
+        selectedBook={hub.selectedBook}
+        selectedBookId={hub.selectedBookId}
+        onSelectBook={hub.setSelectedBookId}
+        hierarchyLoading={hub.hierarchyLoading}
+        hierarchyError={hub.hierarchyError}
+        isUserPro={hub.isUserPro}
+        tests={hub.tests}
+        filteredTests={hub.filteredTests}
+        selectedTestId={hub.selectedTestId}
+        onSelectTest={hub.setSelectedTestId}
+        searchQuery={hub.searchQuery}
+        onSearchChange={hub.setSearchQuery}
+        filterMode={hub.filterMode}
+        onFilterModeChange={hub.setFilterMode}
+        bookStats={hub.bookStats}
+        lastReading={hub.lastReading}
+        onResumeLastReading={handleResumeLastReading}
+        onOpenPassage={handleOpenPassageFromHub}
+        onOpenProModal={handleOpenProModalFromHub}
+      />
+    );
+  }
+
   return (
     <div id="page-bilingual-reading" className="page active bg-[#FAF5EB] min-h-screen text-[#382E2B] font-sans antialiased">
       {/* Sticky Header & Toolbar */}
@@ -101,7 +282,7 @@ export function PageBilingualReading() {
         onChangeFontSize={changeFontSize}
         onClose={handleClose}
         onReportError={handleReportError}
-        onSelectPassage={switchPassage}
+        onSelectPassage={handleSwitchPassageInReader}
       />
 
       {/* Main Body */}
@@ -217,7 +398,7 @@ export function PageBilingualReading() {
           className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-[#D36135] text-white border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all text-xs font-black cursor-pointer"
         >
           <X className="w-4 h-4 shrink-0" />
-          <span>Thoát bài đọc</span>
+          <span>{entryOrigin === 'hub' ? 'Danh sách bài' : 'Thoát bài đọc'}</span>
         </button>
       </div>
 

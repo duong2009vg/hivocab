@@ -664,18 +664,12 @@ export function PageDashboard() {
   };
 
   const handleOpenBilingual = useCallback(() => {
-    if (
-      typeof window !== 'undefined' &&
-      window._currentPassageId &&
-      window._currentPassageId !== '__unlinked__'
-    ) {
-      navigateTo('bilingual-reading');
-      return;
+    if (typeof window !== 'undefined') {
+      window._bilingualEntryOrigin = 'hub';
+      window._currentPassageId = null;
+      window.dispatchEvent(new CustomEvent('hi:bilingual-open-hub'));
     }
-    if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
-      window.showHiToast('Chọn một bộ sách CAM / IELTS Reading trong Kho Chủ Đề để mở Đọc Song Ngữ!', 'info');
-    }
-    navigateTo('topics');
+    navigateTo('bilingual-reading');
   }, [navigateTo]);
 
   const quickHubItems = useMemo(

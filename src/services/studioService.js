@@ -5,6 +5,7 @@
 
 import { HiAudio } from './audioService.js';
 import { convertBlobTo16kMonoWav } from '../utils/audioWavEncoder.js';
+import { supabase } from '../lib/supabaseClient.js';
 
 const DEFAULT_STUDIO_API_URL = 'https://duong2009vg--hivocab-peakfour-studio-fastapi-app.modal.run';
 const STUDIO_URL_STORAGE_KEY = 'hivocab_studio_api_url';
@@ -47,11 +48,24 @@ function normalizeBaseUrl(raw) {
     .replace(/\/+$/, '');
 }
 
+function isAllowedStudioUrl(raw) {
+  if (!raw) return false;
+  try {
+    const parsed = new URL(raw);
+    const host = parsed.hostname.toLowerCase();
+    if (parsed.protocol === 'https:' && host.endsWith('.modal.run')) return true;
+    if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && (host === 'localhost' || host === '127.0.0.1')) return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function getStudioApiUrl() {
   if (typeof window !== 'undefined') {
     try {
       const saved = normalizeBaseUrl(window.localStorage.getItem(STUDIO_URL_STORAGE_KEY));
-      if (saved) return saved;
+      if (saved && isAllowedStudioUrl(saved)) return saved;
     } catch (_) {}
   }
   const envUrl =
@@ -63,6 +77,9 @@ export function getStudioApiUrl() {
 
 export function setStudioApiUrl(url) {
   const clean = normalizeBaseUrl(url);
+  if (clean && !isAllowedStudioUrl(clean)) {
+    throw new Error('URL Studio Backend phải dùng HTTPS (*.modal.run) hoặc localhost.');
+  }
   if (typeof window !== 'undefined') {
     try {
       if (clean) {
@@ -447,11 +464,19 @@ export async function scorePronunciation({ blob, filename = 'recording.webm', ex
  * via Cloudflare Pages Function (/api/youtube-captions).
  */
 export async function fetchYoutubeCaptionsPreview({ youtubeUrl, title = '', author = 'YouTube' } = {}) {
+  let authHeaders = {};
+  try {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.access_token) {
+      authHeaders = { Authorization: `Bearer ${data.session.access_token}` };
+    }
+  } catch (_) {}
+
   const res = await fetchWithTimeout(
     '/api/youtube-captions',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders },
       body: JSON.stringify({
         youtube_url: youtubeUrl,
         title: title.trim(),
@@ -476,16 +501,23 @@ export async function fetchYoutubeCaptionsPreview({ youtubeUrl, title = '', auth
 }
 
 /**
- * Background batch-translate missing Vietnamese cues for long guest clips via /api/translate.
+ * Background batch-translate missing Vietnamese cues for long clips via /api/translate (requires login).
  */
 export async function translateShadowingTexts(texts = []) {
   const clean = (Array.isArray(texts) ? texts : []).map((t) => String(t || '').trim()).slice(0, 24);
   if (!clean.length) return [];
+  let token = '';
+  try {
+    const { data } = await supabase.auth.getSession();
+    token = data?.session?.access_token || '';
+  } catch (_) {}
+  if (!token) return [];
+
   const res = await fetchWithTimeout(
     '/api/translate',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ texts: clean, from: 'en', to: 'vi' }),
     },
     10000

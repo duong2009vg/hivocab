@@ -6,8 +6,19 @@ const SCORES_KEY = 'hivocab_exercise_scores_v1';
 const EXERCISES_MEM = {
   list: null,
   questions: new Map(),
-  theories: null,
+  theoryMeta: null,
+  theoriesById: new Map(),
 };
+
+async function getCorpusHeaders() {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
 
 export function getExerciseScores() {
   if (typeof window === 'undefined') return {};
@@ -55,9 +66,10 @@ export async function getExercises() {
     }
   } catch (_) {}
 
-  // 2. Fallback sang file JSON tĩnh
+  // 2. Fallback sang API /api/corpus (rate-limited, không phơi file tĩnh trên CDN)
   try {
-    const res = await fetch('/data/hivocab_29_chuyen_de_exercises.json');
+    const headers = await getCorpusHeaders();
+    const res = await fetch('/api/corpus?name=chuyen-de-exercises', { headers });
     if (res.ok) {
       const fallbackData = await res.json();
       if (Array.isArray(fallbackData) && fallbackData.length > 0) {
@@ -70,41 +82,52 @@ export async function getExercises() {
   return [];
 }
 
-async function loadTheoriesList() {
-  if (!EXERCISES_MEM.theories) {
+export async function getExerciseTheoryMetaMap() {
+  if (!EXERCISES_MEM.theoryMeta) {
+    const map = {};
     try {
-      const res = await fetch('/data/hivocab_29_chuyen_de_ly_thuyet.json?v=20261114_v4');
+      const headers = await getCorpusHeaders();
+      const res = await fetch('/api/corpus?name=chuyen-de-theory&mode=meta', { headers });
       if (res.ok) {
         const json = await res.json();
-        EXERCISES_MEM.theories = json.theories || [];
+        const list = Array.isArray(json?.meta) ? json.meta : [];
+        for (const item of list) {
+          if (!item?.exercise_id) continue;
+          map[item.exercise_id] = {
+            questions_count: item.questions_count || 0,
+            examples_count: item.examples_count || 0,
+          };
+        }
       }
     } catch (_) {}
+    EXERCISES_MEM.theoryMeta = map;
   }
-  return EXERCISES_MEM.theories || [];
-}
-
-export async function getExerciseTheoryMetaMap() {
-  const list = await loadTheoriesList();
-  const map = {};
-  for (const item of list) {
-    if (!item?.exercise_id) continue;
-    map[item.exercise_id] = {
-      questions_count: item.questions_count || 0,
-      examples_count: Array.isArray(item.examples) ? item.examples.length : 0,
-    };
-  }
-  return map;
+  return EXERCISES_MEM.theoryMeta;
 }
 
 export async function getExerciseTheoryData(exerciseId) {
-  const list = await loadTheoriesList();
-  const match = list.find(t => t.exercise_id === exerciseId);
-  if (match) {
-    return {
-      theory_and_strategy: match.theory_and_strategy || '',
-      examples: Array.isArray(match.examples) ? match.examples : [],
-    };
+  if (EXERCISES_MEM.theoriesById.has(exerciseId)) {
+    return EXERCISES_MEM.theoriesById.get(exerciseId);
   }
+  try {
+    const headers = await getCorpusHeaders();
+    const res = await fetch(
+      `/api/corpus?name=chuyen-de-theory&exercise_id=${encodeURIComponent(exerciseId)}`,
+      { headers }
+    );
+    if (res.ok) {
+      const json = await res.json();
+      const match = json?.theory;
+      if (match) {
+        const data = {
+          theory_and_strategy: match.theory_and_strategy || '',
+          examples: Array.isArray(match.examples) ? match.examples : [],
+        };
+        EXERCISES_MEM.theoriesById.set(exerciseId, data);
+        return data;
+      }
+    }
+  } catch (_) {}
 
   const all = await getExercises();
   const ex = all.find(e => e.id === exerciseId);
@@ -138,12 +161,16 @@ export async function getExerciseQuestions(exerciseId) {
     }
   } catch (_) {}
 
-  // 2. Fallback sang file JSON tĩnh
+  // 2. Fallback sang API /api/corpus theo từng chuyên đề (chống cào hàng loạt)
   try {
-    const res = await fetch('/data/hivocab_29_chuyen_de_questions.json');
+    const headers = await getCorpusHeaders();
+    const res = await fetch(
+      `/api/corpus?name=chuyen-de-questions&exercise_id=${encodeURIComponent(exerciseId)}`,
+      { headers }
+    );
     if (res.ok) {
-      const allQ = await res.json();
-      const filtered = (allQ || []).filter(q => q.exercise_id === exerciseId);
+      const json = await res.json();
+      const filtered = Array.isArray(json?.questions) ? json.questions : [];
       filtered.sort((a, b) => (a.order_index || 0) - (b.order_index || 0));
       EXERCISES_MEM.questions.set(exerciseId, filtered);
       return filtered;
