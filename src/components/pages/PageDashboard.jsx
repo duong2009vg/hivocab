@@ -1036,25 +1036,6 @@ export function PageDashboard() {
           {/* Quick Hub (4 Core Features) */}
           <QuickHubSection items={quickHubItems} onSelectItem={handleSelectQuickHub} variant="mobile" />
 
-          {/* Daily Quests Card */}
-          <DailyQuestsCard
-            quests={dailyQuests}
-            completedCount={completedQuestsCount}
-            onToggle={handleToggleQuest}
-            onAction={handleQuestAction}
-            variant="mobile"
-          />
-
-          {/* Daily Word of the Day Card (Mobile) */}
-          <DailyWordCard
-            dailyWord={dailyWord}
-            onPlayAudio={handlePlayAudio}
-            onRotate={handleRotateDailyWord}
-            onSave={handleSaveDailyWord}
-            onLookup={handleLookupWord}
-            variant="mobile"
-          />
-
           {/* SRS Analytics Card */}
           <section className="bg-[#FFFDF7] p-4 border-[2.5px] border-[#443833] rounded-[26px] shadow-[3px_4px_0px_#443833] relative overflow-hidden mb-4">
             <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
@@ -1142,6 +1123,25 @@ export function PageDashboard() {
               </span>
             </div>
           </section>
+
+          {/* Daily Quests Card */}
+          <DailyQuestsCard
+            quests={dailyQuests}
+            completedCount={completedQuestsCount}
+            onToggle={handleToggleQuest}
+            onAction={handleQuestAction}
+            variant="mobile"
+          />
+
+          {/* Daily Word of the Day Card (Mobile) */}
+          <DailyWordCard
+            dailyWord={dailyWord}
+            onPlayAudio={handlePlayAudio}
+            onRotate={handleRotateDailyWord}
+            onSave={handleSaveDailyWord}
+            onLookup={handleLookupWord}
+            variant="mobile"
+          />
 
           {/* Streak Calendar Card */}
           <section className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-4">
