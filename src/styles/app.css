@@ -779,6 +779,26 @@
     background: #DFB54B;
   }
 
+  .studio-row-scrollbar {
+    scrollbar-color: #B7A792 #F2E9D8;
+    scrollbar-width: thin;
+  }
+  .studio-row-scrollbar::-webkit-scrollbar {
+    height: 8px;
+  }
+  .studio-row-scrollbar::-webkit-scrollbar-track {
+    background: #F2E9D8;
+    border-radius: 9999px;
+  }
+  .studio-row-scrollbar::-webkit-scrollbar-thumb {
+    background: #B7A792;
+    border-radius: 9999px;
+    border: 1.5px solid #F2E9D8;
+  }
+  .studio-row-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #4D6B53;
+  }
+
   .book-spine-leaning {
     transform: rotate(var(--lean-deg, 0deg));
     transform-origin: bottom center;

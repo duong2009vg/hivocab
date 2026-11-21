@@ -8,7 +8,6 @@ import {
   Languages,
   Plus,
   Video,
-  Trash2,
   Mic,
   Keyboard,
   CheckCircle2,
@@ -44,6 +43,16 @@ import {
 } from '../../services/studioService.js';
 import { supabase } from '../../lib/supabaseClient.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
+import ChannelVideoRow from './ChannelVideoRow.jsx';
+
+function getClipChannelName(clip) {
+  return (
+    clip?.channel_name ||
+    clip?.author ||
+    clip?.origin ||
+    (clip?.personal || clip?.guest ? 'Cá nhân' : 'YouTube')
+  ).trim();
+}
 
 function loadYouTubeIframeAPI() {
   if (typeof window === 'undefined') return Promise.reject(new Error('No window'));
@@ -651,7 +660,7 @@ export function ShadowingTab({
   const availableChannels = useMemo(() => {
     const counts = new Map();
     for (const c of levelClips) {
-      const ch = (c.channel_name || c.author || c.origin || (c.personal || c.guest ? 'Cá nhân' : 'YouTube')).trim();
+      const ch = getClipChannelName(c);
       if (!ch) continue;
       counts.set(ch, (counts.get(ch) || 0) + 1);
     }
@@ -662,11 +671,21 @@ export function ShadowingTab({
 
   const filteredClips = useMemo(() => {
     if (channelFilter === 'all') return levelClips;
-    return levelClips.filter((c) => {
-      const ch = (c.channel_name || c.author || c.origin || (c.personal || c.guest ? 'Cá nhân' : 'YouTube')).trim();
-      return ch === channelFilter;
-    });
+    return levelClips.filter((c) => getClipChannelName(c) === channelFilter);
   }, [levelClips, channelFilter]);
+
+  const channelGroups = useMemo(() => {
+    const map = new Map();
+    for (const clip of filteredClips) {
+      const name = getClipChannelName(clip) || 'YouTube';
+      if (!map.has(name)) map.set(name, []);
+      map.get(name).push(clip);
+    }
+    return Array.from(map.entries()).map(([name, groupClips]) => ({
+      name,
+      clips: groupClips,
+    }));
+  }, [filteredClips]);
 
   const activeCue = cues[activeCueIdx] || cues[0] || null;
   const activeDictValue = dictInputs[activeCueIdx] || '';
@@ -942,95 +961,18 @@ export function ShadowingTab({
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filteredClips.map((clip) => {
-              const clipScoreCount = Object.keys(progress.shadowingChecked?.[clip.id] || {}).length;
-              const totalClipCues = clip.cue_count || clip.cues?.length || 0;
-              const thumbUrl = clip.youtube_video_id
-                ? `https://i.ytimg.com/vi/${clip.youtube_video_id}/hqdefault.jpg`
-                : '';
-
-              return (
-                <div
-                  key={clip.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setSelectedClipId(clip.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setSelectedClipId(clip.id);
-                    }
-                  }}
-                  className="group bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl overflow-hidden shadow-[3px_3px_0px_#3D352E] hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_#3D352E] transition-all cursor-pointer flex flex-col text-left focus:outline-none focus:ring-2 focus:ring-[#4D6B53]"
-                >
-                  {/* YouTube Thumbnail */}
-                  <div className="aspect-video w-full bg-[#1E1B17] relative overflow-hidden border-b-2 border-[#3D352E]">
-                    {thumbUrl && (
-                      <img
-                        src={thumbUrl}
-                        alt={clip.title}
-                        loading="lazy"
-                        onError={(e) => {
-                          const img = e.currentTarget;
-                          if (!img.dataset.fallback && clip.youtube_video_id) {
-                            img.dataset.fallback = '1';
-                            img.src = `https://i.ytimg.com/vi/${clip.youtube_video_id}/mqdefault.jpg`;
-                          }
-                        }}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-black/15 group-hover:bg-black/25 transition-colors flex items-center justify-center">
-                      <div className="w-11 h-11 rounded-full bg-[#D96B43]/95 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-white flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Play className="w-5 h-5 fill-current ml-0.5" />
-                      </div>
-                    </div>
-
-                    {/* Top-left Level badge */}
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] shadow-[1px_1px_0px_#3D352E]">
-                      {clip.level || 'Story'}
-                    </span>
-
-                    {/* Top-right Remove button for user clips */}
-                    {(clip.personal || clip.guest) && (
-                      <button
-                        type="button"
-                        disabled={deletingClipId === clip.id}
-                        onClick={(e) => handleDeletePersonalClip(e, clip)}
-                        className="absolute top-2 right-2 p-1.5 rounded-xl bg-white/95 hover:bg-[#FDECE8] text-[#B53D2A] border border-[#3D352E] cursor-pointer disabled:opacity-50"
-                        title="Xóa video cá nhân"
-                        aria-label="Xóa video cá nhân"
-                      >
-                        {deletingClipId === clip.id ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-3.5 h-3.5" />
-                        )}
-                      </button>
-                    )}
-
-                    {/* Bottom-right cue & progress pill */}
-                    <span className="absolute bottom-2 right-2 px-2 py-0.5 rounded-lg text-[10px] font-black bg-[#2E2823]/90 text-white border border-white/20">
-                      {clipScoreCount > 0 ? `${clipScoreCount}/${totalClipCues} câu` : `${totalClipCues} câu`}
-                    </span>
-                  </div>
-
-                  {/* Title & Meta Below Thumbnail */}
-                  <div className="p-3 sm:p-3.5 flex-1 flex flex-col justify-between gap-2">
-                    <h3 className="text-sm font-black text-[#2E2823] leading-snug line-clamp-2 group-hover:text-[#4D6B53] transition-colors">
-                      {clip.title}
-                    </h3>
-                    <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-[#786F66]">
-                      <span className="truncate">{clip.channel_name || clip.genre || clip.origin || 'YouTube'}</span>
-                      <span className="shrink-0 px-2 py-0.5 rounded-lg bg-[#EEF5EC] text-[#355A3B] font-black border border-[#4D6B53]/30">
-                        Luyện ngay
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="space-y-4">
+              {channelGroups.map((group) => (
+                <ChannelVideoRow
+                  key={group.name}
+                  channelName={group.name}
+                  clips={group.clips}
+                  progress={progress}
+                  deletingClipId={deletingClipId}
+                  onSelectClip={setSelectedClipId}
+                  onDeleteClip={handleDeletePersonalClip}
+                />
+              ))}
             </div>
           )}
         </div>
