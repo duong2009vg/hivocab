@@ -49,7 +49,7 @@ export function formatBlanksInHtml(text, startQ, endQ) {
       targetQ = sQ + num - 1;
     }
     if (targetQ !== null) {
-      return `<button type="button" data-jump-q="${targetQ}" class="inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md bg-blue-100 hover:bg-blue-200 border border-blue-300 text-blue-800 font-mono font-bold text-xs shadow-2xs cursor-pointer transition-all">(${num}) _______</button>`;
+      return `<button type="button" data-jump-q="${targetQ}" class="inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md bg-blue-100 hover:bg-blue-200 border border-blue-300 text-blue-800 font-mono font-bold text-xs shadow-2xs cursor-pointer transition-all">(${targetQ}) _______</button>`;
     }
     return match;
   });
