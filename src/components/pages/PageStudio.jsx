@@ -3,7 +3,7 @@
 // Powered by cloned PeakFour core algorithms & datasets + Modal.com OpenPronounce/Kokoro API
 
 import React, { useState, useEffect } from 'react';
-import { Video, Keyboard, Volume2, Sparkles, Loader2 } from 'lucide-react';
+import { Video, Keyboard, Volume2, Sparkles, Loader2, Plus } from 'lucide-react';
 import {
   getPreferredStudioVoice,
   setPreferredStudioVoice,
@@ -17,6 +17,8 @@ import IpaLabTab from '../studio/IpaLabTab.jsx';
 export function PageStudio({ onWorkspaceModeChange } = {}) {
   const [activeTab, setActiveTab] = useState('shadowing'); // 'shadowing' | 'dictation' | 'ipa'
   const [shadowingVideoOpen, setShadowingVideoOpen] = useState(false);
+  const [showShadowingAddForm, setShowShadowingAddForm] = useState(false);
+  const [shadowingQuota, setShadowingQuota] = useState({ used: 0, limit: 5, authenticated: false });
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
 
@@ -44,7 +46,7 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
         } catch (_) {}
 
         const [shRes, dicRes, ipaRes, mpRes, vRes] = await Promise.all([
-          fetch('/api/corpus?name=studio-shadowing', { headers: authHeaders }),
+          fetch('/api/corpus?name=studio-shadowing-index', { headers: authHeaders }),
           fetch('/api/corpus?name=studio-dictation', { headers: authHeaders }),
           fetch('/api/corpus?name=studio-phoneme', { headers: authHeaders }),
           fetch('/api/corpus?name=studio-minimal-pairs', { headers: authHeaders }),
@@ -174,7 +176,25 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
               })}
             </nav>
 
-            {/* Voice Selector (only needed for TTS tabs: Dictation & IPA) */}
+            {/* Right action: Add YouTube button on Shadowing library, or Voice Selector on TTS tabs */}
+            {activeTab === 'shadowing' && !shadowingVideoOpen && (
+              <div className="flex items-center sm:ml-auto shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowShadowingAddForm((prev) => !prev)}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer shrink-0"
+                >
+                  <Plus className="w-4 h-4 shrink-0" />
+                  <span>Thêm video YouTube</span>
+                  <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-black leading-none">
+                    {shadowingQuota.authenticated
+                      ? `${shadowingQuota.used}/${shadowingQuota.limit}`
+                      : `Tối đa ${shadowingQuota.limit}`}
+                  </span>
+                </button>
+              </div>
+            )}
+
             {activeTab !== 'shadowing' && voicesList.length > 0 && (
               <div className="flex items-center sm:ml-auto shrink-0">
                 <label className="flex items-center gap-1.5 bg-[#fffcf7] border-2 border-[#3D352E] rounded-xl sm:rounded-2xl px-2.5 sm:px-3 py-1.5 shadow-[2px_2px_0px_#3D352E] text-[11px] sm:text-xs font-bold max-w-[210px] sm:max-w-none">
@@ -213,6 +233,9 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
                   clips={shadowingClips}
                   voice={selectedVoice}
                   onVideoOpenChange={setShadowingVideoOpen}
+                  showAddForm={showShadowingAddForm}
+                  onShowAddFormChange={setShowShadowingAddForm}
+                  onQuotaChange={setShadowingQuota}
                 />
               )}
               {activeTab === 'dictation' && (

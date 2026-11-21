@@ -1,5 +1,5 @@
 // src/components/studio/ShadowingTab.jsx
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import {
   Play,
   Repeat,
@@ -19,6 +19,9 @@ import {
   ChevronDown,
   ChevronUp,
   ArrowLeft,
+  Info,
+  AlertTriangle,
+  LogIn,
 } from 'lucide-react';
 import {
   extractYoutubeVideoId,
@@ -27,15 +30,19 @@ import {
   compareShadowingWords,
 } from '../../utils/studioCore.js';
 import {
+  MAX_USER_YOUTUBE_VIDEOS,
+  clampYoutubeVideoLimit,
+  fetchStudioVideoCues,
   fetchYoutubeCaptionsPreview,
-  getCustomGuestClips,
-  saveCustomGuestClip,
-  removeCustomGuestClip,
+  loadUserYoutubeVideos,
+  deleteUserYoutubeVideo,
+  updateUserYoutubeVideoCues,
   loadStudioProgress,
   saveShadowingCueScore,
   stopStudioAudio,
   translateShadowingTexts,
 } from '../../services/studioService.js';
+import { supabase } from '../../lib/supabaseClient.js';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 
 function loadYouTubeIframeAPI() {
@@ -71,11 +78,69 @@ function loadYouTubeIframeAPI() {
   return window.__hiYtLoaderPromise;
 }
 
-export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
-  const [customClips, setCustomClips] = useState(() => getCustomGuestClips());
+export function ShadowingTab({
+  clips,
+  voice,
+  onOpenSetup,
+  onVideoOpenChange,
+  showAddForm: controlledShowAddForm,
+  onShowAddFormChange,
+  onQuotaChange,
+}) {
+  const [customClips, setCustomClips] = useState([]);
+  const [videoLimit, setVideoLimit] = useState(MAX_USER_YOUTUBE_VIDEOS);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [loadingCustomClips, setLoadingCustomClips] = useState(true);
+  const [deletingClipId, setDeletingClipId] = useState('');
   const allClips = useMemo(() => [...customClips, ...(clips || [])], [customClips, clips]);
   const [selectedClipId, setSelectedClipId] = useState('');
   const [levelFilter, setLevelFilter] = useState('all');
+  const [channelFilter, setChannelFilter] = useState('all');
+  const [loadedCuesById, setLoadedCuesById] = useState({});
+  const [loadingCues, setLoadingCues] = useState(false);
+  const [cuesLoadError, setCuesLoadError] = useState('');
+  const [cuesLoadNonce, setCuesLoadNonce] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+
+    const syncUserVideos = async () => {
+      setLoadingCustomClips(true);
+      const res = await loadUserYoutubeVideos();
+      if (!active) return;
+      setIsUserAuthenticated(Boolean(res?.authenticated));
+      setCustomClips(Array.isArray(res?.clips) ? res.clips : []);
+      if (Number.isFinite(res?.limit) && res.limit >= 1) {
+        setVideoLimit(res.limit);
+      }
+      setLoadingCustomClips(false);
+    };
+
+    syncUserVideos();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      syncUserVideos();
+    });
+
+    const settingsChannel = supabase
+      .channel('studio_youtube_limit_settings')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'system_settings', filter: 'key=eq.user_youtube_video_limit' },
+        (payload) => {
+          if (payload?.new?.value != null && active) {
+            setVideoLimit(clampYoutubeVideoLimit(payload.new.value, MAX_USER_YOUTUBE_VIDEOS));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      authListener?.subscription?.unsubscribe();
+      supabase.removeChannel(settingsChannel);
+    };
+  }, []);
 
   const selectedClip = useMemo(
     () => (selectedClipId ? allClips.find((c) => c.id === selectedClipId) || null : null),
@@ -88,7 +153,55 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     }
   }, [selectedClip, onVideoOpenChange]);
 
-  const cues = useMemo(() => (Array.isArray(selectedClip?.cues) ? selectedClip.cues : []), [selectedClip]);
+  useEffect(() => {
+    const clip = selectedClip;
+    if (!clip) {
+      setLoadingCues(false);
+      setCuesLoadError('');
+      return;
+    }
+    if ((Array.isArray(clip.cues) && clip.cues.length > 0) || Array.isArray(loadedCuesById[clip.id])) {
+      setLoadingCues(false);
+      setCuesLoadError('');
+      return;
+    }
+    if (clip.guest) {
+      setLoadingCues(false);
+      return;
+    }
+
+    let active = true;
+    setLoadingCues(true);
+    setCuesLoadError('');
+    fetchStudioVideoCues(clip.id)
+      .then((fetchedCues) => {
+        if (!active) return;
+        setLoadedCuesById((prev) => ({
+          ...prev,
+          [clip.id]: Array.isArray(fetchedCues) ? fetchedCues : [],
+        }));
+        setLoadingCues(false);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setCuesLoadError(err?.message || 'Không thể tải phụ đề cho video này.');
+        setLoadingCues(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedClip, loadedCuesById, cuesLoadNonce]);
+
+  const cues = useMemo(() => {
+    if (Array.isArray(selectedClip?.cues) && selectedClip.cues.length > 0) {
+      return selectedClip.cues;
+    }
+    if (selectedClip?.id && Array.isArray(loadedCuesById[selectedClip.id])) {
+      return loadedCuesById[selectedClip.id];
+    }
+    return [];
+  }, [selectedClip, loadedCuesById]);
 
   // Player state
   const playerContainerRef = useRef(null);
@@ -108,10 +221,39 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
   const [progress, setProgress] = useState(() => loadStudioProgress());
 
   // Add custom YouTube video state
-  const [showAddForm, setShowAddForm] = useState(false);
+  const [internalShowAddForm, setInternalShowAddForm] = useState(false);
+  const showAddForm =
+    typeof controlledShowAddForm === 'boolean' ? controlledShowAddForm : internalShowAddForm;
+  const setShowAddForm = useCallback(
+    (next) => {
+      const resolved = typeof next === 'function' ? next(showAddForm) : next;
+      if (typeof onShowAddFormChange === 'function') {
+        onShowAddFormChange(resolved);
+      } else {
+        setInternalShowAddForm(resolved);
+      }
+    },
+    [onShowAddFormChange, showAddForm]
+  );
   const [ytUrlInput, setYtUrlInput] = useState('');
   const [importingYt, setImportingYt] = useState(false);
   const [importError, setImportError] = useState('');
+
+  useEffect(() => {
+    if (showAddForm) {
+      setImportError('');
+    }
+  }, [showAddForm]);
+
+  useEffect(() => {
+    if (typeof onQuotaChange === 'function') {
+      onQuotaChange({
+        used: customClips.length,
+        limit: videoLimit,
+        authenticated: isUserAuthenticated,
+      });
+    }
+  }, [customClips.length, videoLimit, isUserAuthenticated, onQuotaChange]);
 
   // In-video dictation state per cue index
   const [dictInputs, setDictInputs] = useState({});
@@ -319,7 +461,8 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
           });
           if (changed) {
             workingClip = { ...workingClip, cues: updatedCues };
-            setCustomClips(saveCustomGuestClip(workingClip));
+            setCustomClips((prev) => prev.map((c) => (c.id === workingClip.id ? workingClip : c)));
+            void updateUserYoutubeVideoCues(workingClip);
           }
         } catch {
           return;
@@ -377,13 +520,44 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     }
   };
 
+  const usedVideoCount = customClips.length;
+  const isQuotaFull = usedVideoCount >= videoLimit;
+
+  const openLoginForVideoUpload = () => {
+    if (typeof window !== 'undefined' && window.openRequireLoginModal) {
+      window.openRequireLoginModal(
+        `Đăng nhập tài khoản HiVocab để thêm video YouTube cá nhân (tối đa ${videoLimit} video/tài khoản) và đồng bộ trên mọi thiết bị.`,
+        'Đăng nhập để thêm video YouTube 🎬',
+        'thêm video YouTube cá nhân'
+      );
+    } else {
+      window.showHiToast?.('Vui lòng đăng nhập để thêm video YouTube cá nhân!', 'error');
+    }
+  };
+
   const importYoutubeByUrl = async (rawUrl) => {
     if (importingYt) return;
     setImportError('');
+    if (!isUserAuthenticated) {
+      openLoginForVideoUpload();
+      setImportError(
+        `Vui lòng đăng nhập để thêm video YouTube cá nhân (mỗi tài khoản giới hạn ${videoLimit} video).`
+      );
+      return;
+    }
+
     const trimmedUrl = String(rawUrl || '').trim();
     const videoId = extractYoutubeVideoId(trimmedUrl);
     if (!videoId) {
       setImportError('Link hoặc ID YouTube không hợp lệ (ví dụ: https://www.youtube.com/watch?v=...).');
+      return;
+    }
+
+    const isAlreadySavedVideo = customClips.some((c) => c.youtube_video_id === videoId);
+    if (!isAlreadySavedVideo && isQuotaFull) {
+      setImportError(
+        `Bạn đã đạt giới hạn ${videoLimit}/${videoLimit} video cá nhân. Hãy bấm biểu tượng thùng rác ở video cá nhân cũ để xóa bớt trước khi thêm mới.`
+      );
       return;
     }
 
@@ -394,19 +568,65 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
       });
       const fetchedClip = {
         ...res.clip,
+        level: 'Custom',
         cues: res.cues_doc?.cues || [],
       };
       if (!fetchedClip.cues.length) {
         throw new Error('Video này không có phụ đề tiếng Anh trên YouTube.');
       }
-      setCustomClips(saveCustomGuestClip(fetchedClip));
+      const synced = await loadUserYoutubeVideos();
+      if (Number.isFinite(synced?.limit) && synced.limit >= 1) {
+        setVideoLimit(synced.limit);
+      }
+      if (synced?.clips?.length) {
+        setCustomClips(synced.clips);
+      } else {
+        setCustomClips((prev) => {
+          const rest = prev.filter((x) => x.youtube_video_id !== fetchedClip.youtube_video_id);
+          return [fetchedClip, ...rest].slice(0, videoLimit);
+        });
+      }
       setSelectedClipId(fetchedClip.id);
       setShowAddForm(false);
       setYtUrlInput('');
+      window.showHiToast?.('Đã thêm video YouTube vào thư viện cá nhân!', 'success');
     } catch (err) {
+      if (err?.status === 401) {
+        openLoginForVideoUpload();
+      }
       setImportError(err?.message || 'Không lấy được phụ đề tự động từ YouTube.');
+      if (err?.code === 'VIDEO_QUOTA_EXCEEDED') {
+        loadUserYoutubeVideos().then((synced) => {
+          if (Number.isFinite(synced?.limit) && synced.limit >= 1) setVideoLimit(synced.limit);
+          if (synced?.authenticated) setCustomClips(synced.clips);
+        });
+      }
     } finally {
       setImportingYt(false);
+    }
+  };
+
+  const handleDeletePersonalClip = async (e, clip) => {
+    e.stopPropagation();
+    if (!clip || deletingClipId) return;
+    setDeletingClipId(clip.id);
+    try {
+      const next = await deleteUserYoutubeVideo(clip);
+      const nextClips = Array.isArray(next?.clips) ? next.clips : [];
+      const activeLimit = Number.isFinite(next?.limit) && next.limit >= 1 ? next.limit : videoLimit;
+      setVideoLimit(activeLimit);
+      setCustomClips(nextClips);
+      if (selectedClipId === clip.id) {
+        setSelectedClipId('');
+      }
+      window.showHiToast?.(
+        `Đã xóa video cá nhân (${nextClips.length}/${activeLimit} video đã dùng).`,
+        'success'
+      );
+    } catch (err) {
+      window.showHiToast?.(err?.message || 'Không thể xóa video cá nhân.', 'error');
+    } finally {
+      setDeletingClipId('');
     }
   };
 
@@ -423,10 +643,30 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
     void importYoutubeByUrl(pasted);
   };
 
-  const filteredClips = useMemo(() => {
+  const levelClips = useMemo(() => {
     if (levelFilter === 'all') return allClips;
     return allClips.filter((c) => (c.level || 'General') === levelFilter);
   }, [allClips, levelFilter]);
+
+  const availableChannels = useMemo(() => {
+    const counts = new Map();
+    for (const c of levelClips) {
+      const ch = (c.channel_name || c.author || c.origin || (c.personal || c.guest ? 'Cá nhân' : 'YouTube')).trim();
+      if (!ch) continue;
+      counts.set(ch, (counts.get(ch) || 0) + 1);
+    }
+    return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));
+  }, [levelClips]);
+
+  const hasC1Level = useMemo(() => allClips.some((c) => c.level === 'C1'), [allClips]);
+
+  const filteredClips = useMemo(() => {
+    if (channelFilter === 'all') return levelClips;
+    return levelClips.filter((c) => {
+      const ch = (c.channel_name || c.author || c.origin || (c.personal || c.guest ? 'Cá nhân' : 'YouTube')).trim();
+      return ch === channelFilter;
+    });
+  }, [levelClips, channelFilter]);
 
   const activeCue = cues[activeCueIdx] || cues[0] || null;
   const activeDictValue = dictInputs[activeCueIdx] || '';
@@ -454,68 +694,148 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
       {/* STEP 1: YouTube Thumbnail Video Library Grid (shown when no video is opened) */}
       {!selectedClip ? (
         <div className="space-y-4">
-          {/* Library Toolbar & Add YouTube Button */}
+          {/* Library Toolbar */}
           <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 shadow-[2.5px_2.5px_0px_#3D352E] space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
-                <span className="text-[11px] sm:text-xs font-black uppercase tracking-wide text-[#786F66] shrink-0 mr-1">
-                  Thư viện Video ({filteredClips.length}):
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5">
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-wide text-[#786F66] shrink-0 mr-1">
+                Thư viện Video ({filteredClips.length}):
+              </span>
+              {(hasC1Level ? ['all', 'A2', 'B1', 'B2', 'C1', 'Custom'] : ['all', 'A2', 'B1', 'B2', 'Custom']).map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => {
+                    setLevelFilter(lvl);
+                    setChannelFilter('all');
+                  }}
+                  className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
+                    levelFilter === lvl
+                      ? 'bg-[#4D6B53] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
+                      : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
+                  }`}
+                >
+                  {lvl === 'all'
+                    ? 'Tất cả'
+                    : lvl === 'Custom'
+                      ? `Cá nhân (${usedVideoCount}/${videoLimit})`
+                      : lvl}
+                </button>
+              ))}
+            </div>
+
+            {availableChannels.length > 0 && (
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 pt-0.5 border-t border-[#E8DEC8]">
+                <span className="text-[11px] font-black uppercase tracking-wide text-[#786F66] shrink-0 mr-1">
+                  Kênh:
                 </span>
-                {['all', 'A2', 'B1', 'B2', 'Custom'].map((lvl) => (
+                <button
+                  type="button"
+                  onClick={() => setChannelFilter('all')}
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
+                    channelFilter === 'all'
+                      ? 'bg-[#3D352E] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
+                      : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
+                  }`}
+                >
+                  Tất cả kênh ({levelClips.length})
+                </button>
+                {availableChannels.map((ch) => (
                   <button
-                    key={lvl}
+                    key={ch.name}
                     type="button"
-                    onClick={() => setLevelFilter(lvl)}
-                    className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
-                      levelFilter === lvl
-                        ? 'bg-[#4D6B53] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
+                    onClick={() => setChannelFilter(ch.name)}
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
+                      channelFilter === ch.name
+                        ? 'bg-[#D96B43] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
                         : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
                     }`}
                   >
-                    {lvl === 'all' ? 'Tất cả' : lvl}
+                    {ch.name} ({ch.count})
                   </button>
                 ))}
               </div>
+            )}
 
-              <button
-                type="button"
-                onClick={() => setShowAddForm((prev) => !prev)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3.5 py-2 sm:py-1.5 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 cursor-pointer shrink-0"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Thêm video YouTube bất kỳ</span>
-              </button>
+            {/* Compact Quota & Usage Hint Always Visible */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-[#FAF5EB] border border-[#E8DEC8] text-[11px] font-bold text-[#554D42]">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Info className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
+                <span>
+                  {isUserAuthenticated ? (
+                    <>
+                      Đã lưu <strong className="text-[#2E2823]">{usedVideoCount}/{videoLimit}</strong> video YouTube cá nhân (mỗi tài khoản tối đa {videoLimit} video; video mẫu có sẵn không tính vào giới hạn).
+                    </>
+                  ) : (
+                    <>
+                      Mỗi tài khoản được lưu tối đa <strong className="text-[#2E2823]">{videoLimit} video YouTube cá nhân</strong> (đồng bộ theo tài khoản, video mẫu hệ thống dùng miễn phí không giới hạn).
+                    </>
+                  )}
+                </span>
+              </div>
+              {!showAddForm && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(true)}
+                  className="text-[11px] font-black text-[#D96B43] hover:underline shrink-0 cursor-pointer"
+                >
+                  Xem hướng dẫn thêm video →
+                </button>
+              )}
             </div>
 
-            {/* Add Custom YouTube Form */}
+            {/* Add Custom YouTube Form + Step-by-step Guide */}
             {showAddForm && (
               <form
                 onSubmit={handleImportYoutube}
                 className="bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-3 sm:p-4 space-y-3"
               >
-                <label className="block space-y-1">
-                  <span className="text-xs font-extrabold text-[#2E2823]">
-                    Dán link YouTube (tự động lấy tiêu đề, phụ đề Anh &amp; dịch tiếng Việt)
-                  </span>
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <input
-                      type="text"
-                      autoFocus
-                      disabled={importingYt}
-                      value={ytUrlInput}
-                      onChange={(e) => setYtUrlInput(e.target.value)}
-                      onPaste={handleYoutubeUrlPaste}
-                      placeholder="https://www.youtube.com/watch?v=... hoặc youtu.be/..."
-                      className="flex-1 px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none disabled:opacity-60"
-                    />
+                {/* Step-by-step user guide & dynamic video limit explanation */}
+                <div className="bg-white border-2 border-[#3D352E]/80 rounded-xl p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-xs font-black text-[#2E2823] flex items-center gap-1.5">
+                      <HelpCircle className="w-4 h-4 text-[#4D6B53] shrink-0" />
+                      <span>Hướng dẫn thêm video YouTube cá nhân</span>
+                    </span>
+                    <span
+                      className={`text-[10.5px] font-black px-2 py-0.5 rounded-full border ${
+                        isQuotaFull && isUserAuthenticated
+                          ? 'bg-[#FDECE8] text-[#B53D2A] border-[#D96B43]'
+                          : 'bg-[#EEF5EC] text-[#355A3B] border-[#4D6B53]/40'
+                      }`}
+                    >
+                      {loadingCustomClips
+                        ? 'Đang kiểm tra...'
+                        : isUserAuthenticated
+                          ? `Hạn mức tài khoản: ${usedVideoCount}/${videoLimit} video`
+                          : `Giới hạn: ${videoLimit} video / tài khoản`}
+                    </span>
+                  </div>
+                  <ol className="text-[11.5px] font-semibold text-[#554D42] space-y-1 list-decimal list-inside leading-relaxed">
+                    <li>
+                      Chọn một video YouTube <strong className="text-[#2E2823]">có bật phụ đề tiếng Anh (CC)</strong> rồi sao chép link (<code className="text-[10.5px] bg-[#FAF5EB] px-1 rounded">youtube.com/watch?v=...</code>, <code className="text-[10.5px] bg-[#FAF5EB] px-1 rounded">youtu.be/...</code> hoặc Shorts).
+                    </li>
+                    <li>
+                      Dán link vào ô nhập — hệ thống tự động tách phụ đề theo từng câu kèm dịch nghĩa tiếng Việt để bạn luyện Shadowing &amp; Chép chính tả.
+                    </li>
+                    <li>
+                      Mỗi tài khoản lưu tối đa <strong className="text-[#2E2823]">{videoLimit} video cá nhân</strong>. Khi đã đủ {videoLimit}/{videoLimit}, hãy bấm nút <strong className="text-[#B53D2A]">Thùng rác (🗑)</strong> ở góc trên bên phải thẻ video cũ để xóa bớt rồi thêm video mới.
+                    </li>
+                  </ol>
+                </div>
+
+                {!isUserAuthenticated ? (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-[#FFF6DF] border-2 border-[#3D352E] rounded-xl p-3">
+                    <p className="text-xs font-bold text-[#2E2823]">
+                      Bạn cần đăng nhập để thêm video YouTube và lưu tối đa {videoLimit} video vào tài khoản của mình.
+                    </p>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
-                        type="submit"
-                        disabled={importingYt}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-60"
+                        type="button"
+                        onClick={openLoginForVideoUpload}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer"
                       >
-                        {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
-                        <span>{importingYt ? 'Đang lấy phụ đề...' : 'Thêm video'}</span>
+                        <LogIn className="w-3.5 h-3.5" />
+                        <span>Đăng nhập để thêm video</span>
                       </button>
                       <button
                         type="button"
@@ -526,7 +846,66 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                       </button>
                     </div>
                   </div>
-                </label>
+                ) : (
+                  <>
+                    {isQuotaFull && (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-[#FDECE8] border-2 border-[#D96B43] rounded-xl p-3">
+                        <div className="flex items-start gap-2 text-xs font-bold text-[#9C2F1E]">
+                          <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                          <span>
+                            Tài khoản của bạn đã đạt giới hạn <strong>{videoLimit}/{videoLimit} video</strong>. Vui lòng xóa bớt video cá nhân cũ để thêm video mới.
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setLevelFilter('Custom')}
+                          className="px-3 py-1.5 rounded-xl bg-white text-[11px] font-black text-[#B53D2A] border border-[#D96B43] hover:bg-[#FFF5F2] shrink-0 cursor-pointer"
+                        >
+                          Xem {usedVideoCount} video cá nhân
+                        </button>
+                      </div>
+                    )}
+
+                    <label className="block space-y-1">
+                      <span className="text-xs font-extrabold text-[#2E2823]">
+                        Dán link YouTube (tự động lấy tiêu đề, phụ đề Anh &amp; dịch tiếng Việt)
+                      </span>
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          type="text"
+                          autoFocus={!isQuotaFull}
+                          disabled={importingYt}
+                          value={ytUrlInput}
+                          onChange={(e) => setYtUrlInput(e.target.value)}
+                          onPaste={handleYoutubeUrlPaste}
+                          placeholder={
+                            isQuotaFull
+                              ? `Đã đủ ${videoLimit}/${videoLimit} video — hãy xóa bớt video cũ trước khi thêm mới`
+                              : 'https://www.youtube.com/watch?v=... hoặc youtu.be/...'
+                          }
+                          className="flex-1 px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none disabled:opacity-60"
+                        />
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="submit"
+                            disabled={importingYt || isQuotaFull}
+                            className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#4D6B53] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {importingYt ? <Loader2 className="w-4 h-4 animate-spin" /> : <Video className="w-4 h-4" />}
+                            <span>{importingYt ? 'Đang lấy phụ đề...' : isQuotaFull ? `Đã đủ ${videoLimit}/${videoLimit}` : 'Thêm video'}</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowAddForm(false)}
+                            className="px-3 py-2 rounded-xl bg-white text-xs font-bold border-2 border-[#3D352E] cursor-pointer"
+                          >
+                            Đóng
+                          </button>
+                        </div>
+                      </div>
+                    </label>
+                  </>
+                )}
 
                 {importError && (
                   <p className="text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2">
@@ -538,10 +917,35 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
           </div>
 
           {/* YouTube Thumbnail Video Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filteredClips.length === 0 ? (
+            <div className="bg-[#fffcf7] border-2 border-dashed border-[#3D352E]/40 rounded-2xl p-6 text-center space-y-2.5">
+              <Video className="w-8 h-8 text-[#4D6B53]/60 mx-auto" />
+              <p className="text-sm font-black text-[#2E2823]">
+                {levelFilter === 'Custom'
+                  ? 'Bạn chưa thêm video YouTube cá nhân nào'
+                  : 'Không có video nào ở mục này'}
+              </p>
+              <p className="text-xs font-semibold text-[#68594D] max-w-md mx-auto">
+                {levelFilter === 'Custom'
+                  ? `Mỗi tài khoản được thêm tối đa ${videoLimit} video YouTube có phụ đề tiếng Anh để luyện Shadowing & Dictation.`
+                  : 'Hãy chuyển sang mục Tất cả hoặc thêm video YouTube của riêng bạn.'}
+              </p>
+              {levelFilter === 'Custom' && (
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Thêm video YouTube đầu tiên</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredClips.map((clip) => {
               const clipScoreCount = Object.keys(progress.shadowingChecked?.[clip.id] || {}).length;
-              const totalClipCues = clip.cues?.length || 0;
+              const totalClipCues = clip.cue_count || clip.cues?.length || 0;
               const thumbUrl = clip.youtube_video_id
                 ? `https://i.ytimg.com/vi/${clip.youtube_video_id}/hqdefault.jpg`
                 : '';
@@ -589,18 +993,20 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                     </span>
 
                     {/* Top-right Remove button for user clips */}
-                    {clip.guest && (
+                    {(clip.personal || clip.guest) && (
                       <button
                         type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCustomClips(removeCustomGuestClip(clip.id));
-                        }}
-                        className="absolute top-2 right-2 p-1.5 rounded-xl bg-white/95 hover:bg-[#FDECE8] text-[#B53D2A] border border-[#3D352E] cursor-pointer"
+                        disabled={deletingClipId === clip.id}
+                        onClick={(e) => handleDeletePersonalClip(e, clip)}
+                        className="absolute top-2 right-2 p-1.5 rounded-xl bg-white/95 hover:bg-[#FDECE8] text-[#B53D2A] border border-[#3D352E] cursor-pointer disabled:opacity-50"
                         title="Xóa video cá nhân"
                         aria-label="Xóa video cá nhân"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        {deletingClipId === clip.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-3.5 h-3.5" />
+                        )}
                       </button>
                     )}
 
@@ -616,7 +1022,7 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                       {clip.title}
                     </h3>
                     <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-[#786F66]">
-                      <span className="truncate">{clip.genre || clip.origin || 'YouTube'}</span>
+                      <span className="truncate">{clip.channel_name || clip.genre || clip.origin || 'YouTube'}</span>
                       <span className="shrink-0 px-2 py-0.5 rounded-lg bg-[#EEF5EC] text-[#355A3B] font-black border border-[#4D6B53]/30">
                         Luyện ngay
                       </span>
@@ -625,7 +1031,8 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                 </div>
               );
             })}
-          </div>
+            </div>
+          )}
         </div>
       ) : (
         /* STEP 2: Full-width Shadowing & Dictation Workspace (Left MainSidebar hidden) */
@@ -781,7 +1188,23 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
 
               {/* Compact Active Subtitle Strip Below Video */}
               <div className="px-3 py-2 sm:px-4 bg-[#FAF5EB] border-t-2 border-[#3D352E]">
-                {!showSubtitle ? (
+                {loadingCues ? (
+                  <p className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4D6B53]">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Đang tải phụ đề Anh – Việt...</span>
+                  </p>
+                ) : cuesLoadError ? (
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-[#B53D2A]">
+                    <span>{cuesLoadError}</span>
+                    <button
+                      type="button"
+                      onClick={() => setCuesLoadNonce((n) => n + 1)}
+                      className="px-2.5 py-1 rounded-lg bg-white border border-[#3D352E] text-[11px] font-black text-[#2E2823] hover:bg-[#F4E3B4] cursor-pointer"
+                    >
+                      Thử tải lại
+                    </button>
+                  </div>
+                ) : !showSubtitle ? (
                   <p className="text-xs font-bold italic text-[#786F66]">
                     Phụ đề đang ẩn để luyện nghe chủ động. Bấm &ldquo;Thoại&rdquo; trên thanh tác vụ khi cần đối chiếu.
                   </p>
@@ -986,7 +1409,23 @@ export function ShadowingTab({ clips, voice, onOpenSetup, onVideoOpenChange }) {
                 ref={cueListRef}
                 className="relative max-h-[420px] lg:max-h-[780px] overflow-y-auto space-y-2 pr-1"
               >
-                {cues.map((cue, idx) => {
+                {loadingCues && cues.length === 0 ? (
+                  <div className="flex items-center justify-center gap-2 py-8 text-xs font-bold text-[#4D6B53]">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Đang tải danh sách câu thoại...</span>
+                  </div>
+                ) : cuesLoadError && cues.length === 0 ? (
+                  <div className="p-3 rounded-xl bg-[#FDECE8] border border-[#D96B43] text-xs font-bold text-[#B53D2A] space-y-2">
+                    <p>{cuesLoadError}</p>
+                    <button
+                      type="button"
+                      onClick={() => setCuesLoadNonce((n) => n + 1)}
+                      className="px-2.5 py-1 rounded-lg bg-white border border-[#3D352E] text-[#2E2823] font-black cursor-pointer"
+                    >
+                      Tải lại phụ đề
+                    </button>
+                  </div>
+                ) : cues.map((cue, idx) => {
                   const isActive = idx === activeCueIdx;
                   const cueScore = clipScores[String(idx)];
                   return (
