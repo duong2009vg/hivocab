@@ -136,12 +136,15 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
     >
       <div className={`w-full min-w-0 ${isExpandedView ? 'pl-0' : 'lg:pl-[var(--sidebar-w,244px)]'}`}>
         <div
-          className={`mx-auto px-3 sm:px-6 xl:px-8 pt-3 sm:pt-4 lg:pt-5 space-y-3 sm:space-y-4 pwa-safe-top ${
-            isExpandedView ? 'max-w-[1600px] pb-12 lg:pb-10' : 'max-w-[1440px] pb-24 lg:pb-12'
+          className={`mx-auto px-3 sm:px-6 xl:px-8 pwa-safe-top ${
+            isExpandedView
+              ? 'max-w-[1600px] pt-2.5 sm:pt-3 pb-12 lg:pb-10'
+              : 'max-w-[1440px] pt-3 sm:pt-4 lg:pt-5 space-y-3 sm:space-y-4 pb-24 lg:pb-12'
           }`}
         >
-          {/* Compact Top Bar: Mode Switcher Pills + Voice Selector */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
+          {/* Compact Top Bar: Mode Switcher Pills + Right Action (hidden inside video study detail view) */}
+          {!isExpandedView && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
             <nav className="grid grid-cols-3 sm:flex sm:flex-wrap gap-1.5 sm:gap-2.5" aria-label="Chế độ luyện tập Studio">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
@@ -214,7 +217,8 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
                 </label>
               </div>
             )}
-          </div>
+            </div>
+          )}
 
           {/* Main Content */}
           {loading ? (
