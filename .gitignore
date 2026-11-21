@@ -21,7 +21,7 @@ playwright-report/
 
 # Large offline data, raw media & legacy archives (không commit lên GitHub)
 cam 10-21/
-data/
+/data/
 !public/data/
 vocab2/
 motion mascot/
