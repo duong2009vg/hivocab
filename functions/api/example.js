@@ -3,29 +3,31 @@
 // Body: { term: "break a leg", isPhrase: true }
 // Returns: { ok: true, sentence: "..." }
 import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
+import { getCorsHeaders, requireSupabaseUser } from '../_security.js';
 
 const CKEY_URL = 'https://api.xah.io/v1/chat/completions';
 const CKEY_MODEL = 'deepseek-v4-flash';
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-};
-
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'POST, OPTIONS') });
 }
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+    const corsHeaders = getCorsHeaders(request, 'POST, OPTIONS');
 
-    const rateLimit = await checkRateLimit({ request, env, ruleName: 'ai' });
+    const preRateLimit = await checkRateLimit({ request, env, ruleName: 'ai' });
+    if (!preRateLimit.allowed) return rateLimitResponse(preRateLimit, corsHeaders);
+
+    const auth = await requireSupabaseUser(request, env, corsHeaders);
+    if (!auth.ok) return auth.response;
+
+    const rateLimit = await checkRateLimit({ request, env, ruleName: 'ai', subject: auth.user.id });
     if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     const apiKey = env.CKEY_API_KEY;
     if (!apiKey) {
-        return new Response(JSON.stringify({ ok: false, error: 'CKEY_API_KEY not configured' }), {
+        return new Response(JSON.stringify({ ok: false, error: 'AI service not configured' }), {
             status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });

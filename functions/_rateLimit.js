@@ -6,6 +6,7 @@ const localCounters = new Map();
 
 export const RATE_LIMIT_RULES = Object.freeze({
   public: { binding: 'HIVOCAB_PUBLIC_RATE_LIMITER', limit: 60, period: 60 },
+  corpus: { binding: 'HIVOCAB_PUBLIC_RATE_LIMITER', limit: 30, period: 60 },
   ai: { binding: 'HIVOCAB_AI_RATE_LIMITER', limit: 30, period: 60 },
   dictionary: { binding: 'HIVOCAB_DICTIONARY_RATE_LIMITER', limit: 45, period: 60 },
   translate: { binding: 'HIVOCAB_TRANSLATE_RATE_LIMITER', limit: 35, period: 60 },
@@ -17,23 +18,57 @@ export const RATE_LIMIT_RULES = Object.freeze({
   keepalive: { binding: 'HIVOCAB_KEEPALIVE_RATE_LIMITER', limit: 10, period: 60 },
 });
 
+const MAX_LOCAL_COUNTERS = 5000;
+
 function isProduction(env) {
   return Boolean(env?.CF_PAGES || env?.ENVIRONMENT === 'production' || env?.NODE_ENV === 'production');
 }
 
-function getClientIp(request) {
-  return request.headers.get('cf-connecting-ip')
-    || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
-    || 'unknown-ip';
+function normalizeIp(rawIp) {
+  const ip = String(rawIp || '').trim();
+  if (!ip) return '';
+  // Group IPv6 addresses by /64 prefix to prevent trivial single-user IP rotation across a subnet.
+  if (ip.includes(':')) {
+    const clean = ip.split('%')[0];
+    const parts = clean.split('::');
+    if (parts.length === 1) {
+      const hextets = clean.split(':').slice(0, 4).map((h) => h.padStart(4, '0'));
+      return `${hextets.join(':')}::/64`;
+    }
+    const left = parts[0] ? parts[0].split(':') : [];
+    const right = parts[1] ? parts[1].split(':') : [];
+    const missing = Math.max(0, 8 - (left.length + right.length));
+    const expanded = [...left, ...Array(missing).fill('0'), ...right];
+    return `${expanded.slice(0, 4).map((h) => h.padStart(4, '0')).join(':')}::/64`;
+  }
+  return ip;
 }
 
-export function getRateLimitSubject(request, subject = '') {
-  const value = String(subject || getClientIp(request)).trim();
+function getClientIp(request, env) {
+  const cfIp = request.headers.get('cf-connecting-ip');
+  if (cfIp) return normalizeIp(cfIp) || 'unknown-ip';
+  if (!isProduction(env)) {
+    const xff = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
+    if (xff) return normalizeIp(xff) || 'unknown-ip';
+  }
+  return 'unknown-ip';
+}
+
+export function getRateLimitSubject(request, subject = '', env = undefined) {
+  const value = String(subject || getClientIp(request, env)).trim();
   return value.slice(0, 160) || 'unknown';
 }
 
 function localRateLimit(key, rule) {
   const now = Date.now();
+  if (localCounters.size >= MAX_LOCAL_COUNTERS) {
+    for (const [k, v] of localCounters.entries()) {
+      if (now >= v.resetAt || localCounters.size >= MAX_LOCAL_COUNTERS) {
+        localCounters.delete(k);
+        if (localCounters.size < MAX_LOCAL_COUNTERS - 200) break;
+      }
+    }
+  }
   const current = localCounters.get(key);
   if (!current || now >= current.resetAt) {
     localCounters.set(key, { count: 1, resetAt: now + rule.period * 1000 });
@@ -52,7 +87,7 @@ export async function checkRateLimit({ request, env, ruleName, subject }) {
   const rule = RATE_LIMIT_RULES[ruleName];
   if (!rule) throw new Error(`Unknown rate-limit rule: ${ruleName}`);
 
-  const key = `${ruleName}:${getRateLimitSubject(request, subject)}`;
+  const key = `${ruleName}:${getRateLimitSubject(request, subject, env)}`;
 
   // Preferred production path for Pages Functions: a separately deployed
   // Durable Object Worker exposed through a Service Binding.

@@ -33,8 +33,8 @@ export function PageFaq() {
           a: 'This is HiVocab\'s signature reading methodology: IELTS passages are presented in aligned English-Vietnamese layout. You can drag or toggle the "Curtain" to conceal the translation, training your brain to actively comprehend English and deduce meanings in context. You only reveal the curtain when you need to verify. Built-in fill-in-the-blank exercises are embedded right inside the passage.',
         },
         {
-          q: 'How does the Spaced Repetition (SRS SM-2) algorithm help retention?',
-          a: 'HiVocab leverages the proven SuperMemo-2 (SM-2) memory algorithm based on cognitive science. The system schedules learning into 5 memory tiers (1 day, 3 days, 7 days, 14 days, 30 days) and automatically calculates the exact moment you are about to forget a word to prompt a review session. This converts vocabulary into permanent long-term memory while saving up to 80% of study time.',
+          q: 'How does the Spaced Repetition (FSRS-6) algorithm help retention?',
+          a: 'HiVocab uses FSRS-6 (Free Spaced Repetition Scheduler), a modern 21-parameter DSR memory model (Difficulty, Stability, Retrievability) used in Anki. It tracks each word’s forgetting curve and schedules reviews right before recall drops below your target retention, locking vocabulary into long-term memory with up to 30% fewer reviews than legacy SM-2.',
         },
         {
           q: 'What interactive practice modes are available?',
@@ -63,8 +63,8 @@ export function PageFaq() {
           a: 'Đây là phương pháp luyện đọc độc quyền trên HiVocab: Bài đọc IELTS được trình bày song ngữ Anh - Việt đối xứng. Bạn có thể kéo thanh "Rèm che" để che bản dịch tiếng Việt, buộc não bộ phải chủ động đọc hiểu tiếng Anh và tự suy đoán nghĩa trong ngữ cảnh, chỉ mở hé rèm khi cần kiểm tra lại. Đi kèm là tính năng bài tập đục lỗ từ vựng giúp bạn ghi nhớ từ ngay trong bài đọc.',
         },
         {
-          q: 'Thuật toán Lặp lại Ngắt quãng (Spaced Repetition - SRS SM-2) giúp tôi nhớ từ ra sao?',
-          a: 'HiVocab ứng dụng thuật toán SuperMemo-2 (SM-2) theo quy luật khoa học về trí nhớ. Hệ thống chia việc học thành 5 cấp độ (1 ngày, 3 ngày, 7 ngày, 14 ngày, 30 ngày) và tự động tính toán chính xác thời điểm bạn chuẩn bị quên từ để nhắc nhở ôn tập, biến từ vựng thành trí nhớ dài hạn vĩnh viễn và tiết kiệm 80% thời gian.',
+          q: 'Thuật toán Lặp lại Ngắt quãng (FSRS-6) giúp tôi nhớ từ ra sao?',
+          a: 'HiVocab ứng dụng thuật toán FSRS-6 (Free Spaced Repetition Scheduler) chuẩn Anki thế hệ mới dựa trên mô hình trí nhớ DSR (Độ khó - Độ bền - Xác suất nhớ). Hệ thống mô phỏng đường cong lãng quên riêng cho từng từ và tự động nhắc ôn ngay trước khi bạn chuẩn bị quên, giảm 20–30% số lượt ôn không cần thiết so với SM-2 truyền thống.',
         },
         {
           q: 'HiVocab có những chế độ luyện tập nào?',

@@ -61,11 +61,19 @@ export function PageBilingualReading({ onReadingModeChange }) {
     totalParas,
     vocabMap,
     vocabRegex,
+    showHighlights,
+    toggleHighlights,
+    showVocabPopup,
+    toggleVocabPopup,
+    showVocabSidebar,
+    toggleVocabSidebar,
+    curtainMode,
     revealedParas,
     toggleParaCurtain,
     revealAllParas,
     hideAllParas,
     activeTooltip,
+    selectedVocabWord,
     openVocabTooltip,
     closeVocabTooltip,
     // Gap fill
@@ -102,6 +110,7 @@ export function PageBilingualReading({ onReadingModeChange }) {
       setEntryOrigin('hub');
       setSelectedPassageId(null);
       switchPassage(null);
+      hub.closeShelfDetail();
       hub.refreshLastReading();
       if (typeof window !== 'undefined') window.scrollTo(0, 0);
     };
@@ -119,7 +128,9 @@ export function PageBilingualReading({ onReadingModeChange }) {
       testName: passage.testName,
       passageNumber: passage.passageNumber,
       title: passage.title,
+      titleVi: passage.titleVi || null,
       topicLabel: passage.topicLabel,
+      isNewsArticle: Boolean(passage.isNewsArticle),
     });
   }, [passage, loading, error]);
 
@@ -152,6 +163,7 @@ export function PageBilingualReading({ onReadingModeChange }) {
         testName: test?.name || 'Test',
         passageNumber: item.passageNumber,
         title: item.title,
+        titleVi: item.titleVi || null,
         topicLabel: item.topicLabel,
       });
 
@@ -163,18 +175,65 @@ export function PageBilingualReading({ onReadingModeChange }) {
     [hub.selectedBook, hub.hierarchy, switchPassage]
   );
 
+  const handleOpenNewsFromHub = useCallback(
+    (article) => {
+      if (!article?.id) return;
+      const list = hub.filteredNewsArticles?.length > 0 ? hub.filteredNewsArticles : hub.newsArticles;
+      const newsTests = [];
+      for (let i = 0; i < list.length; i += 20) {
+        const chunk = list.slice(i, i + 20);
+        newsTests.push({
+          id: `news-group-${i}`,
+          name: `Bài báo ${chunk[0]?.index || i + 1} – ${chunk[chunk.length - 1]?.index || i + chunk.length}`,
+          passages: chunk,
+        });
+      }
+
+      if (typeof window !== 'undefined') {
+        window._bilingualEntryOrigin = 'hub';
+        window._currentTopicId = null;
+        window._currentTopicName = article.topicName || 'Báo Song Ngữ Chọn Lọc';
+        window._currentTestId = null;
+        window._currentTestName = article.topicLabel || 'Báo Song Ngữ';
+        window._currentPassageId = article.id;
+        window._currentPassageIsPro = false;
+        window._camHierarchy = { tests: newsTests };
+      }
+
+      saveLastBilingualReading({
+        passageId: article.id,
+        topicId: null,
+        topicName: article.topicName || 'Báo Song Ngữ Chọn Lọc',
+        testId: null,
+        testName: article.topicLabel || 'Báo Song Ngữ',
+        passageNumber: article.index,
+        title: article.title,
+        titleVi: article.titleVi || null,
+        topicLabel: article.topicLabel,
+        isNewsArticle: true,
+      });
+
+      setEntryOrigin('hub');
+      setSelectedPassageId(article.id);
+      switchPassage(article.id, 'reading');
+      if (typeof window !== 'undefined') window.scrollTo(0, 0);
+    },
+    [hub.filteredNewsArticles, hub.newsArticles, switchPassage]
+  );
+
   const handleResumeLastReading = useCallback(() => {
     const last = hub.lastReading;
     if (!last?.passageId) return;
+    const isNews = Boolean(last.isNewsArticle || String(last.passageId).startsWith('news-'));
     if (typeof window !== 'undefined') {
       window._bilingualEntryOrigin = 'hub';
-      window._currentTopicId = last.topicId || hub.selectedBook?.id || null;
-      window._currentTopicName = last.topicName || 'IELTS Actual Tests';
+      window._currentTopicId = isNews ? null : last.topicId || hub.selectedBook?.id || null;
+      window._currentTopicName = last.topicName || (isNews ? 'Báo Song Ngữ Chọn Lọc' : 'IELTS Actual Tests');
       window._currentTestId = last.testId || null;
-      window._currentTestName = last.testName || 'Test';
+      window._currentTestName = last.testName || (isNews ? last.topicLabel || 'Báo Song Ngữ' : 'Test');
       window._currentPassageId = last.passageId;
       window._currentPassageIsPro = false;
-      window._camHierarchy = last.topicId && last.topicId === hub.selectedBookId ? hub.hierarchy : null;
+      window._camHierarchy = !isNews && last.topicId && last.topicId === hub.selectedBookId ? hub.hierarchy : null;
     }
     setEntryOrigin('hub');
     setSelectedPassageId(last.passageId);
@@ -244,9 +303,14 @@ export function PageBilingualReading({ onReadingModeChange }) {
   if (isViewingHub) {
     return (
       <BilingualHubView
+        activeShelf={hub.activeShelf}
+        onOpenVolBook={hub.openVolBook}
+        onOpenNewsShelf={hub.openNewsShelf}
+        onBackToShelves={hub.closeShelfDetail}
         books={hub.books}
         booksLoading={hub.booksLoading}
         selectedBook={hub.selectedBook}
+        selectedBookMeta={hub.selectedBookMeta}
         selectedBookId={hub.selectedBookId}
         onSelectBook={hub.setSelectedBookId}
         hierarchyLoading={hub.hierarchyLoading}
@@ -265,6 +329,16 @@ export function PageBilingualReading({ onReadingModeChange }) {
         onResumeLastReading={handleResumeLastReading}
         onOpenPassage={handleOpenPassageFromHub}
         onOpenProModal={handleOpenProModalFromHub}
+        newsCategories={hub.newsCategories}
+        newsArticles={hub.newsArticles}
+        newsLoading={hub.newsLoading}
+        selectedNewsCategory={hub.selectedNewsCategory}
+        onSelectNewsCategory={hub.setSelectedNewsCategory}
+        newsSearchQuery={hub.newsSearchQuery}
+        onNewsSearchChange={hub.setNewsSearchQuery}
+        filteredNewsArticles={hub.filteredNewsArticles}
+        newsCategoryCounts={hub.newsCategoryCounts}
+        onOpenNewsArticle={handleOpenNewsFromHub}
       />
     );
   }
@@ -280,6 +354,13 @@ export function PageBilingualReading({ onReadingModeChange }) {
         onViewModeChange={setViewMode}
         fontSize={fontSize}
         onChangeFontSize={changeFontSize}
+        showHighlights={showHighlights}
+        onToggleHighlights={toggleHighlights}
+        showVocabPopup={showVocabPopup}
+        onToggleVocabPopup={toggleVocabPopup}
+        showVocabSidebar={showVocabSidebar}
+        onToggleVocabSidebar={toggleVocabSidebar}
+        vocabCount={words.length}
         onClose={handleClose}
         onReportError={handleReportError}
         onSelectPassage={handleSwitchPassageInReader}
@@ -364,7 +445,12 @@ export function PageBilingualReading({ onReadingModeChange }) {
                 fontSize={fontSize}
                 vocabRegex={vocabRegex}
                 vocabMap={vocabMap}
+                showHighlights={showHighlights}
+                showVocabSidebar={showVocabSidebar}
+                onToggleVocabSidebar={toggleVocabSidebar}
+                curtainMode={curtainMode}
                 revealedParas={revealedParas}
+                selectedVocabWord={selectedVocabWord}
                 onToggleCurtain={toggleParaCurtain}
                 onRevealAll={revealAllParas}
                 onHideAll={hideAllParas}

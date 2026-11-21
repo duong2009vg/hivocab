@@ -1,32 +1,35 @@
-import React, { useState } from 'react';
-import { 
-  BookOpen, 
-  Heart, 
-  Search, 
-  Share2, 
-  Download, 
-  Compass, 
-  Folder, 
-  MessageSquare, 
-  RotateCcw, 
-  Send, 
-  Globe, 
-  Lock, 
-  X, 
-  Volume2, 
-  Plus, 
-  Trophy, 
-  Flag, 
-  Lightbulb, 
-  Sparkles, 
-  Award, 
-  Flame, 
-  ArrowRight, 
+import React, { useMemo, useState, useCallback } from 'react';
+import {
+  BookOpen,
+  Heart,
+  Search,
+  Share2,
+  Download,
+  Compass,
+  Folder,
+  MessageSquare,
+  RotateCcw,
+  Send,
+  Globe,
+  Lock,
+  X,
+  Volume2,
+  Plus,
+  Trophy,
+  Flag,
+  Lightbulb,
+  Award,
+  Flame,
+  ArrowRight,
   AlertCircle,
-  ChevronLeft 
+  ChevronLeft,
+  Check,
 } from 'lucide-react';
 import { useLibrary } from '../../hooks/useLibrary';
+import { useCommunityChat } from '../../hooks/useCommunityChat';
+import { CommunityChatWidget } from '../library/CommunityChatWidget';
 import { useModal } from '../../context/ModalContext';
+import { useRoute } from '../../router/RouteContext';
 
 const TRUSTED_AVATAR_HOST_SUFFIXES = [
   '.googleusercontent.com',
@@ -134,23 +137,27 @@ function EmptyState({ tab, onOpenCreate }) {
         <Search className="w-12 h-12 text-stone-400 mb-3" />
       )}
       <h3 className="text-lg font-black text-[#2D2824] mb-1">
-        {isMy ? 'Bạn chưa tạo bộ từ nào' : isLiked ? 'Chưa có bộ từ yêu thích' : 'Không tìm thấy bộ từ phù hợp'}
+        {isMy
+          ? 'Bạn chưa tạo bộ từ nào'
+          : isLiked
+            ? 'Chưa có bộ từ yêu thích'
+            : 'Chưa có bộ từ công khai phù hợp'}
       </h3>
       <p className="text-xs sm:text-sm text-[#68594D] max-w-sm mb-5 font-semibold">
-        {isMy 
-          ? 'Tạo các bộ từ cá nhân của bạn để học tập bằng phương pháp tranh vẽ và chia sẻ cùng cộng đồng.'
-          : isLiked 
-          ? 'Khám phá các bộ từ nổi bật và bấm biểu tượng trái tim để lưu lại vào bộ sưu tập cá nhân.'
-          : 'Hãy thử tìm kiếm với từ khóa khác hoặc bấm chọn hashtag phổ biến khác nhé!'}
+        {isMy
+          ? 'Tạo các bộ từ cá nhân của bạn để học tập bằng phương pháp sáp màu và chia sẻ cùng cộng đồng.'
+          : isLiked
+            ? 'Khám phá các bộ từ nổi bật và bấm biểu tượng trái tim để lưu lại vào bộ sưu tập cá nhân.'
+            : 'Hãy thử đổi từ khóa/hashtag hoặc trở thành người tiên phong chia sẻ bộ từ vựng của bạn lên cộng đồng nhé!'}
       </p>
-      {isMy && (
-        <button 
+      {(isMy || tab === 'feed') && (
+        <button
           type="button"
           onClick={onOpenCreate}
-          className="px-5 py-2.5 rounded-2xl bg-[#E66946] text-white text-xs sm:text-sm font-black shadow-[3px_3px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-2"
+          className="px-5 py-2.5 rounded-2xl bg-[#E66946] text-white text-xs sm:text-sm font-black shadow-[3px_3px_0px_#2D2824] hover:bg-[#db5d39] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center gap-2 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Tạo bộ từ mới ngay</span>
+          <span>{isMy ? 'Tạo bộ từ mới ngay' : 'Tạo & Chia sẻ bộ từ ngay'}</span>
         </button>
       )}
     </div>
@@ -225,8 +232,8 @@ function CommentsDrawer({ lib }) {
           <button
             type="button"
             onClick={lib.submitComment}
-            disabled={!lib.commentInput.trim()}
-            className="w-11 h-11 rounded-2xl bg-[#E66946] text-white flex items-center justify-center hover:bg-[#db5d39] disabled:opacity-40 transition-all shrink-0 active:scale-95 shadow-[2px_2px_0px_#2D2824] border-2 border-[#2D2824]"
+            disabled={!lib.commentInput.trim() || lib.isSubmittingComment}
+            className="w-11 h-11 rounded-2xl bg-[#E66946] text-white flex items-center justify-center hover:bg-[#db5d39] disabled:opacity-40 transition-all shrink-0 active:scale-95 shadow-[2px_2px_0px_#2D2824] border-2 border-[#2D2824] cursor-pointer"
           >
             <Send className="w-4 h-4" />
           </button>
@@ -487,27 +494,57 @@ function ThreadDetailModal({ lib }) {
               <Heart className={`w-4 h-4 shrink-0 ${detail.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#2D2824]'}`} />
               <span>{detail.like_count || 0}</span>
             </button>
-            <button 
+            <button
               type="button"
               onClick={() => lib.openComments(detail.id, detail.name)}
               aria-label="Bình luận"
-              className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5"
+              className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-4 py-2 rounded-2xl bg-white border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] text-[#2D2824] hover:bg-[#FAF5ED] transition-all font-black text-xs sm:text-sm active:translate-y-0.5 cursor-pointer"
             >
               <MessageSquare className="w-4 h-4 shrink-0 text-[#2D2824]" />
-              <span className="hidden sm:inline">Bình luận</span>
-            </button>
-            <button 
-              type="button"
-              onClick={() => lib.handleClone(detail.id)}
-              aria-label="Lưu bộ từ"
-              className="min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl bg-[#5A7E56] border-2 border-[#2D2824] text-white hover:bg-[#4B6B46] transition-all font-black text-xs sm:text-sm shadow-[3px_3px_0px_#2D2824] active:translate-x-0.5 active:translate-y-0.5 shrink-0"
-            >
-              <Download className="w-4 h-4 shrink-0 text-white" />
-              <span>
-                <span className="hidden sm:inline">Lưu bộ từ</span>
-                <span className="sm:hidden">Lưu</span> ({detail.clone_count || 0})
+              <span className="hidden sm:inline">
+                Bình luận{detail.comment_count > 0 ? ` (${detail.comment_count})` : ''}
               </span>
             </button>
+            {(() => {
+              const isOwner = Boolean(lib.currentUserId && detail.user_id === lib.currentUserId);
+              const isCloned = Boolean(lib.clonedMap?.[detail.id]);
+              const isCloning = lib.isCloningId === detail.id;
+              return (
+                <button
+                  type="button"
+                  disabled={isCloning}
+                  onClick={() => lib.handleClone(detail)}
+                  aria-label="Lưu bộ từ"
+                  className={`min-h-[44px] flex items-center justify-center gap-1.5 px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl border-2 border-[#2D2824] text-white transition-all font-black text-xs sm:text-sm shadow-[3px_3px_0px_#2D2824] active:translate-x-0.5 active:translate-y-0.5 shrink-0 cursor-pointer disabled:opacity-60 ${
+                    isCloned || isOwner
+                      ? 'bg-[#3F6B4E] hover:bg-[#32573E]'
+                      : 'bg-[#5A7E56] hover:bg-[#4B6B46]'
+                  }`}
+                >
+                  {isCloned ? (
+                    <Check className="w-4 h-4 shrink-0 text-white" />
+                  ) : isOwner ? (
+                    <ArrowRight className="w-4 h-4 shrink-0 text-white" />
+                  ) : (
+                    <Download className="w-4 h-4 shrink-0 text-white" />
+                  )}
+                  <span>
+                    {isCloning ? (
+                      'Đang lưu...'
+                    ) : isOwner ? (
+                      'Mở học ngay'
+                    ) : isCloned ? (
+                      'Đã lưu · Mở học'
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline">Lưu bộ từ</span>
+                        <span className="sm:hidden">Lưu</span> ({detail.clone_count || 0})
+                      </>
+                    )}
+                  </span>
+                </button>
+              );
+            })()}
             <button 
               type="button"
               onClick={() => lib.handleShare(detail.id, detail.name)}
@@ -525,9 +562,68 @@ function ThreadDetailModal({ lib }) {
 }
 
 export function PageLibrary() {
-  const lib = useLibrary();
+  const { navigateTo } = useRoute();
   const { openModal } = useModal ? useModal() : { openModal: () => {} };
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+
+  const handleOpenTopicStudy = useCallback(
+    (topic) => {
+      if (!topic?.id) return;
+      const finalName = topic.name || 'Bộ từ vựng';
+      const finalCat = topic.category || 'personal';
+      if (typeof window !== 'undefined') {
+        window._currentTopicId = topic.id;
+        window._currentTopicName = finalName;
+        window._currentCategory = finalCat;
+        window._currentCategoryName = finalCat;
+        window._currentPassageId = null;
+        window._currentPassageNumber = null;
+        window._currentPassageTitle = null;
+        window._currentTopicLabel = null;
+        window._currentTestId = null;
+        window._currentTestIndex = 0;
+        window._currentLessonIndex = null;
+        window._currentLessonWords = [];
+        window._currentLessonWordsKey = null;
+        try {
+          sessionStorage.setItem(
+            'hi_current_lesson_state',
+            JSON.stringify({
+              topicId: topic.id,
+              topicName: finalName,
+              category: finalCat,
+            })
+          );
+        } catch (_) {}
+      }
+      navigateTo('topic-detail');
+    },
+    [navigateTo]
+  );
+
+  const lib = useLibrary({ onOpenTopic: handleOpenTopicStudy });
+  const chat = useCommunityChat({ currentUserId: lib.currentUserId, enabled: true });
+
+  // Build real dynamic author leaderboard from live public decks (no static/mock sample data)
+  const topAuthors = useMemo(() => {
+    if (lib.currentTab !== 'feed' || !Array.isArray(lib.topics) || lib.topics.length === 0) {
+      return [];
+    }
+    const map = new Map();
+    for (const t of lib.topics) {
+      const name = String(t.author_name || '').trim();
+      if (!name) continue;
+      const cur = map.get(name) || { name, deckCount: 0, interactions: 0, isPro: false };
+      cur.deckCount += 1;
+      cur.interactions += (t.like_count || 0) + (t.clone_count || 0);
+      cur.isPro = cur.isPro || Boolean(t.is_pro);
+      map.set(name, cur);
+    }
+    return Array.from(map.values())
+      .sort((a, b) => b.interactions - a.interactions || b.deckCount - a.deckCount)
+      .slice(0, 3);
+  }, [lib.currentTab, lib.topics]);
 
   const handleOpenCreate = () => {
     if (openModal) {
@@ -716,10 +812,10 @@ export function PageLibrary() {
                           <span>{topic.is_public ? 'Công khai' : 'Riêng tư'}</span>
                         </button>
 
-                        <button 
+                        <button
                           type="button"
-                          onClick={() => window._openTopic?.(topic.id)}
-                          className="px-4 py-2 rounded-2xl bg-[#5A7E56] text-white text-xs font-black border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] hover:bg-[#4B6B46] active:translate-y-0.5 transition-all flex items-center gap-1.5"
+                          onClick={() => lib.openTopicStudy(topic)}
+                          className="px-4 py-2 rounded-2xl bg-[#5A7E56] text-white text-xs font-black border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] hover:bg-[#4B6B46] active:translate-y-0.5 transition-all flex items-center gap-1.5 cursor-pointer"
                         >
                           <span>Mở học</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -748,9 +844,9 @@ export function PageLibrary() {
                               getInitials(topic.author_name)
                             )}
                           </div>
-                          <button 
+                          <button
                             type="button"
-                            onClick={(e) => { e.stopPropagation(); lib.handleClone(topic.id); }}
+                            onClick={(e) => { e.stopPropagation(); lib.handleClone(topic); }}
                             className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#F4BA42] border border-[#2D2824] flex items-center justify-center text-[11px] font-black hover:scale-110 active:scale-95 transition-transform"
                             title="Lưu bộ từ về kho cá nhân"
                           >
@@ -838,13 +934,13 @@ export function PageLibrary() {
                           <Heart className={`w-4 h-4 ${topic.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#68594D]'}`} />
                           <span>{topic.like_count || 0}</span>
                         </button>
-                        <button 
+                        <button
                           type="button"
                           onClick={() => lib.openComments(topic.id, topic.name)}
-                          className="flex items-center gap-1.5 hover:text-[#2D2824] transition-colors whitespace-nowrap"
+                          className="flex items-center gap-1.5 hover:text-[#2D2824] transition-colors whitespace-nowrap cursor-pointer"
                         >
                           <MessageSquare className="w-4 h-4" />
-                          <span>Bình luận</span>
+                          <span>Bình luận{topic.comment_count > 0 ? ` (${topic.comment_count})` : ''}</span>
                         </button>
                         <div className="flex items-center gap-1.5 whitespace-nowrap">
                           <Download className="w-4 h-4" />
@@ -868,95 +964,54 @@ export function PageLibrary() {
             )}
           </div>
 
-          {/* Right Column (4 cols) - Community & Mascot Sidebar Widget */}
+          {/* Right Column (4 cols) - Community Chat Widget (Reused Cozy Crayon Box) */}
           <aside className="col-span-12 lg:col-span-4 space-y-5">
-            
-            {/* Mascot Spotlight Box: Cùng Churbito chia sẻ bộ từ */}
-            <div className="bg-gradient-to-b from-[#E7EFE3] to-[#F1F7EE] border-[2.5px] border-[#2D2824] rounded-3xl p-5 xl:p-6 shadow-[3px_3px_0px_#2D2824] relative overflow-hidden">
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 bg-[#5A7E56] text-white text-[11px] font-black px-3 py-1 rounded-full border border-[#2D2824] shadow-xs whitespace-nowrap">
-                  <Sparkles className="w-3.5 h-3.5 text-white" /> Gợi ý từ Bé Hổ
-                </span>
-                <span className="text-xs font-black text-[#5A7E56] font-hand whitespace-nowrap shrink-0">+50 Hạt mầm</span>
-              </div>
-              
-              {/* Illustration & Text */}
-              <div className="text-center my-3">
-                <div className="w-36 h-36 xl:w-44 xl:h-44 mx-auto rounded-2xl overflow-hidden bg-white/70 border-2 border-[#2D2824] p-2 shadow-[2px_2px_0px_#2D2824] flex items-center justify-center">
-                  <img 
-                    alt="Bé Hổ mascot Churbito ngồi đệm ấm áp" 
-                    className="w-full h-full object-contain mix-blend-multiply" 
-                    src="/mascot/mascot_cozy.png"
-                  />
-                </div>
-                <h4 className="text-lg xl:text-xl font-black font-quicksand text-[#2D2824] mt-3">Đăng tải bộ thẻ từ của bạn!</h4>
-                <p className="text-xs font-semibold text-[#68594D] mt-1.5 px-1 leading-relaxed">
-                  Cùng hơn <strong className="text-[#2D2824] font-black">25,000+ bạn học</strong> mở rộng kho từ vựng mỗi ngày. Chia sẻ kiến thức để cùng nhau tiến bộ nhé!
-                </p>
-              </div>
+            <CommunityChatWidget
+              chat={chat}
+              currentUserId={lib.currentUserId}
+              getSafeAvatarUrl={getSafeAvatarUrl}
+              onOpenTopicDetail={(topicId) => lib.openDetail(topicId)}
+              onOpenCreateTopic={handleOpenCreate}
+              onExpandChat={() => setIsChatModalOpen(true)}
+              variant="card"
+            />
 
-              {/* Upload Deck Button */}
-              <button 
-                type="button"
-                onClick={handleOpenCreate}
-                className="w-full bg-white hover:bg-[#FAF5ED] text-[#2D2824] font-black py-2.5 xl:py-3 px-4 rounded-2xl border-2 border-[#2D2824] shadow-[3px_3px_0px_#2D2824] transition-all active:translate-x-0.5 active:translate-y-0.5 flex items-center justify-center gap-2 text-xs xl:text-sm mt-3 whitespace-nowrap cursor-pointer"
-              >
-                <Plus className="w-4 h-4 text-[#2D2824]" />
-                <span>Tạo &amp; Tải lên bộ từ ngay</span>
-              </button>
-            </div>
-
-            {/* Weekly Top Contributors Widget */}
+            {/* Real Dynamic Top Contributors Widget */}
             <div className="bg-white border-[2.5px] border-[#2D2824] rounded-3xl p-5 xl:p-6 shadow-[3px_3px_0px_#2D2824] space-y-3.5">
               <div className="flex items-center justify-between gap-2 pb-3 border-b-2 border-dashed border-[#2D2824]/20">
                 <div className="flex items-center gap-2 min-w-0">
                   <Trophy className="w-5 h-5 text-amber-500 shrink-0" />
-                  <h4 className="font-black text-sm xl:text-base text-[#2D2824] font-quicksand truncate">Tác giả nổi bật tuần</h4>
+                  <h4 className="font-black text-sm xl:text-base text-[#2D2824] font-quicksand truncate">Tác giả đóng góp</h4>
                 </div>
-                <span className="text-xs font-bold text-[#E66946] whitespace-nowrap shrink-0">Tuyển chọn</span>
+                <span className="text-xs font-bold text-[#E66946] whitespace-nowrap shrink-0">Cộng đồng</span>
               </div>
 
-              {/* Author 1 */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Award className="w-5 h-5 text-amber-500 shrink-0" />
-                  <div className="min-w-0">
-                    <h5 className="text-xs font-black text-[#2D2824] truncate">Cô Mai Phương</h5>
-                    <p className="text-[11px] font-medium text-[#68594D] truncate">12 bộ từ • 1.2k lượt học</p>
+              {topAuthors.length === 0 ? (
+                <p className="text-xs font-semibold text-[#68594D] leading-relaxed py-2">
+                  Chưa có bộ từ công khai nào được chia sẻ. Hãy chuyển một bộ từ của bạn sang <strong className="text-[#2D2824]">Công khai</strong> ở tab Bộ từ của tôi để lên bảng xếp hạng nhé!
+                </p>
+              ) : (
+                topAuthors.map((author, idx) => (
+                  <div key={author.name} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <Award
+                        className={`w-5 h-5 shrink-0 ${
+                          idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-stone-400' : 'text-amber-700'
+                        }`}
+                      />
+                      <div className="min-w-0">
+                        <h5 className="text-xs font-black text-[#2D2824] truncate">{author.name}</h5>
+                        <p className="text-[11px] font-medium text-[#68594D] truncate">
+                          {author.deckCount} bộ từ • {author.interactions} tương tác
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-extrabold px-2.5 py-1 bg-[#FAF5ED] border border-[#2D2824] rounded-xl text-[#2D2824] whitespace-nowrap shrink-0">
+                      {author.isPro ? 'Thành viên PRO' : 'Thành viên'}
+                    </span>
                   </div>
-                </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 bg-[#FAF5ED] border border-[#2D2824] rounded-xl text-[#2D2824] whitespace-nowrap shrink-0">
-                  Giáo viên
-                </span>
-              </div>
-
-              {/* Author 2 */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Award className="w-5 h-5 text-stone-400 shrink-0" />
-                  <div className="min-w-0">
-                    <h5 className="text-xs font-black text-[#2D2824] truncate">Master Vocab Lab</h5>
-                    <p className="text-[11px] font-medium text-[#68594D] truncate">8 bộ từ • 940 lượt học</p>
-                  </div>
-                </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 bg-[#FAF5ED] border border-[#2D2824] rounded-xl text-[#2D2824] whitespace-nowrap shrink-0">
-                  C1-C2 Team
-                </span>
-              </div>
-
-              {/* Author 3 */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <Award className="w-5 h-5 text-amber-700 shrink-0" />
-                  <div className="min-w-0">
-                    <h5 className="text-xs font-black text-[#2D2824] truncate">Ngọc Linh Vocab</h5>
-                    <p className="text-[11px] font-medium text-[#68594D] truncate">6 bộ từ • 720 lượt học</p>
-                  </div>
-                </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 bg-[#FAF5ED] border border-[#2D2824] rounded-xl text-[#2D2824] whitespace-nowrap shrink-0">
-                  Học viên
-                </span>
-              </div>
+                ))
+              )}
             </div>
 
             {/* Community Guidelines Note */}
@@ -1116,8 +1171,8 @@ export function PageLibrary() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => window._openTopic?.(topic.id)}
-                      className="px-3 py-1 bg-[#5A7E56] text-white text-xs font-black rounded-xl border border-[#2D2824] flex items-center gap-1"
+                      onClick={() => lib.openTopicStudy(topic)}
+                      className="px-3 py-1 bg-[#5A7E56] text-white text-xs font-black rounded-xl border border-[#2D2824] flex items-center gap-1 cursor-pointer"
                     >
                       <span>Mở</span>
                       <ArrowRight className="w-3 h-3" />
@@ -1146,9 +1201,9 @@ export function PageLibrary() {
                           getInitials(topic.author_name)
                         )}
                       </div>
-                      <button 
+                      <button
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); lib.handleClone(topic.id); }}
+                        onClick={(e) => { e.stopPropagation(); lib.handleClone(topic); }}
                         className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-[#F4BA42] text-[#2D2824] flex items-center justify-center border border-[#2D2824] text-[10px] font-black"
                       >
                         +
@@ -1215,17 +1270,17 @@ export function PageLibrary() {
                     <Heart className={`w-3.5 h-3.5 ${topic.hasLiked ? 'fill-rose-500 text-rose-500' : 'text-[#68594D]'}`} />
                     <span>{topic.like_count || 0}</span>
                   </button>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => lib.openComments(topic.id, topic.name)}
                     className="flex items-center gap-1.5 hover:text-[#2D2824] transition-colors"
                   >
                     <MessageSquare className="w-3.5 h-3.5" />
-                    <span>Bình luận</span>
+                    <span>Bình luận{topic.comment_count > 0 ? ` (${topic.comment_count})` : ''}</span>
                   </button>
-                  <button 
+                  <button
                     type="button"
-                    onClick={() => lib.handleClone(topic.id)}
+                    onClick={() => lib.handleClone(topic)}
                     className="flex items-center gap-1.5 hover:text-[#5A7E56] transition-colors"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -1236,24 +1291,35 @@ export function PageLibrary() {
             ))
           )}
 
-          {/* Mascot Prompt Invitation Banner on Mobile */}
-          <section className="bg-[#CCE8BC] rounded-[26px_22px_24px_28px] p-4 border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] relative overflow-hidden flex items-center justify-between mt-1">
-            <div className="relative z-10 max-w-[72%]">
-              <div className="inline-flex items-center gap-1 bg-[#4B6540] text-white text-[10px] font-black px-2 py-0.5 rounded-full mb-1">
-                <Sparkles className="w-3 h-3 text-white" />
-                <span>Gợi ý từ Bé Hổ</span>
+          {/* Mobile Community Chat Banner (Reused Cozy Crayon Box) */}
+          <section className="bg-gradient-to-b from-[#E7EFE3] to-[#F1F7EE] rounded-[26px_22px_24px_28px] p-4 border-[3px] border-[#2D2824] shadow-[2.5px_3px_0px_rgba(51,48,44,0.9)] relative overflow-hidden flex items-center justify-between gap-3 mt-1">
+            <div className="relative z-10 min-w-0 flex-1">
+              <div className="inline-flex items-center gap-1.5 bg-[#4B6540] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full mb-1">
+                <MessageSquare className="w-3 h-3 text-white" />
+                <span>Phòng Chat Cộng Đồng · {chat.onlineCount} online</span>
               </div>
-              <h4 className="text-sm font-black text-[#092104]">Đăng tải bộ thẻ từ của bạn!</h4>
-              <p className="text-[11px] font-semibold text-[#344D2A] mt-0.5">Cùng 25,000+ bạn học mở rộng kho từ vựng mỗi ngày.</p>
+              <h4 className="text-sm font-black text-[#092104]">Trò chuyện &amp; Hỏi đáp từ vựng</h4>
+              <p className="text-[11px] font-semibold text-[#344D2A] mt-0.5 truncate">
+                {chat.messages.length > 0
+                  ? `${chat.messages[chat.messages.length - 1]?.author_name}: ${chat.messages[chat.messages.length - 1]?.content}`
+                  : 'Nhấn Mở Chat để thảo luận cùng mọi người!'}
+              </p>
             </div>
-            <div className="relative z-10">
-              <button 
+            <div className="relative z-10 flex items-center gap-1.5 shrink-0">
+              <button
                 type="button"
                 onClick={handleOpenCreate}
-                className="w-11 h-11 rounded-2xl bg-white text-[#2D2824] flex items-center justify-center border-2 border-[#2D2824] shadow-xs active:scale-95 transition-transform text-lg font-black"
+                className="w-10 h-10 rounded-2xl bg-white text-[#2D2824] flex items-center justify-center border-2 border-[#2D2824] shadow-xs active:scale-95 transition-transform cursor-pointer"
                 title="Tạo bộ từ mới"
               >
-                +
+                <Plus className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsChatModalOpen(true)}
+                className="px-3.5 h-10 rounded-2xl bg-[#5A7E56] text-white text-xs font-black flex items-center justify-center border-2 border-[#2D2824] shadow-[2px_2px_0px_#2D2824] active:scale-95 transition-transform cursor-pointer"
+              >
+                Mở Chat
               </button>
             </div>
           </section>
@@ -1280,6 +1346,27 @@ export function PageLibrary() {
       {lib.activeCommentsTopicId && <CommentsDrawer lib={lib} />}
       {lib.publishTopicId && <HashtagPublishModal lib={lib} />}
       {isSearchOpen && <LibrarySearchModal lib={lib} onClose={() => setIsSearchOpen(false)} />}
+      {isChatModalOpen && (
+        <div
+          className="fixed inset-0 z-[65] flex items-end sm:items-center justify-center bg-black/45 backdrop-blur-xs p-0 sm:p-4"
+          onClick={() => setIsChatModalOpen(false)}
+        >
+          <div className="w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <CommunityChatWidget
+              chat={chat}
+              currentUserId={lib.currentUserId}
+              getSafeAvatarUrl={getSafeAvatarUrl}
+              onOpenTopicDetail={(topicId) => {
+                setIsChatModalOpen(false);
+                lib.openDetail(topicId);
+              }}
+              onOpenCreateTopic={handleOpenCreate}
+              variant="modal"
+              onCloseModal={() => setIsChatModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

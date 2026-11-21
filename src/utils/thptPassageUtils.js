@@ -37,11 +37,19 @@ export function formatBlanksInHtml(text, startQ, endQ) {
   escaped = escaped.replace(/\[(I{1,3}|IV|V)\]/g,
     '<span class="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded bg-slate-200 text-slate-800 font-black text-xs mx-1 select-none border border-slate-300 shadow-2xs">[$1]</span>');
 
-  // 4. Blank references: (18), _____(18)_____, etc.
-  escaped = escaped.replace(/(?:[=_~-]*_{1,}[=_~-]*\s*)*\(\s*([1-3][0-9]|40|[1-9])\s*\)(?:\s*(?:_{1,}|\.{2,}|[-=_~]{1,}))*/g, (match, p1) => {
+  // 4. Blank references: (18), _____(18)_____, (1)..(120) including local per-passage numbering
+  const sQ = startQ || 1;
+  const eQ = endQ || 40;
+  escaped = escaped.replace(/(?:[=_~-]*_{1,}[=_~-]*\s*)*\(\s*(\d{1,3})\s*\)(?:\s*(?:_{1,}|\.{2,}|[-=_~]{1,}))*/g, (match, p1) => {
     const num = parseInt(p1, 10);
-    if (num >= (startQ || 1) && num <= (endQ || 40)) {
-      return `<button type="button" data-jump-q="${num}" class="inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md bg-blue-100 hover:bg-blue-200 border border-blue-300 text-blue-800 font-mono font-bold text-xs shadow-2xs cursor-pointer transition-all">(${num}) _______</button>`;
+    let targetQ = null;
+    if (num >= sQ && num <= eQ) {
+      targetQ = num;
+    } else if (sQ > 1 && num >= 1 && num <= eQ - sQ + 1) {
+      targetQ = sQ + num - 1;
+    }
+    if (targetQ !== null) {
+      return `<button type="button" data-jump-q="${targetQ}" class="inline-flex items-center justify-center px-2 py-0.5 mx-1 rounded-md bg-blue-100 hover:bg-blue-200 border border-blue-300 text-blue-800 font-mono font-bold text-xs shadow-2xs cursor-pointer transition-all">(${num}) _______</button>`;
     }
     return match;
   });
@@ -189,15 +197,15 @@ export function buildExamSections(exam) {
         }
       }
 
-      // Auto-detect arrangement type
+      // Auto-detect arrangement type (never assume part === 3 is arrangement)
       const isArrangement =
         s.type === 'arrangement' ||
-        s.part === 3 ||
         secQuestions.some(
           (q) =>
             q.is_arrangement ||
             q.question_type === 'sentence_arrangement' ||
-            q.type === 'arrangement'
+            q.type === 'arrangement' ||
+            (Array.isArray(q.arrangement_sentences) && q.arrangement_sentences.length > 0)
         );
       const type = isArrangement ? 'arrangement' : (s.type || 'reading');
 
@@ -269,7 +277,7 @@ export function buildExamSections(exam) {
  */
 export function parseArrangementSentences(raw) {
   if (!raw) return [];
-  const regex = /(?:^|\n)\s*([a-f])\.\s*([\s\S]*?)(?=(?:\n\s*[a-f]\.|\s*$))/gi;
+  const regex = /(?:^|\n)\s*([a-h])\.\s*([\s\S]*?)(?=(?:\n\s*[a-h]\.|\s*$))/gi;
   const items = [];
   let match;
   while ((match = regex.exec(raw)) !== null) {

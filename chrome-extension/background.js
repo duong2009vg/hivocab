@@ -223,12 +223,49 @@ async function closeLoginWindowIfOpen() {
     chrome.runtime.sendMessage({ type: 'login-success' }).catch(() => {});
 }
 
+// ── Sender Validation Helpers ─────────────────────────────────────────────────
+const VALID_TOPIC_ID_RE = /^[a-zA-Z0-9_-]{1,64}$/;
+
+function isTrustedAppUrl(rawUrl) {
+    if (!rawUrl) return false;
+    try {
+        const parsed = new URL(rawUrl);
+        const p = parsed.protocol;
+        const h = parsed.hostname.toLowerCase();
+        if (p === 'https:' && (h === 'hivocab.site' || h.endsWith('.hivocab.site') || h === 'hivocab.vercel.app')) {
+            return true;
+        }
+        if ((p === 'http:' || p === 'https:') && (h === 'localhost' || h === '127.0.0.1')) {
+            return true;
+        }
+        return false;
+    } catch {
+        return false;
+    }
+}
+
+function isExtensionPageSender(sender) {
+    if (!sender || sender.id !== chrome.runtime.id || sender.tab) return false;
+    const extOrigin = chrome.runtime.getURL('');
+    return Boolean(sender.url && sender.url.startsWith(extOrigin));
+}
+
+function isTrustedAppSender(sender) {
+    if (!sender || sender.id !== chrome.runtime.id) return false;
+    if (isExtensionPageSender(sender)) return true;
+    return isTrustedAppUrl(sender.url || sender.origin || sender.tab?.url);
+}
+
 // ── Message handler ───────────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (!sender || sender.id !== chrome.runtime.id) return;
 
-    // Content script gửi session đầy đủ
+    // Content script gửi session đầy đủ (chỉ chấp nhận từ tab HiVocab hợp lệ hoặc popup)
     if (message?.type === 'store-auth-token') {
+        if (!isTrustedAppSender(sender)) {
+            return sendResponse({ ok: false, error: 'Unauthorized sender' });
+        }
         const session = message.session;
         if (session?.access_token) {
             saveSession(session).then(async () => {
@@ -245,8 +282,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    // Đăng xuất từ popup
+    // Đăng xuất từ popup extension
     if (message?.type === 'logout') {
+        if (!isExtensionPageSender(sender)) {
+            return sendResponse({ ok: false, error: 'Unauthorized sender' });
+        }
         clearSession().then(() => {
             sendResponse({ ok: true });
             chrome.runtime.sendMessage({ type: 'logout-success' }).catch(() => {});
@@ -254,16 +294,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    // Mở login popup
+    // Mở login popup (chỉ cho phép từ trang/popup của extension)
     if (message?.type === 'open-app') {
+        if (!isExtensionPageSender(sender)) {
+            return sendResponse({ ok: false, error: 'Unauthorized sender' });
+        }
         openLoginWindow()
             .then(() => sendResponse({ ok: true }))
             .catch(err => sendResponse({ ok: false, error: err.message }));
         return true;
     }
 
-    // Nhận thông báo topics đã cập nhật từ tab web app hoặc content script
+    // Nhận thông báo topics đã cập nhật từ tab web app hoặc popup
     if (message?.type === 'topics-updated') {
+        if (!isTrustedAppSender(sender)) {
+            return sendResponse({ ok: false, error: 'Unauthorized sender' });
+        }
         // Broadcast tới tất cả tab (để content scripts xóa cache in-memory)
         chrome.tabs.query({}, (tabs) => {
             (tabs || []).forEach(tab => {
@@ -275,6 +321,54 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // Broadcast tới popup (nếu đang mở)
         chrome.runtime.sendMessage({ type: 'topics-updated' }).catch(() => {});
         sendResponse({ ok: true });
+        return true;
+    }
+
+    // Dịch từ/cụm từ qua API có JWT hoặc fallback Google Translate miễn phí
+    if (message?.type === 'translate-text') {
+        (async () => {
+            const text = String(message.payload?.text || '').trim().slice(0, 300);
+            if (!text) return sendResponse({ ok: false });
+            const token = await getValidToken();
+            if (token) {
+                try {
+                    const data = await apiPost('/translate', token, {
+                        text,
+                        from: message.payload?.from || 'en',
+                        to: message.payload?.to || 'vi',
+                    });
+                    if (data?.ok && data?.text) {
+                        return sendResponse({ ok: true, text: data.text });
+                    }
+                } catch (_) {}
+            }
+            try {
+                const gUrl = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(text)}`;
+                const gRes = await fetch(gUrl);
+                if (gRes.ok) {
+                    const gData = await gRes.json();
+                    const trans = (gData[0] || []).map(seg => seg[0]).join('');
+                    if (trans) return sendResponse({ ok: true, text: trans });
+                }
+            } catch (_) {}
+            sendResponse({ ok: false });
+        })().catch(() => sendResponse({ ok: false }));
+        return true;
+    }
+
+    // Tạo câu ví dụ qua API có JWT user
+    if (message?.type === 'generate-example') {
+        (async () => {
+            const token = await getValidToken();
+            if (!token) return sendResponse({ ok: false });
+            const term = String(message.payload?.term || '').trim().slice(0, 80);
+            if (!term) return sendResponse({ ok: false });
+            const data = await apiPost('/example', token, {
+                term,
+                isPhrase: Boolean(message.payload?.isPhrase),
+            });
+            sendResponse({ ok: Boolean(data?.ok && data?.sentence), sentence: data?.sentence || '' });
+        })().catch(() => sendResponse({ ok: false }));
         return true;
     }
 
@@ -339,21 +433,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         return true;
     }
 
-    // Lấy cấu trúc Tests & Passages của một topic (nếu có)
+    // Lấy cấu trúc Tests & Passages của một topic (yêu cầu đăng nhập & kiểm tra định dạng topicId)
     if (message?.type === 'get-topic-tests') {
         (async () => {
-            const topicId = message.payload?.topicId;
-            if (!topicId) return sendResponse({ ok: false, error: 'Thiếu topicId.' });
+            const topicId = String(message.payload?.topicId || '').trim();
+            if (!topicId || !VALID_TOPIC_ID_RE.test(topicId)) {
+                return sendResponse({ ok: false, error: 'topicId không hợp lệ.' });
+            }
 
             const token = await getValidToken();
+            if (!token) {
+                return sendResponse({ ok: false, error: 'Chưa đăng nhập.' });
+            }
             const headers = {
-                'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30.dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU'
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${token}`,
             };
-            if (token) headers['Authorization'] = `Bearer ${token}`;
 
             try {
                 // 1. Query danh sách tests của topic
-                const testsRes = await fetch(`https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/tests?topic_id=eq.${topicId}&select=id,name,test_order&order=test_order.asc`, { headers });
+                const encodedTopicId = encodeURIComponent(topicId);
+                const testsRes = await fetch(`${SUPABASE_URL}/rest/v1/tests?topic_id=eq.${encodedTopicId}&select=id,name,test_order&order=test_order.asc`, { headers });
                 if (!testsRes.ok) {
                     return sendResponse({ ok: true, data: { hasTests: false, tests: [] } });
                 }
@@ -363,7 +463,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 }
 
                 // 2. Query danh sách passages của topic
-                const passagesRes = await fetch(`https://swehdtrqjyklmsefkjdf.supabase.co/rest/v1/passages?topic_id=eq.${topicId}&select=id,test_id,passage_number,title&order=passage_number.asc`, { headers });
+                const passagesRes = await fetch(`${SUPABASE_URL}/rest/v1/passages?topic_id=eq.${encodedTopicId}&select=id,test_id,passage_number,title&order=passage_number.asc`, { headers });
                 const passagesData = passagesRes.ok ? await passagesRes.json() : [];
 
                 const passagesByTest = {};

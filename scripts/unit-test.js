@@ -46,33 +46,34 @@ assert(headersContent.includes('https://*.supabase.co'), 'public/_headers permit
 assert(headersContent.includes("X-Frame-Options: DENY"), 'Anti-Clickjacking: X-Frame-Options is DENY');
 assert(headersContent.includes("X-Content-Type-Options: nosniff"), 'Anti-MIME Sniffing: nosniff enabled');
 
-// 2. SM-2 Spaced Repetition Logic Validation (DIRECT PRODUCTION MODULE: src/services/db.js)
-console.log('\n2. Testing SM-2 SRS Algorithm via Production db.js:');
+// 2. FSRS-6 Spaced Repetition Logic Validation (DIRECT PRODUCTION MODULE: src/services/db.js)
+console.log('\n2. Testing FSRS-6 SRS Algorithm via Production db.js:');
 const { calculateNextReview, getIntervalLabel } = await import('../src/services/db.js');
 
 assert(typeof calculateNextReview === 'function', 'db.calculateNextReview is exported');
 assert(typeof getIntervalLabel === 'function', 'db.getIntervalLabel is exported');
 
-// Test rating 'hard' (level decreases or stays minimum 1)
-const rHard = calculateNextReview(3, 'hard');
-assert(rHard.newLevel === 2, 'Production SM-2: rating "hard" drops Level 3 down to Level 2');
-assert(rHard.nextReviewAt instanceof Date, 'Production SM-2: generates valid nextReviewAt Date');
+// Test rating 'again' (lapse drops Level 3 down to Level 1 Relearning)
+const rAgain = calculateNextReview(3, 'again');
+assert(rAgain.newLevel === 1 && rAgain.stability < 8.0, 'Production FSRS-6: rating "again" lapses Level 3 down to Level 1');
+assert(rAgain.nextReviewAt instanceof Date, 'Production FSRS-6: generates valid nextReviewAt Date');
 
-// Test rating 'good' (level remains the same)
+// Test rating 'hard' (passing recall with lower growth than good)
+const rHard = calculateNextReview(2, 'hard');
 const rGood = calculateNextReview(2, 'good');
-assert(rGood.newLevel === 2, 'Production SM-2: rating "good" maintains current level');
+assert(rHard.stability < rGood.stability && rGood.newLevel >= 2, 'Production FSRS-6: rating "good" grows stability more than "hard" (fixes ease hell)');
 
-// Test rating 'easy' (level increases by 1)
+// Test rating 'easy' (level advances with easy bonus)
 const rEasy = calculateNextReview(2, 'easy');
-assert(rEasy.newLevel === 3, 'Production SM-2: rating "easy" advances Level 2 to Level 3');
+assert(rEasy.newLevel >= 3 && rEasy.stability > rGood.stability, 'Production FSRS-6: rating "easy" advances Level 2 beyond "good"');
 
 // Test ceiling cap at 5 (Mastered)
 const rCap = calculateNextReview(5, 'easy');
-assert(rCap.newLevel === 5, 'Production SM-2: Level caps safely at 5');
+assert(rCap.newLevel === 5, 'Production FSRS-6: Level caps safely at 5');
 
-// Test new word (level 0 moves to level 1)
+// Test new word (level 0 moves to level 1 on good, level 3 on easy)
 const rNew = calculateNextReview(0, 'good');
-assert(rNew.newLevel === 1, 'Production SM-2: Level 0 word advances to Level 1');
+assert(rNew.newLevel === 1, 'Production FSRS-6: Level 0 word rated "good" advances to Level 1');
 
 // Test interval labels
 assert(getIntervalLabel(1) === '1 giờ', 'Interval label for Level 1 is "1 giờ"');
@@ -226,10 +227,10 @@ const todayStr = guestSessionResult?.date || (() => {
 const savedSessions = JSON.parse(mockStorage['hi_study_sessions'] || '{}');
 assert(typeof savedSessions === 'object' && savedSessions[todayStr] !== undefined, 'db.logStudySession persists session date in hi_study_sessions');
 
-const guestReviewResult = await reviewWord('word-test-1', 'easy');
-assert(guestReviewResult && guestReviewResult.guest === true && guestReviewResult.newLevel === 1, 'db.reviewWord handles guest review without throwing "Chưa đăng nhập"');
+const guestReviewResult = await reviewWord('word-test-1', 'good');
+assert(guestReviewResult && guestReviewResult.guest === true && guestReviewResult.newLevel === 1 && guestReviewResult.stability > 0, 'db.reviewWord handles guest review with FSRS-6 DSR state without throwing "Chưa đăng nhập"');
 const guestProgress = JSON.parse(mockStorage['hi_guest_word_progress'] || '{}');
-assert(guestProgress['word-test-1'] && guestProgress['word-test-1'].level === 1, 'db.reviewWord persists guest word progress in localStorage');
+assert(guestProgress['word-test-1'] && guestProgress['word-test-1'].level === 1 && guestProgress['word-test-1'].stability > 0, 'db.reviewWord persists guest FSRS progress in localStorage');
 
 const dashboardStats = await getDashboardStats();
 assert(dashboardStats && typeof dashboardStats.streak === 'number' && dashboardStats.memoryLevels.lv1 === 1, 'db.getDashboardStats calculates streak and memoryLevels from localStorage for guest');
@@ -295,6 +296,13 @@ const { runStudioCoreTests } = await import('../tests/studio-core.test.js');
 const studioResults = await runStudioCoreTests();
 totalTests += studioResults.totalTests;
 passedTests += studioResults.passedTests;
+
+// 9.5 FSRS-6 Core Memory Model Mathematical & Behavioral Test Suite
+console.log('\n9.5 Running FSRS-6 Core Memory Model Test Suite:');
+const { runFSRSAlgorithmTests } = await import('../tests/fsrs-algorithm.test.js');
+const fsrsResults = await runFSRSAlgorithmTests();
+totalTests += fsrsResults.totalTests;
+passedTests += fsrsResults.passedTests;
 
 // Summary
 console.log('\n=======================================================');

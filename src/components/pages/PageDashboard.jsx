@@ -1111,7 +1111,7 @@ export function PageDashboard() {
             </div>
 
             <div className="mt-2 pt-2.5 border-t border-dashed border-[#DECDBB] flex items-center justify-between text-xs text-[#827165]">
-              <span className="font-medium">Chu kỳ SRS v4 thông minh</span>
+              <span className="font-medium">Thuật toán FSRS-6 (DSR)</span>
               <span className="bg-[#FDEAE2] text-[#DE5D53] border border-[#F6C6C2] px-2.5 py-0.5 rounded-full font-bold">
                 Cần ôn: {wordsDueCount} từ
               </span>

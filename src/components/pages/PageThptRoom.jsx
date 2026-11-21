@@ -52,7 +52,13 @@ export function PageThptRoom() {
   // Timer — onTimeUp auto-submits (chỉ áp dụng cho đề thi thật có giới hạn thời gian)
   const handleTimeUp = useCallback(() => {
     if (!session.exam) return;
-    if (session.exam.is_exercise || session.exam.duration_minutes === 0) return;
+    if (
+      session.exam.is_exercise ||
+      session.initialSecondsRef.current === 0 ||
+      session.exam.duration_minutes === 0
+    ) {
+      return;
+    }
     window.alert?.('Hết giờ làm bài! Hệ thống đang tự động nộp bài thi của bạn.');
     session.submitExam(session.answers, session.exam, 0);
     session.setShowResultsModal(true);
@@ -214,11 +220,14 @@ export function PageThptRoom() {
             is_pro: false,
           });
 
+          if (config?.reviewAttempt) {
+            session.loadReviewAttempt(examData, config.reviewAttempt);
+            return;
+          }
           const savedProgress = session.loadSavedProgress(exerciseId);
           const { restoredSeconds } = session.startExam(examData, 0, savedProgress);
-          session.initialSecondsRef.current = restoredSeconds;
           session.timerSecondsRef.current = restoredSeconds;
-          timer.start(restoredSeconds);
+          timer.start(restoredSeconds, 0);
           return;
         }
 
@@ -291,14 +300,20 @@ export function PageThptRoom() {
 
         if (cancelled) return;
 
+        if (config?.reviewAttempt) {
+          session.loadReviewAttempt(examData, config.reviewAttempt);
+          return;
+        }
+
         // Load saved progress if any
         const savedProgress = session.loadSavedProgress(examId);
 
         // Bắt đầu phiên làm bài và đếm ngược thời gian
-        const { restoredSeconds } = session.startExam(examData, minutes, savedProgress);
-        session.initialSecondsRef.current = restoredSeconds;
+        const { restoredSeconds } = session.startExam(examData, minutes, savedProgress, {
+          forceResetTime: Boolean(config?.isCustomTime),
+        });
         session.timerSecondsRef.current = restoredSeconds;
-        timer.start(restoredSeconds);
+        timer.start(restoredSeconds, session.initialSecondsRef.current);
 
       } catch (err) {
         if (!cancelled) {
@@ -392,8 +407,12 @@ export function PageThptRoom() {
   }, [session]);
 
   const handleRetake = useCallback(() => {
-    const { restoredSeconds } = session.retakeExam(session.exam, session.initialSecondsRef.current / 60);
-    timer.start(restoredSeconds);
+    const initSec = session.initialSecondsRef.current;
+    const targetMinutes = session.exam?.is_exercise || initSec === 0
+      ? 0
+      : (initSec > 0 ? initSec / 60 : session.exam?.duration_minutes || 50);
+    const { restoredSeconds } = session.retakeExam(session.exam, targetMinutes);
+    timer.start(restoredSeconds, session.initialSecondsRef.current);
   }, [session, timer]);
 
   // ──────────────────────────────────────────────

@@ -105,7 +105,7 @@ const PLANS = {
     features: [
       'Mở khóa 100% kho từ vựng chuyên sâu',
       'Không giới hạn số từ ôn tập mỗi ngày',
-      'Thuật toán ngắt quãng SM-2 cá nhân hóa',
+      'Thuật toán ngắt quãng FSRS-6 cá nhân hóa',
       'Mở khóa toàn bộ bài đọc IELTS & THPT',
       'Học tập liền mạch, không quảng cáo',
     ],

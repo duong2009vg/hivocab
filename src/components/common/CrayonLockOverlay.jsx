@@ -78,7 +78,7 @@ export function CrayonLockOverlay({
         </div>
         <div className="flex items-center gap-2">
           <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
-          <span>Ghi nhớ dài hạn với thuật toán Spaced Repetition (SM-2)</span>
+          <span>Ghi nhớ dài hạn với thuật toán Spaced Repetition (FSRS-6)</span>
         </div>
       </div>
 

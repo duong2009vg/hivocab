@@ -58,7 +58,7 @@ export function useDictionary() {
       const rpcRes = await supabase.rpc('search_dictionary_suggestions', { p_prefix: cleanQ });
       if (!rpcRes.error && Array.isArray(rpcRes.data)) {
         list = rpcRes.data;
-      } else {
+      } else if (rpcRes.error) {
         const { data, error } = await supabase
           .from('words')
           .select('word, meaning, pos')

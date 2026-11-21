@@ -174,9 +174,9 @@ export async function onRequestPost(context) {
     }
 
     // 4. Kiểm tra mã trạng thái giao dịch thực tế
-    // code: "00" đại diện cho giao dịch thành công
-    if (code !== '00' && data.code !== '00') {
-        console.log('[PayOS Webhook] Transaction not successful:', code, desc);
+    // code: "00" đại diện cho giao dịch thành công (chỉ tin tưởng data.code nằm trong chữ ký HMAC)
+    if (data.code !== '00') {
+        console.log('[PayOS Webhook] Transaction not successful:', data.code, code, desc);
         return new Response(JSON.stringify({ success: true, message: 'Transaction not successful, acknowledged' }), {
             status: 200,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }

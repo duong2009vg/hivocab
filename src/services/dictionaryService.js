@@ -105,7 +105,7 @@ export async function lookupWord(rawWord) {
     const rpcRes = await supabase.rpc('lookup_dictionary_word', { p_word: cleanWord });
     if (!rpcRes.error && Array.isArray(rpcRes.data)) {
       dbWords = rpcRes.data;
-    } else {
+    } else if (rpcRes.error) {
       const tableRes = await supabase
         .from('words')
         .select('id, word, meaning, pos, phonetic, example_sentence')
@@ -167,9 +167,10 @@ export async function lookupWord(rawWord) {
   // 3. Fallback: Nếu không có trong Supabase Database -> Tra qua DeepSeek AI (yêu cầu đăng nhập)
   const authHeaders = await getApiAuthHeaders();
   if (!authHeaders) {
-    return null;
+    throw new Error(`Từ "${cleanWord}" chưa có trong kho từ điển có sẵn. Vui lòng đăng nhập để tra cứu bằng DeepSeek AI.`);
   }
 
+  let aiErrorMessage = '';
   try {
     const cfRes = await fetch('/api/dictionary', {
       method: 'POST',
@@ -180,22 +181,48 @@ export async function lookupWord(rawWord) {
       const cfJson = await cfRes.json();
       if (cfJson.ok && cfJson.data) {
         const d = cfJson.data;
+        const fallbackPos = d.pos || 'từ vựng';
+        const fallbackMeaning = d.meaning || d.viSummary || '';
+        const fallbackExample = d.example || '';
+        const fallbackExampleVi = d.example_vi || '';
+        const entries =
+          Array.isArray(d.entries) && d.entries.length > 0
+            ? d.entries
+            : fallbackMeaning
+              ? [{ meaning: fallbackMeaning, pos: fallbackPos, example: fallbackExample, example_vi: fallbackExampleVi }]
+              : [];
+        const senses =
+          Array.isArray(d.senses) && d.senses.length > 0
+            ? d.senses
+            : entries.map((e, idx) => ({
+                id: idx + 1,
+                grammar: e.pos ? `[ ${e.pos} ]` : '',
+                definition_vi: e.meaning,
+                examples: e.example ? [{ en: e.example, vi: e.example_vi || '' }] : [],
+              }));
         const result = {
           word: d.word || cleanWord,
           phonetic: d.phonetic || '',
-          pos: d.pos || 'từ vựng',
-          meaning: d.meaning || d.viSummary || '',
-          example: d.example || '',
-          example_vi: d.example_vi || '',
-          entries: d.entries || [{ meaning: d.meaning || '', pos: d.pos || 'từ vựng', example: d.example || '', example_vi: '' }],
+          pos: fallbackPos,
+          ...(d.cefr ? { cefr: d.cefr } : {}),
+          meaning: fallbackMeaning,
+          example: fallbackExample,
+          example_vi: fallbackExampleVi,
+          entries,
           source: 'deepseek_ai',
-          viSummary: d.meaning || d.viSummary || '',
-          senses: d.senses || [],
+          viSummary: fallbackMeaning,
+          senses,
         };
         memoryCache.set(cacheKey, result);
         addRecentSearch(result.word);
         return result;
       }
+      if (cfJson.error) aiErrorMessage = cfJson.error;
+    } else {
+      try {
+        const errJson = await cfRes.json();
+        if (errJson?.error) aiErrorMessage = errJson.error;
+      } catch (_) {}
     }
   } catch (_) {}
 
@@ -209,16 +236,28 @@ export async function lookupWord(rawWord) {
     if (aiRes.ok) {
       const aiJson = await aiRes.json();
       if (aiJson.ok && (aiJson.meaning || aiJson.phonetic)) {
+        const fallbackPos = aiJson.pos || 'từ vựng';
+        const fallbackMeaning = aiJson.meaning || '';
+        const fallbackExample = aiJson.example || '';
+        const entries = fallbackMeaning
+          ? [{ meaning: fallbackMeaning, pos: fallbackPos, example: fallbackExample, example_vi: '' }]
+          : [];
         const result = {
           word: cleanWord,
           phonetic: aiJson.phonetic || '',
-          pos: aiJson.pos || 'từ vựng',
-          meaning: aiJson.meaning || '',
-          example: aiJson.example || '',
+          pos: fallbackPos,
+          meaning: fallbackMeaning,
+          example: fallbackExample,
           example_vi: '',
-          entries: [{ meaning: aiJson.meaning || '', pos: aiJson.pos || 'từ vựng', example: aiJson.example || '', example_vi: '' }],
+          entries,
           source: 'deepseek_ai',
-          viSummary: aiJson.meaning || '',
+          viSummary: fallbackMeaning,
+          senses: entries.map((e, idx) => ({
+            id: idx + 1,
+            grammar: e.pos ? `[ ${e.pos} ]` : '',
+            definition_vi: e.meaning,
+            examples: e.example ? [{ en: e.example, vi: '' }] : [],
+          })),
         };
         memoryCache.set(cacheKey, result);
         addRecentSearch(result.word);
@@ -227,6 +266,9 @@ export async function lookupWord(rawWord) {
     }
   } catch (_) {}
 
+  if (aiErrorMessage) {
+    throw new Error(aiErrorMessage);
+  }
   return null;
 }
 

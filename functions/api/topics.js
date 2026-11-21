@@ -1,68 +1,39 @@
 // functions/api/topics.js
 // Cloudflare Pages Function — trả về danh sách topics của user
 import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
+import { getCorsHeaders, requireSupabaseUser } from '../_security.js';
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'GET, OPTIONS') });
 }
 
 export async function onRequestGet(context) {
     const { request, env } = context;
+    const corsHeaders = getCorsHeaders(request, 'GET, OPTIONS');
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (!token) {
-        return new Response(JSON.stringify({ ok: false, error: 'Missing auth token' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const preRateLimit = await checkRateLimit({ request, env, ruleName: 'public' });
+    if (!preRateLimit.allowed) return rateLimitResponse(preRateLimit, corsHeaders);
 
-    const supabaseUrl = env.SUPABASE_URL;
-    const supabaseAnonKey = env.SUPABASE_ANON_KEY;
+    const auth = await requireSupabaseUser(request, env, corsHeaders);
+    if (!auth.ok) return auth.response;
 
-    if (!supabaseUrl || !supabaseAnonKey) {
-        return new Response(JSON.stringify({ ok: false, error: 'Supabase not configured' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const rateLimit = await checkRateLimit({
+        request,
+        env,
+        ruleName: 'public',
+        subject: auth.user.id,
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
+
+    const supabaseUrl = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
+    const supabaseAnonKey = String(env.SUPABASE_ANON_KEY || '').trim();
 
     try {
-        const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'apikey': supabaseAnonKey,
-            },
-        });
-
-        if (!userRes.ok) {
-            return new Response(JSON.stringify({ ok: false, error: 'Invalid or expired token' }), {
-                status: 401,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-        }
-
-        const authenticatedUser = await userRes.json();
-        const rateLimit = await checkRateLimit({
-            request,
-            env,
-            ruleName: 'public',
-            subject: authenticatedUser?.id || undefined,
-        });
-        if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
-
         const topicsRes = await fetch(
             `${supabaseUrl}/rest/v1/topics?select=id,name,icon,category,created_at&order=created_at.asc`,
             {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
+                    'Authorization': `Bearer ${auth.token}`,
                     'apikey': supabaseAnonKey,
                     'Content-Type': 'application/json',
                 },

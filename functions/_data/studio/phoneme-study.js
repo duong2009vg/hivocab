@@ -1,4 +1,4 @@
-{
+export default {
   "version": 1,
   "description": "44 bài âm IPA, 3 cấp học mỗi âm: nhận diện, từ mẫu, ứng dụng trong câu.",
   "sounds": [
@@ -839,4 +839,4 @@
       ]
     }
   ]
-}
+};

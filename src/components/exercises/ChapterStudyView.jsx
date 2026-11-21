@@ -1,9 +1,11 @@
 // src/components/exercises/ChapterStudyView.jsx
 // Giao diện Học Lý thuyết Chuyên đề 9+ THPT & Điều hướng bắt buộc sang Phòng Luyện tập THPT để làm bài
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, History } from 'lucide-react';
 import { TheoryContentRenderer } from './TheoryContentRenderer.jsx';
-import { getExerciseTheoryData, getExerciseQuestions } from '../../services/exercisesService.js';
+import { getExerciseTheoryData, getExerciseQuestions, getExerciseScores } from '../../services/exercisesService.js';
+import { fetchUserExamAttempts } from '../../services/examHistoryService.js';
+import { ExamHistoryModal } from '../thpt/ExamModals.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
 export function ChapterStudyView({ exercise, onBack }) {
@@ -11,6 +13,8 @@ export function ChapterStudyView({ exercise, onBack }) {
   const [theoryData, setTheoryData] = useState({ theory_and_strategy: '', examples: [] });
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [attempts, setAttempts] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // Điều hướng bắt buộc sang Phòng luyện đề THPT để làm bài
   const handleStartPractice = useCallback(() => {
@@ -28,15 +32,36 @@ export function ChapterStudyView({ exercise, onBack }) {
     navigateTo('thpt-room', true);
   }, [exercise, navigateTo]);
 
-  // Nạp dữ liệu lý thuyết chuẩn DOCX và danh sách câu hỏi (lấy số lượng câu)
+  const handleReviewAttempt = useCallback(
+    (attempt) => {
+      if (!navigateTo || !attempt) return;
+      sessionStorage.setItem('hv_roadmap_open_book', 'book2');
+      sessionStorage.setItem('hv_chuyende_active_id', exercise.id);
+      window._thptStartConfig = {
+        examId: exercise.id,
+        exerciseId: exercise.id,
+        isExercise: true,
+        exerciseTitle: exercise.title,
+        topicGroup: exercise.topic_group,
+        minutes: 0,
+        reviewAttempt: attempt,
+      };
+      setShowHistory(false);
+      navigateTo('thpt-room', true);
+    },
+    [exercise, navigateTo]
+  );
+
+  // Nạp dữ liệu lý thuyết chuẩn DOCX, danh sách câu hỏi & lịch sử làm bài của chuyên đề
   useEffect(() => {
     let cancelled = false;
     async function load() {
       setLoading(true);
       try {
-        const [thData, qs] = await Promise.all([
+        const [thData, qs, histRes] = await Promise.all([
           getExerciseTheoryData(exercise.id),
           getExerciseQuestions(exercise.id),
+          fetchUserExamAttempts(exercise.id),
         ]);
         if (!cancelled) {
           setTheoryData({
@@ -44,6 +69,8 @@ export function ChapterStudyView({ exercise, onBack }) {
             examples: Array.isArray(thData?.examples) ? thData.examples : [],
           });
           setQuestions(qs || []);
+          const list = histRes?.historyMap?.[exercise.id] || [];
+          setAttempts(list);
         }
       } catch (err) {
         console.error('Error loading chapter:', err);
@@ -58,6 +85,8 @@ export function ChapterStudyView({ exercise, onBack }) {
   }, [exercise]);
 
   const totalCount = questions.length || exercise.total_questions || 0;
+  const legacyScore = getExerciseScores()?.[exercise.id];
+  const hasHistory = attempts.length > 0 || Boolean(legacyScore);
 
   return (
     <div className="w-full max-w-6xl mx-auto pb-20 px-3 sm:px-6 pt-3">
@@ -88,14 +117,27 @@ export function ChapterStudyView({ exercise, onBack }) {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleStartPractice}
-          className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#486b3c] text-white font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer shrink-0 active:scale-95 transition-all inline-flex items-center justify-center gap-2"
-        >
-          <span>Vào trang Luyện tập THPT ({totalCount} câu)</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={handleStartPractice}
+            className="px-5 py-2.5 rounded-2xl bg-[#557A46] hover:bg-[#486b3c] text-white font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer shrink-0 active:scale-95 transition-all inline-flex items-center justify-center gap-2"
+          >
+            <span>Vào trang Luyện tập THPT ({totalCount} câu)</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+
+          {hasHistory && (
+            <button
+              type="button"
+              onClick={() => setShowHistory(true)}
+              className="px-4 py-2.5 rounded-2xl bg-[#FFF3D6] hover:bg-[#FDE68A] text-[#302A24] font-black text-xs sm:text-sm border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] cursor-pointer shrink-0 active:scale-95 transition-all inline-flex items-center justify-center gap-1.5"
+            >
+              <History className="w-4 h-4" />
+              <span>Lịch sử{attempts.length > 0 ? ` (${attempts.length})` : ''}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Content */}
@@ -111,6 +153,37 @@ export function ChapterStudyView({ exercise, onBack }) {
           chapterTitle={exercise.title}
           onOpenExamRoom={handleStartPractice}
           questionCount={totalCount}
+        />
+      )}
+
+      {showHistory && (
+        <ExamHistoryModal
+          examTitle={exercise.title}
+          attempts={
+            attempts.length > 0
+              ? attempts
+              : legacyScore
+                ? [
+                    {
+                      id: 'legacy-best',
+                      examId: exercise.id,
+                      title: exercise.title,
+                      score: Math.round((legacyScore.score / Math.max(1, legacyScore.total)) * 10 * 100) / 100,
+                      correct: legacyScore.score,
+                      total: legacyScore.total,
+                      percentage: legacyScore.percentage || 0,
+                      timeSpentSeconds: 0,
+                      submittedAt: legacyScore.completedAt || Date.now(),
+                    },
+                  ]
+                : []
+          }
+          onClose={() => setShowHistory(false)}
+          onReviewAttempt={handleReviewAttempt}
+          onRetake={() => {
+            setShowHistory(false);
+            handleStartPractice();
+          }}
         />
       )}
     </div>

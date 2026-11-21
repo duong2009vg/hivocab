@@ -261,7 +261,7 @@ export function PageLanding() {
             <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-7 text-xs sm:text-sm font-bold text-[#8A796F]">
               <div className="flex items-center gap-1.5">
                 <Star className="w-4 h-4 fill-[#F4B41A] text-[#F4B41A] shrink-0" />
-                <span>{isEn ? 'Spaced Repetition (SRS SM-2)' : 'Thuật toán ngắt quãng SRS SM-2'}</span>
+                <span>{isEn ? 'Spaced Repetition (FSRS-6)' : 'Thuật toán ngắt quãng FSRS-6'}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Heart className="w-4 h-4 fill-[#DE5D53] text-[#DE5D53] shrink-0" />

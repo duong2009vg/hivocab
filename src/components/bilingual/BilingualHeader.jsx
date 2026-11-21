@@ -2,8 +2,9 @@
 // Header & Navigation cho bài đọc song ngữ - Phong cách Cozy Crayon ấm áp
 
 import React, { useState } from 'react';
-import { PenTool, BookOpen, Flag, X } from 'lucide-react';
+import { PenTool, BookOpen, Flag, X, Highlighter, MessageSquare, PanelRight } from 'lucide-react';
 import { BilingualPassageSwitcher } from './BilingualPassageSwitcher.jsx';
+import { getVolBookMeta } from '../../data/bilingualVolMeta.js';
 
 export function BilingualHeader({
   passage,
@@ -13,6 +14,13 @@ export function BilingualHeader({
   onViewModeChange,
   fontSize,
   onChangeFontSize,
+  showHighlights,
+  onToggleHighlights,
+  showVocabPopup,
+  onToggleVocabPopup,
+  showVocabSidebar,
+  onToggleVocabSidebar,
+  vocabCount = 0,
   onClose,
   onReportError,
   onSelectPassage,
@@ -20,10 +28,19 @@ export function BilingualHeader({
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
 
   const title = passage?.title || `Passage ${passage?.passageNumber || ''}`;
-  const topicTxt = passage?.topicName || 'IELTS';
-  const testTxt = passage?.testName || 'Test';
-  const passTxt = `Passage ${passage?.passageNumber || ''}`;
+  const titleVi = passage?.titleVi || '';
+  const isNews = Boolean(passage?.isNewsArticle);
+  const topicTxt = isNews
+    ? passage?.topicName || 'Báo Song Ngữ'
+    : passage?.topicName
+      ? getVolBookMeta(passage.topicName).titleVi
+      : 'IELTS Reading';
+  const testTxt = isNews ? passage?.topicLabel || 'Chọn lọc' : passage?.testName || 'Test';
+  const passTxt = isNews
+    ? `Bài số ${passage?.passageNumber || ''}`
+    : `Passage ${passage?.passageNumber || ''}`;
   const metaText = `${topicTxt} · ${testTxt} · ${passTxt}`;
+  const canGapFill = !isNews || vocabCount > 0;
 
   return (
     <>
@@ -56,7 +73,7 @@ export function BilingualHeader({
               </button>
             </div>
             <p className="text-[11px] sm:text-xs font-semibold text-[#766C5F] truncate mt-0.5">
-              {metaText}
+              {titleVi ? `${titleVi} · ${metaText}` : metaText}
             </p>
 
             {/* Dropdown menu switcher */}
@@ -84,18 +101,20 @@ export function BilingualHeader({
             <span className="hidden sm:inline">Đọc chủ động</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => onTabChange('gap-fill')}
-            className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
-              activeTab === 'gap-fill'
-                ? 'bg-[#5a7d4d] text-white font-black shadow-xs'
-                : 'text-[#766C5F] hover:text-[#382E2B] font-bold'
-            }`}
-          >
-            <PenTool className="w-4 h-4 shrink-0" />
-            <span className="hidden sm:inline">Đục lỗ song ngữ</span>
-          </button>
+          {canGapFill && (
+            <button
+              type="button"
+              onClick={() => onTabChange('gap-fill')}
+              className={`flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm transition-all active:scale-95 cursor-pointer ${
+                activeTab === 'gap-fill'
+                  ? 'bg-[#5a7d4d] text-white font-black shadow-xs'
+                  : 'text-[#766C5F] hover:text-[#382E2B] font-bold'
+              }`}
+            >
+              <PenTool className="w-4 h-4 shrink-0" />
+              <span className="hidden sm:inline">Đục lỗ song ngữ</span>
+            </button>
+          )}
         </div>
 
         {/* Right: Tools + Prominent Exit Button */}
@@ -103,6 +122,49 @@ export function BilingualHeader({
           {/* Desktop Tools only shown in Reading mode */}
           {activeTab === 'reading' && (
             <div className="hidden md:flex items-center gap-2">
+              {/* Reading Display Toggles (Cozy Crayon HiVocab Style) */}
+              <div className="flex items-center gap-1 bg-[#F4EFE6] rounded-2xl p-1 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-xs font-black">
+                <button
+                  type="button"
+                  onClick={onToggleHighlights}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    showHighlights
+                      ? 'bg-[#382E2B] text-white'
+                      : 'text-[#766C5F] hover:text-[#382E2B]'
+                  }`}
+                  title={showHighlights ? 'Đang bật highlight từ vựng (nhấn để tắt)' : 'Đang tắt highlight từ vựng (nhấn để bật)'}
+                >
+                  <Highlighter className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden xl:inline">Highlight</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggleVocabPopup}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    showVocabPopup
+                      ? 'bg-[#382E2B] text-white'
+                      : 'text-[#766C5F] hover:text-[#382E2B]'
+                  }`}
+                  title={showVocabPopup ? 'Đang bật popup tra từ (nhấn để tắt)' : 'Đang tắt popup tra từ (nhấn để bật)'}
+                >
+                  <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden xl:inline">Popup</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggleVocabSidebar}
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all cursor-pointer ${
+                    showVocabSidebar
+                      ? 'bg-[#5a7d4d] text-white'
+                      : 'text-[#766C5F] hover:text-[#382E2B]'
+                  }`}
+                  title={showVocabSidebar ? 'Ẩn bảng từ vựng trọng tâm' : 'Hiện bảng từ vựng trọng tâm'}
+                >
+                  <PanelRight className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden lg:inline">Từ vựng ({vocabCount})</span>
+                </button>
+              </div>
+
               {/* Font size adjustment */}
               <div className="flex items-center bg-[#F4EFE6] rounded-2xl p-1 border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] text-xs font-black text-[#382E2B]">
                 <button
@@ -146,17 +208,6 @@ export function BilingualHeader({
                   }`}
                 >
                   English
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onViewModeChange('vi')}
-                  className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
-                    viewMode === 'vi'
-                      ? 'bg-[#382E2B] text-white'
-                      : 'text-[#766C5F] hover:text-[#382E2B]'
-                  }`}
-                >
-                  Tiếng Việt
                 </button>
               </div>
 
@@ -212,24 +263,50 @@ export function BilingualHeader({
             >
               Anh
             </button>
-            <button
-              type="button"
-              onClick={() => onViewModeChange('vi')}
-              className={`px-2.5 py-1.5 min-h-[36px] flex items-center justify-center rounded-xl transition-colors font-black ${
-                viewMode === 'vi'
-                  ? 'bg-[#382E2B] text-white'
-                  : 'text-[#766C5F]'
-              }`}
-            >
-              Việt
-            </button>
           </div>
 
-          <div className="flex items-center gap-1.5 font-black text-[#382E2B]">
+          <div className="flex items-center gap-1 font-black text-[#382E2B]">
+            <button
+              type="button"
+              onClick={onToggleHighlights}
+              className={`px-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
+                showHighlights
+                  ? 'bg-[#382E2B] text-white border-[#382E2B]'
+                  : 'bg-[#F4EFE6] text-[#766C5F] border-[#382E2B]/40'
+              }`}
+              title="Bật/tắt Highlight từ vựng"
+            >
+              <Highlighter className="w-3.5 h-3.5 shrink-0" />
+            </button>
+            <button
+              type="button"
+              onClick={onToggleVocabPopup}
+              className={`px-2 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-xl border transition-colors cursor-pointer ${
+                showVocabPopup
+                  ? 'bg-[#382E2B] text-white border-[#382E2B]'
+                  : 'bg-[#F4EFE6] text-[#766C5F] border-[#382E2B]/40'
+              }`}
+              title="Bật/tắt Popup từ vựng"
+            >
+              <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+            </button>
+            <button
+              type="button"
+              onClick={onToggleVocabSidebar}
+              className={`px-2 min-w-[36px] min-h-[36px] flex items-center justify-center gap-1 rounded-xl border transition-colors cursor-pointer ${
+                showVocabSidebar
+                  ? 'bg-[#5a7d4d] text-white border-[#382E2B]'
+                  : 'bg-[#F4EFE6] text-[#766C5F] border-[#382E2B]/40'
+              }`}
+              title="Ẩn/hiện Từ vựng trọng tâm"
+            >
+              <PanelRight className="w-3.5 h-3.5 shrink-0" />
+              <span className="text-[11px]">{vocabCount}</span>
+            </button>
             <button
               type="button"
               onClick={() => onChangeFontSize(-1)}
-              className="p-1 px-2.5 min-w-[36px] min-h-[36px] flex items-center justify-center bg-[#F4EFE6] border border-[#382E2B]/40 rounded-xl cursor-pointer"
+              className="p-1 px-2 min-w-[36px] min-h-[36px] flex items-center justify-center bg-[#F4EFE6] border border-[#382E2B]/40 rounded-xl cursor-pointer"
               title="Giảm cỡ chữ"
             >
               A-
@@ -237,7 +314,7 @@ export function BilingualHeader({
             <button
               type="button"
               onClick={() => onChangeFontSize(1)}
-              className="p-1 px-2.5 min-w-[36px] min-h-[36px] flex items-center justify-center bg-[#F4EFE6] border border-[#382E2B]/40 rounded-xl cursor-pointer"
+              className="p-1 px-2 min-w-[36px] min-h-[36px] flex items-center justify-center bg-[#F4EFE6] border border-[#382E2B]/40 rounded-xl cursor-pointer"
               title="Tăng cỡ chữ"
             >
               A+

@@ -1,4 +1,4 @@
-{
+export default {
   "default": "af_heart",
   "voices": [
     {
@@ -170,4 +170,4 @@
       "gender": "Nam"
     }
   ]
-}
+};

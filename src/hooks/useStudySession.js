@@ -340,47 +340,51 @@ export function useStudySession() {
     });
   }, []);
 
-  // ── rateFlashcard ───────────────────────────────────────────────────────────
+  // ── rateFlashcard (FSRS-6 4-State: 'again' | 'hard' | 'good' | 'easy') ──────
   const rateFlashcard = useCallback((rating) => {
+    const normalizedRating =
+      rating === 'again' || rating === 'hard' || rating === 'good' || rating === 'easy'
+        ? rating
+        : 'good';
+
     setSession(prev => {
       if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
       const item = prev.queue[prev.queueIndex];
       if (item.exerciseType !== 'flashcard') return prev;
 
       const newItem = { ...item, attempts: item.attempts + 1 };
-      const correct = rating !== 'hard';
+      const isLapse = normalizedRating === 'again';
       const isNewWord = item.word.level === 0 || item.word.isNew === true;
 
-      // ── Case A: Remembered Card (rating === 'easy' or 'good') ─────────
-      if (correct) {
-        const effectiveRating = isNewWord ? (rating === 'easy' ? 'easy' : 'good') : rating;
-        reviewWordInDB(item.word.wordId || item.word.id, effectiveRating);
+      // ── Case A: Recalled Card (rating === 'hard' | 'good' | 'easy') ────
+      if (!isLapse) {
+        reviewWordInDB(item.word.wordId || item.word.id, normalizedRating);
         return {
           ...prev,
           queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
           queueIndex: prev.queueIndex + 1,
           completed: [...prev.completed, {
             word: item.word,
-            rating: effectiveRating,
+            rating: normalizedRating,
             attempts: newItem.attempts,
             isNew: isNewWord,
           }],
         };
       }
 
-      // ── Case B: "Cần ôn lại" (rating === 'hard') ──────────────────────
+      // ── Case B: Forgotten Card / Lapse (rating === 'again') ─────────────
       newItem.failCount = (newItem.failCount || 0) + 1;
 
       // Guard against runaway retries (cap at 3 failed attempts)
       if (newItem.failCount >= 3) {
-        reviewWordInDB(item.word.wordId || item.word.id, 'hard');
+        reviewWordInDB(item.word.wordId || item.word.id, 'again');
         return {
           ...prev,
           queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
           queueIndex: prev.queueIndex + 1,
           completed: [...prev.completed, {
             word: item.word,
-            rating: 'hard',
+            rating: 'again',
             attempts: newItem.attempts,
             skipped: true,
             isNew: isNewWord,
@@ -396,7 +400,7 @@ export function useStudySession() {
         newItem.usedTypes = [...newItem.usedTypes, nextType];
       }
 
-      reviewWordInDB(item.word.wordId || item.word.id, 'hard');
+      reviewWordInDB(item.word.wordId || item.word.id, 'again');
       return {
         ...prev,
         queue: [
@@ -409,7 +413,7 @@ export function useStudySession() {
 
     // Play sound
     if (typeof window !== 'undefined') {
-      if (rating !== 'hard') window.HiSound?.playCorrect?.();
+      if (normalizedRating !== 'again') window.HiSound?.playCorrect?.();
       else window.HiSound?.playIncorrect?.();
     }
   }, []);
@@ -420,7 +424,7 @@ export function useStudySession() {
   // When the user clicks "Tiếp tục" in the modal, nextQuestion() applies all state changes atomically.
   const pendingResultRef = useRef(null);
 
-  // ── submitAnswer (MCQ / Fill / Listen) ─────────────────────────────────────
+  // ── submitAnswer (MCQ / Fill / Listen / Hangman) ───────────────────────────
   const submitAnswer = useCallback((userAnswer) => {
     let result = { correct: false, correctAnswer: '', skipped: false, wordCompleted: false };
 
@@ -438,7 +442,7 @@ export function useStudySession() {
       correct = evalResult.correct;
       correctAnswer = evalResult.correctAnswer;
 
-    // ── Fill / Listen ─────────────────────────────────────────────────────
+    // ── Fill / Listen / Hangman ───────────────────────────────────────────
     } else {
       correct = normalizeAnswer(userAnswer) === normalizeAnswer(item.exerciseData?.answer);
       correctAnswer = item.exerciseData?.answer || '';
@@ -446,6 +450,7 @@ export function useStudySession() {
 
     const isNewWord = item.word?.level === 0 || item.word?.isNew === true;
     const wordId = item.word?.wordId || item.word?.id;
+    const isActiveProduction = item.exerciseType === 'fill' || item.exerciseType === 'listen';
 
     // Play sound
     if (typeof window !== 'undefined') {
@@ -453,12 +458,20 @@ export function useStudySession() {
       else window.HiSound?.playIncorrect?.();
     }
 
-    // Determine result & fire SRS update
+    // Determine FSRS-6 rating & fire SRS update:
+    // - 1st try active recall (fill/listen) -> 'easy' (G=4) for review words, 'good' (G=3) for new words
+    // - 1st try recognition (mcq/hangman) -> 'good' (G=3)
+    // - 2nd try correct -> 'hard' (G=2)
+    // - Failed >= 3 times (skipped) -> 'again' (G=1)
     if (isNewWord) {
       const currentFailCount = (item.failCount || 0) + 1;
       const isWordCompleted = correct || currentFailCount >= 3;
       const isSkipped = !correct && currentFailCount >= 3;
-      const effectiveRating = correct ? 'good' : 'hard';
+      const effectiveRating = !correct
+        ? 'again'
+        : attempts === 1
+          ? 'good'
+          : 'hard';
 
       if (isWordCompleted) {
         reviewWordInDB(wordId, effectiveRating);
@@ -476,13 +489,16 @@ export function useStudySession() {
     } else if (!correct) {
       const currentFailCount = (item.failCount || 0) + 1;
       if (currentFailCount >= 3) {
-        reviewWordInDB(wordId, 'hard');
-        result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: currentFailCount, rating: 'hard' };
+        reviewWordInDB(wordId, 'again');
+        result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: currentFailCount, rating: 'again' };
       } else {
         result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: currentFailCount };
       }
     } else {
-      const rating = attempts === 1 ? 'easy' : attempts === 2 ? 'good' : 'hard';
+      const rating =
+        attempts === 1
+          ? (isActiveProduction ? 'easy' : 'good')
+          : 'hard';
       reviewWordInDB(wordId, rating);
       result = { correct: true, correctAnswer, skipped: false, wordCompleted: true, rating };
     }
@@ -521,6 +537,7 @@ export function useStudySession() {
       const updatedItem = { ...current, attempts };
       const isNewWord = current.word?.level === 0 || current.word?.isNew === true;
       const correct = result.correct;
+      const isActiveProduction = current.exerciseType === 'fill' || current.exerciseType === 'listen';
 
       // ── Case 1: New Word ─────────────────────────────────────────────────
       if (isNewWord) {
@@ -532,7 +549,7 @@ export function useStudySession() {
               ...prev,
               queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
               queueIndex: prev.queueIndex + 1,
-              completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, skipped: true, isNew: true }],
+              completed: [...prev.completed, { word: updatedItem.word, rating: 'again', attempts, skipped: true, isNew: true }],
             };
           }
 
@@ -559,11 +576,12 @@ export function useStudySession() {
             queueIndex: prev.queueIndex + 1,
           };
         }
+        const newWordRating = result.rating || (attempts === 1 ? 'good' : 'hard');
         return {
           ...prev,
           queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
           queueIndex: prev.queueIndex + 1,
-          completed: [...prev.completed, { word: updatedItem.word, rating: 'good', attempts, isNew: true }],
+          completed: [...prev.completed, { word: updatedItem.word, rating: newWordRating, attempts, isNew: true }],
         };
       }
 
@@ -576,7 +594,7 @@ export function useStudySession() {
             ...prev,
             queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),
             queueIndex: prev.queueIndex + 1,
-            completed: [...prev.completed, { word: updatedItem.word, rating: 'hard', attempts, skipped: true }],
+            completed: [...prev.completed, { word: updatedItem.word, rating: 'again', attempts, skipped: true }],
           };
         }
 
@@ -606,7 +624,9 @@ export function useStudySession() {
       }
 
       // ── Case 3: Correct Answer ───────────────────────────────────────────
-      const rating = attempts === 1 ? 'easy' : attempts === 2 ? 'good' : 'hard';
+      const rating =
+        result.rating ||
+        (attempts === 1 ? (isActiveProduction ? 'easy' : 'good') : 'hard');
       return {
         ...prev,
         queue: prev.queue.map((q, i) => i === prev.queueIndex ? updatedItem : q),

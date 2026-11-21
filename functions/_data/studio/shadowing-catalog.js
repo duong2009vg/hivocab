@@ -1,4 +1,4 @@
-{
+export default {
   "version": 1,
   "count": 12,
   "clips": [
@@ -5689,4 +5689,4 @@
       "bundled_transcript": true
     }
   ]
-}
+};

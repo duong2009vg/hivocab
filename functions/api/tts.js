@@ -2,15 +2,10 @@
 // Cloudflare Pages Function — High-performance Google TTS Proxy for English Collocations & Words
 // Supports Collocations, Phrasal Verbs, and Special Delimiters with Global Edge Caching
 import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
+import { getCorsHeaders } from '../_security.js';
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Range',
-};
-
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'GET, HEAD, OPTIONS', 'Content-Type, Range') });
 }
 
 export async function onRequestHead(context) {
@@ -19,11 +14,13 @@ export async function onRequestHead(context) {
 
 export async function onRequestGet(context) {
     const { request } = context;
+    const corsHeaders = getCorsHeaders(request, 'GET, HEAD, OPTIONS', 'Content-Type, Range');
     const rateLimit = await checkRateLimit({ request, env: context.env, ruleName: 'tts' });
     if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
     const url = new URL(request.url);
     const text = (url.searchParams.get('text') || url.searchParams.get('q') || '').trim();
-    const lang = (url.searchParams.get('tl') || url.searchParams.get('lang') || 'en').trim();
+    const rawLang = (url.searchParams.get('tl') || url.searchParams.get('lang') || 'en').trim();
+    const lang = /^[a-z]{2}(-[A-Za-z0-9]{2,4})?$/i.test(rawLang) ? rawLang : 'en';
 
     if (!text) {
         return new Response('Missing text parameter', { status: 400, headers: corsHeaders });
@@ -62,8 +59,16 @@ export async function onRequestGet(context) {
             });
         }
 
+        const contentType = upstream.headers.get('Content-Type') || '';
+        if (!/^audio\//i.test(contentType)) {
+            return new Response('Invalid TTS upstream content type', {
+                status: 502,
+                headers: corsHeaders,
+            });
+        }
+
         const headers = new Headers(corsHeaders);
-        headers.set('Content-Type', upstream.headers.get('Content-Type') || 'audio/mpeg');
+        headers.set('Content-Type', contentType);
         headers.set('Cache-Control', 'public, max-age=604800, s-maxage=604800, immutable');
 
         return new Response(upstream.body, {

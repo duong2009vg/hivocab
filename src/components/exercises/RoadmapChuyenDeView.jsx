@@ -7,6 +7,7 @@ import {
   getExerciseScores,
   getExerciseTheoryMetaMap,
 } from '../../services/exercisesService.js';
+import { fetchUserExamAttempts } from '../../services/examHistoryService.js';
 import ChapterStudyView from './ChapterStudyView.jsx';
 
 const TOPIC_FILTERS = [
@@ -176,14 +177,29 @@ export function RoadmapChuyenDeView() {
     async function load() {
       setLoading(true);
       try {
-        const [list, tMeta] = await Promise.all([
+        const [list, tMeta, histRes] = await Promise.all([
           getExercises(),
           getExerciseTheoryMetaMap(),
+          fetchUserExamAttempts(),
         ]);
         if (!cancelled) {
           setExercises(list);
           setMetaMap(tMeta || {});
-          setScores(getExerciseScores());
+          const mergedScores = { ...(getExerciseScores() || {}) };
+          for (const [eid, attList] of Object.entries(histRes?.historyMap || {})) {
+            if (!Array.isArray(attList) || attList.length === 0) continue;
+            const best = attList.reduce((a, b) => (b.correct > a.correct ? b : a), attList[0]);
+            const prev = mergedScores[eid];
+            if (!prev || best.correct > prev.score) {
+              mergedScores[eid] = {
+                score: best.correct,
+                total: best.total,
+                percentage: best.percentage,
+                completedAt: new Date(best.submittedAt).toISOString(),
+              };
+            }
+          }
+          setScores(mergedScores);
 
           const resumeId = sessionStorage.getItem('hv_chuyende_active_id');
           if (resumeId) {

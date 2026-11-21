@@ -12,15 +12,21 @@ import {
   RefreshCw,
   Mic,
   Volume2,
+  Video,
+  Save,
 } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext.jsx';
 import {
+  MAX_USER_YOUTUBE_VIDEOS,
+  fetchUserYoutubeVideoLimit,
+  saveAdminYoutubeVideoLimit,
   getStudioApiUrl,
   setStudioApiUrl,
   checkStudioBackendStatus,
   getStudioCreditSaver,
   setStudioCreditSaver,
 } from '../../../services/studioService.js';
+import { AdminStudioVideosManager } from './AdminStudioVideosManager.jsx';
 
 const DEPLOY_SNIPPET = `cd PeakFour_FullSource/PeakFour
 pip install modal
@@ -33,6 +39,10 @@ export function AdminShadowingDictationTab() {
   const [urlInput, setUrlInput] = useState(() => getStudioApiUrl());
   const [testing, setTesting] = useState(false);
   const [copiedCmd, setCopiedCmd] = useState(false);
+  const [videoLimit, setVideoLimit] = useState(MAX_USER_YOUTUBE_VIDEOS);
+  const [videoLimitInput, setVideoLimitInput] = useState(String(MAX_USER_YOUTUBE_VIDEOS));
+  const [loadingLimit, setLoadingLimit] = useState(true);
+  const [savingLimit, setSavingLimit] = useState(false);
   const [status, setStatus] = useState(() => ({
     configured: Boolean(getStudioApiUrl()),
     online: false,
@@ -71,8 +81,41 @@ export function AdminShadowingDictationTab() {
     if (existing && !getStudioCreditSaver()) {
       runHealthCheck(existing, true);
     }
+    let active = true;
+    fetchUserYoutubeVideoLimit()
+      .then((limit) => {
+        if (!active) return;
+        setVideoLimit(limit);
+        setVideoLimitInput(String(limit));
+      })
+      .finally(() => {
+        if (active) setLoadingLimit(false);
+      });
+    return () => {
+      active = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleSaveVideoLimit = async (e) => {
+    e?.preventDefault?.();
+    const parsed = Number.parseInt(String(videoLimitInput || '').trim(), 10);
+    if (!Number.isFinite(parsed) || parsed < 1 || parsed > 100) {
+      showToast('Vui lòng nhập số video hợp lệ từ 1 đến 100.', 'error');
+      return;
+    }
+    setSavingLimit(true);
+    try {
+      const saved = await saveAdminYoutubeVideoLimit(parsed);
+      setVideoLimit(saved);
+      setVideoLimitInput(String(saved));
+      showToast(`Đã cập nhật giới hạn upload: tối đa ${saved} video YouTube / tài khoản!`, 'success');
+    } catch (err) {
+      showToast(err?.message || 'Không thể lưu giới hạn video YouTube.', 'error');
+    } finally {
+      setSavingLimit(false);
+    }
+  };
 
   const handleToggleCreditSaver = () => {
     const next = setStudioCreditSaver(!creditSaver);
@@ -122,6 +165,74 @@ export function AdminShadowingDictationTab() {
 
   return (
     <div className="space-y-5 animate-fade-in max-w-5xl font-nunito text-[#3D352E]">
+      {/* Section 0: Per-account YouTube Upload Limit */}
+      <div className="p-5 sm:p-6 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-11 h-11 rounded-2xl bg-[#FDECE8] border-2 border-[#3D352E] flex items-center justify-center text-[#B53D2A] shrink-0">
+              <Video className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base sm:text-lg font-black font-quicksand text-[#3D352E]">
+                  Giới hạn upload Video YouTube mỗi tài khoản
+                </h2>
+                <span className="px-2.5 py-0.5 rounded-full border border-[#3D352E] bg-[#EEF5EC] text-[#355A3B] text-[11px] font-black">
+                  {loadingLimit ? 'Đang tải...' : `Hiện tại: ${videoLimit} video / TK`}
+                </span>
+              </div>
+              <p className="text-xs sm:text-sm font-semibold text-[#6E5D53] leading-relaxed">
+                Điều chỉnh số lượng video YouTube cá nhân tối đa mà mỗi tài khoản người dùng được thêm trong mục Shadowing Video. Thay đổi có hiệu lực ngay trên cả UI, API và Database.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <form onSubmit={handleSaveVideoLimit} className="flex flex-col sm:flex-row sm:items-end gap-3 bg-[#FAF5EB] border-2 border-[#3D352E]/25 rounded-2xl p-4">
+          <div className="space-y-1.5 flex-1">
+            <label className="block text-xs font-black text-[#3D352E]">
+              Số video YouTube tối đa / tài khoản (1 – 100)
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={videoLimitInput}
+                onChange={(e) => setVideoLimitInput(e.target.value)}
+                disabled={savingLimit || loadingLimit}
+                className="w-28 px-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-sm font-black text-[#2E2823] focus:outline-none focus:ring-2 focus:ring-[#4D6B53]/40 tabular-nums"
+              />
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {[3, 5, 10, 20, 50].map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    onClick={() => setVideoLimitInput(String(preset))}
+                    className={`px-2.5 py-1.5 rounded-xl text-xs font-black border-2 transition-all cursor-pointer ${
+                      Number(videoLimitInput) === preset
+                        ? 'bg-[#3D352E] text-white border-[#3D352E]'
+                        : 'bg-white text-[#3D352E] border-[#3D352E]/30 hover:border-[#3D352E]'
+                    }`}
+                  >
+                    {preset} video
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={savingLimit || loadingLimit}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-60 shrink-0"
+          >
+            {savingLimit ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+            <span>{savingLimit ? 'Đang lưu...' : 'Lưu giới hạn'}</span>
+          </button>
+        </form>
+      </div>
+
       {/* Section 1: Credit Saver Toggle */}
       <div className="p-5 sm:p-6 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -338,6 +449,9 @@ export function AdminShadowingDictationTab() {
           </p>
         </div>
       </div>
+
+      {/* Section 3: System Shadowing Video Catalog & Bulk YouTube Importer */}
+      <AdminStudioVideosManager />
     </div>
   );
 }

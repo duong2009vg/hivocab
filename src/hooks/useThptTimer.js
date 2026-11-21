@@ -4,6 +4,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 export function useThptTimer({ initialSeconds, onTimeUp }) {
+  const [configuredInitialSeconds, setConfiguredInitialSeconds] = useState(initialSeconds);
   const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef(null);
@@ -20,8 +21,13 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
     setIsRunning(false);
   }, []);
 
-  const start = useCallback((fromSeconds) => {
+  const start = useCallback((fromSeconds, totalInitialSeconds) => {
     stop();
+    if (totalInitialSeconds !== undefined) {
+      setConfiguredInitialSeconds(totalInitialSeconds);
+    } else if (fromSeconds !== undefined) {
+      setConfiguredInitialSeconds(fromSeconds);
+    }
     if (fromSeconds !== undefined) setSecondsLeft(fromSeconds);
     setIsRunning(true);
   }, [stop]);
@@ -32,8 +38,8 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
 
     intervalRef.current = setInterval(() => {
       setSecondsLeft(prev => {
-        // Chế độ luyện tập không giới hạn thời gian (initialSeconds === 0): hiển thị 99:99 không đếm lùi
-        if (initialSeconds === 0) {
+        // Chế độ luyện tập không giới hạn thời gian (configuredInitialSeconds === 0): hiển thị 99:99 không đếm lùi
+        if (configuredInitialSeconds === 0) {
           return 0;
         }
         if (prev <= 1) {
@@ -50,11 +56,11 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isRunning, initialSeconds]);
+  }, [isRunning, configuredInitialSeconds]);
 
   // Format mm:ss display
   const displayText = (() => {
-    if (initialSeconds === 0) {
+    if (configuredInitialSeconds === 0) {
       return '99:99';
     }
     const m = Math.floor(secondsLeft / 60);
@@ -62,7 +68,7 @@ export function useThptTimer({ initialSeconds, onTimeUp }) {
     return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   })();
 
-  const isWarning = initialSeconds > 0 && secondsLeft <= 300;
+  const isWarning = configuredInitialSeconds > 0 && secondsLeft <= 300;
 
   return {
     secondsLeft,

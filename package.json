@@ -14,10 +14,16 @@
     "test": "node scripts/smoke-test.js && node scripts/unit-test.js",
     "ci": "npm run lint && npm run format:check && npm run typecheck && npm run build && npm test",
     "build:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --minify",
-    "watch:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --watch"
+    "watch:css": "tailwindcss -i ./src/styles/app.css -o ./css/hivocab.min.css --watch",
+    "security:scan": "codex-security scan .",
+    "security:scan:diff": "codex-security scan . --working-tree",
+    "security:scan:deep": "codex-security scan . --mode deep",
+    "security:info": "codex-security info",
+    "security:skills:sync": "codex-security skills add --scope project"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@openai/codex-security": "^0.10.0",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.10",
     "autoprefixer": "^10.4.20",
@@ -36,7 +42,7 @@
     "@supabase/supabase-js": "^2.117.2",
     "@vitejs/plugin-react": "^4.3.4",
     "lucide-react": "^1.66.0",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0"
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
   }
 }

@@ -5,7 +5,7 @@
 import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
-import { Lock, Crown, FileQuestion, Clock, Check } from 'lucide-react';
+import { Lock, Crown, FileQuestion, Clock, Check, History } from 'lucide-react';
 
 const LEVEL_COLORS = {
   easy:   { bg: 'bg-[#eaf4e8]', text: 'text-[#4f7d4b]', border: 'border-[#6e9b6a]', label: 'Cơ bản' },
@@ -13,7 +13,15 @@ const LEVEL_COLORS = {
   hard:   { bg: 'bg-[#ffece4]', text: 'text-[#cf4f23]', border: 'border-[#ea7349]', label: 'Nâng cao' },
 };
 
-export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
+export function ExamCard({
+  exam,
+  is_pro,
+  bestScore,
+  attemptsCount = 0,
+  onStart,
+  onCustomTime,
+  onOpenHistory,
+}) {
   const { isPro } = useAuth();
   const { openModal } = useModal();
 
@@ -22,6 +30,7 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
 
   const level = LEVEL_COLORS[exam?.difficulty] || LEVEL_COLORS.medium;
   const hasScore = bestScore && typeof bestScore.score === 'number';
+  const hasHistory = Boolean(hasScore || attemptsCount > 0);
   const scoreColor = hasScore
     ? (bestScore.score >= 8 ? 'text-[#4f7d4b]' : bestScore.score >= 5 ? 'text-[#b87c24]' : 'text-[#cf4f23]')
     : '';
@@ -144,21 +153,36 @@ export function ExamCard({ exam, is_pro, bestScore, onStart, onCustomTime }) {
                 e.stopPropagation();
                 onStart(exam.id, exam.duration_minutes || exam.time_limit || 50);
               }}
-              className="flex-1 py-2.5 px-4 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-2 border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
+              className="flex-1 min-w-0 py-2.5 px-3 rounded-2xl bg-[#5a7d4d] hover:bg-[#4d6d41] text-white text-xs sm:text-sm font-black uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 cursor-pointer whitespace-nowrap"
             >
-              <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
-              <span>Vào thi ngay</span>
+              <span>{hasHistory ? 'Làm lại' : 'Làm bài'}</span>
             </button>
+            {hasHistory && typeof onOpenHistory === 'function' && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenHistory(exam);
+                }}
+                title="Xem lịch sử làm bài"
+                className="py-2.5 px-3 rounded-2xl bg-[#FFF3D6] hover:bg-[#FDE68A] text-[#382E2B] text-xs font-black border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 whitespace-nowrap"
+              >
+                <History className="w-4 h-4 shrink-0" />
+                <span>Lịch sử{attemptsCount > 1 ? ` (${attemptsCount})` : ''}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 onCustomTime(exam.id, exam.title);
               }}
+              aria-label="Tùy chỉnh thời gian làm bài"
               className="w-10 h-10 rounded-2xl bg-[#FFF8EE] hover:bg-[#F3E7D5] text-[#382E2B] border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer shrink-0"
-              title="Chọn thời gian làm bài tùy chỉnh"
+              title="Tùy chỉnh thời gian làm bài"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="9" />

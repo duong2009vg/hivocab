@@ -8,7 +8,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useThptExams } from '../../hooks/useThptExams';
 import { ExamCard } from '../thpt/ExamCard';
-import { ExamCustomTimeModal } from '../thpt/ExamModals';
+import { ExamCustomTimeModal, ExamHistoryModal } from '../thpt/ExamModals';
 import { useRoute } from '../../router/RouteContext.jsx';
 import {
   BookOpen,
@@ -70,7 +70,7 @@ const BOOKS = [
 
 export function PageExercises() {
   const { navigateTo } = useRoute();
-  const { allExams, loading, error, bestScores } = useThptExams();
+  const { allExams, loading, error, bestScores, attemptHistoryMap } = useThptExams();
 
   // Quyển đang mở: null = đang ở kệ sách, 'book1' | 'book2' | 'book3'
   const [openBook, setOpenBook] = useState(() => {
@@ -93,6 +93,7 @@ export function PageExercises() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [customTimeModal, setCustomTimeModal] = useState(null);
+  const [historyModalExam, setHistoryModalExam] = useState(null);
 
   const handleOpenBook = useCallback((id) => {
     setOpenBook(id);
@@ -107,13 +108,13 @@ export function PageExercises() {
   }, []);
 
   const handleStart = useCallback(
-    (examId, minutes) => {
+    (examId, minutes, opts = {}) => {
       try {
         sessionStorage.setItem(RESUME_KEY, openBook || '');
       } catch (_) {
         /* ignore */
       }
-      window._thptStartConfig = { examId, minutes };
+      window._thptStartConfig = { examId, minutes, isCustomTime: Boolean(opts?.isCustomTime) };
       navigateTo('thpt-room', true);
     },
     [navigateTo, openBook]
@@ -126,9 +127,33 @@ export function PageExercises() {
   const handleCustomTimeStart = useCallback(
     (examId, minutes) => {
       setCustomTimeModal(null);
-      handleStart(examId, minutes);
+      handleStart(examId, minutes, { isCustomTime: true });
     },
     [handleStart]
+  );
+
+  const handleOpenHistory = useCallback((examObj) => {
+    if (!examObj) return;
+    setHistoryModalExam(examObj);
+  }, []);
+
+  const handleReviewHistoryAttempt = useCallback(
+    (attempt) => {
+      if (!historyModalExam || !attempt) return;
+      try {
+        sessionStorage.setItem(RESUME_KEY, openBook || '');
+      } catch (_) {
+        /* ignore */
+      }
+      window._thptStartConfig = {
+        examId: historyModalExam.id,
+        minutes: 0,
+        reviewAttempt: attempt,
+      };
+      setHistoryModalExam(null);
+      navigateTo('thpt-room', true);
+    },
+    [historyModalExam, navigateTo, openBook]
   );
 
   const schoolExams = useMemo(
@@ -149,7 +174,11 @@ export function PageExercises() {
     let list = currentBookExams;
     if (activeFilter === 'free') list = list.filter((e) => !e.is_pro);
     else if (activeFilter === 'pro') list = list.filter((e) => Boolean(e.is_pro));
-    else if (activeFilter === 'completed') list = list.filter((e) => Boolean(bestScores[e.id]));
+    else if (activeFilter === 'completed') {
+      list = list.filter(
+        (e) => Boolean(bestScores[e.id] || (attemptHistoryMap[e.id] || []).length > 0)
+      );
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       list = list.filter(
@@ -157,13 +186,16 @@ export function PageExercises() {
       );
     }
     return list;
-  }, [currentBookExams, activeFilter, searchQuery, bestScores]);
+  }, [currentBookExams, activeFilter, searchQuery, bestScores, attemptHistoryMap]);
 
   const freeCount = useMemo(() => currentBookExams.filter((e) => !e.is_pro).length, [currentBookExams]);
   const proCount = useMemo(() => currentBookExams.filter((e) => Boolean(e.is_pro)).length, [currentBookExams]);
   const completedCount = useMemo(
-    () => currentBookExams.filter((e) => Boolean(bestScores[e.id])).length,
-    [currentBookExams, bestScores]
+    () =>
+      currentBookExams.filter(
+        (e) => Boolean(bestScores[e.id] || (attemptHistoryMap[e.id] || []).length > 0)
+      ).length,
+    [currentBookExams, bestScores, attemptHistoryMap]
   );
 
   const activeBookMeta = BOOKS.find((b) => b.id === openBook) || null;
@@ -397,19 +429,17 @@ export function PageExercises() {
                         Gói PRO ({proCount})
                       </button>
                     )}
-                    {completedCount > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => setActiveFilter('completed')}
-                        className={`${pillBase} ${
-                          activeFilter === 'completed'
-                            ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]'
-                            : 'bg-white text-[#302A24]'
-                        }`}
-                      >
-                        Đã hoàn thành ({completedCount})
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter('completed')}
+                      className={`${pillBase} ${
+                        activeFilter === 'completed'
+                          ? 'bg-[#557A46] text-white shadow-[2px_2px_0px_#3D352E]'
+                          : 'bg-white text-[#302A24] hover:bg-[#FAF5EB]'
+                      }`}
+                    >
+                      Đã làm ({completedCount})
+                    </button>
                   </div>
                 </div>
 
@@ -444,8 +474,10 @@ export function PageExercises() {
                         exam={exam}
                         is_pro={exam.is_pro}
                         bestScore={bestScores[exam.id]}
+                        attemptsCount={(attemptHistoryMap[exam.id] || []).length}
                         onStart={handleStart}
                         onCustomTime={handleOpenCustomTime}
+                        onOpenHistory={handleOpenHistory}
                       />
                     ))}
                   </div>
@@ -458,9 +490,24 @@ export function PageExercises() {
 
       {customTimeModal && (
         <ExamCustomTimeModal
+          examId={customTimeModal.examId}
           examTitle={customTimeModal.examTitle}
-          onConfirm={(minutes) => handleCustomTimeStart(customTimeModal.examId, minutes)}
-          onClose={() => setCustomTimeModal(null)}
+          onStart={handleCustomTimeStart}
+          onCancel={() => setCustomTimeModal(null)}
+        />
+      )}
+
+      {historyModalExam && (
+        <ExamHistoryModal
+          examTitle={historyModalExam.title}
+          attempts={attemptHistoryMap[historyModalExam.id] || []}
+          onClose={() => setHistoryModalExam(null)}
+          onReviewAttempt={handleReviewHistoryAttempt}
+          onRetake={() => {
+            const target = historyModalExam;
+            setHistoryModalExam(null);
+            handleStart(target.id, target.duration_minutes || target.time_limit || 50);
+          }}
         />
       )}
     </div>

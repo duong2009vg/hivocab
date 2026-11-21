@@ -32,8 +32,8 @@ export function PageFeatures() {
           tag: 'Scientific',
           tagColor: 'bg-[#FEF9EE] text-[#D97706] border-[#D97706]/40',
           iconType: 'srs',
-          title: 'Spaced Repetition (SRS SM-2)',
-          desc: 'Powered by the SuperMemo-2 (SM-2) algorithm across 5 memory tiers from Fresh (1 day) to Mastered (30 days). Automatically calculates the exact moment you are about to forget a word to prompt review, locking words into long-term memory.',
+          title: 'Spaced Repetition (FSRS-6)',
+          desc: 'Powered by the modern FSRS-6 (DSR) algorithm used in Anki. Models Difficulty, Stability, and Retrievability for every word to prompt reviews right before forgetting, locking vocabulary into long-term memory.',
           highlight: 'Saves up to 80% study time',
         },
         {
@@ -82,8 +82,8 @@ export function PageFeatures() {
           tag: 'Khoa học',
           tagColor: 'bg-[#FEF9EE] text-[#D97706] border-[#D97706]/40',
           iconType: 'srs',
-          title: 'Lặp lại ngắt quãng (SRS SM-2)',
-          desc: 'Thuật toán SuperMemo-2 phân tầng 5 cấp độ trí nhớ từ Khởi động (1 ngày) đến Thành thạo (30 ngày). Nhắc nhở ôn tập chính xác thời điểm chuẩn bị quên, chuyển hóa từ vựng thành trí nhớ dài hạn vĩnh viễn.',
+          title: 'Lặp lại ngắt quãng (FSRS-6)',
+          desc: 'Ứng dụng thuật toán FSRS-6 (mô hình DSR chuẩn Anki) tính toán Độ khó, Độ bền và Xác suất nhớ cho từng từ vựng. Nhắc ôn tập đúng điểm rơi trí nhớ trước khi quên, giúp nhớ sâu và giảm tới 30% thời gian ôn.',
           highlight: 'Tiết kiệm 80% thời gian học',
         },
         {

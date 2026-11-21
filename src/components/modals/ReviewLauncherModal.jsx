@@ -16,6 +16,7 @@ import {
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { getWordsDueForReview } from '../../services/db.js';
+import { getWordRetrievability } from '../../utils/fsrs.js';
 
 const PRESET_SIZES = [
   { count: 15, label: 'Ôn nhanh', estPerWordMin: 0.33 },
@@ -133,7 +134,11 @@ export function ReviewLauncherModal() {
       return shuffleArray(byTopic);
     }
     if (priorityMode === 'urgent') {
+      const now = new Date();
       return [...byTopic].sort((a, b) => {
+        const retA = getWordRetrievability(a, now);
+        const retB = getWordRetrievability(b, now);
+        if (Math.abs(retA - retB) > 0.0001) return retA - retB;
         const lvDiff = Number(a.level ?? 0) - Number(b.level ?? 0);
         if (lvDiff !== 0) return lvDiff;
         return new Date(a.nextReviewAt || 0).getTime() - new Date(b.nextReviewAt || 0).getTime();

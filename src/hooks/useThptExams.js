@@ -4,9 +4,13 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
+import {
+  getLocalBestScoresMap,
+  getLocalExamHistoryMap,
+  fetchUserExamAttempts,
+} from '../services/examHistoryService.js';
 
 const EXAMS_CACHE_KEY = 'thpt_exams_summaries_v20261112_v3';
-const BEST_SCORES_KEY = 'thpt_best_scores';
 
 function removeAccents(str) {
   return (str || '')
@@ -22,16 +26,36 @@ export function useThptExams() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [bestScores, setBestScores] = useState({});
+  const [bestScores, setBestScores] = useState(() => getLocalBestScoresMap());
+  const [attemptHistoryMap, setAttemptHistoryMap] = useState(() => getLocalExamHistoryMap());
 
-  // Load best scores from localStorage
-  useEffect(() => {
-    try {
-      const str = localStorage.getItem(BEST_SCORES_KEY);
-      setBestScores(str ? JSON.parse(str) : {});
-    } catch (_) {
-      setBestScores({});
+  // Load best scores & attempt history from localStorage + Supabase cloud
+  const refreshBestScores = useCallback(async () => {
+    setBestScores(getLocalBestScoresMap());
+    setAttemptHistoryMap(getLocalExamHistoryMap());
+    const synced = await fetchUserExamAttempts();
+    if (synced) {
+      setBestScores(synced.bestScores || {});
+      setAttemptHistoryMap(synced.historyMap || {});
     }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    const sync = async () => {
+      const synced = await fetchUserExamAttempts();
+      if (!active || !synced) return;
+      setBestScores(synced.bestScores || {});
+      setAttemptHistoryMap(synced.historyMap || {});
+    };
+    sync();
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      sync();
+    });
+    return () => {
+      active = false;
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   // Fetch exams list via RPC get_thpt_exam_summaries
@@ -111,14 +135,6 @@ export function useThptExams() {
     );
   }, [exams, searchQuery]);
 
-  // Refresh best scores
-  const refreshBestScores = useCallback(() => {
-    try {
-      const str = localStorage.getItem(BEST_SCORES_KEY);
-      setBestScores(str ? JSON.parse(str) : {});
-    } catch (_) {}
-  }, []);
-
   return {
     exams: filteredExams,
     allExams: exams,
@@ -127,6 +143,7 @@ export function useThptExams() {
     searchQuery,
     setSearchQuery,
     bestScores,
+    attemptHistoryMap,
     refreshBestScores,
   };
 }

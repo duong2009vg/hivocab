@@ -22,19 +22,19 @@ import requests
 sys.stdout.reconfigure(encoding="utf-8")
 
 # ── R2 CONFIG ──────────────────────────────────────────────────
-R2_ENDPOINT = "https://01033fe0886de81827c8bfdb291025d8.r2.cloudflarestorage.com"
-R2_ACCESS_KEY = "046821c928596cf198381f732d40583a"
-R2_SECRET_KEY = "425f6b891095a821179e3a8cedb53633bc6e4e7bc945e68e23e57cc2fd8dd4f6"
-BUCKET_NAME = "hivocab-images"
-PUBLIC_BASE_URL = "https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev"
+R2_ENDPOINT = os.environ.get("R2_ENDPOINT", "").strip()
+R2_ACCESS_KEY = os.environ.get("R2_ACCESS_KEY", "").strip()
+R2_SECRET_KEY = os.environ.get("R2_SECRET_KEY", "").strip()
+BUCKET_NAME = os.environ.get("R2_BUCKET_NAME", "hivocab-images").strip()
+PUBLIC_BASE_URL = os.environ.get("R2_PUBLIC_BASE_URL", "https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev").strip()
 
 # ── SUPABASE CONFIG ────────────────────────────────────────────
-SUPABASE_URL = "https://swehdtrqjyklmsefkjdf.supabase.co"
-ANON_KEY = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-    "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3ZWhkdHJxanlrbG1zZWZramRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgzOTc4MDcsImV4cCI6MjA5Mzk3MzgwN30."
-    "dXRhEmvS8J21aJ3dwZ4jHaWuKbhNw2yys90YTIop2EU"
-)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "").strip()
+if not R2_ENDPOINT or not R2_ACCESS_KEY or not R2_SECRET_KEY or not SUPABASE_URL or not ANON_KEY:
+    raise RuntimeError(
+        "Missing required R2_ENDPOINT, R2_ACCESS_KEY, R2_SECRET_KEY, SUPABASE_URL, or SUPABASE_ANON_KEY env vars."
+    )
 SB_HEADERS = {
     "apikey": ANON_KEY,
     "Authorization": f"Bearer {ANON_KEY}",

@@ -22,14 +22,33 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
 
   // Tabs & Views
   const [activeTab, setActiveTab] = useState('reading'); // 'reading' | 'gap-fill'
-  const [viewMode, setViewMode] = useState('bilingual'); // 'bilingual' | 'en' | 'vi'
+  const [viewMode, setViewModeState] = useState('bilingual'); // 'bilingual' | 'en'
+  const setViewMode = useCallback((mode) => {
+    setViewModeState(mode === 'en' ? 'en' : 'bilingual');
+  }, []);
   const [fontSize, setFontSize] = useState('base'); // 'sm' | 'base' | 'lg' | 'xl'
 
-  // Curtain Mode state (Set of revealed paragraph indexes)
+  // Reading preferences (persisted)
+  const [showHighlights, setShowHighlights] = useState(() => {
+    if (typeof localStorage === 'undefined') return true;
+    return localStorage.getItem('hivocab_bilingual_highlights') !== 'false';
+  });
+  const [showVocabPopup, setShowVocabPopup] = useState(() => {
+    if (typeof localStorage === 'undefined') return true;
+    return localStorage.getItem('hivocab_bilingual_popup') !== 'false';
+  });
+  const [showVocabSidebar, setShowVocabSidebar] = useState(() => {
+    if (typeof localStorage === 'undefined') return true;
+    return localStorage.getItem('hivocab_bilingual_sidebar') !== 'false';
+  });
+  const [curtainMode, setCurtainMode] = useState(false);
+
+  // Curtain Mode state (Set of revealed paragraph indexes when curtainMode is active)
   const [revealedParas, setRevealedParas] = useState(() => new Set());
 
-  // Tooltip state for highlighted words
+  // Tooltip & active selected vocab state for highlighted words
   const [activeTooltip, setActiveTooltip] = useState(null);
+  const [selectedVocabWord, setSelectedVocabWord] = useState(null);
 
   // Gap-fill state
   const [gapItems, setGapItems] = useState([]);
@@ -82,6 +101,48 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
     let cancelled = false;
 
     async function loadData() {
+      const isNewsId = String(passageId).startsWith('news-');
+
+      // Fast path: local Bilingual News Article (free, no Supabase UUID query)
+      if (isNewsId) {
+        if (PASSAGE_CACHE.has(passageId)) {
+          const cached = PASSAGE_CACHE.get(passageId);
+          if (!cancelled) {
+            setPassage(cached.passage);
+            setWords(cached.words);
+            setRevealedParas(new Set());
+            setActiveTab('reading');
+            setLoading(false);
+            setError(null);
+          }
+          return;
+        }
+        setLoading(true);
+        setError(null);
+        try {
+          const { getBilingualNewsById } = await import('../data/bilingualNewsIndex.js');
+          const article = await getBilingualNewsById(passageId);
+          if (cancelled) return;
+          if (!article) {
+            setError('Không tìm thấy bài báo song ngữ này.');
+            setLoading(false);
+            return;
+          }
+          PASSAGE_CACHE.set(passageId, { passage: article, words: [] });
+          setPassage(article);
+          setWords([]);
+          setRevealedParas(new Set());
+          setActiveTab('reading');
+          setLoading(false);
+        } catch (err) {
+          if (!cancelled) {
+            setError(err?.message || 'Không thể tải bài báo song ngữ.');
+            setLoading(false);
+          }
+        }
+        return;
+      }
+
       // 1. Check PRO access
       try {
         const hasAccess = await checkProAccess({
@@ -143,6 +204,7 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
           finalPassage = {
             id: fetchedPassage.id,
             title: fetchedPassage.title || foundPassage?.title,
+            titleVi: fetchedPassage.title_vi || fetchedPassage.titleVi || foundPassage?.titleVi || '',
             passageNumber: fetchedPassage.passage_number || fetchedPassage.passageNumber || foundPassage?.passageNumber,
             topicLabel: fetchedPassage.topic_label || fetchedPassage.topicLabel || foundPassage?.topicLabel,
             contentEn: fetchedPassage.content_en || fetchedPassage.contentEn || foundPassage?.contentEn || '',
@@ -234,8 +296,36 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
     return { vocabMap: map, vocabRegex: regex };
   }, [words]);
 
+  // Reading preference toggles
+  const toggleHighlights = useCallback(() => {
+    setShowHighlights((prev) => {
+      const next = !prev;
+      try { localStorage.setItem('hivocab_bilingual_highlights', String(next)); } catch (_) {}
+      if (!next) setActiveTooltip(null);
+      return next;
+    });
+  }, []);
+
+  const toggleVocabPopup = useCallback(() => {
+    setShowVocabPopup((prev) => {
+      const next = !prev;
+      try { localStorage.setItem('hivocab_bilingual_popup', String(next)); } catch (_) {}
+      if (!next) setActiveTooltip(null);
+      return next;
+    });
+  }, []);
+
+  const toggleVocabSidebar = useCallback(() => {
+    setShowVocabSidebar((prev) => {
+      const next = !prev;
+      try { localStorage.setItem('hivocab_bilingual_sidebar', String(next)); } catch (_) {}
+      return next;
+    });
+  }, []);
+
   // Curtain Mode Handlers
   const toggleParaCurtain = useCallback((idx) => {
+    setCurtainMode(true);
     setRevealedParas((prev) => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx);
@@ -245,12 +335,14 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
   }, []);
 
   const revealAllParas = useCallback(() => {
+    setCurtainMode(false);
     const all = new Set();
     for (let i = 0; i < totalParas; i++) all.add(i);
     setRevealedParas(all);
   }, [totalParas]);
 
   const hideAllParas = useCallback(() => {
+    setCurtainMode(true);
     setRevealedParas(new Set());
   }, []);
 
@@ -265,10 +357,21 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
     });
   }, []);
 
-  // Tooltip Handlers
+  // Tooltip & Word Selection Handlers
   const openVocabTooltip = useCallback((wordObj, clientX, clientY) => {
-    const x = Math.min(Math.max(16, clientX - 100), window.innerWidth - 320);
-    const y = Math.min(clientY + 20, window.innerHeight - 200);
+    if (!wordObj?.word) return;
+    setSelectedVocabWord(wordObj.word.toLowerCase());
+
+    if (!showVocabPopup) {
+      setActiveTooltip(null);
+      speakWord(wordObj.word);
+      return;
+    }
+
+    const winW = typeof window !== 'undefined' ? window.innerWidth : 1024;
+    const winH = typeof window !== 'undefined' ? window.innerHeight : 768;
+    const x = Math.min(Math.max(16, (clientX || winW / 2) - 100), winW - 320);
+    const y = Math.min((clientY || winH / 2) + 20, winH - 200);
 
     setActiveTooltip({
       word: wordObj.word,
@@ -278,7 +381,7 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
       x,
       y,
     });
-  }, []);
+  }, [showVocabPopup]);
 
   const closeVocabTooltip = useCallback(() => {
     setActiveTooltip(null);
@@ -467,6 +570,7 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
       window._currentPassageId = newId || null;
     }
     setActiveTooltip(null);
+    setSelectedVocabWord(null);
     if (nextTab === 'reading' || nextTab === 'gap-fill') {
       setActiveTab(nextTab);
     }
@@ -490,11 +594,19 @@ export function useBilingualReading(initialPassageId = null, options = {}) {
     totalParas,
     vocabMap,
     vocabRegex,
+    showHighlights,
+    toggleHighlights,
+    showVocabPopup,
+    toggleVocabPopup,
+    showVocabSidebar,
+    toggleVocabSidebar,
+    curtainMode,
     revealedParas,
     toggleParaCurtain,
     revealAllParas,
     hideAllParas,
     activeTooltip,
+    selectedVocabWord,
     openVocabTooltip,
     closeVocabTooltip,
     // Gap fill

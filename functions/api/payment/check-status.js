@@ -2,21 +2,17 @@
 // Cloudflare Pages Function: GET /api/payment/check-status?orderCode=123456
 // Kiểm tra trạng thái đơn hàng và gói cước của người dùng
 import { checkRateLimit, rateLimitResponse } from '../../_rateLimit.js';
+import { getCorsHeaders, requireSupabaseUser } from '../../_security.js';
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'GET, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
-
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'GET, OPTIONS') });
 }
 
 export async function onRequestGet(context) {
     const { request, env } = context;
+    const corsHeaders = getCorsHeaders(request, 'GET, OPTIONS');
 
-    const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim();
+    const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
     const SUPABASE_ANON_KEY         = String(env.SUPABASE_ANON_KEY || '').trim();
     const SUPABASE_SERVICE_ROLE_KEY = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
 
@@ -26,6 +22,9 @@ export async function onRequestGet(context) {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
+
+    const preAuthLimit = await checkRateLimit({ request, env, ruleName: 'paymentStatus' });
+    if (!preAuthLimit.allowed) return rateLimitResponse(preAuthLimit, corsHeaders);
 
     const url = new URL(request.url);
     const orderCode = String(url.searchParams.get('orderCode') || '').trim();
@@ -37,36 +36,9 @@ export async function onRequestGet(context) {
     }
 
     // 1. Xác thực danh tính người dùng (chống IDOR tra cứu đơn hàng của người khác)
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (!token) {
-        return new Response(JSON.stringify({ ok: false, error: 'Vui lòng cung cấp token xác thực' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-
-    const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'apikey': SUPABASE_ANON_KEY,
-        },
-    });
-
-    if (!userRes.ok) {
-        return new Response(JSON.stringify({ ok: false, error: 'Phiên đăng nhập không hợp lệ hoặc đã hết hạn' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
-
-    const authUser = await userRes.json();
-    if (!authUser?.id) {
-        return new Response(JSON.stringify({ ok: false, error: 'Không thể xác thực người dùng' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const auth = await requireSupabaseUser(request, env, corsHeaders);
+    if (!auth.ok) return auth.response;
+    const authUser = auth.user;
 
     const rateLimit = await checkRateLimit({
         request,
@@ -147,10 +119,10 @@ export async function onRequestGet(context) {
             }
         } catch (_) {}
 
-        // Tự động kích hoạt (Auto-heal) nếu đơn hàng đã PAID nhưng profile chưa lên PRO
-        if (order.status === 'PAID' && profile?.tier !== 'pro') {
+        // Tự động kích hoạt (Auto-heal) CHỈ KHI đơn hàng chưa từng được cấp quyền (chống replay sau khi admin thu hồi PRO)
+        if (order.status === 'PAID' && !order.entitlement_granted_at && profile?.tier !== 'pro') {
             try {
-                await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
+                const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
@@ -164,17 +136,18 @@ export async function onRequestGet(context) {
                     }),
                 });
 
-                // Tải lại profile mới nhất sau khi kích hoạt
-                const refreshedProfRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${order.user_id}&select=*`, {
-                    headers: {
-                        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-                        'apikey': SUPABASE_SERVICE_ROLE_KEY,
-                    },
-                });
-                if (refreshedProfRes.ok) {
-                    const refreshedProfiles = await refreshedProfRes.json();
-                    if (refreshedProfiles && refreshedProfiles.length > 0) {
-                        profile = refreshedProfiles[0];
+                if (rpcRes.ok) {
+                    const refreshedProfRes = await fetch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${order.user_id}&select=*`, {
+                        headers: {
+                            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+                            'apikey': SUPABASE_SERVICE_ROLE_KEY,
+                        },
+                    });
+                    if (refreshedProfRes.ok) {
+                        const refreshedProfiles = await refreshedProfRes.json();
+                        if (refreshedProfiles && refreshedProfiles.length > 0) {
+                            profile = refreshedProfiles[0];
+                        }
                     }
                 }
             } catch (rpcErr) {
@@ -212,6 +185,6 @@ export async function onRequest(context) {
     if (method === 'GET') return onRequestGet(context);
     return new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
         status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(context.request, 'GET, OPTIONS'), 'Content-Type': 'application/json' }
     });
 }

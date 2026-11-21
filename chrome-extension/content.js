@@ -1,8 +1,6 @@
 (() => {
-  const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-  const TRANSLATE_URL = 'https://hivocab.site/api/translate';
-  const EXAMPLE_URL   = 'https://hivocab.site/api/example';
-  const APP_URL       = 'https://hivocab.site';
+  const DICT_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
+  const APP_URL  = 'https://hivocab.site';
 
   let fab       = null;
   let panel     = null;
@@ -17,11 +15,15 @@
 
   // ── Auth sync ─────────────────────────────────────────────────────────────
   function isHiVocabHost() {
+    const p = window.location.protocol;
     const h = window.location.hostname.toLowerCase();
-    return h === 'hivocab.site' || 
-           h.endsWith('.hivocab.site') || 
-           h === 'localhost' || 
-           h === '127.0.0.1';
+    if (p === 'https:' && (h === 'hivocab.site' || h.endsWith('.hivocab.site') || h === 'hivocab.vercel.app')) {
+      return true;
+    }
+    if ((p === 'http:' || p === 'https:') && (h === 'localhost' || h === '127.0.0.1')) {
+      return true;
+    }
+    return false;
   }
 
   let _lastSentToken = null;
@@ -63,6 +65,7 @@
 
     // 4. Lắng nghe thông báo trực tiếp từ app (HiDB.onAuthStateChange, topics-updated)
     window.addEventListener('message', e => {
+      if (e.source !== window || e.origin !== window.location.origin || e.origin === 'null') return;
       if (e.data?.source === 'hi-vocab-app' && e.data?.action === 'auth-state-change') {
         syncAuthToken(e.data.session);
       }
@@ -177,23 +180,17 @@
     return { topics, foldersMap };
   }
 
-  // ── Tạo câu ví dụ bằng Groq (chỉ khi FreeDict không có) ─────────────────
+  // ── Tạo câu ví dụ bằng Groq (qua background với JWT user) ─────────────────
   async function generateExample(term, isPhrase) {
     try {
-      const res = await fetchWithTimeout(EXAMPLE_URL, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ term, isPhrase: !!isPhrase }),
-      }, 6000);
-      if (!res || !res.ok) return null;
-      const data = await res.json();
-      return (data?.ok && data?.sentence) ? data.sentence : null;
+      const res = await send('generate-example', { term, isPhrase: !!isPhrase });
+      return (res?.ok && res?.sentence) ? res.sentence : null;
     } catch (_) {
       return null;
     }
   }
 
-  // ── Lookup: DeepL + FreeDict song song ───────────────────────────────────
+  // ── Lookup: DeepL (qua background) + FreeDict song song ──────────────────
   async function lookup(term) {
     const key      = term.trim().toLowerCase();
     if (lookupCache.has(key)) return lookupCache.get(key);
@@ -210,13 +207,8 @@
       isPhrase,
     };
 
-    // Chạy song song: DeepL (4s timeout) và FreeDict (2.5s timeout)
-    const translatePromise = fetchWithTimeout(TRANSLATE_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ text: term.trim(), from: 'en', to: 'vi' }),
-    }, 4000)
-      .then(async r => (r && r.ok) ? (await r.json()) : null)
+    // Chạy song song: Dịch nghĩa (qua background) và FreeDict (2.5s timeout)
+    const translatePromise = send('translate-text', { text: term.trim(), from: 'en', to: 'vi' })
       .catch(() => null);
 
     const dictPromise = isPhrase
@@ -523,8 +515,8 @@
         return;
       }
 
-      topicListEl.innerHTML = topicsInFolder.map(t => `
-        <button type="button" class="hi-vocab-picker-item" data-topic-id="${esc(t.id)}" data-topic-name="${esc(t.name)}">
+      topicListEl.innerHTML = topicsInFolder.map((t, idx) => `
+        <button type="button" class="hi-vocab-picker-item" data-topic-idx="${idx}">
           <div class="hi-vocab-picker-left">
             <span class="hi-vocab-picker-icon">📖</span>
             <span class="hi-vocab-picker-name">${esc(t.name)}</span>
@@ -533,8 +525,11 @@
         </button>
       `).join('');
 
-      topicListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
-        btn.onclick = () => selectTopic({ id: btn.dataset.topicId, name: btn.dataset.topicName });
+      topicListEl.querySelectorAll('.hi-vocab-picker-item').forEach((btn, idx) => {
+        const topicObj = topicsInFolder[idx];
+        btn.onclick = () => {
+          if (topicObj) selectTopic({ id: topicObj.id, name: topicObj.name });
+        };
       });
     }
 
@@ -594,8 +589,8 @@
         return;
       }
 
-      testListEl.innerHTML = tests.map(t => `
-        <button type="button" class="hi-vocab-picker-item" data-test-id="${esc(t.id)}">
+      testListEl.innerHTML = tests.map((t, idx) => `
+        <button type="button" class="hi-vocab-picker-item" data-test-idx="${idx}">
           <div class="hi-vocab-picker-left">
             <span class="hi-vocab-picker-icon">📝</span>
             <span class="hi-vocab-picker-name">${esc(t.name)}</span>
@@ -604,8 +599,8 @@
         </button>
       `).join('');
 
-      testListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
-        const test = tests.find(t => t.id === btn.dataset.testId);
+      testListEl.querySelectorAll('.hi-vocab-picker-item').forEach((btn, idx) => {
+        const test = tests[idx];
         btn.onclick = () => selectTest(test);
       });
     }
@@ -636,8 +631,8 @@
         return;
       }
 
-      passageListEl.innerHTML = passages.map(p => `
-        <button type="button" class="hi-vocab-picker-item" data-passage-id="${esc(p.id)}" data-passage-title="${esc(p.title)}">
+      passageListEl.innerHTML = passages.map((p, idx) => `
+        <button type="button" class="hi-vocab-picker-item" data-passage-idx="${idx}">
           <div class="hi-vocab-picker-left">
             <span class="hi-vocab-picker-icon">📄</span>
             <span class="hi-vocab-picker-name">${esc(p.title || `Passage ${p.passageNumber}`)}</span>
@@ -646,14 +641,11 @@
         </button>
       `).join('');
 
-      passageListEl.querySelectorAll('.hi-vocab-picker-item').forEach(btn => {
-        btn.onclick = () => saveWordToTopic(
-          currentTopic.id,
-          currentTopic.name,
-          btn.dataset.passageId,
-          btn.dataset.passageTitle,
-          test.name
-        );
+      passageListEl.querySelectorAll('.hi-vocab-picker-item').forEach((btn, idx) => {
+        const p = passages[idx];
+        btn.onclick = () => {
+          if (p) saveWordToTopic(currentTopic.id, currentTopic.name, p.id, p.title || `Passage ${p.passageNumber}`, test.name);
+        };
       });
     }
 
@@ -841,15 +833,21 @@
 
   // ── Listener cho web app ─────────────────────────────────────────────────
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (sender?.id && sender.id !== chrome.runtime.id) return;
     if (message?.type === 'topics-updated') {
       invalidateTopicsCache();
       return;
     }
     if (message?.type !== 'HI_EXTENSION_PAGE_REQUEST') return;
-    const targetOrigin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : '*';
+    if (!isHiVocabHost()) return;
+    const targetOrigin = window.location.origin;
+    if (!targetOrigin || targetOrigin === 'null') {
+      sendResponse({ ok: false, error: 'Blocked opaque origin.' });
+      return;
+    }
     window.postMessage({ source: 'hi-vocab-extension', requestId: message.requestId, action: message.action, payload: message.payload }, targetOrigin);
     const handler = event => {
-      if (event.source !== window || event.data?.source !== 'hi-vocab-app' || event.data.requestId !== message.requestId) return;
+      if (event.source !== window || event.origin !== targetOrigin || event.data?.source !== 'hi-vocab-app' || event.data.requestId !== message.requestId) return;
       clearTimeout(timeout);
       window.removeEventListener('message', handler);
       sendResponse({ ok: event.data.ok, data: event.data.data, error: event.data.error });

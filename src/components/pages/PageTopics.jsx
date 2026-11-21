@@ -205,6 +205,9 @@ function formatShelfDisplayName(folderId, folderLabel, count) {
   if (key.includes('common')) {
     return 'Common Words — 60 Chủ Đề Từ Vựng Đời Sống (60 cuốn)';
   }
+  if (key === 'personal') {
+    return `Từ Vựng Đã Lưu (Cá Nhân)${suffix}`;
+  }
   return `${folderLabel || folderId}${suffix}`;
 }
 

@@ -52,6 +52,7 @@ const requiredSourceFiles = [
   'src/components/modals/AddWordModal.jsx',
   'src/components/modals/PricingModal.jsx',
   'functions/api/tts.js',
+  'functions/api/corpus.js',
   'functions/app.js',
   'functions/login.js',
   'public/_redirects',
@@ -82,7 +83,8 @@ if (fs.existsSync(distIndex)) {
 }
 
 assert(!fs.existsSync(path.resolve(distDir, 'legacyApp.js')), 'dist/ is clean: no legacyApp.js copied');
-assert(fs.existsSync(path.resolve(distDir, 'functions/api/tts.js')), 'dist/functions/api/tts.js is present');
+assert(!fs.existsSync(path.resolve(distDir, 'functions')), 'dist/ is clean: server functions/ are not exposed inside static dist/');
+assert(!fs.existsSync(path.resolve(distDir, 'data/thpt_exams.json')), 'dist/ is clean: thpt_exams.json is not served publicly on CDN');
 
 // 3. Bundle Size Check
 console.log('\n3. Checking Code Splitting & Chunk Sizes:');

@@ -1,4 +1,4 @@
-{
+export default {
   "version": 1,
   "locale": "en-US",
   "notice": "Curated near-sounding English words, not exact homophones. IPA uses general US dictionary-style pronunciation.",
@@ -1435,4 +1435,4 @@
       ]
     }
   ]
-}
+};

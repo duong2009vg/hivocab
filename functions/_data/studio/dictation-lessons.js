@@ -1,4 +1,4 @@
-{
+export default {
   "version": 2,
   "locale": "en",
   "notice": "Học liệu gồm hội thoại nguyên bản PeakFour và transcript do người dùng cung cấp; tiếng nói được tạo bằng TTS, không phải âm thanh gốc của phim; transcript nguồn được lưu riêng theo mã cảnh.",
@@ -10484,4 +10484,4 @@
       "lesson_count": 3
     }
   ]
-}
+};

@@ -1,4 +1,4 @@
-{
+export default {
   "theories": [
     {
       "order_index": 1,
@@ -1532,4 +1532,4 @@
       "examples": []
     }
   ]
-}
+};

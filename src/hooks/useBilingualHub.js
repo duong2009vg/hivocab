@@ -1,7 +1,8 @@
 // src/hooks/useBilingualHub.js
-// Hook quản lý Thư viện Đọc Song Ngữ IELTS (10 tập Actual Tests & danh sách Passages)
+// Hook quản lý Thư viện Đọc Song Ngữ 2 Tầng: Tầng 1 (10 tập IELTS Vol 1-10) & Tầng 2 (Bài báo song ngữ)
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getTopics, getCachedTopics, getCamHierarchy, isUserPro as checkPro } from '../services/db.js';
+import { getVolBookMeta } from '../data/bilingualVolMeta.js';
 
 const SELECTED_BOOK_STORAGE_KEY = 'hivocab_bilingual_selected_book';
 const LAST_READING_STORAGE_KEY = 'hivocab_last_bilingual_reading';
@@ -54,7 +55,9 @@ export function saveLastBilingualReading(meta) {
         testName: meta.testName || 'Test',
         passageNumber: meta.passageNumber || null,
         title: meta.title || 'Bài đọc song ngữ',
+        titleVi: meta.titleVi || null,
         topicLabel: meta.topicLabel || null,
+        isNewsArticle: Boolean(meta.isNewsArticle),
         updatedAt: Date.now(),
       })
     );
@@ -68,6 +71,9 @@ export function useBilingualHub(enabled = true) {
       .sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { numeric: true, sensitivity: 'base' }))
   );
   const [booksLoading, setBooksLoading] = useState(books.length === 0);
+
+  // 2-tier navigation: 'home' (2 wooden shelves) | 'vol' (clicked Vol tests & passages) | 'news' (bilingual news)
+  const [activeShelf, setActiveShelf] = useState('home');
   const [selectedBookId, setSelectedBookId] = useState(() => readStoredBookId());
   const [hierarchy, setHierarchy] = useState(() =>
     selectedBookId && HUB_HIERARCHY_CACHE.has(selectedBookId) ? HUB_HIERARCHY_CACHE.get(selectedBookId) : null
@@ -81,11 +87,18 @@ export function useBilingualHub(enabled = true) {
   const [filterMode, setFilterMode] = useState('all'); // 'all' | 'free' | 'with-vocab'
   const [lastReading, setLastReading] = useState(() => readLastBilingualReading());
 
+  // Tier 2: Bilingual News state (lazy loaded)
+  const [newsCategories, setNewsCategories] = useState([]);
+  const [newsArticles, setNewsArticles] = useState([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [selectedNewsCategory, setSelectedNewsCategory] = useState('all');
+  const [newsSearchQuery, setNewsSearchQuery] = useState('');
+
   const refreshLastReading = useCallback(() => {
     setLastReading(readLastBilingualReading());
   }, []);
 
-  // Load books + user Pro status
+  // Load IELTS Vol books + user Pro status + lazy-load Bilingual News articles
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
@@ -120,18 +133,27 @@ export function useBilingualHub(enabled = true) {
       }
     }
 
+    async function loadNews() {
+      try {
+        const mod = await import('../data/bilingualNewsIndex.js');
+        if (cancelled) return;
+        setNewsCategories(mod.BILINGUAL_NEWS_CATEGORIES || []);
+        setNewsArticles(mod.BILINGUAL_NEWS_INDEX || []);
+        setNewsLoading(false);
+      } catch (err) {
+        if (!cancelled) {
+          console.warn('[useBilingualHub] loadNews error:', err);
+          setNewsLoading(false);
+        }
+      }
+    }
+
     loadBooks();
+    loadNews();
     return () => {
       cancelled = true;
     };
   }, [enabled]);
-
-  // Ensure selectedBookId defaults cleanly if books came from synchronous cache
-  useEffect(() => {
-    if (!selectedBookId && books.length > 0) {
-      setSelectedBookId(books[0].id);
-    }
-  }, [books, selectedBookId]);
 
   // Persist selectedBookId
   useEffect(() => {
@@ -141,9 +163,9 @@ export function useBilingualHub(enabled = true) {
     } catch (_) {}
   }, [selectedBookId]);
 
-  // Load hierarchy for selectedBookId
+  // Load hierarchy ONLY when entering a Vol detail screen (or when selectedBookId changes inside 'vol')
   useEffect(() => {
-    if (!enabled || !selectedBookId) return;
+    if (!enabled || activeShelf !== 'vol' || !selectedBookId) return;
     let cancelled = false;
 
     setSelectedTestId('all');
@@ -176,12 +198,40 @@ export function useBilingualHub(enabled = true) {
     return () => {
       cancelled = true;
     };
-  }, [enabled, selectedBookId]);
+  }, [enabled, activeShelf, selectedBookId]);
+
+  const openVolBook = useCallback((bookId) => {
+    if (!bookId) return;
+    setSelectedBookId(bookId);
+    setSelectedTestId('all');
+    setSearchQuery('');
+    setFilterMode('all');
+    setActiveShelf('vol');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const openNewsShelf = useCallback((categoryId = 'all') => {
+    setSelectedNewsCategory(categoryId || 'all');
+    setNewsSearchQuery('');
+    setActiveShelf('news');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const closeShelfDetail = useCallback(() => {
+    setActiveShelf('home');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const selectedBook = useMemo(
     () => books.find((b) => b.id === selectedBookId) || null,
     [books, selectedBookId]
   );
+
+  const selectedBookMeta = useMemo(() => {
+    if (!selectedBook) return null;
+    const idx = books.findIndex((b) => b.id === selectedBook.id);
+    return getVolBookMeta(selectedBook, Math.max(0, idx));
+  }, [selectedBook, books]);
 
   const tests = useMemo(() => {
     const raw = Array.isArray(hierarchy?.tests) ? hierarchy.tests : [];
@@ -200,7 +250,7 @@ export function useBilingualHub(enabled = true) {
           if (filterMode === 'with-vocab' && !(p.totalWords > 0)) return false;
 
           if (!q) return true;
-          const haystack = `${p.title || ''} ${p.topicLabel || ''} ${t.name || ''} passage ${p.passageNumber || ''}`.toLowerCase();
+          const haystack = `${p.title || ''} ${p.titleVi || ''} ${p.topicLabel || ''} ${t.name || ''} passage ${p.passageNumber || ''}`.toLowerCase();
           return haystack.includes(q);
         });
 
@@ -228,10 +278,33 @@ export function useBilingualHub(enabled = true) {
     return { totalPassages, freePassages, totalWords, learnedWords };
   }, [tests, selectedBook, isUserPro]);
 
+  const filteredNewsArticles = useMemo(() => {
+    const q = newsSearchQuery.trim().toLowerCase();
+    return newsArticles.filter((a) => {
+      if (selectedNewsCategory !== 'all' && a.categoryId !== selectedNewsCategory) return false;
+      if (!q) return true;
+      const hay = `${a.title || ''} ${a.titleVi || ''} ${a.topicLabel || ''} bài ${a.index}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [newsArticles, selectedNewsCategory, newsSearchQuery]);
+
+  const newsCategoryCounts = useMemo(() => {
+    const counts = { all: newsArticles.length };
+    for (const a of newsArticles) {
+      counts[a.categoryId] = (counts[a.categoryId] || 0) + 1;
+    }
+    return counts;
+  }, [newsArticles]);
+
   return {
+    activeShelf,
+    openVolBook,
+    openNewsShelf,
+    closeShelfDetail,
     books,
     booksLoading,
     selectedBook,
+    selectedBookMeta,
     selectedBookId,
     setSelectedBookId,
     hierarchy,
@@ -249,6 +322,16 @@ export function useBilingualHub(enabled = true) {
     bookStats,
     lastReading,
     refreshLastReading,
+    // Tier 2 News
+    newsCategories,
+    newsArticles,
+    newsLoading,
+    selectedNewsCategory,
+    setSelectedNewsCategory,
+    newsSearchQuery,
+    setNewsSearchQuery,
+    filteredNewsArticles,
+    newsCategoryCounts,
   };
 }
 

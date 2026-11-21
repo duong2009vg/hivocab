@@ -1,16 +1,12 @@
 // functions/api/translate.js
 // Cloudflare Pages Function — DeepL translation proxy
 import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
+import { getCorsHeaders, requireSupabaseUser } from '../_security.js';
 
 const MAX_ITEMS = 24;
 const MAX_TEXT_LENGTH = 900;
 const DEEPL_URL = 'https://api-free.deepl.com/v2/translate';
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-};
+const VALID_LANG_RE = /^[A-Z]{2}(-[A-Z]{2,4})?$/;
 
 function normalizeTexts(body) {
     const value = Array.isArray(body?.texts) ? body.texts : [body?.text];
@@ -31,14 +27,21 @@ async function fetchWithTimeout(input, init = {}, timeoutMs = 8000) {
     }
 }
 
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'POST, OPTIONS') });
 }
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+    const corsHeaders = getCorsHeaders(request, 'POST, OPTIONS');
 
-    const rateLimit = await checkRateLimit({ request, env, ruleName: 'translate' });
+    const preRateLimit = await checkRateLimit({ request, env, ruleName: 'translate' });
+    if (!preRateLimit.allowed) return rateLimitResponse(preRateLimit, corsHeaders);
+
+    const auth = await requireSupabaseUser(request, env, corsHeaders);
+    if (!auth.ok) return auth.response;
+
+    const rateLimit = await checkRateLimit({ request, env, ruleName: 'translate', subject: auth.user.id });
     if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     let body = {};
@@ -52,8 +55,10 @@ export async function onRequestPost(context) {
     }
 
     const texts = normalizeTexts(body);
-    const sourceLang = String(body?.from || 'en').toUpperCase();
-    const targetLang = String(body?.to || 'vi').toUpperCase();
+    const rawFrom = String(body?.from || 'en').trim().toUpperCase();
+    const rawTo = String(body?.to || 'vi').trim().toUpperCase();
+    const sourceLang = VALID_LANG_RE.test(rawFrom) ? rawFrom : 'EN';
+    const targetLang = VALID_LANG_RE.test(rawTo) ? rawTo : 'VI';
 
     if (!texts.length) {
         return new Response(JSON.stringify({ ok: false, error: 'Missing text' }), {

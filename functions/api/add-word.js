@@ -1,12 +1,9 @@
 // functions/api/add-word.js
 // Cloudflare Pages Function — thêm từ vựng vào topic của user
 import { checkRateLimit, rateLimitResponse } from '../_rateLimit.js';
+import { getCorsHeaders, requireSupabaseUser } from '../_security.js';
 
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-};
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function isEnglishExample(value) {
     const text = String(value || '').trim();
@@ -16,31 +13,30 @@ function isEnglishExample(value) {
     return true;
 }
 
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'POST, OPTIONS') });
 }
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+    const corsHeaders = getCorsHeaders(request, 'POST, OPTIONS');
 
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (!token) {
-        return new Response(JSON.stringify({ ok: false, error: 'Missing auth token' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const preRateLimit = await checkRateLimit({ request, env, ruleName: 'public' });
+    if (!preRateLimit.allowed) return rateLimitResponse(preRateLimit, corsHeaders);
 
-    const supabaseUrl = env.SUPABASE_URL;
-    const supabaseAnonKey = env.SUPABASE_ANON_KEY;
+    const auth = await requireSupabaseUser(request, env, corsHeaders);
+    if (!auth.ok) return auth.response;
 
-    if (!supabaseUrl || !supabaseAnonKey) {
-        return new Response(JSON.stringify({ ok: false, error: 'Supabase not configured' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const rateLimit = await checkRateLimit({
+        request,
+        env,
+        ruleName: 'public',
+        subject: auth.user.id,
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
+
+    const supabaseUrl = String(env.SUPABASE_URL || '').trim().replace(/\/+$/, '');
+    const supabaseAnonKey = String(env.SUPABASE_ANON_KEY || '').trim();
 
     let body = {};
     try {
@@ -53,53 +49,40 @@ export async function onRequestPost(context) {
     }
 
     const { topicId, word, phonetic = '', meaning, exampleSentence = '', passageId, passage_id } = body || {};
-    if (!topicId || !word || !meaning) {
-        return new Response(JSON.stringify({ ok: false, error: 'Missing required fields: topicId, word, meaning' }), {
+    const cleanTopicId = String(topicId || '').trim();
+    const cleanWord = String(word || '').trim().slice(0, 120);
+    const cleanMeaning = String(meaning || '').trim().slice(0, 500);
+    const cleanPassageId = String(passageId || passage_id || '').trim();
+
+    if (!UUID_RE.test(cleanTopicId) || !cleanWord || !cleanMeaning) {
+        return new Response(JSON.stringify({ ok: false, error: 'Missing or invalid required fields: topicId, word, meaning' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+    if (cleanPassageId && !UUID_RE.test(cleanPassageId)) {
+        return new Response(JSON.stringify({ ok: false, error: 'Invalid passageId' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
     }
 
     try {
-        const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'apikey': supabaseAnonKey,
-            },
-        });
-
-        if (!userRes.ok) {
-            return new Response(JSON.stringify({ ok: false, error: 'Invalid or expired token' }), {
-                status: 401,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-        }
-
-        const authenticatedUser = await userRes.json();
-        const rateLimit = await checkRateLimit({
-            request,
-            env,
-            ruleName: 'public',
-            subject: authenticatedUser?.id || undefined,
-        });
-        if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
-
-        const targetPassageId = passageId || passage_id || null;
         const insertPayload = {
-            topic_id:         topicId,
-            word:             String(word).trim(),
-            phonetic:         String(phonetic || '').trim(),
-            meaning:          String(meaning).trim(),
-            example_sentence: isEnglishExample(exampleSentence) ? String(exampleSentence).trim() : '',
+            topic_id:         cleanTopicId,
+            word:             cleanWord,
+            phonetic:         String(phonetic || '').trim().slice(0, 120),
+            meaning:          cleanMeaning,
+            example_sentence: isEnglishExample(exampleSentence) ? String(exampleSentence).trim().slice(0, 500) : '',
         };
-        if (targetPassageId) {
-            insertPayload.passage_id = targetPassageId;
+        if (cleanPassageId) {
+            insertPayload.passage_id = cleanPassageId;
         }
 
         const insertRes = await fetch(`${supabaseUrl}/rest/v1/words`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${auth.token}`,
                 'apikey': supabaseAnonKey,
                 'Content-Type': 'application/json',
                 'Prefer': 'return=minimal',

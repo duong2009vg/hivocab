@@ -388,15 +388,15 @@ function applyWordHighlight(pane, word, paraIndex) {
     }
   }
 
-  // Fallback: không có định dạng sẵn → chỉ tô lần xuất hiện đầu tiên trong ĐÚNG đoạn
-  if (!block) return false;
+  // Fallback: không có định dạng sẵn → tìm trong đúng đoạn (hoặc toàn pane nếu lệch chỉ số đoạn)
+  const fallbackRoot = block || pane;
   const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const wordRegex = new RegExp(`(^|[^\\p{L}\\p{N}])(${escapedWord})(?![\\p{L}\\p{N}])`, 'iu');
-  const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
+  const walker = document.createTreeWalker(fallbackRoot, NodeFilter.SHOW_TEXT, {
     acceptNode(node) {
       if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
       let parent = node.parentNode;
-      while (parent && parent !== block) {
+      while (parent && parent !== fallbackRoot) {
         if (parent.tagName === 'BUTTON' || parent.classList?.contains(FALLBACK_CLS)) {
           return NodeFilter.FILTER_REJECT;
         }

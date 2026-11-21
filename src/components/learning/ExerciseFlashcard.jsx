@@ -1,7 +1,7 @@
 // src/components/learning/ExerciseFlashcard.jsx
 // 100% Cozy Crayon Handcrafted Flashcard - Centered & Responsive
 import React, { useState, useEffect, useCallback } from 'react';
-import { AlertTriangle, Sparkles, PenTool, Star } from 'lucide-react';
+import { AlertTriangle, Sparkles, PenTool, Star, RotateCcw, ThumbsUp } from 'lucide-react';
 
 export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo }) {
   const [flipped, setFlipped] = useState(false);
@@ -30,7 +30,7 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
     [isRatingPending, onRate]
   );
 
-  // Keyboard: Space/Enter/ArrowUp/ArrowDown = flip; 1 / ArrowLeft = Hard; 2 / ArrowRight = Easy
+  // Keyboard: Space/Enter/ArrowUp/ArrowDown = flip; 1 = Again (Quên); 2 = Hard (Khó); 3 = Good (Tốt); 4 = Easy (Dễ)
   useEffect(() => {
     function handleKey(e) {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -43,10 +43,16 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
       }
 
       if (flipped && !isRatingPending) {
-        if (e.key === '1' || e.key === 'ArrowLeft') {
+        if (e.key === '1') {
+          e.preventDefault();
+          handleRate('again');
+        } else if (e.key === '2' || e.key === 'ArrowLeft') {
           e.preventDefault();
           handleRate('hard');
-        } else if (e.key === '2' || e.key === 'ArrowRight') {
+        } else if (e.key === '3') {
+          e.preventDefault();
+          handleRate('good');
+        } else if (e.key === '4' || e.key === 'ArrowRight') {
           e.preventDefault();
           handleRate('easy');
         }
@@ -379,8 +385,21 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                 )}
               </div>
 
-              {/* Rating Action Buttons */}
-              <div className="w-full pt-2.5 sm:pt-3 grid grid-cols-2 gap-2 sm:gap-3">
+              {/* FSRS 4-State Rating Action Buttons (No interval time labels) */}
+              <div className="w-full pt-2.5 sm:pt-3 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+                <button
+                  type="button"
+                  disabled={isRatingPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRate('again');
+                  }}
+                  className="min-h-[48px] py-2.5 px-2.5 bg-[#FDEAE2] hover:bg-[#F9D6C8] disabled:opacity-50 disabled:cursor-not-allowed text-[#C84B31] font-extrabold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4 shrink-0 inline" />
+                  <span>Quên (1)</span>
+                </button>
+
                 <button
                   type="button"
                   disabled={isRatingPending}
@@ -388,10 +407,23 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                     e.stopPropagation();
                     handleRate('hard');
                   }}
-                  className="min-h-[48px] py-2.5 sm:py-3 px-3 bg-[#FAF5EB] hover:bg-[#F2ECE0] disabled:opacity-50 disabled:cursor-not-allowed text-[#D36135] font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="min-h-[48px] py-2.5 px-2.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] disabled:opacity-50 disabled:cursor-not-allowed text-[#D36135] font-extrabold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <PenTool className="w-4 h-4 shrink-0 inline" />
-                  <span>Cần ôn lại (1 / ←)</span>
+                  <span>Khó (2)</span>
+                </button>
+
+                <button
+                  type="button"
+                  disabled={isRatingPending}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRate('good');
+                  }}
+                  className="min-h-[48px] py-2.5 px-2.5 bg-[#EBF2F7] hover:bg-[#D8E6F0] disabled:opacity-50 disabled:cursor-not-allowed text-[#264653] font-extrabold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <ThumbsUp className="w-4 h-4 shrink-0 inline" />
+                  <span>Tốt (3)</span>
                 </button>
 
                 <button
@@ -401,10 +433,10 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
                     e.stopPropagation();
                     handleRate('easy');
                   }}
-                  className="min-h-[48px] py-2.5 sm:py-3 px-3 bg-[#609966] hover:bg-[#528357] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="min-h-[48px] py-2.5 px-2.5 bg-[#609966] hover:bg-[#528357] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs sm:text-sm rounded-2xl border-2 border-[#2D2825] shadow-[2px_2px_0px_#2D2825] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Star className="w-4 h-4 shrink-0 inline" />
-                  <span>Đã nhớ kỹ (2 / →)</span>
+                  <span>Dễ (4)</span>
                 </button>
               </div>
             </div>
@@ -418,12 +450,20 @@ export default function ExerciseFlashcard({ item, onRate, onReport, sessionInfo 
             Lật thẻ
           </span>
           <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
-            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[1 / ←]</kbd>
-            Cần ôn lại
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[1]</kbd>
+            Quên
           </span>
           <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
-            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[2 / →]</kbd>
-            Đã nhớ kỹ
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[2]</kbd>
+            Khó
+          </span>
+          <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[3]</kbd>
+            Tốt
+          </span>
+          <span className="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-lg border border-[#2D2825]/30 shadow-2xs">
+            <kbd className="px-1 py-0.2 bg-stone-100 border border-stone-400 rounded font-mono font-bold text-stone-800">[4]</kbd>
+            Dễ
           </span>
         </div>
       </section>

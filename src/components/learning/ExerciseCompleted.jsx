@@ -9,6 +9,7 @@ import { Trophy, RotateCcw, ArrowLeft, Home, Zap, Clock, Target, CheckCircle2, A
 
 function ratingLabel(w) {
   if (w.skipped) return { text: 'Bỏ qua', cls: 'bg-stone-100 text-stone-700 border border-stone-300' };
+  if (w.rating === 'again') return { text: 'Quên', cls: 'bg-rose-100 text-rose-800 border border-rose-300' };
   if (w.isNew)   return { text: 'Từ mới',  cls: 'bg-blue-100 text-blue-800 border border-blue-300' };
   if (w.rating === 'easy') return { text: 'Đã nhớ kỹ', cls: 'bg-emerald-100 text-emerald-800 border border-emerald-300' };
   if (w.rating === 'good') return { text: 'Tốt', cls: 'bg-sky-100 text-sky-800 border border-sky-300' };
@@ -76,10 +77,10 @@ export default function ExerciseCompleted({
 
   const totalCompleted = completedWords.length;
 
-  // Words that were marked hard or failed during session
+  // Words that were marked again/hard or failed during session
   const failedWords = useMemo(() => {
     return completedWords
-      .filter((w) => w.rating === 'hard' || (w.failCount && w.failCount > 0))
+      .filter((w) => w.rating === 'again' || w.rating === 'hard' || (w.failCount && w.failCount > 0))
       .map((w) => w.word)
       .filter(Boolean);
   }, [completedWords]);
@@ -101,7 +102,10 @@ export default function ExerciseCompleted({
   // Mastery Breakdown counts
   const easyCount = useMemo(() => completedWords.filter((w) => w.rating === 'easy').length, [completedWords]);
   const goodCount = useMemo(() => completedWords.filter((w) => w.rating === 'good').length, [completedWords]);
-  const hardCount = useMemo(() => completedWords.filter((w) => w.rating === 'hard').length, [completedWords]);
+  const hardCount = useMemo(
+    () => completedWords.filter((w) => w.rating === 'hard' || w.rating === 'again').length,
+    [completedWords]
+  );
   const newCount = useMemo(() => completedWords.filter((w) => w.isNew).length, [completedWords]);
 
   const formatDuration = (sec) => {

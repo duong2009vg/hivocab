@@ -4,6 +4,23 @@
 // Legacy pages (sessionUI, bilingualReading, thptExam) still use window.HiDB.
 
 import { supabase } from '../lib/supabaseClient.js';
+import {
+  FSRS6_DEFAULT_WEIGHTS,
+  FSRS_DEFAULT_RETENTION,
+  FSRS_RATING,
+  FSRS_STATE,
+  clamp,
+  normalizeFSRSRating,
+  calculateRetrievability,
+  calculateNextIntervalDays,
+  stabilityToMemoryLevel,
+  migrateSM2ToFSRSState,
+  formatFSRSIntervalLabel,
+  normalizeFSRSCard,
+  scheduleFSRSReview,
+  previewFSRSIntervals,
+  getWordRetrievability,
+} from '../utils/fsrs.js';
 
 function isMissingRpcError(error) {
   const code = String(error?.code || '');
@@ -454,7 +471,7 @@ async function getCamHierarchyLegacy(topicId) {
 
     const { data: passagesData, error: passagesErr } = await supabase
       .from('passages')
-      .select('id, test_id, passage_number, title, topic_label, content_en, content_vi, is_pro')
+      .select('id, test_id, passage_number, title, title_vi, topic_label, content_en, content_vi, is_pro')
       .eq('topic_id', topicId)
       .order('passage_number', { ascending: true });
 
@@ -527,6 +544,7 @@ async function getCamHierarchyLegacy(topicId) {
         testId: p.test_id,
         passageNumber: p.passage_number,
         title: p.title || `Passage ${p.passage_number}`,
+        titleVi: p.title_vi || null,
         topicLabel: p.topic_label,
         contentEn: p.content_en,
         contentVi: p.content_vi,
@@ -741,7 +759,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
       const wordIds = wordsList.map((w) => w.id);
       const { data: progData } = await supabase
         .from('word_progress')
-        .select('word_id, level, next_review_at, last_reviewed_at, review_count')
+        .select('word_id, level, next_review_at, last_reviewed_at, review_count, stability, difficulty, fsrs_state, lapses')
         .eq('user_id', user.id)
         .in('word_id', wordIds);
       if (progData) {
@@ -751,7 +769,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
 
     return wordsList.map((w) => {
       const prog = progressMap[w.id];
-      return {
+      const wordItem = {
         ...w,
         exampleSentence: w.example_sentence || '',
         imageUrl: w.image_url || '',
@@ -759,8 +777,14 @@ export async function getWordsInLesson(topicId, lessonIndex) {
         nextReviewAt: prog?.next_review_at ?? null,
         lastReviewedAt: prog?.last_reviewed_at ?? null,
         reviewCount: prog?.review_count ?? 0,
+        stability: prog?.stability ?? null,
+        difficulty: prog?.difficulty ?? null,
+        fsrsState: prog?.fsrs_state ?? 0,
+        lapses: prog?.lapses ?? 0,
         isDue: !prog || (prog.next_review_at && new Date(prog.next_review_at) <= new Date()),
       };
+      wordItem.retrievability = prog ? getWordRetrievability(wordItem) : 0;
+      return wordItem;
     });
   } catch (err) {
     console.warn('[db.getWordsInLesson]', err);
@@ -784,7 +808,7 @@ export async function getWordsInPassage(passageId) {
       const wordIds = wordsList.map((w) => w.id);
       const { data: progData } = await supabase
         .from('word_progress')
-        .select('word_id, level, next_review_at, last_reviewed_at, review_count')
+        .select('word_id, level, next_review_at, last_reviewed_at, review_count, stability, difficulty, fsrs_state, lapses')
         .eq('user_id', user.id)
         .in('word_id', wordIds);
       if (progData) {
@@ -794,7 +818,7 @@ export async function getWordsInPassage(passageId) {
 
     return wordsList.map((w) => {
       const prog = progressMap[w.id];
-      return {
+      const wordItem = {
         ...w,
         exampleSentence: w.example_sentence || '',
         imageUrl: w.image_url || '',
@@ -802,8 +826,14 @@ export async function getWordsInPassage(passageId) {
         nextReviewAt: prog?.next_review_at ?? null,
         lastReviewedAt: prog?.last_reviewed_at ?? null,
         reviewCount: prog?.review_count ?? 0,
+        stability: prog?.stability ?? null,
+        difficulty: prog?.difficulty ?? null,
+        fsrsState: prog?.fsrs_state ?? 0,
+        lapses: prog?.lapses ?? 0,
         isDue: !prog || (prog.next_review_at && new Date(prog.next_review_at) <= new Date()),
       };
+      wordItem.retrievability = prog ? getWordRetrievability(wordItem) : 0;
+      return wordItem;
     });
   } catch (err) {
     console.warn('[db.getWordsInPassage]', err);
@@ -815,7 +845,7 @@ export async function getPassage(passageId) {
   try {
     const { data, error } = await supabase
       .from('passages')
-      .select('id, test_id, topic_id, passage_number, title, topic_label, content_en, content_vi')
+      .select('id, test_id, topic_id, passage_number, title, title_vi, topic_label, content_en, content_vi')
       .eq('id', passageId)
       .single();
     if (error) throw error;
@@ -894,6 +924,9 @@ export async function clonePublicTopic(topicId) {
   }
   if (!data) throw new Error('Supabase không trả về chủ đề mới.');
   clearTopicCache();
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('hi:topics-updated'));
+  }
   return data;
 }
 
@@ -932,35 +965,60 @@ export async function checkProAccess({ topicId, passageId, showModal = true } = 
   return true;
 }
 
-// ─── Vocabulary Notebook & SM-2 Spaced Repetition Engine ─────────────────────
+// ─── Vocabulary Notebook & FSRS-6 Spaced Repetition Engine ───────────────────
+
+export function getFSRSDesiredRetention() {
+  if (typeof localStorage === 'undefined') return FSRS_DEFAULT_RETENTION;
+  try {
+    const raw = localStorage.getItem('hi_fsrs_desired_retention');
+    if (raw) {
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed) && parsed >= 0.7 && parsed <= 0.97) {
+        return parsed;
+      }
+    }
+  } catch (_) {}
+  return FSRS_DEFAULT_RETENTION;
+}
+
+export function setFSRSDesiredRetention(retention) {
+  const safeRetention = clamp(Number(retention) || FSRS_DEFAULT_RETENTION, 0.7, 0.97);
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('hi_fsrs_desired_retention', String(safeRetention));
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('hivocab:fsrs-retention-changed', {
+          detail: { desiredRetention: safeRetention },
+        })
+      );
+    }
+  } catch (_) {}
+  return safeRetention;
+}
 
 export function getIntervalMs(level) {
   const HOUR = 60 * 60 * 1000;
   const DAY  = 24 * HOUR;
 
   switch (level) {
-    case 0: return HOUR;
-    case 1: return HOUR;
-    case 2: return 8 * HOUR;
-    case 3: return DAY;
-    case 4: return (5 + Math.random() * 2) * DAY;
-    case 5: return (15 + Math.random() * 15) * DAY;
-    default: return HOUR;
+    case 0: return 5 * HOUR;
+    case 1: return DAY;
+    case 2: return 3.5 * DAY;
+    case 3: return 8 * DAY;
+    case 4: return 18 * DAY;
+    case 5: return 35 * DAY;
+    default: return DAY;
   }
 }
 
-export function calculateNextReview(currentLevel, rating) {
-  let newLevel = currentLevel;
-  if (currentLevel === 0) {
-    newLevel = 1;
-  } else if (rating === 'easy') {
-    newLevel = Math.min(currentLevel + 1, 5);
-  } else if (rating === 'hard') {
-    newLevel = Math.max(currentLevel - 1, 1);
-  }
-  const intervalMs = getIntervalMs(newLevel);
-  const nextReviewAt = new Date(Date.now() + intervalMs);
-  return { newLevel, nextReviewAt };
+export function calculateNextReview(currentLevelOrCard, rating, options = {}) {
+  const desiredRetention = options.desiredRetention ?? getFSRSDesiredRetention();
+  return scheduleFSRSReview(currentLevelOrCard, rating, {
+    ...options,
+    desiredRetention,
+  });
 }
 
 export function getIntervalLabel(level) {
@@ -1032,8 +1090,9 @@ export async function logStudySession(wordsReviewedCount = 1) {
 
 export async function reviewWord(wordId, rating) {
   const user = await getCurrentUser();
+  const desiredRetention = getFSRSDesiredRetention();
 
-  // ── Guest fallback: Save progress in localStorage without throwing ──
+  // ── Guest fallback: Save FSRS-6 progress in localStorage without throwing ──
   if (!user) {
     const today = getLocalDateString();
     let guestProgress = {};
@@ -1042,35 +1101,22 @@ export async function reviewWord(wordId, rating) {
     } catch (_) {}
 
     const existing = guestProgress[wordId] || { level: 0, review_count: 0 };
-    const currentLevel = Number(existing.level) || 0;
-    const reviewCount = Number(existing.review_count) || 0;
-
-    let newLevel = currentLevel;
-    if (currentLevel === 0) {
-      newLevel = 1;
-    } else if (rating === 'easy') {
-      newLevel = Math.min(currentLevel + 1, 5);
-    } else if (rating === 'hard') {
-      newLevel = Math.max(currentLevel - 1, 1);
-    } else {
-      newLevel = currentLevel > 0 ? currentLevel : 1;
-    }
-
-    const intervals = {
-      1: 60 * 60 * 1000,           // 1 hour
-      2: 8 * 60 * 60 * 1000,        // 8 hours
-      3: 24 * 60 * 60 * 1000,       // 24 hours
-      4: 6 * 24 * 60 * 60 * 1000,   // 6 days
-      5: 20 * 24 * 60 * 60 * 1000,  // 20 days
-    };
-    const nextReviewAt = new Date(Date.now() + (intervals[newLevel] || 60 * 60 * 1000));
+    const fsrsResult = scheduleFSRSReview(existing, rating, { desiredRetention });
+    const newLevel = fsrsResult.newLevel;
+    const nextReviewAt = fsrsResult.nextReviewAt;
 
     guestProgress[wordId] = {
       wordId,
       level: newLevel,
+      stability: fsrsResult.stability,
+      difficulty: fsrsResult.difficulty,
+      fsrs_state: fsrsResult.state,
+      lapses: fsrsResult.lapses,
+      elapsed_days: fsrsResult.elapsedDays,
+      scheduled_days: fsrsResult.scheduledDays,
       last_reviewed_at: new Date().toISOString(),
       next_review_at: nextReviewAt.toISOString(),
-      review_count: reviewCount + 1,
+      review_count: fsrsResult.reps,
     };
 
     try {
@@ -1085,7 +1131,14 @@ export async function reviewWord(wordId, rating) {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('hivocab:word-reviewed', {
-          detail: { wordId, newLevel, guest: true },
+          detail: {
+            wordId,
+            newLevel,
+            stability: fsrsResult.stability,
+            difficulty: fsrsResult.difficulty,
+            retrievability: fsrsResult.retrievability,
+            guest: true,
+          },
         })
       );
     }
@@ -1093,16 +1146,22 @@ export async function reviewWord(wordId, rating) {
     return {
       newLevel,
       nextReviewAt,
-      intervalLabel: getIntervalLabel(newLevel),
+      stability: fsrsResult.stability,
+      difficulty: fsrsResult.difficulty,
+      retrievability: fsrsResult.retrievability,
+      state: fsrsResult.state,
+      lapses: fsrsResult.lapses,
+      intervalLabel: fsrsResult.intervalLabel,
       guest: true,
     };
   }
 
-  // ── Authenticated user: Proceed with Supabase RPC ──
+  // ── Authenticated user: Proceed with Supabase FSRS-6 RPC ──
   const { data, error } = await supabase.rpc('review_word', {
     p_word_id: wordId,
-    p_rating: rating,
+    p_rating: String(rating),
     p_session_date: getLocalDateString(),
+    p_desired_retention: desiredRetention,
   });
   if (error) throwRpcError(error, 'Không thể lưu kết quả ôn tập');
   const newLevel = Number(data?.newLevel);
@@ -1112,12 +1171,27 @@ export async function reviewWord(wordId, rating) {
   }
 
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('hivocab:word-reviewed', { detail: { wordId, newLevel } }));
+    window.dispatchEvent(
+      new CustomEvent('hivocab:word-reviewed', {
+        detail: {
+          wordId,
+          newLevel,
+          stability: Number(data?.stability) || null,
+          difficulty: Number(data?.difficulty) || null,
+          retrievability: Number(data?.retrievability) || null,
+        },
+      })
+    );
   }
 
   return {
     newLevel,
     nextReviewAt,
+    stability: Number(data?.stability) || null,
+    difficulty: Number(data?.difficulty) || null,
+    retrievability: Number(data?.retrievability) || null,
+    state: Number(data?.state) || 2,
+    lapses: Number(data?.lapses) || 0,
     intervalLabel: data?.intervalLabel || getIntervalLabel(newLevel),
   };
 }
@@ -1164,7 +1238,7 @@ async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', lev
   let query = supabase
     .from('word_progress')
     .select(`
-      level, next_review_at, last_reviewed_at, review_count, user_id,
+      level, next_review_at, last_reviewed_at, review_count, stability, difficulty, fsrs_state, lapses, user_id,
       words!inner (
         id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
         topics ( id, name )
@@ -1201,7 +1275,7 @@ async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', lev
 
   const words = (data || []).map((row) => {
     const w = row.words || {};
-    return {
+    const wordObj = {
       id: w.id,
       wordId: w.id,
       topicId: w.topic_id,
@@ -1216,8 +1290,14 @@ async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', lev
       nextReviewAt: row.next_review_at,
       lastReviewedAt: row.last_reviewed_at,
       reviewCount: row.review_count || 0,
+      stability: row.stability ?? null,
+      difficulty: row.difficulty ?? null,
+      fsrsState: row.fsrs_state ?? 0,
+      lapses: row.lapses ?? 0,
       isDue: !row.next_review_at || new Date(row.next_review_at) <= new Date(),
     };
+    wordObj.retrievability = getWordRetrievability(wordObj);
+    return wordObj;
   });
 
   return {
@@ -1238,7 +1318,7 @@ export async function getVocabularyPage(page = 1, pageSize = 20, search = '', le
     ? Number(levelFilter)
     : null;
 
-  const { data, error } = await supabase.rpc('get_vocabulary_page', {
+  const { data, error } = await supabase.rpc('get_vocabulary_page_v2', {
     p_page: safePage,
     p_page_size: safePageSize,
     p_search: String(search || '').trim(),
@@ -1249,23 +1329,32 @@ export async function getVocabularyPage(page = 1, pageSize = 20, search = '', le
   if (!error) {
     const rows = Array.isArray(data) ? data : [];
     return {
-      words: rows.map((row) => ({
-        id: row.id,
-        wordId: row.id,
-        topicId: row.topic_id,
-        word: row.word,
-        pos: row.pos || '',
-        phonetic: row.phonetic,
-        meaning: row.meaning,
-        exampleSentence: row.example_sentence || '',
-        imageUrl: null,
-        topicName: row.topic_name || '',
-        level: Number(row.level) || 0,
-        nextReviewAt: row.next_review_at,
-        lastReviewedAt: row.last_reviewed_at,
-        reviewCount: Number(row.review_count) || 0,
-        isDue: !row.next_review_at || new Date(row.next_review_at) <= new Date(),
-      })),
+      words: rows.map((row) => {
+        const migrated = migrateSM2ToFSRSState(Number(row.level) || 0, Number(row.review_count) || 0);
+        const wordObj = {
+          id: row.id,
+          wordId: row.id,
+          topicId: row.topic_id,
+          word: row.word,
+          pos: row.pos || '',
+          phonetic: row.phonetic,
+          meaning: row.meaning,
+          exampleSentence: row.example_sentence || '',
+          imageUrl: null,
+          topicName: row.topic_name || '',
+          level: Number(row.level) || 0,
+          nextReviewAt: row.next_review_at,
+          lastReviewedAt: row.last_reviewed_at,
+          reviewCount: Number(row.review_count) || 0,
+          stability: row.stability ?? migrated.stability,
+          difficulty: row.difficulty ?? migrated.difficulty,
+          fsrsState: row.fsrs_state ?? migrated.state,
+          lapses: Number(row.lapses) || 0,
+          isDue: !row.next_review_at || new Date(row.next_review_at) <= new Date(),
+        };
+        wordObj.retrievability = wordObj.level > 0 ? getWordRetrievability(wordObj) : 0;
+        return wordObj;
+      }),
       total: Number(rows[0]?.total_count) || 0,
       page: safePage,
       pageSize: safePageSize,
@@ -1406,6 +1495,12 @@ export async function getWordsDueForReview(limit = 50) {
     .select(`
       level,
       next_review_at,
+      last_reviewed_at,
+      review_count,
+      stability,
+      difficulty,
+      fsrs_state,
+      lapses,
       words!inner (
         id,
         topic_id,
@@ -1430,20 +1525,30 @@ export async function getWordsDueForReview(limit = 50) {
 
   return (dueWords || [])
     .filter(p => p && p.words)
-    .map(p => ({
-      wordId:          p.words.id,
-      id:              p.words.id,
-      topicId:         p.words.topic_id,
-      word:            p.words.word,
-      pos:             p.words.pos || '',
-      phonetic:        p.words.phonetic || '',
-      meaning:         p.words.meaning || '',
-      exampleSentence: p.words.example_sentence || '',
-      imageUrl:        p.words.image_url || null,
-      level:           p.level,
-      nextReviewAt:    p.next_review_at,
-      topic:           p.words.topics,
-    }));
+    .map(p => {
+      const wordObj = {
+        wordId:          p.words.id,
+        id:              p.words.id,
+        topicId:         p.words.topic_id,
+        word:            p.words.word,
+        pos:             p.words.pos || '',
+        phonetic:        p.words.phonetic || '',
+        meaning:         p.words.meaning || '',
+        exampleSentence: p.words.example_sentence || '',
+        imageUrl:        p.words.image_url || null,
+        level:           p.level,
+        nextReviewAt:    p.next_review_at,
+        lastReviewedAt:  p.last_reviewed_at || null,
+        reviewCount:     p.review_count || 0,
+        stability:       p.stability ?? null,
+        difficulty:      p.difficulty ?? null,
+        fsrsState:       p.fsrs_state ?? 2,
+        lapses:          p.lapses ?? 0,
+        topic:           p.words.topics,
+      };
+      wordObj.retrievability = getWordRetrievability(wordObj);
+      return wordObj;
+    });
 }
 
 function calculateStreakFromSessions(sessions) {
@@ -1689,7 +1794,7 @@ export const db = {
   updatePassageTitle,
   clonePublicTopic,
   checkProAccess,
-  // Vocabulary & SM-2
+  // Vocabulary & FSRS-6
   getVocabularyPage,
   getLearnedVocabStats,
   getUserWordCount,
@@ -1700,12 +1805,29 @@ export const db = {
   getMonthlyStudySessions,
   getIELTSGoal,
   saveIELTSGoal,
+  getFSRSDesiredRetention,
+  setFSRSDesiredRetention,
   getIntervalMs,
   calculateNextReview,
   getIntervalLabel,
   reviewWord,
   reviewWordToLevel,
   logStudySession,
+  // Direct FSRS-6 DSR exports
+  FSRS6_DEFAULT_WEIGHTS,
+  FSRS_DEFAULT_RETENTION,
+  FSRS_RATING,
+  FSRS_STATE,
+  normalizeFSRSRating,
+  calculateRetrievability,
+  calculateNextIntervalDays,
+  stabilityToMemoryLevel,
+  migrateSM2ToFSRSState,
+  formatFSRSIntervalLabel,
+  normalizeFSRSCard,
+  scheduleFSRSReview,
+  previewFSRSIntervals,
+  getWordRetrievability,
 };
 
 // Expose HiDB globally for any remaining non-React call

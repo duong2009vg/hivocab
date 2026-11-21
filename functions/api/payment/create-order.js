@@ -2,6 +2,7 @@
 // Cloudflare Pages Function: POST /api/payment/create-order
 // Tạo đơn hàng PayOS và trả về checkoutUrl cho Embedded Form
 import { checkRateLimit, rateLimitResponse } from '../../_rateLimit.js';
+import { getCorsHeaders, requireSupabaseUser } from '../../_security.js';
 
 const PLANS = {
     pro_1m: {
@@ -28,12 +29,6 @@ const PLANS = {
         amount: 499000,
         days: 36500, // ~100 năm
     },
-};
-
-const corsHeaders = {
-    'Access-Control-Allow-Origin': 'https://hivocab.site',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 function getAllowedOrigin(request, env) {
@@ -72,12 +67,13 @@ async function createPayOSSignature({ amount, cancelUrl, description, orderCode,
     return await hmacSha256(checksumKey, rawData);
 }
 
-export async function onRequestOptions() {
-    return new Response(null, { status: 204, headers: corsHeaders });
+export async function onRequestOptions(context) {
+    return new Response(null, { status: 204, headers: getCorsHeaders(context.request, 'GET, POST, OPTIONS') });
 }
 
 export async function onRequestPost(context) {
     const { request, env } = context;
+    const corsHeaders = getCorsHeaders(request, 'GET, POST, OPTIONS');
 
     const SUPABASE_URL              = String(env.SUPABASE_URL || '').trim();
     const SUPABASE_ANON_KEY         = String(env.SUPABASE_ANON_KEY || '').trim();
@@ -98,46 +94,21 @@ export async function onRequestPost(context) {
         });
     }
 
+    const preAuthLimit = await checkRateLimit({ request, env, ruleName: 'payment' });
+    if (!preAuthLimit.allowed) return rateLimitResponse(preAuthLimit, corsHeaders);
+
     // 2. Xác thực user qua token
-    const authHeader = request.headers.get('authorization') || '';
-    const token = authHeader.replace(/^Bearer\s+/i, '').trim();
-    if (!token) {
-        return new Response(JSON.stringify({ ok: false, error: 'Vui lòng đăng nhập để nâng cấp' }), {
-            status: 401,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const auth = await requireSupabaseUser(request, env, corsHeaders);
+    if (!auth.ok) return auth.response;
+    const user = auth.user;
 
-    let user = null;
-    try {
-        const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'apikey': SUPABASE_ANON_KEY,
-            },
-        });
-        if (!userRes.ok) {
-            return new Response(JSON.stringify({ ok: false, error: 'Phiên đăng nhập hết hạn' }), {
-                status: 401,
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-            });
-        }
-        user = await userRes.json();
-
-        const rateLimit = await checkRateLimit({
-            request,
-            env,
-            ruleName: 'payment',
-            subject: user?.id || undefined,
-        });
-        if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
-    } catch (err) {
-        console.error('[create-order auth]', err);
-        return new Response(JSON.stringify({ ok: false, error: 'Không thể xác thực phiên đăng nhập.' }), {
-            status: 500,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+    const rateLimit = await checkRateLimit({
+        request,
+        env,
+        ruleName: 'payment',
+        subject: user?.id || undefined,
+    });
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit, corsHeaders);
 
     // 3. Kiểm tra gói cước
     let body = {};
@@ -218,7 +189,6 @@ export async function onRequestPost(context) {
             return new Response(JSON.stringify({
                 ok: false,
                 error: payosResult.desc || 'Không thể tạo liên kết thanh toán với PayOS',
-                details: payosResult,
             }), {
                 status: 502,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -301,6 +271,6 @@ export async function onRequest(context) {
     if (method === 'POST') return onRequestPost(context);
     return new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
         status: 405,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...getCorsHeaders(context.request, 'GET, POST, OPTIONS'), 'Content-Type': 'application/json' }
     });
 }

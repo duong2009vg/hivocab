@@ -1,5 +1,5 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v20';
+const CACHE_NAME = 'hivocab-shell-v21';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',
@@ -98,7 +98,15 @@ self.addEventListener('fetch', (event) => {
       event.respondWith(
         fetch(event.request)
           .then((networkResponse) => {
-            if (networkResponse && networkResponse.status >= 200 && networkResponse.status < 300) {
+            const cacheControl = networkResponse?.headers?.get('Cache-Control') || '';
+            const hasSensitiveParams = Boolean(url.search) || url.pathname === '/admin' || url.pathname.startsWith('/admin/');
+            if (
+              networkResponse &&
+              networkResponse.status >= 200 &&
+              networkResponse.status < 300 &&
+              !/no-store/i.test(cacheControl) &&
+              !hasSensitiveParams
+            ) {
               const responseClone = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
                 cache.put(event.request, responseClone);

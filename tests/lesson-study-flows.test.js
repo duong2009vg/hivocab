@@ -695,9 +695,11 @@ export async function runLessonStudyFlowsTests() {
     );
 
     assert(
-      exerciseFlashcardContent.includes("e.key === '1' || e.key === 'ArrowLeft'") &&
-      exerciseFlashcardContent.includes("e.key === '2' || e.key === 'ArrowRight'"),
-      'T1.7.4: Number keys (1, 2) and Arrow keys (Left, Right) select "hard" and "easy" ratings in ExerciseFlashcard.jsx'
+      exerciseFlashcardContent.includes("e.key === '1'") &&
+      exerciseFlashcardContent.includes("e.key === '2' || e.key === 'ArrowLeft'") &&
+      exerciseFlashcardContent.includes("e.key === '3'") &&
+      exerciseFlashcardContent.includes("e.key === '4' || e.key === 'ArrowRight'"),
+      'T1.7.4: Number keys (1-4) and Arrow keys (Left, Right) select FSRS 4-state ratings in ExerciseFlashcard.jsx'
     );
 
     assert(
@@ -1012,13 +1014,18 @@ export async function runLessonStudyFlowsTests() {
     }
     assert(e3.isComplete && e3.state.completed[0].word.word === 'thrive', 'T3.3b: Requeued item answered correctly completes session');
 
-    // T3.4: Guest user finishes session -> local SM-2 and streak updated
+    // T3.4: Guest user finishes session -> local FSRS-6 progress and streak updated
     mockLocalStorage = {};
-    await reviewWord('guest-word-1', 'easy');
+    await reviewWord('guest-word-1', 'good');
     await logStudySession(1);
     const guestProgress = JSON.parse(mockLocalStorage['hi_guest_word_progress'] || '{}');
     const guestSessions = JSON.parse(mockLocalStorage['hi_study_sessions'] || '{}');
-    assert(guestProgress['guest-word-1']?.level === 1 && Object.keys(guestSessions).length > 0, 'T3.4: Guest user completes session without error, saving SM-2 and streak locally');
+    assert(
+      guestProgress['guest-word-1']?.level === 1 &&
+      guestProgress['guest-word-1']?.stability > 0 &&
+      Object.keys(guestSessions).length > 0,
+      'T3.4: Guest user completes session without error, saving FSRS-6 and streak locally'
+    );
 
     // T3.5: Mid-session reload survival via sessionStorage
     mockSessionStorage = {};

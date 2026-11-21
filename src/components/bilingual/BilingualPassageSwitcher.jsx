@@ -56,7 +56,7 @@ export function BilingualPassageSwitcher({
               <div className="space-y-1.5 mt-1.5">
                 {test.passages.map((p) => {
                   const isActive = p.id === currentPassageId;
-                  const hasReading = Boolean(p.contentEn || p.content_en);
+                  const hasReading = Boolean(p.contentEn || p.content_en || p.isNewsArticle);
 
                   return (
                     <button
@@ -72,9 +72,22 @@ export function BilingualPassageSwitcher({
                           : 'text-[#382E2B] hover:bg-[#FAF5EB] border-2 border-transparent'
                       }`}
                     >
-                      <div className="truncate">
-                        <span className="opacity-80 mr-1">P{p.passageNumber || p.passage_number}:</span>
-                        <span>{p.title || `Passage ${p.passageNumber || p.passage_number}`}</span>
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate">
+                          <span className="opacity-80 mr-1">
+                            {p.isNewsArticle ? `#${p.passageNumber}:` : `P${p.passageNumber || p.passage_number}:`}
+                          </span>
+                          <span>{p.title || `Passage ${p.passageNumber || p.passage_number}`}</span>
+                        </div>
+                        {(p.titleVi || p.title_vi) && (
+                          <div
+                            className={`text-[11px] font-semibold truncate mt-0.5 ${
+                              isActive ? 'text-white/85' : 'text-[#766C5F]'
+                            }`}
+                          >
+                            {p.titleVi || p.title_vi}
+                          </div>
+                        )}
                       </div>
                       {hasReading && (
                         <span

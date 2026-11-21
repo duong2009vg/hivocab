@@ -11,6 +11,7 @@ export default [
       "data/**",
       "scratch/**",
       "public/data/**",
+      "functions/_data/**",
       "src/styles/themes.css",
     ],
   },

@@ -25,11 +25,11 @@ import { useAuth } from '../../providers/AuthProvider.jsx';
 
 const LEVEL_INTERVALS = {
   0: 'Mới thêm',
-  1: '1h',
-  2: '3 Ngày',
-  3: '1 Tuần',
-  4: '2 Tuần',
-  5: 'Ghi nhớ sâu',
+  1: '< 2.5 ngày',
+  2: '2.5–6 ngày',
+  3: '6–15 ngày',
+  4: '15–30 ngày',
+  5: '≥ 30 ngày',
 };
 
 const LEVEL_COLORS = {
@@ -1024,6 +1024,30 @@ export function PageVocabulary() {
                         <span className="px-2.5 py-1 rounded-lg bg-[#EFE9DA] border border-[#7A6B63]/40 text-[#4A3E39]">
                           {selectedWord.topicName}
                         </span>
+                      </div>
+                    )}
+
+                    {/* FSRS-6 DSR Memory Metrics */}
+                    {selectedWord.level > 0 && (
+                      <div className="mt-4 grid grid-cols-3 gap-2">
+                        <div className="p-2.5 rounded-xl bg-[#f8f1e7] border border-[#d8c8b4] text-center">
+                          <div className="text-[10px] font-black uppercase text-[#807669]">Độ bền (S)</div>
+                          <div className="text-sm font-black text-[#37322f] font-mono mt-0.5">
+                            {Number(selectedWord.stability || 0).toFixed(1)}d
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-[#f8f1e7] border border-[#d8c8b4] text-center">
+                          <div className="text-[10px] font-black uppercase text-[#807669]">Độ khó (D)</div>
+                          <div className="text-sm font-black text-[#37322f] font-mono mt-0.5">
+                            {Number(selectedWord.difficulty || 0).toFixed(1)}/10
+                          </div>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-[#eaf4e8] border border-[#6e9b6a]/40 text-center">
+                          <div className="text-[10px] font-black uppercase text-[#4f7d4b]">Khả năng nhớ</div>
+                          <div className="text-sm font-black text-[#4f7d4b] font-mono mt-0.5">
+                            {Math.round((Number(selectedWord.retrievability) || 0.9) * 100)}%
+                          </div>
+                        </div>
                       </div>
                     )}
 

@@ -4,6 +4,7 @@
 
 import { useState, useCallback, useRef } from 'react';
 import { saveExerciseScore } from '../services/exercisesService.js';
+import { recordExamAttempt } from '../services/examHistoryService.js';
 
 const BEST_SCORES_KEY = 'thpt_best_scores';
 
@@ -22,6 +23,7 @@ export function useThptSession() {
   // Ref for timer seconds (needed in submitExam without causing re-render)
   const timerSecondsRef = useRef(0);
   const initialSecondsRef = useRef(0);
+  const startedAtRef = useRef(Date.now());
 
   // ---------- PROGRESS PERSISTENCE ----------
   const saveProgress = useCallback((currentAnswers, currentFlags, timerSec, examObj) => {
@@ -64,9 +66,10 @@ export function useThptSession() {
   }, []);
 
   // ---------- START EXAM ----------
-  const startExam = useCallback((examData, minutes, savedProgress) => {
-    const secs = (minutes === 0 ? 0 : (minutes || 50)) * 60;
+  const startExam = useCallback((examData, minutes, savedProgress, { forceResetTime = false } = {}) => {
+    const secs = (minutes === 0 ? 0 : (Number(minutes) > 0 ? Number(minutes) : 50)) * 60;
     initialSecondsRef.current = secs;
+    startedAtRef.current = Date.now();
 
     setExam(examData);
     setIsReviewMode(false);
@@ -80,7 +83,10 @@ export function useThptSession() {
     if (savedProgress && !savedProgress.submitted) {
       setAnswers(savedProgress.answers || {});
       setFlags(savedProgress.flags || {});
-      const restored = secs === 0 ? 0 : (savedProgress.timeRemaining ?? secs);
+      const sameDuration = savedProgress.initialSeconds === secs;
+      const restored = forceResetTime || !sameDuration
+        ? secs
+        : (secs === 0 ? 0 : (savedProgress.timeRemaining ?? secs));
       timerSecondsRef.current = restored;
       return { restoredSeconds: restored };
     } else {
@@ -89,6 +95,46 @@ export function useThptSession() {
       timerSecondsRef.current = secs;
       return { restoredSeconds: secs };
     }
+  }, []);
+
+  // ---------- LOAD HISTORICAL ATTEMPT IN REVIEW MODE ----------
+  const loadReviewAttempt = useCallback((examData, attempt) => {
+    initialSecondsRef.current = 0;
+    timerSecondsRef.current = 0;
+
+    const details = attempt?.details && typeof attempt.details === 'object' ? attempt.details : {};
+    const reconstructedAnswers = {};
+    Object.entries(details).forEach(([qNum, entry]) => {
+      if (entry?.userAns) {
+        reconstructedAnswers[qNum] = entry.userAns;
+      }
+    });
+
+    const totalQ = attempt?.total || examData?.total_questions || examData?.questions?.length || 40;
+    const correctCount = Number(attempt?.correct || 0);
+
+    setExam(examData);
+    setAnswers(reconstructedAnswers);
+    setFlags({});
+    setCurrentQIndex(0);
+    setShowConfirmModal(false);
+    setShowResultsModal(false);
+    setFontSizeLevel(0);
+    setMobileView('both');
+    setResults({
+      examId: examData?.id || attempt?.examId,
+      title: examData?.title || attempt?.title,
+      score: Number(attempt?.score || 0),
+      correct: correctCount,
+      wrong: Math.max(0, totalQ - correctCount),
+      unanswered: Math.max(0, totalQ - Object.keys(reconstructedAnswers).length),
+      total: totalQ,
+      percentage: Number(attempt?.percentage ?? Math.round((correctCount / Math.max(1, totalQ)) * 100)),
+      timeSpentSeconds: Number(attempt?.timeSpentSeconds || 0),
+      submittedAt: attempt?.submittedAt || Date.now(),
+      details,
+    });
+    setIsReviewMode(true);
   }, []);
 
   // ---------- ANSWER ----------
@@ -150,9 +196,10 @@ export function useThptSession() {
 
     const totalQ = currentExam.total_questions;
     const score = Math.round((correctCount / totalQ) * 10 * 100) / 100;
-    const timeSpentSeconds = (initialSecondsRef.current || 0) === 0
-      ? (currentTimerSecs || 0)
-      : Math.max(0, (initialSecondsRef.current || 0) - (currentTimerSecs || 0));
+    const initSecs = initialSecondsRef.current || 0;
+    const timeSpentSeconds = initSecs === 0
+      ? Math.max(0, Math.round((Date.now() - (startedAtRef.current || Date.now())) / 1000))
+      : Math.max(0, initSecs - (currentTimerSecs || 0));
 
     const res = {
       examId: currentExam.id,
@@ -169,6 +216,19 @@ export function useThptSession() {
     };
 
     saveBestScore(currentExam.id, res);
+    void recordExamAttempt({
+      examId: currentExam.id,
+      examTitle: currentExam.title,
+      isExercise: Boolean(currentExam.is_exercise),
+      score,
+      correct: correctCount,
+      total: totalQ,
+      percentage: res.percentage,
+      timeSpentSeconds,
+      durationMinutes: Math.round(initSecs / 60),
+      details,
+      submittedAt: res.submittedAt,
+    });
     if (currentExam.is_exercise) {
       try {
         saveExerciseScore(currentExam.id, correctCount, totalQ);
@@ -228,6 +288,7 @@ export function useThptSession() {
 
     // Actions
     startExam,
+    loadReviewAttempt,
     selectAnswer: selectAnswerFull,
     toggleFlag,
     jumpToQuestion,

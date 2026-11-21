@@ -312,9 +312,21 @@ function SolutionBox({ explanation, fontSizeClass }) {
 function ArrangementPrompt({ qNum, q, fontSizeClass }) {
   const raw = q.arrangement_sentences || q.raw_sentences || '';
   const letters = [];
-  const regex = /(?:^|\n)\s*([a-f])\./gi;
-  let m;
-  while ((m = regex.exec(raw)) !== null) letters.push(m[1].toLowerCase());
+  if (Array.isArray(raw)) {
+    raw.forEach((item) => {
+      if (item && typeof item === 'object') {
+        const l = String(item.letter || item.key || '').trim().toLowerCase();
+        if (l) letters.push(l);
+      } else if (typeof item === 'string') {
+        const m = item.trim().match(/^([a-h])\./i);
+        if (m) letters.push(m[1].toLowerCase());
+      }
+    });
+  } else if (typeof raw === 'string') {
+    const regex = /(?:^|\n)\s*([a-h])\./gi;
+    let m;
+    while ((m = regex.exec(raw)) !== null) letters.push(m[1].toLowerCase());
+  }
   const labelStr = letters.length > 0 ? `(${letters.join(', ')})` : '';
 
   return (
