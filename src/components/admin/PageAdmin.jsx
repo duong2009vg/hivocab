@@ -79,7 +79,7 @@ export function PageAdmin() {
           .limit(250),
         supabase.from('thpt_exams').select('id', { count: 'exact', head: true }),
         supabase.from('passages').select('id', { count: 'exact', head: true }),
-        supabase.from('words').select('id', { count: 'exact', head: true }),
+        supabase.from('topics').select('word_count'),
         supabase.from('user_bug_reports').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('answer_reports').select('id', { count: 'exact', head: true }),
         supabase.from('system_error_logs').select('id', { count: 'exact', head: true }),
@@ -96,6 +96,10 @@ export function PageAdmin() {
           ? (result.value.count ?? 0)
           : null
       );
+      const totalWordsFromTopics =
+        wordCountRes.status === 'fulfilled' && !wordCountRes.value.error && Array.isArray(wordCountRes.value.data)
+          ? wordCountRes.value.data.reduce((sum, t) => sum + (Number(t.word_count) || 0), 0)
+          : null;
       const userBugs = readCount(userBugCountRes) ?? 0;
       const answerReps = readCount(answerReportCountRes) ?? 0;
       const sysErrors = readCount(sysErrorCountRes) ?? 0;
@@ -104,7 +108,7 @@ export function PageAdmin() {
       setCounts({
         thptExams: readCount(thptCountRes),
         readings: readCount(passageCountRes),
-        words: readCount(wordCountRes),
+        words: totalWordsFromTopics,
         pendingReports: totalPending,
       });
     } catch (err) {

@@ -16,12 +16,12 @@ export function AdminBulkImportTab() {
   useEffect(() => {
     supabase
       .from('topics')
-      .select('id, name, words(count)')
+      .select('id, name, word_count')
       .order('name', { ascending: true })
       .then(({ data }) => {
         const mapped = (data || []).map((t) => ({
           ...t,
-          word_count: t.words?.[0]?.count || 0,
+          word_count: t.word_count || 0,
         }));
         setTopics(mapped);
         if (mapped && mapped.length > 0) setSelectedTopicId(mapped[0].id);

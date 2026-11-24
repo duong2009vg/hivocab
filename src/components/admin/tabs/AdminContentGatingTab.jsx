@@ -100,12 +100,12 @@ export function AdminContentGatingTab() {
       if (subTab === 'topics') {
         const { data, error } = await supabase
           .from('topics')
-          .select('id, name, icon, is_pro, created_at, category, words(count)')
+          .select('id, name, icon, is_pro, created_at, category, word_count')
           .order('name', { ascending: true });
         if (error) throw error;
         const mapped = (data || []).map((t) => ({
           ...t,
-          word_count: t.words?.[0]?.count || 0,
+          word_count: t.word_count || 0,
         }));
         setItems(mapped);
       } else if (subTab === 'thpt') {
@@ -650,7 +650,13 @@ export function AdminContentGatingTab() {
                         {/* Title & Icon */}
                         <td className="py-2.5 px-3.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-base shrink-0">{icon}</span>
+                            {icon && /^[a-z0-9_]+$/i.test(icon) ? (
+                              <span className="material-symbols-outlined text-[18px] text-[#557A46] shrink-0">
+                                {icon}
+                              </span>
+                            ) : (
+                              <span className="text-base shrink-0">{icon}</span>
+                            )}
                             <span
                               className="font-black text-[#3D352E] max-w-[340px] truncate cursor-pointer hover:text-[#DE5D53] transition-colors"
                               title={title}

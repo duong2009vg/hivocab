@@ -33,7 +33,7 @@ export function AdminFoldersTab() {
     try {
       const { data, error } = await supabase
         .from('topics')
-        .select('id, name, icon, is_pro, is_public, category, words(count)')
+        .select('id, name, icon, is_pro, is_public, category, word_count')
         .order('category', { ascending: true })
         .order('name', { ascending: true });
 
@@ -42,7 +42,7 @@ export function AdminFoldersTab() {
       const mapped = (data || []).map((t) => ({
         ...t,
         category: (t.category || 'general').trim(),
-        word_count: t.words?.[0]?.count || 0,
+        word_count: t.word_count || 0,
       }));
 
       setTopics(mapped);
@@ -410,7 +410,13 @@ export function AdminFoldersTab() {
                           className="p-3 rounded-2xl bg-[#FAF5EB] border-2 border-[#3D352E] shadow-2xs flex items-center justify-between gap-2.5"
                         >
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-base shrink-0">{t.icon || '📖'}</span>
+                            {t.icon && /^[a-z0-9_]+$/i.test(t.icon) ? (
+                              <span className="material-symbols-outlined text-[18px] text-[#557A46] shrink-0">
+                                {t.icon}
+                              </span>
+                            ) : (
+                              <span className="text-base shrink-0">{t.icon || '📖'}</span>
+                            )}
                             <div className="min-w-0">
                               <div className="text-xs font-black text-[#3D352E] truncate" title={t.name}>
                                 {t.name}

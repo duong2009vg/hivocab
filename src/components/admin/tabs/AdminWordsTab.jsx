@@ -94,7 +94,7 @@ export function AdminWordsTab() {
       try {
         let query = supabase
           .from('topics')
-          .select('id, name, icon, is_pro, category, words(count)')
+          .select('id, name, icon, is_pro, category, word_count')
           .order('name', { ascending: true });
 
         if (selectedCategory !== 'all') {
@@ -106,7 +106,7 @@ export function AdminWordsTab() {
 
         const mapped = (data || []).map((t) => ({
           ...t,
-          word_count: t.words?.[0]?.count || 0,
+          word_count: t.word_count || 0,
         }));
 
         setTopics(mapped);
@@ -172,19 +172,31 @@ export function AdminWordsTab() {
           setCamPassages([]);
           setSelectedPassageId('');
 
-          // Check if there are named lessons
-          const { data: wordsData, error } = await supabase
-            .from('words')
-            .select('id, lesson_name, lesson_order')
-            .eq('topic_id', selectedTopicId);
+          // Paginate across all rows in this topic (PostgREST caps single page at 1000 rows)
+          const wordsData = [];
+          const PAGE_SIZE = 1000;
+          let offset = 0;
+          while (true) {
+            const { data: pageRows, error } = await supabase
+              .from('words')
+              .select('id, lesson_name, lesson_order')
+              .eq('topic_id', selectedTopicId)
+              .order('lesson_order', { ascending: true, nullsFirst: false })
+              .order('word_order', { ascending: true, nullsFirst: false })
+              .range(offset, offset + PAGE_SIZE - 1);
 
-          if (error) throw error;
-          if (isCancelled) return;
+            if (error) throw error;
+            if (isCancelled) return;
+            if (!pageRows || pageRows.length === 0) break;
+            wordsData.push(...pageRows);
+            if (pageRows.length < PAGE_SIZE) break;
+            offset += PAGE_SIZE;
+          }
 
-          const count = (wordsData || []).length;
+          const count = wordsData.length;
           setTotalTopicWords(count);
 
-          const namedLessons = (wordsData || []).filter(
+          const namedLessons = wordsData.filter(
             (w) => w.lesson_name && w.lesson_order !== null
           );
 
