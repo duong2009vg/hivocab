@@ -267,7 +267,7 @@ export function useLibrary({ onOpenTopic } = {}) {
         supabase.from('topics').select(TOPIC_SELECT_FIELDS).eq('id', topicId).maybeSingle(),
         supabase
           .from('words')
-          .select('id, word, pos, phonetic, meaning, example_sentence, image_url, word_order')
+          .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, word_order')
           .eq('topic_id', topicId)
           .order('word_order', { ascending: true, nullsFirst: false })
           .limit(100),

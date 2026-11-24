@@ -1,7 +1,3 @@
-const DICT_URL      = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
-const TRANSLATE_URL = 'https://hivocab.site/api/translate';
-const EXAMPLE_URL   = 'https://hivocab.site/api/example';
-
 let requestId       = 0;
 let currentResult   = null;
 let topicsReady     = false;
@@ -60,7 +56,17 @@ let _topicsLoadedAt  = 0;
 function send(type, payload = {}) {
   return new Promise(resolve => {
     const id = `popup-${Date.now()}-${++requestId}`;
-    chrome.runtime.sendMessage({ type, requestId: id, payload }, resolve);
+    try {
+      chrome.runtime.sendMessage({ type, requestId: id, payload }, res => {
+        if (chrome.runtime.lastError) {
+          resolve({ ok: false, error: chrome.runtime.lastError.message });
+          return;
+        }
+        resolve(res);
+      });
+    } catch (err) {
+      resolve({ ok: false, error: err?.message || 'Extension error' });
+    }
   });
 }
 
@@ -120,17 +126,11 @@ function speakTTS(word) {
   window.speechSynthesis.speak(utter);
 }
 
-// ── Tạo câu ví dụ bằng Groq ──────────────────────────────────────────────
+// ── Tạo câu ví dụ qua background (JWT auth) ───────────────────────────────
 async function generateExample(term, isPhrase) {
   try {
-    const res = await fetchWithTimeout(EXAMPLE_URL, {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ term, isPhrase: !!isPhrase }),
-    }, 6000);
-    if (!res || !res.ok) return null;
-    const data = await res.json();
-    return (data?.ok && data?.sentence) ? data.sentence : null;
+    const res = await send('generate-example', { term, isPhrase: !!isPhrase });
+    return (res?.ok && res?.sentence) ? res.sentence : null;
   } catch (_) {
     return null;
   }
@@ -138,27 +138,15 @@ async function generateExample(term, isPhrase) {
 
 const lookupCache = new Map();
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 3000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    clearTimeout(timer);
-    return response;
-  } catch (e) {
-    clearTimeout(timer);
-    return null;
-  }
-}
-
-// ── Lookup ────────────────────────────────────────────────────────────────
+// ── Lookup qua background (Supabase 70k DB + FreeDict + AI/DeepL + fallback) ──
 async function lookup(term) {
-  const key      = term.trim().toLowerCase();
+  const clean    = term.trim().replace(/\s+/g, ' ');
+  const key      = clean.toLowerCase();
   if (lookupCache.has(key)) return lookupCache.get(key);
 
   const isPhrase = key.includes(' ');
   const result   = {
-    word:           term.trim(),
+    word:           clean,
     phonetic:       '',
     meaning:        '',
     example:        '',
@@ -168,58 +156,31 @@ async function lookup(term) {
     isPhrase,
   };
 
-  const translatePromise = fetchWithTimeout(TRANSLATE_URL, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ text: term.trim(), from: 'en', to: 'vi' }),
-  }, 4000).then(r => r && r.ok ? r.json() : null).catch(() => null);
+  const res = await send('lookup-word', { term: clean }).catch(() => null);
+  const d   = res?.data;
 
-  const dictPromise = isPhrase
-    ? Promise.resolve(null)
-    : fetchWithTimeout(DICT_URL + encodeURIComponent(key), {}, 2500)
-        .then(r => r && r.ok ? r.json() : null)
-        .catch(() => null);
-
-  const [translateData, dictData] = await Promise.all([translatePromise, dictPromise]);
-
-  if (translateData?.ok && translateData?.text) result.meaning = translateData.text;
-
-  if (Array.isArray(dictData) && dictData.length > 0) {
-    const entry = dictData[0];
-    result.word     = entry.word || term.trim();
-    result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
-
-    if (entry.phonetics) {
-      const withAudio = entry.phonetics.filter(p => p.audio);
-      const us        = withAudio.find(p => p.audio.includes('-us.'));
-      const audioUrl  = (us || withAudio[0])?.audio || null;
-      if (audioUrl) {
-        result.audioUrl = audioUrl;
-        const audio     = new Audio(audioUrl);
+  if (d) {
+    if (d.word) result.word = d.word;
+    if (d.phonetic) result.phonetic = d.phonetic;
+    if (d.meaning) result.meaning = d.meaning;
+    if (d.example && isEnglishExample(d.example)) {
+      result.example = d.example;
+      result.hasRealExample = Boolean(d.hasRealExample || d.example);
+    }
+    if (d.audioUrl) {
+      result.audioUrl = d.audioUrl;
+      try {
+        const audio     = new Audio(d.audioUrl);
         audio.preload   = 'auto';
         audio.load();
         result.audioEl  = audio;
-      }
-    }
-
-    let foundExample = '';
-    outer: for (const e of dictData) {
-      for (const m of (e.meanings || [])) {
-        for (const d of (m.definitions || [])) {
-          if (d.example && isEnglishExample(d.example)) {
-            foundExample = d.example;
-            break outer;
-          }
-        }
-      }
-    }
-    if (foundExample) {
-      result.example        = foundExample;
-      result.hasRealExample = true;
+      } catch (_) {}
     }
   }
 
-  lookupCache.set(key, result);
+  if (result.meaning) {
+    lookupCache.set(key, result);
+  }
   return result;
 }
 
@@ -633,12 +594,14 @@ async function runLookup(term) {
 
     if (!result.hasRealExample) {
       generateExample(cleanTerm, result.isPhrase).then(sentence => {
-        if (!sentence) return;
+        const finalSentence = sentence || (result.isPhrase
+          ? `She said "${result.word}" to encourage her friend.`
+          : `She learned how to use "${result.word}" in a sentence today.`);
         const cached = lookupCache.get(cleanTerm.toLowerCase());
-        if (cached) { cached.example = sentence; cached.hasRealExample = true; }
+        if (cached) { cached.example = finalSentence; cached.hasRealExample = true; }
         if (currentResult?.word === result.word) {
-          currentResult.example = sentence;
-          exampleText.textContent = sentence;
+          currentResult.example = finalSentence;
+          exampleText.textContent = finalSentence;
         }
       });
     }
@@ -760,10 +723,12 @@ modalRefreshBtn?.addEventListener('click', async () => {
 
 chrome.runtime.onMessage.addListener(message => {
   if (message?.type === 'login-success') {
+    lookupCache.clear();
     stopLoginPolling();
     checkAndShowUI();
   }
   if (message?.type === 'logout-success') {
+    lookupCache.clear();
     checkAndShowUI();
   }
   if (message?.type === 'topics-updated') {

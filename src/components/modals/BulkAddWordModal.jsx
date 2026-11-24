@@ -28,20 +28,21 @@ import { clearTopicCache } from '../../services/topicsService.js';
 const AI_PROMPT_TEMPLATE = `Bạn là trợ lý học thuật tiếng Anh chuyên nghiệp cho nền tảng học từ vựng HiVocab.
 
 NHIỆM VỤ:
-Tiếp nhận danh sách từ vựng thô bên dưới, tra cứu thông tin chính xác và XUẤT RA FILE EXCEL (.xlsx) hoặc BẢNG DỮ LIỆU chuẩn 5 cột để nạp trực tiếp vào HiVocab:
+Tiếp nhận danh sách từ vựng thô bên dưới, tra cứu thông tin chính xác và XUẤT RA FILE EXCEL (.xlsx) hoặc BẢNG DỮ LIỆU chuẩn 6 cột để nạp trực tiếp vào HiVocab:
 1. word: Từ vựng hoặc cụm từ tiếng Anh (viết thường).
 2. phonetic: Phiên âm quốc tế IPA chuẩn, đặt trong cặp dấu /.../ (ví dụ: /rɪˈzɪl.jənt/).
 3. pos: Từ loại viết tắt tiếng Anh (noun, verb, adj, adv, phrase, idiom).
 4. meaning: Định nghĩa tiếng Việt ngắn gọn, chuẩn xác, tự nhiên theo ngữ cảnh.
 5. example_sentence: Đúng 1 câu ví dụ tiếng Anh thực tế và tự nhiên chứa từ vựng.
+6. english_meaning: Định nghĩa tiếng Anh (English–English, ngắn gọn theo chuẩn từ điển học thuật; có thể để trống nếu không cần).
 
 HƯỚNG DẪN XUẤT KẾT QUẢ (QUAN TRỌNG):
-- ƯU TIÊN 1 (Nếu AI của bạn có tính năng tạo file / Python / Code Interpreter): Hãy chạy mã để tạo và gửi trực tiếp link tải FILE EXCEL (.xlsx) có tên "hivocab_words.xlsx" chứa đủ 5 cột trên để tôi tải về máy.
-- ƯU TIÊN 2 (Nếu chỉ có thể trả lời bằng văn bản): Hãy xuất duy nhất một BẢNG DỮ LIỆU (Markdown Table) chuẩn 5 cột trên. Tuyệt đối không thêm lời chào, lời dẫn hay giải thích thừa để tôi sao chép trực tiếp vào HiVocab.
+- ƯU TIÊN 1 (Nếu AI của bạn có tính năng tạo file / Python / Code Interpreter): Hãy chạy mã để tạo và gửi trực tiếp link tải FILE EXCEL (.xlsx) có tên "hivocab_words.xlsx" chứa đủ các cột trên để tôi tải về máy.
+- ƯU TIÊN 2 (Nếu chỉ có thể trả lời bằng văn bản): Hãy xuất duy nhất một BẢNG DỮ LIỆU (Markdown Table) chuẩn các cột trên. Tuyệt đối không thêm lời chào, lời dẫn hay giải thích thừa để tôi sao chép trực tiếp vào HiVocab.
 
 BẢNG CỘT MẪU:
-| word | phonetic | pos | meaning | example_sentence |
-| resilient | /rɪˈzɪl.jənt/ | adj | kiên cường, có khả năng phục hồi nhanh | She remained remarkably resilient throughout all the challenges. |
+| word | phonetic | pos | meaning | example_sentence | english_meaning |
+| resilient | /rɪˈzɪl.jənt/ | adj | kiên cường, có khả năng phục hồi nhanh | She remained remarkably resilient throughout all the challenges. | able to recover quickly from difficult conditions |
 
 DANH SÁCH TỪ VỰNG THÔ CỦA TÔI:
 [DÁN DANH SÁCH TỪ VỰNG HOẶC CHỦ ĐỀ BẠN MUỐN TẠO VÀO ĐÂY]`;
@@ -71,6 +72,7 @@ export function parseBulkInput(text) {
           phonetic: String(item.phonetic || item.ipa || item.pronunciation || item.Phonetic || '').trim(),
           pos: String(item.pos || item.type || item.part_of_speech || item.POS || '').trim(),
           meaning: String(item.meaning || item.definition || item.vietnamese || item.vi || item.Meaning || '').trim(),
+          english_meaning: String(item.english_meaning || item.englishMeaning || item.definition_en || item.en_meaning || '').trim(),
           example_sentence: String(item.example_sentence || item.example || item.sentence || item.Example || '').trim(),
         })).filter(row => row.word || row.meaning);
       }
@@ -80,6 +82,7 @@ export function parseBulkInput(text) {
   // 2. Tách từng dòng (Bảng Markdown, Tab Excel, CSV, hoặc Dấu gạch ngang)
   const lines = trimmed.split(/\r?\n/).filter((l) => l.trim().length > 0);
   const rows = [];
+  let customColMap = null;
 
   for (let idx = 0; idx < lines.length; idx++) {
     const line = lines[idx].trim();
@@ -88,23 +91,21 @@ export function parseBulkInput(text) {
     if (/^\|?\s*[-:]+[-|\s:]+$/.test(line)) continue;
 
     let parts = [];
+    let isDelimitedTable = false;
 
     if (line.includes('|')) {
-      // Markdown table
+      isDelimitedTable = true;
       parts = line
         .split('|')
         .map((s) => s.trim())
         .filter((s, i, a) => !(i === 0 && s === '') && !(i === a.length - 1 && s === ''));
-      if (parts[0]?.toLowerCase() === 'word' || parts[0]?.toLowerCase() === 'từ vựng') continue;
     } else if (line.includes('\t')) {
-      // Tab separated (Copy từ Excel / Google Sheets)
+      isDelimitedTable = true;
       parts = line.split('\t').map((s) => s.trim());
-      if (parts[0]?.toLowerCase() === 'word' || parts[0]?.toLowerCase() === 'từ vựng') continue;
     } else if (line.includes(',') && !line.includes(' - ')) {
-      // CSV
+      isDelimitedTable = true;
       parts = line.match(/(?:[^\s,"]+|"[^"]*")+/g) || line.split(',');
       parts = parts.map((s) => s.trim().replace(/^"|"$/g, ''));
-      if (parts[0]?.toLowerCase() === 'word' || parts[0]?.toLowerCase() === 'từ vựng') continue;
     } else if (line.includes(' - ')) {
       parts = line.split(' - ').map((s) => s.trim());
     } else if (line.includes(' : ')) {
@@ -115,14 +116,61 @@ export function parseBulkInput(text) {
       parts = [line];
     }
 
-    if (parts.length >= 5) {
+    if (isDelimitedTable && parts.length >= 2) {
+      const normCols = parts.map(normalizeHeader);
+      const isHeader = normCols[0] === 'word' || normCols[0] === 'tu_vung' || normCols.includes('english_meaning');
+      if (isHeader) {
+        const findCol = (aliases) => normCols.findIndex((h) => aliases.includes(h));
+        customColMap = {
+          word: findCol(['word', 'english', 'english_word', 'vocab', 'vocabulary', 'term', 'tu_vung', 'tu_tieng_anh', 'tu']),
+          phonetic: findCol(['phonetic', 'ipa', 'pronunciation', 'phien_am']),
+          pos: findCol(['pos', 'type', 'part_of_speech', 'tu_loai']),
+          meaning: findCol(['meaning', 'definition', 'vietnamese', 'vietnamese_meaning', 'meaning_vi', 'vi', 'nghia', 'nghia_tieng_viet']),
+          english_meaning: findCol(['english_meaning', 'english_definition', 'definition_en', 'en_meaning', 'meaning_en', 'en_definition']),
+          example_sentence: findCol(['example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du']),
+        };
+        continue;
+      }
+    }
+
+    if (customColMap && isDelimitedTable) {
+      const getVal = (k, fallbackIdx = -1) => {
+        const i = customColMap[k] >= 0 ? customColMap[k] : fallbackIdx;
+        return i >= 0 && i < parts.length ? parts[i] || '' : '';
+      };
+      const wVal = getVal('word', 0);
+      if (!wVal) continue;
+      rows.push({
+        id: `row-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        word: wVal,
+        phonetic: getVal('phonetic', 1),
+        pos: getVal('pos', 2),
+        meaning: getVal('meaning', 3),
+        english_meaning: getVal('english_meaning', -1),
+        example_sentence: getVal('example_sentence', 4),
+      });
+      continue;
+    }
+
+    if (parts.length >= 6) {
       rows.push({
         id: `row-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
         word: parts[0] || '',
         phonetic: parts[1] || '',
         pos: parts[2] || '',
         meaning: parts[3] || '',
-        example_sentence: parts.slice(4).join(' ') || '',
+        example_sentence: parts[4] || '',
+        english_meaning: parts.slice(5).join(' ') || '',
+      });
+    } else if (parts.length === 5) {
+      rows.push({
+        id: `row-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 6)}`,
+        word: parts[0] || '',
+        phonetic: parts[1] || '',
+        pos: parts[2] || '',
+        meaning: parts[3] || '',
+        example_sentence: parts[4] || '',
+        english_meaning: '',
       });
     } else if (parts.length === 4) {
       rows.push({
@@ -132,6 +180,7 @@ export function parseBulkInput(text) {
         pos: parts[2] || '',
         meaning: parts[3] || '',
         example_sentence: '',
+        english_meaning: '',
       });
     } else if (parts.length === 3) {
       const isPos = /^(n|v|adj|adv|prep|conj|noun|verb|adjective|adverb|phrase|idiom)$/i.test(parts[1]);
@@ -142,6 +191,7 @@ export function parseBulkInput(text) {
         pos: isPos ? parts[1] : '',
         meaning: parts[2] || '',
         example_sentence: '',
+        english_meaning: '',
       });
     } else if (parts.length === 2) {
       rows.push({
@@ -151,6 +201,7 @@ export function parseBulkInput(text) {
         pos: '',
         meaning: parts[1] || '',
         example_sentence: '',
+        english_meaning: '',
       });
     } else if (parts.length === 1 && parts[0]) {
       rows.push({
@@ -160,6 +211,7 @@ export function parseBulkInput(text) {
         pos: '',
         meaning: '',
         example_sentence: '',
+        english_meaning: '',
       });
     }
   }
@@ -198,12 +250,14 @@ function spreadsheetRowsToText(rows) {
     findColumn(['pos', 'type', 'part_of_speech', 'tu_loai'], 2),
     findColumn(['meaning', 'definition', 'vietnamese', 'vietnamese_meaning', 'meaning_vi', 'vi', 'nghia', 'nghia_tieng_viet'], 3),
     findColumn(['example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du'], 4),
+    findColumn(['english_meaning', 'english_definition', 'definition_en', 'en_meaning', 'meaning_en', 'en_definition'], -1),
   ];
   const hasHeader = headerNames.some((header) => [
     'word', 'english', 'english_word', 'vocab', 'vocabulary', 'term', 'tu_vung', 'tu_tieng_anh',
     'phonetic', 'ipa', 'pronunciation', 'pos', 'type', 'part_of_speech', 'tu_loai',
     'meaning', 'definition', 'vietnamese', 'vietnamese_meaning', 'meaning_vi', 'vi', 'nghia',
-    'nghia_tieng_viet', 'example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du'
+    'nghia_tieng_viet', 'english_meaning', 'english_definition', 'definition_en', 'en_meaning', 'meaning_en', 'en_definition',
+    'example', 'example_sentence', 'sentence', 'vi_du', 'cau_vi_du'
   ].includes(header));
 
   const dataRows = hasHeader ? rows.slice(1) : rows;
@@ -214,7 +268,11 @@ function spreadsheetRowsToText(rows) {
   };
 
   return dataRows
-    .map((row) => columns.map((column) => cellToText(Array.isArray(row) ? row[column] : '')).join('\t'))
+    .map((row) =>
+      columns
+        .map((column) => (column >= 0 && Array.isArray(row) ? cellToText(row[column]) : ''))
+        .join('\t')
+    )
     .filter((row) => row.replace(/\t/g, '').trim())
     .join('\n');
 }
@@ -473,6 +531,7 @@ export function BulkAddWordModal() {
         phonetic: '',
         pos: '',
         meaning: '',
+        english_meaning: '',
         example_sentence: '',
       },
     ]);
@@ -501,6 +560,7 @@ export function BulkAddWordModal() {
         phonetic: item.phonetic?.trim() || null,
         pos: item.pos?.trim() || null,
         meaning: item.meaning.trim(),
+        english_meaning: item.english_meaning?.trim() || null,
         example_sentence: item.example_sentence?.trim() || null,
         lesson_name: lessonName.trim() || null,
         word_order: idx + 1,
@@ -890,6 +950,7 @@ export function BulkAddWordModal() {
                         <th className="py-2.5 px-2.5 min-w-[100px]">Phiên âm</th>
                         <th className="py-2.5 px-2.5 w-20">Loại từ</th>
                         <th className="py-2.5 px-2.5 min-w-[150px]">Nghĩa tiếng Việt *</th>
+                        <th className="py-2.5 px-2.5 min-w-[160px]">English meaning</th>
                         <th className="py-2.5 px-2.5 min-w-[180px]">Câu ví dụ</th>
                         <th className="py-2.5 px-2 w-9 text-center">Xóa</th>
                       </tr>
@@ -941,6 +1002,15 @@ export function BulkAddWordModal() {
                                 onChange={(e) => handleCellChange(row.id, 'meaning', e.target.value)}
                                 placeholder="Nghĩa tiếng Việt"
                                 className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs font-semibold text-[#382E2B] outline-none"
+                              />
+                            </td>
+                            <td className="py-1.5 px-1.5">
+                              <input
+                                type="text"
+                                value={row.english_meaning || ''}
+                                onChange={(e) => handleCellChange(row.id, 'english_meaning', e.target.value)}
+                                placeholder="Định nghĩa tiếng Anh (tùy chọn)"
+                                className="w-full px-2 py-1.5 rounded-lg border border-[#DECDBB] focus:border-[#D36135] text-xs text-[#5C5248] outline-none"
                               />
                             </td>
                             <td className="py-1.5 px-1.5">

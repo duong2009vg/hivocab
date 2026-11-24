@@ -102,13 +102,13 @@ export async function lookupWord(rawWord) {
   try {
     let dbWords = null;
     let dbErr = null;
-    const rpcRes = await supabase.rpc('lookup_dictionary_word', { p_word: cleanWord });
+    const rpcRes = await supabase.rpc('lookup_dictionary_word_v2', { p_word: cleanWord });
     if (!rpcRes.error && Array.isArray(rpcRes.data)) {
       dbWords = rpcRes.data;
     } else if (rpcRes.error) {
       const tableRes = await supabase
         .from('words')
-        .select('id, word, meaning, pos, phonetic, example_sentence')
+        .select('id, word, meaning, english_meaning, pos, phonetic, example_sentence')
         .ilike('word', cleanWord)
         .limit(6);
       dbWords = tableRes.data;
@@ -116,10 +116,13 @@ export async function lookupWord(rawWord) {
     }
 
     if (!dbErr && Array.isArray(dbWords) && dbWords.length > 0) {
-      const main = dbWords.find((w) => w.phonetic && w.example_sentence) || dbWords[0];
+      const main = dbWords.find((w) => w.english_meaning && w.phonetic && w.example_sentence)
+        || dbWords.find((w) => w.phonetic && w.example_sentence)
+        || dbWords[0];
       const phonetic = main.phonetic || dbWords.find((w) => w.phonetic)?.phonetic || '';
       const pos = extractPos(main.pos, main.meaning);
       const meaning = cleanMeaning(main.meaning);
+      const englishMeaning = main.english_meaning || dbWords.find((w) => w.english_meaning)?.english_meaning || '';
       const example = main.example_sentence || dbWords.find((w) => w.example_sentence)?.example_sentence || '';
 
       // Xây dựng danh sách entries cho các nét nghĩa khác nhau trong DB
@@ -127,10 +130,12 @@ export async function lookupWord(rawWord) {
       const seen = new Set();
       for (const item of dbWords) {
         const cMean = cleanMeaning(item.meaning);
-        if (cMean && !seen.has(cMean.toLowerCase())) {
-          seen.add(cMean.toLowerCase());
+        const cEnMean = String(item.english_meaning || '').trim();
+        if (cMean && !seen.has(`${cMean.toLowerCase()}::${cEnMean.toLowerCase()}`)) {
+          seen.add(`${cMean.toLowerCase()}::${cEnMean.toLowerCase()}`);
           entries.push({
             meaning: cMean,
+            english_meaning: cEnMean,
             pos: extractPos(item.pos, item.meaning),
             example: item.example_sentence || '',
             example_vi: '',
@@ -143,15 +148,17 @@ export async function lookupWord(rawWord) {
         phonetic,
         pos,
         meaning,
+        english_meaning: englishMeaning,
         example,
         example_vi: '',
-        entries: entries.length > 0 ? entries : [{ meaning, pos, example, example_vi: '' }],
+        entries: entries.length > 0 ? entries : [{ meaning, english_meaning: englishMeaning, pos, example, example_vi: '' }],
         source: 'database',
         viSummary: meaning,
         senses: entries.map((e, idx) => ({
           id: idx + 1,
           grammar: e.pos ? `[ ${e.pos} ]` : '',
           definition_vi: e.meaning,
+          definition_en: e.english_meaning || '',
           examples: e.example ? [{ en: e.example, vi: '' }] : [],
         })),
       };
@@ -183,13 +190,14 @@ export async function lookupWord(rawWord) {
         const d = cfJson.data;
         const fallbackPos = d.pos || 'từ vựng';
         const fallbackMeaning = d.meaning || d.viSummary || '';
+        const fallbackEnglishMeaning = d.english_meaning || d.englishMeaning || d.entries?.[0]?.english_meaning || '';
         const fallbackExample = d.example || '';
         const fallbackExampleVi = d.example_vi || '';
         const entries =
           Array.isArray(d.entries) && d.entries.length > 0
             ? d.entries
             : fallbackMeaning
-              ? [{ meaning: fallbackMeaning, pos: fallbackPos, example: fallbackExample, example_vi: fallbackExampleVi }]
+              ? [{ meaning: fallbackMeaning, english_meaning: fallbackEnglishMeaning, pos: fallbackPos, example: fallbackExample, example_vi: fallbackExampleVi }]
               : [];
         const senses =
           Array.isArray(d.senses) && d.senses.length > 0
@@ -198,6 +206,7 @@ export async function lookupWord(rawWord) {
                 id: idx + 1,
                 grammar: e.pos ? `[ ${e.pos} ]` : '',
                 definition_vi: e.meaning,
+                definition_en: e.english_meaning || '',
                 examples: e.example ? [{ en: e.example, vi: e.example_vi || '' }] : [],
               }));
         const result = {
@@ -206,6 +215,7 @@ export async function lookupWord(rawWord) {
           pos: fallbackPos,
           ...(d.cefr ? { cefr: d.cefr } : {}),
           meaning: fallbackMeaning,
+          english_meaning: fallbackEnglishMeaning,
           example: fallbackExample,
           example_vi: fallbackExampleVi,
           entries,
@@ -238,15 +248,17 @@ export async function lookupWord(rawWord) {
       if (aiJson.ok && (aiJson.meaning || aiJson.phonetic)) {
         const fallbackPos = aiJson.pos || 'từ vựng';
         const fallbackMeaning = aiJson.meaning || '';
+        const fallbackEnglishMeaning = aiJson.english_meaning || aiJson.data?.english_meaning || '';
         const fallbackExample = aiJson.example || '';
         const entries = fallbackMeaning
-          ? [{ meaning: fallbackMeaning, pos: fallbackPos, example: fallbackExample, example_vi: '' }]
+          ? [{ meaning: fallbackMeaning, english_meaning: fallbackEnglishMeaning, pos: fallbackPos, example: fallbackExample, example_vi: '' }]
           : [];
         const result = {
           word: cleanWord,
           phonetic: aiJson.phonetic || '',
           pos: fallbackPos,
           meaning: fallbackMeaning,
+          english_meaning: fallbackEnglishMeaning,
           example: fallbackExample,
           example_vi: '',
           entries,
@@ -256,6 +268,7 @@ export async function lookupWord(rawWord) {
             id: idx + 1,
             grammar: e.pos ? `[ ${e.pos} ]` : '',
             definition_vi: e.meaning,
+            definition_en: e.english_meaning || '',
             examples: e.example ? [{ en: e.example, vi: '' }] : [],
           })),
         };
@@ -295,6 +308,8 @@ export async function autofillWordWithAI(rawWord) {
             word: cleanWord,
             phonetic: data.phonetic || data.data?.phonetic || '',
             meaning: data.meaning || data.data?.meaning || '',
+            english_meaning: data.english_meaning || data.data?.english_meaning || '',
+            englishMeaning: data.english_meaning || data.data?.english_meaning || '',
             example: data.example || data.data?.example || '',
             pos: data.pos || data.data?.pos || 'từ vựng',
             source: 'deepseek_ai',
@@ -313,6 +328,8 @@ export async function autofillWordWithAI(rawWord) {
       word: dbEntry.word || cleanWord,
       phonetic: dbEntry.phonetic || '',
       meaning: dbEntry.meaning || '',
+      english_meaning: dbEntry.english_meaning || '',
+      englishMeaning: dbEntry.english_meaning || '',
       example: dbEntry.example || '',
       pos: dbEntry.pos || 'từ vựng',
       source: 'database',

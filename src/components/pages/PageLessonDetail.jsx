@@ -363,6 +363,14 @@ export function PageLessonDetail() {
                       </div>
                     )}
                     <p className="text-sm font-bold text-[#1e1b17]">{word.meaning}</p>
+                    {(word.englishMeaning || word.english_meaning) && (
+                      <div className="mt-1.5 flex items-start gap-1.5 text-xs text-[#5d534a] font-medium leading-relaxed">
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#EEF5EC] border border-[#799b6e]/50 text-[#4b6540] font-black text-[10px] shrink-0 mt-0.5">
+                          EN
+                        </span>
+                        <span>{word.englishMeaning || word.english_meaning}</span>
+                      </div>
+                    )}
 
                     {/* Example Sentence in Sketch Quote */}
                     {(word.exampleSentence || word.example_sentence) && (
@@ -694,6 +702,14 @@ export function PageLessonDetail() {
                     {/* Meaning */}
                     <div className="mb-3 pl-11">
                       <p className="text-base font-bold text-[#322e2b]">{word.meaning}</p>
+                      {(word.englishMeaning || word.english_meaning) && (
+                        <div className="mt-1.5 flex items-start gap-2 text-xs sm:text-[13px] text-[#5c534a] font-medium leading-relaxed">
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-[#eef5ec] border border-[#799b6e]/60 text-[#4b6540] font-black text-[10px] shrink-0 mt-0.5">
+                            EN
+                          </span>
+                          <span>{word.englishMeaning || word.english_meaning}</span>
+                        </div>
+                      )}
                       {word.notes && (
                         <p className="text-xs text-[#78726b] font-medium mt-0.5">{word.notes}</p>
                       )}

@@ -790,7 +790,7 @@ async function getAdminAuthHeaders() {
   };
 }
 
-export async function adminResolveYoutubeChannel({ channelUrl, limit = 20 } = {}) {
+export async function adminResolveYoutubeChannel({ channelUrl, limit = 20, cursor = null } = {}) {
   const headers = await getAdminAuthHeaders();
   const res = await fetchWithTimeout(
     '/api/admin/studio-import',
@@ -801,13 +801,16 @@ export async function adminResolveYoutubeChannel({ channelUrl, limit = 20 } = {}
         action: 'resolve_channel',
         channel_url: channelUrl,
         limit,
+        ...(cursor ? { cursor } : {}),
       }),
     },
     25000
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data?.ok) {
-    throw new Error(data?.error || data?.detail || `HTTP ${res.status}`);
+    const err = new Error(data?.error || data?.detail || `HTTP ${res.status}`);
+    err.code = data?.code || '';
+    throw err;
   }
   return data;
 }
@@ -840,7 +843,9 @@ export async function adminImportStudioYoutubeVideo({
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data?.ok) {
-    throw new Error(data?.error || data?.detail || `HTTP ${res.status}`);
+    const err = new Error(data?.error || data?.detail || `HTTP ${res.status}`);
+    err.code = data?.code || '';
+    throw err;
   }
   if (data?.video?.id) {
     videoCuesCache.delete(data.video.id);

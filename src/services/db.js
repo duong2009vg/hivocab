@@ -713,7 +713,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
     // 1. Thử lấy theo lesson_order được định nghĩa cụ thể
     const { data, error } = await supabase
       .from('words')
-      .select('id, word, pos, phonetic, meaning, example_sentence, image_url, lesson_order, word_order, created_at')
+      .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, lesson_order, word_order, created_at')
       .eq('topic_id', topicId)
       .eq('lesson_order', safeIndex)
       .order('word_order', { ascending: true, nullsFirst: false })
@@ -736,7 +736,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
         // Topic có bài học đặt tên, index này là nhóm từ vựng tự thêm (unassigned)
         const { data: unassignedData } = await supabase
           .from('words')
-          .select('id, word, pos, phonetic, meaning, example_sentence, image_url, created_at')
+          .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, created_at')
           .eq('topic_id', topicId)
           .or('lesson_name.is.null,lesson_order.is.null')
           .order('created_at', { ascending: true });
@@ -746,7 +746,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
         const LESSON_SIZE = 50;
         const { data: fbData } = await supabase
           .from('words')
-          .select('id, word, pos, phonetic, meaning, example_sentence, image_url, created_at')
+          .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, created_at')
           .eq('topic_id', topicId)
           .order('created_at', { ascending: true })
           .range(safeIndex * LESSON_SIZE, (safeIndex + 1) * LESSON_SIZE - 1);
@@ -771,6 +771,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
       const prog = progressMap[w.id];
       const wordItem = {
         ...w,
+        englishMeaning: w.english_meaning || '',
         exampleSentence: w.example_sentence || '',
         imageUrl: w.image_url || '',
         level: prog?.level ?? 0,
@@ -797,7 +798,7 @@ export async function getWordsInPassage(passageId) {
     const user = await getCurrentUser();
     const { data, error } = await supabase
       .from('words')
-      .select('id, word, pos, phonetic, meaning, example_sentence, image_url, passage_id, word_order, created_at')
+      .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, passage_id, word_order, created_at')
       .eq('passage_id', passageId)
       .order('word_order', { ascending: true, nullsFirst: false });
     if (error) throw error;
@@ -820,6 +821,7 @@ export async function getWordsInPassage(passageId) {
       const prog = progressMap[w.id];
       const wordItem = {
         ...w,
+        englishMeaning: w.english_meaning || '',
         exampleSentence: w.example_sentence || '',
         imageUrl: w.image_url || '',
         level: prog?.level ?? 0,
@@ -871,6 +873,8 @@ export async function addWord(topicIdOrObj, options = {}) {
     meaning: String(opts.meaning || '').trim(),
     example_sentence: String(opts.exampleSentence || opts.example_sentence || '').trim(),
   };
+  const enMeaning = String(opts.englishMeaning || opts.english_meaning || '').trim();
+  if (enMeaning) payload.english_meaning = enMeaning;
   const passageId = opts.passageId || opts.passage_id;
   if (passageId) payload.passage_id = passageId;
 
@@ -1240,7 +1244,7 @@ async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', lev
     .select(`
       level, next_review_at, last_reviewed_at, review_count, stability, difficulty, fsrs_state, lapses, user_id,
       words!inner (
-        id, topic_id, word, pos, phonetic, meaning, example_sentence, image_url, created_at,
+        id, topic_id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, created_at,
         topics ( id, name )
       )
     `, { count: 'exact' })
@@ -1260,7 +1264,7 @@ async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', lev
 
   if (safeSearch) {
     const escaped = safeSearch.replace(/[,%_()]/g, ' ').trim();
-    query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%`, { foreignTable: 'words' });
+    query = query.or(`word.ilike.%${escaped}%,meaning.ilike.%${escaped}%,english_meaning.ilike.%${escaped}%`, { foreignTable: 'words' });
   }
 
   query = query
@@ -1283,6 +1287,8 @@ async function getVocabularyPageLegacy(page = 1, pageSize = 20, search = '', lev
       pos: w.pos || '',
       phonetic: w.phonetic,
       meaning: w.meaning,
+      englishMeaning: w.english_meaning || '',
+      english_meaning: w.english_meaning || '',
       exampleSentence: w.example_sentence || '',
       imageUrl: w.image_url || null,
       topicName: w.topics?.name || '',
@@ -1318,13 +1324,17 @@ export async function getVocabularyPage(page = 1, pageSize = 20, search = '', le
     ? Number(levelFilter)
     : null;
 
-  const { data, error } = await supabase.rpc('get_vocabulary_page_v2', {
+  const rpcParams = {
     p_page: safePage,
     p_page_size: safePageSize,
     p_search: String(search || '').trim(),
     p_level_filter: Number.isNaN(safeLevel) ? null : safeLevel,
     p_topic_id: topicIdFilter ? String(topicIdFilter).trim() : null,
-  });
+  };
+  let { data, error } = await supabase.rpc('get_vocabulary_page_v3', rpcParams);
+  if (error && isMissingRpcError(error)) {
+    ({ data, error } = await supabase.rpc('get_vocabulary_page_v2', rpcParams));
+  }
 
   if (!error) {
     const rows = Array.isArray(data) ? data : [];
@@ -1339,6 +1349,8 @@ export async function getVocabularyPage(page = 1, pageSize = 20, search = '', le
           pos: row.pos || '',
           phonetic: row.phonetic,
           meaning: row.meaning,
+          englishMeaning: row.english_meaning || '',
+          english_meaning: row.english_meaning || '',
           exampleSentence: row.example_sentence || '',
           imageUrl: null,
           topicName: row.topic_name || '',
@@ -1508,6 +1520,7 @@ export async function getWordsDueForReview(limit = 50) {
         pos,
         phonetic,
         meaning,
+        english_meaning,
         example_sentence,
         image_url,
         topics ( id, name, icon )
@@ -1534,6 +1547,8 @@ export async function getWordsDueForReview(limit = 50) {
         pos:             p.words.pos || '',
         phonetic:        p.words.phonetic || '',
         meaning:         p.words.meaning || '',
+        englishMeaning:  p.words.english_meaning || '',
+        english_meaning: p.words.english_meaning || '',
         exampleSentence: p.words.example_sentence || '',
         imageUrl:        p.words.image_url || null,
         level:           p.level,

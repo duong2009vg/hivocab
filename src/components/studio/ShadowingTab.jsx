@@ -103,7 +103,7 @@ export function ShadowingTab({
   const [deletingClipId, setDeletingClipId] = useState('');
   const allClips = useMemo(() => [...customClips, ...(clips || [])], [customClips, clips]);
   const [selectedClipId, setSelectedClipId] = useState('');
-  const [levelFilter, setLevelFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all'); // 'all' | 'custom'
   const [channelFilter, setChannelFilter] = useState('all');
   const [loadedCuesById, setLoadedCuesById] = useState({});
   const [loadingCues, setLoadingCues] = useState(false);
@@ -274,6 +274,7 @@ export function ShadowingTab({
   const cuesRef = useRef(cues);
   const clipRef = useRef(selectedClip);
   const sampleEndRef = useRef(null);
+  const lastPolledTimeRef = useRef(0);
 
   useEffect(() => {
     loopRef.current = loopActiveCue;
@@ -298,24 +299,43 @@ export function ShadowingTab({
     setDictInputs({});
     setDictChecked({});
     sampleEndRef.current = null;
+    lastPolledTimeRef.current = 0;
     setSamplePlaying(false);
     setDictHinted({});
   }, [selectedClip?.id]);
 
-  // Scroll only the cue list container (never the page window) when active cue changes
+  // Always keep the active cue pinned at the top of the cue list and smoothly glide as video plays
   useEffect(() => {
     const container = cueListRef.current;
     const item = activeCueItemRef.current;
-    if (!container || !item) return;
-    const itemTop = item.offsetTop;
-    const itemBottom = itemTop + item.offsetHeight;
-    if (itemTop < container.scrollTop || itemBottom > container.scrollTop + container.clientHeight) {
-      container.scrollTo({
-        top: Math.max(0, itemTop - container.clientHeight / 3),
-        behavior: 'smooth',
+    if (!container || !item || container.clientHeight === 0) return undefined;
+
+    let raf2 = 0;
+    const raf1 = window.requestAnimationFrame(() => {
+      raf2 = window.requestAnimationFrame(() => {
+        const currentContainer = cueListRef.current;
+        const currentItem = activeCueItemRef.current;
+        if (!currentContainer || !currentItem || currentContainer.clientHeight === 0) return;
+
+        const containerRect = currentContainer.getBoundingClientRect();
+        const itemRect = currentItem.getBoundingClientRect();
+        const delta = itemRect.top - containerRect.top;
+        if (Math.abs(delta) < 3) return;
+
+        const targetTop = Math.max(0, currentContainer.scrollTop + delta - 2);
+        const isLargeJump = Math.abs(delta) > 420;
+        currentContainer.scrollTo({
+          top: targetTop,
+          behavior: isLargeJump ? 'auto' : 'smooth',
+        });
       });
-    }
-  }, [activeCueIdx]);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(raf1);
+      if (raf2) window.cancelAnimationFrame(raf2);
+    };
+  }, [activeCueIdx, cues.length, mobileCuesOpen, selectedClip?.id]);
 
   // Initialize & clean up YouTube IFrame Player
   useEffect(() => {
@@ -396,6 +416,8 @@ export function ShadowingTab({
             const localTime = Math.max(0, absTime - Number(clip.start_seconds || 0));
             const pinnedCue = currentCues[activeCueIdxRef.current];
             const playerState = player.getPlayerState?.();
+            const scrubbedWhilePaused = playerState !== 1 && Math.abs(localTime - lastPolledTimeRef.current) > 0.35;
+            lastPolledTimeRef.current = localTime;
 
             if (sampleEndRef.current !== null && playerState === 1) {
               if (localTime >= Number(sampleEndRef.current) - 0.06) {
@@ -416,7 +438,7 @@ export function ShadowingTab({
               return;
             }
 
-            if (!loopRef.current && playerState === 1) {
+            if (!loopRef.current && (playerState === 1 || scrubbedWhilePaused)) {
               const found = resolveActiveCueIndex(localTime, clip, currentCues);
               if (found >= 0 && found !== activeCueIdxRef.current) {
                 setActiveCueIdx(found);
@@ -496,6 +518,7 @@ export function ShadowingTab({
     const cue = cues[idx];
     if (!cue || !selectedClip) return;
     sampleEndRef.current = null;
+    lastPolledTimeRef.current = Number(cue.start || 0);
     setSamplePlaying(false);
     setActiveCueIdx(idx);
     try {
@@ -652,27 +675,27 @@ export function ShadowingTab({
     void importYoutubeByUrl(pasted);
   };
 
-  const levelClips = useMemo(() => {
-    if (levelFilter === 'all') return allClips;
-    return allClips.filter((c) => (c.level || 'General') === levelFilter);
-  }, [allClips, levelFilter]);
+  const sourceClips = useMemo(() => {
+    if (sourceFilter === 'custom') {
+      return allClips.filter((c) => Boolean(c.personal || c.guest || c.level === 'Custom'));
+    }
+    return allClips;
+  }, [allClips, sourceFilter]);
 
   const availableChannels = useMemo(() => {
     const counts = new Map();
-    for (const c of levelClips) {
+    for (const c of sourceClips) {
       const ch = getClipChannelName(c);
       if (!ch) continue;
       counts.set(ch, (counts.get(ch) || 0) + 1);
     }
     return Array.from(counts.entries()).map(([name, count]) => ({ name, count }));
-  }, [levelClips]);
-
-  const hasC1Level = useMemo(() => allClips.some((c) => c.level === 'C1'), [allClips]);
+  }, [sourceClips]);
 
   const filteredClips = useMemo(() => {
-    if (channelFilter === 'all') return levelClips;
-    return levelClips.filter((c) => getClipChannelName(c) === channelFilter);
-  }, [levelClips, channelFilter]);
+    if (channelFilter === 'all') return sourceClips;
+    return sourceClips.filter((c) => getClipChannelName(c) === channelFilter);
+  }, [sourceClips, channelFilter]);
 
   const channelGroups = useMemo(() => {
     const map = new Map();
@@ -719,25 +742,21 @@ export function ShadowingTab({
               <span className="text-[11px] sm:text-xs font-black uppercase tracking-wide text-[#786F66] shrink-0 mr-1">
                 Thư viện Video ({filteredClips.length}):
               </span>
-              {(hasC1Level ? ['all', 'A2', 'B1', 'B2', 'C1', 'Custom'] : ['all', 'A2', 'B1', 'B2', 'Custom']).map((lvl) => (
+              {['all', 'custom'].map((srcKey) => (
                 <button
-                  key={lvl}
+                  key={srcKey}
                   type="button"
                   onClick={() => {
-                    setLevelFilter(lvl);
+                    setSourceFilter(srcKey);
                     setChannelFilter('all');
                   }}
                   className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-extrabold border-2 transition-all cursor-pointer shrink-0 ${
-                    levelFilter === lvl
+                    sourceFilter === srcKey
                       ? 'bg-[#4D6B53] text-white border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E]'
                       : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
                   }`}
                 >
-                  {lvl === 'all'
-                    ? 'Tất cả'
-                    : lvl === 'Custom'
-                      ? `Cá nhân (${usedVideoCount}/${videoLimit})`
-                      : lvl}
+                  {srcKey === 'all' ? 'Tất cả' : `Cá nhân (${usedVideoCount}/${videoLimit})`}
                 </button>
               ))}
             </div>
@@ -756,7 +775,7 @@ export function ShadowingTab({
                       : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
                   }`}
                 >
-                  Tất cả kênh ({levelClips.length})
+                  Tất cả kênh ({sourceClips.length})
                 </button>
                 {availableChannels.map((ch) => (
                   <button
@@ -877,7 +896,7 @@ export function ShadowingTab({
                         </div>
                         <button
                           type="button"
-                          onClick={() => setLevelFilter('Custom')}
+                          onClick={() => setSourceFilter('custom')}
                           className="px-3 py-1.5 rounded-xl bg-white text-[11px] font-black text-[#B53D2A] border border-[#D96B43] hover:bg-[#FFF5F2] shrink-0 cursor-pointer"
                         >
                           Xem {usedVideoCount} video cá nhân
@@ -940,16 +959,16 @@ export function ShadowingTab({
             <div className="bg-[#fffcf7] border-2 border-dashed border-[#3D352E]/40 rounded-2xl p-6 text-center space-y-2.5">
               <Video className="w-8 h-8 text-[#4D6B53]/60 mx-auto" />
               <p className="text-sm font-black text-[#2E2823]">
-                {levelFilter === 'Custom'
+                {sourceFilter === 'custom'
                   ? 'Bạn chưa thêm video YouTube cá nhân nào'
                   : 'Không có video nào ở mục này'}
               </p>
               <p className="text-xs font-semibold text-[#68594D] max-w-md mx-auto">
-                {levelFilter === 'Custom'
+                {sourceFilter === 'custom'
                   ? `Mỗi tài khoản được thêm tối đa ${videoLimit} video YouTube có phụ đề tiếng Anh để luyện Shadowing & Dictation.`
                   : 'Hãy chuyển sang mục Tất cả hoặc thêm video YouTube của riêng bạn.'}
               </p>
-              {levelFilter === 'Custom' && (
+              {sourceFilter === 'custom' && (
                 <button
                   type="button"
                   onClick={() => setShowAddForm(true)}
@@ -990,9 +1009,6 @@ export function ShadowingTab({
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>Thư viện Video</span>
               </button>
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] shrink-0">
-                {selectedClip.level || 'Story'}
-              </span>
               <h2 className="text-xs sm:text-sm font-black text-[#2E2823] truncate">
                 {selectedClip.title}
               </h2>
@@ -1349,7 +1365,7 @@ export function ShadowingTab({
               </div>
               <div
                 ref={cueListRef}
-                className="relative max-h-[420px] lg:max-h-[780px] overflow-y-auto space-y-2 pr-1"
+                className="relative max-h-[420px] lg:max-h-[min(540px,calc(100vh-220px))] xl:max-h-[min(620px,calc(100vh-210px))] overflow-y-auto space-y-2 pr-1 pb-32"
               >
                 {loadingCues && cues.length === 0 ? (
                   <div className="flex items-center justify-center gap-2 py-8 text-xs font-bold text-[#4D6B53]">

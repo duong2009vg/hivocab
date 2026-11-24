@@ -52,6 +52,7 @@ export function AdminWordsTab() {
     phonetic: '',
     pos: 'noun',
     meaning: '',
+    english_meaning: '',
     example_sentence: '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -278,7 +279,7 @@ export function AdminWordsTab() {
       if (isCambridge) {
         let query = supabase
           .from('words')
-          .select('id, word, pos, phonetic, meaning, example_sentence, passage_id, word_order, created_at')
+          .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, passage_id, word_order, created_at')
           .eq('topic_id', selectedTopicId);
 
         if (selectedPassageId) {
@@ -292,7 +293,7 @@ export function AdminWordsTab() {
       } else {
         let query = supabase
           .from('words')
-          .select('id, word, pos, phonetic, meaning, example_sentence, lesson_name, lesson_order, word_order, created_at')
+          .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, lesson_name, lesson_order, word_order, created_at')
           .eq('topic_id', selectedTopicId);
 
         if (selectedLessonIndex !== 'all') {
@@ -342,6 +343,7 @@ export function AdminWordsTab() {
       return (
         String(w.word || '').toLowerCase().includes(q) ||
         String(w.meaning || '').toLowerCase().includes(q) ||
+        String(w.english_meaning || '').toLowerCase().includes(q) ||
         String(w.phonetic || '').toLowerCase().includes(q)
       );
     });
@@ -356,6 +358,7 @@ export function AdminWordsTab() {
       phonetic: '',
       pos: 'noun',
       meaning: '',
+      english_meaning: '',
       example_sentence: '',
     });
     setIsAddOpen(true);
@@ -368,6 +371,7 @@ export function AdminWordsTab() {
       phonetic: w.phonetic || '',
       pos: w.pos || 'noun',
       meaning: w.meaning || '',
+      english_meaning: w.english_meaning || '',
       example_sentence: w.example_sentence || '',
     });
   };
@@ -393,6 +397,7 @@ export function AdminWordsTab() {
             phonetic: wordForm.phonetic.trim() || null,
             pos: wordForm.pos.trim() || null,
             meaning: wordForm.meaning.trim(),
+            english_meaning: wordForm.english_meaning.trim() || null,
             example_sentence: wordForm.example_sentence.trim() || null,
           })
           .eq('id', editingWord.id);
@@ -410,6 +415,7 @@ export function AdminWordsTab() {
           phonetic: wordForm.phonetic.trim() || null,
           pos: wordForm.pos.trim() || null,
           meaning: wordForm.meaning.trim(),
+          english_meaning: wordForm.english_meaning.trim() || null,
           example_sentence: wordForm.example_sentence.trim() || null,
           passage_id: isCambridge ? selectedPassageId || null : null,
           lesson_order: !isCambridge && selectedLessonIndex !== 'all' ? Number(selectedLessonIndex) : 0,
@@ -766,6 +772,11 @@ export function AdminWordsTab() {
 
                     <td className="py-2.5 px-3.5">
                       <span className="font-bold text-[#3D352E] text-xs">{w.meaning}</span>
+                      {w.english_meaning && (
+                        <div className="text-[11px] font-medium text-[#557A46] mt-0.5 line-clamp-2">
+                          EN: {w.english_meaning}
+                        </div>
+                      )}
                     </td>
 
                     <td className="py-2.5 px-3.5 max-w-xs">
@@ -886,6 +897,19 @@ export function AdminWordsTab() {
                   value={wordForm.meaning}
                   onChange={(e) => setWordForm({ ...wordForm, meaning: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-bold text-[#3D352E] focus:ring-2 focus:ring-[#557A46]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black font-quicksand uppercase text-[#6E5D53] mb-1">
+                  Định nghĩa tiếng Anh (English Meaning)
+                </label>
+                <input
+                  type="text"
+                  placeholder="VD: able to recover quickly from difficulties"
+                  value={wordForm.english_meaning}
+                  onChange={(e) => setWordForm({ ...wordForm, english_meaning: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-[#3D352E] text-xs font-semibold text-[#3D352E] focus:ring-2 focus:ring-[#557A46]"
                 />
               </div>
 

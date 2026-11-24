@@ -2,6 +2,8 @@
 // Shared YouTube timedtext caption extractor, Vietnamese batch translator, and YouTube Channel latest-videos resolver
 
 export const SERVER_BUSY_MSG = 'Server đang quá tải, vui lòng thử lại sau.';
+export const ADMIN_BOT_BLOCK_MSG =
+  'YouTube chặn IP máy chủ Cloudflare (yêu cầu xác minh bot / HTTP 429 / 403). Hãy chạy lệnh "npm run import-studio" trên máy cá nhân để nạp không bị chặn.';
 const MAX_TIMEDTEXT_BYTES = 2 * 1024 * 1024;
 const ALLOWED_TIMEDTEXT_HOSTS = new Set(['www.youtube.com', 'youtube.com', 'm.youtube.com', 'timedtext.youtube.com']);
 const WATCH_URL = 'https://www.youtube.com/watch';
@@ -11,12 +13,30 @@ const INNERTUBE_CLIENTS = [
   {
     name: 'ANDROID',
     userAgent: 'com.google.android.youtube/20.10.38 (Linux; U; Android 14)',
-    context: { client: { clientName: 'ANDROID', clientVersion: '20.10.38', hl: 'en' } },
+    buildContext: () => ({ client: { clientName: 'ANDROID', clientVersion: '20.10.38', hl: 'en' } }),
   },
   {
     name: 'IOS',
     userAgent: 'com.google.ios.youtube/20.10.4 (iPhone16,2; U; CPU iOS 18_3 like Mac OS X)',
-    context: { client: { clientName: 'IOS', clientVersion: '20.10.4', hl: 'en' } },
+    buildContext: () => ({ client: { clientName: 'IOS', clientVersion: '20.10.4', hl: 'en' } }),
+  },
+  {
+    name: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    buildContext: (videoId) => ({
+      client: {
+        clientName: 'TVHTML5_SIMPLY_EMBEDDED_PLAYER',
+        clientVersion: '2.0',
+        hl: 'en',
+      },
+      thirdParty: { embedUrl: `https://www.youtube.com/embed/${videoId}` },
+    }),
+  },
+  {
+    name: 'WEB',
+    requireApiKey: true,
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    buildContext: () => ({ client: { clientName: 'WEB', clientVersion: '2.20250219.01.00', hl: 'en' } }),
   },
 ];
 
@@ -177,6 +197,7 @@ async function tryInnertubeClients(videoId, apiKey = '') {
     : `${INNERTUBE_API_URL}?prettyPrint=false`;
 
   for (const clientSpec of INNERTUBE_CLIENTS) {
+    if (clientSpec.requireApiKey && !apiKey) continue;
     try {
       const playerRes = await fetchWithTimeout(
         endpoint,
@@ -188,7 +209,7 @@ async function tryInnertubeClients(videoId, apiKey = '') {
             'User-Agent': clientSpec.userAgent || BROWSER_USER_AGENT,
           },
           body: JSON.stringify({
-            context: clientSpec.context,
+            context: clientSpec.buildContext(videoId),
             videoId,
             racyCheckOk: true,
             contentCheckOk: true,
@@ -280,15 +301,14 @@ export async function fetchPlayerData(videoId) {
   const direct = await tryInnertubeClients(videoId, '');
   if (direct.found) return direct.found;
   if (direct.hadPlayableOkWithoutCaptions) {
-    throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
-  }
-  if (direct.lastBlockError?.code === 'REQUEST_BLOCKED') {
-    throw { status: 503, detail: SERVER_BUSY_MSG };
+    throw { status: 404, code: 'NO_CAPTIONS', detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
   }
 
   let lastBlockError = direct.lastBlockError;
   let videoTitle = direct.videoTitle || '';
   let videoAuthor = direct.videoAuthor || '';
+  let sawBotBlock = direct.lastBlockError?.code === 'REQUEST_BLOCKED';
+  let sawPlayableNoCaptions = false;
 
   const fallbackUrls = [
     `${EMBED_URL}/${encodeURIComponent(videoId)}?hl=en`,
@@ -327,7 +347,12 @@ export async function fetchPlayerData(videoId) {
           };
         }
         const playability = checkPlayability(embeddedPlayer);
-        if (!playability.ok) lastBlockError = playability;
+        if (playability.ok) {
+          sawPlayableNoCaptions = true;
+        } else {
+          lastBlockError = playability;
+          if (playability.code === 'REQUEST_BLOCKED') sawBotBlock = true;
+        }
       }
 
       const apiKeyMatch = html.match(/"INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)"/);
@@ -335,28 +360,37 @@ export async function fetchPlayerData(videoId) {
         const keyed = await tryInnertubeClients(videoId, apiKeyMatch[1]);
         if (keyed.found) return keyed.found;
         if (keyed.hadPlayableOkWithoutCaptions) {
-          throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
+          sawPlayableNoCaptions = true;
         }
-        if (keyed.lastBlockError) lastBlockError = keyed.lastBlockError;
+        if (keyed.lastBlockError) {
+          lastBlockError = keyed.lastBlockError;
+          if (keyed.lastBlockError.code === 'REQUEST_BLOCKED') sawBotBlock = true;
+        }
       }
     } catch (err) {
       if (err?.status && err?.detail) throw err;
     }
   }
 
-  if (sawRecaptcha) {
-    throw { status: 503, detail: SERVER_BUSY_MSG };
+  if (sawPlayableNoCaptions) {
+    throw { status: 404, code: 'NO_CAPTIONS', detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
+  }
+  if (sawRecaptcha || sawBotBlock || lastBlockError?.code === 'REQUEST_BLOCKED' || lastPageStatus === 429 || lastPageStatus === 403) {
+    throw {
+      status: 503,
+      code: 'YOUTUBE_BOT_BLOCKED',
+      detail: SERVER_BUSY_MSG,
+      adminDetail: ADMIN_BOT_BLOCK_MSG,
+    };
   }
   if (lastBlockError) {
     throw {
-      status: lastBlockError.code === 'REQUEST_BLOCKED' ? 503 : 404,
-      detail: lastBlockError.code === 'REQUEST_BLOCKED' ? SERVER_BUSY_MSG : lastBlockError.detail,
+      status: 404,
+      code: lastBlockError.code || 'PLAYABILITY_ERROR',
+      detail: lastBlockError.detail,
     };
   }
-  if (lastPageStatus === 429 || lastPageStatus === 403) {
-    throw { status: 503, detail: SERVER_BUSY_MSG };
-  }
-  throw { status: 404, detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
+  throw { status: 404, code: 'NO_CAPTIONS', detail: 'Video này đã tắt phụ đề hoặc không có track phụ đề.' };
 }
 
 function isEnglishLang(code) {
@@ -803,7 +837,9 @@ export async function extractYoutubeVideoCaptions({
     const isThrottled = /\b(429|403|503)\b/.test(msg);
     throw {
       status: isThrottled ? 503 : 502,
+      code: isThrottled ? 'YOUTUBE_BOT_BLOCKED' : 'TIMEDTEXT_FETCH_FAILED',
       detail: isThrottled ? SERVER_BUSY_MSG : `Lỗi tải file phụ đề tiếng Anh từ YouTube (${msg || 'network'}).`,
+      adminDetail: isThrottled ? ADMIN_BOT_BLOCK_MSG : `Lỗi tải file phụ đề từ YouTube (${msg || 'network'}).`,
     };
   }
 
@@ -917,6 +953,45 @@ function readRunsText(obj) {
   return '';
 }
 
+function extractLockupMeta(lv) {
+  const metaRows = lv?.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel?.metadataRows;
+  let publishedText = '';
+  let isUpcoming = false;
+  if (Array.isArray(metaRows)) {
+    for (const row of metaRows) {
+      const parts = Array.isArray(row?.metadataParts) ? row.metadataParts : [];
+      for (const part of parts) {
+        const txt = String(part?.text?.content || '').trim();
+        const label = String(part?.accessibilityLabel || '').trim();
+        if (/upcoming|premieres|scheduled/i.test(txt) || /upcoming|premieres|scheduled/i.test(label)) {
+          isUpcoming = true;
+        }
+        if (/(\bago\b|streamed|premiered|\b(sec|min|hour|day|week|month|year)s?\b)/i.test(txt) || /\bago\b/i.test(label)) {
+          publishedText = txt;
+        }
+      }
+    }
+  }
+
+  let durationText = '';
+  const overlays = lv?.contentImage?.thumbnailViewModel?.overlays;
+  if (Array.isArray(overlays)) {
+    for (const ov of overlays) {
+      const badges = ov?.thumbnailBottomOverlayViewModel?.badges;
+      if (!Array.isArray(badges)) continue;
+      for (const b of badges) {
+        const bText = String(b?.thumbnailBadgeViewModel?.text || '').trim();
+        if (/upcoming/i.test(bText)) isUpcoming = true;
+        else if (/^\d{1,2}(:\d{2}){1,2}$/.test(bText)) {
+          durationText = bText;
+        }
+      }
+    }
+  }
+
+  return { publishedText, durationText, isUpcoming };
+}
+
 function collectChannelVideoRenderers(node, out = [], seen = new Set()) {
   if (!node || typeof node !== 'object') return out;
   if (Array.isArray(node)) {
@@ -941,6 +1016,34 @@ function collectChannelVideoRenderers(node, out = [], seen = new Set()) {
           title,
           published_text: publishedText,
           duration_text: durationText,
+        });
+      }
+    }
+  }
+
+  const lv = node.lockupViewModel;
+  if (
+    lv &&
+    typeof lv.contentId === 'string' &&
+    /^[A-Za-z0-9_-]{11}$/.test(lv.contentId) &&
+    (!lv.contentType || lv.contentType === 'LOCKUP_CONTENT_TYPE_VIDEO')
+  ) {
+    if (!seen.has(lv.contentId)) {
+      const navUrl = String(
+        lv?.rendererContext?.commandContext?.onTap?.innertubeCommand?.commandMetadata?.webCommandMetadata?.url || ''
+      );
+      const { publishedText, durationText, isUpcoming } = extractLockupMeta(lv);
+      const isShort = navUrl.includes('/shorts/');
+      if (!isUpcoming && !isShort) {
+        seen.add(lv.contentId);
+        const rawTitle = lv?.metadata?.lockupMetadataViewModel?.title?.content;
+        const title = cleanCaptionText(rawTitle || `YouTube ${lv.contentId}`);
+        out.push({
+          youtube_video_id: lv.contentId,
+          url: `https://www.youtube.com/watch?v=${lv.contentId}`,
+          title,
+          published_text: cleanCaptionText(publishedText),
+          duration_text: cleanCaptionText(durationText),
         });
       }
     }
@@ -980,8 +1083,127 @@ function parseChannelRssFeed(xmlText, limit = 20) {
   return { feedAuthor, entries };
 }
 
-export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20) {
+function extractContinuationToken(node) {
+  if (!node || typeof node !== 'object') return '';
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      const found = extractContinuationToken(item);
+      if (found) return found;
+    }
+    return '';
+  }
+
+  const contTok =
+    node?.continuationItemRenderer?.continuationEndpoint?.continuationCommand?.token
+    || node?.continuationEndpoint?.continuationCommand?.token;
+  if (typeof contTok === 'string' && contTok.trim()) {
+    return contTok.trim();
+  }
+
+  for (const val of Object.values(node)) {
+    if (val && typeof val === 'object') {
+      const found = extractContinuationToken(val);
+      if (found) return found;
+    }
+  }
+  return '';
+}
+
+async function fetchChannelBrowseContinuation({ continuation, apiKey, clientVersion, visitorData }) {
+  if (!continuation || !apiKey || !/^[a-zA-Z0-9_-]+$/.test(apiKey)) {
+    return { videos: [], nextToken: '' };
+  }
+  const res = await fetchWithTimeout(
+    `https://www.youtube.com/youtubei/v1/browse?key=${encodeURIComponent(apiKey)}&prettyPrint=false`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'User-Agent': BROWSER_USER_AGENT,
+      },
+      body: JSON.stringify({
+        context: {
+          client: {
+            clientName: 'WEB',
+            clientVersion: clientVersion || '2.20250219.01.00',
+            hl: 'en',
+            ...(visitorData ? { visitorData } : {}),
+          },
+        },
+        continuation,
+      }),
+    },
+    10000
+  );
+  if (!res.ok) {
+    throw { status: res.status === 429 || res.status === 403 ? 503 : 502, detail: 'Không tải thêm được video từ YouTube.' };
+  }
+  const data = await res.json().catch(() => null);
+  if (!data) return { videos: [], nextToken: '' };
+  return {
+    videos: collectChannelVideoRenderers(data),
+    nextToken: extractContinuationToken(data),
+  };
+}
+
+function appendUniqueVideos(pool, incoming, seenSet) {
+  for (const v of incoming || []) {
+    if (v?.youtube_video_id && !seenSet.has(v.youtube_video_id)) {
+      seenSet.add(v.youtube_video_id);
+      pool.push(v);
+    }
+  }
+}
+
+export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20, options = {}) {
   const targetLimit = Math.min(30, Math.max(1, Number.parseInt(String(rawLimit || 20), 10) || 20));
+  const cursor = options?.cursor && typeof options.cursor === 'object' ? options.cursor : null;
+
+  if (cursor) {
+    const pool = [];
+    const seen = new Set();
+    if (Array.isArray(cursor.buffered_videos)) {
+      appendUniqueVideos(pool, cursor.buffered_videos, seen);
+    }
+    let continuation = String(cursor.continuation || '').trim();
+    const apiKey = String(cursor.api_key || '').trim();
+    const clientVersion = String(cursor.client_version || '2.20250219.01.00').trim();
+    const visitorData = String(cursor.visitor_data || '').trim();
+
+    while (pool.length < targetLimit && continuation && apiKey) {
+      const page = await fetchChannelBrowseContinuation({ continuation, apiKey, clientVersion, visitorData });
+      const prevCount = pool.length;
+      appendUniqueVideos(pool, page.videos, seen);
+      continuation = page.nextToken && page.nextToken !== continuation ? page.nextToken : '';
+      if (pool.length === prevCount && !continuation) break;
+    }
+
+    const videos = pool.slice(0, targetLimit);
+    const leftover = pool.slice(targetLimit);
+    const nextCursor =
+      leftover.length > 0 || (continuation && apiKey)
+        ? {
+            buffered_videos: leftover,
+            continuation,
+            api_key: apiKey,
+            client_version: clientVersion,
+            visitor_data: visitorData,
+            channel_id: String(cursor.channel_id || ''),
+            channel_name: String(cursor.channel_name || ''),
+          }
+        : null;
+
+    return {
+      channel_id: String(cursor.channel_id || ''),
+      channel_name: String(cursor.channel_name || 'YouTube Channel'),
+      count: videos.length,
+      videos,
+      has_more: Boolean(nextCursor),
+      next_cursor: nextCursor,
+    };
+  }
+
   const videosPageUrl = normalizeChannelVideosUrl(channelUrlInput);
   if (!videosPageUrl) {
     throw {
@@ -993,7 +1215,11 @@ export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20
   const directChannelMatch = videosPageUrl.match(/\/channel\/(UC[A-Za-z0-9_-]{22})/);
   let channelId = directChannelMatch ? directChannelMatch[1] : '';
   let channelTitle = '';
-  let videos = [];
+  let allVideos = [];
+  let apiKey = '';
+  let clientVersion = '2.20250219.01.00';
+  let visitorData = '';
+  let continuation = '';
 
   try {
     const pageRes = await fetchPageWithConsentRetry(`${videosPageUrl}?hl=en`);
@@ -1006,6 +1232,10 @@ export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20
           || html.match(/"channelId":\s*"(UC[A-Za-z0-9_-]{22})"/);
         if (extMatch?.[1]) channelId = extMatch[1];
       }
+
+      apiKey = html.match(/"INNERTUBE_API_KEY":\s*"([a-zA-Z0-9_-]+)"/)?.[1] || '';
+      clientVersion = html.match(/"INNERTUBE_CLIENT_VERSION":\s*"([^"]+)"/)?.[1] || clientVersion;
+      visitorData = html.match(/"visitorData":\s*"([^"]+)"/)?.[1] || '';
 
       const ogTitle = html.match(/<meta property="og:title" content="([^"]+)"/i);
       if (ogTitle?.[1]) {
@@ -1020,7 +1250,11 @@ export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20
         if (!channelTitle) {
           channelTitle = cleanCaptionText(ytData?.metadata?.channelMetadataRenderer?.title || '');
         }
-        videos = collectChannelVideoRenderers(ytData).slice(0, targetLimit);
+        const tabs = ytData?.contents?.twoColumnBrowseResultsRenderer?.tabs;
+        const selectedTab = Array.isArray(tabs) ? tabs.find((t) => t?.tabRenderer?.selected) : null;
+        const primaryVideos = selectedTab ? collectChannelVideoRenderers(selectedTab) : [];
+        allVideos = primaryVideos.length > 0 ? primaryVideos : collectChannelVideoRenderers(ytData);
+        continuation = extractContinuationToken(selectedTab || ytData);
       }
     }
   } catch {
@@ -1028,7 +1262,7 @@ export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20
   }
 
   // Fallback or supplement via official YouTube RSS feed (up to 15 items cleanly)
-  if ((!videos.length || !channelTitle) && channelId) {
+  if ((!allVideos.length || !channelTitle) && channelId) {
     try {
       const rssRes = await fetchWithTimeout(
         `https://www.youtube.com/feeds/videos.xml?channel_id=${encodeURIComponent(channelId)}`,
@@ -1039,8 +1273,9 @@ export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20
         const xml = await rssRes.text();
         const { feedAuthor, entries } = parseChannelRssFeed(xml, targetLimit);
         if (!channelTitle && feedAuthor) channelTitle = feedAuthor;
-        if (!videos.length && entries.length) {
-          videos = entries.slice(0, targetLimit);
+        if (!allVideos.length && entries.length) {
+          allVideos = entries;
+          continuation = '';
         }
       }
     } catch {
@@ -1048,17 +1283,35 @@ export async function resolveYoutubeChannelVideos(channelUrlInput, rawLimit = 20
     }
   }
 
-  if (!videos.length) {
+  if (!allVideos.length) {
     throw {
       status: 404,
       detail: 'Không lấy được danh sách video từ kênh YouTube này. Hãy kiểm tra lại link kênh hoặc dán danh sách link video trực tiếp.',
     };
   }
 
+  const videos = allVideos.slice(0, targetLimit);
+  const leftover = allVideos.slice(targetLimit);
+  const resolvedName = channelTitle || 'YouTube Channel';
+  const nextCursor =
+    leftover.length > 0 || (continuation && apiKey)
+      ? {
+          buffered_videos: leftover,
+          continuation,
+          api_key: apiKey,
+          client_version: clientVersion,
+          visitor_data: visitorData,
+          channel_id: channelId,
+          channel_name: resolvedName,
+        }
+      : null;
+
   return {
     channel_id: channelId,
-    channel_name: channelTitle || 'YouTube Channel',
+    channel_name: resolvedName,
     count: videos.length,
     videos,
+    has_more: Boolean(nextCursor),
+    next_cursor: nextCursor,
   };
 }

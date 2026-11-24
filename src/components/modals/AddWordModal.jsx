@@ -35,6 +35,7 @@ export function AddWordModal() {
   const [phonetic, setPhonetic] = useState('');
   const [pos, setPos] = useState('');
   const [meaning, setMeaning] = useState('');
+  const [englishMeaning, setEnglishMeaning] = useState('');
   const [exampleSentence, setExampleSentence] = useState('');
   const [topicId, setTopicId] = useState('');
   const [passageId, setPassageId] = useState(null);
@@ -93,6 +94,7 @@ export function AddWordModal() {
     setPhonetic('');
     setPos('');
     setMeaning(initialMeaning || '');
+    setEnglishMeaning('');
     setExampleSentence('');
     setErrorMessage('');
     setIsSubmitting(false);
@@ -134,10 +136,13 @@ export function AddWordModal() {
 
     try {
       const data = await autofillWordWithAI(clean);
-      if (data && (data.meaning || data.phonetic || data.example)) {
+      if (data && (data.meaning || data.phonetic || data.example || data.english_meaning)) {
         if (data.phonetic) setPhonetic(data.phonetic);
         if (data.pos) setPos(data.pos);
         if (data.meaning) setMeaning(data.meaning);
+        if (data.english_meaning || data.englishMeaning) {
+          setEnglishMeaning(data.english_meaning || data.englishMeaning);
+        }
         if (data.example && !exampleSentence) {
           setExampleSentence(data.example);
         }
@@ -180,6 +185,7 @@ export function AddWordModal() {
         phonetic: phonetic.trim(),
         pos: pos.trim(),
         meaning: cleanMeaning,
+        englishMeaning: englishMeaning.trim(),
         exampleSentence: exampleSentence.trim(),
         passageId: passageId,
       });
@@ -355,6 +361,20 @@ export function AddWordModal() {
               onChange={(e) => setMeaning(e.target.value)}
               placeholder="Ví dụ: kiên cường, phục hồi nhanh sau khó khăn..."
               className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2 rounded-2xl outline-none text-[#382E2B] text-sm font-bold shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none"
+            />
+          </div>
+
+          {/* English Meaning (Optional) */}
+          <div>
+            <label className="block text-xs font-black text-[#766C5F] uppercase tracking-wider mb-1.5">
+              Định nghĩa tiếng Anh (English meaning)
+            </label>
+            <textarea
+              rows={2}
+              value={englishMeaning}
+              onChange={(e) => setEnglishMeaning(e.target.value)}
+              placeholder="Ví dụ: able to withstand or recover quickly from difficult conditions"
+              className="w-full bg-white border-2 border-[#382E2B] focus:border-[#D36135] px-4 py-2 rounded-2xl outline-none text-[#382E2B] text-sm font-medium shadow-[1px_2px_0px_rgba(56,46,43,0.15)] transition-colors resize-none"
             />
           </div>
 

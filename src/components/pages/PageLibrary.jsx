@@ -465,7 +465,15 @@ function ThreadDetailModal({ lib }) {
                             <Volume2 className="w-4 h-4 text-[#2D2824]" />
                           </button>
                         </div>
-                        <p className="text-[#2D2824] text-xs sm:text-sm font-bold mb-2">{word.meaning}</p>
+                        <p className="text-[#2D2824] text-xs sm:text-sm font-bold mb-1.5">{word.meaning}</p>
+                        {word.english_meaning && (
+                          <div className="flex items-start gap-1.5 text-xs text-[#594B43] font-medium mb-2 leading-relaxed">
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded bg-[#E8EFE5] border border-[#5A7E56]/40 text-[#4B6B47] font-black text-[10px] shrink-0 mt-0.5">
+                              EN
+                            </span>
+                            <span>{word.english_meaning}</span>
+                          </div>
+                        )}
                       </div>
                       {word.example_sentence && (
                         <p className="text-[#68594D] text-xs italic border-l-2 border-[#E66946] pl-2.5 py-0.5 mt-auto bg-[#FAF5ED] rounded-r-lg font-medium">

@@ -13,8 +13,12 @@ import {
   EyeOff,
   Save,
   Search,
+  Terminal,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { useToast } from '../../../context/ToastContext.jsx';
+import { supabase } from '../../../lib/supabaseClient.js';
 import {
   adminDeleteStudioVideo,
   adminImportStudioYoutubeVideo,
@@ -22,8 +26,6 @@ import {
   adminResolveYoutubeChannel,
   adminUpdateStudioVideo,
 } from '../../../services/studioService.js';
-
-const LEVELS = ['A2', 'B1', 'B2', 'C1'];
 
 function parseYoutubeUrlLines(rawText) {
   const tokens = String(rawText || '')
@@ -76,26 +78,25 @@ export function AdminStudioVideosManager() {
   const [channelUrlInput, setChannelUrlInput] = useState('');
   const [channelLimit, setChannelLimit] = useState(20);
   const [resolvingChannel, setResolvingChannel] = useState(false);
+  const [loadingMoreChannel, setLoadingMoreChannel] = useState(false);
   const [channelResult, setChannelResult] = useState(null);
   const [selectedVideoIds, setSelectedVideoIds] = useState(() => new Set());
   const [channelNameOverride, setChannelNameOverride] = useState('');
-  const [defaultLevel, setDefaultLevel] = useState('B1');
 
   // Batch URLs state
   const [batchUrlsText, setBatchUrlsText] = useState('');
   const [batchChannelName, setBatchChannelName] = useState('');
-  const [batchLevel, setBatchLevel] = useState('B1');
   const parsedBatchItems = useMemo(() => parseYoutubeUrlLines(batchUrlsText), [batchUrlsText]);
 
   // Queue state
   const [queueJobs, setQueueJobs] = useState([]);
   const [runningQueue, setRunningQueue] = useState(false);
+  const [copiedCli, setCopiedCli] = useState(false);
 
   // Catalog table state
   const [videos, setVideos] = useState([]);
   const [loadingVideos, setLoadingVideos] = useState(true);
   const [filterChannel, setFilterChannel] = useState('all');
-  const [filterLevel, setFilterLevel] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [draftEdits, setDraftEdits] = useState({});
   const [busyVideoId, setBusyVideoId] = useState('');
@@ -150,6 +151,46 @@ export function AdminStudioVideosManager() {
     }
   };
 
+  const handleLoadMoreChannel = async () => {
+    if (!channelResult?.next_cursor || loadingMoreChannel || resolvingChannel) return;
+    setLoadingMoreChannel(true);
+    try {
+      const res = await adminResolveYoutubeChannel({
+        channelUrl: channelUrlInput.trim(),
+        limit: channelLimit,
+        cursor: channelResult.next_cursor,
+      });
+      const existingIds = new Set((channelResult.videos || []).map((v) => v.youtube_video_id));
+      const added = (res.videos || []).filter((v) => !existingIds.has(v.youtube_video_id));
+      setChannelResult((prev) =>
+        prev
+          ? {
+              ...prev,
+              videos: [...(prev.videos || []), ...added],
+              has_more: Boolean(res.has_more),
+              next_cursor: res.next_cursor || null,
+            }
+          : prev
+      );
+      setSelectedVideoIds((prev) => {
+        const next = new Set(prev);
+        for (const v of added) {
+          if (!v.already_imported) next.add(v.youtube_video_id);
+        }
+        return next;
+      });
+      if (added.length > 0) {
+        showToast(`Đã quét thêm ${added.length} video từ kênh "${channelResult.channel_name || 'YouTube'}".`, 'success');
+      } else {
+        showToast('Không còn video mới nào thêm từ kênh này.', 'info');
+      }
+    } catch (err) {
+      showToast(err?.message || 'Không tải thêm được video từ kênh này.', 'error');
+    } finally {
+      setLoadingMoreChannel(false);
+    }
+  };
+
   const toggleVideoSelection = (vid) => {
     setSelectedVideoIds((prev) => {
       const next = new Set(prev);
@@ -179,7 +220,7 @@ export function AdminStudioVideosManager() {
         const job = queue[myPos];
 
         setQueueJobs((prev) =>
-          prev.map((item, i) => (i === job.idx ? { ...item, status: 'processing', error: '' } : item))
+          prev.map((item, i) => (i === job.idx ? { ...item, status: 'processing', error: '', errorCode: '' } : item))
         );
 
         try {
@@ -197,6 +238,7 @@ export function AdminStudioVideosManager() {
                 ? {
                     ...item,
                     status: 'done',
+                    errorCode: '',
                     title: imported?.title || item.title || item.youtube_video_id,
                     cueCount: imported?.cue_count || 0,
                     translatedCues: imported?.translated_cues || 0,
@@ -212,17 +254,22 @@ export function AdminStudioVideosManager() {
                 ? {
                     ...item,
                     status: 'error',
+                    errorCode: err?.code || '',
                     error: err?.message || 'Lỗi trích xuất/dịch phụ đề',
                   }
                 : item
             )
           );
         }
+
+        if (cursor < queue.length) {
+          await new Promise((resolve) => setTimeout(resolve, 600));
+        }
       }
     };
 
-    const concurrency = Math.min(2, queue.length);
-    await Promise.all(Array.from({ length: concurrency }, () => worker()));
+    // Sequential queue reduces YouTube 429 burst throttling on shared Cloudflare POP IPs
+    await worker();
     setRunningQueue(false);
     await refreshCatalog();
 
@@ -248,7 +295,6 @@ export function AdminStudioVideosManager() {
       url: v.url,
       title: v.title || '',
       channelName: (channelNameOverride || channelResult.channel_name || '').trim(),
-      level: defaultLevel,
       status: 'pending',
       error: '',
       cueCount: 0,
@@ -267,7 +313,6 @@ export function AdminStudioVideosManager() {
       url: item.url,
       title: '',
       channelName: batchChannelName.trim(),
-      level: batchLevel,
       status: 'pending',
       error: '',
       cueCount: 0,
@@ -301,14 +346,13 @@ export function AdminStudioVideosManager() {
     return videos.filter((v) => {
       const ch = (v.channel_name || v.author || 'YouTube').trim();
       if (filterChannel !== 'all' && ch !== filterChannel) return false;
-      if (filterLevel !== 'all' && (v.level || 'B1') !== filterLevel) return false;
       if (q) {
         const hay = `${v.title || ''} ${v.youtube_video_id || ''} ${ch}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
     });
-  }, [videos, filterChannel, filterLevel, searchQuery]);
+  }, [videos, filterChannel, searchQuery]);
 
   const setDraftField = (id, field, value) => {
     setDraftEdits((prev) => ({
@@ -332,7 +376,6 @@ export function AdminStudioVideosManager() {
         patch.channel_name = nextCh;
         patch.author = nextCh;
       }
-      if (draft.level !== undefined) patch.level = draft.level;
 
       await adminUpdateStudioVideo(video.id, patch);
       setVideos((prev) => prev.map((v) => (v.id === video.id ? { ...v, ...patch } : v)));
@@ -382,6 +425,60 @@ export function AdminStudioVideosManager() {
   const queueDoneCount = queueJobs.filter((j) => j.status === 'done').length;
   const queueErrorCount = queueJobs.filter((j) => j.status === 'error').length;
   const queueFinishedCount = queueDoneCount + queueErrorCount;
+  const hasBotBlockedError = queueJobs.some((j) => j.errorCode === 'YOUTUBE_BOT_BLOCKED');
+
+  const recommendedCliCommand = useMemo(() => {
+    if (importMode === 'channel' && channelUrlInput.trim()) {
+      const chOverride = channelNameOverride.trim() ? ` --channel-name "${channelNameOverride.trim()}"` : '';
+      return `npm run import-studio -- --channel "${channelUrlInput.trim()}" --limit ${channelLimit}${chOverride}`;
+    }
+    if (parsedBatchItems.length > 0) {
+      const ids = parsedBatchItems.map((i) => i.youtube_video_id).join(',');
+      const chName = batchChannelName.trim() ? ` --channel-name "${batchChannelName.trim()}"` : '';
+      return `npm run import-studio -- --urls "${ids}"${chName}`;
+    }
+    return 'npm run import-studio -- --channel "https://www.youtube.com/@TEDEd" --limit 20';
+  }, [importMode, channelUrlInput, channelLimit, channelNameOverride, parsedBatchItems, batchChannelName]);
+
+  const handleCopyCli = async () => {
+    try {
+      await navigator.clipboard.writeText(recommendedCliCommand);
+      setCopiedCli(true);
+      setTimeout(() => setCopiedCli(false), 2000);
+      showToast('Đã chép lệnh import qua máy cá nhân (PA 1).', 'success');
+    } catch {
+      showToast('Không chép tự động được, hãy bôi đen lệnh để copy.', 'warning');
+    }
+  };
+
+  const handleConnectLocalTool = async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      const accessToken = data?.session?.access_token;
+      if (!accessToken) {
+        showToast('Không tìm thấy phiên đăng nhập Admin.', 'error');
+        return;
+      }
+      try {
+        const res = await fetch('http://127.0.0.1:4199/api/connect-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: accessToken }),
+        });
+        const payload = await res.json().catch(() => ({}));
+        if (res.ok && payload?.ok) {
+          showToast('Đã kết nối phiên Admin sang HiVocab_YouTube_Tool.exe!', 'success');
+          return;
+        }
+      } catch {
+        // Fallback to copying token to clipboard when local tool is closed or blocked by browser PNA
+      }
+      await navigator.clipboard.writeText(accessToken);
+      showToast('Đã chép Access Token Admin — mở HiVocab_YouTube_Tool.exe và dán vào ô Cách 2!', 'success');
+    } catch {
+      showToast('Không thể lấy Access Token phiên hiện tại.', 'error');
+    }
+  };
 
   return (
     <div className="bg-[#fffcf7] border-2 border-[#3D352E] rounded-3xl p-5 sm:p-6 shadow-[4px_4px_0px_#3D352E] space-y-5">
@@ -400,9 +497,20 @@ export function AdminStudioVideosManager() {
             </p>
           </div>
         </div>
-        <span className="self-start px-3 py-1 rounded-full bg-[#EEF5EC] border border-[#4D6B53] text-xs font-black text-[#355A3B] shrink-0">
-          {videos.length} video trong kho
-        </span>
+        <div className="flex flex-wrap items-center gap-2 self-start shrink-0">
+          <button
+            type="button"
+            onClick={handleConnectLocalTool}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white hover:bg-[#F4E3B4] border border-[#3D352E] text-xs font-black text-[#2E2823] cursor-pointer"
+            title="Truyền phiên đăng nhập Admin sang HiVocab_YouTube_Tool.exe (không bị CAPTCHA)"
+          >
+            <Terminal className="w-3.5 h-3.5 text-[#D96B43]" />
+            <span>Kết nối Tool PC</span>
+          </button>
+          <span className="px-3 py-1 rounded-full bg-[#EEF5EC] border border-[#4D6B53] text-xs font-black text-[#355A3B]">
+            {videos.length} video trong kho
+          </span>
+        </div>
       </div>
 
       {/* Mode Switcher */}
@@ -476,7 +584,7 @@ export function AdminStudioVideosManager() {
           {channelResult && (
             <div className="space-y-3 pt-2 border-t border-[#E8DEC8]">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end">
-                <div className="md:col-span-5 space-y-1">
+                <div className="md:col-span-8 space-y-1">
                   <label className="text-[11px] font-black uppercase text-[#554D42]">
                     Tên Kênh hiển thị trong bộ lọc Shadowing
                   </label>
@@ -487,20 +595,6 @@ export function AdminStudioVideosManager() {
                     placeholder="Ví dụ: TED-Ed, Friends, BBC Learning English..."
                     className="w-full px-3 py-2 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#2E2823]"
                   />
-                </div>
-                <div className="md:col-span-3 space-y-1">
-                  <label className="text-[11px] font-black uppercase text-[#554D42]">Trình độ mặc định</label>
-                  <select
-                    value={defaultLevel}
-                    onChange={(e) => setDefaultLevel(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#2E2823]"
-                  >
-                    {LEVELS.map((lvl) => (
-                      <option key={lvl} value={lvl}>
-                        {lvl}
-                      </option>
-                    ))}
-                  </select>
                 </div>
                 <div className="md:col-span-4 flex flex-wrap gap-2">
                   <button
@@ -576,15 +670,37 @@ export function AdminStudioVideosManager() {
                   Đã chọn <strong className="text-[#2E2823]">{selectedVideoIds.size}</strong> /{' '}
                   {channelResult.videos?.length || 0} video (mặc định Free, tự trích xuất sub Anh &amp; dịch 100% sang Tiếng Việt)
                 </span>
-                <button
-                  type="button"
-                  disabled={runningQueue || selectedVideoIds.size === 0}
-                  onClick={handleStartChannelImport}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] disabled:opacity-50 cursor-pointer"
-                >
-                  {runningQueue ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-                  <span>Nạp {selectedVideoIds.size} video đã chọn</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {channelResult.next_cursor && (
+                    <button
+                      type="button"
+                      disabled={loadingMoreChannel || runningQueue}
+                      onClick={handleLoadMoreChannel}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#EEF5EC] hover:bg-[#DFEDDC] text-[#355A3B] text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] disabled:opacity-50 cursor-pointer"
+                    >
+                      {loadingMoreChannel ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                      <span>{loadingMoreChannel ? 'Đang quét thêm...' : '+ Quét thêm video kênh này'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleCopyCli}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white hover:bg-[#F4E3B4] text-[#2E2823] text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] cursor-pointer"
+                    title="Chạy từ máy cá nhân bằng IP thật để không bao giờ bị YouTube chặn Cloudflare"
+                  >
+                    {copiedCli ? <Check className="w-3.5 h-3.5 text-[#4D6B53]" /> : <Terminal className="w-3.5 h-3.5" />}
+                    <span>{copiedCli ? 'Đã chép lệnh' : 'Chép lệnh máy cá nhân (PA 1)'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={runningQueue || selectedVideoIds.size === 0}
+                    onClick={handleStartChannelImport}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-xs font-black border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] disabled:opacity-50 cursor-pointer"
+                  >
+                    {runningQueue ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                    <span>Nạp {selectedVideoIds.size} video đã chọn</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -608,7 +724,7 @@ export function AdminStudioVideosManager() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end">
-            <div className="md:col-span-6 space-y-1">
+            <div className="md:col-span-9 space-y-1">
               <label className="text-[11px] font-black uppercase text-[#554D42]">
                 Tên Kênh phân loại (bỏ trống sẽ tự lấy tên kênh trên YouTube)
               </label>
@@ -619,20 +735,6 @@ export function AdminStudioVideosManager() {
                 placeholder="Ví dụ: BBC Learning English, Suits, Friends..."
                 className="w-full px-3 py-2 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#2E2823]"
               />
-            </div>
-            <div className="md:col-span-3 space-y-1">
-              <label className="text-[11px] font-black uppercase text-[#554D42]">Trình độ mặc định</label>
-              <select
-                value={batchLevel}
-                onChange={(e) => setBatchLevel(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#2E2823]"
-              >
-                {LEVELS.map((lvl) => (
-                  <option key={lvl} value={lvl}>
-                    {lvl}
-                  </option>
-                ))}
-              </select>
             </div>
             <div className="md:col-span-3">
               <button
@@ -700,13 +802,35 @@ export function AdminStudioVideosManager() {
                   {job.status === 'error' && (
                     <span className="inline-flex items-center gap-1 text-[#B53D2A]" title={job.error}>
                       <AlertTriangle className="w-3.5 h-3.5" />
-                      {job.error}
+                      <span className="max-w-[260px] truncate">{job.error}</span>
                     </span>
                   )}
                 </span>
               </div>
             ))}
           </div>
+
+          {hasBotBlockedError && (
+            <div className="bg-[#FFF4E0] border-2 border-[#D96B43] rounded-xl p-3 space-y-2 text-xs">
+              <div className="flex items-center justify-between gap-2">
+                <span className="font-black text-[#B53D2A] inline-flex items-center gap-1.5">
+                  <Terminal className="w-4 h-4 shrink-0" />
+                  YouTube đang chặn IP máy chủ Cloudflare — chạy lệnh trên máy cá nhân (0đ, 100% qua):
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCli}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white border border-[#3D352E] text-[11px] font-black hover:bg-[#F4E3B4] shrink-0 cursor-pointer"
+                >
+                  {copiedCli ? <Check className="w-3 h-3 text-[#4D6B53]" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedCli ? 'Đã chép' : 'Chép lệnh'}</span>
+                </button>
+              </div>
+              <pre className="bg-[#2E2823] text-[#FFF9F0] text-[11px] rounded-lg p-2.5 overflow-x-auto font-mono">
+                {recommendedCliCommand}
+              </pre>
+            </div>
+          )}
         </div>
       )}
 
@@ -726,18 +850,6 @@ export function AdminStudioVideosManager() {
               {availableChannels.map((ch) => (
                 <option key={ch.name} value={ch.name}>
                   {ch.name} ({ch.count})
-                </option>
-              ))}
-            </select>
-            <select
-              value={filterLevel}
-              onChange={(e) => setFilterLevel(e.target.value)}
-              className="px-2.5 py-1.5 rounded-xl border-2 border-[#3D352E] bg-white text-xs font-bold text-[#2E2823]"
-            >
-              <option value="all">Mọi trình độ</option>
-              {LEVELS.map((lvl) => (
-                <option key={lvl} value={lvl}>
-                  {lvl}
                 </option>
               ))}
             </select>
@@ -776,7 +888,6 @@ export function AdminStudioVideosManager() {
               const titleVal = draft.title !== undefined ? draft.title : video.title;
               const channelVal =
                 draft.channel_name !== undefined ? draft.channel_name : video.channel_name || video.author || '';
-              const levelVal = draft.level !== undefined ? draft.level : video.level || 'B1';
               const hasChanges = Boolean(draftEdits[video.id]);
               const isBusy = busyVideoId === video.id;
 
@@ -796,28 +907,17 @@ export function AdminStudioVideosManager() {
                         type="text"
                         value={titleVal}
                         onChange={(e) => setDraftField(video.id, 'title', e.target.value)}
-                        className="sm:col-span-6 px-2.5 py-1.5 rounded-lg border border-[#3D352E]/50 bg-white text-xs font-bold text-[#2E2823]"
+                        className="sm:col-span-7 px-2.5 py-1.5 rounded-lg border border-[#3D352E]/50 bg-white text-xs font-bold text-[#2E2823]"
                         title="Tiêu đề video"
                       />
                       <input
                         type="text"
                         value={channelVal}
                         onChange={(e) => setDraftField(video.id, 'channel_name', e.target.value)}
-                        className="sm:col-span-4 px-2.5 py-1.5 rounded-lg border border-[#3D352E]/50 bg-white text-xs font-semibold text-[#554D42]"
+                        className="sm:col-span-5 px-2.5 py-1.5 rounded-lg border border-[#3D352E]/50 bg-white text-xs font-semibold text-[#554D42]"
                         placeholder="Tên kênh"
                         title="Kênh phân loại"
                       />
-                      <select
-                        value={levelVal}
-                        onChange={(e) => setDraftField(video.id, 'level', e.target.value)}
-                        className="sm:col-span-2 px-2 py-1.5 rounded-lg border border-[#3D352E]/50 bg-white text-xs font-black text-[#2E2823]"
-                      >
-                        {LEVELS.map((lvl) => (
-                          <option key={lvl} value={lvl}>
-                            {lvl}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                   </div>
 

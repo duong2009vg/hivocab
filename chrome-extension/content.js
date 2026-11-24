@@ -1,5 +1,4 @@
 (() => {
-  const DICT_URL = 'https://api.dictionaryapi.dev/api/v2/entries/en/';
   const APP_URL  = 'https://hivocab.site';
 
   let fab       = null;
@@ -85,7 +84,20 @@
   // ── Utility ───────────────────────────────────────────────────────────────
   function send(type, payload = {}) {
     return new Promise(resolve => {
-      chrome.runtime.sendMessage({ type, requestId: `clip-${Date.now()}-${++requestId}`, payload }, resolve);
+      try {
+        chrome.runtime.sendMessage(
+          { type, requestId: `clip-${Date.now()}-${++requestId}`, payload },
+          res => {
+            if (chrome.runtime.lastError) {
+              resolve({ ok: false, error: chrome.runtime.lastError.message });
+              return;
+            }
+            resolve(res);
+          }
+        );
+      } catch (err) {
+        resolve({ ok: false, error: err?.message || 'Extension disconnected' });
+      }
     });
   }
 
@@ -190,78 +202,50 @@
     }
   }
 
-  // ── Lookup: DeepL (qua background) + FreeDict song song ──────────────────
+  // ── Lookup qua background (Supabase 70k DB + FreeDict + AI/DeepL + fallback) ──
   async function lookup(term) {
-    const key      = term.trim().toLowerCase();
+    const clean = term.trim().replace(/\s+/g, ' ');
+    const key   = clean.toLowerCase();
     if (lookupCache.has(key)) return lookupCache.get(key);
 
     const isPhrase = key.includes(' ');
     const result   = {
-      word:           term.trim(),
+      word:           clean,
       phonetic:       '',
       meaning:        '',
       example:        '',
       audioUrl:       null,
       audioEl:        null,   // Audio element pre-loaded, cho phát tức thì
-      hasRealExample: false,  // true nếu FreeDict cung cấp ví dụ thực
+      hasRealExample: false,  // true nếu DB / FreeDict / AI cung cấp ví dụ thực
       isPhrase,
     };
 
-    // Chạy song song: Dịch nghĩa (qua background) và FreeDict (2.5s timeout)
-    const translatePromise = send('translate-text', { text: term.trim(), from: 'en', to: 'vi' })
-      .catch(() => null);
+    const res = await send('lookup-word', { term: clean }).catch(() => null);
+    const d   = res?.data;
 
-    const dictPromise = isPhrase
-      ? Promise.resolve(null)
-      : fetchWithTimeout(DICT_URL + encodeURIComponent(key), {}, 2500)
-          .then(async r => (r && r.ok) ? (await r.json()) : null)
-          .catch(() => null);
-
-    const [translateData, dictData] = await Promise.all([translatePromise, dictPromise]);
-
-    // Nghĩa tiếng Việt từ DeepL
-    if (translateData?.ok && translateData?.text) result.meaning = translateData.text;
-
-    // IPA + Audio + Example từ FreeDict (chỉ từ đơn)
-    if (Array.isArray(dictData) && dictData.length > 0) {
-      const entry = dictData[0];
-      result.word     = entry.word || result.word;
-      result.phonetic = entry.phonetic || entry.phonetics?.find(p => p.text)?.text || '';
-
-      // Pre-load audio ngầm để phát gần như tức thì khi user click
-      if (entry.phonetics) {
-        const withAudio = entry.phonetics.filter(p => p.audio);
-        const us        = withAudio.find(p => p.audio.includes('-us.'));
-        const audioUrl  = (us || withAudio[0])?.audio || null;
-        if (audioUrl) {
-          result.audioUrl = audioUrl;
-          const audio     = new Audio(audioUrl);
-          audio.preload   = 'auto';
-          audio.load();         // bắt đầu buffer ngầm ngay lập tức
-          result.audioEl  = audio;
-        }
+    if (d) {
+      if (d.word) result.word = d.word;
+      if (d.phonetic) result.phonetic = d.phonetic;
+      if (d.meaning) result.meaning = d.meaning;
+      if (d.example && isEnglishExample(d.example)) {
+        result.example = d.example;
+        result.hasRealExample = Boolean(d.hasRealExample || d.example);
       }
-
-      // Tìm ví dụ tiếng Anh đầu tiên
-      let foundExample = '';
-      outer: for (const e of dictData) {
-        for (const m of (e.meanings || [])) {
-          for (const d of (m.definitions || [])) {
-            if (d.example && isEnglishExample(d.example)) {
-              foundExample = d.example;
-              break outer;
-            }
-          }
-        }
-      }
-      if (foundExample) {
-        result.example        = foundExample;
-        result.hasRealExample = true;
+      if (d.audioUrl) {
+        result.audioUrl = d.audioUrl;
+        try {
+          const audio = new Audio(d.audioUrl);
+          audio.preload = 'auto';
+          audio.load();
+          result.audioEl = audio;
+        } catch (_) {}
       }
     }
 
-    // Lưu cache kết quả (ví dụ có thể được cập nhật sau bởi Groq)
-    lookupCache.set(key, result);
+    // Chỉ lưu cache khi có nghĩa để tránh giữ kết quả lỗi
+    if (result.meaning) {
+      lookupCache.set(key, result);
+    }
     return result;
   }
 

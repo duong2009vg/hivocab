@@ -16,7 +16,7 @@ const ALLOWED_POS = new Set(['noun', 'verb', 'adjective', 'adverb', 'phrase', 'i
 
 const ALLOWED_CEFR = new Set(['A1', 'A2', 'B1', 'B2', 'C1', 'C2']);
 
-function normalizeEntryList(rawData, fallbackPos, fallbackMeaning, fallbackExample, fallbackExampleVi) {
+function normalizeEntryList(rawData, fallbackPos, fallbackMeaning, fallbackEnglishMeaning, fallbackExample, fallbackExampleVi) {
     const rawEntries = Array.isArray(rawData?.entries) ? rawData.entries : [];
     const seen = new Set();
     const entries = [];
@@ -29,6 +29,7 @@ function normalizeEntryList(rawData, fallbackPos, fallbackMeaning, fallbackExamp
         entries.push({
             pos: ALLOWED_POS.has(rPos) ? rPos : fallbackPos,
             meaning: m,
+            english_meaning: sanitizeField(item.english_meaning || item.definition_en, 300) || fallbackEnglishMeaning,
             example: sanitizeField(item.example, 300),
             example_vi: sanitizeField(item.example_vi, 300),
         });
@@ -37,6 +38,7 @@ function normalizeEntryList(rawData, fallbackPos, fallbackMeaning, fallbackExamp
         entries.push({
             pos: fallbackPos,
             meaning: fallbackMeaning,
+            english_meaning: fallbackEnglishMeaning,
             example: fallbackExample,
             example_vi: fallbackExampleVi,
         });
@@ -49,8 +51,38 @@ function buildSensesFromEntries(entries) {
         id: idx + 1,
         grammar: e.pos ? `[ ${e.pos} ]` : '',
         definition_vi: e.meaning,
+        definition_en: e.english_meaning || '',
         examples: e.example ? [{ en: e.example, vi: e.example_vi || '' }] : [],
     }));
+}
+
+async function fetchOfficialEnglishMeanings(word) {
+    const byPos = new Map();
+    let firstDef = '';
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 3500);
+    try {
+        const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, {
+            signal: controller.signal,
+        });
+        if (!res.ok) return { firstDef, byPos };
+        const arr = await res.json();
+        if (!Array.isArray(arr)) return { firstDef, byPos };
+        for (const entry of arr) {
+            for (const m of entry?.meanings || []) {
+                const pos = sanitizeField(m?.partOfSpeech, 32).toLowerCase();
+                const def = sanitizeField(m?.definitions?.[0]?.definition, 300);
+                if (!def) continue;
+                if (!firstDef) firstDef = def;
+                if (pos && !byPos.has(pos)) byPos.set(pos, def);
+            }
+        }
+    } catch (_) {
+        // Non-blocking fallback when Free Dictionary API doesn't have phrase/timeouts
+    } finally {
+        clearTimeout(timer);
+    }
+    return { firstDef, byPos };
 }
 
 function sanitizeField(val, maxLen = 280) {
@@ -191,9 +223,17 @@ async function handleDictionaryLookup(context, rawWord) {
             const kvData = await env.DICTIONARY_KV.get(cacheKey, 'json');
             if (kvData && typeof kvData.word === 'string' && kvData.word.toLowerCase() === word.toLowerCase()) {
                 const kvPos = ALLOWED_POS.has(String(kvData.pos || '').toLowerCase()) ? String(kvData.pos).toLowerCase() : 'từ vựng';
-                const kvEntries = normalizeEntryList(kvData, kvPos, kvData.meaning || kvData.viSummary || '', kvData.example || '', kvData.example_vi || '');
+                const kvEntries = normalizeEntryList(
+                    kvData,
+                    kvPos,
+                    kvData.meaning || kvData.viSummary || '',
+                    kvData.english_meaning || kvData.entries?.[0]?.english_meaning || '',
+                    kvData.example || '',
+                    kvData.example_vi || ''
+                );
                 const normalizedKv = {
                     ...kvData,
+                    english_meaning: kvData.english_meaning || kvEntries[0]?.english_meaning || '',
                     entries: kvEntries,
                     senses: Array.isArray(kvData.senses) && kvData.senses.length > 0 ? kvData.senses : buildSensesFromEntries(kvEntries),
                 };
@@ -238,12 +278,14 @@ Return strictly raw JSON with this exact schema:
   "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom" | "preposition" | "conjunction" | "pronoun",
   "cefr": "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
   "meaning": "nghĩa tiếng Việt chính ngắn gọn, chuẩn xác",
+  "english_meaning": "Concise official-style English definition matching this sense",
   "example": "Authentic example sentence in English",
   "example_vi": "Bản dịch tiếng Việt của câu ví dụ",
   "entries": [
     {
       "pos": "noun" | "verb" | "adjective" | "adverb" | "phrase" | "idiom",
       "meaning": "nghĩa tiếng Việt ngắn gọn, chuẩn xác",
+      "english_meaning": "Concise English definition matching this sense",
       "example": "Authentic example sentence in English",
       "example_vi": "Bản dịch tiếng Việt của câu ví dụ"
     }
@@ -251,11 +293,12 @@ Return strictly raw JSON with this exact schema:
 }
 Rules:
 1. Provide accurate IPA phonetic notation in "phonetic".
-2. Provide 1 to 3 distinct common senses in "entries" (each with pos, Vietnamese meaning, English example, and Vietnamese translation).
-3. Put the primary meaning and example in top-level "meaning", "example", "example_vi".
+2. Provide 1 to 3 distinct common senses in "entries" (each with pos, Vietnamese meaning, concise English meaning, English example, and Vietnamese translation).
+3. Put the primary meaning and example in top-level "meaning", "english_meaning", "example", "example_vi".
 4. Output strictly raw JSON only, no markdown, no explanation.`;
 
     const userPrompt = `Lookup word JSON: ${JSON.stringify(word)}`;
+    const officialDictPromise = fetchOfficialEnglishMeanings(word);
     let parsedResult = null;
     let providerUsed = '';
 
@@ -276,6 +319,8 @@ Rules:
         parsedResult = await fetchAI(GROQ_URL, groqKey, GROQ_MODEL, systemPrompt, userPrompt, 12000);
         if (parsedResult) providerUsed = 'groq';
     }
+
+    const officialDict = await officialDictPromise;
 
     if (!parsedResult || typeof parsedResult !== 'object') {
         return new Response(JSON.stringify({
@@ -303,9 +348,18 @@ Rules:
         });
     }
 
+    const safeEnglishMeaning =
+        officialDict.byPos.get(safePos) ||
+        officialDict.firstDef ||
+        sanitizeField(parsedResult.english_meaning, 300) ||
+        sanitizeField(parsedResult.entries?.[0]?.english_meaning, 300);
     const safeExample = sanitizeField(parsedResult.example, 300) || sanitizeField(parsedResult.entries?.[0]?.example, 300);
     const safeExampleVi = sanitizeField(parsedResult.example_vi, 300) || sanitizeField(parsedResult.entries?.[0]?.example_vi, 300);
-    const entries = normalizeEntryList(parsedResult, safePos, safeMeaning, safeExample, safeExampleVi);
+    const entries = normalizeEntryList(parsedResult, safePos, safeMeaning, safeEnglishMeaning, safeExample, safeExampleVi)
+        .map((e) => ({
+            ...e,
+            english_meaning: officialDict.byPos.get(e.pos) || e.english_meaning || officialDict.firstDef || '',
+        }));
     const senses = buildSensesFromEntries(entries);
 
     const finalData = {
@@ -314,6 +368,7 @@ Rules:
         pos: entries[0]?.pos || safePos,
         ...(safeCefr ? { cefr: safeCefr } : {}),
         meaning: entries[0]?.meaning || safeMeaning,
+        english_meaning: entries[0]?.english_meaning || safeEnglishMeaning,
         example: entries[0]?.example || safeExample,
         example_vi: entries[0]?.example_vi || safeExampleVi,
         entries,

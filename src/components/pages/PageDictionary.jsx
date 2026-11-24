@@ -70,7 +70,8 @@ export function PageDictionary() {
       ? result.entries
       : Array.isArray(result.senses) && result.senses.length > 0
       ? result.senses.map((s) => ({
-          meaning: s.definition_vi || s.definition_en || '',
+          meaning: s.definition_vi || '',
+          english_meaning: s.definition_en || '',
           pos: s.grammar ? s.grammar.replace(/[\[\]]/g, '').trim() : result.pos || '',
           example: s.examples?.[0]?.en || '',
           example_vi: s.examples?.[0]?.vi || '',
@@ -78,6 +79,7 @@ export function PageDictionary() {
       : [
           {
             meaning: result.meaning || result.viSummary || '',
+            english_meaning: result.english_meaning || '',
             pos: result.pos || '',
             example: result.example || '',
             example_vi: result.example_vi || '',
@@ -244,6 +246,16 @@ export function PageDictionary() {
                 <p className="text-base font-bold text-[#1e1b17] leading-snug">
                   {entry.meaning}
                 </p>
+                {entry.english_meaning && (
+                  <div className="p-2.5 bg-[#f3f8f1] rounded-xl border border-[#86a378]/50">
+                    <span className="text-[10px] font-black uppercase text-[#4b6540] tracking-wider block mb-0.5">
+                      English Meaning
+                    </span>
+                    <p className="text-xs font-semibold text-[#2e2823] leading-relaxed">
+                      {entry.english_meaning}
+                    </p>
+                  </div>
+                )}
 
                 {entry.example && (
                   <div className="p-3 bg-[#FAF5EB] rounded-xl border border-dashed border-[#d8c8b4] text-xs text-[#594B43]">
@@ -458,6 +470,16 @@ export function PageDictionary() {
                         <p className="text-xl font-bold text-[#2e2823] leading-snug">
                           {entry.meaning}
                         </p>
+                        {entry.english_meaning && (
+                          <div className="mt-2 p-3 bg-[#f3f8f1] rounded-2xl border border-[#86a378]/60">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-[#4b6540] block mb-0.5">
+                              ENGLISH MEANING
+                            </span>
+                            <p className="text-sm font-semibold text-[#2e2823] leading-relaxed">
+                              {entry.english_meaning}
+                            </p>
+                          </div>
+                        )}
                       </div>
 
                       {entry.example && (

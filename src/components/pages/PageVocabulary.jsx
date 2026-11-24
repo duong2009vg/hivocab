@@ -496,10 +496,18 @@ export function PageVocabulary() {
                     </div>
                   </div>
 
-                  <div className="mt-1 ml-8">
+                  <div className="mt-1 ml-8 space-y-1">
                     <p className="text-sm font-bold text-[#4A3E39]">
                       {w.meaning}
                     </p>
+                    {(w.englishMeaning || w.english_meaning) && (
+                      <div className="flex items-start gap-1.5 text-xs text-[#68594D] font-medium leading-relaxed">
+                        <span className="inline-flex items-center px-1.5 py-0.2 rounded bg-[#eaf4e8] border border-[#6e9b6a]/50 text-[#558451] font-black text-[10px] shrink-0 mt-0.5">
+                          EN
+                        </span>
+                        <span>{w.englishMeaning || w.english_meaning}</span>
+                      </div>
+                    )}
                   </div>
 
                   {w.exampleSentence && (
@@ -869,6 +877,14 @@ export function PageVocabulary() {
                             <div className="text-base font-extrabold text-[#3a342c] mt-1">
                               {w.meaning}
                             </div>
+                            {(w.englishMeaning || w.english_meaning) && (
+                              <div className="mt-1 flex items-start gap-1.5 text-xs font-semibold text-[#64594d] leading-snug">
+                                <span className="inline-flex items-center px-1.5 py-0.2 rounded bg-[#eaf4e8] border border-[#6e9b6a]/50 text-[#558451] font-black text-[10px] shrink-0 mt-0.5">
+                                  EN
+                                </span>
+                                <span>{w.englishMeaning || w.english_meaning}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -1004,6 +1020,18 @@ export function PageVocabulary() {
                         {selectedWord.meaning}
                       </p>
                     </div>
+
+                    {/* English Definition */}
+                    {(selectedWord.englishMeaning || selectedWord.english_meaning) && (
+                      <div className="mt-3 p-4 bg-[#f3f8f1] rounded-2xl border-2 border-[#cbe0c5]">
+                        <div className="text-xs font-black uppercase text-[#558451] tracking-wider mb-1">
+                          Định nghĩa tiếng Anh (English Meaning)
+                        </div>
+                        <p className="text-sm font-bold text-[#37322f] leading-relaxed">
+                          {selectedWord.englishMeaning || selectedWord.english_meaning}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Example Sentence */}
                     {selectedWord.exampleSentence && (

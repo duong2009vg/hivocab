@@ -148,11 +148,6 @@ export function ChannelVideoRow({
                   </div>
                 </div>
 
-                {/* Top-left Level badge */}
-                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E] shadow-[1px_1px_0px_#3D352E]">
-                  {clip.level || 'Story'}
-                </span>
-
                 {/* Top-right Remove button for user clips */}
                 {(clip.personal || clip.guest) && (
                   <button

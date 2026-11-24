@@ -46,6 +46,7 @@ export function AdminBulkImportTab() {
             phonetic: String(item.phonetic || '').trim(),
             pos: String(item.pos || '').trim(),
             meaning: String(item.meaning || '').trim(),
+            english_meaning: String(item.english_meaning || item.englishMeaning || '').trim(),
             example_sentence: String(item.example_sentence || item.example || '').trim(),
             isValid: Boolean(item.word && item.meaning),
           }))
@@ -69,6 +70,7 @@ export function AdminBulkImportTab() {
         const pos = (parts[2] || '').trim().replace(/^"/, '').replace(/"$/, '');
         const meaning = (parts[3] || parts[1] || '').trim().replace(/^"/, '').replace(/"$/, '');
         const example = (parts[4] || '').trim().replace(/^"/, '').replace(/"$/, '');
+        const englishMeaning = (parts[5] || '').trim().replace(/^"/, '').replace(/"$/, '');
 
         if (word) {
           results.push({
@@ -76,6 +78,7 @@ export function AdminBulkImportTab() {
             phonetic: phonetic.startsWith('/') ? phonetic : '',
             pos,
             meaning,
+            english_meaning: englishMeaning,
             example_sentence: example,
             isValid: Boolean(word && meaning),
           });
@@ -105,6 +108,7 @@ export function AdminBulkImportTab() {
         phonetic: w.phonetic || null,
         pos: w.pos || null,
         meaning: w.meaning || null,
+        english_meaning: w.english_meaning || null,
         example_sentence: w.example_sentence || null,
         word_order: idx + 1,
       }));
@@ -140,7 +144,7 @@ export function AdminBulkImportTab() {
             <span>Nhập Từ Vựng Hàng Loạt (Bulk CSV / JSON)</span>
           </h3>
           <p className="text-xs font-semibold text-[#6E5D53] mt-1">
-            Dán danh sách từ theo định dạng CSV (<code className="font-mono bg-[#FAF5EB] px-2 py-0.5 rounded-lg border border-[#3D352E]/30 text-[#DE5D53] font-bold">word,phonetic,pos,meaning,example</code>) hoặc JSON mảng đối tượng.
+            Dán danh sách từ theo định dạng CSV (<code className="font-mono bg-[#FAF5EB] px-2 py-0.5 rounded-lg border border-[#3D352E]/30 text-[#DE5D53] font-bold">word,phonetic,pos,meaning,example,english_meaning</code>) hoặc JSON mảng đối tượng.
           </p>
         </div>
 
@@ -220,6 +224,7 @@ export function AdminBulkImportTab() {
                   <th className="py-2.5 px-3.5">PHIÊN ÂM</th>
                   <th className="py-2.5 px-3.5">TỪ LOẠI</th>
                   <th className="py-2.5 px-3.5">NGHĨA</th>
+                  <th className="py-2.5 px-3.5">ENGLISH MEANING</th>
                   <th className="py-2.5 px-3.5">TRẠNG THÁI</th>
                 </tr>
               </thead>
@@ -230,6 +235,7 @@ export function AdminBulkImportTab() {
                     <td className="py-2.5 px-3.5 font-mono text-[#6E5D53]">{row.phonetic || '—'}</td>
                     <td className="py-2.5 px-3.5 font-semibold text-[#6E5D53]">{row.pos || '—'}</td>
                     <td className="py-2.5 px-3.5 font-semibold text-[#3D352E]">{row.meaning || '—'}</td>
+                    <td className="py-2.5 px-3.5 text-[#557A46] font-medium">{row.english_meaning || '—'}</td>
                     <td className="py-2.5 px-3.5">
                       {row.isValid ? (
                         <span className="px-2 py-0.5 rounded-md text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#557A46]/40">

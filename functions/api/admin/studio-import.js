@@ -91,8 +91,9 @@ export async function onRequestPost(context) {
   if (action === 'resolve_channel') {
     const channelUrl = String(body?.channel_url || body?.url || '').trim();
     const limit = Math.min(30, Math.max(1, Number.parseInt(String(body?.limit || 20), 10) || 20));
+    const cursor = body?.cursor && typeof body.cursor === 'object' ? body.cursor : null;
     try {
-      const resolved = await resolveYoutubeChannelVideos(channelUrl, limit);
+      const resolved = await resolveYoutubeChannelVideos(channelUrl, limit, { cursor });
 
       // Mark which videos are already imported into studio_videos
       const ytIds = resolved.videos.map((v) => v.youtube_video_id);
@@ -127,6 +128,8 @@ export async function onRequestPost(context) {
           channel_id: resolved.channel_id,
           channel_name: resolved.channel_name,
           count: resolved.videos.length,
+          has_more: Boolean(resolved.has_more),
+          next_cursor: resolved.next_cursor || null,
           videos: resolved.videos.map((v) => ({
             ...v,
             already_imported: existingSet.has(v.youtube_video_id),
@@ -139,7 +142,8 @@ export async function onRequestPost(context) {
       return jsonResponse(
         {
           ok: false,
-          error: err?.detail || err?.message || 'Không thể lấy danh sách video từ kênh YouTube.',
+          code: err?.code || 'RESOLVE_CHANNEL_FAILED',
+          error: err?.adminDetail || err?.detail || err?.message || 'Không thể lấy danh sách video từ kênh YouTube.',
         },
         Number(err?.status) || 502,
         corsHeaders
@@ -177,7 +181,8 @@ export async function onRequestPost(context) {
       return jsonResponse(
         {
           ok: false,
-          error: err?.detail || err?.message || 'Không lấy được phụ đề tiếng Anh từ video này.',
+          code: err?.code || 'EXTRACT_FAILED',
+          error: err?.adminDetail || err?.detail || err?.message || 'Không lấy được phụ đề tiếng Anh từ video này.',
         },
         Number(err?.status) || 502,
         corsHeaders

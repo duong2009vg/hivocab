@@ -8,7 +8,9 @@
     "https://hivocab.site/*",
     "https://*.hivocab.site/*",
     "https://swehdtrqjyklmsefkjdf.supabase.co/*",
-    "https://translate.googleapis.com/*"
+    "https://api.dictionaryapi.dev/*",
+    "https://translate.googleapis.com/*",
+    "https://api.mymemory.translated.net/*"
   ],
   "background": { "service_worker": "background.js" },
   "content_scripts": [

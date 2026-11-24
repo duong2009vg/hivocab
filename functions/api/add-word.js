@@ -48,10 +48,21 @@ export async function onRequestPost(context) {
         });
     }
 
-    const { topicId, word, phonetic = '', meaning, exampleSentence = '', passageId, passage_id } = body || {};
+    const {
+        topicId,
+        word,
+        phonetic = '',
+        meaning,
+        englishMeaning = '',
+        english_meaning = '',
+        exampleSentence = '',
+        passageId,
+        passage_id
+    } = body || {};
     const cleanTopicId = String(topicId || '').trim();
     const cleanWord = String(word || '').trim().slice(0, 120);
     const cleanMeaning = String(meaning || '').trim().slice(0, 500);
+    const cleanEnglishMeaning = String(englishMeaning || english_meaning || '').trim().slice(0, 500);
     const cleanPassageId = String(passageId || passage_id || '').trim();
 
     if (!UUID_RE.test(cleanTopicId) || !cleanWord || !cleanMeaning) {
@@ -75,6 +86,9 @@ export async function onRequestPost(context) {
             meaning:          cleanMeaning,
             example_sentence: isEnglishExample(exampleSentence) ? String(exampleSentence).trim().slice(0, 500) : '',
         };
+        if (cleanEnglishMeaning) {
+            insertPayload.english_meaning = cleanEnglishMeaning;
+        }
         if (cleanPassageId) {
             insertPayload.passage_id = cleanPassageId;
         }

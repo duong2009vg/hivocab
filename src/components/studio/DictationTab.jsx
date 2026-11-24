@@ -29,9 +29,7 @@ import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 
 export function DictationTab({ catalog, voice, onOpenSetup }) {
   const rawLessons = useMemo(() => (Array.isArray(catalog?.lessons) ? catalog.lessons : []), [catalog]);
-  const levels = useMemo(() => (Array.isArray(catalog?.levels) ? catalog.levels : []), [catalog]);
 
-  const [levelFilter, setLevelFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLessonId, setSelectedLessonId] = useState('');
   const [sentenceIndex, setSentenceIndex] = useState(0);
@@ -53,7 +51,6 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
   const filteredLessons = useMemo(() => {
     const q = searchTerm.trim().toLowerCase();
     return expandedLessons.filter((l) => {
-      if (levelFilter !== 'all' && l.level !== levelFilter) return false;
       if (
         q &&
         !String(l.title || '').toLowerCase().includes(q) &&
@@ -64,7 +61,7 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
       }
       return true;
     });
-  }, [expandedLessons, levelFilter, searchTerm]);
+  }, [expandedLessons, searchTerm]);
 
   useEffect(() => {
     if (!selectedLessonId && expandedLessons.length > 0) {
@@ -138,9 +135,6 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
         <div className="lg:hidden bg-[#fffcf7] border-2 border-[#3D352E] rounded-2xl p-3 shadow-[2px_2px_0px_#3D352E] flex items-center justify-between gap-2">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 text-[10px] font-black text-[#4D6B53]">
-              <span className="px-2 py-0.5 rounded-full bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E]">
-                {activeLesson.level}
-              </span>
               <span className="truncate">{activeLesson.topic}</span>
             </div>
             <div className="text-sm font-black text-[#2E2823] truncate mt-0.5">{activeLesson.title}</div>
@@ -169,7 +163,7 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
           </h3>
         </div>
 
-        {/* Search & Level Filter */}
+        {/* Search Filter */}
         <div className="relative">
           <Search className="w-4 h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
@@ -179,25 +173,6 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
             placeholder="Tìm chủ đề, bài hội thoại..."
             className="w-full pl-9 pr-3 py-2 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-bold focus:outline-none"
           />
-        </div>
-
-        <div className="flex flex-wrap gap-1.5">
-          {levels
-            .filter((lvl) => lvl.id !== 'C2')
-            .map((lvl) => (
-              <button
-                key={lvl.id}
-                type="button"
-                onClick={() => setLevelFilter(lvl.id)}
-                className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold border-2 cursor-pointer ${
-                  levelFilter === lvl.id
-                    ? 'bg-[#4D6B53] text-white border-[#3D352E]'
-                    : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
-                }`}
-              >
-                {lvl.id === 'all' ? 'Tất cả' : lvl.id}
-              </button>
-            ))}
         </div>
 
         {/* Lesson List */}
@@ -218,16 +193,16 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#F4E3B4] text-[#3D352E] border border-[#3D352E]">
-                    {lesson.level}
+                  <span className="text-[11px] font-extrabold text-[#786F66] truncate">
+                    {lesson.topic}
                   </span>
-                  <span className="text-[11px] font-extrabold text-[#4D6B53]">
+                  <span className="text-[11px] font-extrabold text-[#4D6B53] shrink-0">
                     {done}/{total} câu
                   </span>
                 </div>
                 <div className="text-xs sm:text-sm font-black text-[#2E2823]">{lesson.title}</div>
                 <div className="text-[11px] font-semibold text-[#786F66] truncate">
-                  {lesson.topic} · {lesson.description}
+                  {lesson.description}
                 </div>
               </button>
             );
@@ -243,9 +218,6 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E8DEC8]">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-[#F4E3B4] border border-[#3D352E]">
-                    {activeLesson.level}
-                  </span>
                   <span className="text-xs font-extrabold text-[#786F66]">
                     Câu {sentenceIndex + 1} / {lines.length}
                   </span>
