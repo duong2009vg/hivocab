@@ -18,7 +18,6 @@ import {
   Check,
   Shield,
   FileText,
-  Sparkles,
   ChevronDown,
 } from 'lucide-react';
 
@@ -214,21 +213,12 @@ export function PageLanding() {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
           {/* CỘT TRÁI: LỜI GIỚI THIỆU ẤM ÁP + 3 SỐ LIỆU THỰC + CTA */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-5 lg:space-y-6 text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-black text-[#3D352E]">
-              <Sparkles className="w-3.5 h-3.5 text-[#DE5D53] shrink-0" />
-              <span>
-                {isEn
-                  ? '2026 Edition • YouTube Shadowing · 44 IPA AI · FSRS-6 · 3-Book THPT'
-                  : 'Phiên bản 2026 • Studio YouTube · 44 Âm IPA AI · FSRS-6 · 3 Cuốn THPT'}
-              </span>
-            </div>
-
             <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[50px] xl:text-[56px] 2xl:text-[62px] text-[#3D352E] tracking-tight leading-[1.15]">
               {isEn ? (
                 <>
-                  Sketch your ultimate{' '}
+                  Build your ultimate{' '}
                   <span className="text-[#DE5D53] relative inline-block">
-                    English mastery
+                    English foundation
                     <svg
                       className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
                       viewBox="0 0 100 20"
@@ -242,9 +232,9 @@ export function PageLanding() {
                 </>
               ) : (
                 <>
-                  Cùng Bé Hổ vẽ nên{' '}
+                  Cùng Bé Hổ xây nên{' '}
                   <span className="text-[#DE5D53] relative inline-block">
-                    hành trình tiếng Anh
+                    vốn tiếng Anh
                     <svg
                       className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
                       viewBox="0 0 100 20"
@@ -303,12 +293,6 @@ export function PageLanding() {
                 </div>
               </div>
             </div>
-
-            <p className="text-base sm:text-lg text-[#6E5D53] font-medium leading-relaxed max-w-2xl">
-              {isEn
-                ? 'Flip through a cozy crayon sketchbook powered by FSRS-6 memory science, interactive YouTube Shadowing & 44-IPA AI coaching, 112 Bilingual News with Curtain Mode, and authentic 2026 CBT exam rooms.'
-                : 'Học tiếng Anh như lật từng trang tập vẽ màu sáp: từ Kệ sách 3D & thuật toán FSRS-6 đến phòng Studio Shadowing YouTube, 44 âm IPA AI, 112 bài Báo song ngữ rèm che và Phòng thi CBT THPT Quốc Gia.'}
-            </p>
 
             {/* Các nút gọi hành động chính */}
             <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
