@@ -1,11 +1,26 @@
 // src/components/pages/PageLanding.jsx
-// Trang giới thiệu HiVocab mô phỏng một bức tranh sáp màu của trẻ con (Cozy Crayon Handcrafted Picture Book)
-// Hỗ trợ song ngữ Tiếng Anh (Mặc định) và Tiếng Việt với LanguageSwitcher
-import React, { useState, useEffect } from 'react';
+// Trang giới thiệu HiVocab mô phỏng tập vẽ sáp màu (Cozy Crayon Handcrafted Picture Book)
+// Bé Hổ Churbito là trung tâm dẫn chuyện, tích hợp Showcase tương tác toàn bộ tính năng mới.
+import { useState, useEffect } from 'react';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useLandingLang } from '../../context/LandingLangContext.jsx';
 import LanguageSwitcher from '../common/LanguageSwitcher.jsx';
-import { BookOpen, GraduationCap, RotateCcw, Search, ArrowRight, Star, Heart, Check, Shield, FileText } from 'lucide-react';
+import LandingShowcaseSection from '../landing/LandingShowcaseSection.jsx';
+import LandingBentoEcosystem from '../landing/LandingBentoEcosystem.jsx';
+import LandingTigerJourney from '../landing/LandingTigerJourney.jsx';
+import {
+  BookOpen,
+  GraduationCap,
+  Mic,
+  ArrowRight,
+  Star,
+  Heart,
+  Check,
+  Shield,
+  FileText,
+  Sparkles,
+  ChevronDown,
+} from 'lucide-react';
 
 function useCountUp(end, duration = 1600, delay = 0) {
   const [count, setCount] = useState(0);
@@ -46,30 +61,78 @@ export function PageLanding() {
   const { navigateTo } = useRoute();
   const { isEn } = useLandingLang();
 
-  // Hiệu ứng hiện số lần lượt: Số từ vựng đếm trước (delay 150ms), số đề thi đếm sau (delay 800ms)
-  const vocabCount = useCountUp(66000, 1600, 150);
-  const examCount = useCountUp(38, 1200, 800);
+  const vocabCount = useCountUp(77786, 1600, 150);
+  const examCount = useCountUp(48, 1200, 500);
+  const studioCount = useCountUp(139, 1300, 750);
+
+  const [tigerMood, setTigerMood] = useState('wave');
+
+  const moodConfigs = {
+    wave: {
+      label: isEn ? 'Say Hi' : 'Vẫy chào',
+      img: '/mascot/mascot_waving.webp',
+      fallback: '/mascot/mascot_waving.png',
+      bubble: isEn
+        ? 'Hello learner! Ready to sketch today’s words?'
+        : 'Chào bạn học ơi! Cùng tớ vào phòng học nhé!',
+      subtitle: isEn
+        ? 'Your cheerful buddy for 15 minutes of joyful daily practice!'
+        : 'Người bạn nhỏ đồng hành cùng bạn ghi nhớ 15 phút mỗi ngày!',
+    },
+    study: {
+      label: isEn ? 'Study Cozy' : 'Học chăm',
+      img: '/mascot/mascot_cozy.png',
+      fallback: '/mascot/mascot_cozy.png',
+      bubble: isEn
+        ? 'Let’s pull the Curtain Mode & shadow a YouTube clip!'
+        : 'Cùng mở Rèm che đọc hiểu & luyện Shadowing YouTube nào!',
+      subtitle: isEn
+        ? 'Focused reading, 44 IPA AI feedback & FSRS-6 scheduling.'
+        : 'Đọc song ngữ chủ động, chấm phát âm 44 âm IPA & FSRS-6.',
+    },
+    celebrate: {
+      label: isEn ? 'Streak Win' : 'Ăn mừng',
+      img: '/mascot/mascot_celebrating.png',
+      fallback: '/mascot/mascot_cozy.png',
+      bubble: isEn
+        ? 'Woohoo! Another daily streak & 40/40 CBT mock done!'
+        : 'Hoan hô! Giữ lửa Streak mỗi ngày và chinh phục 9+ THPT!',
+      subtitle: isEn
+        ? 'Every small daily step builds unstoppable mastery.'
+        : 'Mỗi ngày một bước nhỏ, tích lũy vốn từ vững chắc bền lâu!',
+    },
+  };
+
+  const activeMood = moodConfigs[tigerMood] || moodConfigs.wave;
+
+  const scrollToShowcase = () => {
+    const el = document.getElementById('landing-showcase');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      navigateTo('features');
+    }
+  };
 
   return (
     <div
       id="page-landing"
-      className="page active min-h-screen font-nunito text-[#3D352E] bg-[#FAF5EB] relative flex flex-col justify-between selection:bg-[#EBDDC8] selection:text-[#3D352E]"
+      className="page active min-h-screen overflow-x-clip font-nunito text-[#3D352E] bg-[#FAF5EB] relative flex flex-col justify-between selection:bg-[#EBDDC8] selection:text-[#3D352E]"
       style={{
         backgroundImage: 'radial-gradient(#E2D6C3 1.2px, transparent 1.2px)',
         backgroundSize: '24px 24px',
       }}
     >
       {/* ── TOP DECORATIVE CRAYON HEADER & NAVIGATION BAR ── */}
-      <header className="sticky top-0 z-40 w-full px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3 sm:py-3.5 bg-[#FAF5EB]/95 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
-        <div className="w-full flex items-center justify-between gap-3 sm:gap-6">
-          
-          {/* Logo app bản sáp màu đã tách nền ở góc trên cùng bên trái */}
+      <header className="sticky top-0 z-40 w-full px-3 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-2.5 sm:py-3.5 bg-[#FAF5EB]/95 backdrop-blur-md border-b-2 border-[#3D352E]/10 transition-all">
+        <div className="w-full flex items-center justify-between gap-2 sm:gap-6">
+          {/* Logo app bản sáp màu */}
           <div
             onClick={() => navigateTo('landing')}
-            className="flex items-center gap-2 sm:gap-2.5 cursor-pointer select-none group shrink-0"
-            title={isEn ? "HiVocab – Crayon Picture Book Home" : "HiVocab – Trang chủ tranh sáp màu"}
+            className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer select-none group shrink-0"
+            title={isEn ? 'HiVocab – Crayon Picture Book Home' : 'HiVocab – Trang chủ tranh sáp màu'}
           >
-            <div className="relative w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center transition-transform group-hover:scale-105">
+            <div className="relative w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center transition-transform group-hover:scale-105">
               <img
                 src="/logo-hi-transparent.png"
                 alt="HiVocab Logo"
@@ -84,7 +147,7 @@ export function PageLanding() {
             </span>
           </div>
 
-          {/* Desktop Navigation Links (Pill viên con nhộng sáp màu) */}
+          {/* Desktop Navigation Links */}
           <nav
             aria-label="Điều hướng trang giới thiệu"
             className="hidden md:flex items-center gap-2 bg-white border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] rounded-full px-4 py-1.5"
@@ -110,7 +173,7 @@ export function PageLanding() {
               onClick={() => navigateTo('faq')}
               className="px-4 py-1.5 text-xs sm:text-sm font-black text-[#5E5147] hover:text-[#3D352E] hover:bg-[#FAF5EB] rounded-full transition-all cursor-pointer"
             >
-              {isEn ? 'FAQ' : 'FAQ'}
+              FAQ
             </button>
             <span className="text-[#DECDBB] select-none">•</span>
             <button
@@ -123,43 +186,49 @@ export function PageLanding() {
           </nav>
 
           {/* Right Area: Language Switcher + Actions */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Language Switcher */}
-            <LanguageSwitcher />
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+            <LanguageSwitcher compact className="sm:hidden" />
+            <LanguageSwitcher className="hidden sm:inline-flex" />
 
             <button
               type="button"
               onClick={() => navigateTo('login')}
-              className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer"
+              className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-[11px] sm:text-sm font-black rounded-xl sm:rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer whitespace-nowrap"
             >
               {isEn ? 'Log in' : 'Đăng nhập'}
             </button>
             <button
               type="button"
               onClick={() => navigateTo('dashboard')}
-              className="px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5"
+              className="px-3 sm:px-5 py-1.5 sm:py-2 text-[11px] sm:text-sm font-black rounded-xl sm:rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
             >
-              <span>{isEn ? 'Get Started' : 'Bắt đầu ngay'}</span>
-              
+              <span>{isEn ? 'Get Started' : 'Bắt đầu'}</span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── HERO SECTION: BỨC TRANH SÁP MÀU VỚI BÉ MASCOT VẪY TAY CHÀO ── */}
-      <main className="flex-1 w-full max-w-[1560px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 sm:py-14 flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 2xl:gap-20 items-center w-full">
-          
-          {/* CỘT TRÁI: LỜI GIỚI THIỆU ẤM ÁP & HÀNH ĐỘNG HỌC TẬP */}
+      {/* ── MAIN LANDING BODY ── */}
+      <main className="flex-1 w-full max-w-[1560px] 2xl:max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20 py-8 sm:py-12">
+        {/* ── SECTION 1: HERO BỨC TRANH SÁP MÀU & BÉ HỔ CHURBITO ── */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 xl:gap-16 items-center w-full">
+          {/* CỘT TRÁI: LỜI GIỚI THIỆU ẤM ÁP + 3 SỐ LIỆU THỰC + CTA */}
           <div className="lg:col-span-7 flex flex-col items-start space-y-5 lg:space-y-6 text-left">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFFDF9] border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] text-xs font-black text-[#3D352E]">
+              <Sparkles className="w-3.5 h-3.5 text-[#DE5D53] shrink-0" />
+              <span>
+                {isEn
+                  ? '2026 Edition • YouTube Shadowing · 44 IPA AI · FSRS-6 · 3-Book THPT'
+                  : 'Phiên bản 2026 • Studio YouTube · 44 Âm IPA AI · FSRS-6 · 3 Cuốn THPT'}
+              </span>
+            </div>
 
-            {/* Tiêu đề chính nét bút sáp đậm */}
-            <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[52px] xl:text-[58px] 2xl:text-[64px] text-[#3D352E] tracking-tight leading-[1.15]">
+            <h1 className="font-quicksand font-black text-3xl sm:text-5xl lg:text-[50px] xl:text-[56px] 2xl:text-[62px] text-[#3D352E] tracking-tight leading-[1.15]">
               {isEn ? (
                 <>
                   Sketch your ultimate{' '}
                   <span className="text-[#DE5D53] relative inline-block">
-                    vocabulary
+                    English mastery
                     <svg
                       className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
                       viewBox="0 0 100 20"
@@ -169,13 +238,13 @@ export function PageLanding() {
                       <path d="M0,15 Q50,0 100,15 L100,20 Q50,5 0,20 Z" />
                     </svg>
                   </span>{' '}
-                  mastery with Little Tiger!
+                  with Little Tiger!
                 </>
               ) : (
                 <>
                   Cùng Bé Hổ vẽ nên{' '}
                   <span className="text-[#DE5D53] relative inline-block">
-                    vốn từ vựng
+                    hành trình tiếng Anh
                     <svg
                       className="absolute -bottom-1 left-0 w-full h-3 text-[#F4B41A]/70 -z-10"
                       viewBox="0 0 100 20"
@@ -190,58 +259,63 @@ export function PageLanding() {
               )}
             </h1>
 
-            {/* Cụm điểm nhấn số liệu: Số từ vựng & Số đề thi THPT QG có hiệu ứng đếm số lần lượt */}
-            <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4 pt-1">
-              {/* Thẻ 1: Số từ vựng học thuật (chạy trước: delay 150ms) */}
-              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                <BookOpen className="w-10 h-10 text-[#DE5D53] shrink-0" />
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#DE5D53] tracking-tight">
+            {/* 3 Thẻ Số Liệu Sống Động (Từ vựng, THPT, Studio) */}
+            <div className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-2.5 hover:-translate-y-0.5 transition-transform">
+                <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 text-[#DE5D53] shrink-0" />
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-quicksand font-black text-xl sm:text-2xl text-[#DE5D53] tracking-tight">
                       {formatNumber(vocabCount)}+
                     </span>
-                    <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider">
-                      {isEn ? 'Words' : 'Từ vựng'}
-                    </span>
                   </div>
-                  <p className="text-xs sm:text-sm font-bold text-[#6E5D53] truncate">
-                    {isEn ? 'Cambridge 10–21 & IELTS Academic' : 'Cambridge 10–21 & IELTS Academic'}
+                  <p className="text-[11px] font-black text-[#3D352E] leading-tight">
+                    {isEn ? 'Words • 115+ Books' : 'Từ vựng • 115+ Sách'}
                   </p>
                 </div>
               </div>
 
-              {/* Thẻ 2: Số đề thi (chạy tiếp sau: delay 800ms) */}
-              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-4 sm:p-4.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-3.5 relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
-                <GraduationCap className="w-10 h-10 text-[#557A46] shrink-0" />
-                <div className="flex flex-col min-w-0">
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-quicksand font-black text-2xl sm:text-3xl lg:text-4xl text-[#557A46] tracking-tight">
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-2.5 hover:-translate-y-0.5 transition-transform">
+                <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-[#557A46] shrink-0" />
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-quicksand font-black text-xl sm:text-2xl text-[#557A46] tracking-tight">
                       {examCount}+
                     </span>
-                    <span className="text-xs font-black text-[#557A46] uppercase tracking-wider">
-                      {isEn ? 'Mock Exams' : 'Đề thi THPT'}
+                  </div>
+                  <p className="text-[11px] font-black text-[#3D352E] leading-tight">
+                    {isEn ? 'Exams • 29 Topics' : 'Đề • 29 Chuyên đề'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 sm:p-3.5 shadow-[2.5px_3.5px_0px_#3D352E] flex items-center gap-2.5 hover:-translate-y-0.5 transition-transform">
+                <Mic className="w-7 h-7 sm:w-8 sm:h-8 text-[#2A7BA0] shrink-0" />
+                <div className="min-w-0">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-quicksand font-black text-xl sm:text-2xl text-[#2A7BA0] tracking-tight">
+                      {studioCount}+
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm font-bold text-[#6E5D53] truncate">
-                    {isEn ? 'Standard Matrix & CBT Format' : 'Chuẩn ma trận BGD & CBT'}
+                  <p className="text-[11px] font-black text-[#3D352E] leading-tight">
+                    {isEn ? 'Dictation • 44 IPA' : 'Hội thoại • 44 IPA'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Lời dẫn truyện ấm áp */}
-            <p className="text-base sm:text-lg lg:text-xl text-[#6E5D53] font-medium leading-relaxed max-w-2xl">
+            <p className="text-base sm:text-lg text-[#6E5D53] font-medium leading-relaxed max-w-2xl">
               {isEn
-                ? 'Learning English is as delightful as flipping through pages of a colorful crayon sketchbook. Lock words into long-term memory with Spaced Repetition (SRS) and authentic exam room simulations.'
-                : 'Học tiếng Anh như lật từng trang tập vẽ màu sáp. Ghi nhớ sâu bền qua phương pháp lặp lại ngắt quãng (SRS) và hệ thống phòng luyện thi chuẩn cấu trúc đề thực tế.'}
+                ? 'Flip through a cozy crayon sketchbook powered by FSRS-6 memory science, interactive YouTube Shadowing & 44-IPA AI coaching, 112 Bilingual News with Curtain Mode, and authentic 2026 CBT exam rooms.'
+                : 'Học tiếng Anh như lật từng trang tập vẽ màu sáp: từ Kệ sách 3D & thuật toán FSRS-6 đến phòng Studio Shadowing YouTube, 44 âm IPA AI, 112 bài Báo song ngữ rèm che và Phòng thi CBT THPT Quốc Gia.'}
             </p>
 
             {/* Các nút gọi hành động chính */}
-            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+            <div className="w-full sm:w-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-1">
               <button
                 type="button"
                 onClick={() => navigateTo('dashboard')}
-                className="px-8 py-4 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
+                className="px-7 py-3.5 sm:py-4 rounded-2xl bg-[#557A46] hover:bg-[#476739] text-white font-black text-base sm:text-lg border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2.5"
               >
                 <span>{isEn ? 'Enter Study Room' : 'Vào phòng học ngay'}</span>
                 <ArrowRight className="w-5 h-5 shrink-0" />
@@ -249,216 +323,158 @@ export function PageLanding() {
 
               <button
                 type="button"
-                onClick={() => navigateTo('features')}
-                className="px-7 py-4 rounded-2xl bg-white hover:bg-[#FAF5EB] text-[#3D352E] font-black text-base sm:text-lg border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
+                onClick={scrollToShowcase}
+                className="px-6 py-3.5 sm:py-4 rounded-2xl bg-white hover:bg-[#FFF9EE] text-[#3D352E] font-black text-base sm:text-lg border-2 border-[#3D352E] shadow-[3px_3.5px_0px_#3D352E] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>{isEn ? 'Explore Features' : 'Khám phá tính năng'}</span>
-                
+                <span>{isEn ? 'Explore New Features' : 'Xem tính năng mới'}</span>
+                <ChevronDown className="w-5 h-5 shrink-0 text-[#DE5D53]" />
               </button>
             </div>
 
             {/* Sticker ghi chú nét sáp nhỏ phía dưới */}
-            <div className="pt-2 flex flex-wrap items-center gap-4 sm:gap-7 text-xs sm:text-sm font-bold text-[#8A796F]">
+            <div className="pt-1 flex flex-wrap items-center gap-4 sm:gap-6 text-xs sm:text-sm font-bold text-[#8A796F]">
               <div className="flex items-center gap-1.5">
                 <Star className="w-4 h-4 fill-[#F4B41A] text-[#F4B41A] shrink-0" />
                 <span>{isEn ? 'Spaced Repetition (FSRS-6)' : 'Thuật toán ngắt quãng FSRS-6'}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Heart className="w-4 h-4 fill-[#DE5D53] text-[#DE5D53] shrink-0" />
-                <span>{isEn ? 'Bilingual Curtain Reading Mode' : 'Song ngữ Anh - Việt che dịch'}</span>
+                <span>{isEn ? 'YouTube Shadowing & AI IPA' : 'Shadowing YouTube & Chấm IPA AI'}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Check className="w-4 h-4 text-[#557A46] shrink-0" />
-                <span>{isEn ? '38+ Real CBT Practice Tests' : '38+ Đề thi THPT Quốc Gia CBT'}</span>
+                <span>{isEn ? '112 Bilingual News & Curtain' : '112 Báo Song Ngữ Rèm Che'}</span>
               </div>
             </div>
           </div>
 
-          {/* CỘT PHẢI: BỨC TRANH BÉ MASCOT ĐANG VẪY TAY CHÀO KÈM LỜI MỜI */}
+          {/* CỘT PHẢI: BỨC TRANH BÉ HỔ CHURBITO TƯƠNG TÁC */}
           <div className="lg:col-span-5 flex flex-col items-center justify-center relative w-full">
-            
-            {/* Khung tranh sáp màu lớn */}
-            <div className="w-full max-w-[480px] xl:max-w-[530px] bg-white border-[3.5px] border-[#3D352E] rounded-[38px] p-6 sm:p-9 shadow-[7px_9px_0px_#3D352E] relative flex flex-col items-center text-center rotate-1 hover:rotate-0 transition-transform duration-300">
-              
-              {/* Cúc ghim giấy sáp trang trí trên đầu khung */}
+            <div className="w-full max-w-[480px] xl:max-w-[520px] bg-white border-[3.5px] border-[#3D352E] rounded-[38px] p-6 sm:p-8 shadow-[7px_9px_0px_#3D352E] relative flex flex-col items-center text-center rotate-1 hover:rotate-0 transition-transform duration-300">
+              {/* Cúc ghim giấy sáp */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[#DE5D53] border-2 border-[#3D352E] flex items-center justify-center shadow-xs">
-                <div className="w-2.5 h-2.5 rounded-full bg-white border border-[#3D352E]"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-white border border-[#3D352E]" />
               </div>
 
-              {/* Đám mây thoại hình bong bóng sáp màu */}
-              <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-5 py-3 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base md:text-lg flex items-center gap-2 mb-3 mt-1 transform -rotate-2">
-                <span>{isEn ? '"Hello learner! Let\'s study together!"' : '"Chào bạn học ơi! Cùng tớ vào học nhé!"'}</span>
-                {/* Mũi tên bong bóng chỉ xuống mascot */}
-                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#FFF9EE] border-r-2 border-b-2 border-[#3D352E] transform rotate-45"></div>
+              {/* Bong bóng thoại động theo biểu cảm Bé Hổ */}
+              <div className="relative bg-[#FFF9EE] border-2 border-[#3D352E] px-4 py-3 rounded-2xl shadow-[3px_4px_0px_#3D352E] text-[#3D352E] font-quicksand font-bold text-sm sm:text-base flex items-center gap-2 mb-3 mt-1 transform -rotate-1">
+                <span>“{activeMood.bubble}”</span>
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#FFF9EE] border-r-2 border-b-2 border-[#3D352E] transform rotate-45" />
               </div>
 
-              {/* Ảnh chú hổ Bé Mascot Churbito vẫy tay chào */}
-              <div className="relative w-60 h-60 sm:w-72 sm:h-72 xl:w-80 xl:h-80 my-2 flex items-center justify-center">
-                {/* Vùng tỏa màu sáp dịu nhẹ đằng sau */}
-                <div className="absolute inset-2 bg-[#FEEFEA] rounded-full filter blur-md -z-0"></div>
+              {/* Ảnh Bé Hổ Churbito */}
+              <div className="relative w-56 h-56 sm:w-68 sm:h-68 xl:w-72 xl:h-72 my-2 flex items-center justify-center">
+                <div className="absolute inset-2 bg-[#FEEFEA] rounded-full filter blur-md -z-0" />
                 <img
-                  src="/mascot/mascot_cozy.png"
+                  key={activeMood.img}
+                  src={activeMood.img}
                   alt="Bé Hổ Churbito"
                   className="w-full h-full object-contain relative z-10 mix-blend-multiply drop-shadow-sm transition-transform duration-300 hover:scale-105 select-none"
                   onError={(e) => {
-                    e.currentTarget.style.display = 'none';
+                    if (e.currentTarget.src !== activeMood.fallback) {
+                      e.currentTarget.src = activeMood.fallback;
+                    }
                   }}
                 />
               </div>
 
-              {/* Thẻ tên bé Hổ bằng phong cách nét vẽ sáp */}
+              {/* Nút đổi biểu cảm Bé Hổ */}
+              <div className="inline-flex items-center gap-1.5 bg-[#FAF5EB] p-1 rounded-full border-2 border-[#3D352E] my-2">
+                {Object.entries(moodConfigs).map(([key, cfg]) => {
+                  const selected = tigerMood === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setTigerMood(key)}
+                      className={`px-3 py-1 rounded-full text-[11px] font-black transition-all cursor-pointer ${
+                        selected
+                          ? 'bg-[#DE5D53] text-white shadow-xs'
+                          : 'text-[#6E5D53] hover:text-[#3D352E]'
+                      }`}
+                    >
+                      {cfg.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Thẻ tên Bé Hổ */}
               <div className="mt-1 space-y-1">
                 <h2 className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E]">
                   {isEn ? 'Churbito the Tiger' : 'Bé Hổ Churbito'}
                 </h2>
                 <p className="text-xs sm:text-sm font-semibold text-[#86756C]">
-                  {isEn
-                    ? 'Your cheerful buddy for 15 minutes of joyful daily practice!'
-                    : 'Người bạn nhỏ đồng hành cùng bạn ghi nhớ 15 phút mỗi ngày!'}
+                  {activeMood.subtitle}
                 </p>
               </div>
 
-              {/* Nút nhỏ mời học tương tác */}
               <button
                 type="button"
                 onClick={() => navigateTo('dashboard')}
                 className="mt-4 w-full py-3 px-5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#3D352E] text-xs sm:text-sm md:text-base font-black rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>{isEn ? 'Open App & Learn Now' : 'Mở app học ngay'}</span>
-                <BookOpen className="w-3.5 h-3.5 shrink-0 inline mr-1" />
+                <BookOpen className="w-4 h-4 shrink-0" />
               </button>
             </div>
 
-            {/* Nhãn dán sticker bé bên cạnh trang trí */}
+            {/* Sticker trang trí */}
             <div className="hidden sm:flex absolute -bottom-5 -left-4 bg-[#FAF5EB] border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#DE5D53] rotate-[-6deg]">
               {isEn ? 'Keep your daily streak!' : 'Giữ lửa mỗi ngày!'}
             </div>
             <div className="hidden sm:flex absolute -top-4 -right-3 bg-[#EAF3E7] border-2 border-[#557A46] shadow-[2px_3px_0px_#557A46] rounded-2xl px-3.5 py-1.5 text-xs sm:text-sm font-bold text-[#557A46] rotate-[8deg]">
-              {isEn ? '100% Stress-free!' : '100% Không áp lực!'}
-            </div>
-          </div>
-        </div>
-
-        {/* ── SECTION 2: 3 BỨC TRANH BƯU THIẾP TÍNH NĂNG CỐT LÕI ── */}
-        <section className="mt-16 sm:mt-24">
-          <div className="text-center space-y-2 mb-10">
-            <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wider bg-[#FDEAE2] px-3 py-1 rounded-full border border-[#F8C8B8]">
-              {isEn ? 'Feature Postcards' : 'Tranh ghép tính năng'}
-            </span>
-            <h2 className="font-quicksand font-black text-2xl sm:text-4xl text-[#3D352E]">
-              {isEn ? 'Why You\'ll Love HiVocab?' : 'Vì sao bạn sẽ yêu thích HiVocab?'}
-            </h2>
-            <p className="text-xs sm:text-sm text-[#78685E] max-w-lg mx-auto">
-              {isEn
-                ? 'No more tedious rote learning. Every lesson is an engaging, colorful, and scientifically backed memory adventure.'
-                : 'Không còn học vẹt nhàm chán. Mỗi bài học là một trải nghiệm ghi nhớ ngập tràn sắc màu và khoa học.'}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Card 1: Kho 66.000+ từ vựng */}
-            <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div>
-                <BookOpen className="w-10 h-10 text-[#DE5D53] mb-4 shrink-0" />
-                <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
-                  {isEn ? '66,000+ Academic Words Vault' : 'Kho 66.000+ Từ Học Thuật'}
-                </h3>
-                <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
-                  {isEn
-                    ? 'Complete collections from Cambridge IELTS 10–21, IELTS Actual Tests, Oxford 3000, and Destination C1-C2 with standardized IPA phonetics, clear meanings, and authentic passage contexts.'
-                    : 'Trọn bộ Cambridge 10–21, IELTS Actual Tests, Oxford 3000 và Destination C1-C2 chuẩn hóa phiên âm IPA, nghĩa tiếng Việt và câu ví dụ ngữ cảnh thật.'}
-                </p>
-              </div>
-              <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
-                <button
-                  type="button"
-                  onClick={() => navigateTo('features')}
-                  className="text-xs font-black text-[#DE5D53] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{isEn ? 'Explore word vault' : 'Xem chi tiết danh mục'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-                </button>
-              </div>
-            </div>
-
-            {/* Card 2: Lặp lại ngắt quãng SRS */}
-            <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div>
-                <RotateCcw className="w-10 h-10 text-[#557A46] mb-4 shrink-0" />
-                <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
-                  {isEn ? 'Spaced Repetition SRS v4' : 'Lặp Lại Ngắt Quãng SRS v4'}
-                </h3>
-                <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
-                  {isEn
-                    ? 'An intelligent algorithm that computes your natural forgetting curve, reminding you to review right at the golden moment to turn new words into permanent memory.'
-                    : 'Thuật toán thông minh tính toán chu kỳ quên tự nhiên của não bộ, tự động nhắc nhở ôn tập đúng thời điểm vàng để biến từ mới thành phản xạ dài hạn.'}
-                </p>
-              </div>
-              <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
-                <button
-                  type="button"
-                  onClick={() => navigateTo('dashboard')}
-                  className="text-xs font-black text-[#557A46] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{isEn ? 'Discover SRS algorithm' : 'Khám phá thuật toán SRS'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-                </button>
-              </div>
-            </div>
-
-            {/* Card 3: Đọc hiểu song ngữ che dịch */}
-            <div className="bg-white border-[2.5px] border-[#3D352E] rounded-3xl p-6 shadow-[4px_5px_0px_#3D352E] hover:-translate-y-1 transition-all flex flex-col justify-between">
-              <div>
-                <Search className="w-10 h-10 text-[#2A7BA0] mb-4 shrink-0" />
-                <h3 className="font-quicksand font-black text-lg text-[#3D352E] mb-2">
-                  {isEn ? 'Bilingual Reading & Curtain Mode' : 'Đọc Song Ngữ & Che Dịch'}
-                </h3>
-                <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
-                  {isEn
-                    ? 'Our proprietary Curtain Mode lets you read aligned bilingual passages, stimulating your brain to deduce meanings in context before pulling the curtain for answers.'
-                    : 'Chế độ rèm che Curtain Mode cho phép bạn đọc báo, đọc đề IELTS đối sánh câu thông minh, kích thích trí não tự đoán nghĩa trước khi bấm xem giải thích.'}
-                </p>
-              </div>
-              <div className="mt-5 pt-3 border-t-2 border-dashed border-[#DECDBB]">
-                <button
-                  type="button"
-                  onClick={() => navigateTo('features')}
-                  className="text-xs font-black text-[#2A7BA0] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>{isEn ? 'Experience reading room' : 'Trải nghiệm phòng đọc'}</span>
-                  <ArrowRight className="w-3.5 h-3.5 shrink-0" />
-                </button>
-              </div>
+              {isEn ? '100% Free to Try!' : 'Trải nghiệm miễn phí!'}
             </div>
           </div>
         </section>
 
-        {/* ── SECTION 3: BỨC TRANH LỜI MỜI VÀO PHÒNG HỌC ── */}
+        {/* ── SECTION 2: SHOWCASE TƯƠNG TÁC 5 TRỤ CỘT TÍNH NĂNG MỚI ── */}
+        <LandingShowcaseSection isEn={isEn} navigateTo={navigateTo} />
+
+        {/* ── SECTION 3: BENTO GRID HỆ SINH THÁI (FSRS-6, 5 CHẾ ĐỘ, CỘNG ĐỒNG, AI) ── */}
+        <LandingBentoEcosystem isEn={isEn} navigateTo={navigateTo} />
+
+        {/* ── SECTION 4: DẢI TRUYỆN TRANH 3 BƯỚC CÙNG BÉ HỔ ── */}
+        <LandingTigerJourney isEn={isEn} />
+
+        {/* ── SECTION 5: BANNER LỜI MỜI VÀO PHÒNG HỌC CUỐI TRANG ── */}
         <section className="mt-14 sm:mt-20">
           <div className="w-full bg-[#FFFDF9] border-[3px] border-[#3D352E] rounded-[32px] p-6 sm:p-10 shadow-[5px_7px_0px_#3D352E] flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-2 text-center md:text-left">
-              <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wide">
-                {isEn ? 'Little Tiger is waiting' : 'Bé Hổ đang đợi bạn'}
-              </span>
-              <h3 className="font-quicksand font-black text-2xl sm:text-3xl text-[#3D352E]">
-                {isEn ? 'Ready to expand your vocabulary today?' : 'Sẵn sàng nâng cao vốn từ vựng hôm nay?'}
-              </h3>
-              <p className="text-xs sm:text-sm text-[#78685E] max-w-lg">
-                {isEn
-                  ? 'With just 15 minutes of daily practice on HiVocab, you will experience remarkable breakthroughs in your IELTS Reading and Listening skills!'
-                  : 'Chỉ 15 phút ôn luyện cùng HiVocab mỗi ngày, bạn sẽ thấy sự khác biệt rõ rệt trong kỹ năng Đọc và Nghe IELTS!'}
-              </p>
+            <div className="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-[#FFF9EE] border-2 border-[#3D352E] shadow-[2.5px_3px_0px_#3D352E] p-2 shrink-0 flex items-center justify-center">
+                <img
+                  src="/mascot/mascot_celebrating.png"
+                  alt="Bé Hổ Churbito ăn mừng"
+                  className="w-full h-full object-contain mix-blend-multiply"
+                  onError={(e) => {
+                    e.currentTarget.src = '/mascot/mascot_cozy.png';
+                  }}
+                />
+              </div>
+              <div className="space-y-2">
+                <span className="text-xs font-black text-[#DE5D53] uppercase tracking-wide">
+                  {isEn ? 'Little Tiger is waiting for you' : 'Bé Hổ đang đợi bạn trong phòng học'}
+                </span>
+                <h3 className="font-quicksand font-black text-2xl sm:text-3xl text-[#3D352E]">
+                  {isEn ? 'Ready to level up your English today?' : 'Sẵn sàng bứt phá tiếng Anh cùng HiVocab hôm nay?'}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#78685E] max-w-xl font-medium">
+                  {isEn
+                    ? 'Jump straight in as a guest with zero setup, or sign in to sync your 115+ book progress, custom YouTube videos, and FSRS-6 reviews across all devices.'
+                    : 'Bắt đầu trải nghiệm ngay không cần chờ đợi, hoặc đăng nhập để đồng bộ tiến độ 115+ đầu sách, video YouTube cá nhân và lịch ôn FSRS-6 trên mọi thiết bị.'}
+                </p>
+              </div>
             </div>
-            
-            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full sm:w-auto">
+
+            <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0 w-full md:w-auto">
               <button
                 type="button"
                 onClick={() => navigateTo('dashboard')}
                 className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-sm sm:text-base border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <span>{isEn ? 'Start Learning with Tiger' : 'Vào học cùng Bé Hổ'}</span>
-                <ArrowRight className="w-4 h-4 shrink-0 inline ml-1" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
               <button
                 type="button"
@@ -475,8 +491,6 @@ export function PageLanding() {
       {/* ── FOOTER: BỨC TRANH BÌA SAU TRANG NHÃ THEO PHONG CÁCH COZY CRAYON ── */}
       <footer className="mt-16 border-t-2 border-dashed border-[#DECDBB] bg-[#FFFDF9]/80 text-[#6E5D53] text-xs sm:text-sm py-10 px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
         <div className="max-w-[1560px] 2xl:max-w-[1720px] mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          
-          {/* Logo & Thông tin giới thiệu */}
           <div className="md:col-span-2 space-y-3 pr-0 md:pr-8">
             <div className="flex items-center gap-2.5">
               <img
@@ -493,17 +507,25 @@ export function PageLanding() {
             </div>
             <p className="text-xs text-[#7A6A60] leading-relaxed max-w-md">
               {isEn
-                ? 'A delightful, crayon-crafted English vocabulary ecosystem. Blending Spaced Repetition (SRS) with Active Bilingual Reading tailored for Cambridge IELTS and CBT exams.'
-                : 'Hệ sinh thái học từ vựng tiếng Anh thông minh với phong cách tranh vẽ sáp màu ấm áp. Kết hợp Spaced Repetition (SRS) và phương pháp Đọc chủ động chuẩn hóa Cambridge IELTS & THPT Quốc Gia.'}
+                ? 'A delightful, crayon-crafted English vocabulary & studio ecosystem. Combining FSRS-6 Spaced Repetition, YouTube Shadowing & 44 IPA AI, Bilingual Curtain Reading, and THPT National Exam CBT rooms.'
+                : 'Hệ sinh thái học tiếng Anh thông minh phong cách tranh vẽ sáp màu ấm áp. Kết hợp FSRS-6, Studio Shadowing YouTube & 44 âm IPA AI, Đọc song ngữ rèm che và Phòng thi THPT Quốc Gia CBT.'}
             </p>
             <div className="text-[11px] text-[#86756C] space-y-1 pt-1">
-              <p><strong>{isEn ? 'Developer:' : 'Đơn vị phát triển:'}</strong> HiVocab Education</p>
-              <p><strong>{isEn ? 'Support:' : 'Hỗ trợ:'}</strong> <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">support@hivocab.site</a></p>
-              <p><strong>Hotline/Zalo:</strong> 0846 407 898</p>
+              <p>
+                <strong>{isEn ? 'Developer:' : 'Đơn vị phát triển:'}</strong> HiVocab Education
+              </p>
+              <p>
+                <strong>{isEn ? 'Support:' : 'Hỗ trợ:'}</strong>{' '}
+                <a href="mailto:support@hivocab.site" className="text-[#DE5D53] hover:underline font-bold">
+                  support@hivocab.site
+                </a>
+              </p>
+              <p>
+                <strong>Hotline/Zalo:</strong> 0846 407 898
+              </p>
             </div>
           </div>
 
-          {/* Cột điều hướng chức năng */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-black uppercase tracking-wider text-[#3D352E]">
               {isEn ? 'Explore' : 'Khám phá'}
@@ -537,7 +559,6 @@ export function PageLanding() {
             </ul>
           </div>
 
-          {/* Cột pháp lý & chính sách */}
           <div className="space-y-2.5">
             <h4 className="text-xs font-black uppercase tracking-wider text-[#3D352E]">
               {isEn ? 'Legal & Policies' : 'Pháp lý & Điều khoản'}
@@ -545,13 +566,13 @@ export function PageLanding() {
             <ul className="space-y-2 text-xs font-bold text-[#6E5D53]">
               <li>
                 <a href="/privacy" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 shrink-0 inline mr-1" />
+                  <Shield className="w-3.5 h-3.5 shrink-0" />
                   <span>{isEn ? 'Privacy Policy' : 'Chính sách quyền riêng tư'}</span>
                 </a>
               </li>
               <li>
                 <a href="/terms" className="hover:text-[#DE5D53] transition-colors flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 shrink-0 inline mr-1" />
+                  <FileText className="w-3.5 h-3.5 shrink-0" />
                   <span>{isEn ? 'Terms of Service' : 'Điều khoản dịch vụ'}</span>
                 </a>
               </li>
@@ -559,7 +580,6 @@ export function PageLanding() {
           </div>
         </div>
 
-        {/* Dòng bản quyền cuối trang */}
         <div className="max-w-[1560px] 2xl:max-w-[1720px] mx-auto pt-6 border-t border-[#DECDBB]/60 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#86756C] font-semibold">
           <p>
             {isEn
@@ -567,11 +587,17 @@ export function PageLanding() {
               : '© 2026 HiVocab (hivocab.site). Bản quyền tập vẽ sáp màu được bảo lưu.'}
           </p>
           <div className="flex items-center gap-3">
-            <a href="/privacy" className="hover:underline">Privacy Policy</a>
+            <a href="/privacy" className="hover:underline">
+              {isEn ? 'Privacy Policy' : 'Chính sách quyền riêng tư'}
+            </a>
             <span>•</span>
-            <a href="/terms" className="hover:underline">Terms of Service</a>
+            <a href="/terms" className="hover:underline">
+              {isEn ? 'Terms of Service' : 'Điều khoản dịch vụ'}
+            </a>
             <span>•</span>
-            <a href="/" className="hover:underline text-[#DE5D53] font-bold">hivocab.site</a>
+            <a href="/" className="hover:underline text-[#DE5D53] font-bold">
+              hivocab.site
+            </a>
           </div>
         </div>
       </footer>
