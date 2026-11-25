@@ -14,11 +14,11 @@ import { useRoute } from '../router/RouteContext.jsx';
 
 export const SRS_LEVEL_CONFIG = [
   { label: 'Mới', color: 'bg-surface-container text-outline' },
-  { label: '1h', color: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300' },
-  { label: '8h', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300' },
-  { label: '1 ngày', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300' },
-  { label: '1 tuần', color: 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300' },
-  { label: '1 tháng', color: 'bg-emerald-200 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' },
+  { label: '< 2.5 ngày', color: 'bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300' },
+  { label: '2.5–6 ngày', color: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-950/50 dark:text-yellow-300' },
+  { label: '6–15 ngày', color: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300' },
+  { label: '15–30 ngày', color: 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300' },
+  { label: '≥ 30 ngày', color: 'bg-emerald-200 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300' },
 ];
 
 export function useLessonDetail() {
@@ -113,9 +113,13 @@ export function useLessonDetail() {
 
     window.addEventListener('hi:topics-updated', handleRefresh);
     window.addEventListener('hivocab:words-bulk-added', handleRefresh);
+    window.addEventListener('hivocab:word-reviewed', handleRefresh);
+    window.addEventListener('hivocab:study-session-completed', handleRefresh);
     return () => {
       window.removeEventListener('hi:topics-updated', handleRefresh);
       window.removeEventListener('hivocab:words-bulk-added', handleRefresh);
+      window.removeEventListener('hivocab:word-reviewed', handleRefresh);
+      window.removeEventListener('hivocab:study-session-completed', handleRefresh);
     };
   }, [loadWords, topicId]);
 
@@ -133,9 +137,9 @@ export function useLessonDetail() {
     if (statusFilter === 'new') {
       result = result.filter((w) => (w.level || 0) === 0);
     } else if (statusFilter === 'learning') {
-      result = result.filter((w) => (w.level || 0) >= 1 && (w.level || 0) <= 4);
+      result = result.filter((w) => (w.level || 0) >= 1 && (w.level || 0) <= 3);
     } else if (statusFilter === 'mastered') {
-      result = result.filter((w) => (w.level || 0) >= 5);
+      result = result.filter((w) => (w.level || 0) >= 4);
     }
 
     if (searchQuery.trim()) {

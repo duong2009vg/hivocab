@@ -100,7 +100,18 @@ export function PageVocabulary() {
       });
       return;
     }
-    navigateTo('learning');
+    if (typeof window !== 'undefined') {
+      window._currentLessonWords = null;
+      window._currentSessionWords = null;
+      window._currentTopicId = null;
+      window._currentPassageId = null;
+      window._currentLessonIndex = null;
+      window._practiceMode = null;
+      try {
+        sessionStorage.removeItem('hivocab_study_session_config');
+      } catch (_) {}
+    }
+    openModal('reviewLauncher', { wordsDueCount: srsStats?.due || 0 });
   };
 
   const [selectedWordId, setSelectedWordId] = useState(null);

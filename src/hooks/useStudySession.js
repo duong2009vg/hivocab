@@ -208,19 +208,6 @@ function generateExerciseData(word, type, allWords = [], flashcardMode = 'en_vi'
   }
 }
 
-// ─── SRS: reviewWord via Supabase directly ────────────────────────────────────
-
-async function reviewWordInDB(wordId, rating) {
-  if (!wordId) return;
-  try {
-    await reviewWord(wordId, rating);
-  } catch (err) {
-    console.warn('[useStudySession] reviewWordInDB error:', err);
-  }
-}
-
-// ─── Session State Factory ────────────────────────────────────────────────────
-
 function createInitialState() {
   return {
     allWords: [],
@@ -233,18 +220,22 @@ function createInitialState() {
   };
 }
 
-function createQueueItem(word, forcedType = null, allWords = [], flashcardMode = 'en_vi', preferredMcqType = null) {
-  const exerciseType = forcedType || randomFrom(EXERCISE_TYPES);
-  const mcqType = exerciseType === 'mcq' ? (preferredMcqType || randomFrom(MCQ_SUBTYPES)) : null;
+function createQueueItem(word, allowedType = null, allWords = [], flashcardMode = 'en_vi', mcqSubtype = null) {
+  const exerciseType = allowedType || randomFrom(EXERCISE_TYPES);
+  const exerciseData = generateExerciseData(word, exerciseType, allWords, flashcardMode, mcqSubtype);
+  const resolvedMcqType = exerciseType === 'mcq'
+    ? (exerciseData?.type || exerciseData?.subtype || mcqSubtype || null)
+    : null;
+
   return {
     word,
     exerciseType,
-    mcqType,
-    usedMcqTypes: mcqType ? [mcqType] : [],
-    exerciseData: generateExerciseData(word, exerciseType, allWords, flashcardMode, mcqType),
-    usedTypes: [exerciseType],
+    mcqType: resolvedMcqType,
+    usedMcqTypes: resolvedMcqType ? [resolvedMcqType] : [],
+    exerciseData,
     attempts: 0,
     failCount: 0,
+    usedTypes: [exerciseType],
   };
 }
 
@@ -252,7 +243,47 @@ function createQueueItem(word, forcedType = null, allWords = [], flashcardMode =
 
 export function useStudySession() {
   const [session, setSession] = useState(createInitialState);
+  const sessionRef = useRef(session);
+  sessionRef.current = session;
   const sessionLoggedRef = useRef(false);
+  const pendingSavesRef = useRef(new Set());
+  const savedWordsCountRef = useRef(0);
+  const lastSyncErrorToastAtRef = useRef(0);
+
+  const persistWordReview = useCallback((wordId, rating) => {
+    if (!wordId) return Promise.resolve(null);
+
+    const runWithRetry = async () => {
+      try {
+        const res = await reviewWord(wordId, rating);
+        savedWordsCountRef.current += 1;
+        return res;
+      } catch (firstErr) {
+        await new Promise((r) => setTimeout(r, 300));
+        try {
+          const retryRes = await reviewWord(wordId, rating);
+          savedWordsCountRef.current += 1;
+          return retryRes;
+        } catch (retryErr) {
+          console.error('[useStudySession] reviewWord failed after retry:', retryErr || firstErr);
+          if (typeof window !== 'undefined' && typeof window.showHiToast === 'function') {
+            const now = Date.now();
+            if (now - lastSyncErrorToastAtRef.current > 5000) {
+              lastSyncErrorToastAtRef.current = now;
+              window.showHiToast('Không thể lưu tiến độ từ vựng lên hệ thống. Vui lòng thử lại.', 'error');
+            }
+          }
+          return null;
+        }
+      }
+    };
+
+    const p = runWithRetry().finally(() => {
+      pendingSavesRef.current.delete(p);
+    });
+    pendingSavesRef.current.add(p);
+    return p;
+  }, []);
 
   // Derived values
   const currentItem = session.isActive && session.queueIndex < session.queue.length
@@ -275,13 +306,24 @@ export function useStudySession() {
   };
 
   useEffect(() => {
-    if (isComplete && !sessionLoggedRef.current) {
-      sessionLoggedRef.current = true;
-      const count = session.completed.length || session.allWords.length || 1;
-      logStudySession(count).catch(err => {
-        console.warn('[useStudySession] logStudySession error:', err);
-      });
-      if (typeof window !== 'undefined') {
+    if (!isComplete || sessionLoggedRef.current) return;
+    sessionLoggedRef.current = true;
+    let cancelled = false;
+    const count = session.completed.length || session.allWords.length || 1;
+
+    (async () => {
+      if (pendingSavesRef.current.size > 0) {
+        await Promise.allSettled(Array.from(pendingSavesRef.current));
+      }
+      if (cancelled) return;
+
+      if (savedWordsCountRef.current === 0) {
+        await logStudySession(count).catch((err) => {
+          console.warn('[useStudySession] logStudySession error:', err);
+        });
+      }
+
+      if (!cancelled && typeof window !== 'undefined') {
         window.dispatchEvent(
           new CustomEvent('hivocab:study-session-completed', {
             detail: {
@@ -292,12 +334,18 @@ export function useStudySession() {
           })
         );
       }
-    }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [isComplete, session.completed.length, session.allWords.length]);
 
   // ── startSession ────────────────────────────────────────────────────────────
   const startSession = useCallback((words, allowedType = null, flashcardMode = null) => {
     sessionLoggedRef.current = false;
+    pendingSavesRef.current.clear();
+    savedWordsCountRef.current = 0;
     if (!words || words.length === 0) return;
     const validWords = words
       .filter(w => w && (w.word || w.meaning))
@@ -347,76 +395,90 @@ export function useStudySession() {
         ? rating
         : 'good';
 
-    setSession(prev => {
-      if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
-      const item = prev.queue[prev.queueIndex];
-      if (item.exerciseType !== 'flashcard') return prev;
+    const cur = sessionRef.current;
+    if (!cur?.isActive || cur.queueIndex >= cur.queue.length) return;
+    const curItem = cur.queue[cur.queueIndex];
+    if (!curItem || curItem.exerciseType !== 'flashcard') return;
 
-      const newItem = { ...item, attempts: item.attempts + 1 };
-      const isLapse = normalizedRating === 'again';
-      const isNewWord = item.word.level === 0 || item.word.isNew === true;
+    const wordId = curItem.word?.wordId || curItem.word?.id;
+    const isLapse = normalizedRating === 'again';
+    const nextFailCount = (curItem.failCount || 0) + 1;
+    const isNewWord = curItem.word?.level === 0 || curItem.word?.isNew === true;
 
-      // ── Case A: Recalled Card (rating === 'hard' | 'good' | 'easy') ────
-      if (!isLapse) {
-        reviewWordInDB(item.word.wordId || item.word.id, normalizedRating);
+    if (!isLapse) {
+      const effectiveRating = (curItem.failCount || 0) > 0 ? 'hard' : normalizedRating;
+      persistWordReview(wordId, effectiveRating);
+      setSession((prev) => {
+        if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
+        const item = prev.queue[prev.queueIndex];
+        if (!item || item.exerciseType !== 'flashcard') return prev;
+        const newItem = { ...item, attempts: item.attempts + 1 };
         return {
           ...prev,
-          queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
+          queue: prev.queue.map((q, i) => (i === prev.queueIndex ? newItem : q)),
           queueIndex: prev.queueIndex + 1,
-          completed: [...prev.completed, {
-            word: item.word,
-            rating: normalizedRating,
-            attempts: newItem.attempts,
-            isNew: isNewWord,
-          }],
+          completed: [
+            ...prev.completed,
+            {
+              word: item.word,
+              rating: effectiveRating,
+              attempts: newItem.attempts,
+              isNew: isNewWord,
+            },
+          ],
         };
-      }
-
-      // ── Case B: Forgotten Card / Lapse (rating === 'again') ─────────────
-      newItem.failCount = (newItem.failCount || 0) + 1;
-
-      // Guard against runaway retries (cap at 3 failed attempts)
-      if (newItem.failCount >= 3) {
-        reviewWordInDB(item.word.wordId || item.word.id, 'again');
+      });
+    } else if (nextFailCount >= 3) {
+      persistWordReview(wordId, 'again');
+      setSession((prev) => {
+        if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
+        const item = prev.queue[prev.queueIndex];
+        if (!item || item.exerciseType !== 'flashcard') return prev;
+        const newItem = { ...item, attempts: item.attempts + 1, failCount: (item.failCount || 0) + 1 };
         return {
           ...prev,
-          queue: prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
+          queue: prev.queue.map((q, i) => (i === prev.queueIndex ? newItem : q)),
           queueIndex: prev.queueIndex + 1,
-          completed: [...prev.completed, {
-            word: item.word,
-            rating: 'again',
-            attempts: newItem.attempts,
-            skipped: true,
-            isNew: isNewWord,
-          }],
+          completed: [
+            ...prev.completed,
+            {
+              word: item.word,
+              rating: 'again',
+              attempts: newItem.attempts,
+              skipped: true,
+              isNew: isNewWord,
+            },
+          ],
         };
-      }
-
-      // Rotate exercise type and append to end of queue for review
-      const nextType = prev.allowedType || pickNextType(newItem.usedTypes);
-      newItem.exerciseType = nextType;
-      newItem.exerciseData = generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode);
-      if (!newItem.usedTypes.includes(nextType)) {
-        newItem.usedTypes = [...newItem.usedTypes, nextType];
-      }
-
-      reviewWordInDB(item.word.wordId || item.word.id, 'again');
-      return {
-        ...prev,
-        queue: [
-          ...prev.queue.map((q, i) => i === prev.queueIndex ? newItem : q),
-          newItem,
-        ],
-        queueIndex: prev.queueIndex + 1,
-      };
-    });
+      });
+    } else {
+      setSession((prev) => {
+        if (!prev.isActive || prev.queueIndex >= prev.queue.length) return prev;
+        const item = prev.queue[prev.queueIndex];
+        if (!item || item.exerciseType !== 'flashcard') return prev;
+        const nextType = prev.allowedType || pickNextType(item.usedTypes);
+        const newItem = {
+          ...item,
+          attempts: item.attempts + 1,
+          failCount: (item.failCount || 0) + 1,
+          exerciseType: nextType,
+          exerciseData: generateExerciseData(item.word, nextType, prev.allWords, prev.flashcardMode),
+          usedTypes: item.usedTypes.includes(nextType) ? item.usedTypes : [...item.usedTypes, nextType],
+        };
+        return {
+          ...prev,
+          queue: [...prev.queue.map((q, i) => (i === prev.queueIndex ? newItem : q)), newItem],
+          queueIndex: prev.queueIndex + 1,
+        };
+      });
+    }
 
     // Play sound
     if (typeof window !== 'undefined') {
-      if (normalizedRating !== 'again') window.HiSound?.playCorrect?.();
+      if (!isLapse) window.HiSound?.playCorrect?.();
       else window.HiSound?.playIncorrect?.();
     }
-  }, []);
+  }, [persistWordReview]);
 
   // ── pendingResultRef — bridges submitAnswer → nextQuestion ──────────────────
   // submitAnswer is pure computation: evaluates the answer, fires SRS DB update & sound.
@@ -474,7 +536,7 @@ export function useStudySession() {
           : 'hard';
 
       if (isWordCompleted) {
-        reviewWordInDB(wordId, effectiveRating);
+        persistWordReview(wordId, effectiveRating);
       }
 
       result = {
@@ -489,7 +551,7 @@ export function useStudySession() {
     } else if (!correct) {
       const currentFailCount = (item.failCount || 0) + 1;
       if (currentFailCount >= 3) {
-        reviewWordInDB(wordId, 'again');
+        persistWordReview(wordId, 'again');
         result = { correct: false, correctAnswer, skipped: true, wordCompleted: true, failCount: currentFailCount, rating: 'again' };
       } else {
         result = { correct: false, correctAnswer, skipped: false, wordCompleted: false, failCount: currentFailCount };
@@ -499,7 +561,7 @@ export function useStudySession() {
         attempts === 1
           ? (isActiveProduction ? 'easy' : 'good')
           : 'hard';
-      reviewWordInDB(wordId, rating);
+      persistWordReview(wordId, rating);
       result = { correct: true, correctAnswer, skipped: false, wordCompleted: true, rating };
     }
 
@@ -507,7 +569,7 @@ export function useStudySession() {
     pendingResultRef.current = { result, attempts };
 
     return result;
-  }, [session.isActive, session.queue, session.queueIndex]);
+  }, [session.isActive, session.queue, session.queueIndex, persistWordReview]);
 
   // ── nextQuestion ────────────────────────────────────────────────────────────
   /**
