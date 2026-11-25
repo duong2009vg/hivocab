@@ -4,8 +4,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
-import { deleteFolderCascade, deleteTopicCascade } from '../../../services/topicsService.js';
+import { deleteFolderCascade, deleteTopicCascade, renameFolder, renameTopic } from '../../../services/topicsService.js';
 import { getCategoryIcon } from '../../../hooks/useTopics.js';
+import RenameModal from '../modals/RenameModal.jsx';
 
 export function AdminFoldersTab() {
   const { showToast } = useToast();
@@ -16,6 +17,7 @@ export function AdminFoldersTab() {
   const [expandedFolders, setExpandedFolders] = useState({});
   const [deletingFolder, setDeletingFolder] = useState(null);
   const [deletingTopicId, setDeletingTopicId] = useState(null);
+  const [renameTarget, setRenameTarget] = useState(null); // { mode: 'folder' | 'topic', id?, name, subtitle, existingNames }
 
   // Modal Create Folder
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -153,6 +155,32 @@ export function AdminFoldersTab() {
       showToast(`Lỗi khi xóa chủ đề: ${err.message}`, 'error');
     } finally {
       setDeletingTopicId(null);
+    }
+  };
+
+  // 4b. Rename Folder or Single Topic
+  const handleRenameSubmit = async (newName) => {
+    if (!renameTarget) return;
+    try {
+      if (renameTarget.mode === 'folder') {
+        const res = await renameFolder(renameTarget.name, newName);
+        setExpandedFolders((prev) => {
+          if (!prev[renameTarget.name]) return prev;
+          const next = { ...prev };
+          delete next[renameTarget.name];
+          next[res.newName] = true;
+          return next;
+        });
+        showToast(`Đã đổi tên thư mục "${renameTarget.name}" → "${res.newName}" (${res.updatedCount} chủ đề)! 🎉`, 'success');
+      } else {
+        await renameTopic(renameTarget.id, newName);
+        showToast(`Đã đổi tên chủ đề → "${newName}" thành công! 🎉`, 'success');
+      }
+      setRenameTarget(null);
+      await loadData();
+    } catch (err) {
+      console.error('[AdminFoldersTab] Rename error:', err);
+      showToast(`Lỗi đổi tên: ${err.message}`, 'error');
     }
   };
 
@@ -376,6 +404,24 @@ export function AdminFoldersTab() {
 
                     <button
                       type="button"
+                      onClick={() =>
+                        setRenameTarget({
+                          mode: 'folder',
+                          name: folder.name,
+                          subtitle: `Thư mục hiện có ${folder.topics.length} chủ đề (${folder.wordCount.toLocaleString()} từ).`,
+                          existingNames: folders.map((f) => f.name),
+                        })
+                      }
+                      disabled={isDeleting}
+                      className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border-2 border-[#3D352E] shadow-2xs text-xs font-black flex items-center gap-1 transition active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
+                      title={`Đổi tên thư mục "${folder.name}"`}
+                    >
+                      <span className="material-symbols-outlined text-[15px]">edit</span>
+                      <span>Đổi tên</span>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => handleDeleteFolder(folder)}
                       disabled={isDeleting}
                       className="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] text-xs font-black flex items-center gap-1.5 transition active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
@@ -427,17 +473,37 @@ export function AdminFoldersTab() {
                             </div>
                           </div>
 
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteTopic(t, folder.name)}
-                            disabled={deletingTopicId === t.id}
-                            className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-500 border border-[#3D352E] shadow-2xs transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
-                            title={`Xóa chủ đề "${t.name}"`}
-                          >
-                            <span className="material-symbols-outlined text-[14px]">
-                              {deletingTopicId === t.id ? 'refresh' : 'delete'}
-                            </span>
-                          </button>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setRenameTarget({
+                                  mode: 'topic',
+                                  id: t.id,
+                                  name: t.name,
+                                  subtitle: `Thuộc thư mục: ${folder.name} • ${t.word_count || 0} từ vựng`,
+                                  existingNames: folder.topics.map((x) => x.name),
+                                })
+                              }
+                              disabled={deletingTopicId === t.id}
+                              className="p-1.5 rounded-lg bg-white hover:bg-amber-50 text-amber-700 border border-[#3D352E] shadow-2xs transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+                              title={`Đổi tên chủ đề "${t.name}"`}
+                            >
+                              <span className="material-symbols-outlined text-[14px]">edit</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTopic(t, folder.name)}
+                              disabled={deletingTopicId === t.id}
+                              className="p-1.5 rounded-lg bg-white hover:bg-rose-50 text-rose-500 border border-[#3D352E] shadow-2xs transition active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+                              title={`Xóa chủ đề "${t.name}"`}
+                            >
+                              <span className="material-symbols-outlined text-[14px]">
+                                {deletingTopicId === t.id ? 'refresh' : 'delete'}
+                              </span>
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -551,6 +617,16 @@ export function AdminFoldersTab() {
           </div>
         </div>
       )}
+
+      <RenameModal
+        isOpen={Boolean(renameTarget)}
+        mode={renameTarget?.mode || 'topic'}
+        currentName={renameTarget?.name || ''}
+        subtitle={renameTarget?.subtitle || ''}
+        existingNames={renameTarget?.existingNames || []}
+        onClose={() => setRenameTarget(null)}
+        onSubmit={handleRenameSubmit}
+      />
     </div>
   );
 }

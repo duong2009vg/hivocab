@@ -6,7 +6,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
 import { playWordAudio } from '../../../services/audioService.js';
-import { deleteFolderCascade, deleteTopicCascade } from '../../../services/topicsService.js';
+import { deleteFolderCascade, deleteTopicCascade, renameFolder, renameTopic } from '../../../services/topicsService.js';
+import RenameModal from '../modals/RenameModal.jsx';
 
 const POS_OPTIONS = [
   { value: 'noun', label: 'Danh từ (n)' },
@@ -44,9 +45,10 @@ export function AdminWordsTab() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Modals state (Create & Edit)
+  // Modals state (Create, Edit & Rename)
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [editingWord, setEditingWord] = useState(null);
+  const [renameTarget, setRenameTarget] = useState(null);
   const [wordForm, setWordForm] = useState({
     word: '',
     phonetic: '',
@@ -519,6 +521,30 @@ export function AdminWordsTab() {
     }
   };
 
+  const handleRenameSubmit = async (newName) => {
+    if (!renameTarget) return;
+    try {
+      if (renameTarget.mode === 'folder') {
+        const res = await renameFolder(renameTarget.name, newName);
+        setCategories((prev) => {
+          const withoutOld = prev.filter((c) => c !== renameTarget.name);
+          if (withoutOld.includes(res.newName)) return withoutOld.sort();
+          return [...withoutOld, res.newName].sort();
+        });
+        setSelectedCategory(res.newName);
+        showToast(`Đã đổi tên thư mục "${renameTarget.name}" → "${res.newName}"! 🎉`, 'success');
+      } else {
+        await renameTopic(renameTarget.id, newName);
+        setTopics((prev) => prev.map((t) => (t.id === renameTarget.id ? { ...t, name: newName } : t)));
+        showToast(`Đã đổi tên chủ đề → "${newName}" thành công! 🎉`, 'success');
+      }
+      setRenameTarget(null);
+    } catch (err) {
+      console.error('handleRenameSubmit error:', err);
+      showToast(`Lỗi đổi tên: ${err.message}`, 'error');
+    }
+  };
+
   return (
     <div className="space-y-4 animate-fade-in font-nunito text-[#3D352E]">
       {/* ───────────────────────────────────────────────────────────── */}
@@ -532,15 +558,33 @@ export function AdminWordsTab() {
               1. Thư mục / Danh mục học tập (Category)
             </label>
             {selectedCategory && selectedCategory !== 'all' && (
-              <button
-                type="button"
-                onClick={() => handleDeleteCategory(selectedCategory)}
-                className="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[10px] font-bold flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
-                title={`Xóa vĩnh viễn thư mục "${selectedCategory}" và tất cả dữ liệu bên trong`}
-              >
-                <span className="material-symbols-outlined text-[13px]">delete</span>
-                <span>Xóa thư mục "{selectedCategory}"</span>
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRenameTarget({
+                      mode: 'folder',
+                      name: selectedCategory,
+                      subtitle: `Đổi tên thư mục "${selectedCategory}" (${topics.length} chủ đề đang hiển thị).`,
+                      existingNames: categories,
+                    })
+                  }
+                  className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
+                  title={`Đổi tên thư mục "${selectedCategory}"`}
+                >
+                  <span className="material-symbols-outlined text-[13px]">edit</span>
+                  <span>Đổi tên thư mục</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCategory(selectedCategory)}
+                  className="px-2 py-0.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-300 text-[10px] font-bold flex items-center gap-1 active:translate-y-0.5 transition cursor-pointer"
+                  title={`Xóa vĩnh viễn thư mục "${selectedCategory}" và tất cả dữ liệu bên trong`}
+                >
+                  <span className="material-symbols-outlined text-[13px]">delete</span>
+                  <span>Xóa thư mục "{selectedCategory}"</span>
+                </button>
+              </div>
             )}
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -581,15 +625,34 @@ export function AdminWordsTab() {
                 2. Chủ đề (Topic)
               </label>
               {currentTopic && (
-                <button
-                  type="button"
-                  onClick={handleDeleteCurrentTopic}
-                  className="text-rose-600 hover:text-rose-700 text-[10px] font-bold inline-flex items-center gap-0.5 cursor-pointer"
-                  title={`Xóa chủ đề "${currentTopic.name}"`}
-                >
-                  <span className="material-symbols-outlined text-[13px]">delete</span>
-                  <span>Xóa chủ đề</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setRenameTarget({
+                        mode: 'topic',
+                        id: currentTopic.id,
+                        name: currentTopic.name,
+                        subtitle: `Thuộc thư mục: ${currentTopic.category || selectedCategory} • ${currentTopic.word_count || 0} từ vựng`,
+                        existingNames: topics.map((t) => t.name),
+                      })
+                    }
+                    className="text-amber-700 hover:text-amber-800 text-[10px] font-bold inline-flex items-center gap-0.5 cursor-pointer"
+                    title={`Đổi tên chủ đề "${currentTopic.name}"`}
+                  >
+                    <span className="material-symbols-outlined text-[13px]">edit</span>
+                    <span>Đổi tên</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteCurrentTopic}
+                    className="text-rose-600 hover:text-rose-700 text-[10px] font-bold inline-flex items-center gap-0.5 cursor-pointer"
+                    title={`Xóa chủ đề "${currentTopic.name}"`}
+                  >
+                    <span className="material-symbols-outlined text-[13px]">delete</span>
+                    <span>Xóa chủ đề</span>
+                  </button>
+                </div>
               )}
             </div>
             <select
@@ -962,6 +1025,16 @@ export function AdminWordsTab() {
           </div>
         </div>
       )}
+
+      <RenameModal
+        isOpen={Boolean(renameTarget)}
+        mode={renameTarget?.mode || 'topic'}
+        currentName={renameTarget?.name || ''}
+        subtitle={renameTarget?.subtitle || ''}
+        existingNames={renameTarget?.existingNames || []}
+        onClose={() => setRenameTarget(null)}
+        onSubmit={handleRenameSubmit}
+      />
     </div>
   );
 }

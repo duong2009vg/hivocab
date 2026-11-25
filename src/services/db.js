@@ -459,6 +459,98 @@ export async function deleteFolderCascade(categoryName) {
   return true;
 }
 
+/**
+ * Rename a single topic in Supabase and broadcast cache invalidation.
+ */
+export async function renameTopic(topicId, newName) {
+  const trimmed = String(newName || '').trim();
+  if (!topicId) throw new Error('Thiếu ID chủ đề cần đổi tên.');
+  if (!trimmed) throw new Error('Tên chủ đề không được để trống.');
+
+  const { data, error } = await supabase
+    .from('topics')
+    .update({ name: trimmed })
+    .eq('id', topicId)
+    .select('id, name, category')
+    .single();
+
+  if (error) throw error;
+
+  clearTopicCache();
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('hi:topics-updated'));
+  }
+  return data;
+}
+
+/**
+ * Rename all topics belonging to a folder (category) in Supabase and sync local caches.
+ */
+export async function renameFolder(oldCategoryName, newCategoryName) {
+  const oldTrimmed = String(oldCategoryName || '').trim();
+  const newTrimmed = String(newCategoryName || '').trim();
+  if (!oldTrimmed) throw new Error('Thiếu tên thư mục hiện tại.');
+  if (!newTrimmed) throw new Error('Tên thư mục mới không được để trống.');
+  if (oldTrimmed === newTrimmed) {
+    return { updatedCount: 0, oldName: oldTrimmed, newName: newTrimmed };
+  }
+
+  const { data: allTopics, error: fetchErr } = await supabase
+    .from('topics')
+    .select('id, category');
+
+  if (fetchErr) throw fetchErr;
+
+  const oldLower = oldTrimmed.toLowerCase();
+  const exactMatches = (allTopics || []).filter(
+    (t) => String(t.category || '').trim() === oldTrimmed
+  );
+  const matched =
+    exactMatches.length > 0
+      ? exactMatches
+      : (allTopics || []).filter(
+          (t) => String(t.category || '').trim().toLowerCase() === oldLower
+        );
+
+  const topicIds = matched.map((t) => t.id);
+  if (topicIds.length > 0) {
+    const { error: updErr } = await supabase
+      .from('topics')
+      .update({ category: newTrimmed })
+      .in('id', topicIds);
+    if (updErr) throw updErr;
+  }
+
+  try {
+    if (typeof window !== 'undefined') {
+      const newLower = newTrimmed.toLowerCase();
+      let userFolders = JSON.parse(localStorage.getItem('hivocab_user_folders') || '[]');
+      if (Array.isArray(userFolders)) {
+        userFolders = userFolders.map((f) => {
+          if (f && String(f.name || '').trim().toLowerCase() === oldLower) {
+            return { ...f, name: newTrimmed };
+          }
+          return f;
+        });
+        localStorage.setItem('hivocab_user_folders', JSON.stringify(userFolders));
+      }
+
+      let deletedFolders = JSON.parse(localStorage.getItem('hivocab_deleted_folders') || '[]');
+      if (Array.isArray(deletedFolders) && deletedFolders.includes(newLower)) {
+        deletedFolders = deletedFolders.filter((k) => k !== newLower);
+        localStorage.setItem('hivocab_deleted_folders', JSON.stringify(deletedFolders));
+      }
+
+      window.dispatchEvent(new CustomEvent('hi:topics-updated'));
+    }
+  } catch (err) {
+    console.warn('[renameFolder] LocalStorage sync:', err);
+  }
+
+  clearTopicCache();
+  return { updatedCount: topicIds.length, oldName: oldTrimmed, newName: newTrimmed };
+}
+
 async function getCamHierarchyLegacy(topicId) {
   try {
     const { data: testsData, error: testsErr } = await supabase

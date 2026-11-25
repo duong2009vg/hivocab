@@ -7,6 +7,8 @@ export {
   getTopics,
   isUserPro,
   createTopic,
+  renameTopic,
+  renameFolder,
   deleteTopic,
   deleteTopicCascade,
   deleteFolderCascade,
