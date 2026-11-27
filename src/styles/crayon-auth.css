@@ -1,0 +1,131 @@
+/* src/styles/crayon-auth.css
+ * HiVocab Signature Cozy Crayon Auth Page styling:
+ * Keeps the clean split-screen crayon-bordered form structure with HiVocab's warm paper,
+ * charcoal ink (#3D352E), sage (#557A46), terracotta (#DE5D53), and warm gold (#F4D06F) palette.
+ */
+
+.auth-crayon-card {
+  position: relative;
+  background-color: #FFFFFF;
+  border-radius: 20px;
+  box-shadow: 5px 5px 0px #F2CF7E;
+}
+
+/* Sketchy SVG border overlay — keeps interior text and inputs 100% crisp */
+.auth-crayon-border-svg {
+  position: absolute;
+  inset: -3px;
+  width: calc(100% + 6px);
+  height: calc(100% + 6px);
+  pointer-events: none;
+  overflow: visible;
+  z-index: 20;
+}
+
+.auth-crayon-field {
+  background-color: #FFFFFF;
+  border: 1.5px solid #DDD1BE;
+  border-radius: 12px;
+  color: #3D352E;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.auth-crayon-field:hover {
+  border-color: #B9A791;
+}
+
+.auth-crayon-field:focus {
+  outline: none;
+  border-color: #557A46;
+  box-shadow: 0 0 0 3px rgba(85, 122, 70, 0.14);
+}
+
+.auth-crayon-field::placeholder {
+  color: #A69889;
+}
+
+/* Crayon white button with HiVocab warm-gold offset drop shadow */
+.auth-crayon-btn-white {
+  background-color: #FFFFFF;
+  border: 2px solid #3D352E;
+  border-radius: 14px;
+  box-shadow: 3px 3.5px 0px #F2CF7E;
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 140ms ease, background-color 160ms ease;
+}
+
+.auth-crayon-btn-white:hover {
+  background-color: #FAF5EB;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4.5px 0px #ECC468;
+}
+
+.auth-crayon-btn-white:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1.5px 0px #F2CF7E;
+}
+
+/* Wax-crayon textured submit button (Sage for Login, Terracotta for Sign Up) */
+.auth-crayon-btn-primary {
+  position: relative;
+  overflow: hidden;
+  background-color: #557A46;
+  border: 2px solid #3D352E;
+  border-radius: 14px;
+  box-shadow: 3px 4px 0px #3D352E;
+  transition: transform 140ms cubic-bezier(0.22, 1, 0.36, 1), box-shadow 140ms ease, background-color 160ms ease;
+}
+
+.auth-crayon-btn-primary.is-signup {
+  background-color: #DE5D53;
+}
+
+.auth-crayon-btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.2;
+  pointer-events: none;
+  background-image:
+    radial-gradient(rgba(255, 253, 249, 0.72) 0.75px, transparent 0.85px),
+    radial-gradient(rgba(61, 53, 46, 0.4) 0.85px, transparent 0.95px);
+  background-size: 7px 7px, 11px 11px;
+  background-position: 0 0, 3px 4px;
+}
+
+.auth-crayon-btn-primary:hover:not(:disabled) {
+  background-color: #476739;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 5px 0px #3D352E;
+}
+
+.auth-crayon-btn-primary.is-signup:hover:not(:disabled) {
+  background-color: #C84F45;
+}
+
+.auth-crayon-btn-primary:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1.5px 0px #3D352E;
+}
+
+/* Segmented tab active pill */
+.auth-crayon-tab-active {
+  background-color: #FFFFFF;
+  color: #3D352E;
+  border: 1.5px solid #3D352E;
+  box-shadow: 2px 2.5px 0px #F2CF7E;
+}
+
+.auth-panel-fade {
+  animation: authFadeIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes authFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
