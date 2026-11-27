@@ -18,7 +18,6 @@ import { useVocabulary } from '../../hooks/useVocabulary.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
-import { SrsLevelChart } from '../ui/SrsLevelChart.jsx';
 
 const LEVEL_INTERVALS = {
   0: 'Mới thêm',
@@ -172,6 +171,22 @@ export function PageVocabulary() {
   const startIndex = (page - 1) * pageSize;
   const hasActiveFilters = Boolean(search || levelFilter !== null || topicId);
 
+  const maxLevelCount = Math.max(
+    memoryLevels.lv0 || 0,
+    memoryLevels.lv1 || 0,
+    memoryLevels.lv2 || 0,
+    memoryLevels.lv3 || 0,
+    memoryLevels.lv4 || 0,
+    memoryLevels.lv5 || 0,
+    1
+  );
+
+  const getBarHeight = (count) => {
+    if (!count || count === 0) return '8px';
+    const percent = Math.min(100, Math.max(16, Math.round((count / maxLevelCount) * 100)));
+    return `${percent}%`;
+  };
+
   const handleResetFilters = () => {
     if (search) clearSearch();
     if (levelFilter !== null) handleLevelFilterChange(null);
@@ -291,14 +306,44 @@ export function PageVocabulary() {
             </button>
           </div>
 
-          <div className="pt-3">
-            <SrsLevelChart
-              counts={memoryLevels}
-              selectedLevel={levelFilter === null ? 'all' : levelFilter}
-              onSelectLevel={(lvl) => handleLevelFilterChange(levelFilter === lvl ? null : lvl)}
-              compact
-              showHeader={false}
-            />
+          {/* 6 Crayon Bars (Classic Design) */}
+          <div className="pt-3 pb-1 flex items-end justify-between px-1 text-center">
+            {[0, 1, 2, 3, 4, 5].map((lvl) => {
+              const count = memoryLevels[`lv${lvl}`] || 0;
+              const isSelected = levelFilter === lvl;
+              const theme = LEVEL_COLORS[lvl];
+
+              return (
+                <div
+                  key={lvl}
+                  onClick={() => handleLevelFilterChange(isSelected ? null : lvl)}
+                  className={`flex flex-col items-center flex-1 cursor-pointer transition-transform active:scale-95 ${
+                    isSelected ? 'scale-105' : 'hover:scale-102'
+                  }`}
+                >
+                  <span
+                    className={`text-sm font-bold tabular-nums ${
+                      isSelected ? 'text-[#D95D39]' : 'text-[#382E2B]'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                  <div className="h-24 flex items-end justify-center w-full py-1">
+                    <div
+                      className={`w-5 rounded-full border-2 border-[#382E2B] ${theme.fill} shadow-xs transition-all`}
+                      style={{ height: getBarHeight(count) }}
+                    />
+                  </div>
+                  <span
+                    className={`text-[11px] font-bold mt-1 ${
+                      isSelected ? 'text-[#D95D39] underline' : 'text-[#6E6259]'
+                    }`}
+                  >
+                    Lvl {lvl}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </section>
 
@@ -617,41 +662,97 @@ export function PageVocabulary() {
             </div>
           </header>
 
-          {/* Compact Collapsible FSRS-6 Strip (frees ~190px above the fold) */}
+          {/* Compact Collapsible FSRS-6 Strip (Classic Bar Design) */}
           {showSrsStrip && (
             <section className="bg-[#FFFDF9] rounded-2xl border-2 border-[#382E2B] p-4 shadow-[2px_3px_0px_#382E2B]">
-              <div className="flex flex-col xl:flex-row items-stretch justify-between gap-4">
+              <div className="flex flex-col xl:flex-row items-stretch justify-between gap-5">
                 <div className="flex-1 min-w-0">
-                  <SrsLevelChart
-                    counts={memoryLevels}
-                    selectedLevel={levelFilter === null ? 'all' : levelFilter}
-                    onSelectLevel={(lvl) => handleLevelFilterChange(levelFilter === lvl ? null : lvl)}
-                    compact
-                    title="Phân bổ trí nhớ FSRS-6"
-                    subtitle="Nhấn cột bất kỳ để lọc nhanh theo cấp độ ghi nhớ"
-                    headerRight={
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={refresh}
-                          className="p-1.5 rounded-lg text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] transition-colors cursor-pointer"
-                          title="Làm mới dữ liệu"
-                          aria-label="Làm mới dữ liệu"
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => openModal('srsExplainer')}
-                          className="w-6 h-6 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs font-bold flex items-center justify-center cursor-pointer"
-                          title="Giải thích thuật toán FSRS-6"
-                          aria-label="Giải thích thuật toán FSRS-6"
-                        >
-                          ?
-                        </button>
+                  <div className="flex items-center justify-between mb-3 pb-2 border-b border-dashed border-[#E3D7C5]">
+                    <div className="flex items-center gap-2">
+                      <RotateCcw className="w-5 h-5 text-[#5b8fb9] shrink-0" />
+                      <div>
+                        <h2 className="text-base font-black text-[#382E2B]">
+                          Tổng quan phân bổ trí nhớ FSRS-6
+                        </h2>
+                        <p className="text-xs text-[#6E6259] font-semibold">
+                          Nhấn vào từng cột để lọc nhanh theo cấp độ ghi nhớ
+                        </p>
                       </div>
-                    }
-                  />
+                    </div>
+
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={refresh}
+                        className="p-1.5 rounded-lg text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] transition-colors cursor-pointer"
+                        title="Làm mới dữ liệu"
+                        aria-label="Làm mới dữ liệu"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => openModal('srsExplainer')}
+                        className="w-6 h-6 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs font-bold flex items-center justify-center cursor-pointer"
+                        title="Giải thích thuật toán FSRS-6"
+                        aria-label="Giải thích thuật toán FSRS-6"
+                      >
+                        ?
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 6 Classic Crayon Bars Grid */}
+                  <div className="grid grid-cols-6 gap-3 items-end pt-1 text-center select-none">
+                    {[0, 1, 2, 3, 4, 5].map((lvl) => {
+                      const count = memoryLevels[`lv${lvl}`] || 0;
+                      const isSelected = levelFilter === lvl;
+                      const theme = LEVEL_COLORS[lvl];
+
+                      return (
+                        <div
+                          key={lvl}
+                          onClick={() => handleLevelFilterChange(isSelected ? null : lvl)}
+                          className={`flex flex-col items-center gap-1.5 cursor-pointer transition-transform active:scale-95 ${
+                            isSelected ? 'scale-105' : 'hover:scale-102'
+                          }`}
+                          title={`Lọc từ vựng cấp độ ${lvl}`}
+                        >
+                          <span
+                            className={`text-sm font-black tabular-nums ${
+                              isSelected ? 'text-[#D95D39]' : 'text-[#6E6259]'
+                            }`}
+                          >
+                            {count}
+                          </span>
+                          <div
+                            className={`w-full max-w-[54px] h-24 rounded-2xl border-2 p-1.5 flex flex-col justify-end ${
+                              isSelected
+                                ? 'bg-[#FCECE7] border-[#382E2B] shadow-[2px_2px_0px_#382E2B]'
+                                : 'bg-[#F5EDE2] border-dashed border-[#D8C8B4]'
+                            }`}
+                          >
+                            <div
+                              className={`w-full rounded-xl transition-all duration-300 ${theme.fill}`}
+                              style={{ height: getBarHeight(count) }}
+                            />
+                          </div>
+                          <div className="text-xs font-black text-[#382E2B]">
+                            <span
+                              className={`block ${
+                                isSelected ? 'text-[#D95D39] font-black underline' : ''
+                              }`}
+                            >
+                              Lvl {lvl}
+                            </span>
+                            <span className="text-[10px] text-[#6E6259] font-semibold">
+                              {LEVEL_INTERVALS[lvl]}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Compact Mascot Review Card */}

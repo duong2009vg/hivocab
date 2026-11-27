@@ -34,7 +34,6 @@ import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { getWordsDueForReview } from '../../services/db.js';
 import { IeltsGoalModal, getIeltsVocabStandard } from '../modals/IeltsGoalModal.jsx';
-import { SrsLevelChart } from '../ui/SrsLevelChart.jsx';
 
 const DAILY_WORDS_POOL = [
   {
@@ -598,6 +597,21 @@ export function PageDashboard() {
 
   const { memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } } = stats;
 
+  const maxLevelCount = Math.max(
+    memoryLevels.lv0 || 0,
+    memoryLevels.lv1 || 0,
+    memoryLevels.lv2 || 0,
+    memoryLevels.lv3 || 0,
+    memoryLevels.lv4 || 0,
+    memoryLevels.lv5 || 0,
+    1
+  );
+
+  const getBarHeight = (count) => {
+    if (!count || count === 0) return '6px';
+    return `${Math.max(14, Math.round((count / maxLevelCount) * 100))}%`;
+  };
+
   const handleLevelClick = (lvl) => {
     navigateTo('vocabulary');
     setTimeout(() => {
@@ -1040,12 +1054,51 @@ export function PageDashboard() {
               </button>
             </div>
 
-            <div className="pt-3">
-              <SrsLevelChart
-                counts={memoryLevels}
-                onSelectLevel={handleLevelClick}
-                showHeader={false}
-              />
+            <div className="pt-3 pb-2 flex items-end justify-between px-1 text-center">
+              {[0, 1, 2, 3, 4, 5].map((lvl) => {
+                const count = memoryLevels[`lv${lvl}`] || 0;
+                let bgClass = '',
+                  borderClass = '',
+                  dims = 'w-4',
+                  opacity = 'opacity-70';
+                if (lvl === 0) {
+                  bgClass = 'bg-[#96A0A8]';
+                  opacity = 'opacity-80';
+                } else if (lvl === 1) {
+                  bgClass = 'bg-[#F0783C]';
+                  borderClass = 'border-2 border-[#382E2B]';
+                  dims = 'w-5';
+                  opacity = '';
+                } else if (lvl === 2) {
+                  bgClass = 'bg-[#ECA43B]';
+                  borderClass = 'border-2 border-[#382E2B]';
+                  dims = 'w-5';
+                  opacity = '';
+                } else if (lvl === 3) {
+                  bgClass = 'bg-[#4CA9D6]';
+                } else if (lvl === 4) {
+                  bgClass = 'bg-[#A682BD]';
+                } else if (lvl === 5) {
+                  bgClass = 'bg-[#6EB882]';
+                }
+
+                return (
+                  <div
+                    key={lvl}
+                    onClick={() => handleLevelClick(lvl)}
+                    className="flex flex-col items-center flex-1 cursor-pointer"
+                  >
+                    <span className="text-sm font-bold text-[#382E2B] tabular-nums">{count}</span>
+                    <div className="h-24 flex items-end justify-center w-full py-1">
+                      <div
+                        className={`${dims} ${bgClass} ${borderClass} rounded-full relative shadow-sm ${opacity} transition-all`}
+                        style={{ height: getBarHeight(count) }}
+                      />
+                    </div>
+                    <span className="text-[11px] font-bold text-[#7A6B62] mt-1">Lvl {lvl}</span>
+                  </div>
+                );
+              })}
             </div>
 
             <div className="mt-2.5 pt-2.5 border-t border-dashed border-[#E3D7C5] flex items-center justify-between text-xs text-[#6E6259]">
@@ -1532,38 +1585,86 @@ export function PageDashboard() {
                 {/* Quick Hub (4 Core Features) */}
                 <QuickHubSection items={quickHubItems} onSelectItem={handleSelectQuickHub} variant="desktop" />
 
-                {/* SRS Distribution Card (Unified FSRS-6 SrsLevelChart) */}
-                <section className="dashboard-desktop-card bg-[#FFFDF9] rounded-3xl p-6 crayon-border shadow-crayonSm space-y-3">
-                  <SrsLevelChart
-                    counts={memoryLevels}
-                    onSelectLevel={handleLevelClick}
-                    title="Phân bố trí nhớ FSRS-6"
-                    subtitle="Nhấn vào từng cột để mở đúng nhóm từ trong Sổ từ cá nhân"
-                    headerRight={
-                      <div className="flex items-center gap-2 shrink-0">
+                {/* SRS Distribution Card (Classic Bar Design) */}
+                <section className="dashboard-desktop-card bg-[#FFFDF9] rounded-3xl p-6 crayon-border shadow-crayonSm space-y-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <div>
+                      <h3 className="text-lg font-black text-[#382E2B] font-quicksand flex items-center gap-2">
+                        <RotateCcw className="w-5 h-5 text-[#4D6B53] shrink-0" />
+                        <span>Phân bố trí nhớ FSRS-6</span>
                         <button
                           type="button"
                           onClick={() => openModal('srsExplainer')}
                           aria-label="Tìm hiểu thuật toán FSRS-6"
                           title="Giải thích 6 cấp độ FSRS-6"
-                          className="w-6 h-6 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs flex items-center justify-center font-bold cursor-pointer transition-colors"
+                          className="w-5 h-5 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs flex items-center justify-center font-bold cursor-pointer transition-colors"
                         >
                           ?
                         </button>
-                        <span className="text-xs font-extrabold tabular-nums bg-[#FAF5EB] text-[#382E2B] px-3 py-1 rounded-full border border-[#E3D7C5] whitespace-nowrap">
-                          {total.toLocaleString('vi-VN')} từ
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => navigateTo('vocabulary')}
-                          className="text-xs font-extrabold text-[#D95D39] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                      </h3>
+                      <p className="text-xs text-[#6E6259]">
+                        Theo dõi mức độ khắc sâu vào trí nhớ dài hạn của bạn
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-extrabold tabular-nums bg-[#FAF5EB] text-[#382E2B] px-3 py-1 rounded-full border border-[#E3D7C5] whitespace-nowrap">
+                        Tổng cộng: {total.toLocaleString('vi-VN')} từ
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => navigateTo('vocabulary')}
+                        className="text-xs font-extrabold text-[#D95D39] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                      >
+                        <span>Sổ từ</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-6 gap-2 sm:gap-3 pt-3">
+                    {[0, 1, 2, 3, 4, 5].map((lvl) => {
+                      const count = memoryLevels[`lv${lvl}`] || 0;
+                      let bg = '',
+                        border = '';
+                      if (lvl === 0) {
+                        bg = 'bg-gray-200';
+                        border = 'border border-dashed border-gray-400';
+                      } else if (lvl === 1) {
+                        bg = 'bg-terracotta';
+                        border = 'border-2 border-terracotta';
+                      } else if (lvl === 2) {
+                        bg = 'bg-warmAmber';
+                        border = 'border border-warmAmber';
+                      } else if (lvl === 3) {
+                        bg = 'bg-softBlue';
+                        border = 'border border-dashed border-softBlue';
+                      } else if (lvl === 4) {
+                        bg = 'bg-softPurple';
+                        border = 'border border-dashed border-softPurple';
+                      } else if (lvl === 5) {
+                        bg = 'bg-sage';
+                        border = 'border border-dashed border-sage';
+                      }
+
+                      return (
+                        <div
+                          key={lvl}
+                          onClick={() => handleLevelClick(lvl)}
+                          className="flex flex-col items-center justify-end h-32 cursor-pointer group"
                         >
-                          <span>Sổ từ</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    }
-                  />
+                          <div
+                            className={`w-full rounded-t-lg ${bg} ${border} transition-all group-hover:opacity-80`}
+                            style={{ height: getBarHeight(count) }}
+                          />
+                          <div className="text-center mt-2">
+                            <span className="block text-sm font-black text-[#382E2B] tabular-nums">
+                              {count}
+                            </span>
+                            <span className="block text-[10px] text-[#6E6259]">Lv {lvl}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </section>
 
                 {/* THPT Exam Roadmap Card */}
