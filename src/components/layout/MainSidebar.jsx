@@ -105,7 +105,7 @@ export function MainSidebar() {
   const navGroups = [
     {
       id: 'daily',
-      label: 'Học mỗi ngày',
+      label: 'Không gian học',
       items: [
         {
           id: 'dashboard',
@@ -133,7 +133,7 @@ export function MainSidebar() {
     },
     {
       id: 'practice',
-      label: 'Luyện kỹ năng',
+      label: 'Phòng luyện tập',
       items: [
         {
           id: 'exercises',
@@ -173,7 +173,7 @@ export function MainSidebar() {
     },
     {
       id: 'tools',
-      label: 'Tài nguyên',
+      label: 'Tra cứu & Cộng đồng',
       items: [
         {
           id: 'library',
@@ -239,12 +239,13 @@ export function MainSidebar() {
           </button>
         </div>
 
-        {/* Grouped Navigation Menu */}
+        {/* Grouped Navigation Menu (vertically centered safely between logo & footer) */}
         <nav
           aria-label="Điều hướng chính"
-          className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col gap-1 pr-0.5"
+          className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col pr-0.5"
         >
-          {navGroups.map((group, groupIdx) => (
+          <div className="my-auto flex flex-col gap-1 py-1">
+            {navGroups.map((group, groupIdx) => (
             <div
               key={group.id}
               data-nav-group="true"
@@ -320,6 +321,7 @@ export function MainSidebar() {
               })}
             </div>
           ))}
+          </div>
         </nav>
       </div>
 
