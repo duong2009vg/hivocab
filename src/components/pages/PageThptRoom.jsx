@@ -18,6 +18,8 @@ import { AlertTriangle, Flag, X, CheckCircle2 } from 'lucide-react';
 import { supabase } from '../../lib/supabaseClient.js';
 import { getExerciseTheory, getExerciseQuestions } from '../../services/exercisesService.js';
 
+const THPT_EXAM_CACHE = new Map();
+
 export function PageThptRoom() {
   const { navigateTo } = useRoute();
   const { isPro, loading: authLoading } = useAuth();
@@ -275,20 +277,24 @@ export function PageThptRoom() {
           setIsLocked(false);
         }
 
-        let examData = null;
+        const examCacheKey = `${examId}:${isPro ? 'pro' : 'free'}`;
+        let examData = THPT_EXAM_CACHE.get(examCacheKey) || null;
 
         // Nạp từ Supabase thpt_exams table (bảo vệ bằng RLS — tuyệt đối không fallback sang file tĩnh)
-        try {
-          const { data: supaExam, error: err } = await supabase
-            .from('thpt_exams')
-            .select('*')
-            .eq('id', examId)
-            .maybeSingle();
+        if (!examData) {
+          try {
+            const { data: supaExam, error: err } = await supabase
+              .from('thpt_exams')
+              .select('id, title, year, total_questions, duration_minutes, is_pro, sections, questions')
+              .eq('id', examId)
+              .maybeSingle();
 
-          if (!err && supaExam && Array.isArray(supaExam.questions) && supaExam.questions.length > 0) {
-            examData = supaExam;
-          }
-        } catch (_) {}
+            if (!err && supaExam && Array.isArray(supaExam.questions) && supaExam.questions.length > 0) {
+              examData = supaExam;
+              THPT_EXAM_CACHE.set(examCacheKey, supaExam);
+            }
+          } catch (_) {}
+        }
 
         if (!examData) {
           throw new Error(

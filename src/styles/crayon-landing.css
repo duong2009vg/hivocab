@@ -1,0 +1,153 @@
+/* src/styles/crayon-landing.css
+ * Cozy Crayon Picture-Book Motion & Texture Layer for HiVocab Landing Page.
+ * Hand-drawn crayon text feel, self-drawing SVG underlines, and springy scroll pop-out stickers.
+ */
+
+/* Crayon-written display text feel (Playpen Sans + Mali + warm wax depth) */
+.crayon-heading {
+  font-family: "Playpen Sans", "Mali", "Patrick Hand", cursive, sans-serif;
+  letter-spacing: -0.015em;
+}
+
+.crayon-note {
+  font-family: "Patrick Hand", "Playpen Sans", "Mali", cursive, sans-serif;
+}
+
+/* Subtle wax-crayon textured text accent (looks drawn with thick colored wax on sketchbook paper) */
+.crayon-wax-word {
+  font-family: "Playpen Sans", "Mali", cursive, sans-serif;
+  text-shadow:
+    1px 1px 0 rgba(255, 253, 249, 0.85),
+    2.5px 2.5px 0 rgba(61, 53, 46, 0.14);
+}
+
+/* Wax-crayon marker highlight pill behind key phrases */
+.crayon-marker-highlight {
+  background-image: linear-gradient(
+    102deg,
+    rgba(244, 180, 26, 0.08) 0%,
+    rgba(244, 180, 26, 0.34) 12%,
+    rgba(244, 180, 26, 0.28) 86%,
+    rgba(244, 180, 26, 0.06) 100%
+  );
+  border-radius: 0.45em 0.18em 0.5em 0.22em;
+  padding: 0 0.18em;
+}
+
+/* Self-drawing crayon SVG underline */
+.crayon-draw-path {
+  stroke-dasharray: 280;
+  stroke-dashoffset: 280;
+  animation: crayonStrokeDraw 1.05s cubic-bezier(0.22, 1, 0.36, 1) 0.28s forwards;
+}
+
+.crayon-draw-path-2 {
+  stroke-dasharray: 260;
+  stroke-dashoffset: 260;
+  animation: crayonStrokeDraw 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.52s forwards;
+}
+
+@keyframes crayonStrokeDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Hero initial playful entrance */
+.crayon-hero-pop {
+  opacity: 0;
+  transform: translateY(22px) scale(0.96);
+  animation: crayonHeroIn 640ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--cr-delay, 0ms) forwards;
+}
+
+@keyframes crayonHeroIn {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Gentle crayon sticker bobbing for decorative tags & sparkles */
+.crayon-float-slow {
+  animation: crayonFloatSlow 4.2s ease-in-out infinite;
+}
+
+.crayon-float-alt {
+  animation: crayonFloatAlt 4.8s ease-in-out 0.6s infinite;
+}
+
+@keyframes crayonFloatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-6px) rotate(-4deg);
+  }
+}
+
+@keyframes crayonFloatAlt {
+  0%, 100% {
+    transform: translateY(0px) rotate(8deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(6deg);
+  }
+}
+
+/* ── SCROLL-TRIGGERED POP-OUT ANIMATIONS ("nhảy ra" khi lướt xuống) ── */
+.cr-pop {
+  opacity: 0;
+  will-change: transform, opacity;
+  transition:
+    opacity 540ms cubic-bezier(0.22, 1, 0.36, 1) var(--cr-delay, 0ms),
+    transform 680ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--cr-delay, 0ms);
+}
+
+.cr-pop-up {
+  transform: translateY(46px) scale(0.92) rotate(-1.2deg);
+}
+
+.cr-pop-left {
+  transform: translateX(-44px) translateY(18px) scale(0.93) rotate(-2.2deg);
+}
+
+.cr-pop-right {
+  transform: translateX(44px) translateY(18px) scale(0.93) rotate(2.2deg);
+}
+
+.cr-pop-sticker {
+  transform: translateY(28px) scale(0.76) rotate(-3deg);
+}
+
+.cr-pop.is-popped {
+  opacity: 1;
+  transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+}
+
+/* Tab switch springy pop inside Showcase preview */
+.crayon-tab-pop {
+  animation: crayonTabPop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes crayonTabPop {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Playful crayon card hover lift */
+.crayon-card-interactive {
+  transition:
+    transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.crayon-card-interactive:hover {
+  transform: translateY(-5px) rotate(-0.4deg);
+  box-shadow: 6px 8px 0px #3D352E;
+}

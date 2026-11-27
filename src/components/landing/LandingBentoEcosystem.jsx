@@ -2,6 +2,7 @@
 // Asymmetric Bento Grid showcasing FSRS-6 (with interactive Little Tiger mood), 5 Study Modes,
 // Community Chat & Library, Contextual AI Dictionary, and Personal Excel Notebook.
 import { useState } from 'react';
+import CrayonPopReveal from './CrayonPopReveal.jsx';
 import {
   RotateCcw,
   Gamepad2,
@@ -75,13 +76,13 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
 
   return (
     <section className="mt-16 sm:mt-24">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-10">
+      <CrayonPopReveal variant="up" className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 sm:mb-10">
         <div className="space-y-2 text-left">
-          <span className="inline-flex items-center gap-1.5 text-xs font-black text-[#557A46] uppercase tracking-wider bg-[#EAF3E7] px-3.5 py-1 rounded-full border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
+          <span className="crayon-note inline-flex items-center gap-1.5 text-sm font-bold text-[#557A46] tracking-wide bg-[#EAF3E7] px-4 py-1 rounded-full border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]">
             <Sparkles className="w-3.5 h-3.5" />
             <span>{isEn ? 'Smart Learning Engine' : 'Hệ Sinh Thái Học Tập Thông Minh'}</span>
           </span>
-          <h2 className="font-quicksand font-black text-2xl sm:text-4xl text-[#3D352E]">
+          <h2 className="crayon-heading font-extrabold text-2xl sm:text-4xl text-[#3D352E] leading-[1.25]">
             {isEn
               ? 'Built for Deep Memory & Daily Joy'
               : 'Ghi Nhớ Sâu Bền & Học Vui Mỗi Ngày Cùng Cộng Đồng'}
@@ -92,12 +93,16 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
             ? 'Powered by modern FSRS-6 memory science, 5 interactive practice games, real-time learner chat, and instant AI dictionary tools.'
             : 'Kết hợp thuật toán FSRS-6 thế hệ mới, 5 chế độ luyện tập đa giác quan, chat cộng đồng realtime và từ điển AI tức thời.'}
         </p>
-      </div>
+      </CrayonPopReveal>
 
-      {/* 12-Column Asymmetric Bento Grid */}
+      {/* 12-Column Asymmetric Bento Grid — each feature card pops out on scroll */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
         {/* BENTO 1 (7 cols): FSRS-6 Interactive + Little Tiger Mood */}
-        <div className="lg:col-span-7 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-7 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-5">
+        <CrayonPopReveal
+          variant="left"
+          delay={0}
+          className="lg:col-span-7 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-7 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-5 crayon-card-interactive"
+        >
           <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
             <div className="space-y-2 flex-1">
               <div className="inline-flex items-center gap-2">
@@ -108,7 +113,7 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
                   {isEn ? 'FSRS-6 (21-Parameter DSR)' : 'FSRS-6 (21 Tham Số DSR)'}
                 </span>
               </div>
-              <h3 className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E]">
+              <h3 className="crayon-heading font-extrabold text-xl sm:text-2xl text-[#3D352E]">
                 {isEn
                   ? 'Spaced Repetition That Adapts to Your Brain'
                   : 'Thuật Toán Lặp Lại Ngắt Quãng FSRS-6 Chuẩn Anki'}
@@ -123,6 +128,7 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
             {/* Interactive Little Tiger Mood Box */}
             <div className="w-full sm:w-44 shrink-0 bg-[#FFF9EE] border-2 border-[#3D352E] rounded-2xl p-3 shadow-[2px_3px_0px_#3D352E] flex sm:flex-col items-center gap-3 sm:gap-2 text-left sm:text-center">
               <img
+                key={activeFsrs.id}
                 src={activeFsrs.mascot}
                 alt="Bé Hổ FSRS-6"
                 onError={(e) => {
@@ -130,9 +136,9 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
                     e.currentTarget.src = activeFsrs.fallbackMascot;
                   }
                 }}
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 mix-blend-multiply transition-transform duration-300"
+                className="crayon-tab-pop w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 mix-blend-multiply transition-transform duration-300"
               />
-              <p className="text-[11px] font-bold text-[#3D352E] leading-snug">
+              <p className="crayon-note text-xs font-bold text-[#3D352E] leading-snug">
                 “{activeFsrs.bubble}”
               </p>
             </div>
@@ -174,10 +180,14 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
               </div>
             </div>
           </div>
-        </div>
+        </CrayonPopReveal>
 
         {/* BENTO 2 (5 cols): 5 Practice Modes + Streak */}
-        <div className="lg:col-span-5 bg-[#FFFDF9] border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-7 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-5">
+        <CrayonPopReveal
+          variant="right"
+          delay={110}
+          className="lg:col-span-5 bg-[#FFFDF9] border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-7 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-5 crayon-card-interactive"
+        >
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="w-10 h-10 rounded-2xl bg-[#F3E8FF] border-2 border-[#3D352E] flex items-center justify-center">
@@ -189,7 +199,7 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
               </span>
             </div>
 
-            <h3 className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E]">
+            <h3 className="crayon-heading font-extrabold text-xl sm:text-2xl text-[#3D352E]">
               {isEn ? '5 Multi-Sensory Practice Modes' : '5 Chế Độ Luyện Tập Đa Giác Quan'}
             </h3>
             <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
@@ -213,20 +223,24 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
           <button
             type="button"
             onClick={() => navigateTo('dashboard')}
-            className="w-full py-3 px-4 rounded-2xl bg-[#3D352E] hover:bg-[#2A241F] text-white text-xs sm:text-sm font-black border-2 border-[#3D352E] flex items-center justify-center gap-2 cursor-pointer transition-all"
+            className="crayon-heading w-full py-3 px-4 rounded-2xl bg-[#3D352E] hover:bg-[#2A241F] text-white text-xs sm:text-sm font-extrabold border-2 border-[#3D352E] flex items-center justify-center gap-2 cursor-pointer transition-all"
           >
             <span>{isEn ? 'Try Quick Practice Now' : 'Thử chế độ Luyện Tập Nhanh'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
-        </div>
+        </CrayonPopReveal>
 
         {/* BENTO 3 (4 cols): Community Library & Realtime Chat */}
-        <div className="lg:col-span-4 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-6 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-4">
+        <CrayonPopReveal
+          variant="up"
+          delay={0}
+          className="lg:col-span-4 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-6 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-4 crayon-card-interactive"
+        >
           <div className="space-y-2.5">
             <span className="w-10 h-10 rounded-2xl bg-[#FEEFEA] border-2 border-[#3D352E] flex items-center justify-center">
               <MessageSquareHeart className="w-5 h-5 text-[#DE5D53]" />
             </span>
-            <h3 className="font-quicksand font-black text-lg sm:text-xl text-[#3D352E]">
+            <h3 className="crayon-heading font-extrabold text-lg sm:text-xl text-[#3D352E]">
               {isEn ? 'Community Library & Live Chat' : 'Thư Viện Cộng Đồng & Chat Realtime'}
             </h3>
             <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
@@ -243,15 +257,19 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
             <span>{isEn ? 'Visit Community Hub' : 'Ghé Thư viện cộng đồng'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
-        </div>
+        </CrayonPopReveal>
 
         {/* BENTO 4 (4 cols): Contextual AI Dictionary & Chrome Extension */}
-        <div className="lg:col-span-4 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-6 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-4">
+        <CrayonPopReveal
+          variant="up"
+          delay={110}
+          className="lg:col-span-4 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-6 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-4 crayon-card-interactive"
+        >
           <div className="space-y-2.5">
             <span className="w-10 h-10 rounded-2xl bg-[#E6F3FB] border-2 border-[#3D352E] flex items-center justify-center">
               <Search className="w-5 h-5 text-[#2A7BA0]" />
             </span>
-            <h3 className="font-quicksand font-black text-lg sm:text-xl text-[#3D352E]">
+            <h3 className="crayon-heading font-extrabold text-lg sm:text-xl text-[#3D352E]">
               {isEn ? 'Contextual AI Dictionary & Extension' : 'Từ Điển AI Ngữ Cảnh & Extension'}
             </h3>
             <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
@@ -268,15 +286,19 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
             <span>{isEn ? 'Open AI Dictionary' : 'Mở Từ điển AI ngay'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
-        </div>
+        </CrayonPopReveal>
 
         {/* BENTO 5 (4 cols): Personal Notebook & Bulk Excel Import */}
-        <div className="lg:col-span-4 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-6 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-4">
+        <CrayonPopReveal
+          variant="up"
+          delay={220}
+          className="lg:col-span-4 bg-white border-[2.5px] border-[#3D352E] rounded-[28px] p-5 sm:p-6 shadow-[4px_5px_0px_#3D352E] flex flex-col justify-between gap-4 crayon-card-interactive"
+        >
           <div className="space-y-2.5">
             <span className="w-10 h-10 rounded-2xl bg-[#FEF3C7] border-2 border-[#3D352E] flex items-center justify-center">
               <FileSpreadsheet className="w-5 h-5 text-[#B45309]" />
             </span>
-            <h3 className="font-quicksand font-black text-lg sm:text-xl text-[#3D352E]">
+            <h3 className="crayon-heading font-extrabold text-lg sm:text-xl text-[#3D352E]">
               {isEn ? 'Personal Wordbook & Excel Import' : 'Sổ Từ Cá Nhân & Nhập Excel Siêu Tốc'}
             </h3>
             <p className="text-xs sm:text-sm text-[#6E5D53] leading-relaxed">
@@ -293,7 +315,7 @@ export function LandingBentoEcosystem({ isEn, navigateTo }) {
             <span>{isEn ? 'Open Wordbook' : 'Xem Sổ từ cá nhân'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
-        </div>
+        </CrayonPopReveal>
       </div>
     </section>
   );

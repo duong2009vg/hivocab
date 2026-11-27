@@ -191,14 +191,14 @@ export function MainSidebar() {
 
   return (
     <aside
-      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-5 flex-col justify-between border-r border-[#E3D7C5] fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#F5EFE3]/95 backdrop-blur-sm select-none overflow-y-auto no-scrollbar"
+      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-4 flex-col justify-between border-r border-[#E3D7C5] fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#F5EFE3]/95 backdrop-blur-sm select-none overflow-hidden"
       data-purpose="desktop-sidebar"
     >
       {/* Top Section: Brand & Grouped Nav */}
-      <div className="flex flex-col shrink-0">
+      <div className="flex flex-col flex-1 min-h-0">
         {/* Brand Logo + Collapse Toggle */}
         <div
-          className="px-1 mb-4 shrink-0 select-none flex items-center justify-between gap-2"
+          className="px-1 mb-3 shrink-0 select-none flex items-center justify-between gap-2"
           data-purpose="sidebar-brand"
         >
           <button
@@ -218,16 +218,6 @@ export function MainSidebar() {
                 className="w-full h-full object-cover"
               />
             </div>
-            {!collapsed && (
-              <div className="text-left leading-tight">
-                <div className="font-display font-extrabold text-[15px] text-[#382E2B] tracking-tight">
-                  HiVocab
-                </div>
-                <div className="text-[10.5px] font-bold text-[#6E6259]">
-                  Phòng học FSRS-6
-                </div>
-              </div>
-            )}
           </button>
 
           <button
@@ -250,20 +240,28 @@ export function MainSidebar() {
         </div>
 
         {/* Grouped Navigation Menu */}
-        <nav aria-label="Điều hướng chính" className="flex flex-col gap-1 pr-0.5">
+        <nav
+          aria-label="Điều hướng chính"
+          className="flex-1 min-h-0 overflow-y-auto no-scrollbar flex flex-col gap-1 pr-0.5"
+        >
           {navGroups.map((group, groupIdx) => (
             <div
               key={group.id}
+              data-nav-group="true"
+              data-nav-group-first={groupIdx === 0 ? 'true' : 'false'}
               className={
                 groupIdx > 0
                   ? collapsed
-                    ? 'pt-2 mt-1 border-t border-[#E3D7C5]/90 flex flex-col items-center gap-1'
-                    : 'pt-2.5 mt-1.5 border-t border-[#E3D7C5]/80 flex flex-col gap-1'
-                  : 'flex flex-col gap-1'
+                    ? 'pt-1.5 mt-1 border-t border-[#E3D7C5]/90 flex flex-col items-center gap-0.5'
+                    : 'pt-2 mt-1 border-t border-[#E3D7C5]/80 flex flex-col gap-0.5'
+                  : 'flex flex-col gap-0.5'
               }
             >
               {!collapsed && (
-                <div className="px-3 pb-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.06em] text-[#7D7066]">
+                <div
+                  data-nav-group-label="true"
+                  className="px-3 pb-0.5 text-[10px] font-extrabold uppercase tracking-[0.06em] text-[#7D7066]"
+                >
                   {group.label}
                 </div>
               )}

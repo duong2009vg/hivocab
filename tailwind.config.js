@@ -26,6 +26,7 @@ export default {
         'display': ['"Comfortaa"', '"Quicksand"', 'sans-serif'],
         'heading': ['"Comfortaa"', '"Quicksand"', 'sans-serif'],
         'hand': ['"Patrick Hand"', 'cursive', 'sans-serif'],
+        'crayon': ['"Playpen Sans"', '"Mali"', '"Patrick Hand"', 'cursive', 'sans-serif'],
         'body': ['"Quicksand"', 'sans-serif'],
         'mali': ['"Mali"', 'cursive', 'sans-serif'],
         'patrick': ['"Patrick Hand"', 'cursive', 'sans-serif'],

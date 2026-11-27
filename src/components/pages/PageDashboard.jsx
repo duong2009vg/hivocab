@@ -1510,22 +1510,40 @@ export function PageDashboard() {
                           </>
                         )}
                       </h2>
-                      <div className="bg-cream/80 border-2 border-[#3d352e] rounded-2xl p-3 relative inline-block text-xs xl:text-sm font-semibold text-crayonText">
-                        <span className="font-bold text-terracotta">Bé Hổ nhắc:</span>{' '}
-                        {mascotInteracted
-                          ? isAngry
-                            ? '"Grừ! Mau ôn bài thôi, bé hổ đang giận vì còn nhiều từ chưa ôn đó!"'
-                            : '"Chào bạn nhé! Cùng bé hổ ôn tập từ vựng thật chăm chỉ nào!"'
-                          : heroState === 'countdown'
-                          ? '"Tuyệt vời! Bạn đã hoàn thành hết từ SRS hôm nay. Học thêm từ mới hoặc luyện Shadowing nhé!"'
-                          : heroState === 'empty'
-                          ? '"Hãy mở Kho Chủ Đề để chọn bộ từ yêu thích hoặc thử luyện Shadowing cùng AI nhé!"'
-                          : isAngry
-                          ? `"Hơn 100 từ tích lũy rồi (${wordsDueCount} từ), mau ôn tập cùng bé hổ ngay nhé!"`
-                          : wordsDueCount > 0
-                          ? `"Cùng bé hổ hoàn thành ${wordsDueCount} từ hôm nay nhé!"`
-                          : '"Hôm nay chưa có từ nào đến hạn, tiếp tục phát huy nhé!"'}
-                        <div className="absolute -left-2 top-4 w-3 h-3 bg-cream border-l-2 border-b-2 border-crayonText rotate-45"></div>
+                      <div
+                        className={`relative inline-block max-w-md rounded-[22px] px-4 py-3 border-2 border-[#3d352e] shadow-[3px_3.5px_0px_#3d352e] font-crayon text-xs xl:text-sm font-bold leading-relaxed text-crayonText transition-transform duration-200 hover:-translate-y-0.5 ${
+                          isAngry ? 'bg-[#FFF1EC]' : 'bg-[#FFF9EE]'
+                        }`}
+                      >
+                        <span>
+                          {mascotInteracted
+                            ? isAngry
+                              ? 'Grừ! Mau ôn bài thôi, bé hổ đang giận vì còn nhiều từ chưa ôn đó!'
+                              : 'Chào bạn nhé! Cùng bé hổ ôn tập từ vựng thật chăm chỉ nào!'
+                            : heroState === 'countdown'
+                            ? 'Tuyệt vời! Bạn đã hoàn thành hết từ SRS hôm nay. Học thêm từ mới hoặc luyện Shadowing nhé!'
+                            : heroState === 'empty'
+                            ? 'Hãy mở Kho Chủ Đề để chọn bộ từ yêu thích hoặc thử luyện Shadowing cùng AI nhé!'
+                            : isAngry
+                            ? `Hơn 100 từ tích lũy rồi (${wordsDueCount} từ), mau ôn tập cùng bé hổ ngay nhé!`
+                            : wordsDueCount > 0
+                            ? `Cùng bé hổ hoàn thành ${wordsDueCount} từ hôm nay nhé!`
+                            : 'Hôm nay chưa có từ nào đến hạn, tiếp tục phát huy nhé!'}
+                        </span>
+                        {/* Đuôi bong bóng thoại hướng sang phải về phía Bé Hổ trên desktop */}
+                        <div
+                          aria-hidden="true"
+                          className={`hidden md:block absolute -right-[9px] top-1/2 -translate-y-1/2 w-4 h-4 border-r-2 border-t-2 border-[#3d352e] rotate-45 rounded-tr-[3px] ${
+                            isAngry ? 'bg-[#FFF1EC]' : 'bg-[#FFF9EE]'
+                          }`}
+                        />
+                        {/* Đuôi bong bóng thoại hướng xuống dưới về phía Bé Hổ trên mobile */}
+                        <div
+                          aria-hidden="true"
+                          className={`md:hidden absolute -bottom-[9px] left-1/2 -translate-x-1/2 w-4 h-4 border-r-2 border-b-2 border-[#3d352e] rotate-45 rounded-br-[3px] ${
+                            isAngry ? 'bg-[#FFF1EC]' : 'bg-[#FFF9EE]'
+                          }`}
+                        />
                       </div>
                       <div className="pt-1.5 flex flex-wrap items-center gap-3">
                         {heroState === 'ready' && wordsDueCount > 0 ? (
