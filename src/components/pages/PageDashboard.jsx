@@ -34,6 +34,7 @@ import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { getWordsDueForReview } from '../../services/db.js';
 import { IeltsGoalModal, getIeltsVocabStandard } from '../modals/IeltsGoalModal.jsx';
+import { SrsLevelChart } from '../ui/SrsLevelChart.jsx';
 
 const DAILY_WORDS_POOL = [
   {
@@ -212,28 +213,28 @@ function writeDailyQuests(dateKey, state) {
 function getCalendarDayClass(day, isDesktop = false) {
   const count = Number(day?.count || 0);
   const baseSize = isDesktop
-    ? 'h-9 flex items-center justify-center rounded-xl text-xs transition-all cursor-pointer select-none'
-    : 'py-1.5 rounded-xl text-xs transition-all cursor-pointer select-none';
+    ? 'h-9 flex items-center justify-center rounded-xl text-xs tabular-nums transition-all cursor-pointer select-none'
+    : 'py-1.5 rounded-xl text-xs tabular-nums transition-all cursor-pointer select-none';
 
   let heatClass = isDesktop
-    ? 'bg-gray-50 text-gray-400 border border-transparent hover:border-gray-200'
-    : 'bg-[#FAF5EB] border border-[#E3D9C8] text-[#9E8E84] font-semibold';
+    ? 'bg-[#FAF5EB] text-[#8E8176] border border-transparent hover:border-[#D9CBB6]'
+    : 'bg-[#FAF5EB] border border-[#E3D7C5] text-[#8E8176] font-semibold';
 
   if (count >= 25) {
-    heatClass = 'bg-[#DE5D53] text-white border border-[#B84138] font-black shadow-xs';
+    heatClass = 'bg-[#D95D39] text-white border border-[#A63F22] font-black shadow-xs';
   } else if (count >= 10) {
-    heatClass = 'bg-orange-400 text-white border border-orange-500 font-black shadow-2xs';
+    heatClass = 'bg-[#ECA43B] text-[#382E2B] border border-[#C68322] font-black shadow-2xs';
   } else if (count >= 1) {
     heatClass = isDesktop
-      ? 'bg-[#fae3d5] text-[#933D0D] font-black border border-orange-300'
-      : 'bg-[#fae3d5] text-[#933D0D] font-bold border-2 border-[#F0783C]';
+      ? 'bg-[#FAE3D5] text-[#8F3A1D] font-extrabold border border-[#E5B49A]'
+      : 'bg-[#FAE3D5] text-[#8F3A1D] font-bold border-2 border-[#D95D39]';
   }
 
   if (day?.isToday) {
     if (count === 0) {
-      return `${baseSize} bg-[#E6F3FB] border-2 border-blue-600 text-blue-700 font-black shadow-sm`;
+      return `${baseSize} bg-[#EAF4FB] border-2 border-[#2A7BA0] text-[#1D5E7C] font-black shadow-xs`;
     }
-    return `${baseSize} ${heatClass} ring-2 ring-blue-600 ring-offset-1`;
+    return `${baseSize} ${heatClass} ring-2 ring-[#2A7BA0] ring-offset-1`;
   }
 
   return `${baseSize} ${heatClass}`;
@@ -348,7 +349,7 @@ function QuickHubSection({ items, onSelectItem, variant = 'desktop' }) {
         </span>
       </div>
 
-      <div className={isMobile ? 'grid grid-cols-2 gap-2.5' : 'grid grid-cols-2 xl:grid-cols-4 gap-3'}>
+      <div className={isMobile ? 'grid grid-cols-2 gap-2.5' : 'grid grid-cols-2 lg:grid-cols-4 gap-3'}>
         {items.map((item) => {
           const IconComponent = item.icon;
           return (
@@ -356,25 +357,25 @@ function QuickHubSection({ items, onSelectItem, variant = 'desktop' }) {
               key={item.id}
               type="button"
               onClick={() => onSelectItem(item)}
-              className={`group text-left rounded-2xl border-2 border-[#382E2B] ${item.bgClass} p-3.5 shadow-[2px_3px_0px_#382E2B] hover:-translate-y-0.5 active:translate-y-0 transition-all flex flex-col justify-between gap-2.5 cursor-pointer`}
+              className="group text-left rounded-2xl border-2 border-[#382E2B] bg-[#FFFDF9] hover:bg-[#FAF5EB] p-3.5 shadow-[2px_3px_0px_#382E2B] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 flex flex-col justify-between gap-2.5 cursor-pointer"
             >
               <div className="flex items-start justify-between gap-2 w-full">
                 <span
                   className={`w-9 h-9 rounded-xl ${item.iconBoxClass} border-2 border-[#382E2B] flex items-center justify-center shrink-0`}
                 >
-                  <IconComponent className="w-4.5 h-4.5" />
+                  <IconComponent className="w-4 h-4" />
                 </span>
                 <span
-                  className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${item.badgeClass} whitespace-nowrap`}
+                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${item.badgeClass} whitespace-nowrap`}
                 >
                   {item.badge}
                 </span>
               </div>
               <div>
-                <div className="text-sm font-black text-[#382E2B] leading-tight group-hover:underline decoration-2 underline-offset-2">
+                <div className="text-sm font-extrabold text-[#382E2B] leading-tight group-hover:text-[#D95D39] transition-colors">
                   {item.title}
                 </div>
-                <div className="text-[11px] font-semibold text-[#6A5A50] mt-0.5 leading-snug">
+                <div className="text-[11px] font-semibold text-[#6E6259] mt-0.5 leading-snug">
                   {item.subtitle}
                 </div>
               </div>
@@ -500,6 +501,7 @@ export function PageDashboard() {
   const [dailyWordOffset, setDailyWordOffset] = useState(0);
   const [isBellOpen, setIsBellOpen] = useState(false);
   const [bellSeen, setBellSeen] = useState(false);
+  const [mobileSecondaryTab, setMobileSecondaryTab] = useState('calendar');
   const bellRef = useRef(null);
 
   const todayKey = useMemo(() => getLocalDateKey(), []);
@@ -596,21 +598,6 @@ export function PageDashboard() {
 
   const { memoryLevels = { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 } } = stats;
 
-  const maxLevelCount = Math.max(
-    memoryLevels.lv0 || 0,
-    memoryLevels.lv1 || 0,
-    memoryLevels.lv2 || 0,
-    memoryLevels.lv3 || 0,
-    memoryLevels.lv4 || 0,
-    memoryLevels.lv5 || 0,
-    1
-  );
-
-  const getBarHeight = (count) => {
-    if (!count || count === 0) return '6px';
-    return `${Math.max(14, Math.round((count / maxLevelCount) * 100))}%`;
-  };
-
   const handleLevelClick = (lvl) => {
     navigateTo('vocabulary');
     setTimeout(() => {
@@ -680,9 +667,8 @@ export function PageDashboard() {
         subtitle: 'Nghe chép & chấm phát âm AI',
         badge: 'Mới',
         icon: Mic,
-        bgClass: 'bg-[#FFF5EE] hover:bg-[#FDEAE0]',
-        iconBoxClass: 'bg-[#DE5D53] text-white',
-        badgeClass: 'bg-[#DE5D53] text-white border-[#382E2B]',
+        iconBoxClass: 'bg-[#D95D39] text-white',
+        badgeClass: 'bg-[#FCECE7] text-[#B8452A] border-[#E5B49A]',
       },
       {
         id: 'topics',
@@ -690,9 +676,8 @@ export function PageDashboard() {
         subtitle: 'CAM, IELTS, THPT theo bài học',
         badge: 'Tủ sách',
         icon: FolderOpen,
-        bgClass: 'bg-[#F2F7F0] hover:bg-[#E5EFE1]',
-        iconBoxClass: 'bg-[#557A46] text-white',
-        badgeClass: 'bg-white text-[#4B6540] border-[#86A378]',
+        iconBoxClass: 'bg-[#4D6B53] text-white',
+        badgeClass: 'bg-[#EAF3EB] text-[#35523B] border-[#A7C4AB]',
       },
       {
         id: 'exercises',
@@ -700,9 +685,8 @@ export function PageDashboard() {
         subtitle: '48 đề thi & 29 chuyên đề 9+',
         badge: '3 quyển',
         icon: GraduationCap,
-        bgClass: 'bg-[#EEF6FB] hover:bg-[#DFEEF8]',
         iconBoxClass: 'bg-[#2A7BA0] text-white',
-        badgeClass: 'bg-white text-[#2A7BA0] border-[#96CBE4]',
+        badgeClass: 'bg-[#EAF4FB] text-[#226493] border-[#9ECBE0]',
       },
       {
         id: 'bilingual',
@@ -710,9 +694,8 @@ export function PageDashboard() {
         subtitle: 'Đọc Anh–Việt & điền từ ngữ cảnh',
         badge: 'IELTS',
         icon: BookOpenText,
-        bgClass: 'bg-[#FEF9EC] hover:bg-[#FCF1D4]',
         iconBoxClass: 'bg-[#ECA43B] text-[#382E2B]',
-        badgeClass: 'bg-white text-[#935D0B] border-[#E8C57B]',
+        badgeClass: 'bg-[#FEF6E4] text-[#935D0B] border-[#E8C57B]',
       },
     ],
     []
@@ -1031,88 +1014,43 @@ export function PageDashboard() {
           <QuickHubSection items={quickHubItems} onSelectItem={handleSelectQuickHub} variant="mobile" />
 
           {/* SRS Analytics Card */}
-          <section className="bg-[#FFFDF7] p-4 border-[2.5px] border-[#443833] rounded-[26px] shadow-[3px_4px_0px_#443833] relative overflow-hidden mb-4">
-            <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
+          <section className="bg-[#FFFDF9] p-4 border-[2.5px] border-[#382E2B] rounded-[26px] shadow-[3px_4px_0px_#382E2B] relative overflow-hidden mb-4">
+            <div className="flex items-center justify-between pb-3 border-b border-dashed border-[#E3D7C5]">
               <div className="flex items-center space-x-2">
-                <RotateCcw className="w-5 h-5 text-[#557A46] shrink-0" />
-                <h2 className="text-xl font-bold text-[#382E2B] tracking-wide">Tổng quan SRS</h2>
+                <RotateCcw className="w-4 h-4 text-[#4D6B53] shrink-0" />
+                <h2 className="text-base font-extrabold text-[#382E2B] tracking-tight">
+                  Phân bổ trí nhớ FSRS-6
+                </h2>
                 <button
                   type="button"
                   onClick={() => openModal('srsExplainer')}
-                  aria-label="Tìm hiểu thuật toán SRS"
-                  className="w-5 h-5 rounded-full border border-[#86756C] text-[#86756C] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs flex items-center justify-center font-bold cursor-pointer transition-colors"
+                  aria-label="Tìm hiểu thuật toán FSRS-6"
+                  className="w-5 h-5 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs flex items-center justify-center font-bold cursor-pointer transition-colors"
                 >
                   ?
                 </button>
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="px-2.5 py-0.5 text-xs font-bold text-[#382E2B] bg-[#EADDC7] rounded-full border border-dashed border-[#86756C]">
-                  {total} từ
-                </span>
-              </div>
-            </div>
-            <div className="flex items-center justify-between mt-3 mb-2">
-              <span className="text-[11px] font-bold tracking-wider text-[#8A796F] uppercase">
-                Phân bố từ vựng theo cấp độ
-              </span>
-              <span
+              <button
+                type="button"
                 onClick={() => navigateTo('vocabulary')}
-                className="text-xs text-[#DE5D53] font-bold cursor-pointer inline-flex items-center gap-0.5"
+                className="text-xs text-[#D95D39] font-extrabold cursor-pointer inline-flex items-center gap-0.5"
               >
-                Chi tiết <ArrowRight className="w-3.5 h-3.5" />
-              </span>
+                <span>Sổ từ</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
-            <div className="pt-3 pb-2 flex items-end justify-between px-1 text-center">
-              {[0, 1, 2, 3, 4, 5].map((lvl) => {
-                const count = memoryLevels[`lv${lvl}`] || 0;
-                let bgClass = '',
-                  borderClass = '',
-                  dims = 'w-4',
-                  opacity = 'opacity-70';
-                if (lvl === 0) {
-                  bgClass = 'bg-[#96A0A8]';
-                  opacity = 'opacity-80';
-                } else if (lvl === 1) {
-                  bgClass = 'bg-[#F0783C]';
-                  borderClass = 'border-2 border-[#382E2B]';
-                  dims = 'w-5';
-                  opacity = '';
-                } else if (lvl === 2) {
-                  bgClass = 'bg-[#ECA43B]';
-                  borderClass = 'border-2 border-[#382E2B]';
-                  dims = 'w-5';
-                  opacity = '';
-                } else if (lvl === 3) {
-                  bgClass = 'bg-[#4CA9D6]';
-                } else if (lvl === 4) {
-                  bgClass = 'bg-[#A682BD]';
-                } else if (lvl === 5) {
-                  bgClass = 'bg-[#6EB882]';
-                }
-
-                return (
-                  <div
-                    key={lvl}
-                    onClick={() => handleLevelClick(lvl)}
-                    className="flex flex-col items-center flex-1 cursor-pointer"
-                  >
-                    <span className="text-sm font-bold text-[#382E2B]">{count}</span>
-                    <div className="h-24 flex items-end justify-center w-full py-1">
-                      <div
-                        className={`${dims} ${bgClass} ${borderClass} rounded-full relative shadow-sm ${opacity} transition-all`}
-                        style={{ height: getBarHeight(count) }}
-                      />
-                    </div>
-                    <span className="text-[11px] font-bold text-[#7A6B62] mt-1">Lvl {lvl}</span>
-                  </div>
-                );
-              })}
+            <div className="pt-3">
+              <SrsLevelChart
+                counts={memoryLevels}
+                onSelectLevel={handleLevelClick}
+                showHeader={false}
+              />
             </div>
 
-            <div className="mt-2 pt-2.5 border-t border-dashed border-[#DECDBB] flex items-center justify-between text-xs text-[#827165]">
-              <span className="font-medium">Thuật toán FSRS-6 (DSR)</span>
-              <span className="bg-[#FDEAE2] text-[#DE5D53] border border-[#F6C6C2] px-2.5 py-0.5 rounded-full font-bold">
+            <div className="mt-2.5 pt-2.5 border-t border-dashed border-[#E3D7C5] flex items-center justify-between text-xs text-[#6E6259]">
+              <span className="font-semibold tabular-nums">Tổng: {total.toLocaleString('vi-VN')} từ</span>
+              <span className="bg-[#FCECE7] text-[#B8452A] border border-[#E5B49A] px-2.5 py-0.5 rounded-full font-extrabold tabular-nums">
                 Cần ôn: {wordsDueCount} từ
               </span>
             </div>
@@ -1127,217 +1065,232 @@ export function PageDashboard() {
             variant="mobile"
           />
 
-          {/* Daily Word of the Day Card (Mobile) */}
-          <DailyWordCard
-            dailyWord={dailyWord}
-            onPlayAudio={handlePlayAudio}
-            onRotate={handleRotateDailyWord}
-            onSave={handleSaveDailyWord}
-            onLookup={handleLookupWord}
-            variant="mobile"
-          />
+          {/* Compact Tabbed Secondary Panel (Lịch học | Từ hôm nay | Mục tiêu IELTS) */}
+          <section className="mb-4">
+            <div
+              role="tablist"
+              aria-label="Tiện ích học tập phụ"
+              className="grid grid-cols-3 gap-1.5 p-1 mb-3 rounded-2xl bg-[#F2E9DA] border-2 border-[#382E2B]"
+            >
+              {[
+                { id: 'calendar', label: 'Lịch học' },
+                { id: 'dailyWord', label: 'Từ hôm nay' },
+                { id: 'ielts', label: 'Mục tiêu' },
+              ].map((t) => {
+                const active = mobileSecondaryTab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setMobileSecondaryTab(t.id)}
+                    className={`min-h-[38px] rounded-xl text-xs font-extrabold transition-all cursor-pointer ${
+                      active
+                        ? 'bg-[#382E2B] text-[#FFFDF9] shadow-xs'
+                        : 'text-[#5C524B] hover:text-[#382E2B]'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
 
-          {/* Streak Calendar Card */}
-          <section className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-4">
-            <div className="flex items-center justify-between pb-2 border-b-2 border-dashed border-[#E3D9C6]">
-              <div className="flex items-center space-x-2">
-                <Flame className="w-6 h-6 text-amber-500 shrink-0" />
-                <div>
-                  <h3 className="text-base font-bold text-[#382E2B]">Lịch giữ lửa</h3>
-                  <p className="text-[11px] text-[#7C6C62]">Mức độ chuyên cần ôn luyện mỗi ngày</p>
+            {mobileSecondaryTab === 'dailyWord' && (
+              <DailyWordCard
+                dailyWord={dailyWord}
+                onPlayAudio={handlePlayAudio}
+                onRotate={handleRotateDailyWord}
+                onSave={handleSaveDailyWord}
+                onLookup={handleLookupWord}
+                variant="mobile"
+              />
+            )}
+
+            {mobileSecondaryTab === 'calendar' && (
+              <div className="bg-[#FFFDF9] border-[2.5px] border-[#382E2B] rounded-[26px] shadow-[3px_4px_0px_#382E2B] p-4">
+                <div className="flex items-center justify-between pb-2 border-b border-dashed border-[#E3D7C5]">
+                  <div className="flex items-center space-x-2">
+                    <Flame className="w-5 h-5 text-amber-500 shrink-0" />
+                    <div>
+                      <h3 className="text-base font-extrabold text-[#382E2B]">Lịch giữ lửa</h3>
+                      <p className="text-[11px] text-[#6E6259]">Mức độ chuyên cần mỗi ngày</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-extrabold tabular-nums text-[#B8452A] bg-[#FCECE7] px-2.5 py-1 rounded-full border border-[#E5B49A]">
+                    {streak} ngày
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-3 mb-2 px-2 py-1.5 bg-[#FAF5EB] rounded-2xl border-2 border-[#382E2B]">
+                  <button
+                    type="button"
+                    onClick={prevMonth}
+                    aria-label="Tháng trước"
+                    className="w-9 h-8 flex items-center justify-center text-sm font-bold text-[#382E2B] rounded-lg hover:bg-[#EFE6D6]"
+                  >
+                    ‹
+                  </button>
+                  <span className="text-sm font-extrabold text-[#382E2B]">{calendar.monthYear}</span>
+                  <button
+                    type="button"
+                    onClick={nextMonth}
+                    aria-label="Tháng sau"
+                    className="w-9 h-8 flex items-center justify-center text-sm font-bold text-[#382E2B] rounded-lg hover:bg-[#EFE6D6]"
+                  >
+                    ›
+                  </button>
+                </div>
+                <div className="grid grid-cols-7 text-center text-xs font-bold text-[#6E6259] mt-2 mb-1">
+                  <span>T2</span>
+                  <span>T3</span>
+                  <span>T4</span>
+                  <span>T5</span>
+                  <span>T6</span>
+                  <span>T7</span>
+                  <span>CN</span>
+                </div>
+                <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-semibold">
+                  {Array.from({ length: startDayIndex }).map((_, i) => (
+                    <span key={`empty-${i}`} className="py-1.5 opacity-0">
+                      0
+                    </span>
+                  ))}
+                  {flatDays.map((day, i) => (
+                    <button
+                      key={day.date || i}
+                      type="button"
+                      onClick={() => showDayDetail(day)}
+                      className={getCalendarDayClass(day, false)}
+                    >
+                      {day.day}
+                    </button>
+                  ))}
+                </div>
+                {calendar.hint && (
+                  <div className="mt-2.5 px-3 py-2 rounded-xl bg-[#FAF5EB] border border-dashed border-[#D5C7B2] text-xs font-bold text-[#382E2B]">
+                    {calendar.hint}
+                  </div>
+                )}
+                <div className="mt-3 pt-2.5 border-t border-[#EFE7DA] flex flex-wrap items-center justify-between gap-2 text-xs">
+                  <span className="bg-[#FAF5EB] border border-[#E3D7C5] text-[#382E2B] px-2.5 py-1 rounded-full font-bold tabular-nums">
+                    Đã học: {activeDaysCount} ngày
+                  </span>
+                  <span className="bg-[#FAF5EB] border border-[#E3D7C5] text-[#382E2B] px-2.5 py-1 rounded-full font-bold tabular-nums">
+                    Tổng: {totalWords} từ
+                  </span>
                 </div>
               </div>
-              <span className="text-xs font-bold text-[#E65F2B] bg-[#FDEAE2] px-2.5 py-1 rounded-full border border-[#F7BFAB]">
-                {streak} ngày liên tiếp
-              </span>
-            </div>
-            <div className="flex items-center justify-between mt-3 mb-2 px-2 py-1.5 bg-[#FAF5EB] rounded-2xl border-2 border-[#382E2B]">
-              <button
-                type="button"
-                onClick={prevMonth}
-                aria-label="Tháng trước"
-                className="text-sm font-bold text-[#382E2B] px-2 hover:opacity-75"
+            )}
+
+            {mobileSecondaryTab === 'ielts' && (
+              <div
+                onClick={handleOpenIELTSModal}
+                className="bg-[#FFFDF9] border-[2.5px] border-[#382E2B] rounded-[26px] shadow-[3px_4px_0px_#382E2B] p-4 text-center cursor-pointer active:scale-[0.99] transition-transform"
               >
-                ‹
-              </button>
-              <span className="text-sm font-bold text-[#382E2B]">{calendar.monthYear}</span>
-              <button
-                type="button"
-                onClick={nextMonth}
-                aria-label="Tháng sau"
-                className="text-sm font-bold text-[#382E2B] px-2 hover:opacity-75"
-              >
-                ›
-              </button>
-            </div>
-            <div className="grid grid-cols-7 text-center text-xs font-bold text-[#86756C] mt-2 mb-1">
-              <span>T2</span>
-              <span>T3</span>
-              <span>T4</span>
-              <span>T5</span>
-              <span>T6</span>
-              <span>T7</span>
-              <span>CN</span>
-            </div>
-            <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-semibold">
-              {Array.from({ length: startDayIndex }).map((_, i) => (
-                <span key={`empty-${i}`} className="py-1.5 opacity-0">
-                  0
-                </span>
-              ))}
-              {flatDays.map((day, i) => (
+                <Flag className="w-6 h-6 mx-auto mb-1 text-[#D95D39]" />
+                <h3 className="text-base font-extrabold text-[#382E2B]">
+                  Mục tiêu IELTS {ieltsGoal?.overall || '7.0'}
+                </h3>
+                <p className="text-xs text-[#6E6259] mt-1 max-w-xs mx-auto leading-relaxed">
+                  {vocabStandard.description}
+                </p>
+                <div className="mt-3 px-1 space-y-1.5 text-left">
+                  <div className="flex justify-between text-xs font-bold text-[#382E2B]">
+                    <span>Từ vựng cốt lõi</span>
+                    <span className="text-[#D95D39] font-black tabular-nums">{ieltsPercent}%</span>
+                  </div>
+                  <div className="w-full bg-[#F1EBD9] rounded-full h-3 p-0.5 border border-[#382E2B]">
+                    <div
+                      className="bg-[#D95D39] h-full rounded-full transition-all duration-500"
+                      style={{ width: `${ieltsPercent}%` }}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-[#6E6259] font-semibold tabular-nums">
+                    <span>
+                      {currentWordsLearned} / ~{targetWords.toLocaleString()} từ
+                    </span>
+                    <span className="text-[#D95D39] font-bold">
+                      {ieltsGoal?.daysLeft > 0
+                        ? `Còn ${ieltsGoal.daysLeft} ngày`
+                        : ieltsGoal?.examDateText
+                        ? `Ngày thi: ${ieltsGoal.examDateText}`
+                        : 'Chưa chọn ngày thi'}
+                    </span>
+                  </div>
+                </div>
                 <button
-                  key={day.date || i}
                   type="button"
-                  onClick={() => showDayDetail(day)}
-                  className={getCalendarDayClass(day, false)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenIELTSModal();
+                  }}
+                  className="mt-3.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#382E2B] py-2 px-4 rounded-2xl text-xs font-extrabold border-2 border-[#382E2B] inline-flex items-center space-x-1.5 shadow-xs cursor-pointer"
                 >
-                  {day.day}
+                  <Target className="w-4 h-4 text-[#D95D39]" />
+                  <span>Tinh chỉnh band điểm mục tiêu</span>
                 </button>
-              ))}
-            </div>
-            {calendar.hint && (
-              <div className="mt-2.5 px-3 py-2 rounded-xl bg-[#FAF5EB] border border-dashed border-[#CBBBA0] text-xs font-bold text-[#382E2B]">
-                {calendar.hint}
               </div>
             )}
-            <div className="mt-3 pt-2.5 border-t border-[#F0E8D9] flex flex-wrap items-center justify-between text-[11px] text-[#78685E]">
-              <div className="flex items-center space-x-2">
-                <span>Mức độ:</span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#FAF5EB] border border-[#D9CDB8]"></span> 0
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#fae3d5] border border-orange-300"></span> 1-9
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span> 10-24
-                </span>
-                <span className="inline-flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded-full bg-[#DE5D53]"></span> 25+
-                </span>
-              </div>
-            </div>
-            <div className="mt-2 flex space-x-2 text-xs">
-              <span className="bg-[#FAF5EB] border border-[#D9CDB8] text-[#69574C] px-2.5 py-1 rounded-full font-bold">
-                Đã học: {activeDaysCount} ngày
-              </span>
-              <span className="bg-[#FAF5EB] border border-[#D9CDB8] text-[#69574C] px-2.5 py-1 rounded-full font-bold">
-                Tổng: {totalWords} từ
-              </span>
-            </div>
           </section>
 
           {/* Exam Hall Card */}
-          <section className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-4">
+          <section className="bg-[#FFFDF9] border-[2.5px] border-[#382E2B] rounded-[26px] shadow-[3px_4px_0px_#382E2B] p-4 mb-4">
             <div className="flex items-start space-x-3">
-              <GraduationCap className="w-8 h-8 text-[#2A7BA0] shrink-0 mt-0.5" />
+              <GraduationCap className="w-7 h-7 text-[#2A7BA0] shrink-0 mt-0.5" />
               <div className="flex-1">
                 <div className="flex flex-wrap gap-1.5 mb-1">
-                  <span className="text-[11px] font-bold text-[#2A7BA0] bg-[#E1F1FA] px-2.5 py-0.5 rounded-full border border-[#BCE1F5]">
-                    PHÒNG THI TRỰC TUYẾN
-                  </span>
-                  <span className="text-[11px] font-bold text-[#826E5F] bg-[#F3ECE0] px-2 py-0.5 rounded-full border border-[#DED4C3]">
-                    38+ Đề chuẩn CBT
+                  <span className="text-[11px] font-bold text-[#226493] bg-[#EAF4FB] px-2.5 py-0.5 rounded-full border border-[#9ECBE0]">
+                    48 Đề thi &amp; 29 chuyên đề 9+
                   </span>
                 </div>
-                <h3 className="text-lg font-bold text-[#382E2B] leading-snug">
-                  Phòng Luyện Đề THPT Quốc Gia & IELTS
+                <h3 className="text-base font-extrabold text-[#382E2B] leading-snug">
+                  Lộ trình Ôn Thi THPT Quốc Gia (3 Quyển)
                 </h3>
               </div>
             </div>
-            <p className="text-xs text-[#6B5A4E] mt-2.5 leading-relaxed">
-              Luyện trắc nghiệm tiếng Anh chuẩn cấu trúc đề thi chính thức mới nhất. Bấm giờ 50 phút thực tế, bảng điều hướng tức thì và giải thích chi tiết.
+            <p className="text-xs text-[#6E6259] mt-2 leading-relaxed">
+              Luyện trắc nghiệm chuẩn cấu trúc Bộ GD&amp;ĐT mới nhất. Bấm giờ 50 phút thực tế, bảng điều hướng tức thì và giải thích chi tiết.
             </p>
-            <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-[#4E4138] font-bold">
+            <div className="grid grid-cols-2 gap-2 mt-2.5 text-xs text-[#382E2B] font-bold">
               <div className="flex items-center space-x-1.5">
-                <Check className="w-4 h-4 text-[#557A46] shrink-0" />
+                <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
                 <span>Chuẩn ma trận BGD</span>
               </div>
               <div className="flex items-center space-x-1.5">
-                <Check className="w-4 h-4 text-[#557A46] shrink-0" />
+                <Check className="w-4 h-4 text-[#4D6B53] shrink-0" />
                 <span>Bấm giờ tự động</span>
               </div>
             </div>
-            <div className="mt-3.5">
+            <div className="mt-3">
               <button
                 type="button"
                 onClick={() => navigateTo('exercises')}
-                className="w-full bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-bold text-sm flex items-center justify-center space-x-2"
+                className="w-full min-h-[44px] bg-[#382E2B] hover:bg-[#2A2220] text-white py-2.5 px-4 rounded-2xl font-extrabold text-sm flex items-center justify-center space-x-2 cursor-pointer"
               >
                 <span>Khám phá lộ trình ngay</span>
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                  3 quyển sách <ArrowRight className="w-3 h-3" />
-                </span>
+                <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </section>
 
-          {/* IELTS Goal Card */}
-          <section
-            onClick={handleOpenIELTSModal}
-            className="bg-white border-[3.5px] border-[#382E2B] rounded-[28px] shadow-sm p-4 mb-5 text-center cursor-pointer active:scale-[0.99] transition-transform"
-          >
-            <Flag className="w-7 h-7 mx-auto mb-1 text-rose-500" />
-            <h3 className="text-base font-bold text-[#382E2B]">
-              Mục tiêu IELTS {ieltsGoal?.overall || '7.0'}
-            </h3>
-            <p className="text-xs text-[#6B5A4E] mt-1 max-w-xs mx-auto leading-relaxed">
-              {vocabStandard.description}
-            </p>
-            <div className="mt-3 px-1 space-y-1.5 text-left">
-              <div className="flex justify-between text-xs font-bold text-[#382E2B]">
-                <span>Từ vựng cốt lõi</span>
-                <span className="text-[#DE5D53] font-black">{ieltsPercent}%</span>
-              </div>
-              <div className="w-full bg-[#f1ebd9] rounded-full h-3 p-0.5 border border-[#382E2B]">
-                <div
-                  className="bg-[#DE5D53] h-full rounded-full transition-all duration-500"
-                  style={{ width: `${ieltsPercent}%` }}
-                ></div>
-              </div>
-              <div className="flex justify-between text-[11px] text-[#7C6C62] font-semibold">
-                <span>
-                  {currentWordsLearned} / ~{targetWords.toLocaleString()} từ
-                </span>
-                <span className="text-[#DE5D53] font-bold">
-                  {ieltsGoal?.daysLeft > 0
-                    ? `Còn ${ieltsGoal.daysLeft} ngày`
-                    : ieltsGoal?.examDateText
-                    ? `Ngày thi: ${ieltsGoal.examDateText}`
-                    : 'Chưa chọn ngày thi'}
-                </span>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleOpenIELTSModal();
-              }}
-              className="mt-3.5 bg-[#FAF5EB] hover:bg-[#F2ECE0] text-[#382E2B] py-2 px-4 rounded-2xl text-xs font-bold border-2 border-[#382E2B] inline-flex items-center space-x-1.5 shadow-sm cursor-pointer"
-            >
-              <Target className="w-4 h-4 text-[#DE5D53]" />
-              <span>Tinh chỉnh band điểm mục tiêu</span>
-            </button>
-          </section>
-
           <footer className="text-center py-2 mb-4">
-            <p className="text-[11px] text-[#8C7B71] font-semibold">
+            <p className="text-[11px] text-[#6E6259] font-semibold">
               © 2026 HiVocab · Học từ vựng &amp; luyện thi thông minh
             </p>
           </footer>
         </div>
 
-        {/* Mobile FAB */}
-        <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] right-4 z-40">
+        {/* Mobile FAB — Add New Word */}
+        <div className="fixed bottom-[calc(5.65rem+env(safe-area-inset-bottom,0px))] right-4 z-40">
           <button
             type="button"
             onClick={handleOpenAddWord}
             aria-label="Thêm từ mới"
-            className="w-12 h-12 sm:w-14 sm:h-14 p-3 bg-[#DE5D53] hover:bg-[#C84F45] text-white rounded-full border-[3px] border-[#382E2B] shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+            title="Thêm từ mới"
+            className="w-12 h-12 sm:w-14 sm:h-14 bg-[#D95D39] hover:bg-[#BF4D2C] text-white rounded-full border-[2.5px] border-[#382E2B] shadow-[2px_3px_0px_#382E2B] flex items-center justify-center active:scale-95 transition-transform cursor-pointer"
           >
-            <BookOpen className="w-6 h-6" />
+            <Plus className="w-6 h-6 stroke-[2.5]" />
           </button>
         </div>
       </div>
@@ -1346,17 +1299,12 @@ export function PageDashboard() {
       <div className="dashboard-desktop-layout hidden lg:flex flex-1 w-full min-h-screen lg:pl-[var(--sidebar-w,244px)]">
         <div className="flex-1 flex flex-col min-w-0">
           {/* TopBar */}
-          <header className="dashboard-desktop-header px-6 xl:px-8 py-4 border-b-2 border-[#e6dcce] bg-[#FAF5EB] sticky top-0 z-20 shadow-2xs">
+          <header className="dashboard-desktop-header px-6 xl:px-8 py-3 border-b-2 border-[#E3D7C5] bg-[#FAF5EB]/95 backdrop-blur-xs sticky top-0 z-20">
             <div className="max-w-[1440px] w-full mx-auto flex items-center justify-between gap-3 xl:gap-4">
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2 min-w-0">
-                  <h1 className="text-xl xl:text-2xl font-black text-crayonText font-quicksand truncate">
-                    {greeting}, {userName} ơi!
-                  </h1>
-                </div>
-                <p className="text-xs xl:text-sm text-softMuted mt-0.5 truncate">
-                  Hôm nay là một ngày tuyệt vời để ghi nhớ thêm những từ vựng mới.
-                </p>
+                <h1 className="text-lg xl:text-xl font-black text-[#382E2B] font-quicksand truncate">
+                  {greeting}, {userName}!
+                </h1>
               </div>
               <div className="flex items-center gap-2.5 xl:gap-3 shrink-0">
                 <form
@@ -1369,12 +1317,12 @@ export function PageDashboard() {
                   <button
                     type="submit"
                     aria-label="Tra từ vựng"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-softMuted hover:text-crayonText transition-colors cursor-pointer"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[#6E6259] hover:text-[#382E2B] transition-colors cursor-pointer"
                   >
                     <Search className="w-4 h-4" />
                   </button>
                   <input
-                    className="w-full pl-9 pr-8 py-2 text-xs xl:text-sm bg-white rounded-full crayon-border focus:ring-2 focus:ring-sage focus:outline-none transition-all placeholder:text-softMuted/70"
+                    className="w-full pl-9 pr-8 py-2 text-xs xl:text-sm bg-[#FFFDF9] rounded-full border-2 border-[#382E2B] focus:ring-2 focus:ring-[#4D6B53] focus:outline-none transition-all placeholder:text-[#8E8176]"
                     placeholder="Tra nhanh từ vựng..."
                     type="text"
                     value={searchQuery}
@@ -1385,22 +1333,22 @@ export function PageDashboard() {
                       type="button"
                       onClick={() => setSearchQuery('')}
                       aria-label="Xóa từ khóa"
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-softMuted hover:text-crayonText p-0.5 rounded-full cursor-pointer"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6E6259] hover:text-[#382E2B] p-0.5 rounded-full cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </form>
 
-                <div className="hidden sm:flex items-center gap-1.5 px-3 xl:px-3.5 py-2 rounded-full bg-orange-100 text-terracotta font-extrabold text-xs xl:text-sm crayon-border shadow-crayonSm whitespace-nowrap shrink-0">
-                  <Flame className="w-4 h-4 text-amber-500 shrink-0 inline" />
-                  <span>{streak} ngày liên tiếp</span>
+                <div className="hidden sm:flex items-center gap-1.5 px-3 xl:px-3.5 py-2 rounded-full bg-[#FCECE7] text-[#B8452A] font-extrabold tabular-nums text-xs xl:text-sm border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] whitespace-nowrap shrink-0">
+                  <Flame className="w-4 h-4 text-[#D98A1C] shrink-0 inline" />
+                  <span>{streak} ngày</span>
                 </div>
 
                 <button
                   type="button"
                   onClick={handleOpenAddWord}
-                  className="bg-terracotta hover:bg-terracotta-dark text-white font-bold text-xs xl:text-sm px-3.5 xl:px-4 py-2 rounded-full crayon-border shadow-crayonOrange active:translate-y-0.5 transition-all flex items-center gap-1.5 xl:gap-2 whitespace-nowrap shrink-0 cursor-pointer"
+                  className="bg-[#D95D39] hover:bg-[#BF4D2C] text-white font-extrabold text-xs xl:text-sm px-3.5 xl:px-4 py-2 rounded-full border-2 border-[#382E2B] shadow-[2px_2.5px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <Plus className="w-4 h-4 shrink-0" />
                   <span>Thêm từ mới</span>
@@ -1584,74 +1532,38 @@ export function PageDashboard() {
                 {/* Quick Hub (4 Core Features) */}
                 <QuickHubSection items={quickHubItems} onSelectItem={handleSelectQuickHub} variant="desktop" />
 
-                {/* SRS Distribution Card */}
-                <section className="dashboard-desktop-card bg-white rounded-3xl p-6 crayon-border shadow-crayonSm space-y-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <div>
-                      <h3 className="text-lg font-black text-crayonText font-quicksand flex items-center gap-2">
-                        <RotateCcw className="w-5 h-5 text-sage shrink-0" />
-                        <span>Phân bố từ vựng theo cấp độ SRS</span>
+                {/* SRS Distribution Card (Unified FSRS-6 SrsLevelChart) */}
+                <section className="dashboard-desktop-card bg-[#FFFDF9] rounded-3xl p-6 crayon-border shadow-crayonSm space-y-3">
+                  <SrsLevelChart
+                    counts={memoryLevels}
+                    onSelectLevel={handleLevelClick}
+                    title="Phân bố trí nhớ FSRS-6"
+                    subtitle="Nhấn vào từng cột để mở đúng nhóm từ trong Sổ từ cá nhân"
+                    headerRight={
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
                           onClick={() => openModal('srsExplainer')}
-                          aria-label="Tìm hiểu thuật toán SRS"
-                          title="Giải thích 6 cấp độ SRS"
-                          className="w-5 h-5 rounded-full border border-softMuted text-softMuted hover:bg-cream hover:text-crayonText text-xs flex items-center justify-center font-bold cursor-pointer transition-colors"
+                          aria-label="Tìm hiểu thuật toán FSRS-6"
+                          title="Giải thích 6 cấp độ FSRS-6"
+                          className="w-6 h-6 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs flex items-center justify-center font-bold cursor-pointer transition-colors"
                         >
                           ?
                         </button>
-                      </h3>
-                      <p className="text-xs text-softMuted">
-                        Theo dõi mức độ khắc sâu vào trí nhớ dài hạn của bạn
-                      </p>
-                    </div>
-                    <span className="text-xs font-extrabold bg-[#f5ede0] px-3 py-1 rounded-full border border-crayonText/20 whitespace-nowrap shrink-0">
-                      Tổng cộng: {total} từ
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-6 gap-2 sm:gap-3 pt-3">
-                    {[0, 1, 2, 3, 4, 5].map((lvl) => {
-                      const count = memoryLevels[`lv${lvl}`] || 0;
-                      let bg = '',
-                        border = '';
-                      if (lvl === 0) {
-                        bg = 'bg-gray-200';
-                        border = 'border border-dashed border-gray-400';
-                      } else if (lvl === 1) {
-                        bg = 'bg-terracotta';
-                        border = 'border-2 border-terracotta';
-                      } else if (lvl === 2) {
-                        bg = 'bg-warmAmber';
-                        border = 'border border-warmAmber';
-                      } else if (lvl === 3) {
-                        bg = 'bg-softBlue';
-                        border = 'border border-dashed border-softBlue';
-                      } else if (lvl === 4) {
-                        bg = 'bg-softPurple';
-                        border = 'border border-dashed border-softPurple';
-                      } else if (lvl === 5) {
-                        bg = 'bg-sage';
-                        border = 'border border-dashed border-sage';
-                      }
-
-                      return (
-                        <div
-                          key={lvl}
-                          onClick={() => handleLevelClick(lvl)}
-                          className="flex flex-col items-center justify-end h-32 cursor-pointer group"
+                        <span className="text-xs font-extrabold tabular-nums bg-[#FAF5EB] text-[#382E2B] px-3 py-1 rounded-full border border-[#E3D7C5] whitespace-nowrap">
+                          {total.toLocaleString('vi-VN')} từ
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => navigateTo('vocabulary')}
+                          className="text-xs font-extrabold text-[#D95D39] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
                         >
-                          <div
-                            className={`w-full rounded-t-lg ${bg} ${border} transition-all group-hover:opacity-80`}
-                            style={{ height: getBarHeight(count) }}
-                          ></div>
-                          <div className="text-center mt-2">
-                            <span className="block text-sm font-black text-crayonText">{count}</span>
-                            <span className="block text-[10px] text-softMuted">Lv {lvl}</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                          <span>Sổ từ</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    }
+                  />
                 </section>
 
                 {/* THPT Exam Roadmap Card */}
@@ -1709,8 +1621,8 @@ export function PageDashboard() {
                         <h3 className="text-base font-black text-crayonText font-quicksand truncate">
                           Lịch giữ lửa
                         </h3>
-                        <p className="text-[11px] text-softMuted truncate">
-                          Mức độ chuyên cần ôn luyện mỗi ngày
+                        <p className="text-[11px] text-[#6E6259] truncate">
+                          Chuyên cần ôn luyện mỗi ngày
                         </p>
                       </div>
                     </div>
@@ -1771,30 +1683,30 @@ export function PageDashboard() {
                       {calendar.hint}
                     </div>
                   )}
-                  <div className="pt-2 border-t border-gray-100 space-y-2.5">
-                    <div className="flex items-center justify-between text-[11px] text-softMuted">
+                  <div className="pt-2 border-t border-[#EFE7DA] space-y-2.5">
+                    <div className="flex items-center justify-between text-[11px] text-[#6E6259]">
                       <span>Mức độ:</span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 tabular-nums">
                         <span className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded-full border border-gray-300 bg-white"></span>0
+                          <span className="w-2.5 h-2.5 rounded-full border border-[#D5C7B2] bg-[#FAF5EB]"></span>0
                         </span>
                         <span className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#fae3d5] border border-orange-300"></span>1-9
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#FAE3D5] border border-[#E5B49A]"></span>1-9
                         </span>
                         <span className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded-full bg-orange-400"></span>10-24
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#ECA43B]"></span>10-24
                         </span>
                         <span className="flex items-center gap-1">
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#DE5D53]"></span>25+
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#D95D39]"></span>25+
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 pt-1">
-                      <div className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-bold text-crayonText">
-                        Đã học: <span className="text-terracotta font-black">{activeDaysCount} ngày</span>
+                    <div className="flex items-center gap-2 pt-1 tabular-nums">
+                      <div className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] border border-[#E3D7C5] text-xs font-bold text-[#382E2B]">
+                        Đã học: <span className="text-[#D95D39] font-black">{activeDaysCount} ngày</span>
                       </div>
-                      <div className="px-3 py-1.5 rounded-xl bg-gray-100 text-xs font-bold text-crayonText">
-                        Tổng: <span className="text-terracotta font-black">{totalWords} từ</span>
+                      <div className="px-3 py-1.5 rounded-xl bg-[#FAF5EB] border border-[#E3D7C5] text-xs font-bold text-[#382E2B]">
+                        Tổng: <span className="text-[#D95D39] font-black">{totalWords} từ</span>
                       </div>
                     </div>
                   </div>
@@ -1802,22 +1714,19 @@ export function PageDashboard() {
 
                 {/* IELTS Goal Card */}
                 <section
-                  className="dashboard-desktop-card bg-white rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden cursor-pointer hover:shadow-crayon transition-all group"
+                  className="dashboard-desktop-card bg-[#FFFDF9] rounded-3xl p-6 crayon-border shadow-crayonSm relative overflow-hidden cursor-pointer hover:shadow-crayon transition-all group"
                   onClick={handleOpenIELTSModal}
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-[11px] font-black uppercase text-terracotta tracking-wider">
-                        Lộ trình rèn luyện
-                      </span>
-                      <h3 className="text-lg font-black text-crayonText font-quicksand mt-0.5">
+                      <h3 className="text-lg font-black text-[#382E2B] font-quicksand">
                         Mục tiêu IELTS {ieltsGoal?.overall || '7.0'}
                       </h3>
-                      <p className="text-[11px] text-softMuted mt-0.5 font-medium">
+                      <p className="text-xs text-[#6E6259] mt-0.5 font-medium">
                         {vocabStandard.description}
                       </p>
                     </div>
-                    <Flag className="w-6 h-6 text-terracotta shrink-0 group-hover:scale-105 transition-transform" />
+                    <Flag className="w-5 h-5 text-[#D95D39] shrink-0 group-hover:scale-105 transition-transform" />
                   </div>
                   <div className="mt-4 space-y-2">
                     <div className="flex justify-between text-xs font-bold text-crayonText">

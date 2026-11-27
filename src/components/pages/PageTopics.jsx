@@ -16,6 +16,7 @@ import {
 import { useTopics } from '../../hooks/useTopics.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { prefetchTopicDetail } from '../../services/db.js';
 
 // ---------------------------------------------------------------------------
 // DESIGN SYSTEM TOKENS & VINTAGE BOOKBINDING PALETTE
@@ -294,6 +295,92 @@ function estimateFallbackWords(rawName, category, actualWords) {
 }
 
 // ---------------------------------------------------------------------------
+// SUB-COMPONENT: CRAYON SKETCHBOOK FRONT COVER FACE
+// Shared by static cover mode & hover pull-out reveal animation
+// ---------------------------------------------------------------------------
+function CrayonBookCoverFace({ book, shelf, progress, onDeleteTopic }) {
+  return (
+    <div className="relative w-full h-full flex flex-col justify-between p-2.5 text-left overflow-hidden rounded-l-[5px] rounded-r-[16px]">
+      {/* Left cloth spine hinge with hand-stitched crayon notches */}
+      <div className="absolute left-0 top-0 bottom-0 w-3 border-r-2 border-[#3D352E]/75 bg-black/20 pointer-events-none flex flex-col justify-between py-2.5 items-center">
+        <span className="w-1.5 h-1 rounded-full bg-[#FFFDF7]/50" />
+        <span className="w-1.5 h-1 rounded-full bg-[#FFFDF7]/50" />
+        <span className="w-1.5 h-1 rounded-full bg-[#FFFDF7]/50" />
+      </div>
+
+      {/* Subtle warm vignette for depth and crisp direct-on-cover legibility */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(26,14,6,0.08) 0%, rgba(26,14,6,0.22) 52%, rgba(26,14,6,0.36) 100%)',
+        }}
+      />
+
+      {/* Top Crayon tag pills */}
+      <div className="pl-2.5 flex items-center justify-between gap-1 relative z-10">
+        <span className="px-1.5 py-0.5 rounded-full bg-[#FFFDF7]/90 text-[#302A24] border border-[#3D352E] text-[8px] font-black tracking-wide uppercase truncate max-w-[82px]">
+          {shelf.code}
+        </span>
+        {book.isLockedPro ? (
+          <span className="px-1.5 py-0.5 rounded-full bg-[#FEF3C7] text-[#302A24] border border-[#3D352E] text-[8px] font-black shrink-0">
+            PRO
+          </span>
+        ) : (
+          <span className="px-1.5 py-0.5 rounded-full bg-[#EAF5E4] text-[#3F5E45] border border-[#3D352E] text-[8px] font-black shrink-0">
+            {book.cefr}
+          </span>
+        )}
+      </div>
+
+      {/* Direct-on-cover typography framed by subtle crayon bookbinding rules */}
+      <div className="pl-2.5 my-auto relative z-10 py-1">
+        <div className="w-8 h-[1.5px] rounded-full bg-[#FAF5EB]/55 mb-1.5" />
+        <p
+          className="font-display font-extrabold text-[11px] leading-[1.28] line-clamp-4 text-[#FFFDF7] tracking-[-0.01em]"
+          style={{
+            textShadow:
+              '0 1px 0 #3D352E, 1px 1px 0 rgba(61,53,46,0.85), 0 2px 5px rgba(15,8,3,0.55)',
+          }}
+        >
+          {book.title}
+        </p>
+        <div className="w-5 h-[1.5px] rounded-full bg-[#FAF5EB]/40 mt-1.5" />
+      </div>
+
+      {/* Bottom stats & Crayon progress bar */}
+      <div className="pl-2.5 space-y-1 relative z-10">
+        <div className="flex items-center justify-between text-[9px] text-[#FFFDF7] font-black drop-shadow-[0_1px_1px_rgba(0,0,0,0.45)]">
+          <span>{book.wordCount > 0 ? `${book.wordCount} từ` : book.cefr}</span>
+          <div className="flex items-center gap-1">
+            <span>{progress}%</span>
+            {book.isCustom && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteTopic(book.id, book.title);
+                }}
+                title={`Xóa "${book.title}"`}
+                className="w-5 h-5 rounded-full bg-[#FFFDF7] hover:bg-rose-500 text-[#302A24] hover:text-white border border-[#3D352E] transition-colors flex items-center justify-center cursor-pointer"
+              >
+                <Trash2 className="w-2.5 h-2.5" />
+              </button>
+            )}
+          </div>
+        </div>
+        <div className="w-full h-2 rounded-full bg-[#FFFDF7]/90 border-[1.5px] border-[#3D352E] overflow-hidden">
+          <div
+            className="h-full bg-[#557A46] transition-all"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // SUB-COMPONENT: SINGLE SHELF ROW INSIDE THE ANTIQUE BOOKCASE
 // ---------------------------------------------------------------------------
 function ShelfRowTier({
@@ -302,12 +389,30 @@ function ShelfRowTier({
   bookDisplayStyle,
   onSelectFolder,
   onOpenBook,
-  onHoverBook,
   onAddBookToShelf,
   onDeleteFolder,
   onDeleteTopic,
 }) {
   const scrollRef = useRef(null);
+  const hoverPrefetchTimerRef = useRef(null);
+
+  const cancelBookPrefetch = useCallback(() => {
+    if (hoverPrefetchTimerRef.current) {
+      clearTimeout(hoverPrefetchTimerRef.current);
+      hoverPrefetchTimerRef.current = null;
+    }
+  }, []);
+
+  const triggerBookPrefetch = useCallback((bookId) => {
+    cancelBookPrefetch();
+    if (!bookId) return;
+    hoverPrefetchTimerRef.current = setTimeout(() => {
+      hoverPrefetchTimerRef.current = null;
+      prefetchTopicDetail(bookId);
+    }, 180);
+  }, [cancelBookPrefetch]);
+
+  useEffect(() => cancelBookPrefetch, [cancelBookPrefetch]);
 
   const handleScrollShelf = (dir) => {
     if (!scrollRef.current) return;
@@ -392,8 +497,7 @@ function ShelfRowTier({
 
         <div
           ref={scrollRef}
-          onScroll={() => onHoverBook(null)}
-          className="flex-1 min-w-0 antique-recess-cavity px-4 sm:px-7 pt-9 pb-0 relative overflow-x-auto shelf-scrollbar"
+          className="flex-1 min-w-0 antique-recess-cavity px-4 sm:px-7 pt-12 pb-0 relative overflow-x-auto shelf-scrollbar"
         >
           <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2">
             <div className="w-14 h-1.5 bg-[#D4AF37]/80 border-x border-b border-[#3D352E] rounded-b-full shadow-[0_4px_14px_rgba(244,180,26,0.65)]" />
@@ -435,9 +539,9 @@ function ShelfRowTier({
                     <div
                       key={book.id}
                       onClick={() => onOpenBook(book, shelf)}
-                      onMouseEnter={(e) => onHoverBook(book, shelf, e.currentTarget)}
-                      onMouseMove={(e) => onHoverBook(book, shelf, e.currentTarget)}
-                      onMouseLeave={() => onHoverBook(null)}
+                      onMouseEnter={() => triggerBookPrefetch(book.id)}
+                      onMouseLeave={cancelBookPrefetch}
+                      onFocus={() => triggerBookPrefetch(book.id)}
                       role="button"
                       tabIndex={0}
                       onKeyDown={(e) => {
@@ -447,43 +551,14 @@ function ShelfRowTier({
                         height: `${dims.heightPx}px`,
                         backgroundColor: book.coverColor,
                       }}
-                      className="book-cover-item group relative w-36 sm:w-40 mx-1.5 rounded-r-xl rounded-l-sm border-[2.5px] border-[#3D352E] shadow-[5px_4px_0px_#1A0E06] cursor-pointer flex flex-col justify-between p-3 text-[#FAF5EB] select-none shrink-0"
+                      className="book-cover-item group relative w-36 sm:w-40 mx-1.5 rounded-r-[18px] rounded-l-[6px] border-[2.5px] border-[#3D352E] shadow-[4px_5px_0px_#1A0E06] cursor-pointer select-none shrink-0"
                     >
-                      <div className="absolute left-0 top-0 bottom-0 w-3 border-r border-[#3D352E]/60 bg-black/20" />
-                      <div className="pl-2 flex items-center justify-between gap-1 text-[9px] font-bold tracking-wider uppercase text-[#E6C98A]">
-                        <span className="truncate">{shelf.code}</span>
-                        {book.isLockedPro ? (
-                          <span className="px-1.5 py-0.2 rounded bg-[#FEF3C7] text-[#302A24] border border-[#3D352E] font-black shrink-0">
-                            PRO
-                          </span>
-                        ) : (
-                          <span className="shrink-0">{book.cefr}</span>
-                        )}
-                      </div>
-                      <div className="pl-2 my-auto py-2 border-y border-[#E6C98A]/35">
-                        <p className="font-display font-bold text-xs leading-snug line-clamp-3 text-[#FAF5EB]">
-                          {book.shortSpine}
-                        </p>
-                      </div>
-                      <div className="pl-2 flex items-center justify-between text-[9px] text-[#E6C98A]/90 font-semibold">
-                        <span>{book.wordCount > 0 ? `${book.wordCount} từ` : book.cefr}</span>
-                        <div className="flex items-center gap-1">
-                          <span>{progress}%</span>
-                          {book.isCustom && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteTopic(book.id, book.title);
-                              }}
-                              title={`Xóa "${book.title}"`}
-                              className="min-w-[36px] min-h-[36px] p-2 rounded-lg bg-black/40 hover:bg-rose-600 text-white transition-colors flex items-center justify-center relative z-20 cursor-pointer active:scale-[0.95]"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-                      </div>
+                      <CrayonBookCoverFace
+                        book={book}
+                        shelf={shelf}
+                        progress={progress}
+                        onDeleteTopic={onDeleteTopic}
+                      />
                     </div>
                   );
                 }
@@ -492,73 +567,107 @@ function ShelfRowTier({
                   <div
                     key={book.id}
                     onClick={() => onOpenBook(book, shelf)}
-                    onMouseEnter={(e) => onHoverBook(book, shelf, e.currentTarget)}
-                    onMouseMove={(e) => onHoverBook(book, shelf, e.currentTarget)}
-                    onMouseLeave={() => onHoverBook(null)}
+                    onMouseEnter={() => triggerBookPrefetch(book.id)}
+                    onMouseLeave={cancelBookPrefetch}
+                    onFocus={() => triggerBookPrefetch(book.id)}
                     role="button"
                     tabIndex={0}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') onOpenBook(book, shelf);
                     }}
                     style={{
-                      width: `${dims.widthPx}px`,
+                      '--spine-width': `${dims.widthPx}px`,
                       height: `${dims.heightPx}px`,
-                      backgroundColor: book.coverColor,
                       '--lean-deg': `${lean.rotateDeg}deg`,
                       marginLeft: `${lean.marginLeftPx}px`,
                       marginRight: `${lean.marginRightPx}px`,
                     }}
-                    className="book-spine-leaning group relative rounded-t-[5px] border-[2.5px] border-[#3D352E] shadow-[3px_0px_6px_rgba(15,8,3,0.65)] cursor-pointer flex flex-col items-center justify-between py-2.5 px-1 select-none shrink-0 text-[#FAF5EB] active:scale-[0.98] before:absolute before:-top-6 before:bottom-0 before:inset-x-0"
+                    className="book-spine-leaning group relative cursor-pointer select-none shrink-0 text-[#FAF5EB] active:scale-[0.98] focus:outline-none"
                   >
-                    {/* Top page edge stripes */}
+                    {/* Soft recessed shadow niche left on shelf when book lifts & parts neighbors */}
                     <div
-                      className="absolute -top-2 left-0.5 right-0.5 h-2 rounded-t-[3px] bg-[#EFE8D6] border-t-2 border-x border-[#3D352E] pointer-events-none"
-                      style={{
-                        backgroundImage:
-                          'repeating-linear-gradient(180deg, #FAF5EB 0px, #FAF5EB 1.5px, #D8C8B4 1.5px, #D8C8B4 2.5px)',
-                      }}
+                      aria-hidden="true"
+                      className="book-shelf-gap pointer-events-none absolute inset-x-1 bottom-0 top-2 rounded-t-xl bg-[#1A0D05]/70 border border-dashed border-[#E6C98A]/20"
                     />
 
-                    {/* Spine lighting gradient */}
+                    {/* Physical Book Body that lifts out cleanly while neighbors part aside */}
                     <div
-                      className="pointer-events-none absolute inset-0 rounded-t-[3px]"
-                      style={{
-                        background:
-                          'linear-gradient(90deg, rgba(255,255,255,0.16) 0%, transparent 24%, transparent 74%, rgba(0,0,0,0.38) 100%)',
-                      }}
-                    />
+                      style={{ backgroundColor: book.coverColor }}
+                      className="book-pull-body absolute border-[2.5px] border-[#3D352E] shadow-[3px_0px_6px_rgba(15,8,3,0.65)]"
+                    >
+                      {/* Top page edge stripes (resting spine) */}
+                      <div
+                        className="book-spine-face absolute -top-2 left-0.5 right-0.5 h-2 rounded-t-[3px] bg-[#EFE8D6] border-[1.5px] border-[#382E2B] pointer-events-none"
+                        style={{
+                          backgroundImage:
+                            'repeating-linear-gradient(180deg, #FAF5EB 0px, #FAF5EB 1.5px, #D8C8B4 1.5px, #D8C8B4 2.5px)',
+                        }}
+                      />
 
-                    {/* Top brass foil bands */}
-                    <div className="w-full flex flex-col gap-0.5 relative z-10 px-0.5">
-                      <div className="w-full h-[1.5px] bg-[#E6C98A]/75" />
-                      <div className="w-full h-[1px] bg-[#E6C98A]/40" />
-                    </div>
+                      {/* Soft rounded cream page edge along top when book pulls out */}
+                      <div
+                        aria-hidden="true"
+                        className="book-pull-top-pages pointer-events-none absolute -top-2 left-1 right-3 h-2 rounded-tl-[4px] rounded-tr-[12px] border-[1.5px] border-[#382E2B]"
+                        style={{
+                          backgroundImage:
+                            'repeating-linear-gradient(180deg, #FAF5EB 0px, #FAF5EB 1.5px, #DECDB8 1.5px, #DECDB8 2.8px)',
+                        }}
+                      />
 
-                    {/* Vertical Spine Title */}
-                    <div className="writing-vertical flex-1 flex items-center justify-center my-1 px-0.5 overflow-hidden relative z-10">
-                      <span className="font-display font-bold text-[10.5px] sm:text-[11px] leading-tight tracking-wide text-[#FAF5EB] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] truncate max-h-[118px]">
-                        {book.shortSpine}
-                      </span>
-                    </div>
-
-                    {/* Bottom status dot & foil band */}
-                    <div className="w-full flex flex-col items-center gap-1 relative z-10 px-0.5">
-                      {book.isLockedPro ? (
-                        <Crown className="w-2.5 h-2.5 text-[#FEF3C7] fill-[#F4B41A]" />
-                      ) : (
-                        <span
-                          className="w-1.5 h-1.5 rounded-full border border-[#3D352E]/60"
+                      {/* 1. REST STATE: CLASSIC VERTICAL SPINE */}
+                      <div className="book-spine-face absolute inset-0 flex flex-col items-center justify-between py-2.5 px-1 overflow-hidden rounded-t-[3px]">
+                        {/* Spine lighting gradient */}
+                        <div
+                          className="pointer-events-none absolute inset-0 rounded-t-[3px]"
                           style={{
-                            backgroundColor:
-                              progress >= 80
-                                ? '#A3D98B'
-                                : progress > 0
-                                ? '#F4B41A'
-                                : '#E6C98A',
+                            background:
+                              'linear-gradient(90deg, rgba(255,255,255,0.16) 0%, transparent 24%, transparent 74%, rgba(0,0,0,0.38) 100%)',
                           }}
                         />
-                      )}
-                      <div className="w-full h-[1.5px] bg-[#E6C98A]/75" />
+
+                        {/* Top brass foil bands */}
+                        <div className="w-full flex flex-col gap-0.5 relative z-10 px-0.5">
+                          <div className="w-full h-[1.5px] bg-[#E6C98A]/75" />
+                          <div className="w-full h-[1px] bg-[#E6C98A]/40" />
+                        </div>
+
+                        {/* Vertical Spine Title */}
+                        <div className="writing-vertical flex-1 flex items-center justify-center my-1 px-0.5 overflow-hidden relative z-10">
+                          <span className="font-display font-bold text-[10.5px] sm:text-[11px] leading-tight tracking-wide text-[#FAF5EB] drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)] truncate max-h-[118px]">
+                            {book.shortSpine}
+                          </span>
+                        </div>
+
+                        {/* Bottom status dot & foil band */}
+                        <div className="w-full flex flex-col items-center gap-1 relative z-10 px-0.5">
+                          {book.isLockedPro ? (
+                            <Crown className="w-2.5 h-2.5 text-[#FEF3C7] fill-[#F4B41A]" />
+                          ) : (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full border border-[#3D352E]/60"
+                              style={{
+                                backgroundColor:
+                                  progress >= 80
+                                    ? '#A3D98B'
+                                    : progress > 0
+                                    ? '#F4B41A'
+                                    : '#E6C98A',
+                              }}
+                            />
+                          )}
+                          <div className="w-full h-[1.5px] bg-[#E6C98A]/75" />
+                        </div>
+                      </div>
+
+                      {/* 2. PULLED-OUT STATE: CRAYON SKETCHBOOK ROUNDED FRONT COVER */}
+                      <div className="book-front-cover-face absolute inset-0">
+                        <CrayonBookCoverFace
+                          book={book}
+                          shelf={shelf}
+                          progress={progress}
+                          onDeleteTopic={onDeleteTopic}
+                        />
+                      </div>
                     </div>
                   </div>
                 );
@@ -620,9 +729,22 @@ export function PageTopics() {
       return 'shelf';
     }
   }); // 'shelf' | 'folders'
-  const [bookDisplayStyle, setBookDisplayStyle] = useState('spines'); // 'spines' | 'mixed' | 'covers'
+  const [bookDisplayStyle, setBookDisplayStyle] = useState(() => {
+    if (typeof window !== 'undefined' && window.matchMedia?.('(hover: none)').matches) {
+      return 'covers';
+    }
+    return 'spines';
+  }); // 'spines' | 'covers'
+  const [recentBookIds, setRecentBookIds] = useState(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const parsed = JSON.parse(localStorage.getItem('hivocab_recent_topic_ids') || '[]');
+      return Array.isArray(parsed) ? parsed.slice(0, 3) : [];
+    } catch {
+      return [];
+    }
+  });
   const soundMuted = false;
-  const [floatingTooltip, setFloatingTooltip] = useState(null);
 
   // Category horizontal scroll & drag state
   const categoryScrollRef = useRef(null);
@@ -845,28 +967,29 @@ export function PageTopics() {
     return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
-  const handleHoverBook = useCallback((book, shelf, targetEl) => {
-    if (!book || !targetEl) {
-      setFloatingTooltip(null);
-      return;
-    }
-    const rect = targetEl.getBoundingClientRect();
-    const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
-    const clampedX = Math.max(140, Math.min(vw - 140, rect.left + rect.width / 2));
-    const topY = Math.max(130, rect.top - 10);
-    setFloatingTooltip({
-      book,
-      shelf,
-      x: clampedX,
-      y: topY,
+  // Resolve recently opened books for the Quick Resume Strip
+  const recentBooks = useMemo(() => {
+    if (!recentBookIds.length || !shelves.length) return [];
+    const lookup = new Map();
+    shelves.forEach((shelf) => {
+      shelf.books.forEach((book) => {
+        lookup.set(String(book.id), { book, shelf });
+      });
     });
-  }, []);
+    return recentBookIds.map((id) => lookup.get(String(id))).filter(Boolean);
+  }, [recentBookIds, shelves]);
 
   // Clicking a book opens the existing live production Topic Detail flow!
   const handleOpenBook = useCallback(
     (book, shelf) => {
-      setFloatingTooltip(null);
       playCrayonSound('book-open', soundMuted);
+      setRecentBookIds((prev) => {
+        const next = [book.id, ...prev.filter((id) => String(id) !== String(book.id))].slice(0, 3);
+        try {
+          localStorage.setItem('hivocab_recent_topic_ids', JSON.stringify(next));
+        } catch (_) {}
+        return next;
+      });
       openTopic(book.id, book.title, book.category || shelf?.id);
     },
     [soundMuted, openTopic]
@@ -875,239 +998,63 @@ export function PageTopics() {
   return (
     <div
       id="page-topics"
-      className="page active min-h-screen text-[#302A24] selection:bg-[#FEF3C7] selection:text-[#302A24] lg:pl-[var(--sidebar-w,244px)] pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] lg:pb-10 pwa-safe-top"
+      className="page active min-h-screen text-[#382E2B] selection:bg-[#FEF3C7] selection:text-[#382E2B] lg:pl-[var(--sidebar-w,244px)] pb-[calc(7.5rem+env(safe-area-inset-bottom,0px))] lg:pb-10 pwa-safe-top"
       style={{
         backgroundColor: '#FAF5EB',
         backgroundImage: 'radial-gradient(#E2D6C3 1.25px, transparent 1.25px)',
         backgroundSize: '22px 22px',
-        fontFamily: "'Nunito', 'Quicksand', sans-serif",
+        fontFamily: "'Quicksand', 'Nunito', sans-serif",
       }}
     >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@700;800&family=Nunito:wght@500;600;700;800;900&family=Patrick+Hand&family=Quicksand:wght@600;700;800&display=swap');
-
-        .font-display {
-          font-family: 'Comfortaa', 'Quicksand', sans-serif;
-        }
-        .font-hand {
-          font-family: 'Patrick Hand', cursive;
-        }
-        .font-mono-ipa {
-          font-family: 'SF Mono', Menlo, Consolas, monospace;
-        }
-
-        .no-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-        .no-scrollbar {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
-
-        .antique-cornice {
-          background: linear-gradient(180deg, #432714 0%, #684024 45%, #4A2C17 100%);
-          box-shadow: inset 0 2px 0 rgba(255, 235, 200, 0.22);
-        }
-        .antique-folder-beam {
-          background: linear-gradient(180deg, #5C381E 0%, #462915 55%, #341D0E 100%);
-          box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.2), 0 4px 10px rgba(15, 8, 3, 0.45);
-        }
-        .antique-dentil-trim {
-          background-image: repeating-linear-gradient(
-            90deg,
-            #341D0E 0px,
-            #341D0E 12px,
-            #754A2B 12px,
-            #754A2B 24px
-          );
-        }
-        .brass-plaque {
-          background: linear-gradient(135deg, #FFF5D6 0%, #EDD07E 52%, #D4AC42 100%);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.85), 0 2px 0 #241308;
-        }
-        .antique-recess-cavity {
-          background-color: #2A190E;
-          background-image:
-            radial-gradient(ellipse at 50% 0%, rgba(255, 204, 102, 0.20) 0%, rgba(255, 180, 60, 0.05) 50%, transparent 75%),
-            repeating-linear-gradient(
-              90deg,
-              rgba(18, 9, 3, 0.35) 0px,
-              rgba(18, 9, 3, 0.35) 2px,
-              transparent 2px,
-              transparent 64px
-            ),
-            linear-gradient(180deg, #1C1008 0%, #331F12 32%, #422817 100%);
-          box-shadow:
-            inset 0 18px 24px -6px rgba(8, 4, 1, 0.85),
-            inset 14px 0 20px -8px rgba(8, 4, 1, 0.7),
-            inset -14px 0 20px -8px rgba(8, 4, 1, 0.7),
-            inset 0 -6px 14px rgba(8, 4, 1, 0.65);
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior-x: contain;
-        }
-        .antique-pilaster {
-          background: linear-gradient(90deg, #341D0E 0%, #684024 35%, #7E5030 50%, #56341C 75%, #2E190B 100%);
-        }
-        .antique-pilaster-flute {
-          background-image: repeating-linear-gradient(
-            90deg,
-            transparent 0px,
-            transparent 4px,
-            rgba(20, 10, 3, 0.45) 4px,
-            rgba(20, 10, 3, 0.45) 7px
-          );
-        }
-        .antique-shelf-top-plane {
-          background: linear-gradient(180deg, #4B2E19 0%, #744A2C 65%, #8F5E3B 100%);
-        }
-        .antique-shelf-front-plank {
-          background: linear-gradient(180deg, #875836 0%, #633E23 55%, #3E2514 100%);
-          box-shadow: inset 0 1.5px 0 rgba(255, 230, 195, 0.25);
-        }
-
-        .shelf-scrollbar {
-          scrollbar-color: #B58E58 #241308;
-          scrollbar-width: thin;
-        }
-        .shelf-scrollbar::-webkit-scrollbar {
-          height: 8px;
-        }
-        .shelf-scrollbar::-webkit-scrollbar-track {
-          background: #241308;
-        }
-        .shelf-scrollbar::-webkit-scrollbar-thumb {
-          background: #B58E58;
-          border-radius: 9999px;
-          border: 2px solid #241308;
-        }
-        .shelf-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #DFB54B;
-        }
-
-        .book-spine-leaning {
-          transform: rotate(var(--lean-deg, 0deg));
-          transform-origin: bottom center;
-          transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease, filter 0.2s ease;
-        }
-        @media (hover: hover) and (pointer: fine) {
-          .book-spine-leaning:hover {
-            transform: translateY(-14px) rotate(0deg) scale(1.06);
-            filter: brightness(1.08);
-            z-index: 35;
-          }
-        }
-        .book-cover-item {
-          transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
-        }
-        @media (hover: hover) and (pointer: fine) {
-          .book-cover-item:hover {
-            transform: translateY(-10px) rotate(1deg) scale(1.03);
-            z-index: 35;
-          }
-        }
-
-        .writing-vertical {
-          writing-mode: vertical-rl;
-          text-orientation: mixed;
-        }
-      `}</style>
-
-      {/* FLOATING BOOK DETAIL CARD (Renders above wooden bookshelf beams on hover) */}
-      {floatingTooltip && (() => {
-        const { book, shelf, x, y } = floatingTooltip;
-        const progress = book.progress;
-        return (
-          <div
-            style={{
-              left: `${x}px`,
-              top: `${y}px`,
-              transform: 'translate(-50%, -100%)',
-            }}
-            className="pointer-events-none hidden md:block fixed z-[90] w-60 p-3.5 rounded-2xl bg-[#FFFDF9] text-[#302A24] border-[3px] border-[#3D352E] shadow-[5px_6px_0px_#3D352E] transition-all duration-75"
-          >
-            <div className="flex items-center justify-between gap-1 text-[10px] font-black text-[#557A46] mb-1">
-              <span className="px-2 py-0.5 rounded-md bg-[#EAF5E4] border border-[#3D352E] truncate max-w-[130px]">
-                📁 {shelf?.code}
-              </span>
-              <span className="shrink-0">
-                {book.wordCount > 0 ? `${book.wordCount} từ • ` : ''}
-                {book.isLockedPro ? 'PRO' : book.cefr}
-              </span>
-            </div>
-            <p className="font-display font-extrabold text-xs text-[#302A24] leading-snug mt-1">
-              {book.title}
-            </p>
-            <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-[#786F66]">
-              <span>
-                {book.wordCount > 0
-                  ? `Đã thuộc ${book.learnedCount}/${book.wordCount} từ`
-                  : 'Tiến độ hoàn thành'}
-              </span>
-              <span className="text-[#557A46] font-black">{progress}%</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-[#EFE8D6] border border-[#3D352E] overflow-hidden mt-1">
-              <div
-                className="h-full bg-[#557A46]"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-            <div className="mt-2 py-1 px-2 rounded-lg bg-[#FEF3C7] text-[#302A24] text-[10px] font-black text-center border border-[#3D352E]">
-              📖 Nhấp để mở sách học ngay →
-            </div>
-            <div className="w-3.5 h-3.5 bg-[#FFFDF9] border-r-[3px] border-b-[3px] border-[#3D352E] rotate-45 absolute -bottom-2 left-1/2 -translate-x-1/2" />
-          </div>
-        );
-      })()}
-
       {/* MAIN LIBRARY CONTENT AREA */}
       <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-7 max-w-[1400px] mx-auto w-full">
         {/* COMPACT TOP HEADER BAR */}
         <header className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 sm:pb-4 border-b-2 border-dashed border-[#DECDBB]">
           <div className="hidden lg:block">
-            <p className="text-xs sm:text-sm font-semibold text-[#786F66]">
+            <p className="text-xs sm:text-sm font-semibold text-[#6E6259] tabular-nums">
               {stats.totalWords > 0 ? (
                 <>
                   Đã thuộc{' '}
-                  <strong className="text-[#557A46]">
+                  <strong className="text-[#4D6B53]">
                     {stats.learnedWords.toLocaleString()}
                   </strong>{' '}
                   / {stats.totalWords.toLocaleString()} từ vựng trên{' '}
-                  <strong>{stats.totalBooks} cuốn sách</strong>
+                  <strong className="text-[#382E2B]">{stats.totalBooks} cuốn sách</strong>
                 </>
               ) : (
                 <>
-                  Khám phá <strong>{stats.totalBooks} cuốn sách</strong> trên{' '}
-                  <strong>{stats.totalShelves} giá sách chuyên đề</strong>
+                  Khám phá <strong className="text-[#382E2B]">{stats.totalBooks} cuốn sách</strong> trên{' '}
+                  <strong className="text-[#382E2B]">{stats.totalShelves} giá sách chuyên đề</strong>
                 </>
               )}
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 w-full lg:w-auto">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full lg:w-auto">
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[110px] sm:min-w-[160px] max-w-full sm:max-w-xs lg:w-56 lg:flex-initial">
-              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#786F66] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <div className="relative flex-1 min-w-[180px] sm:min-w-[190px] max-w-full sm:max-w-xs lg:w-60 lg:flex-initial">
+              <Search className="w-4 h-4 text-[#6E6259] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Tìm sách (CAM 21, Cô MP, SAT...)"
-                className="w-full h-8 sm:h-9 pl-8 sm:pl-9 pr-7 sm:pr-8 py-1 rounded-xl bg-white border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] sm:shadow-[2px_3px_0px_#3D352E] text-xs font-bold text-[#302A24] placeholder-[#A89C92] focus:outline-none focus:ring-2 focus:ring-[#557A46]"
+                className="w-full h-10 pl-9 pr-8 py-1 rounded-xl bg-[#FFFDF9] border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] text-xs font-bold text-[#382E2B] placeholder-[#8E8176] focus:outline-none focus:ring-2 focus:ring-[#4D6B53]"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
                   aria-label="Xóa tìm kiếm"
-                  className="absolute right-0 top-0 bottom-0 min-w-[30px] sm:min-w-[34px] flex items-center justify-center text-[#786F66] hover:text-[#302A24] cursor-pointer"
+                  className="absolute right-0 top-0 bottom-0 min-w-[36px] flex items-center justify-center text-[#6E6259] hover:text-[#382E2B] cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
             </div>
 
-            {/* Extra-Compact Book Display Mode Switcher (Between search and profiles) */}
-            <div className="flex items-center bg-[#F4EDE2] p-0.5 sm:p-1 rounded-xl border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] sm:shadow-[2px_3px_0px_#3D352E] shrink-0">
+            {/* Book Display Mode Switcher */}
+            <div className="flex items-center bg-[#F4EDE2] p-0.5 rounded-xl border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] shrink-0 order-3 sm:order-none w-full sm:w-auto justify-center">
               {[
                 { id: 'spines', label: 'Gáy sách' },
                 { id: 'covers', label: 'Mặt bìa' },
@@ -1119,10 +1066,10 @@ export function PageTopics() {
                     playCrayonSound('page-flip', soundMuted);
                     setBookDisplayStyle(m.id);
                   }}
-                  className={`h-7 sm:h-8 px-2 sm:px-2.5 rounded-lg text-[11px] sm:text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
+                  className={`flex-1 sm:flex-initial h-8 px-2.5 rounded-lg text-[11px] sm:text-xs font-extrabold transition-all cursor-pointer flex items-center justify-center whitespace-nowrap ${
                     bookDisplayStyle === m.id
-                      ? 'bg-[#557A46] text-white shadow-sm'
-                      : 'text-[#786F66] hover:text-[#302A24]'
+                      ? 'bg-[#4D6B53] text-white shadow-xs'
+                      : 'text-[#6E6259] hover:text-[#382E2B]'
                   }`}
                 >
                   {m.label}
@@ -1130,13 +1077,25 @@ export function PageTopics() {
               ))}
             </div>
 
+            {/* Create New Topic / Book Button — accessible on BOTH Mobile & Desktop */}
+            <button
+              type="button"
+              onClick={() => handleOpenCreateTopic(activeCategory)}
+              aria-label="Thêm sách từ vựng mới"
+              title="Thêm sách mới"
+              className="flex h-10 px-2.5 lg:px-3.5 rounded-xl bg-[#D95D39] hover:bg-[#BF4D2C] text-white font-extrabold text-xs border-2 border-[#382E2B] shadow-[2px_2.5px_0px_#382E2B] active:translate-y-0.5 transition-all items-center justify-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="hidden lg:inline">Thêm sách mới</span>
+            </button>
+
             {/* Mobile User Avatar Dropdown Trigger */}
             <button
               type="button"
               data-mobile-avatar="true"
               onClick={() => window.toggleMobileProfileDropdown?.()}
               aria-label="Mở menu tài khoản cá nhân"
-              className="mobile-user-avatar lg:hidden w-8 h-8 sm:w-9 sm:h-9 min-w-[32px] min-h-[32px] sm:min-w-[36px] sm:min-h-[36px] rounded-full border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] sm:shadow-[2px_3px_0px_#3D352E] bg-[#FEF3C7] text-[#302A24] flex items-center justify-center font-display font-extrabold text-xs cursor-pointer select-none overflow-hidden shrink-0 active:scale-[0.96]"
+              className="mobile-user-avatar lg:hidden w-10 h-10 min-w-[40px] min-h-[40px] rounded-full border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] bg-[#FEF3C7] text-[#382E2B] flex items-center justify-center font-display font-extrabold text-xs cursor-pointer select-none overflow-hidden shrink-0 active:scale-[0.96]"
             >
               {user?.user_metadata?.avatar_url ? (
                 <img
@@ -1150,18 +1109,39 @@ export function PageTopics() {
                 </span>
               )}
             </button>
-
-            {/* Create New Topic / Book Button - visible on desktop */}
-            <button
-              type="button"
-              onClick={() => handleOpenCreateTopic(activeCategory)}
-              className="hidden lg:flex h-9 py-1.5 px-3 sm:px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] active:translate-y-0.5 active:shadow-none transition-all items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap"
-            >
-              <Plus className="w-4 h-4 shrink-0" />
-              <span>Thêm sách mới</span>
-            </button>
           </div>
         </header>
+
+        {/* QUICK RESUME STRIP (Recently Opened Books) */}
+        {recentBooks.length > 0 && !searchQuery && (
+          <section className="mt-3 flex items-center gap-2 overflow-x-auto no-scrollbar pb-0.5">
+            <span className="text-[11px] font-extrabold text-[#6E6259] whitespace-nowrap shrink-0">
+              Tiếp tục học:
+            </span>
+            {recentBooks.map(({ book, shelf }) => (
+              <button
+                key={book.id}
+                type="button"
+                onClick={() => handleOpenBook(book, shelf)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 min-h-[36px] rounded-xl bg-[#FFFDF9] hover:bg-[#FEF3C7]/60 border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer shrink-0 max-w-[240px]"
+              >
+                <span
+                  aria-hidden="true"
+                  className="w-2.5 h-2.5 rounded-full border border-[#382E2B] shrink-0"
+                  style={{ backgroundColor: book.coverColor }}
+                />
+                <span className="text-xs font-extrabold text-[#382E2B] truncate">
+                  {book.title}
+                </span>
+                {book.progress > 0 && (
+                  <span className="text-[10.5px] font-black tabular-nums text-[#4D6B53] bg-[#EAF3EB] px-1.5 py-0.5 rounded-md shrink-0">
+                    {book.progress}%
+                  </span>
+                )}
+              </button>
+            ))}
+          </section>
+        )}
 
         {/* FOLDER / CATEGORY PILLS */}
         <section className="mt-4">
@@ -1255,21 +1235,35 @@ export function PageTopics() {
             ))}
           </div>
         ) : filteredShelves.length === 0 ? (
-          <div className="mt-6 text-center py-14 px-6 rounded-3xl bg-[#FFFDF9] border-[3px] border-[#3D352E] shadow-[5px_6px_0px_#3D352E]">
-            <p className="font-display font-extrabold text-base text-[#302A24]">
+          <div className="mt-6 text-center py-14 px-6 rounded-3xl bg-[#FFFDF9] border-[2.5px] border-[#382E2B] shadow-[4px_5px_0px_#382E2B]">
+            <p className="font-display font-extrabold text-base text-[#382E2B]">
               Không tìm thấy cuốn sách hoặc chủ đề nào phù hợp
             </p>
-            <p className="text-xs font-semibold text-[#786F66] mt-1">
+            <p className="text-xs font-semibold text-[#6E6259] mt-1">
               Bạn có thể thử từ khóa khác hoặc tự đóng thêm cuốn sách từ vựng mới lên kệ nhé!
             </p>
-            <button
-              type="button"
-              onClick={() => handleOpenCreateTopic(activeCategory)}
-              className="mt-4 py-2.5 px-5 rounded-2xl bg-[#557A46] hover:bg-[#48683B] text-white font-black text-xs border-2 border-[#3D352E] shadow-[3px_4px_0px_#3D352E] cursor-pointer inline-flex items-center gap-1.5"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Thêm sách từ vựng mới</span>
-            </button>
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-2.5">
+              {(searchQuery || activeCategory !== 'all') && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery('');
+                    setActiveCategory('all');
+                  }}
+                  className="py-2.5 px-4 rounded-2xl bg-[#FAF5EB] hover:bg-[#F0E6D6] text-[#382E2B] font-extrabold text-xs border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] cursor-pointer"
+                >
+                  Xem lại tất cả giá sách
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => handleOpenCreateTopic(activeCategory)}
+                className="py-2.5 px-5 rounded-2xl bg-[#4D6B53] hover:bg-[#3F5944] text-white font-extrabold text-xs border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] cursor-pointer inline-flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Thêm sách từ vựng mới</span>
+              </button>
+            </div>
           </div>
         ) : libraryLayout === 'shelf' ? (
           <section className="mt-4">
@@ -1295,7 +1289,6 @@ export function PageTopics() {
                       setActiveCategory(folderId);
                     }}
                     onOpenBook={handleOpenBook}
-                    onHoverBook={handleHoverBook}
                     onAddBookToShelf={(shelfId) => handleOpenCreateTopic(shelfId)}
                     onDeleteFolder={handleDeleteFolder}
                     onDeleteTopic={handleDeleteTopic}
@@ -1326,8 +1319,8 @@ export function PageTopics() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="px-3 py-1 rounded-xl bg-[#FEF3C7] border-2 border-[#3D352E] font-display font-extrabold text-xs text-[#302A24] truncate">
-                      📁 {shelf.code}
+                    <span className="px-3 py-1 rounded-xl bg-[#FEF3C7] border-2 border-[#382E2B] font-display font-extrabold text-xs text-[#382E2B] truncate">
+                      {shelf.code}
                     </span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <span className="text-xs font-black text-[#557A46]">
@@ -1387,14 +1380,11 @@ export function PageTopics() {
                 />
               </div>
               <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#EAF5E4] text-[#557A46] text-[11px] font-black border border-[#3D352E]">
-                  <Sparkles className="w-3.5 h-3.5 text-[#557A46] shrink-0" />
-                  <span>GÓC ĐỌC SÁCH CÙNG BÉ HỔ</span>
-                </div>
-                <h4 className="font-display font-extrabold text-sm sm:text-base text-[#302A24]">
-                  "Mỗi chủ đề là một quyển sách nghiêng tựa vào nhau trên tủ gỗ — hãy rút một cuốn để bắt đầu học nhé!"
+                <h4 className="font-display font-extrabold text-sm sm:text-base text-[#382E2B] flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#4D6B53] shrink-0" />
+                  <span>Góc đọc sách cùng Bé Hổ — rút một cuốn để bắt đầu học nhé!</span>
                 </h4>
-                <p className="text-xs text-[#786F66] font-semibold">
+                <p className="text-xs text-[#6E6259] font-semibold leading-relaxed">
                   Độ dày của gáy sách tương ứng với số lượng từ vựng bên trong. Nhấp vào gáy sách hoặc mặt bìa để mở bài học.
                 </p>
               </div>

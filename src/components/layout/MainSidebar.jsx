@@ -1,5 +1,4 @@
 // src/components/layout/MainSidebar.jsx
-// 100% Pixel-Perfect match to taskbar fix design (code.html & screen.png)
 import React, { useState, useEffect } from 'react';
 import {
   User,
@@ -14,6 +13,12 @@ import {
   PanelLeftOpen,
   Settings,
   MessageSquare,
+  Swords,
+  Home,
+  BookMarked,
+  Map,
+  Globe,
+  Search,
 } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
@@ -75,14 +80,16 @@ export function MainSidebar() {
       : currentRoute;
 
   const userName = user
-    ? (user?.user_metadata?.full_name ||
-       user?.user_metadata?.name ||
-       (user?.email ? user.email.split('@')[0] : 'Bạn học'))
+    ? user?.user_metadata?.full_name ||
+      user?.user_metadata?.name ||
+      (user?.email ? user.email.split('@')[0] : 'Bạn học')
     : 'Khách trải nghiệm';
 
   const masteryBadge = getMasteryBadge(masteredCount);
   const userRank = user
-    ? (statsLoading ? 'Đang cập nhật huy hiệu…' : `Huy hiệu: ${masteryBadge.name}`)
+    ? statsLoading
+      ? 'Đang cập nhật huy hiệu…'
+      : `Huy hiệu: ${masteryBadge.name}`
     : 'Chưa đăng nhập';
   const displayStreak = user ? (statsLoading ? '…' : streak) : 0;
   const displayWordCount = user ? (statsLoading ? '…' : wordCount) : null;
@@ -95,110 +102,114 @@ export function MainSidebar() {
     }
   };
 
-  const navItems = [
+  const navGroups = [
     {
-      id: 'dashboard',
-      label: 'Trang chủ',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
-      ),
+      id: 'daily',
+      label: 'Học mỗi ngày',
+      items: [
+        {
+          id: 'dashboard',
+          label: 'Trang chủ',
+          icon: <Home className="w-[18px] h-[18px] shrink-0" />,
+        },
+        {
+          id: 'topics',
+          label: 'Chủ đề',
+          icon: <Folder className="w-[18px] h-[18px] shrink-0" />,
+          onMouseEnter: () => {
+            import('../../services/db.js')
+              .then(({ getTopics }) => getTopics().catch(() => {}))
+              .catch(() => {});
+          },
+        },
+        {
+          id: 'vocabulary',
+          label: 'Sổ từ cá nhân',
+          icon: <BookMarked className="w-[18px] h-[18px] shrink-0" />,
+          badge: displayWordCount,
+          badgeTabular: true,
+        },
+      ],
     },
     {
-      id: 'topics',
-      label: 'Chủ đề',
-      icon: <Folder className="w-5 h-5 shrink-0" />,
-      onMouseEnter: () => {
-        import('../../services/db.js')
-          .then(({ getTopics }) => getTopics().catch(() => {}))
-          .catch(() => {});
-      },
+      id: 'practice',
+      label: 'Luyện kỹ năng',
+      items: [
+        {
+          id: 'exercises',
+          label: 'Lộ trình THPT',
+          icon: <Map className="w-[18px] h-[18px] shrink-0" />,
+          badge: '3 quyển',
+        },
+        {
+          id: 'bilingual-reading',
+          label: 'Đọc song ngữ',
+          badge: 'IELTS',
+          icon: <BookOpenText className="w-[18px] h-[18px] shrink-0" />,
+          onClick: () => {
+            if (typeof window !== 'undefined') {
+              window._bilingualEntryOrigin = 'hub';
+              window._currentPassageId = null;
+              window.dispatchEvent(new CustomEvent('hi:bilingual-open-hub'));
+            }
+            navigateTo('bilingual-reading');
+          },
+          onMouseEnter: () => {
+            import('../pages/PageBilingualReading.jsx').catch(() => {});
+          },
+        },
+        {
+          id: 'studio',
+          label: 'Shadowing & AI',
+          badge: 'Mới',
+          icon: <Mic className="w-[18px] h-[18px] shrink-0" />,
+        },
+        {
+          id: 'arena',
+          label: 'Đấu trường 1v1',
+          icon: <Swords className="w-[18px] h-[18px] shrink-0" />,
+        },
+      ],
     },
     {
-      id: 'vocabulary',
-      label: 'Sổ từ cá nhân',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
-      ),
-      badge: displayWordCount,
-    },
-    {
-      id: 'exercises',
-      label: 'Lộ trình',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
-      ),
-      badge: '3 quyển',
-    },
-    {
-      id: 'bilingual-reading',
-      label: 'Đọc song ngữ',
-      badge: 'IELTS',
-      icon: <BookOpenText className="w-5 h-5 shrink-0" />,
-      onClick: () => {
-        if (typeof window !== 'undefined') {
-          window._bilingualEntryOrigin = 'hub';
-          window._currentPassageId = null;
-          window.dispatchEvent(new CustomEvent('hi:bilingual-open-hub'));
-        }
-        navigateTo('bilingual-reading');
-      },
-      onMouseEnter: () => {
-        import('../pages/PageBilingualReading.jsx').catch(() => {});
-      },
-    },
-    {
-      id: 'studio',
-      label: 'Shadowing & Dictation',
-      badge: 'Mới',
-      icon: <Mic className="w-5 h-5 shrink-0" />,
-    },
-    {
-      id: 'library',
-      label: 'Thư viện cộng đồng',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
-      ),
-    },
-    {
-      id: 'dictionary',
-      label: 'Tra cứu từ điển',
-      icon: (
-        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-        </svg>
-      ),
+      id: 'tools',
+      label: 'Tài nguyên',
+      items: [
+        {
+          id: 'library',
+          label: 'Thư viện cộng đồng',
+          icon: <Globe className="w-[18px] h-[18px] shrink-0" />,
+        },
+        {
+          id: 'dictionary',
+          label: 'Tra cứu từ điển',
+          icon: <Search className="w-[18px] h-[18px] shrink-0" />,
+        },
+      ],
     },
   ];
 
   return (
     <aside
-      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-5 flex-col justify-between border-r border-[#E8DEC8]/80 fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#FBF8F1]/95 backdrop-blur-sm select-none overflow-y-auto no-scrollbar"
+      className="hidden lg:flex lg:w-[var(--sidebar-w,244px)] shrink-0 p-5 flex-col justify-between border-r border-[#E3D7C5] fixed left-0 top-0 h-screen h-[100dvh] z-30 bg-[#F5EFE3]/95 backdrop-blur-sm select-none overflow-y-auto no-scrollbar"
       data-purpose="desktop-sidebar"
     >
-      {/* Top Section: Brand & Nav Links */}
+      {/* Top Section: Brand & Grouped Nav */}
       <div className="flex flex-col shrink-0">
         {/* Brand Logo + Collapse Toggle */}
         <div
-          className="px-1.5 mb-4 shrink-0 select-none flex items-center justify-between gap-2"
+          className="px-1 mb-4 shrink-0 select-none flex items-center justify-between gap-2"
           data-purpose="sidebar-brand"
         >
           <button
             type="button"
             onClick={() => navigateTo('dashboard')}
-            className="cursor-pointer group flex items-center justify-center shrink-0 focus:outline-none"
+            className="cursor-pointer group flex items-center gap-2.5 shrink-0 focus-visible:outline-none"
             title="Trang chủ HiVocab"
             aria-label="Trang chủ HiVocab"
           >
             <div
-              className="w-14 h-14 rounded-2xl border-2 border-[#3D352E] shadow-[2.5px_2.5px_0px_#3D352E] overflow-hidden bg-[#F7F0DE] group-hover:scale-105 active:scale-95 transition-transform flex items-center justify-center"
+              className="w-12 h-12 rounded-2xl border-2 border-[#382E2B] shadow-[2px_2.5px_0px_#382E2B] overflow-hidden bg-[#FAF5EB] group-hover:scale-[1.03] active:scale-95 transition-transform flex items-center justify-center shrink-0"
               data-purpose="sidebar-logo-box"
             >
               <img
@@ -207,6 +218,16 @@ export function MainSidebar() {
                 className="w-full h-full object-cover"
               />
             </div>
+            {!collapsed && (
+              <div className="text-left leading-tight">
+                <div className="font-display font-extrabold text-[15px] text-[#382E2B] tracking-tight">
+                  HiVocab
+                </div>
+                <div className="text-[10.5px] font-bold text-[#6E6259]">
+                  Phòng học FSRS-6
+                </div>
+              </div>
+            )}
           </button>
 
           <button
@@ -214,7 +235,7 @@ export function MainSidebar() {
             onClick={() => setCollapsed((prev) => !prev)}
             className={`${
               collapsed ? 'w-10 h-7 rounded-lg' : 'w-8 h-8 rounded-xl'
-            } bg-white hover:bg-[#F4E3B4] text-[#3D352E] border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer shrink-0`}
+            } bg-[#FFFDF9] hover:bg-[#F4E3B4] text-[#382E2B] border-2 border-[#382E2B] shadow-[1.5px_1.5px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer shrink-0`}
             title={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn chỉ hiện icon'}
             aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn chỉ hiện icon'}
             aria-expanded={!collapsed}
@@ -228,58 +249,87 @@ export function MainSidebar() {
           </button>
         </div>
 
-        {/* Navigation Menu */}
-        <nav className="flex flex-col gap-2 pt-1 pr-0.5">
-          {navItems.map((item) => {
-            const isActive = activeTab === item.id;
-            return (
-              <a
-                key={item.id}
-                onClick={() => (item.onClick ? item.onClick() : navigateTo(item.id))}
-                onMouseEnter={item.onMouseEnter}
-                title={item.label}
-                aria-label={item.label}
-                className={`flex items-center ${
-                  collapsed ? 'justify-center px-0' : 'justify-between gap-2 px-3.5 py-2.5'
-                } rounded-2xl cursor-pointer transition-all shrink-0 ${
-                  isActive
-                    ? 'font-bold text-white bg-[#4D6B53] border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E]'
-                    : 'font-semibold text-[#786F66] hover:bg-white/80 hover:text-[#302A24] border border-transparent'
-                }`}
-              >
-                <div className={`flex items-center ${collapsed ? 'justify-center' : 'gap-3 min-w-0'}`}>
-                  {item.emoji ? (
-                    <span className="text-lg leading-none shrink-0">{item.emoji}</span>
-                  ) : (
-                    item.icon
-                  )}
-                  {!collapsed && (
-                    <span className={`truncate whitespace-nowrap text-sm ${isActive ? 'font-heading' : ''}`}>
-                      {item.label}
-                    </span>
-                  )}
+        {/* Grouped Navigation Menu */}
+        <nav aria-label="Điều hướng chính" className="flex flex-col gap-1 pr-0.5">
+          {navGroups.map((group, groupIdx) => (
+            <div
+              key={group.id}
+              className={
+                groupIdx > 0
+                  ? collapsed
+                    ? 'pt-2 mt-1 border-t border-[#E3D7C5]/90 flex flex-col items-center gap-1'
+                    : 'pt-2.5 mt-1.5 border-t border-[#E3D7C5]/80 flex flex-col gap-1'
+                  : 'flex flex-col gap-1'
+              }
+            >
+              {!collapsed && (
+                <div className="px-3 pb-0.5 text-[10.5px] font-extrabold uppercase tracking-[0.06em] text-[#7D7066]">
+                  {group.label}
                 </div>
+              )}
+              {group.items.map((item) => {
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-nav-item="true"
+                    aria-current={isActive ? 'page' : undefined}
+                    onClick={() => (item.onClick ? item.onClick() : navigateTo(item.id))}
+                    onMouseEnter={item.onMouseEnter}
+                    title={item.label}
+                    aria-label={item.label}
+                    className={`w-full flex items-center ${
+                      collapsed ? 'justify-center px-0' : 'justify-between gap-2 px-3 py-2'
+                    } rounded-2xl cursor-pointer transition-all duration-150 shrink-0 text-left ${
+                      isActive
+                        ? 'font-extrabold text-white bg-[#4D6B53] border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B]'
+                        : 'font-bold text-[#5C524B] hover:bg-[#FFFDF9] hover:text-[#382E2B] border-2 border-transparent hover:border-[#E3D7C5]'
+                    }`}
+                  >
+                    <div
+                      className={`flex items-center ${
+                        collapsed ? 'justify-center' : 'gap-2.5 min-w-0'
+                      }`}
+                    >
+                      {item.icon}
+                      {!collapsed && (
+                        <span className="truncate whitespace-nowrap text-[13.5px]">
+                          {item.label}
+                        </span>
+                      )}
+                    </div>
 
-                {!collapsed && isActive && (
-                  <span className="w-2.5 h-2.5 rounded-full bg-amber-300 ring-2 ring-white shrink-0"></span>
-                )}
-                {!collapsed && !isActive && item.badge != null && (
-                  <span className="px-2 py-0.5 text-xs font-bold bg-[#F4E3B4] text-[#3D352E] rounded-full border border-[#3D352E] shrink-0">
-                    {item.badge}
-                  </span>
-                )}
-              </a>
-            );
-          })}
+                    {!collapsed && isActive && (
+                      <span
+                        aria-hidden="true"
+                        className="w-2 h-2 rounded-full bg-[#F4D06F] ring-2 ring-white/80 shrink-0"
+                      />
+                    )}
+                    {!collapsed && !isActive && item.badge != null && (
+                      <span
+                        className={`px-2 py-0.5 text-[10.5px] font-extrabold rounded-full border shrink-0 ${
+                          item.badgeTabular
+                            ? 'tabular-nums bg-[#FAF5EB] text-[#382E2B] border-[#D5C7B2]'
+                            : 'bg-[#F5E6C4] text-[#382E2B] border-[#382E2B]/40'
+                        }`}
+                      >
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </nav>
       </div>
 
       {/* Bottom Section: User Profile Card & Actions */}
       <div
-        className="shrink-0 flex flex-col gap-2.5 pt-3 mt-2 border-t border-[#E8DEC8]/80 bg-[#FBF8F1]/95"
+        className="shrink-0 flex flex-col gap-2 pt-3 mt-2 border-t border-[#E3D7C5] bg-[#F5EFE3]/95"
         data-purpose="sidebar-footer"
       >
-        {/* User Profile Pill or Guest CTA */}
         {!user ? (
           collapsed ? (
             <button
@@ -287,29 +337,33 @@ export function MainSidebar() {
               onClick={() => navigateTo('login')}
               title="Đăng nhập / Đăng ký"
               aria-label="Đăng nhập / Đăng ký"
-              className="w-11 h-11 rounded-2xl bg-[#D96B43] hover:bg-[#C85A3F] text-white border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer"
+              className="w-11 h-11 rounded-2xl bg-[#D95D39] hover:bg-[#BF4D2C] text-white border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center cursor-pointer"
               data-purpose="sidebar-profile-card"
             >
               <LogIn className="w-4 h-4 shrink-0" />
             </button>
           ) : (
             <div
-              className="bg-[#FAF3E7] rounded-2xl p-2.5 border-2 border-[#3D352E] shadow-[2px_3px_0px_#3D352E] space-y-2"
+              className="bg-[#FFFDF9] rounded-2xl p-2.5 border-2 border-[#382E2B] shadow-[2px_3px_0px_#382E2B] space-y-2"
               data-purpose="sidebar-profile-card"
             >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold shrink-0">
-                  <User className="w-4 h-4 text-[#8A796F]" />
+                <div className="w-8 h-8 rounded-full bg-[#FFE8C2] border-2 border-[#382E2B] flex items-center justify-center text-sm font-bold shrink-0">
+                  <User className="w-4 h-4 text-[#6E6259]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-xs font-black text-[#302A24] truncate">Khách trải nghiệm</div>
-                  <div className="text-[10px] text-[#786F66] truncate">Chưa đăng nhập</div>
+                  <div className="text-xs font-extrabold text-[#382E2B] truncate">
+                    Khách trải nghiệm
+                  </div>
+                  <div className="text-[10.5px] font-medium text-[#6E6259] truncate">
+                    Chưa đăng nhập
+                  </div>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => navigateTo('login')}
-                className="w-full py-1.5 px-3 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white font-black text-xs border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                className="w-full py-1.5 px-3 rounded-xl bg-[#D95D39] hover:bg-[#BF4D2C] text-white font-extrabold text-xs border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
                 <span>Đăng nhập / Đăng ký</span>
                 <LogIn className="w-3.5 h-3.5 shrink-0" />
@@ -321,7 +375,7 @@ export function MainSidebar() {
             <button
               type="button"
               onClick={() => navigateTo('profile')}
-              className={`relative w-9 h-9 rounded-full border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] flex items-center justify-center overflow-visible cursor-pointer transition-all ${
+              className={`relative w-9 h-9 rounded-full border-2 border-[#382E2B] shadow-[1.5px_1.5px_0px_#382E2B] flex items-center justify-center overflow-visible cursor-pointer transition-all ${
                 activeTab === 'profile' ? 'ring-2 ring-[#4D6B53]' : ''
               }`}
               title={`${userName} • ${userRank} • ${displayStreak} ngày streak`}
@@ -335,10 +389,10 @@ export function MainSidebar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <User className="w-4 h-4 text-[#302A24]" />
+                  <User className="w-4 h-4 text-[#382E2B]" />
                 )}
               </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
             </button>
 
             <button
@@ -346,7 +400,7 @@ export function MainSidebar() {
               onClick={() => navigateTo('profile')}
               title="Cài đặt"
               aria-label="Cài đặt"
-              className="w-8 h-8 rounded-xl text-[#786F66] hover:bg-white/80 hover:text-[#302A24] flex items-center justify-center cursor-pointer transition-colors"
+              className="w-8 h-8 rounded-xl text-[#6E6259] hover:bg-[#FFFDF9] hover:text-[#382E2B] flex items-center justify-center cursor-pointer transition-colors"
             >
               <Settings className="w-4 h-4 shrink-0" />
             </button>
@@ -356,7 +410,7 @@ export function MainSidebar() {
               onClick={openFeedbackModal}
               title="Góp ý"
               aria-label="Góp ý"
-              className="w-8 h-8 rounded-xl text-[#786F66] hover:bg-white/80 hover:text-[#302A24] flex items-center justify-center cursor-pointer transition-colors"
+              className="w-8 h-8 rounded-xl text-[#6E6259] hover:bg-[#FFFDF9] hover:text-[#382E2B] flex items-center justify-center cursor-pointer transition-colors"
             >
               <MessageSquare className="w-4 h-4 shrink-0" />
             </button>
@@ -366,24 +420,27 @@ export function MainSidebar() {
               onClick={handleLogout}
               title="Đăng xuất"
               aria-label="Đăng xuất"
-              className="w-8 h-8 rounded-xl text-[#786F66] hover:bg-[#FBECE7] hover:text-[#C85A3F] flex items-center justify-center cursor-pointer transition-colors"
+              className="w-8 h-8 rounded-xl text-[#6E6259] hover:bg-[#FBECE7] hover:text-[#C85A3F] flex items-center justify-center cursor-pointer transition-colors"
             >
               <LogOut className="w-4 h-4 shrink-0" />
             </button>
           </div>
         ) : (
           <>
-            <div
+            <button
+              type="button"
               onClick={() => navigateTo('profile')}
-              className={`p-2.5 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2px_0px_#3D352E] flex items-center justify-between gap-2 cursor-pointer transition-all ${
-                activeTab === 'profile' ? 'bg-[#EFF6EE] border-[#4D6B53]' : 'bg-white hover:bg-[#FFFBF3]'
+              className={`w-full text-left p-2.5 rounded-2xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] flex items-center justify-between gap-2 cursor-pointer transition-all ${
+                activeTab === 'profile'
+                  ? 'bg-[#E8F1E8] border-[#4D6B53]'
+                  : 'bg-[#FFFDF9] hover:bg-[#FAF5EB]'
               }`}
               title="Xem thông tin và quản lý hồ sơ học viên"
               data-purpose="sidebar-profile-card"
             >
               <div className="flex items-center gap-2.5 min-w-0 flex-1">
                 <div className="relative shrink-0">
-                  <div className="w-9 h-9 rounded-full bg-[#FFE8C2] border-2 border-[#3D352E] flex items-center justify-center text-sm font-bold overflow-hidden">
+                  <div className="w-9 h-9 rounded-full bg-[#FFE8C2] border-2 border-[#382E2B] flex items-center justify-center text-sm font-bold overflow-hidden">
                     {user?.user_metadata?.avatar_url ? (
                       <img
                         src={user.user_metadata.avatar_url}
@@ -391,17 +448,17 @@ export function MainSidebar() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <User className="w-5 h-5 text-[#302A24]" />
+                      <User className="w-5 h-5 text-[#382E2B]" />
                     )}
                   </div>
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></span>
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <div className="text-xs font-bold text-[#302A24] truncate">{userName}</div>
+                    <div className="text-xs font-extrabold text-[#382E2B] truncate">{userName}</div>
                     {isPro && (
                       <span
-                        className="profile-pro-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#3D352E] rounded-md shadow-[1px_1px_0px_#3D352E] shrink-0"
+                        className="profile-pro-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#382E2B] rounded-md shadow-[1px_1px_0px_#382E2B] shrink-0"
                         title="Thành viên HiVocab PRO"
                       >
                         <Crown className="w-2.5 h-2.5 text-[#8C5311] shrink-0" />
@@ -409,38 +466,40 @@ export function MainSidebar() {
                       </span>
                     )}
                   </div>
-                  <div className="text-[10px] text-[#786F66] truncate">{userRank}</div>
+                  <div className="text-[10.5px] font-medium text-[#6E6259] truncate">{userRank}</div>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-xs font-bold text-[#C85A3F] bg-[#FBECE7] px-2 py-0.5 rounded-full border border-[#C85A3F]/40 shrink-0 whitespace-nowrap">
+              <div className="flex items-center gap-1 text-xs font-extrabold tabular-nums text-[#C85A3F] bg-[#FBECE7] px-2 py-0.5 rounded-full border border-[#C85A3F]/40 shrink-0 whitespace-nowrap">
                 <Flame className="w-3.5 h-3.5 text-[#C85A3F] shrink-0" />
                 <span>{displayStreak}</span>
               </div>
-            </div>
+            </button>
 
-            {/* Sub-actions */}
-            <div className="flex items-center justify-between text-[11px] font-semibold text-[#786F66] px-1 pt-0.5 whitespace-nowrap">
-              <a
+            <div className="flex items-center justify-between text-[11px] font-bold text-[#6E6259] px-1 pt-0.5 whitespace-nowrap">
+              <button
+                type="button"
                 onClick={() => navigateTo('profile')}
-                className="hover:text-[#302A24] transition cursor-pointer"
+                className="hover:text-[#382E2B] transition cursor-pointer"
               >
                 Cài đặt
-              </a>
-              <span>•</span>
-              <a
+              </button>
+              <span aria-hidden="true">•</span>
+              <button
+                type="button"
                 onClick={openFeedbackModal}
-                className="hover:text-[#302A24] transition cursor-pointer"
+                className="hover:text-[#382E2B] transition cursor-pointer"
               >
                 Góp ý
-              </a>
-              <span>•</span>
-              <a
+              </button>
+              <span aria-hidden="true">•</span>
+              <button
+                type="button"
                 onClick={handleLogout}
                 className="hover:text-[#C85A3F] transition cursor-pointer"
               >
                 Đăng xuất
-              </a>
+              </button>
             </div>
           </>
         )}

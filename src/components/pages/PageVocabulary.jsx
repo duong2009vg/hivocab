@@ -1,27 +1,24 @@
 // src/components/pages/PageVocabulary.jsx
-// 100% Pixel-Perfect match to Stitch Design (desktop_vocabulary.html & mobile_vocabulary.html)
-import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  RotateCcw, 
-  Volume2, 
-  Trash2, 
-  Heart, 
-  Search, 
-  LogIn, 
-  UserPlus, 
-  Folder, 
-  BookOpen, 
-  Plus, 
-  Clock, 
-  Sparkles, 
-  ArrowRight, 
-  X, 
-  Layers 
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import {
+  RotateCcw,
+  Volume2,
+  Trash2,
+  Search,
+  Folder,
+  BookOpen,
+  Plus,
+  Clock,
+  X,
+  Layers,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 import { useVocabulary } from '../../hooks/useVocabulary.js';
 import { useModal } from '../../context/ModalContext.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 import { useAuth } from '../../providers/AuthProvider.jsx';
+import { SrsLevelChart } from '../ui/SrsLevelChart.jsx';
 
 const LEVEL_INTERVALS = {
   0: 'Mới thêm',
@@ -115,6 +112,8 @@ export function PageVocabulary() {
   };
 
   const [selectedWordId, setSelectedWordId] = useState(null);
+  const [showSrsStrip, setShowSrsStrip] = useState(true);
+  const desktopSearchRef = useRef(null);
 
   // Sync selected word
   useEffect(() => {
@@ -131,24 +130,52 @@ export function PageVocabulary() {
     return words.find((w) => w.id === selectedWordId) || words[0] || null;
   }, [words, selectedWordId]);
 
+  // Operate-mode keyboard shortcuts: ↑/↓ to browse words, P to pronounce, / to focus search
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const onKeyDown = (e) => {
+      const tag = (e.target?.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable) {
+        return;
+      }
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (e.key === '/' && desktopSearchRef.current) {
+        e.preventDefault();
+        desktopSearchRef.current.focus();
+        return;
+      }
+
+      if (!words || words.length === 0) return;
+      const currentIdx = words.findIndex((w) => w.id === selectedWord?.id);
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextWord = words[Math.min(words.length - 1, currentIdx + 1)];
+        if (nextWord) setSelectedWordId(nextWord.id);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevWord = words[Math.max(0, currentIdx - 1)];
+        if (prevWord) setSelectedWordId(prevWord.id);
+      } else if ((e.key === 'p' || e.key === 'P') && selectedWord?.word) {
+        e.preventDefault();
+        playWord(selectedWord.word);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [words, selectedWord, playWord]);
+
   const memoryLevels = srsStats?.memoryLevels || { lv0: 0, lv1: 0, lv2: 0, lv3: 0, lv4: 0, lv5: 0 };
   const totalPages = Math.ceil(total / pageSize) || 1;
   const startIndex = (page - 1) * pageSize;
+  const hasActiveFilters = Boolean(search || levelFilter !== null || topicId);
 
-  const maxLevelCount = Math.max(
-    memoryLevels.lv0 || 0,
-    memoryLevels.lv1 || 0,
-    memoryLevels.lv2 || 0,
-    memoryLevels.lv3 || 0,
-    memoryLevels.lv4 || 0,
-    memoryLevels.lv5 || 0,
-    1
-  );
-
-  const getBarHeight = (count) => {
-    if (!count || count === 0) return '8px';
-    const percent = Math.min(100, Math.max(16, Math.round((count / maxLevelCount) * 100)));
-    return `${percent}%`;
+  const handleResetFilters = () => {
+    if (search) clearSearch();
+    if (levelFilter !== null) handleLevelFilterChange(null);
+    if (topicId) handleTopicFilterChange('');
   };
 
   const getPagesToShow = () => {
@@ -187,46 +214,46 @@ export function PageVocabulary() {
       <div className="block lg:hidden w-full max-w-[430px] mx-auto min-h-screen pb-28 px-4 pt-2 pwa-safe-top">
         {/* Title & Header Section */}
         <section className="space-y-3 pt-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <h1 className="text-3xl font-black tracking-tight text-[#4A3E39] font-['Quicksand',sans-serif]">
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <h1 className="text-2xl font-black tracking-tight text-[#382E2B] font-['Quicksand',sans-serif] truncate">
                 Sổ từ cá nhân
               </h1>
-              <span className="inline-block px-3 py-0.5 text-xs font-bold text-[#4A3E39] bg-[#E1EDDB] border border-[#8DAA68] rounded-full rotate-[-2deg] shadow-xs">
-                Đã học
+              <span className="inline-block px-2.5 py-0.5 text-[11px] font-extrabold text-[#35523B] bg-[#EAF3EB] border border-[#4D6B53]/50 rounded-full tabular-nums shrink-0">
+                {total} từ
               </span>
             </div>
-            <Heart className="w-6 h-6 text-[#DF5C58] fill-[#DF5C58] rotate-12 shrink-0" />
+            <button
+              type="button"
+              onClick={handleStartReview}
+              className="px-3 py-1.5 rounded-xl bg-[#4D6B53] hover:bg-[#3F5944] text-white text-xs font-extrabold border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] active:scale-95 transition-all cursor-pointer shrink-0 whitespace-nowrap"
+            >
+              Ôn tập ({srsStats.due || 0})
+            </button>
           </div>
 
-          <p className="text-sm text-[#7D716A] font-medium leading-relaxed -mt-1">
-            Sổ tay nhỏ xinh. Tổng cộng <strong className="text-[#4A3E39] font-black text-base">{total}</strong> từ vựng bạn đã lưu trữ.
-          </p>
-
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 pt-1">
+          <div className="flex items-center gap-2 pt-0.5">
             <button
               onClick={handleOpenAddWord}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#443833] text-[#FAF5EB] rounded-2xl shadow-md active:scale-95 transition-transform text-sm font-bold cursor-pointer"
+              className="flex-1 min-h-[44px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#D95D39] hover:bg-[#BF4D2C] text-white rounded-2xl border-2 border-[#382E2B] shadow-[2px_2.5px_0px_#382E2B] active:scale-95 transition-transform text-sm font-extrabold cursor-pointer"
               type="button"
             >
-              <span className="text-xl leading-none font-bold text-[#F7A738]">+</span>
-              <span>Thêm từ vựng</span>
+              <Plus className="w-4 h-4 shrink-0" />
+              <span>Thêm từ mới</span>
             </button>
             <button
               onClick={handleOpenBulkAdd}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#EFE8D6] text-[#4A3E39] border-2 border-dashed border-[#8A796F] rounded-2xl shadow-xs active:scale-95 transition-transform text-sm font-bold cursor-pointer"
+              className="flex-1 min-h-[44px] flex items-center justify-center gap-1.5 py-2.5 px-3 bg-[#FFFDF9] text-[#382E2B] border-2 border-[#382E2B] rounded-2xl shadow-[2px_2.5px_0px_#382E2B] active:scale-95 transition-transform text-sm font-extrabold cursor-pointer"
               type="button"
             >
-              <svg className="w-4 h-4 text-[#4A3E39]" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h10M4 18h16M18 9v6M15 12h6" />
-              </svg>
+              <Layers className="w-4 h-4 text-[#382E2B] shrink-0" />
               <span>Thêm hàng loạt</span>
             </button>
             <button
               aria-label="Cài đặt"
               onClick={() => navigateTo('settings')}
-              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-[#E5DFCC] border-2 border-[#4A3E39] text-[#4A3E39] rounded-2xl shadow-xs active:scale-90 transition-transform cursor-pointer"
+              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center bg-[#FAF5EB] border-2 border-[#382E2B] text-[#382E2B] rounded-2xl shadow-[1.5px_2px_0px_#382E2B] active:scale-90 transition-transform cursor-pointer"
               type="button"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -237,17 +264,19 @@ export function PageVocabulary() {
           </div>
         </section>
 
-        {/* SRS Overview Card */}
-        <section className="bg-[#FFFDF7] p-4 border-2 border-[#5B4C44] rounded-[24px] shadow-[3px_4px_0px_#443833] relative overflow-hidden mt-4">
-          <div className="flex items-center justify-between pb-3 border-b-2 border-dashed border-[#DECDBB]">
+        {/* SRS Overview Card (Unified FSRS-6 SrsLevelChart — zero bounce) */}
+        <section className="bg-[#FFFDF9] p-4 border-2 border-[#382E2B] rounded-[24px] shadow-[3px_4px_0px_#382E2B] relative overflow-hidden mt-4">
+          <div className="flex items-center justify-between pb-2.5 border-b border-dashed border-[#E3D7C5]">
             <div className="flex items-center gap-2">
-              <RotateCcw className="w-5 h-5 text-[#5b8fb9] shrink-0" />
-              <h2 className="text-xl font-bold text-[#4A3E39] tracking-wide">
-                Tổng quan SRS
+              <RotateCcw className="w-4 h-4 text-[#4D6B53] shrink-0" />
+              <h2 className="text-base font-extrabold text-[#382E2B] tracking-tight">
+                Phân bổ FSRS-6
               </h2>
               <button
+                type="button"
                 onClick={() => openModal('srsExplainer')}
-                className="w-5 h-5 rounded-full border border-[#7D716A] text-[#7D716A] text-xs flex items-center justify-center font-bold"
+                aria-label="Tìm hiểu thuật toán FSRS-6"
+                className="w-5 h-5 rounded-full border border-[#6E6259] text-[#6E6259] text-xs flex items-center justify-center font-bold cursor-pointer"
               >
                 ?
               </button>
@@ -255,55 +284,21 @@ export function PageVocabulary() {
             <button
               aria-label="Làm mới trạng thái"
               onClick={refresh}
-              className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-[#7D716A] hover:text-[#4A3E39] hover:bg-[#FAF5EB] transition-colors active:rotate-45 cursor-pointer"
+              className="w-10 h-10 flex items-center justify-center rounded-xl text-[#6E6259] hover:text-[#382E2B] hover:bg-[#FAF5EB] transition-colors cursor-pointer"
               type="button"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v5h5"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21v-5h-5"></path>
-              </svg>
+              <RotateCcw className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="flex items-center justify-between mt-3 mb-2">
-            <span className="text-xs font-bold tracking-wider text-[#7D716A] uppercase">
-              Phân bố từ vựng theo cấp độ
-            </span>
-            <span className="px-2.5 py-0.5 text-xs font-bold text-[#4A3E39] bg-[#EADDC7] rounded-full border border-dashed border-[#4A3E39]">
-              {total} từ
-            </span>
-          </div>
-
-          {/* 6 Crayon Bars */}
-          <div className="pt-3 pb-1 flex items-end justify-between px-1 text-center">
-            {[0, 1, 2, 3, 4, 5].map((lvl) => {
-              const count = memoryLevels[`lv${lvl}`] || 0;
-              const isSelected = levelFilter === lvl;
-              const theme = LEVEL_COLORS[lvl];
-
-              return (
-                <div
-                  key={lvl}
-                  onClick={() => handleLevelFilterChange(isSelected ? null : lvl)}
-                  className={`flex flex-col items-center flex-1 cursor-pointer transition-transform active:scale-95 ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
-                >
-                  <span className={`text-sm font-bold ${isSelected ? 'text-[#F07D43] animate-bounce' : 'text-[#4A3E39]'}`}>
-                    {count}
-                  </span>
-                  <div className="h-24 flex items-end justify-center w-full py-1">
-                    <div
-                      className={`w-5 rounded-full border-2 border-[#4A3E39] ${theme.fill} shadow-xs transition-all`}
-                      style={{ height: getBarHeight(count) }}
-                    />
-                  </div>
-                  <span className={`text-[11px] font-bold mt-1 ${isSelected ? 'text-[#F07D43] underline' : 'text-[#7D716A]'}`}>
-                    Lvl {lvl}
-                  </span>
-                </div>
-              );
-            })}
+          <div className="pt-3">
+            <SrsLevelChart
+              counts={memoryLevels}
+              selectedLevel={levelFilter === null ? 'all' : levelFilter}
+              onSelectLevel={(lvl) => handleLevelFilterChange(levelFilter === lvl ? null : lvl)}
+              compact
+              showHeader={false}
+            />
           </div>
         </section>
 
@@ -562,172 +557,166 @@ export function PageVocabulary() {
       </div>
 
       {/* ========================================================================= */}
-      {/* DESKTOP LAYOUT (hidden lg:flex) - 100% Match to desktop_vocabulary.html  */}
+      {/* DESKTOP LAYOUT (hidden lg:flex) — Compact Above-the-Fold Operate Workspace */}
       {/* ========================================================================= */}
       <div className="hidden lg:flex flex-col min-w-0 flex-1 lg:pl-[var(--sidebar-w,244px)]">
         {/* Content Container */}
-        <div className="p-6 xl:p-8 space-y-5 max-w-[1440px] w-full mx-auto">
-          {/* Action Row - 3 nút tác vụ (Quản lý chủ đề, Thêm hàng loạt, Thêm từ mới) */}
-          <div className="flex items-center justify-end gap-2.5">
-            <button
-              onClick={() => navigateTo('topics')}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <Folder className="w-4 h-4 text-[#37322f]" />
-              <span>Quản lý chủ đề</span>
-            </button>
-            <button
-              onClick={handleOpenBulkAdd}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-[#fff8ef] hover:bg-[#faebd7] text-[#37322f] text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:scale-95 transition-all cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <Layers className="w-4 h-4 text-[#37322f]" />
-              <span>Thêm hàng loạt</span>
-            </button>
-            <button
-              onClick={handleOpenAddWord}
-              className="flex items-center gap-1.5 px-4 py-2 bg-[#ea7349] hover:bg-[#d96237] text-white text-xs xl:text-sm font-black rounded-2xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer whitespace-nowrap shrink-0"
-            >
-              <Plus className="w-4 h-4 text-white" />
-              <span>Thêm từ mới</span>
-            </button>
-          </div>
-          {/* SRS Stats Banner */}
-          <section className="bg-[#fffcf7] rounded-3xl border-2 border-[#443c35] p-6 shadow-[3px_4px_0px_#443c35]">
-            <div className="flex flex-col lg:flex-row items-stretch justify-between gap-6">
-              {/* Left: SRS Level Distribution Chart */}
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b-2 border-dashed border-[#e6decb]">
-                  <div className="flex items-center gap-2.5">
-                    <RotateCcw className="w-6 h-6 text-[#5b8fb9] shrink-0" />
-                    <div>
-                      <h2 className="text-lg font-black text-[#37322f]">Tổng quan phân bổ trí nhớ SRS</h2>
-                      <p className="text-xs text-[#807669] font-bold">6 cấp độ trí nhớ từ ngắn hạn đến ghi nhớ vĩnh viễn</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={refresh}
-                      className="p-2 rounded-xl text-[#7c7264] hover:bg-[#faefe0] border border-transparent hover:border-[#443c35] transition-all cursor-pointer"
-                      title="Làm mới trạng thái"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                      </svg>
-                    </button>
-                    <button
-                      onClick={() => openModal('srsExplainer')}
-                      className="p-2 rounded-xl text-[#7c7264] hover:bg-[#faefe0] border border-transparent hover:border-[#443c35] transition-all cursor-pointer"
-                      title="Xem giải thích thuật toán"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="9"></circle>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 16v-4m0-4h.01"></path>
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 6 Crayon Bars Grid */}
-                <div className="grid grid-cols-6 gap-3 items-end pt-2 text-center select-none">
-                  {[0, 1, 2, 3, 4, 5].map((lvl) => {
-                    const count = memoryLevels[`lv${lvl}`] || 0;
-                    const isSelected = levelFilter === lvl;
-                    const theme = LEVEL_COLORS[lvl];
-
-                    return (
-                      <div
-                        key={lvl}
-                        onClick={() => handleLevelFilterChange(isSelected ? null : lvl)}
-                        className={`flex flex-col items-center gap-2 cursor-pointer transition-transform active:scale-95 ${isSelected ? 'scale-105' : 'hover:scale-102'}`}
-                        title={`Lọc từ vựng cấp độ ${lvl}`}
-                      >
-                        <span className={`text-base font-black ${isSelected ? 'text-[#ea7349] animate-bounce' : 'text-[#7a7267]'}`}>
-                          {count}
-                        </span>
-                        <div className={`w-full max-w-[54px] h-28 rounded-2xl border-2 p-1.5 flex flex-col justify-end ${
-                          isSelected ? 'bg-[#ffece4] border-[#443c35] shadow-[2px_2px_0px_#443c35]' : 'bg-[#f5ede2] border-dashed border-[#d8c8b4]'
-                        }`}>
-                          <div
-                            className={`w-full rounded-xl transition-all duration-500 ${theme.fill}`}
-                            style={{ height: getBarHeight(count) }}
-                          />
-                        </div>
-                        <div className="text-xs font-black text-[#443c35]">
-                          <span className={`block ${isSelected ? 'text-[#ea7349] font-black underline' : ''}`}>Lvl {lvl}</span>
-                          <span className="text-[10px] text-[#938777] font-semibold">{LEVEL_INTERVALS[lvl]}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Right: Mascot Reminder Box */}
-              <div className="lg:w-[380px] bg-[#faf3e8] border-2 border-[#443c35] rounded-2xl p-4 flex flex-col justify-between shadow-[2px_2px_0px_#443c35] relative overflow-hidden">
-                <div className="flex items-start gap-4">
-                  <img
-                    alt="Churbito Mascot"
-                    src="/mascot/mascot_cozy.png"
-                    className="w-24 h-24 object-contain shrink-0 mix-blend-multiply drop-shadow-xs -mt-1"
-                  />
-                  <div>
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#ffefe8] text-[#d6572a] border border-[#ea7349]/40 text-[10px] font-black uppercase tracking-wider mb-1">
-                      Bé Hổ Đồng Hành
-                    </span>
-                    <h3 className="font-black text-sm text-[#37322f] leading-snug">
-                      {srsStats.due > 0 ? `Có ${srsStats.due} từ đến hạn ôn tập!` : 'Hôm nay bạn học rất chăm chỉ!'}
-                    </h3>
-                    <p className="text-xs text-[#6e6354] mt-1 font-semibold leading-relaxed">
-                      Luyện tập 10 phút ngắt quãng mỗi ngày sẽ giúp từ vựng khắc sâu vào trí nhớ dài hạn vĩnh viễn.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-[#e2d5c3] flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#857766]">Ước tính: ~5 phút</span>
-                  <button
-                    onClick={handleStartReview}
-                    className="px-4 py-2 bg-[#6e9b6a] hover:bg-[#5f875b] text-white text-xs font-black rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
-                  >
-                    Ôn tập ngay
-                  </button>
-                </div>
-              </div>
+        <div className="p-5 xl:p-6 space-y-4 max-w-[1440px] w-full mx-auto">
+          {/* Unified Top Command Bar */}
+          <header className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <h1 className="text-xl xl:text-2xl font-black text-[#382E2B] tracking-tight">
+                Sổ từ cá nhân
+              </h1>
+              <span className="text-xs font-extrabold px-2.5 py-0.5 bg-[#EAF3EB] text-[#35523B] rounded-full border border-[#4D6B53]/50 tabular-nums">
+                FSRS-6 · {total.toLocaleString('vi-VN')} từ
+              </span>
+              <button
+                type="button"
+                onClick={() => setShowSrsStrip((prev) => !prev)}
+                className="text-xs font-bold text-[#6E6259] hover:text-[#382E2B] inline-flex items-center gap-1 px-2.5 py-1 rounded-xl hover:bg-[#F2E9DA] transition-colors cursor-pointer"
+              >
+                <span>{showSrsStrip ? 'Thu gọn biểu đồ' : 'Hiện biểu đồ FSRS-6'}</span>
+                {showSrsStrip ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              </button>
             </div>
-          </section>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => navigateTo('topics')}
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#FFFDF9] hover:bg-[#FAF5EB] text-[#382E2B] text-xs font-extrabold rounded-xl border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <Folder className="w-3.5 h-3.5" />
+                <span>Chủ đề</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenBulkAdd}
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#FFFDF9] hover:bg-[#FAF5EB] text-[#382E2B] text-xs font-extrabold rounded-xl border-2 border-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>Thêm hàng loạt</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleStartReview}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#4D6B53] hover:bg-[#3F5944] text-white text-xs font-extrabold rounded-xl border-2 border-[#382E2B] shadow-[2px_2.5px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer whitespace-nowrap tabular-nums"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Ôn tập ({srsStats.due || 0})</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleOpenAddWord}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-[#D95D39] hover:bg-[#BF4D2C] text-white text-xs font-extrabold rounded-xl border-2 border-[#382E2B] shadow-[2px_2.5px_0px_#382E2B] active:translate-y-0.5 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Thêm từ mới</span>
+              </button>
+            </div>
+          </header>
+
+          {/* Compact Collapsible FSRS-6 Strip (frees ~190px above the fold) */}
+          {showSrsStrip && (
+            <section className="bg-[#FFFDF9] rounded-2xl border-2 border-[#382E2B] p-4 shadow-[2px_3px_0px_#382E2B]">
+              <div className="flex flex-col xl:flex-row items-stretch justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <SrsLevelChart
+                    counts={memoryLevels}
+                    selectedLevel={levelFilter === null ? 'all' : levelFilter}
+                    onSelectLevel={(lvl) => handleLevelFilterChange(levelFilter === lvl ? null : lvl)}
+                    compact
+                    title="Phân bổ trí nhớ FSRS-6"
+                    subtitle="Nhấn cột bất kỳ để lọc nhanh theo cấp độ ghi nhớ"
+                    headerRight={
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={refresh}
+                          className="p-1.5 rounded-lg text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] transition-colors cursor-pointer"
+                          title="Làm mới dữ liệu"
+                          aria-label="Làm mới dữ liệu"
+                        >
+                          <RotateCcw className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openModal('srsExplainer')}
+                          className="w-6 h-6 rounded-full border border-[#6E6259] text-[#6E6259] hover:bg-[#FAF5EB] hover:text-[#382E2B] text-xs font-bold flex items-center justify-center cursor-pointer"
+                          title="Giải thích thuật toán FSRS-6"
+                          aria-label="Giải thích thuật toán FSRS-6"
+                        >
+                          ?
+                        </button>
+                      </div>
+                    }
+                  />
+                </div>
+
+                {/* Compact Mascot Review Card */}
+                <div className="xl:w-[320px] bg-[#FAF5EB] border border-[#E3D7C5] rounded-xl p-3.5 flex items-center gap-3 shrink-0">
+                  <img
+                    alt="Bé Hổ Churbito"
+                    src="/mascot/mascot_cozy.png"
+                    className="w-16 h-16 object-contain shrink-0 mix-blend-multiply"
+                  />
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <h3 className="font-extrabold text-sm text-[#382E2B] leading-snug tabular-nums">
+                      {srsStats.due > 0
+                        ? `Có ${srsStats.due} từ đến hạn ôn`
+                        : 'Bạn đã ôn hết từ hôm nay!'}
+                    </h3>
+                    <p className="text-[11px] text-[#6E6259] font-semibold leading-snug">
+                      Ôn ngắn 5 phút mỗi ngày giúp ổn định trí nhớ dài hạn.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleStartReview}
+                      className="px-3 py-1.5 bg-[#4D6B53] hover:bg-[#3F5944] text-white text-xs font-extrabold rounded-lg border border-[#382E2B] transition-colors cursor-pointer"
+                    >
+                      Bắt đầu ôn tập
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
 
           {/* Filter & Search Bar */}
-          <section className="space-y-3">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
+          <section className="space-y-2.5">
+            <div className="flex flex-col sm:flex-row items-center gap-2.5">
               {/* Search Box */}
               <div className="relative flex-1 w-full">
-                <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-                  <Search className="w-4 h-4 text-[#a69c8f]" />
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none">
+                  <Search className="w-4 h-4 text-[#6E6259]" />
                 </span>
                 <input
+                  ref={desktopSearchRef}
                   value={search}
                   onChange={(e) => handleSearchChange(e.target.value)}
-                  placeholder="Tìm kiếm từ vựng, phiên âm IPA, nghĩa tiếng Việt..."
-                  className="w-full pl-11 pr-10 py-3 bg-[#fffcf7] rounded-2xl border-2 border-[#443c35] text-sm font-bold text-[#37322f] placeholder-[#a69c8f] focus:outline-none focus:ring-2 focus:ring-[#ea7349] shadow-[2px_2px_0px_#443c35]"
+                  placeholder="Tìm từ vựng, IPA, nghĩa tiếng Việt... (nhấn / để tìm nhanh)"
+                  className="w-full pl-10 pr-10 py-2.5 bg-[#FFFDF9] rounded-xl border-2 border-[#382E2B] text-sm font-bold text-[#382E2B] placeholder-[#8E8176] focus:outline-none focus:ring-2 focus:ring-[#4D6B53] shadow-[1.5px_2px_0px_#382E2B]"
                   type="text"
                 />
                 {search && (
                   <button
+                    type="button"
                     onClick={clearSearch}
-                    className="absolute inset-y-0 right-0 flex items-center pr-3.5 text-xs text-[#7a7267] hover:text-[#37322f] font-bold"
+                    aria-label="Xóa từ khóa"
+                    className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#6E6259] hover:text-[#382E2B] cursor-pointer"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
 
               {/* Topic Filter Dropdown */}
-              <div className="relative w-full sm:w-auto min-w-[260px]">
+              <div className="relative w-full sm:w-auto min-w-[240px]">
                 <select
                   value={topicId}
                   onChange={(e) => handleTopicFilterChange(e.target.value)}
-                  className="w-full appearance-none bg-[#fffcf7] border-2 border-[#443c35] rounded-2xl px-4 py-3 pr-10 text-sm font-black text-[#37322f] shadow-[2px_2px_0px_#443c35] cursor-pointer focus:outline-none"
+                  className="w-full appearance-none bg-none bg-[#FFFDF9] border-2 border-[#382E2B] rounded-xl px-3.5 py-2.5 pr-9 text-sm font-extrabold text-[#382E2B] shadow-[1.5px_2px_0px_#382E2B] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#4D6B53]"
                 >
                   <option value="">Tất cả chủ đề ({total} từ)</option>
                   {topics.map((t) => (
@@ -736,63 +725,79 @@ export function PageVocabulary() {
                     </option>
                   ))}
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-3.5 pointer-events-none text-xs font-black">
-                  ▼
+                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-[#382E2B]">
+                  <ChevronDown className="w-4 h-4" />
                 </div>
               </div>
             </div>
 
             {/* Filter Badges Row */}
-            <div className="flex flex-wrap items-center gap-2 text-xs select-none">
+            <div className="flex flex-wrap items-center gap-1.5 text-xs select-none tabular-nums">
               <button
+                type="button"
                 onClick={() => handleLevelFilterChange(null)}
-                className={`px-4 py-2 rounded-xl font-black border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] cursor-pointer transition-all whitespace-nowrap ${
-                  levelFilter === null ? 'bg-[#443833] text-white' : 'bg-white text-[#37322f] hover:bg-[#fff9f0]'
+                className={`px-3 py-1.5 rounded-xl font-extrabold border-2 cursor-pointer transition-all whitespace-nowrap ${
+                  levelFilter === null
+                    ? 'border-[#382E2B] bg-[#382E2B] text-white shadow-[1.5px_2px_0px_#382E2B]'
+                    : 'border-[#E3D7C5] bg-[#FFFDF9] text-[#382E2B] hover:border-[#382E2B]'
                 }`}
               >
                 Tất cả ({total})
               </button>
               <button
+                type="button"
                 onClick={() => handleLevelFilterChange(levelFilter === -1 ? null : -1)}
-                className={`px-4 py-2 rounded-xl font-black border-2 border-[#ea7349] flex items-center gap-1.5 shadow-[2px_2px_0px_#443c35] cursor-pointer transition-all whitespace-nowrap ${
-                  levelFilter === -1 ? 'bg-[#ea7349] text-white' : 'bg-[#ffede5] text-[#d6572a] hover:bg-[#ffd9cb]'
+                className={`px-3 py-1.5 rounded-xl font-extrabold border-2 flex items-center gap-1.5 cursor-pointer transition-all whitespace-nowrap ${
+                  levelFilter === -1
+                    ? 'border-[#382E2B] bg-[#D95D39] text-white shadow-[1.5px_2px_0px_#382E2B]'
+                    : 'border-[#E5B49A] bg-[#FCECE7] text-[#B8452A] hover:border-[#D95D39]'
                 }`}
               >
                 <Clock className="w-3.5 h-3.5" />
                 <span>Cần ôn gấp</span>
-                <span className="bg-[#ea7349] text-white px-1.5 py-0.2 rounded-full text-[10px]">
+                <span className="bg-[#D95D39] text-white px-1.5 py-0.2 rounded-full text-[10px]">
                   {srsStats.due || 0}
                 </span>
               </button>
               {[0, 1, 2, 3, 4, 5].map((lvl) => (
                 <button
                   key={lvl}
+                  type="button"
                   onClick={() => handleLevelFilterChange(levelFilter === lvl ? null : lvl)}
-                  className={`px-3.5 py-2 rounded-xl font-black border-2 cursor-pointer transition-all whitespace-nowrap ${
+                  className={`px-3 py-1.5 rounded-xl font-extrabold border-2 cursor-pointer transition-all whitespace-nowrap ${
                     levelFilter === lvl
-                      ? 'border-[#443c35] bg-[#443c35] text-white shadow-[2px_2px_0px_#443c35]'
-                      : 'border-[#d9ccbe] bg-[#fffdf9] text-[#695f52] hover:bg-[#faefe2]'
+                      ? 'border-[#382E2B] bg-[#382E2B] text-white shadow-[1.5px_2px_0px_#382E2B]'
+                      : 'border-[#E3D7C5] bg-[#FFFDF9] text-[#5C524B] hover:border-[#382E2B]'
                   }`}
                 >
-                  Lvl {lvl} ({memoryLevels[`lv${lvl}`] || 0})
+                  L{lvl} ({memoryLevels[`lv${lvl}`] || 0})
                 </button>
               ))}
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="ml-auto px-2.5 py-1.5 rounded-xl text-xs font-extrabold text-[#D95D39] hover:bg-[#FCECE7] transition-colors cursor-pointer"
+                >
+                  Xóa bộ lọc
+                </button>
+              )}
             </div>
           </section>
 
           {/* Master-Detail 12-Column Grid */}
-          <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-12">
+          <section className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start pb-12">
             {/* Left Column: Words List (7 cols) */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <h3 className="text-base font-black text-[#443c35] flex items-center gap-2">
+            <div className="lg:col-span-7 space-y-3">
+              <div className="flex items-center justify-between px-1 gap-2">
+                <h2 className="text-sm font-black text-[#382E2B] flex items-center gap-2">
                   <span>Danh sách từ đang học</span>
-                  <span className="text-xs font-extrabold px-2.5 py-0.5 bg-[#eaf4e8] text-[#558451] rounded-full border border-[#6e9b6a]">
-                    SRS V2.4
+                  <span className="text-[11px] font-bold text-[#6E6259] hidden xl:inline">
+                    · ↑↓ chọn · P nghe
                   </span>
-                </h3>
-                <span className="text-xs text-[#8a7f71] font-bold">
-                  Hiển thị {words.length > 0 ? startIndex + 1 : 0} - {Math.min(total, startIndex + pageSize)} trong {total} từ
+                </h2>
+                <span className="text-xs text-[#6E6259] font-bold tabular-nums">
+                  {words.length > 0 ? startIndex + 1 : 0}–{Math.min(total, startIndex + pageSize)} / {total} từ
                 </span>
               </div>
 
@@ -829,18 +834,30 @@ export function PageVocabulary() {
                   </div>
                 </div>
               ) : words.length === 0 ? (
-                <div className="p-12 text-center bg-white rounded-3xl border-2 border-[#443c35] shadow-[3px_4px_0px_#443c35]">
-                  <BookOpen className="w-12 h-12 text-stone-300 mx-auto mb-3" />
-                  <h4 className="text-lg font-black text-[#37322f]">Không tìm thấy từ vựng nào</h4>
-                  <p className="text-xs text-[#766c5f] mt-1 mb-4">
+                <div className="p-10 text-center bg-[#FFFDF9] rounded-3xl border-2 border-[#382E2B] shadow-[3px_4px_0px_#382E2B]">
+                  <BookOpen className="w-10 h-10 text-[#A89C92] mx-auto mb-3" />
+                  <h4 className="text-lg font-black text-[#382E2B]">Không tìm thấy từ vựng nào</h4>
+                  <p className="text-xs text-[#6E6259] mt-1 mb-4">
                     Thử thay đổi từ khóa tìm kiếm hoặc lọc theo cấp độ khác nhé.
                   </p>
-                  <button
-                    onClick={handleOpenAddWord}
-                    className="px-5 py-2.5 bg-[#ea7349] text-white font-bold text-sm rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] cursor-pointer"
-                  >
-                    + Thêm từ mới ngay
-                  </button>
+                  <div className="flex items-center justify-center gap-2.5">
+                    {hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className="px-4 py-2.5 bg-[#FAF5EB] hover:bg-[#F0E6D6] text-[#382E2B] font-extrabold text-xs rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer"
+                      >
+                        Xóa bộ lọc
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={handleOpenAddWord}
+                      className="px-5 py-2.5 bg-[#D95D39] hover:bg-[#BF4D2C] text-white font-extrabold text-xs rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] cursor-pointer"
+                    >
+                      + Thêm từ mới ngay
+                    </button>
+                  </div>
                 </div>
               ) : (
                 words.map((w, index) => {
@@ -1090,8 +1107,9 @@ export function PageVocabulary() {
                       </div>
                     )}
 
-                    <div className="mt-6 pt-4 border-t border-[#e6decb] flex items-center justify-between">
+                    <div className="mt-6 pt-4 border-t border-[#E3D7C5] flex items-center justify-between">
                       <button
+                        type="button"
                         onClick={() => deleteWord(selectedWord.id, selectedWord.word)}
                         className="px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 border border-transparent hover:border-red-300 transition-all cursor-pointer flex items-center gap-1"
                       >
@@ -1099,10 +1117,11 @@ export function PageVocabulary() {
                         <span>Xóa từ này</span>
                       </button>
                       <button
-                        onClick={() => navigateTo('learning')}
-                        className="px-5 py-2.5 bg-[#ea7349] hover:bg-[#d96237] text-white font-bold text-xs rounded-xl border-2 border-[#443c35] shadow-[2px_2px_0px_#443c35] active:translate-y-0.5 cursor-pointer"
+                        type="button"
+                        onClick={handleStartReview}
+                        className="px-5 py-2.5 bg-[#D95D39] hover:bg-[#BF4D2C] text-white font-extrabold text-xs rounded-xl border-2 border-[#382E2B] shadow-[2px_2px_0px_#382E2B] active:translate-y-0.5 cursor-pointer"
                       >
-                        Luyện tập ngay
+                        Ôn tập FSRS-6 ngay
                       </button>
                     </div>
                   </div>
