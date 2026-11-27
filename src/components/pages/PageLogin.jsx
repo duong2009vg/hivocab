@@ -4,6 +4,7 @@ import {
   BookOpen,
   CheckCircle2,
   AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
@@ -170,6 +171,19 @@ export function PageLogin() {
   };
 
   const handleGoogleClick = async () => {
+    setErrorMessage('');
+    if (authMode === 'signup') {
+      if (!consentTerms) {
+        setErrorMessage('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ để tiếp tục.');
+        return;
+      }
+      if (!consentPrivacy) {
+        setErrorMessage(
+          'Vui lòng tích chọn đồng ý cho phép xử lý dữ liệu cá nhân theo Chính sách bảo mật (tuân thủ Nghị định 356/2025/NĐ-CP).'
+        );
+        return;
+      }
+    }
     try {
       await signInWithGoogle();
     } catch (err) {
@@ -475,24 +489,24 @@ export function PageLogin() {
                     </div>
                   )}
 
-                  {/* Tách riêng sự đồng ý theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 */}
+                  {/* Tách riêng 2 sự đồng ý bắt buộc theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 */}
                   {authMode === 'signup' && (
-                    <div className="space-y-2 pt-0.5">
-                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#5E5147] font-medium leading-snug select-none">
+                    <div className="space-y-2.5 p-3 rounded-xl bg-[#FAF5EB]/85 border border-[#E3D7C5]">
+                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
                         <input
                           type="checkbox"
                           id="consent-terms"
                           checked={consentTerms}
                           onChange={(e) => setConsentTerms(e.target.checked)}
-                          className="mt-0.5 rounded border-[#3D352E] text-[#DE5D53] focus:ring-[#DE5D53] w-4 h-4 cursor-pointer accent-[#DE5D53] shrink-0"
+                          className="auth-consent-checkbox mt-0.5"
                         />
                         <span>
-                          Tôi đồng ý với{' '}
+                          Tôi đã đọc và đồng ý với{' '}
                           <a
                             href="/terms.html"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#3D352E] font-bold underline hover:text-[#DE5D53]"
+                            className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
                           >
                             Điều khoản dịch vụ
                           </a>{' '}
@@ -500,21 +514,21 @@ export function PageLogin() {
                         </span>
                       </label>
 
-                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#5E5147] font-medium leading-snug select-none">
+                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
                         <input
                           type="checkbox"
                           id="consent-privacy"
                           checked={consentPrivacy}
                           onChange={(e) => setConsentPrivacy(e.target.checked)}
-                          className="mt-0.5 rounded border-[#3D352E] text-[#DE5D53] focus:ring-[#DE5D53] w-4 h-4 cursor-pointer accent-[#DE5D53] shrink-0"
+                          className="auth-consent-checkbox mt-0.5"
                         />
                         <span>
-                          Tôi đồng ý cho phép xử lý dữ liệu cá nhân theo{' '}
+                          Tôi đồng ý cho phép HiVocab thu thập và xử lý dữ liệu cá nhân theo{' '}
                           <a
                             href="/privacy.html"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-[#3D352E] font-bold underline hover:text-[#DE5D53]"
+                            className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
                           >
                             Chính sách bảo mật
                           </a>
@@ -623,17 +637,39 @@ export function PageLogin() {
               </div>
             </div>
 
-            {/* Footer links nhẹ cuối thẻ */}
-            <div className="mt-5 text-center space-y-1.5">
-              <p className="text-[11px] text-[#8A796F] font-medium">
-                <a href="/terms.html" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                  Điều khoản
-                </a>{' '}
-                ·{' '}
-                <a href="/privacy.html" target="_blank" rel="noopener noreferrer" className="hover:underline">
-                  Bảo mật
-                </a>
-              </p>
+            {/* Cam kết pháp lý & bảo mật dữ liệu cá nhân theo luật VN */}
+            <div className="mt-5 text-center px-2">
+              {authMode === 'login' ? (
+                <p className="text-[11px] text-[#8A796F] leading-relaxed font-medium">
+                  Đăng nhập đồng nghĩa với việc bạn đồng ý với{' '}
+                  <a
+                    href="/terms.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#302A24] font-bold underline hover:text-[#557A46]"
+                  >
+                    Điều khoản
+                  </a>{' '}
+                  &amp;{' '}
+                  <a
+                    href="/privacy.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#302A24] font-bold underline hover:text-[#557A46]"
+                  >
+                    Chính sách bảo mật
+                  </a>{' '}
+                  của HiVocab.
+                </p>
+              ) : (
+                <p className="inline-flex items-start justify-center gap-1.5 text-[10.5px] text-[#8A796F] leading-relaxed font-medium">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#557A46] shrink-0 mt-0.5" />
+                  <span>
+                    Dữ liệu cá nhân của bạn được mã hóa an toàn theo Luật Bảo vệ DLCN 91/2025/QH15
+                    &amp; Nghị định 356/2025/NĐ-CP.
+                  </span>
+                </p>
+              )}
             </div>
           </div>
 

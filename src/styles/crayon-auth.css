@@ -44,6 +44,19 @@
   color: #A69889;
 }
 
+/* Crisp square legal consent checkbox (overrides any global round checkbox rules) */
+.auth-consent-checkbox {
+  appearance: auto;
+  -webkit-appearance: checkbox;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px !important;
+  border: 2px solid #3D352E;
+  accent-color: #DE5D53;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 /* Crayon white button with HiVocab warm-gold offset drop shadow */
 .auth-crayon-btn-white {
   background-color: #FFFFFF;

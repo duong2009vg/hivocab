@@ -1,6 +1,6 @@
 // src/components/landing/LandingShowcaseSection.jsx
 // Interactive 5-pillar Crayon Showcase letting visitors preview HiVocab's newest modules.
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import CrayonPopReveal from './CrayonPopReveal.jsx';
 import {
   Video,
@@ -9,100 +9,473 @@ import {
   GraduationCap,
   Library,
   ArrowRight,
-  Play,
   Eye,
   EyeOff,
   Volume2,
   CheckCircle2,
   Sparkles,
   ChevronRight,
+  RotateCcw,
+  Keyboard,
+  Lightbulb,
 } from 'lucide-react';
 
+const SHADOWING_DEMO_WORDS = [
+  {
+    word: 'Wait,',
+    ipa: '/weɪt/',
+    level: 'good',
+    score: 96,
+    phones: [
+      { p: 'w', level: 'good' },
+      { p: 'eɪ', level: 'good' },
+      { p: 't', level: 'good' },
+    ],
+    heard: '/weɪt/',
+    tipVi: 'Phát âm chuẩn xác, âm đuôi /t/ bật gọn rõ ràng!',
+    tipEn: 'Crisp and accurate pronunciation with a clean /t/ release!',
+  },
+  {
+    word: 'did',
+    ipa: '/dɪd/',
+    level: 'good',
+    score: 94,
+    phones: [
+      { p: 'd', level: 'good' },
+      { p: 'ɪ', level: 'good' },
+      { p: 'd', level: 'good' },
+    ],
+    heard: '/dɪd/',
+    tipVi: 'Nhịp nối tự nhiên, nguyên âm ngắn /ɪ/ chính xác.',
+    tipEn: 'Natural rhythm and accurate short vowel /ɪ/.',
+  },
+  {
+    word: 'you',
+    ipa: '/juː/',
+    level: 'good',
+    score: 95,
+    phones: [
+      { p: 'j', level: 'good' },
+      { p: 'uː', level: 'good' },
+    ],
+    heard: '/juː/',
+    tipVi: 'Nối âm "did you" mượt mà như người bản xứ!',
+    tipEn: 'Smooth linking with "did you" — sounds very natural!',
+  },
+  {
+    word: 'actually',
+    ipa: '/ˈæktʃuəli/',
+    level: 'near',
+    score: 74,
+    phones: [
+      { p: 'æ', level: 'good' },
+      { p: 'k', level: 'good' },
+      { p: 'tʃ', level: 'near' },
+      { p: 'uə', level: 'good' },
+      { p: 'li', level: 'good' },
+    ],
+    heard: '/ˈækʃuəli/',
+    tipVi: 'Gần đúng rồi! Bật rõ hơn âm /tʃ/ (tròn môi nhẹ) ở giữa thay vì lướt sang /ʃ/.',
+    tipEn: 'Almost there! Add a sharper /tʃ/ burst in the middle instead of softening to /ʃ/.',
+  },
+  {
+    word: 'think',
+    ipa: '/θɪŋk/',
+    level: 'bad',
+    score: 52,
+    phones: [
+      { p: 'θ', level: 'bad' },
+      { p: 'ɪ', level: 'good' },
+      { p: 'ŋ', level: 'good' },
+      { p: 'k', level: 'good' },
+    ],
+    heard: '/tɪŋk/',
+    tipVi: 'Lỗi hay gặp: Bạn đọc /θ/ thành /t/. Hãy đặt nhẹ đầu lưỡi giữa 2 hàm răng và thổi hơi ra nhé!',
+    tipEn: 'Common slip: /θ/ sounded like /t/. Place your tongue tip gently between teeth and blow air.',
+  },
+  {
+    word: 'through',
+    ipa: '/θruː/',
+    level: 'near',
+    score: 76,
+    phones: [
+      { p: 'θ', level: 'near' },
+      { p: 'r', level: 'good' },
+      { p: 'uː', level: 'good' },
+    ],
+    heard: '/sruː/',
+    tipVi: 'Âm /θ/ hơi bị kéo thành /s/. Giữ đầu lưỡi chạm nhẹ răng cửa trên trước khi cuộn /r/.',
+    tipEn: 'Your /θ/ drifted slightly toward /s/. Touch your upper teeth lightly before curling into /r/.',
+  },
+  {
+    word: 'this',
+    ipa: '/ðɪs/',
+    level: 'good',
+    score: 91,
+    phones: [
+      { p: 'ð', level: 'good' },
+      { p: 'ɪ', level: 'good' },
+      { p: 's', level: 'good' },
+    ],
+    heard: '/ðɪs/',
+    tipVi: 'Âm rung /ð/ chuẩn, độ rõ rất tốt!',
+    tipEn: 'Great voiced /ð/ and clear ending /s/!',
+  },
+  {
+    word: 'carefully?',
+    ipa: '/ˈkerfəli/',
+    level: 'good',
+    score: 93,
+    phones: [
+      { p: 'k', level: 'good' },
+      { p: 'er', level: 'good' },
+      { p: 'f', level: 'good' },
+      { p: 'ə', level: 'good' },
+      { p: 'li', level: 'good' },
+    ],
+    heard: '/ˈkerfəli/',
+    tipVi: 'Lên giọng cuối câu hỏi tự nhiên, trọng âm đầu chuẩn xác!',
+    tipEn: 'Nice rising question intonation and clear primary stress!',
+  },
+];
+
+const DEMO_WORD_STYLES = {
+  good: {
+    base: 'bg-[#E9F6E6] text-[#28532F] border-[#4D6B53]',
+    selected: 'bg-[#DFF0DC] text-[#1F4425] border-[#3D352E] ring-2 ring-[#4D6B53]/40 shadow-[2px_2px_0px_#3D352E]',
+    chip: 'bg-white text-[#28532F] border-[#4D6B53]/45',
+    badge: 'bg-[#4D6B53] text-white',
+    symbol: '✓',
+    labelVi: 'Đọc đúng',
+    labelEn: 'Accurate',
+  },
+  near: {
+    base: 'bg-[#FFF3D6] text-[#8A4F0B] border-[#D9822B]',
+    selected: 'bg-[#FFEBBF] text-[#733F04] border-[#3D352E] ring-2 ring-[#D9822B]/40 shadow-[2px_2px_0px_#3D352E]',
+    chip: 'bg-[#FFE7B3] text-[#7A4407] border-[#D9822B]/70',
+    badge: 'bg-[#D9822B] text-white',
+    symbol: '≈',
+    labelVi: 'Gần đúng',
+    labelEn: 'Close',
+  },
+  bad: {
+    base: 'bg-[#FDECE8] text-[#A8321F] border-[#D96B43]',
+    selected: 'bg-[#FADAD2] text-[#8F2413] border-[#3D352E] ring-2 ring-[#D96B43]/40 shadow-[2px_2px_0px_#3D352E]',
+    chip: 'bg-[#FAD4CB] text-[#8F2413] border-[#D96B43]/80 font-black',
+    badge: 'bg-[#D96B43] text-white',
+    symbol: '!',
+    labelVi: 'Cần sửa',
+    labelEn: 'Needs fix',
+  },
+};
+
 function ShowcasePreviewStudioVideo({ isEn }) {
+  const [practiceTab, setPracticeTab] = useState('shadowing'); // 'shadowing' | 'dictation'
+  const [phase, setPhase] = useState('scored'); // 'scored' | 'recording' | 'analyzing'
+  const [selectedWordIdx, setSelectedWordIdx] = useState(4); // default to "think" (/θɪŋk/) to highlight coaching
+  const [speakingSample, setSpeakingSample] = useState(false);
+  const timerRef = useRef([]);
+
+  useEffect(() => {
+    return () => {
+      timerRef.current.forEach((id) => clearTimeout(id));
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+        } catch (_) {}
+      }
+    };
+  }, []);
+
+  const sentenceEn = 'Wait, did you actually think through this carefully?';
+  const sentenceVi = 'Khoan đã, cậu đã thực sự suy nghĩ thấu đáo chuyện này chưa?';
+
+  const handlePlaySample = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(sentenceEn);
+      utter.lang = 'en-US';
+      utter.rate = 0.92;
+      utter.onstart = () => setSpeakingSample(true);
+      utter.onend = () => setSpeakingSample(false);
+      utter.onerror = () => setSpeakingSample(false);
+      window.speechSynthesis.speak(utter);
+    } catch (_) {
+      setSpeakingSample(false);
+    }
+  };
+
+  const runSimulatedGrading = () => {
+    timerRef.current.forEach((id) => clearTimeout(id));
+    timerRef.current = [];
+    setPracticeTab('shadowing');
+    setPhase('recording');
+    const t1 = setTimeout(() => setPhase('analyzing'), 1100);
+    const t2 = setTimeout(() => {
+      setPhase('scored');
+      setSelectedWordIdx(4);
+    }, 1850);
+    timerRef.current = [t1, t2];
+  };
+
+  const activeWord = SHADOWING_DEMO_WORDS[selectedWordIdx] || SHADOWING_DEMO_WORDS[4];
+  const activeStyle = DEMO_WORD_STYLES[activeWord.level];
+
   return (
     <div className="space-y-3">
-      {/* Mini YouTube Paste Bar */}
-      <div className="flex items-center gap-2 bg-[#FAF5EB] border-2 border-[#3D352E] rounded-2xl p-2 shadow-[2px_2px_0px_#3D352E]">
-        <div className="w-8 h-8 rounded-xl bg-[#FEEFEA] border border-[#3D352E] flex items-center justify-center shrink-0">
-          <Video className="w-4 h-4 text-[#DE5D53]" />
-        </div>
-        <div className="flex-1 min-w-0 text-[11px] font-bold text-[#6E5D53] truncate">
-          https://youtube.com/watch?v=ted-english-learning...
-        </div>
-        <span className="px-2.5 py-1 rounded-xl bg-[#DE5D53] text-white text-[10px] font-black border border-[#3D352E] shrink-0">
-          {isEn ? '+ Add Video' : '+ Thêm Video'}
-        </span>
+      {/* Top Mode Toggle matching real ShadowingTab.jsx */}
+      <div className="grid grid-cols-2 gap-1.5">
+        <button
+          type="button"
+          onClick={() => setPracticeTab('shadowing')}
+          className={`inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-black border-2 border-[#3D352E] cursor-pointer transition-all ${
+            practiceTab === 'shadowing'
+              ? 'bg-[#4D6B53] text-white shadow-[2px_2px_0px_#3D352E]'
+              : 'bg-white text-[#554D42] hover:bg-[#FFF9EE]'
+          }`}
+        >
+          <Mic className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">{isEn ? 'Shadowing & AI Score' : 'Shadowing & Chấm bài'}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setPracticeTab('dictation')}
+          className={`inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-black border-2 border-[#3D352E] cursor-pointer transition-all ${
+            practiceTab === 'dictation'
+              ? 'bg-[#4D6B53] text-white shadow-[2px_2px_0px_#3D352E]'
+              : 'bg-white text-[#554D42] hover:bg-[#FFF9EE]'
+          }`}
+        >
+          <Keyboard className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">{isEn ? 'Cue Dictation Check' : 'Chép chính tả câu'}</span>
+        </button>
       </div>
 
-      {/* Mini Channel-Grouped Horizontal Row */}
-      <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 shadow-[2.5px_3px_0px_#3D352E] space-y-2.5">
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 min-w-0">
+      {/* Active Video Cue Prompt Strip */}
+      <div className="bg-white border-2 border-[#3D352E] rounded-2xl p-3 shadow-[2px_2.5px_0px_#3D352E] space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5">
             <span className="px-2 py-0.5 rounded-lg bg-[#F4E3B4] border border-[#3D352E] text-[10px] font-black text-[#3D352E]">
-              {isEn ? 'Friends · 3 videos' : 'Friends · 3 video'}
+              {isEn ? 'Cue 12 / 28 · TED-Ed' : 'Câu 12 / 28 · TED-Ed'}
             </span>
-            <span className="text-[10px] font-bold text-[#8A796F] truncate">
-              {isEn ? 'Grouped cleanly by channel' : 'Chia hàng ngang theo từng kênh'}
-            </span>
+            <span className="text-[10px] font-bold text-[#8A796F]">00:42 – 00:46</span>
           </div>
-          <div className="flex items-center gap-1 shrink-0">
-            <span className="w-5 h-5 rounded-lg bg-[#FAF5EB] border border-[#3D352E] flex items-center justify-center text-[10px] font-black">
-              ‹
-            </span>
-            <span className="w-5 h-5 rounded-lg bg-[#F4E3B4] border border-[#3D352E] flex items-center justify-center text-[10px] font-black">
-              ›
-            </span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-          {[
-            { title: 'The One With The Coffee', level: 'B1', cues: '24/32' },
-            { title: 'TED-Ed: Memory Secrets', level: 'B2', cues: '18/28' },
-            { title: 'Suits: Sharp Negotiation', level: 'C1', cues: '12/26' },
-          ].map((vid, idx) => (
-            <div
-              key={idx}
-              className={`border-2 border-[#3D352E] rounded-xl overflow-hidden bg-[#FFFDF9] ${
-                idx === 2 ? 'hidden sm:block' : ''
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handlePlaySample}
+              className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-black border border-[#3D352E] cursor-pointer transition-all ${
+                speakingSample ? 'bg-[#EEF5EC] text-[#355A3B]' : 'bg-[#FAF5EB] hover:bg-[#F4E3B4] text-[#3D352E]'
               }`}
             >
-              <div className="aspect-video bg-[#2D2422] relative flex items-center justify-center">
-                <div className="w-7 h-7 rounded-full bg-[#DE5D53] border border-white flex items-center justify-center text-white">
-                  <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
-                </div>
-                <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-[#F4E3B4] border border-[#3D352E] text-[9px] font-black">
-                  {vid.level}
-                </span>
-                <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold">
-                  {vid.cues}
-                </span>
-              </div>
-              <div className="p-2">
-                <p className="text-[11px] font-black text-[#3D352E] truncate">{vid.title}</p>
-                <p className="text-[10px] font-bold text-[#557A46]">
-                  {isEn ? 'EN + VI Subtitles' : 'Phụ đề Anh - Việt'}
-                </p>
-              </div>
-            </div>
-          ))}
+              <Volume2 className={`w-3.5 h-3.5 ${speakingSample ? 'animate-pulse text-[#4D6B53]' : ''}`} />
+              <span>{speakingSample ? (isEn ? 'Playing…' : 'Đang đọc…') : isEn ? 'Listen' : 'Nghe mẫu'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={runSimulatedGrading}
+              disabled={phase !== 'scored'}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#D96B43] hover:bg-[#C85A3F] text-white text-[11px] font-black border border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 cursor-pointer disabled:opacity-60"
+            >
+              <RotateCcw className={`w-3 h-3 ${phase !== 'scored' ? 'animate-spin' : ''}`} />
+              <span>{isEn ? 'Simulate Score' : 'Chạy thử chấm bài'}</span>
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-xs sm:text-sm font-black text-[#3D352E] leading-snug">“{sentenceEn}”</p>
+          <p className="text-[11px] font-bold text-[#557A46] mt-0.5">{sentenceVi}</p>
         </div>
       </div>
 
-      {/* Synced Subtitle Sample */}
-      <div className="bg-[#EAF3E7] border-2 border-[#3D352E] rounded-2xl p-3 flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-black text-[#3D352E] truncate">
-            "Wait, did you actually memorize all of them?"
-          </p>
-          <p className="text-[11px] font-bold text-[#557A46] truncate">
-            {isEn ? 'Auto-synced cue • Instant shadow scoring' : 'Khoan đã, cậu học thuộc hết đống đó thật sao?'}
+      {practiceTab === 'dictation' ? (
+        /* Interactive Dictation Graded Check Preview */
+        <div className="crayon-tab-pop bg-white border-2 border-[#3D352E] rounded-2xl p-3.5 shadow-[2.5px_3px_0px_#3D352E] space-y-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#8A796F]">
+              {isEn ? 'Word-by-Word Dictation Diff' : 'So khớp từng từ bạn gõ'}
+            </span>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#EAF3E7] text-[#355A3B] border border-[#4D6B53] text-xs font-black">
+              {isEn ? '7 / 8 words (88%)' : 'Khớp 7 / 8 từ (88%)'}
+            </span>
+          </div>
+
+          <div className="bg-[#FAF5EB] border border-[#E3D7C5] rounded-xl p-2.5 flex flex-wrap gap-1.5 text-xs font-black">
+            {['Wait,', 'did', 'you', 'actually', 'think', 'through', 'this', 'carefully?'].map((w, idx) => {
+              const missed = idx === 5;
+              return (
+                <span
+                  key={w}
+                  className={`px-2 py-0.5 rounded-lg border ${
+                    missed
+                      ? 'bg-[#FDECE8] text-[#A8321F] border-[#D96B43] line-through decoration-2'
+                      : 'bg-[#E9F6E6] text-[#28532F] border-[#4D6B53]/50'
+                  }`}
+                >
+                  {missed ? 'threw → through' : `${w} ✓`}
+                </span>
+              );
+            })}
+          </div>
+
+          <p className="text-[11px] font-bold text-[#6E5D53] bg-[#FFF9EE] border border-[#DECDBB] rounded-xl px-3 py-2">
+            {isEn
+              ? 'Tip: "through" /θruː/ and "threw" sound identical — context ("think through") locks in the right spelling!'
+              : 'Gợi ý: "through" (thấu đáo) và "threw" (ném) đọc giống hệt nhau — cụm "think through" giúp bạn bắt đúng chính tả!'}
           </p>
         </div>
-        <span className="px-2.5 py-1 rounded-xl bg-white border-2 border-[#3D352E] text-[11px] font-black text-[#557A46] shrink-0">
-          {isEn ? '94% Match' : 'Khớp 94%'}
-        </span>
-      </div>
+      ) : phase !== 'scored' ? (
+        /* Live Simulated Recording -> AI Phoneme Analyzing State */
+        <div className="crayon-tab-pop bg-white border-2 border-[#3D352E] rounded-2xl p-5 shadow-[2.5px_3px_0px_#3D352E] flex flex-col items-center justify-center text-center gap-3 min-h-[218px]">
+          <div
+            className={`w-12 h-12 rounded-2xl border-2 border-[#3D352E] shadow-[2px_2.5px_0px_#3D352E] flex items-center justify-center ${
+              phase === 'recording' ? 'bg-[#DE5D53] text-white animate-pulse' : 'bg-[#4D6B53] text-white'
+            }`}
+          >
+            {phase === 'recording' ? <Mic className="w-6 h-6" /> : <Sparkles className="w-6 h-6 animate-spin" />}
+          </div>
+          <div className="space-y-1">
+            <p className="crayon-heading text-sm sm:text-base font-extrabold text-[#3D352E]">
+              {phase === 'recording'
+                ? isEn
+                  ? 'Listening to your voice… (0:03)'
+                  : 'Đang thu âm giọng đọc của bạn… (0:03)'
+                : isEn
+                  ? 'AI analyzing 44 IPA phonemes & intonation…'
+                  : 'AI đang đối chiếu từng âm vị IPA & ngữ điệu…'}
+            </p>
+            <p className="text-[11px] font-bold text-[#786F66]">
+              {phase === 'recording'
+                ? '“Wait, did you actually tink srough this carefully?”'
+                : isEn
+                  ? 'Checking word accuracy, phoneme match, and pitch contour'
+                  : 'Đang chấm điểm phát âm, lỗi khẩu hình và đường cong ngữ điệu'}
+            </p>
+          </div>
+          {/* Animated equalizer bars */}
+          <div className="flex items-end justify-center gap-1.5 h-7" aria-hidden="true">
+            {[14, 24, 18, 28, 20, 26, 15, 22, 16].map((h, i) => (
+              <span
+                key={i}
+                className={`w-1.5 rounded-full transition-all duration-300 ${
+                  phase === 'recording' ? 'bg-[#DE5D53] animate-bounce' : 'bg-[#4D6B53] animate-pulse'
+                }`}
+                style={{ height: `${h}px`, animationDelay: `${i * 75}ms` }}
+              />
+            ))}
+          </div>
+        </div>
+      ) : (
+        /* Real Shadowing Pronunciation Grading Card Simulation */
+        <div className="crayon-tab-pop bg-white border-2 border-[#3D352E] rounded-2xl p-3.5 shadow-[2.5px_3px_0px_#3D352E] space-y-3">
+          {/* 3 Sub-score Metric Cards + Dual Pitch Contour */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-xl border border-[#4D6B53]/50 bg-[#EEF5EC] text-[#28532F] px-2.5 py-1.5">
+              <span className="block text-[9.5px] font-extrabold uppercase tracking-wide opacity-80">
+                {isEn ? 'Overall' : 'Tổng điểm AI'}
+              </span>
+              <span className="block text-base sm:text-lg font-black leading-tight">86 / 100</span>
+            </div>
+            <div className="rounded-xl border border-[#D9822B]/50 bg-[#FFF5DC] text-[#8A4F0B] px-2.5 py-1.5">
+              <span className="block text-[9.5px] font-extrabold uppercase tracking-wide opacity-80">
+                {isEn ? 'Word & IPA' : 'Chuẩn âm IPA'}
+              </span>
+              <span className="block text-base sm:text-lg font-black leading-tight">5✓ · 2≈ · 1!</span>
+            </div>
+            <div className="rounded-xl border border-[#4D6B53]/50 bg-[#FAF5EB] text-[#3D352E] px-2.5 py-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[9.5px] font-extrabold uppercase tracking-wide text-[#786F66]">
+                  {isEn ? 'Pitch' : 'Ngữ điệu'}
+                </span>
+                <span className="text-[11px] font-black text-[#4D6B53]">91%</span>
+              </div>
+              <svg viewBox="0 0 100 22" className="w-full h-5 mt-0.5 overflow-visible" aria-hidden="true">
+                <polyline
+                  fill="none"
+                  stroke="#4D6B53"
+                  strokeWidth="2"
+                  strokeDasharray="3 2"
+                  points="2,15 18,10 36,14 54,6 74,11 98,4"
+                />
+                <polyline
+                  fill="none"
+                  stroke="#D96B43"
+                  strokeWidth="2.2"
+                  points="2,16 18,11 36,12 54,9 74,12 98,5"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Clickable 3-State Word-by-Word Chips */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] font-extrabold text-[#8A796F]">
+              <span>
+                {isEn
+                  ? 'Tap any word below to inspect phoneme errors:'
+                  : 'Bấm vào từng từ bên dưới để xem AI chỉ lỗi phát âm:'}
+              </span>
+              <span className="hidden sm:inline text-[#4D6B53]">
+                {isEn ? '✓ Good · ≈ Close · ! Fix' : '✓ Đúng · ≈ Gần · ! Sửa'}
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+              {SHADOWING_DEMO_WORDS.map((item, idx) => {
+                const st = DEMO_WORD_STYLES[item.level];
+                const isSelected = idx === selectedWordIdx;
+                return (
+                  <button
+                    key={item.word}
+                    type="button"
+                    onClick={() => setSelectedWordIdx(idx)}
+                    className={`px-2.5 py-1 rounded-xl border-2 text-xs font-black transition-all cursor-pointer inline-flex items-center gap-1 ${
+                      isSelected ? st.selected : st.base
+                    }`}
+                  >
+                    <span>{item.word}</span>
+                    <span className="text-[10px] opacity-85">{st.symbol}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Detailed Phoneme & Coaching Inspector for Selected Word */}
+          <div
+            key={activeWord.word}
+            className="crayon-tab-pop bg-[#FFF9EE] border-2 border-[#3D352E]/25 rounded-xl p-2.5 space-y-2"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black text-[#3D352E]">
+                  {activeWord.word} <span className="font-mono text-[#786F66] font-bold">{activeWord.ipa}</span>
+                </span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${activeStyle.badge}`}>
+                  {isEn ? activeStyle.labelEn : activeStyle.labelVi} · {activeWord.score}%
+                </span>
+              </div>
+              <div className="flex items-center gap-1">
+                {activeWord.phones.map((ph, i) => (
+                  <span
+                    key={`${ph.p}-${i}`}
+                    className={`px-1.5 py-0.5 rounded-md border text-[10.5px] font-mono ${DEMO_WORD_STYLES[ph.level].chip}`}
+                  >
+                    /{ph.p}/
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-[11px] font-bold text-[#5E5147] leading-snug flex items-start gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5 text-[#D9822B] shrink-0 mt-0.5" />
+              <span>{isEn ? activeWord.tipEn : activeWord.tipVi}</span>
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -337,29 +710,29 @@ export function LandingShowcaseSection({ isEn, navigateTo }) {
   const pillars = [
     {
       id: 'studio-video',
-      tabLabel: isEn ? 'Shadowing Video' : 'Shadowing Video',
+      tabLabel: isEn ? 'Shadowing & Dictation' : 'Shadowing & Dictation',
       badge: isEn ? 'NEW' : 'MỚI',
       icon: Video,
       accentBg: 'bg-[#FEEFEA]',
       accentText: 'text-[#DE5D53]',
       title: isEn
-        ? 'YouTube Shadowing Studio Organized by Channel'
-        : 'Phòng Studio Shadowing Video Chia Theo Kênh & Dán Link YouTube',
+        ? 'YouTube Shadowing & Real-Time AI Pronunciation Scoring'
+        : 'Studio Shadowing & Chấm Phát Âm AI Từng Từ, Từng Âm Vị',
       desc: isEn
-        ? 'Practice speaking naturally alongside real YouTube clips neatly grouped into channel rows. Paste any YouTube link with English captions to auto-extract synced EN-VI cues!'
-        : 'Các video luyện nói được phân loại gọn gàng thành từng hàng lướt ngang theo kênh (Friends, TED-Ed, Suits...). Bạn còn có thể dán link YouTube cá nhân để tự động tách phụ đề song ngữ Anh - Việt.',
+        ? 'Practice shadowing alongside real YouTube clips or paste any link. AI grades every word in green/amber/red, plots your intonation curve against the native speaker, and tells you exactly how to fix each IPA sound.'
+        : 'Luyện nhại giọng (Shadowing) & chép chính tả ngay theo từng câu video YouTube. AI chấm điểm trực tiếp từng từ xanh/vàng/đỏ, so sánh đường cong ngữ điệu với giọng mẫu và chỉ rõ cách sửa từng âm IPA.',
       bullets: isEn
         ? [
-            'Horizontal channel rows with smooth left/right navigation',
-            'Auto-import personal YouTube videos with synced bilingual cues',
-            'Practice Shadowing or switch to in-video Dictation anytime',
+            'Click any graded word on the right to inspect its IPA breakdown & tips',
+            'Dual pitch-contour chart comparing your intonation with the native clip',
+            'Switch smoothly between Shadowing AI scoring & cue-by-cue Dictation',
           ]
         : [
-            'Phân loại theo kênh dạng hàng lướt ngang có thanh điều hướng',
-            'Dán link YouTube bất kỳ để tự động tách câu & dịch tiếng Việt',
-            'Vừa luyện Shadowing theo câu vừa gõ Dictation ngay dưới video',
+            'Bấm thử từng từ bên phải để xem AI chỉ rõ lỗi âm vị /θ/, /tʃ/ & mẹo sửa miệng',
+            'Biểu đồ đường cong ngữ điệu so sánh trực tiếp giọng bạn với giọng mẫu',
+            'Chuyển mượt giữa Shadowing chấm bài AI và Chép chính tả từng câu',
           ],
-      cta: isEn ? 'Try Video Studio' : 'Mở Studio Video ngay',
+      cta: isEn ? 'Try Shadowing Studio' : 'Mở Studio Shadowing ngay',
       route: 'studio',
     },
     {
