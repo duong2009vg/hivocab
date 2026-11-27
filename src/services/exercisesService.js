@@ -3,6 +3,8 @@
 import { supabase } from '../lib/supabaseClient.js';
 
 const SCORES_KEY = 'hivocab_exercise_scores_v1';
+const EXERCISES_LIST_CACHE_KEY = 'hivocab_chuyen_de_exercises_v1';
+const EXERCISES_LIST_TTL_MS = 5 * 60 * 1000;
 const EXERCISES_MEM = {
   list: null,
   questions: new Map(),
@@ -52,16 +54,43 @@ export async function getExercises() {
     return EXERCISES_MEM.list;
   }
 
-  // 1. Thử truy vấn từ Supabase
+  if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+    try {
+      const raw = sessionStorage.getItem(EXERCISES_LIST_CACHE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (
+          parsed &&
+          Array.isArray(parsed.data) &&
+          parsed.data.length > 0 &&
+          Date.now() - Number(parsed.ts || 0) < EXERCISES_LIST_TTL_MS
+        ) {
+          EXERCISES_MEM.list = parsed.data;
+          return parsed.data;
+        }
+      }
+    } catch (_) {}
+  }
+
+  const persistListCache = (list) => {
+    EXERCISES_MEM.list = list;
+    if (typeof window !== 'undefined' && typeof sessionStorage !== 'undefined') {
+      try {
+        sessionStorage.setItem(EXERCISES_LIST_CACHE_KEY, JSON.stringify({ data: list, ts: Date.now() }));
+      } catch (_) {}
+    }
+  };
+
+  // 1. Truy vấn danh sách 29 chuyên đề THPT từ Supabase (dùng idx_exercises_category_id)
   try {
     const { data, error } = await supabase
       .from('exercises')
       .select('id, title, description, category, topic_group, icon, created_at')
-      .ilike('id', 'c0000000-%')
+      .eq('category', 'thpt')
       .order('id');
 
     if (!error && Array.isArray(data) && data.length > 0) {
-      EXERCISES_MEM.list = data;
+      persistListCache(data);
       return data;
     }
   } catch (_) {}
@@ -73,7 +102,7 @@ export async function getExercises() {
     if (res.ok) {
       const fallbackData = await res.json();
       if (Array.isArray(fallbackData) && fallbackData.length > 0) {
-        EXERCISES_MEM.list = fallbackData;
+        persistListCache(fallbackData);
         return fallbackData;
       }
     }
@@ -147,11 +176,11 @@ export async function getExerciseQuestions(exerciseId) {
     return EXERCISES_MEM.questions.get(exerciseId);
   }
 
-  // 1. Thử nạp từ Supabase
+  // 1. Thử nạp từ Supabase với projection cụ thể (idx_exercise_questions_exercise_order)
   try {
     const { data, error } = await supabase
       .from('exercise_questions')
-      .select('*')
+      .select('id, exercise_id, question_type, prompt, options, options_map, answer, hint, order_index, passage, is_arrangement, arrangement_sentences')
       .eq('exercise_id', exerciseId)
       .order('order_index');
 

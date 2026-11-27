@@ -304,6 +304,13 @@ const fsrsResults = await runFSRSAlgorithmTests();
 totalTests += fsrsResults.totalTests;
 passedTests += fsrsResults.passedTests;
 
+// 9.6 Battle Arena PvP & Mini-Game Engine Test Suite
+console.log('\n9.6 Running Battle Arena & Mini-Game Engine Test Suite:');
+const { runBattleArenaTests } = await import('../tests/battle-arena.test.js');
+const battleResults = await runBattleArenaTests();
+totalTests += battleResults.totalTests;
+passedTests += battleResults.passedTests;
+
 // Summary
 console.log('\n=======================================================');
 console.log(`📊 INTEGRATION TEST RESULTS: ${passedTests}/${totalTests} PASSED`);

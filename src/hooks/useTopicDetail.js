@@ -1,8 +1,7 @@
 // src/hooks/useTopicDetail.js
 // Reactive Hook for Topic Detail & Lessons/Passages Management in pure React
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getCamHierarchy, getLessonsInTopic, isUserPro as checkPro, checkProAccess, getCachedTopics } from '../services/db.js';
-import { supabase } from '../lib/supabaseClient.js';
+import { getTopicDetailBundle, clearTopicDetailCache, checkProAccess, getCachedTopics } from '../services/db.js';
 import { useRoute } from '../router/RouteContext.jsx';
 
 export function useTopicDetail() {
@@ -53,7 +52,7 @@ export function useTopicDetail() {
     }
   }, [topicId]);
 
-  const loadTopicData = useCallback(async () => {
+  const loadTopicData = useCallback(async (force = false) => {
     if (!topicId) {
       setLoading(false);
       return;
@@ -63,57 +62,43 @@ export function useTopicDetail() {
     }
     setError(null);
 
-    // Sync topic category & name from cache or DB if available
     try {
-      let resolvedCat = typeof window !== 'undefined' ? window._currentCategory : null;
-      let resolvedName = typeof window !== 'undefined' ? window._currentTopicName : null;
       const cachedTopic = getCachedTopics()?.find((t) => t.id === topicId);
       if (cachedTopic) {
-        if (cachedTopic.category) resolvedCat = cachedTopic.category;
-        if (cachedTopic.name) resolvedName = cachedTopic.name;
-      } else {
-        const { data: tRow } = await supabase.from('topics').select('name, category').eq('id', topicId).maybeSingle();
-        if (tRow) {
-          if (tRow.category) resolvedCat = tRow.category;
-          if (tRow.name) resolvedName = tRow.name;
+        if (cachedTopic.category) {
+          setCategory(cachedTopic.category);
+          if (typeof window !== 'undefined') window._currentCategory = cachedTopic.category;
+        }
+        if (cachedTopic.name) {
+          setTopicName(cachedTopic.name);
+          if (typeof window !== 'undefined') window._currentTopicName = cachedTopic.name;
         }
       }
-      if (resolvedCat) {
-        setCategory(resolvedCat);
-        if (typeof window !== 'undefined') window._currentCategory = resolvedCat;
-      }
-      if (resolvedName && resolvedName !== '—') {
-        setTopicName(resolvedName);
-        if (typeof window !== 'undefined') window._currentTopicName = resolvedName;
-      }
-    } catch (_) {}
 
-    try {
-      const [proStatus, hier] = await Promise.all([
-        checkPro().catch(() => false),
-        getCamHierarchy(topicId),
-      ]);
+      const bundle = await getTopicDetailBundle(topicId, { force });
+      if (bundle?.topic) {
+        if (bundle.topic.category) {
+          setCategory(bundle.topic.category);
+          if (typeof window !== 'undefined') window._currentCategory = bundle.topic.category;
+        }
+        if (bundle.topic.name) {
+          setTopicName(bundle.topic.name);
+          if (typeof window !== 'undefined') window._currentTopicName = bundle.topic.name;
+        }
+      }
+
+      const proStatus = Boolean(bundle?.isProUser);
       setIsUserPro(proStatus);
       if (typeof window !== 'undefined') {
         window._isUserPro = proStatus;
       }
 
-      // TRƯỜNG HỢP 1: Chế độ Cambridge IELTS (Có phân cấp Test -> Passage)
-      if (hier && hier.tests && hier.tests.length > 0) {
-        setCamHierarchy(hier);
+      if (bundle?.isCambridge && bundle?.camHierarchy?.tests?.length > 0) {
+        setCamHierarchy(bundle.camHierarchy);
         setLessons([]);
-        if (typeof window !== 'undefined') {
-          window._camHierarchy = hier;
-        }
       } else {
-        // TRƯỜNG HỢP 2: Chủ đề Non-CAM (Oxford, Destination, IELTS...)
         setCamHierarchy(null);
-        const nonCamLessons = await getLessonsInTopic(topicId);
-        setLessons(nonCamLessons || []);
-        if (typeof window !== 'undefined') {
-          window._lessonsCache = window._lessonsCache || {};
-          window._lessonsCache[topicId] = nonCamLessons;
-        }
+        setLessons(Array.isArray(bundle?.lessons) ? bundle.lessons : []);
       }
     } catch (err) {
       console.error('[useTopicDetail] Error loading topic details:', err);
@@ -128,18 +113,14 @@ export function useTopicDetail() {
 
     const handleRefresh = (e) => {
       if (e?.detail?.topicId && String(e.detail.topicId) !== String(topicId)) return;
-      if (typeof window !== 'undefined' && window._lessonsCache && topicId) {
-        delete window._lessonsCache[topicId];
-      }
-      loadTopicData();
+      clearTopicDetailCache(topicId);
+      loadTopicData(true);
     };
 
     // Invalidate cache & re-fetch progress when user completes a study session or word review
     const handleProgressUpdate = () => {
-      if (typeof window !== 'undefined' && window._lessonsCache && topicId) {
-        delete window._lessonsCache[topicId];
-      }
-      loadTopicData();
+      clearTopicDetailCache(topicId);
+      loadTopicData(true);
     };
 
     window.addEventListener('hi:topics-updated', handleRefresh);

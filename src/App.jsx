@@ -45,6 +45,7 @@ const PageThptRoom = lazy(() => import('./components/pages/PageThptRoom.jsx'));
 const PageVocabulary = lazy(() => import('./components/pages/PageVocabulary.jsx'));
 const PageDictionary = lazy(() => import('./components/pages/PageDictionary.jsx'));
 const PageStudio = lazy(() => import('./components/pages/PageStudio.jsx'));
+const PageArena = lazy(() => import('./components/pages/PageArena.jsx'));
 const PageSettings = lazy(() => import('./components/pages/PageSettings.jsx'));
 const PageProfile = lazy(() => import('./components/pages/PageProfile.jsx'));
 const PageBilingualReading = lazy(() => import('./components/pages/PageBilingualReading.jsx'));
@@ -99,6 +100,7 @@ function AppRoutes() {
 
   const [studioVideoFocused, setStudioVideoFocused] = React.useState(false);
   const [bilingualReadingFocused, setBilingualReadingFocused] = React.useState(false);
+  const [arenaMatchActive, setArenaMatchActive] = React.useState(false);
 
   React.useEffect(() => {
     if (currentRoute !== 'studio') {
@@ -106,6 +108,9 @@ function AppRoutes() {
     }
     if (currentRoute !== 'bilingual-reading') {
       setBilingualReadingFocused(false);
+    }
+    if (currentRoute !== 'arena') {
+      setArenaMatchActive(false);
     }
   }, [currentRoute]);
 
@@ -141,6 +146,8 @@ function AppRoutes() {
         return <PageVocabulary />;
       case 'studio':
         return <PageStudio onWorkspaceModeChange={setStudioVideoFocused} />;
+      case 'arena':
+        return <PageArena onMatchStateChange={setArenaMatchActive} />;
       case 'dictionary':
         return <PageDictionary />;
       case 'settings':
@@ -160,11 +167,13 @@ function AppRoutes() {
 
   const hideSidebarForStudio = currentRoute === 'studio' && studioVideoFocused;
   const hideSidebarForReading = currentRoute === 'bilingual-reading' && bilingualReadingFocused;
+  const hideChromeForArena = currentRoute === 'arena';
 
   const shouldShowSidebar =
     (isMainTab || isTopicDetail) &&
     !hideSidebarForStudio &&
     !hideSidebarForReading &&
+    !hideChromeForArena &&
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
     currentRoute !== 'thpt-room' &&
@@ -175,6 +184,7 @@ function AppRoutes() {
     (isMainTab || isTopicDetail) &&
     !hideSidebarForStudio &&
     !hideSidebarForReading &&
+    !hideChromeForArena &&
     currentRoute !== 'landing' &&
     currentRoute !== 'learning' &&
     currentRoute !== 'thpt-room' &&
@@ -184,7 +194,7 @@ function AppRoutes() {
     <div id="app-root" className="desktop-density-compact min-h-screen bg-background text-on-background font-sans antialiased">
       {/* Conditionally render Layout components only when needed */}
       {shouldShowSidebar && <MainSidebar />}
-      {(isMainTab || isTopicDetail) && !hideSidebarForStudio && <MobileProfileDropdown />}
+      {(isMainTab || isTopicDetail) && !hideSidebarForStudio && !hideChromeForArena && <MobileProfileDropdown />}
       {shouldShowBottomNav && <MobileBottomNav />}
 
       {/* Render active page inside ErrorBoundary and Suspense to prevent blank screen */}

@@ -10,7 +10,7 @@ const RouteContext = createContext({
   isExerciseDetail: false,
 });
 
-export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'bilingual-reading', 'studio', 'dictionary', 'settings', 'profile'];
+export const MAIN_TABS = ['dashboard', 'topics', 'library', 'vocabulary', 'exercises', 'bilingual-reading', 'studio', 'arena', 'dictionary', 'settings', 'profile'];
 
 function normalizeRoute(raw) {
   if (!raw) return 'landing';
@@ -21,7 +21,7 @@ function normalizeRoute(raw) {
   if (clean === 'thpt') return 'exercises';
   if (clean === 'bilingual' || clean === 'reading') return 'bilingual-reading';
   if (clean === 'shadowing' || clean === 'dictation' || clean === 'pronunciation') return 'studio';
-  if (clean === 'game') return 'dashboard';
+  if (clean === 'battle' || clean === 'games' || clean === 'game') return 'arena';
   if (clean === 'settings') return 'profile';
   return clean || 'landing';
 }

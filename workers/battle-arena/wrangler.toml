@@ -1,0 +1,14 @@
+name = "hivocab-battle-arena"
+main = "src/index.js"
+compatibility_date = "2026-10-17"
+
+[durable_objects]
+bindings = [
+  { name = "MATCHMAKER", class_name = "MatchmakerDO" },
+  { name = "BATTLE_ROOM", class_name = "BattleRoomDO" },
+  { name = "LEADERBOARD", class_name = "LeaderboardDO" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = [ "MatchmakerDO", "BattleRoomDO", "LeaderboardDO" ]

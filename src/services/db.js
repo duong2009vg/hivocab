@@ -44,12 +44,84 @@ const MEM = {
   wordCounts: null,   // Map<topicId, count>
   progress: null,     // Map<topicId, pct>
   progressUid: null,  // uid that progress belongs to
+  isPro: null,
+  isProUid: null,
+  isProAt: 0,
+  isProPromise: null,
+  isProPromiseUid: null,
+  topicDetailBundles: new Map(),
+  topicDetailRequests: new Map(),
+  lessonWords: new Map(),
+  lessonWordsRequests: new Map(),
+  dashboardNextReviewAt: undefined,
+  dashboardStatsUid: null,
+  dashboardStatsAt: 0,
 };
 const TOPICS_TTL_MS = 5 * 60 * 1000; // 5 min memory cache
 const TOPICS_MAX_CACHE_AGE_MS = 24 * 60 * 60 * 1000;
+const IS_PRO_TTL_MS = 60 * 1000;
+const TOPIC_DETAIL_TTL_MS = 60 * 1000;
+const LESSON_WORDS_TTL_MS = 60 * 1000;
 const LS_KEY_PREFIX = 'hi_topics_v2';
 let topicsRequest = null;
 let topicsRequestUid = null;
+
+export function clearProCache() {
+  MEM.isPro = null;
+  MEM.isProUid = null;
+  MEM.isProAt = 0;
+  MEM.isProPromise = null;
+  MEM.isProPromiseUid = null;
+}
+
+export function clearLessonWordsCache(topicId = null) {
+  if (!topicId) {
+    MEM.lessonWords.clear();
+    MEM.lessonWordsRequests.clear();
+    return;
+  }
+  const prefix = `lesson:${topicId}:`;
+  for (const key of MEM.lessonWords.keys()) {
+    if (key.startsWith(prefix) || key.startsWith('passage:')) MEM.lessonWords.delete(key);
+  }
+  for (const key of MEM.lessonWordsRequests.keys()) {
+    if (key.startsWith(prefix) || key.startsWith('passage:')) MEM.lessonWordsRequests.delete(key);
+  }
+}
+
+export function clearTopicDetailCache(topicId = null) {
+  if (!topicId) {
+    MEM.topicDetailBundles.clear();
+    MEM.topicDetailRequests.clear();
+    if (typeof window !== 'undefined') {
+      window._camHierarchy = null;
+      window._lessonsCache = {};
+    }
+    return;
+  }
+  const prefix = `${topicId}:`;
+  for (const key of MEM.topicDetailBundles.keys()) {
+    if (key.startsWith(prefix)) MEM.topicDetailBundles.delete(key);
+  }
+  for (const key of MEM.topicDetailRequests.keys()) {
+    if (key.startsWith(prefix)) MEM.topicDetailRequests.delete(key);
+  }
+  if (typeof window !== 'undefined') {
+    if (window._camHierarchy?.topicId === topicId) window._camHierarchy = null;
+    if (window._lessonsCache) delete window._lessonsCache[topicId];
+  }
+}
+
+if (typeof window !== 'undefined' && typeof supabase?.auth?.onAuthStateChange === 'function') {
+  supabase.auth.onAuthStateChange(() => {
+    clearProCache();
+    clearTopicDetailCache();
+    clearLessonWordsCache();
+    MEM.dashboardNextReviewAt = undefined;
+    MEM.dashboardStatsAt = 0;
+    MEM.dashboardStatsUid = null;
+  });
+}
 
 function getStoredAuthUid() {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return null;
@@ -95,6 +167,8 @@ export function clearTopicCache(uid = getStoredAuthUid()) {
   MEM.topicsUid = null;
   MEM.progress = null;
   MEM.progressUid = null;
+  clearTopicDetailCache();
+  clearLessonWordsCache();
   if (typeof window !== 'undefined') {
     window._allTopics = null;
     window._topicsCacheUid = null;
@@ -343,6 +417,14 @@ export async function getTopics(force = false) {
 // ─── Auth helpers (thin wrappers for React components) ───────────────────────
 
 export async function getCurrentUser() {
+  if (typeof supabase?.auth?.getSession === 'function') {
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data && 'session' in data) {
+        return data.session?.user ?? null;
+      }
+    } catch (_) {}
+  }
   const { data: { user } } = await supabase.auth.getUser();
   return user ?? null;
 }
@@ -353,27 +435,53 @@ export async function isUserPro() {
   }
   const user = await getCurrentUser();
   if (!user) return false;
-  const { data } = await supabase
-    .from('profiles')
-    .select('tier, subscription_plan, subscription_expires_at')
-    .eq('id', user.id)
-    .maybeSingle();
-  if (!data) return false;
-  const plan = String(data.subscription_plan || '').toLowerCase();
-  const isProTier = (
-    data.tier === 'pro' ||
-    data.tier === 'lifetime' ||
-    plan === 'lifetime' ||
-    plan.startsWith('pro')
-  );
-  if (!isProTier) return false;
-  if (data.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime') {
-    return true;
+
+  const now = Date.now();
+  if (MEM.isPro !== null && MEM.isProUid === user.id && now - MEM.isProAt < IS_PRO_TTL_MS) {
+    return MEM.isPro;
   }
-  if (!data.subscription_expires_at) {
-    return true;
+  if (MEM.isProPromise && MEM.isProPromiseUid === user.id) {
+    return MEM.isProPromise;
   }
-  return new Date(data.subscription_expires_at) > new Date();
+
+  MEM.isProPromiseUid = user.id;
+  MEM.isProPromise = (async () => {
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('tier, subscription_plan, subscription_expires_at')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (!data) {
+        MEM.isPro = false;
+      } else {
+        const plan = String(data.subscription_plan || '').toLowerCase();
+        const isProTier = (
+          data.tier === 'pro' ||
+          data.tier === 'lifetime' ||
+          plan === 'lifetime' ||
+          plan.startsWith('pro')
+        );
+        if (!isProTier) {
+          MEM.isPro = false;
+        } else if (data.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime' || !data.subscription_expires_at) {
+          MEM.isPro = true;
+        } else {
+          MEM.isPro = new Date(data.subscription_expires_at) > new Date();
+        }
+      }
+      MEM.isProUid = user.id;
+      MEM.isProAt = Date.now();
+      return MEM.isPro;
+    } finally {
+      if (MEM.isProPromiseUid === user.id) {
+        MEM.isProPromise = null;
+        MEM.isProPromiseUid = null;
+      }
+    }
+  })();
+
+  return MEM.isProPromise;
 }
 
 // ─── Native Supabase Mutations & Domain Queries ──────────────────────────────
@@ -686,7 +794,7 @@ export async function getCamHierarchy(topicId) {
   return getCamHierarchyLegacy(topicId);
 }
 
-export async function getLessonsInTopic(topicId) {
+async function getLessonsInTopicLegacy(topicId) {
   try {
     const user = await getCurrentUser();
     const { data, error } = await supabase
@@ -796,13 +904,131 @@ export async function getLessonsInTopic(topicId) {
   }
 }
 
+export async function getLessonsInTopic(topicId) {
+  if (!topicId) return [];
+  const { data, error } = await supabase.rpc('get_lessons_in_topic', {
+    p_topic_id: topicId,
+  });
 
-export async function getWordsInLesson(topicId, lessonIndex) {
+  if (!error) {
+    return Array.isArray(data) ? data : [];
+  }
+  if (!isMissingRpcError(error)) {
+    console.warn('[db.getLessonsInTopic] RPC fallback:', error.message || error);
+  }
+  return getLessonsInTopicLegacy(topicId);
+}
+
+export async function getTopicDetailBundle(topicId, { force = false } = {}) {
+  if (!topicId) return null;
+  const uid = getStoredAuthUid() || 'guest';
+  const cacheKey = `${topicId}:${uid}`;
+  const now = Date.now();
+
+  if (!force) {
+    const cached = MEM.topicDetailBundles.get(cacheKey);
+    if (cached && now - cached.ts < TOPIC_DETAIL_TTL_MS) {
+      return cached.data;
+    }
+    if (MEM.topicDetailRequests.has(cacheKey)) {
+      return MEM.topicDetailRequests.get(cacheKey);
+    }
+  }
+
+  const syncGlobals = (bundle) => {
+    if (typeof window === 'undefined' || !bundle) return;
+    window._isUserPro = Boolean(bundle.isProUser || window._hivocabGlobalFree);
+    if (bundle.isCambridge && bundle.camHierarchy) {
+      window._camHierarchy = { topicId, ...bundle.camHierarchy };
+    } else {
+      window._lessonsCache = window._lessonsCache || {};
+      window._lessonsCache[topicId] = Array.isArray(bundle.lessons) ? bundle.lessons : [];
+    }
+  };
+
+  const promise = (async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_topic_detail_bundle', {
+        p_topic_id: topicId,
+      });
+
+      let bundle = null;
+      if (!error && data) {
+        const isProEffective = Boolean(data.isProUser || (typeof window !== 'undefined' && window._hivocabGlobalFree));
+        bundle = {
+          topic: data.topic || null,
+          isProUser: isProEffective,
+          isCambridge: Boolean(data.isCambridge && data.camHierarchy?.tests?.length > 0),
+          camHierarchy: data.camHierarchy ? { topicId, ...data.camHierarchy } : null,
+          lessons: Array.isArray(data.lessons) ? data.lessons : [],
+        };
+      } else if (error && isMissingRpcError(error)) {
+        const [proStatus, hier] = await Promise.all([
+          isUserPro().catch(() => false),
+          getCamHierarchy(topicId).catch(() => null),
+        ]);
+        const isCam = Boolean(hier && hier.tests && hier.tests.length > 0);
+        const nonCamLessons = isCam ? [] : await getLessonsInTopic(topicId);
+        bundle = {
+          topic: getCachedTopics()?.find((t) => t.id === topicId) || null,
+          isProUser: proStatus,
+          isCambridge: isCam,
+          camHierarchy: isCam ? { topicId, ...hier } : null,
+          lessons: nonCamLessons,
+        };
+      } else if (error) {
+        throwRpcError(error, 'Không thể tải nội dung chủ đề');
+      }
+
+      if (bundle) {
+        MEM.topicDetailBundles.set(cacheKey, { data: bundle, ts: Date.now() });
+        syncGlobals(bundle);
+      }
+      return bundle;
+    } finally {
+      if (MEM.topicDetailRequests.get(cacheKey) === promise) {
+        MEM.topicDetailRequests.delete(cacheKey);
+      }
+    }
+  })();
+
+  MEM.topicDetailRequests.set(cacheKey, promise);
+  return promise;
+}
+
+export function prefetchTopicDetail(topicId) {
+  if (!topicId) return;
+  getTopicDetailBundle(topicId).catch(() => {});
+}
+
+function mapWordRowsWithProgress(rows) {
+  const now = Date.now();
+  return (rows || []).map((row) => {
+    const level = Number(row.level ?? 0);
+    const hasProgress = Boolean(row.last_reviewed_at || row.next_review_at || level > 0 || (row.review_count || 0) > 0);
+    const wordItem = {
+      ...row,
+      englishMeaning: row.english_meaning || '',
+      exampleSentence: row.example_sentence || '',
+      imageUrl: row.image_url || '',
+      level,
+      nextReviewAt: row.next_review_at ?? null,
+      lastReviewedAt: row.last_reviewed_at ?? null,
+      reviewCount: Number(row.review_count ?? 0),
+      stability: row.stability ?? null,
+      difficulty: row.difficulty ?? null,
+      fsrsState: row.fsrs_state ?? 0,
+      lapses: Number(row.lapses ?? 0),
+      isDue: !row.next_review_at || new Date(row.next_review_at).getTime() <= now,
+    };
+    wordItem.retrievability = hasProgress ? getWordRetrievability(wordItem) : 0;
+    return wordItem;
+  });
+}
+
+async function getWordsInLessonLegacy(topicId, safeIndex) {
   try {
     const user = await getCurrentUser();
-    const safeIndex = typeof lessonIndex === 'number' ? lessonIndex : 0;
-
-    // 1. Thử lấy theo lesson_order được định nghĩa cụ thể
     const { data, error } = await supabase
       .from('words')
       .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, lesson_order, word_order, created_at')
@@ -813,9 +1039,7 @@ export async function getWordsInLesson(topicId, lessonIndex) {
 
     let wordsList = (!error && data && data.length > 0) ? data : [];
 
-    // 2. Nếu không có từ mang lesson_order này
     if (wordsList.length === 0) {
-      // Kiểm tra xem topic có bài học đặt tên hay không
       const { data: namedCheck } = await supabase
         .from('words')
         .select('id')
@@ -825,7 +1049,6 @@ export async function getWordsInLesson(topicId, lessonIndex) {
         .limit(1);
 
       if (namedCheck && namedCheck.length > 0) {
-        // Topic có bài học đặt tên, index này là nhóm từ vựng tự thêm (unassigned)
         const { data: unassignedData } = await supabase
           .from('words')
           .select('id, word, pos, phonetic, meaning, english_meaning, example_sentence, image_url, created_at')
@@ -834,7 +1057,6 @@ export async function getWordsInLesson(topicId, lessonIndex) {
           .order('created_at', { ascending: true });
         wordsList = unassignedData || [];
       } else {
-        // Chủ đề thông thường / cá nhân (chia theo từng trang 50 từ có order xác định)
         const LESSON_SIZE = 50;
         const { data: fbData } = await supabase
           .from('words')
@@ -859,33 +1081,58 @@ export async function getWordsInLesson(topicId, lessonIndex) {
       }
     }
 
-    return wordsList.map((w) => {
-      const prog = progressMap[w.id];
-      const wordItem = {
+    return mapWordRowsWithProgress(
+      wordsList.map((w) => ({
         ...w,
-        englishMeaning: w.english_meaning || '',
-        exampleSentence: w.example_sentence || '',
-        imageUrl: w.image_url || '',
-        level: prog?.level ?? 0,
-        nextReviewAt: prog?.next_review_at ?? null,
-        lastReviewedAt: prog?.last_reviewed_at ?? null,
-        reviewCount: prog?.review_count ?? 0,
-        stability: prog?.stability ?? null,
-        difficulty: prog?.difficulty ?? null,
-        fsrsState: prog?.fsrs_state ?? 0,
-        lapses: prog?.lapses ?? 0,
-        isDue: !prog || (prog.next_review_at && new Date(prog.next_review_at) <= new Date()),
-      };
-      wordItem.retrievability = prog ? getWordRetrievability(wordItem) : 0;
-      return wordItem;
-    });
+        ...(progressMap[w.id] || {}),
+      }))
+    );
   } catch (err) {
     console.warn('[db.getWordsInLesson]', err);
     return [];
   }
 }
 
-export async function getWordsInPassage(passageId) {
+export async function getWordsInLesson(topicId, lessonIndex) {
+  if (!topicId) return [];
+  const safeIndex = typeof lessonIndex === 'number' ? lessonIndex : 0;
+  const uid = getStoredAuthUid() || 'guest';
+  const cacheKey = `lesson:${topicId}:${safeIndex}:${uid}`;
+  const cached = MEM.lessonWords.get(cacheKey);
+  if (cached && Date.now() - cached.ts < LESSON_WORDS_TTL_MS) {
+    return cached.data;
+  }
+  if (MEM.lessonWordsRequests.has(cacheKey)) {
+    return MEM.lessonWordsRequests.get(cacheKey);
+  }
+
+  const promise = (async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_words_in_lesson', {
+        p_topic_id: topicId,
+        p_lesson_index: safeIndex,
+      });
+
+      const list = !error
+        ? mapWordRowsWithProgress(data || [])
+        : isMissingRpcError(error)
+        ? await getWordsInLessonLegacy(topicId, safeIndex)
+        : (console.warn('[db.getWordsInLesson] RPC error:', error), []);
+
+      MEM.lessonWords.set(cacheKey, { data: list, ts: Date.now() });
+      return list;
+    } finally {
+      if (MEM.lessonWordsRequests.get(cacheKey) === promise) {
+        MEM.lessonWordsRequests.delete(cacheKey);
+      }
+    }
+  })();
+
+  MEM.lessonWordsRequests.set(cacheKey, promise);
+  return promise;
+}
+
+async function getWordsInPassageLegacy(passageId) {
   try {
     const user = await getCurrentUser();
     const { data, error } = await supabase
@@ -909,30 +1156,53 @@ export async function getWordsInPassage(passageId) {
       }
     }
 
-    return wordsList.map((w) => {
-      const prog = progressMap[w.id];
-      const wordItem = {
+    return mapWordRowsWithProgress(
+      wordsList.map((w) => ({
         ...w,
-        englishMeaning: w.english_meaning || '',
-        exampleSentence: w.example_sentence || '',
-        imageUrl: w.image_url || '',
-        level: prog?.level ?? 0,
-        nextReviewAt: prog?.next_review_at ?? null,
-        lastReviewedAt: prog?.last_reviewed_at ?? null,
-        reviewCount: prog?.review_count ?? 0,
-        stability: prog?.stability ?? null,
-        difficulty: prog?.difficulty ?? null,
-        fsrsState: prog?.fsrs_state ?? 0,
-        lapses: prog?.lapses ?? 0,
-        isDue: !prog || (prog.next_review_at && new Date(prog.next_review_at) <= new Date()),
-      };
-      wordItem.retrievability = prog ? getWordRetrievability(wordItem) : 0;
-      return wordItem;
-    });
+        ...(progressMap[w.id] || {}),
+      }))
+    );
   } catch (err) {
     console.warn('[db.getWordsInPassage]', err);
     return [];
   }
+}
+
+export async function getWordsInPassage(passageId) {
+  if (!passageId) return [];
+  const uid = getStoredAuthUid() || 'guest';
+  const cacheKey = `passage:${passageId}:${uid}`;
+  const cached = MEM.lessonWords.get(cacheKey);
+  if (cached && Date.now() - cached.ts < LESSON_WORDS_TTL_MS) {
+    return cached.data;
+  }
+  if (MEM.lessonWordsRequests.has(cacheKey)) {
+    return MEM.lessonWordsRequests.get(cacheKey);
+  }
+
+  const promise = (async () => {
+    try {
+      const { data, error } = await supabase.rpc('get_words_in_passage', {
+        p_passage_id: passageId,
+      });
+
+      const list = !error
+        ? mapWordRowsWithProgress(data || [])
+        : isMissingRpcError(error)
+        ? await getWordsInPassageLegacy(passageId)
+        : (console.warn('[db.getWordsInPassage] RPC error:', error), []);
+
+      MEM.lessonWords.set(cacheKey, { data: list, ts: Date.now() });
+      return list;
+    } finally {
+      if (MEM.lessonWordsRequests.get(cacheKey) === promise) {
+        MEM.lessonWordsRequests.delete(cacheKey);
+      }
+    }
+  })();
+
+  MEM.lessonWordsRequests.set(cacheKey, promise);
+  return promise;
 }
 
 export async function getPassage(passageId) {
@@ -999,6 +1269,8 @@ export async function deleteWord(wordId) {
     .delete()
     .eq('id', wordId);
   if (error) throw error;
+  clearTopicDetailCache();
+  clearLessonWordsCache();
   return true;
 }
 
@@ -1031,12 +1303,17 @@ export async function checkProAccess({ topicId, passageId, showModal = true } = 
   if (isPro) return true;
 
   if (topicId) {
-    const { data } = await supabase
-      .from('topics')
-      .select('is_pro')
-      .eq('id', topicId)
-      .maybeSingle();
-    if (data?.is_pro) {
+    const cachedTopic = getCachedTopics()?.find((t) => t.id === topicId);
+    let topicIsPro = cachedTopic ? Boolean(cachedTopic.is_pro) : null;
+    if (topicIsPro === null) {
+      const { data } = await supabase
+        .from('topics')
+        .select('is_pro')
+        .eq('id', topicId)
+        .maybeSingle();
+      topicIsPro = Boolean(data?.is_pro);
+    }
+    if (topicIsPro) {
       if (showModal && typeof window !== 'undefined' && window.__modalContext?.openModal) {
         window.__modalContext.openModal('pricingModal');
       }
@@ -1045,12 +1322,25 @@ export async function checkProAccess({ topicId, passageId, showModal = true } = 
   }
 
   if (passageId) {
-    const { data } = await supabase
-      .from('passages')
-      .select('is_pro')
-      .eq('id', passageId)
-      .maybeSingle();
-    if (data?.is_pro) {
+    let passageIsPro = null;
+    if (typeof window !== 'undefined' && window._camHierarchy?.tests) {
+      for (const test of window._camHierarchy.tests) {
+        const hit = (test.passages || []).find((p) => p.id === passageId);
+        if (hit) {
+          passageIsPro = Boolean(hit.isPro || hit.is_pro || test.isPro || test.is_pro);
+          break;
+        }
+      }
+    }
+    if (passageIsPro === null) {
+      const { data } = await supabase
+        .from('passages')
+        .select('is_pro')
+        .eq('id', passageId)
+        .maybeSingle();
+      passageIsPro = Boolean(data?.is_pro);
+    }
+    if (passageIsPro) {
       if (showModal && typeof window !== 'undefined' && window.__modalContext?.openModal) {
         window.__modalContext.openModal('pricingModal');
       }
@@ -1280,6 +1570,10 @@ export async function reviewWord(wordId, rating) {
     );
   }
 
+  clearTopicDetailCache();
+  clearLessonWordsCache();
+  MEM.dashboardStatsAt = 0;
+
   return {
     newLevel,
     nextReviewAt,
@@ -1307,6 +1601,10 @@ export async function reviewWordToLevel(wordId, targetLevel) {
   if (!Number.isFinite(newLevel) || Number.isNaN(nextReviewAt.getTime())) {
     throw new Error('Supabase trả về kết quả cấp độ không hợp lệ.');
   }
+
+  clearTopicDetailCache();
+  clearLessonWordsCache();
+  MEM.dashboardStatsAt = 0;
 
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('hivocab:word-reviewed', { detail: { wordId, newLevel } }));
@@ -1726,6 +2024,35 @@ export async function getDashboardStats() {
     };
   }
 
+  try {
+    const { data, error } = await supabase.rpc('get_dashboard_stats');
+    if (!error && data) {
+      const mem = data.memoryLevels || {};
+      const sessionDates = Array.isArray(data.sessionDates) ? data.sessionDates : [];
+      const streak = calculateStreakFromSessions(sessionDates.map((d) => ({ session_date: d })));
+      MEM.dashboardNextReviewAt = data.nextReviewAt ? new Date(data.nextReviewAt) : null;
+      MEM.dashboardStatsUid = user.id;
+      MEM.dashboardStatsAt = Date.now();
+      return {
+        wordsDueCount: Number(data.wordsDueCount) || 0,
+        streak,
+        memoryLevels: {
+          lv0: Number(mem.lv0) || 0,
+          lv1: Number(mem.lv1) || 0,
+          lv2: Number(mem.lv2) || 0,
+          lv3: Number(mem.lv3) || 0,
+          lv4: Number(mem.lv4) || 0,
+          lv5: Number(mem.lv5) || 0,
+        },
+      };
+    }
+    if (error && !isMissingRpcError(error)) {
+      console.warn('[db.getDashboardStats RPC error]:', error);
+    }
+  } catch (e) {
+    console.warn('[db.getDashboardStats RPC exception]:', e);
+  }
+
   const now = new Date().toISOString();
 
   let wordsDueCount = 0;
@@ -1788,6 +2115,13 @@ export async function getDashboardStats() {
 export async function getNextReviewTime() {
   const user = await getCurrentUser();
   if (!user) return null;
+  if (
+    MEM.dashboardStatsUid === user.id &&
+    Date.now() - MEM.dashboardStatsAt < 15000 &&
+    MEM.dashboardNextReviewAt !== undefined
+  ) {
+    return MEM.dashboardNextReviewAt;
+  }
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from('word_progress')
@@ -1886,6 +2220,9 @@ export const db = {
   isUserPro,
   getCachedTopics,
   clearTopicCache,
+  clearTopicDetailCache,
+  clearLessonWordsCache,
+  clearProCache,
   getTopics,
   createTopic,
   deleteTopic,
@@ -1893,6 +2230,8 @@ export const db = {
   deleteFolderCascade,
   getCamHierarchy,
   getLessonsInTopic,
+  getTopicDetailBundle,
+  prefetchTopicDetail,
   getWordsInLesson,
   getWordsInPassage,
   getPassage,

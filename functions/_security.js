@@ -11,8 +11,8 @@ export const SECURITY_CSP = [
   "style-src-elem 'self' https://fonts.googleapis.com https://cdnjs.cloudflare.com",
   "style-src-attr 'unsafe-inline'",
   "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:",
-  "img-src 'self' data: blob: https: https://img.vietqr.io https://*.r2.cloudflarestorage.com https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev https://*.supabase.co https://*.payos.vn",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.dictionaryapi.dev https://payos.vn https://*.payos.vn https://fonts.googleapis.com https://fonts.gstatic.com https://static.cloudflareinsights.com https://challenges.cloudflare.com https://*.modal.run",
+  "img-src 'self' data: blob: https: https://img.vietqr.io https://*.r2.cloudflarestorage.com https://pub-d574cb0773d248b29827bfc428bb1f81.r2.dev https://pub-cacd93fa272d490a875125df96a7ffdb.r2.dev https://*.supabase.co https://*.payos.vn",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://pub-cacd93fa272d490a875125df96a7ffdb.r2.dev https://api.dictionaryapi.dev https://payos.vn https://*.payos.vn https://fonts.googleapis.com https://fonts.gstatic.com https://static.cloudflareinsights.com https://challenges.cloudflare.com https://*.modal.run",
   "media-src 'self' data: blob: https:",
   "frame-src 'self' https://accounts.google.com https://payos.vn https://*.payos.vn https://cdn.payos.vn https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com",
 ].join('; ') + ';';

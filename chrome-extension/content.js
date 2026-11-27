@@ -44,7 +44,9 @@
       const currentToken = session?.access_token || null;
       if (currentToken !== _lastSentToken) {
         _lastSentToken = currentToken;
-        chrome.runtime.sendMessage({ type: 'store-auth-token', session });
+        chrome.runtime.sendMessage({ type: 'store-auth-token', session }, () => {
+          void chrome.runtime.lastError;
+        });
       }
     } catch (_) {}
   }

@@ -8,3 +8,7 @@ compatibility_date = "2026-10-17"
 [[services]]
 binding = "HIVOCAB_RATE_LIMIT_SERVICE"
 service = "hivocab-rate-limiter"
+
+[[services]]
+binding = "HIVOCAB_BATTLE_SERVICE"
+service = "hivocab-battle-arena"
