@@ -26,21 +26,194 @@ let activeSampleEndTimer = null;
 let lastPrewarmAt = 0;
 
 const PREWARM_COOLDOWN_MS = 45000;
+const LOCAL_AI_QUOTA_KEY = 'hivocab_ai_shadowing_usage_v1';
+
+function getVietnamDateKey() {
+  try {
+    return new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Ho_Chi_Minh',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date());
+  } catch (_) {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+function getTierDailyAiLimit(tier) {
+  const t = String(tier || 'free').toLowerCase();
+  if (t === 'premium' || t === 'lifetime') return null;
+  if (t === 'pro') return 500;
+  return 50;
+}
+
+function readLocalAiUsage(userKey = 'guest') {
+  const today = getVietnamDateKey();
+  if (typeof window === 'undefined') return { date: today, used: 0 };
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(LOCAL_AI_QUOTA_KEY) || '{}');
+    const rec = raw?.[userKey];
+    if (rec && rec.date === today && Number.isFinite(rec.used)) {
+      return { date: today, used: Math.max(0, Math.floor(rec.used)) };
+    }
+  } catch (_) {}
+  return { date: today, used: 0 };
+}
+
+function writeLocalAiUsage(userKey = 'guest', used = 0) {
+  const today = getVietnamDateKey();
+  if (typeof window === 'undefined') return;
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(LOCAL_AI_QUOTA_KEY) || '{}');
+    raw[userKey] = { date: today, used: Math.max(0, Math.floor(used)) };
+    window.localStorage.setItem(LOCAL_AI_QUOTA_KEY, JSON.stringify(raw));
+  } catch (_) {}
+}
 
 /**
- * Quietly wake the Modal container (throttled) when the learner starts recording so
- * the container is already warm by the time they click "Chấm sâu AI".
+ * Fetch today's AI Shadowing pronunciation scoring quota (Vietnam timezone).
+ * Uses Supabase RPC get_my_plan_usage when available, falling back smoothly to local tracking.
  */
-export function prewarmStudioBackend() {
-  if (typeof window === 'undefined') return;
+export async function getAiShadowingQuotaStatus(tier = 'free') {
+  const fallbackLimit = getTierDailyAiLimit(tier);
+  const today = getVietnamDateKey();
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    const userKey = user?.id || 'guest';
+    if (user?.id) {
+      const { data, error } = await supabase.rpc('get_my_plan_usage');
+      if (!error && data && typeof data === 'object') {
+        const limit = data.ai_shadowing_daily_limit ?? null;
+        const used = Number(data.ai_shadowing_used_today) || 0;
+        return {
+          tier: data.tier || tier,
+          used,
+          limit,
+          remaining: limit === null ? null : Math.max(0, limit - used),
+          unlimited: limit === null,
+          usageDate: data.usage_date || today,
+          source: 'server',
+        };
+      }
+    }
+    const local = readLocalAiUsage(userKey);
+    return {
+      tier,
+      used: local.used,
+      limit: fallbackLimit,
+      remaining: fallbackLimit === null ? null : Math.max(0, fallbackLimit - local.used),
+      unlimited: fallbackLimit === null,
+      usageDate: today,
+      source: 'local',
+    };
+  } catch (_) {
+    const local = readLocalAiUsage('guest');
+    return {
+      tier,
+      used: local.used,
+      limit: fallbackLimit,
+      remaining: fallbackLimit === null ? null : Math.max(0, fallbackLimit - local.used),
+      unlimited: fallbackLimit === null,
+      usageDate: today,
+      source: 'local',
+    };
+  }
+}
+
+/**
+ * Consume 1 daily AI Shadowing turn before calling Modal OpenPronounce.
+ * Free: 50/day · Pro: 500/day · Premium/Lifetime: unlimited.
+ */
+export async function consumeAiShadowingQuota(tier = 'free') {
+  const today = getVietnamDateKey();
+  const fallbackLimit = getTierDailyAiLimit(tier);
+  let userKey = 'guest';
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    userKey = user?.id || 'guest';
+
+    if (user?.id) {
+      const { data, error } = await supabase.rpc('consume_ai_shadowing_quota');
+      if (!error && data && typeof data === 'object') {
+        const limit = data.limit ?? null;
+        const used = Number(data.used) || 0;
+        writeLocalAiUsage(userKey, used);
+        return {
+          allowed: Boolean(data.allowed),
+          code: data.code || '',
+          tier: data.tier || tier,
+          used,
+          limit,
+          remaining: limit === null ? null : Math.max(0, limit - used),
+          unlimited: limit === null,
+          usageDate: data.usage_date || today,
+          message: data.message || '',
+        };
+      }
+    }
+  } catch (_) {}
+
+  // Graceful fallback when guest or before DB migration is applied
+  const local = readLocalAiUsage(userKey);
+  if (fallbackLimit !== null && local.used >= fallbackLimit) {
+    return {
+      allowed: false,
+      code: 'AI_SHADOWING_QUOTA_EXCEEDED',
+      tier,
+      used: local.used,
+      limit: fallbackLimit,
+      remaining: 0,
+      unlimited: false,
+      usageDate: today,
+      message:
+        tier === 'pro'
+          ? 'Bạn đã dùng hết 500 lượt chấm AI Shadowing hôm nay (gói Pro). Nâng cấp HiVocab Premium để chấm không giới hạn!'
+          : 'Bạn đã dùng hết 50 lượt chấm AI Shadowing hôm nay (gói Miễn phí). Nâng cấp HiVocab Pro để mở khóa 500 lượt/ngày!',
+    };
+  }
+
+  const nextUsed = local.used + 1;
+  writeLocalAiUsage(userKey, nextUsed);
+  return {
+    allowed: true,
+    code: '',
+    tier,
+    used: nextUsed,
+    limit: fallbackLimit,
+    remaining: fallbackLimit === null ? null : Math.max(0, fallbackLimit - nextUsed),
+    unlimited: fallbackLimit === null,
+    usageDate: today,
+    message: '',
+  };
+}
+
+export function isPronunciationScoreCached({ blob, expectedText, lang = 'en' } = {}) {
   const baseUrl = getStudioApiUrl();
-  if (!baseUrl) return;
+  if (!baseUrl || !(blob instanceof Blob) || !expectedText) return false;
+  const scoreKey = `${baseUrl}::${blob.size}::${blob.type || 'audio'}::${lang}::${String(expectedText).trim()}`;
+  return pronunciationScoreCache.has(scoreKey);
+}
+
+/**
+ * Quietly wake the Modal container (throttled) ONLY for Pro / Premium / Admin learners
+ * when they open a Studio lesson or start recording so Modal has 0 cold-start delay.
+ * Free learners intentionally do NOT prewarm to protect Modal Starter credits.
+ */
+export function prewarmStudioBackend({ allowed = false } = {}) {
+  if (!allowed || typeof window === 'undefined') return false;
+  const baseUrl = getStudioApiUrl();
+  if (!baseUrl) return false;
   const now = Date.now();
-  if (now - lastPrewarmAt < PREWARM_COOLDOWN_MS) return;
+  if (now - lastPrewarmAt < PREWARM_COOLDOWN_MS) return false;
   lastPrewarmAt = now;
   try {
     fetch(`${baseUrl}/health`, { method: 'GET', cache: 'no-store', keepalive: true }).catch(() => {});
-  } catch (_) {}
+    return true;
+  } catch (_) {
+    return false;
+  }
 }
 
 function normalizeBaseUrl(raw) {
@@ -696,20 +869,41 @@ export async function loadUserYoutubeVideos() {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user?.id) {
-      return { authenticated: false, userId: null, clips: [], limit };
+      return { authenticated: false, userId: null, clips: [], limit, unlimited: false };
     }
-    const { data, error } = await supabase
-      .from('user_youtube_videos')
-      .select('id, clip_id, youtube_video_id, title, author, clip_data, created_at')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(100);
-    if (error) throw error;
+    const [videosRes, profileRes] = await Promise.all([
+      supabase
+        .from('user_youtube_videos')
+        .select('id, clip_id, youtube_video_id, title, author, clip_data, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(200),
+      supabase
+        .from('profiles')
+        .select('role, tier, subscription_plan, subscription_expires_at')
+        .eq('id', user.id)
+        .maybeSingle(),
+    ]);
+    if (videosRes.error) throw videosRes.error;
+
+    const p = profileRes?.data;
+    const rawTier = String(p?.tier || '').toLowerCase();
+    const plan = String(p?.subscription_plan || '').toLowerCase();
+    const expired = p?.subscription_expires_at && new Date(p.subscription_expires_at) <= new Date();
+    const unlimited = Boolean(
+      p?.role === 'admin' ||
+      rawTier === 'lifetime' ||
+      plan === 'lifetime' ||
+      plan === 'pro_lifetime' ||
+      (!expired && (rawTier === 'premium' || plan.startsWith('premium')))
+    );
+
     return {
       authenticated: true,
       userId: user.id,
-      clips: (data || []).map(mapSavedYoutubeRowToClip),
-      limit,
+      clips: (videosRes.data || []).map(mapSavedYoutubeRowToClip),
+      limit: unlimited ? null : limit,
+      unlimited,
     };
   } catch (err) {
     return {
@@ -717,6 +911,7 @@ export async function loadUserYoutubeVideos() {
       userId: null,
       clips: [],
       limit,
+      unlimited: false,
       error: err?.message || 'Không thể tải danh sách video YouTube cá nhân.',
     };
   }

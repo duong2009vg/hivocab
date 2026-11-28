@@ -32,6 +32,13 @@ const BADGE_VARIANTS = {
     iconType: 'crown',
     defaultLabel: 'Trọn Đời',
   },
+  premium: {
+    bg: 'bg-[#F3E8FF]',
+    text: 'text-[#6B21A8]',
+    border: 'border-[#3D352E]',
+    iconType: 'crown',
+    defaultLabel: 'PREMIUM',
+  },
   trial: {
     bg: 'bg-[#E3EDE2]',
     text: 'text-[#4D6B53]',

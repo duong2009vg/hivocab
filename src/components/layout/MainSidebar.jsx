@@ -29,7 +29,7 @@ import { getMasteryBadge } from '../../utils/masteryBadge.js';
 const SIDEBAR_COLLAPSED_STORAGE_KEY = 'hivocab_sidebar_collapsed';
 
 export function MainSidebar() {
-  const { user, signOut, isPaidPro: isPro } = useAuth();
+  const { user, signOut, isPaidPro: isPro, isPremium } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const { openModal } = useModal();
   const { streak, wordCount, masteredCount, loading: statsLoading } = useProfileStats();
@@ -458,11 +458,15 @@ export function MainSidebar() {
                     <div className="text-xs font-extrabold text-[#382E2B] truncate">{userName}</div>
                     {isPro && (
                       <span
-                        className="profile-pro-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black bg-[#FFE8C2] text-[#8C5311] border border-[#382E2B] rounded-md shadow-[1px_1px_0px_#382E2B] shrink-0"
-                        title="Thành viên HiVocab PRO"
+                        className={`profile-pro-badge inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black border border-[#382E2B] rounded-md shadow-[1px_1px_0px_#382E2B] shrink-0 ${
+                          isPremium
+                            ? 'bg-[#F3E8FF] text-[#6B21A8]'
+                            : 'bg-[#FFE8C2] text-[#8C5311]'
+                        }`}
+                        title={isPremium ? 'Thành viên HiVocab PREMIUM' : 'Thành viên HiVocab PRO'}
                       >
-                        <Crown className="w-2.5 h-2.5 text-[#8C5311] shrink-0" />
-                        <span>PRO</span>
+                        <Crown className={`w-2.5 h-2.5 shrink-0 ${isPremium ? 'text-[#6B21A8]' : 'text-[#8C5311]'}`} />
+                        <span>{isPremium ? 'PREMIUM' : 'PRO'}</span>
                       </span>
                     )}
                   </div>

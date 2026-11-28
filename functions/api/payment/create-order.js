@@ -3,33 +3,7 @@
 // Tạo đơn hàng PayOS và trả về checkoutUrl cho Embedded Form
 import { checkRateLimit, rateLimitResponse } from '../../_rateLimit.js';
 import { getCorsHeaders, requireSupabaseUser } from '../../_security.js';
-
-const PLANS = {
-    pro_1m: {
-        id: 'pro_1m',
-        name: 'HiVocab Pro 1 Tháng',
-        amount: 29000,
-        days: 30,
-    },
-    pro_6m: {
-        id: 'pro_6m',
-        name: 'HiVocab Pro 6 Tháng',
-        amount: 149000,
-        days: 180,
-    },
-    pro_1y: {
-        id: 'pro_1y',
-        name: 'HiVocab Pro 1 Năm',
-        amount: 249000,
-        days: 365,
-    },
-    pro_lifetime: {
-        id: 'pro_lifetime',
-        name: 'HiVocab Pro Trọn Đời',
-        amount: 499000,
-        days: 36500, // ~100 năm
-    },
-};
+import { getServerPlan } from './_plans.js';
 
 function getAllowedOrigin(request, env) {
     const fallback = String(env.APP_ORIGIN || 'https://hivocab.site').replace(/\/+$/, '');
@@ -122,7 +96,7 @@ export async function onRequestPost(context) {
     }
 
     const { planId } = body || {};
-    const plan = PLANS[planId];
+    const plan = getServerPlan(planId);
     if (!plan) {
         return new Response(JSON.stringify({ ok: false, error: 'Gói cước không hợp lệ' }), {
             status: 400,
@@ -247,6 +221,8 @@ export async function onRequestPost(context) {
             qrImageUrl: vietQrUrl,
             bin,
             amount: plan.amount,
+            planId: plan.id,
+            planTier: plan.tier,
             planName: plan.name,
             accountNumber: payosData.accountNumber,
             accountName: payosData.accountName,

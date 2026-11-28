@@ -12,7 +12,8 @@ export function GrantProModal({
   onSuccess,
 }) {
   const { showToast } = useToast();
-  const [selectedPlan, setSelectedPlan] = useState('1m'); // '1m' | '6m' | '1y' | 'lifetime' | 'custom'
+  const [selectedTier, setSelectedTier] = useState('pro'); // 'pro' | 'premium'
+  const [selectedPlan, setSelectedPlan] = useState('1m'); // '1m' | '3m' | '6m' | '1y' | 'lifetime' | 'custom'
   const [customDays, setCustomDays] = useState(30);
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,11 +32,13 @@ export function GrantProModal({
     let daysToAdd = 30;
 
     if (selectedPlan === '1m') daysToAdd = 30;
+    else if (selectedPlan === '3m') daysToAdd = 90;
     else if (selectedPlan === '6m') daysToAdd = 180;
     else if (selectedPlan === '1y') daysToAdd = 365;
     else if (selectedPlan === 'custom') daysToAdd = Math.max(1, parseInt(customDays, 10) || 30);
 
     const targets = isBulk ? selectedUsers : [targetUser];
+    const targetTierValue = isLifetime ? 'lifetime' : selectedTier;
 
     try {
       for (const target of targets) {
@@ -49,13 +52,14 @@ export function GrantProModal({
           newExpiresAt = new Date(baseTime + daysToAdd * 24 * 60 * 60 * 1000).toISOString();
         }
 
-        const planCode = isLifetime ? 'pro_lifetime' : `pro_${selectedPlan === 'custom' ? `${daysToAdd}d` : selectedPlan}`;
+        const planPrefix = selectedTier === 'premium' ? 'premium' : 'pro';
+        const planCode = isLifetime ? 'pro_lifetime' : `${planPrefix}_${selectedPlan === 'custom' ? `${daysToAdd}d` : selectedPlan}`;
 
         // 1. Update profiles table
         const { error: profErr } = await supabase
           .from('profiles')
           .update({
-            tier: isLifetime ? 'lifetime' : 'pro',
+            tier: targetTierValue,
             subscription_plan: planCode,
             subscription_status: 'active',
             subscription_started_at: now.toISOString(),
@@ -87,12 +91,13 @@ export function GrantProModal({
         }
       }
 
-      showToast(`Đã tặng gói PRO thành công cho ${userCount} học viên! 🎉`, 'success');
+      const tierLabel = isLifetime ? 'Trọn Đời' : selectedTier === 'premium' ? 'PREMIUM' : 'PRO';
+      showToast(`Đã tặng gói ${tierLabel} thành công cho ${userCount} học viên! 🎉`, 'success');
       onSuccess?.();
       onClose();
     } catch (err) {
       console.error('handleGrantProSubmit error:', err);
-      showToast(`Lỗi khi cấp PRO: ${err.message}`, 'error');
+      showToast(`Lỗi khi cấp gói: ${err.message}`, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -152,14 +157,42 @@ export function GrantProModal({
             </div>
           )}
 
+          {/* Tier Selector (Pro vs Premium) */}
+          <div>
+            <label className="block text-xs font-bold text-on-surface mb-2">Chọn hạng tài khoản</label>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { id: 'pro', title: 'HiVocab PRO', subtitle: 'Từ vựng ∞ · 500 AI/ngày · 5 YouTube' },
+                { id: 'premium', title: 'HiVocab PREMIUM', subtitle: 'Không giới hạn toàn bộ tính năng' },
+              ].map((t) => (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => setSelectedTier(t.id)}
+                  className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    selectedTier === t.id
+                      ? t.id === 'premium'
+                        ? 'border-purple-600 bg-purple-500/10 ring-1 ring-purple-600'
+                        : 'border-amber-500 bg-amber-500/10 ring-1 ring-amber-500'
+                      : 'border-outline-variant/20 bg-surface hover:bg-surface-container'
+                  }`}
+                >
+                  <div className="font-bold text-xs text-on-surface">{t.title}</div>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">{t.subtitle}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Plan Selector */}
           <div>
             <label className="block text-xs font-bold text-on-surface mb-2">Chọn thời hạn tặng</label>
             <div className="grid grid-cols-2 gap-2">
               {[
                 { id: '1m', title: '1 Tháng', subtitle: '+30 ngày', badge: 'Tiêu chuẩn' },
+                { id: '3m', title: '3 Tháng', subtitle: '+90 ngày', badge: 'Tiết kiệm' },
                 { id: '6m', title: '6 Tháng', subtitle: '+180 ngày', badge: 'Phổ biến' },
-                { id: '1y', title: '1 Năm', subtitle: '+365 ngày', badge: 'Ưu đãi' },
+                { id: '1y', title: '1 Năm', subtitle: '+365 ngày', badge: 'Ưu đãi nhất' },
                 { id: 'lifetime', title: 'Trọn Đời', subtitle: 'Không hết hạn', badge: 'Vĩnh viễn' },
               ].map((plan) => (
                 <button

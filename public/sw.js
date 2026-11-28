@@ -1,5 +1,5 @@
 // HiVocab Service Worker — PWA Cache Engine
-const CACHE_NAME = 'hivocab-shell-v22';
+const CACHE_NAME = 'hivocab-shell-v23';
 const PRECACHE_URLS = [
   '/',
   '/manifest.webmanifest',

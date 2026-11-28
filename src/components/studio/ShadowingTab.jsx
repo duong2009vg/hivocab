@@ -40,8 +40,11 @@ import {
   saveShadowingCueScore,
   stopStudioAudio,
   translateShadowingTexts,
+  prewarmStudioBackend,
 } from '../../services/studioService.js';
 import { supabase } from '../../lib/supabaseClient.js';
+import { useAuth } from '../../providers/AuthProvider.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 import ChannelVideoRow from './ChannelVideoRow.jsx';
 
@@ -96,6 +99,8 @@ export function ShadowingTab({
   onShowAddFormChange,
   onQuotaChange,
 }) {
+  const { isPremium, canPrewarmStudioAi } = useAuth();
+  const { openModal } = useModal();
   const [customClips, setCustomClips] = useState([]);
   const [videoLimit, setVideoLimit] = useState(MAX_USER_YOUTUBE_VIDEOS);
   const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
@@ -155,6 +160,13 @@ export function ShadowingTab({
     () => (selectedClipId ? allClips.find((c) => c.id === selectedClipId) || null : null),
     [allClips, selectedClipId]
   );
+
+  // Pro & Premium: pre-warm Modal container immediately when opening a Shadowing lesson
+  useEffect(() => {
+    if (selectedClip?.id && canPrewarmStudioAi) {
+      prewarmStudioBackend({ allowed: true });
+    }
+  }, [selectedClip?.id, canPrewarmStudioAi]);
 
   useEffect(() => {
     if (typeof onVideoOpenChange === 'function') {
@@ -258,11 +270,12 @@ export function ShadowingTab({
     if (typeof onQuotaChange === 'function') {
       onQuotaChange({
         used: customClips.length,
-        limit: videoLimit,
+        limit: isPremium ? null : videoLimit,
+        unlimited: Boolean(isPremium),
         authenticated: isUserAuthenticated,
       });
     }
-  }, [customClips.length, videoLimit, isUserAuthenticated, onQuotaChange]);
+  }, [customClips.length, videoLimit, isPremium, isUserAuthenticated, onQuotaChange]);
 
   // In-video dictation state per cue index
   const [dictInputs, setDictInputs] = useState({});
@@ -553,7 +566,7 @@ export function ShadowingTab({
   };
 
   const usedVideoCount = customClips.length;
-  const isQuotaFull = usedVideoCount >= videoLimit;
+  const isQuotaFull = !isPremium && usedVideoCount >= videoLimit;
 
   const openLoginForVideoUpload = () => {
     if (typeof window !== 'undefined' && window.openRequireLoginModal) {
@@ -588,8 +601,9 @@ export function ShadowingTab({
     const isAlreadySavedVideo = customClips.some((c) => c.youtube_video_id === videoId);
     if (!isAlreadySavedVideo && isQuotaFull) {
       setImportError(
-        `Bạn đã đạt giới hạn ${videoLimit}/${videoLimit} video cá nhân. Hãy bấm biểu tượng thùng rác ở video cá nhân cũ để xóa bớt trước khi thêm mới.`
+        `Bạn đã đạt giới hạn ${videoLimit}/${videoLimit} video cá nhân. Xóa bớt video cũ hoặc nâng cấp HiVocab Premium để tải lên không giới hạn!`
       );
+      openModal('pricingModal', { defaultTier: 'premium', reason: 'youtube_limit' });
       return;
     }
 
@@ -756,7 +770,7 @@ export function ShadowingTab({
                       : 'bg-white text-[#554D42] border-[#E8DEC8] hover:border-[#3D352E]'
                   }`}
                 >
-                  {srcKey === 'all' ? 'Tất cả' : `Cá nhân (${usedVideoCount}/${videoLimit})`}
+                  {srcKey === 'all' ? 'Tất cả' : isPremium ? `Cá nhân (${usedVideoCount} · ∞)` : `Cá nhân (${usedVideoCount}/${videoLimit})`}
                 </button>
               ))}
             </div>
@@ -800,12 +814,18 @@ export function ShadowingTab({
                 <Info className="w-3.5 h-3.5 text-[#4D6B53] shrink-0" />
                 <span>
                   {isUserAuthenticated ? (
-                    <>
-                      Đã lưu <strong className="text-[#2E2823]">{usedVideoCount}/{videoLimit}</strong> video YouTube cá nhân (mỗi tài khoản tối đa {videoLimit} video; video mẫu có sẵn không tính vào giới hạn).
-                    </>
+                    isPremium ? (
+                      <>
+                        Đã lưu <strong className="text-[#2E2823]">{usedVideoCount}</strong> video YouTube cá nhân (<strong className="text-[#6B21A8]">Premium · Không giới hạn</strong>).
+                      </>
+                    ) : (
+                      <>
+                        Đã lưu <strong className="text-[#2E2823]">{usedVideoCount}/{videoLimit}</strong> video YouTube cá nhân (Free/Pro tối đa {videoLimit} video · <button type="button" onClick={() => openModal('pricingModal', { defaultTier: 'premium', reason: 'youtube_limit' })} className="text-[#6B21A8] underline cursor-pointer">Premium không giới hạn</button>).
+                      </>
+                    )
                   ) : (
                     <>
-                      Mỗi tài khoản được lưu tối đa <strong className="text-[#2E2823]">{videoLimit} video YouTube cá nhân</strong> (đồng bộ theo tài khoản, video mẫu hệ thống dùng miễn phí không giới hạn).
+                      Mỗi tài khoản Free/Pro được lưu tối đa <strong className="text-[#2E2823]">{videoLimit} video YouTube cá nhân</strong> (Premium không giới hạn; video mẫu hệ thống dùng miễn phí).
                     </>
                   )}
                 </span>
@@ -891,16 +911,25 @@ export function ShadowingTab({
                         <div className="flex items-start gap-2 text-xs font-bold text-[#9C2F1E]">
                           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                           <span>
-                            Tài khoản của bạn đã đạt giới hạn <strong>{videoLimit}/{videoLimit} video</strong>. Vui lòng xóa bớt video cá nhân cũ để thêm video mới.
+                            Tài khoản của bạn đã đạt giới hạn <strong>{videoLimit}/{videoLimit} video</strong>. Xóa bớt video cũ hoặc nâng cấp <strong>HiVocab Premium</strong> để tải không giới hạn!
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setSourceFilter('custom')}
-                          className="px-3 py-1.5 rounded-xl bg-white text-[11px] font-black text-[#B53D2A] border border-[#D96B43] hover:bg-[#FFF5F2] shrink-0 cursor-pointer"
-                        >
-                          Xem {usedVideoCount} video cá nhân
-                        </button>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => openModal('pricingModal', { defaultTier: 'premium', reason: 'youtube_limit' })}
+                            className="px-3 py-1.5 rounded-xl bg-[#3D352E] text-white text-[11px] font-black hover:bg-[#2E2823] shrink-0 cursor-pointer"
+                          >
+                            Lên Premium ∞
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSourceFilter('custom')}
+                            className="px-3 py-1.5 rounded-xl bg-white text-[11px] font-black text-[#B53D2A] border border-[#D96B43] hover:bg-[#FFF5F2] shrink-0 cursor-pointer"
+                          >
+                            Xem {usedVideoCount} video
+                          </button>
+                        </div>
                       </div>
                     )}
 

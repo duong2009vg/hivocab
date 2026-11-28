@@ -22,6 +22,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { useToast } from '../../context/ToastContext.jsx';
 import { supabase } from '../../lib/supabaseClient.js';
 import { clearTopicCache } from '../../services/topicsService.js';
+import { checkFreeWordQuota, FREE_WORD_LIMIT } from '../../services/db.js';
 
 // Mẫu Prompt chuẩn hóa để người dùng sao chép gửi cho ChatGPT / Gemini / Claude
 // Hướng dẫn AI xuất trực tiếp file Excel (.xlsx) tải về hoặc bảng dữ liệu chuẩn 5 cột
@@ -554,6 +555,15 @@ export function BulkAddWordModal() {
     setErrorMessage('');
 
     try {
+      const quota = await checkFreeWordQuota(validWords.length);
+      if (!quota.allowed) {
+        const msg = `Tài khoản Miễn phí giới hạn tối đa ${FREE_WORD_LIMIT.toLocaleString('vi-VN')} từ vựng cá nhân (bạn đã có ${quota.used.toLocaleString('vi-VN')}, chỉ còn thêm được ${quota.remaining.toLocaleString('vi-VN')} từ). Nâng cấp HiVocab Pro để lưu từ không giới hạn!`;
+        setErrorMessage(msg);
+        toastError(msg);
+        openModal('pricingModal', { defaultTier: 'pro', reason: 'word_limit' });
+        return;
+      }
+
       const wordsPayload = validWords.map((item, idx) => ({
         topic_id: topicId,
         word: item.word.trim(),
@@ -571,6 +581,11 @@ export function BulkAddWordModal() {
         .insert(wordsPayload);
 
       if (insertErr) {
+        if (insertErr.message?.includes('FREE_WORD_LIMIT_REACHED')) {
+          const msg = `Tài khoản Miễn phí giới hạn tối đa ${FREE_WORD_LIMIT.toLocaleString('vi-VN')} từ vựng cá nhân. Nâng cấp HiVocab Pro để lưu từ không giới hạn!`;
+          openModal('pricingModal', { defaultTier: 'pro', reason: 'word_limit' });
+          throw new Error(msg);
+        }
         if (insertErr.message?.includes('violates row-level security policy')) {
           throw new Error('Chủ đề này thuộc hệ thống hoặc của người dùng khác. Bạn hãy bấm "+ Tạo chủ đề mới" để lưu vào kho từ của riêng bạn nhé!');
         }

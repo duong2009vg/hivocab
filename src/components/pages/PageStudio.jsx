@@ -190,9 +190,11 @@ export function PageStudio({ onWorkspaceModeChange } = {}) {
                   <Plus className="w-4 h-4 shrink-0" />
                   <span>Thêm video YouTube</span>
                   <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-white/20 text-[10px] font-black leading-none">
-                    {shadowingQuota.authenticated
-                      ? `${shadowingQuota.used}/${shadowingQuota.limit}`
-                      : `Tối đa ${shadowingQuota.limit}`}
+                    {shadowingQuota.unlimited
+                      ? `${shadowingQuota.used} · ∞`
+                      : shadowingQuota.authenticated
+                        ? `${shadowingQuota.used}/${shadowingQuota.limit}`
+                        : `Tối đa ${shadowingQuota.limit}`}
                   </span>
                 </button>
               </div>

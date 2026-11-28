@@ -21,9 +21,9 @@ export function AdminOverviewTab({
       tab: 'users',
     },
     {
-      title: 'HỘI VIÊN PRO ACTIVE',
+      title: 'HỘI VIÊN TRẢ PHÍ ACTIVE',
       value: (stats.activePro || 0).toLocaleString(),
-      subtitle: `${stats.lifetimePro || 0} học viên trọn đời`,
+      subtitle: `${stats.activePremium || 0} Premium · ${stats.lifetimePro || 0} Trọn đời`,
       icon: 'card_giftcard',
       tab: 'subscriptions',
     },
@@ -44,10 +44,10 @@ export function AdminOverviewTab({
   ];
 
   const planBreakdown = [
-    { label: 'Gói 1 Tháng (pro_1m)', count: stats.plan1m || 0, price: '69.000đ', icon: 'looks_one' },
-    { label: 'Gói 6 Tháng (pro_6m)', count: stats.plan6m || 0, price: '299.000đ', icon: 'looks_6' },
-    { label: 'Gói 1 Năm (pro_1y)', count: stats.plan1y || 0, price: '499.000đ', icon: 'event' },
-    { label: 'Gói Trọn Đời (lifetime)', count: stats.lifetimePro || 0, price: '899.000đ', icon: 'all_inclusive' },
+    { label: 'Gói 1 Tháng (Pro 25k / Prem 69k)', count: stats.plan1m || 0, price: '25k / 69k', icon: 'looks_one' },
+    { label: 'Gói 3 Tháng (Pro 65k / Prem 179k)', count: stats.plan3m || 0, price: '65k / 179k', icon: 'looks_3' },
+    { label: 'Gói 6 Tháng (Pro 119k / Prem 329k)', count: stats.plan6m || 0, price: '119k / 329k', icon: 'looks_6' },
+    { label: 'Gói 1 Năm (Pro 199k / Prem 549k)', count: stats.plan1y || 0, price: '199k / 549k', icon: 'event' },
   ];
 
   return (

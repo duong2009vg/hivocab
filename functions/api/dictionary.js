@@ -60,7 +60,7 @@ async function fetchOfficialEnglishMeanings(word) {
     const byPos = new Map();
     let firstDef = '';
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3500);
+    const timer = setTimeout(() => controller.abort(), 1800);
     try {
         const res = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, {
             signal: controller.signal,
@@ -302,22 +302,19 @@ Rules:
     let parsedResult = null;
     let providerUsed = '';
 
-    // 1. Thử DeepSeek official nếu có key
-    if (deepseekKey) {
-        parsedResult = await fetchAI(DEEPSEEK_URL, deepseekKey, DEEPSEEK_MODEL, systemPrompt, userPrompt, 22000);
-        if (parsedResult) providerUsed = 'deepseek_ai';
-    }
+    // Primary-first sequential fallback (DeepSeek -> CKEY -> Groq) to avoid paying 2-3x API calls per miss
+    const providers = [];
+    if (deepseekKey) providers.push({ url: DEEPSEEK_URL, key: deepseekKey, model: DEEPSEEK_MODEL, provider: 'deepseek_ai', timeoutMs: 8500 });
+    if (ckeyKey) providers.push({ url: CKEY_URL, key: ckeyKey, model: CKEY_MODEL, provider: 'ckey_deepseek', timeoutMs: 8500 });
+    if (groqKey) providers.push({ url: GROQ_URL, key: groqKey, model: GROQ_MODEL, provider: 'groq', timeoutMs: 7000 });
 
-    // 2. Thử DeepSeek qua CKEY proxy nếu chưa có kết quả
-    if (!parsedResult && ckeyKey) {
-        parsedResult = await fetchAI(CKEY_URL, ckeyKey, CKEY_MODEL, systemPrompt, userPrompt, 22000);
-        if (parsedResult) providerUsed = 'ckey_deepseek';
-    }
-
-    // 3. Fallback sang Groq nếu cả 2 phía trên chưa trả lời
-    if (!parsedResult && groqKey) {
-        parsedResult = await fetchAI(GROQ_URL, groqKey, GROQ_MODEL, systemPrompt, userPrompt, 12000);
-        if (parsedResult) providerUsed = 'groq';
+    for (const p of providers) {
+        const data = await fetchAI(p.url, p.key, p.model, systemPrompt, userPrompt, p.timeoutMs);
+        if (data && typeof data === 'object') {
+            parsedResult = data;
+            providerUsed = p.provider;
+            break;
+        }
     }
 
     const officialDict = await officialDictPromise;

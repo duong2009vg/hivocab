@@ -449,22 +449,27 @@ export async function isUserPro() {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('tier, subscription_plan, subscription_expires_at')
+        .select('role, tier, subscription_plan, subscription_expires_at')
         .eq('id', user.id)
         .maybeSingle();
       if (!data) {
         MEM.isPro = false;
+      } else if (data.role === 'admin') {
+        MEM.isPro = true;
       } else {
+        const rawTier = String(data.tier || '').toLowerCase();
         const plan = String(data.subscription_plan || '').toLowerCase();
-        const isProTier = (
-          data.tier === 'pro' ||
-          data.tier === 'lifetime' ||
+        const isPaidTier = (
+          rawTier === 'pro' ||
+          rawTier === 'premium' ||
+          rawTier === 'lifetime' ||
           plan === 'lifetime' ||
-          plan.startsWith('pro')
+          plan.startsWith('pro') ||
+          plan.startsWith('premium')
         );
-        if (!isProTier) {
+        if (!isPaidTier) {
           MEM.isPro = false;
-        } else if (data.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime' || !data.subscription_expires_at) {
+        } else if (rawTier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime' || !data.subscription_expires_at) {
           MEM.isPro = true;
         } else {
           MEM.isPro = new Date(data.subscription_expires_at) > new Date();
@@ -1220,6 +1225,48 @@ export async function getPassage(passageId) {
   }
 }
 
+export const FREE_WORD_LIMIT = 1000;
+
+export async function getUserSavedWordsCount() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.id) return 0;
+
+  try {
+    const { data: ownTopics } = await supabase
+      .from('topics')
+      .select('id')
+      .eq('user_id', user.id);
+
+    const topicIds = (ownTopics || []).map((t) => t.id).filter(Boolean);
+    if (!topicIds.length) return 0;
+
+    const { count, error } = await supabase
+      .from('words')
+      .select('id', { count: 'exact', head: true })
+      .in('topic_id', topicIds);
+
+    if (!error && typeof count === 'number') {
+      return count;
+    }
+  } catch (_) {}
+  return 0;
+}
+
+export async function checkFreeWordQuota(incomingCount = 1) {
+  const paid = await isUserPro();
+  if (paid) {
+    return { allowed: true, used: 0, limit: null };
+  }
+  const used = await getUserSavedWordsCount();
+  const allowed = used + Math.max(1, Number(incomingCount) || 1) <= FREE_WORD_LIMIT;
+  return {
+    allowed,
+    used,
+    limit: FREE_WORD_LIMIT,
+    remaining: Math.max(0, FREE_WORD_LIMIT - used),
+  };
+}
+
 export async function addWord(topicIdOrObj, options = {}) {
   let topicId = topicIdOrObj;
   let opts = options || {};
@@ -1227,6 +1274,18 @@ export async function addWord(topicIdOrObj, options = {}) {
     topicId = topicIdOrObj.topic_id || topicIdOrObj.topicId;
     opts = topicIdOrObj;
   }
+
+  // Client-side pre-check for Free 1,000 personal word limit (mirrors DB trigger)
+  const quota = await checkFreeWordQuota(1);
+  if (!quota.allowed) {
+    const limitErr = new Error(
+      `Tài khoản Miễn phí giới hạn tối đa ${FREE_WORD_LIMIT.toLocaleString('vi-VN')} từ vựng cá nhân (bạn đã lưu ${quota.used.toLocaleString('vi-VN')}/${FREE_WORD_LIMIT.toLocaleString('vi-VN')} từ). Nâng cấp HiVocab Pro để lưu từ không giới hạn!`
+    );
+    limitErr.code = 'FREE_WORD_LIMIT_REACHED';
+    limitErr.quota = quota;
+    throw limitErr;
+  }
+
   const payload = {
     topic_id: topicId,
     word: String(opts.word || '').trim(),
@@ -1245,7 +1304,16 @@ export async function addWord(topicIdOrObj, options = {}) {
     .insert(payload)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    if (String(error.message || '').includes('FREE_WORD_LIMIT_REACHED')) {
+      const limitErr = new Error(
+        `Tài khoản Miễn phí giới hạn tối đa ${FREE_WORD_LIMIT.toLocaleString('vi-VN')} từ vựng cá nhân. Nâng cấp HiVocab Pro để lưu từ không giới hạn!`
+      );
+      limitErr.code = 'FREE_WORD_LIMIT_REACHED';
+      throw limitErr;
+    }
+    throw error;
+  }
 
   // Xóa cache bài học và danh sách từ của topic để giao diện tải lại từ mới ngay lập tức
   if (typeof window !== 'undefined') {

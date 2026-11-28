@@ -1,13 +1,18 @@
 // src/components/studio/StudioVoiceRecorder.jsx
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Square, Trash2, Sparkles, Loader2, Server, Volume2 } from 'lucide-react';
+import { Mic, Square, Trash2, Sparkles, Loader2, Server, Volume2, Zap, Crown } from 'lucide-react';
 import {
   scorePronunciation,
   getStudioApiUrl,
   prewarmStudioBackend,
+  getAiShadowingQuotaStatus,
+  consumeAiShadowingQuota,
+  isPronunciationScoreCached,
   playStudioTts,
   stopStudioAudio,
 } from '../../services/studioService.js';
+import { useAuth } from '../../providers/AuthProvider.jsx';
+import { useModal } from '../../context/ModalContext.jsx';
 import { convertBlobTo16kMonoWav, encodeFloat32ChunksTo16kMonoWav } from '../../utils/audioWavEncoder.js';
 import { buildLocalPronunciationResult } from '../../utils/studioCore.js';
 import PronunciationResultCard from './PronunciationResultCard.jsx';
@@ -51,6 +56,9 @@ export function StudioVoiceRecorder({
   onScored,
   onOpenSetup,
 }) {
+  const { tier, canPrewarmStudioAi } = useAuth();
+  const { openModal } = useModal();
+
   const [isRecording, setIsRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [recordedBlob, setRecordedBlob] = useState(null);
@@ -60,6 +68,18 @@ export function StudioVoiceRecorder({
   const [samplePlaying, setSamplePlaying] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [aiQuota, setAiQuota] = useState(null);
+  const [quotaBlocked, setQuotaBlocked] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    getAiShadowingQuotaStatus(tier).then((q) => {
+      if (active && q) setAiQuota(q);
+    });
+    return () => {
+      active = false;
+    };
+  }, [tier]);
 
   const sampleTokenRef = useRef(0);
 
@@ -268,7 +288,31 @@ export function StudioVoiceRecorder({
     }
     setScoring(true);
     setError('');
+    setQuotaBlocked(false);
     try {
+      const cachedHit = isPronunciationScoreCached({
+        blob: targetBlob,
+        expectedText: expectedTextRef.current,
+        lang: 'en',
+      });
+
+      if (!cachedHit) {
+        const quotaRes = await consumeAiShadowingQuota(tier);
+        if (quotaRes) {
+          setAiQuota(quotaRes);
+        }
+        if (quotaRes && !quotaRes.allowed) {
+          setQuotaBlocked(true);
+          setError(
+            quotaRes.message ||
+              (tier === 'pro'
+                ? 'Bạn đã dùng hết 500 lượt chấm AI hôm nay. Nâng cấp Premium để dùng không giới hạn!'
+                : 'Bạn đã dùng hết 50 lượt chấm AI hôm nay. Nâng cấp HiVocab Pro để mở khóa 500 lượt/ngày!')
+          );
+          return;
+        }
+      }
+
       const data = await scorePronunciation({
         blob: targetBlob,
         expectedText: expectedTextRef.current,
@@ -358,7 +402,10 @@ export function StudioVoiceRecorder({
   };
 
   const startRecording = async () => {
-    prewarmStudioBackend();
+    // Only pre-warm Modal for Pro & Premium learners; Free learners wake Modal solely on clicking "Chấm sâu AI"
+    if (canPrewarmStudioAi) {
+      prewarmStudioBackend({ allowed: true });
+    }
     sampleTokenRef.current += 1;
     setSamplePlaying(false);
     stopStudioAudio();
@@ -659,6 +706,46 @@ export function StudioVoiceRecorder({
             <span>Gắn AI Modal để chấm IPA sâu</span>
           </button>
         )}
+
+        {hasServer && aiQuota && (
+          <div className="w-full sm:w-auto sm:ml-auto flex items-center justify-between sm:justify-end gap-2">
+            <span
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-extrabold border ${
+                aiQuota.unlimited
+                  ? 'bg-[#F3E8FF] text-[#6B21A8] border-[#6B21A8]/35'
+                  : (aiQuota.remaining ?? 0) <= 5
+                  ? 'bg-[#FDECE8] text-[#B53D2A] border-[#D96B43]/50'
+                  : canPrewarmStudioAi
+                  ? 'bg-[#EEF5EC] text-[#355A3B] border-[#4D6B53]/35'
+                  : 'bg-[#FAF5EB] text-[#6E5D53] border-[#3D352E]/20'
+              }`}
+              title={
+                canPrewarmStudioAi
+                  ? 'Gói Pro/Premium tự động làm ấm AI Modal ngay khi vào bài học (0 độ trễ khởi động)'
+                  : 'Gói Miễn phí kích hoạt AI khi bạn bấm Chấm sâu AI (tối đa 50 lượt/ngày)'
+              }
+            >
+              {aiQuota.unlimited ? (
+                <>
+                  <Crown className="w-3 h-3 shrink-0" />
+                  <span>AI không giới hạn · Làm ấm sẵn</span>
+                </>
+              ) : (
+                <>
+                  {canPrewarmStudioAi ? (
+                    <Zap className="w-3 h-3 shrink-0" />
+                  ) : (
+                    <Sparkles className="w-3 h-3 shrink-0" />
+                  )}
+                  <span>
+                    AI hôm nay: {aiQuota.remaining}/{aiQuota.limit} lượt
+                    {canPrewarmStudioAi ? ' · Làm ấm sẵn' : ''}
+                  </span>
+                </>
+              )}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Live Web Speech preview while recording */}
@@ -680,9 +767,24 @@ export function StudioVoiceRecorder({
       )}
 
       {error && (
-        <p className="text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2">
-          {error}
-        </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs font-bold text-[#B53D2A] bg-[#FDECE8] border border-[#D96B43]/40 rounded-xl px-3 py-2.5">
+          <span>{error}</span>
+          {quotaBlocked && (
+            <button
+              type="button"
+              onClick={() =>
+                openModal('pricingModal', {
+                  defaultTier: tier === 'pro' ? 'premium' : 'pro',
+                  reason: 'ai_shadowing_limit',
+                })
+              }
+              className="shrink-0 inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-[#3D352E] hover:bg-[#2E2823] text-white text-[11px] font-black cursor-pointer"
+            >
+              <Crown className="w-3.5 h-3.5 text-[#F4D06F]" />
+              <span>{tier === 'pro' ? 'Lên Premium không giới hạn' : 'Nâng cấp Pro (500 lượt/ngày)'}</span>
+            </button>
+          )}
+        </div>
       )}
 
       {result && (

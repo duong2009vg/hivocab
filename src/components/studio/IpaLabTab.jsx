@@ -1,10 +1,12 @@
 // src/components/studio/IpaLabTab.jsx
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { Volume2, Sparkles } from 'lucide-react';
-import { playStudioTts } from '../../services/studioService.js';
+import { playStudioTts, prewarmStudioBackend } from '../../services/studioService.js';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 
 export function IpaLabTab({ phonemeData, minimalPairsData, voice, onOpenSetup }) {
+  const { canPrewarmStudioAi } = useAuth();
   const sounds = useMemo(() => (Array.isArray(phonemeData?.sounds) ? phonemeData.sounds : []), [phonemeData]);
   const pairGroups = useMemo(() => (Array.isArray(minimalPairsData?.groups) ? minimalPairsData.groups : []), [minimalPairsData]);
   const pairCategories = useMemo(
@@ -21,6 +23,13 @@ export function IpaLabTab({ phonemeData, minimalPairsData, voice, onOpenSetup })
   const detailCardRef = useRef(null);
 
   const activeSound = selectedSound || sounds[0] || null;
+
+  // Pro & Premium: pre-warm Modal when opening IPA Lab or switching phoneme lesson
+  useEffect(() => {
+    if (canPrewarmStudioAi) {
+      prewarmStudioBackend({ allowed: true });
+    }
+  }, [canPrewarmStudioAi, activeSound?.id]);
 
   const handleSelectSound = (sound) => {
     setSelectedSound(sound);

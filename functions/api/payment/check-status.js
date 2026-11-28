@@ -119,8 +119,14 @@ export async function onRequestGet(context) {
             }
         } catch (_) {}
 
-        // Tự động kích hoạt (Auto-heal) CHỈ KHI đơn hàng chưa từng được cấp quyền (chống replay sau khi admin thu hồi PRO)
-        if (order.status === 'PAID' && !order.entitlement_granted_at && profile?.tier !== 'pro') {
+        // Tự động kích hoạt (Auto-heal) CHỈ KHI đơn hàng chưa từng được cấp quyền (chống replay sau khi admin thu hồi)
+        const expectedTier = String(order.plan_id || '').toLowerCase().startsWith('premium') ? 'premium' : 'pro';
+        const alreadyHasExpectedOrHigher =
+            profile?.tier === 'lifetime' ||
+            profile?.tier === 'premium' ||
+            (expectedTier === 'pro' && profile?.tier === 'pro');
+
+        if (order.status === 'PAID' && !order.entitlement_granted_at && !alreadyHasExpectedOrHigher) {
             try {
                 const rpcRes = await fetch(`${SUPABASE_URL}/rest/v1/rpc/activate_pro_order`, {
                     method: 'POST',
@@ -161,9 +167,11 @@ export async function onRequestGet(context) {
             status: order.status,
             paid: order.status === 'PAID',
             amount: order.amount,
+            planId: order.plan_id,
             planName: order.plan_name,
             paymentTime: order.payment_time,
             userTier: profile?.tier || 'free',
+            subscriptionPlan: profile?.subscription_plan || null,
             subscriptionExpiresAt: profile?.subscription_expires_at || null,
         }), {
             status: 200,

@@ -7,7 +7,7 @@ import { useModal } from '../../context/ModalContext.jsx';
 import { Crown } from 'lucide-react';
 
 export function MobileProfileDropdown() {
-  const { user, signOut, isPaidPro: isPro } = useAuth();
+  const { user, signOut, isPaidPro: isPro, isPremium } = useAuth();
   const { navigateTo } = useRoute();
   const { openModal } = useModal();
 
@@ -84,9 +84,9 @@ export function MobileProfileDropdown() {
           </div>
           <span
             id="mobile-profile-pro-badge"
-            className={`profile-pro-badge ${isPro ? 'inline-flex' : 'hidden'} shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 text-white rounded-md shadow-xs`}
+            className={`profile-pro-badge ${isPro ? 'inline-flex' : 'hidden'} shrink-0 items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${isPremium ? 'bg-gradient-to-r from-purple-600 to-violet-700' : 'bg-gradient-to-r from-amber-500 to-amber-600'} text-white rounded-md shadow-xs`}
           >
-            <span className="material-symbols-outlined text-[10px] icon-fill">workspace_premium</span>PRO
+            <span className="material-symbols-outlined text-[10px] icon-fill">workspace_premium</span>{isPremium ? 'PREMIUM' : 'PRO'}
           </span>
         </div>
         <div id="mobile-dropdown-email" className="text-xs text-on-surface-variant truncate mt-0.5">
@@ -107,13 +107,17 @@ export function MobileProfileDropdown() {
           <span className="material-symbols-outlined text-[14px] text-amber-500/70">arrow_forward</span>
         </button>
       ) : (
-        <div className="w-full min-h-[44px] flex items-center justify-between px-4 py-3 text-xs text-[#557A46] bg-[#E5EFE2] font-black border-b border-outline-variant/15 select-none">
+        <button
+          type="button"
+          onClick={handleUpgrade}
+          className={`w-full min-h-[44px] flex items-center justify-between px-4 py-3 text-xs ${isPremium ? 'text-[#6B21A8] bg-[#F3E8FF]' : 'text-[#557A46] bg-[#E5EFE2]'} font-black border-b border-outline-variant/15 cursor-pointer`}
+        >
           <div className="flex items-center gap-1.5">
-            <Crown className="w-3.5 h-3.5 text-[#557A46] shrink-0" />
-            <span>HiVocab PRO</span>
+            <Crown className={`w-3.5 h-3.5 shrink-0 ${isPremium ? 'text-[#6B21A8]' : 'text-[#557A46]'}`} />
+            <span>{isPremium ? 'HiVocab PREMIUM' : 'HiVocab PRO'}</span>
           </div>
-          <span className="text-[10px] bg-[#557A46] text-white px-1.5 py-0.5 rounded-full font-bold">Active</span>
-        </div>
+          <span className={`text-[10px] ${isPremium ? 'bg-[#6B21A8]' : 'bg-[#557A46]'} text-white px-1.5 py-0.5 rounded-full font-bold`}>Active</span>
+        </button>
       )}
 
       <button

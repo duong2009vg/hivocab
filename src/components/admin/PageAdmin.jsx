@@ -130,8 +130,10 @@ export function PageAdmin() {
   const stats = useMemo(() => {
     const totalUsers = profiles.length;
     let activePro = 0;
+    let activePremium = 0;
     let lifetimePro = 0;
     let plan1m = 0;
+    let plan3m = 0;
     let plan6m = 0;
     let plan1y = 0;
 
@@ -139,10 +141,15 @@ export function PageAdmin() {
       const isPro = checkIsPro(p);
       if (isPro) {
         activePro++;
+        if (p.tier === 'premium' || String(p.subscription_plan || '').startsWith('premium')) {
+          activePremium++;
+        }
         if (p.tier === 'lifetime' || p.subscription_plan === 'pro_lifetime' || p.subscription_plan === 'lifetime') {
           lifetimePro++;
         } else if (p.subscription_plan?.includes('1m')) {
           plan1m++;
+        } else if (p.subscription_plan?.includes('3m')) {
+          plan3m++;
         } else if (p.subscription_plan?.includes('6m')) {
           plan6m++;
         } else if (p.subscription_plan?.includes('1y')) {
@@ -157,8 +164,10 @@ export function PageAdmin() {
     return {
       totalUsers,
       activePro,
+      activePremium,
       lifetimePro,
       plan1m,
+      plan3m,
       plan6m,
       plan1y,
       totalRevenue,

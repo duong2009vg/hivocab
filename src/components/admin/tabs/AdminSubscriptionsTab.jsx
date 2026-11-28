@@ -20,14 +20,17 @@ export function AdminSubscriptionsTab({
   const now = new Date();
   const sevenDaysLater = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-  // Helper to compute user PRO status
+  // Helper to compute user PRO / PREMIUM status
   const evaluateProStatus = (p) => {
     const plan = String(p.subscription_plan || '').toLowerCase();
+    const isPremiumTier = p.tier === 'premium' || plan.startsWith('premium');
     const isProTier = (
       p.tier === 'pro' ||
+      p.tier === 'premium' ||
       p.tier === 'lifetime' ||
       plan === 'lifetime' ||
       plan.startsWith('pro') ||
+      plan.startsWith('premium') ||
       Boolean(p.is_pro)
     );
 
@@ -35,10 +38,12 @@ export function AdminSubscriptionsTab({
     const isExpired = expiresAt && expiresAt < now;
     const isLifetime = p.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime' || (!expiresAt && isProTier);
     const isActivePro = isProTier && !isExpired;
+    const isActivePremium = isPremiumTier && !isExpired;
     const isExpiringSoon = isActivePro && expiresAt && expiresAt <= sevenDaysLater && !isLifetime;
 
     return {
       isActivePro,
+      isActivePremium,
       isLifetime,
       isExpired,
       isExpiringSoon,
@@ -362,12 +367,18 @@ export function AdminSubscriptionsTab({
                           className={`px-2.5 py-0.5 rounded-full font-black text-[10px] border ${
                             isLifetime
                               ? 'bg-[#F3E8FF] text-[#7E22CE] border-[#C084FC]'
+                              : p.tier === 'premium' || String(p.subscription_plan || '').startsWith('premium')
+                              ? 'bg-[#F3E8FF] text-[#6B21A8] border-[#A855F7]'
                               : isActivePro
                               ? 'bg-[#EAF3E7] text-[#557A46] border-[#8FB383]'
                               : 'bg-[#FAF5EB] text-[#86756C] border-[#3D352E]/20'
                           }`}
                         >
-                          {isLifetime ? 'PRO Trọn đời ✨' : isActivePro ? p.subscription_plan || 'PRO 👑' : 'Miễn phí 🌱'}
+                          {isLifetime
+                            ? 'Trọn đời ✨'
+                            : isActivePro
+                            ? p.subscription_plan || (p.tier === 'premium' ? 'PREMIUM 💎' : 'PRO 👑')
+                            : 'Miễn phí 🌱'}
                         </span>
                       </td>
 

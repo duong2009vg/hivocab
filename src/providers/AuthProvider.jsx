@@ -4,32 +4,31 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../lib/supabaseClient.js';
 import { clearTopicCache } from '../services/db.js';
+import {
+  resolveEffectiveTier,
+  isProOrHigher,
+  isPremiumOrHigher,
+  getPlanLimits,
+} from '../config/plans.js';
 
 export function checkIsPro(profile) {
-  if (!profile) return false;
-  const plan = String(profile.subscription_plan || '').toLowerCase();
-  const isProTier = (
-    profile.tier === 'pro' ||
-    profile.tier === 'lifetime' ||
-    plan === 'lifetime' ||
-    plan.startsWith('pro') ||
-    Boolean(profile.is_pro)
-  );
-  if (!isProTier) return false;
-  if (profile.tier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime') {
-    return true;
-  }
-  if (!profile.subscription_expires_at) {
-    return isProTier;
-  }
-  return new Date(profile.subscription_expires_at) > new Date();
+  return isProOrHigher(profile);
+}
+
+export function checkIsPremium(profile) {
+  return isPremiumOrHigher(profile);
 }
 
 const AuthContext = createContext({
   user: null,
   session: null,
   profile: null,
+  tier: 'free',
   isPro: false,
+  isPaidPro: false,
+  isPremium: false,
+  planLimits: getPlanLimits('free'),
+  canPrewarmStudioAi: false,
   globalGatingMode: 'pro',
   isGlobalFree: false,
   isAdmin: false,
@@ -265,24 +264,34 @@ export function AuthProvider({ children }) {
   }, []);
 
   const isGlobalFree = globalGatingMode === 'free';
-  const isPro = isGlobalFree || checkIsPro(profile);
+  const tier = resolveEffectiveTier(profile);
   const isPaidPro = checkIsPro(profile);
+  const isPremium = checkIsPremium(profile);
+  const isPro = isGlobalFree || isPaidPro;
   const isAdmin = Boolean(profile?.role === 'admin');
+  const planLimits = getPlanLimits(tier);
+  const canPrewarmStudioAi = Boolean(planLimits.prewarmStudioAi);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      window._userTier = tier;
       window._isUserPro = isPro;
+      window._isUserPremium = isPremium;
       window._hivocabGlobalFree = isGlobalFree;
       window._systemGatingMode = globalGatingMode;
     }
-  }, [isPro, isGlobalFree, globalGatingMode]);
+  }, [tier, isPro, isPremium, isGlobalFree, globalGatingMode]);
 
   const value = {
     user,
     session,
     profile,
+    tier,
     isPro,
     isPaidPro,
+    isPremium,
+    planLimits,
+    canPrewarmStudioAi,
     globalGatingMode,
     isGlobalFree,
     isAdmin,

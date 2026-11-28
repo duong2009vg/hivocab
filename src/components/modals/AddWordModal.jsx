@@ -200,6 +200,10 @@ export function AddWordModal() {
     } catch (err) {
       setErrorMessage(err?.message || 'Không thể lưu từ vựng.');
       toastError(err?.message || 'Lỗi thêm từ vựng.');
+      if (err?.code === 'FREE_WORD_LIMIT_REACHED' || String(err?.message || '').includes('FREE_WORD_LIMIT_REACHED')) {
+        handleClose();
+        openModal('pricingModal', { defaultTier: 'pro', reason: 'word_limit' });
+      }
     } finally {
       setIsSubmitting(false);
     }

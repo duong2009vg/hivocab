@@ -60,6 +60,38 @@ async function fetchConfiguredYoutubeVideoLimit(env) {
   return DEFAULT_USER_YOUTUBE_VIDEO_LIMIT;
 }
 
+async function fetchUserEffectiveTier(env, userId, token) {
+  const { supabaseUrl, supabaseAnonKey } = getSupabaseRestConfig(env);
+  if (!supabaseUrl || !supabaseAnonKey || !userId || !token) return 'free';
+  try {
+    const url = `${supabaseUrl}/rest/v1/profiles?select=role,tier,subscription_plan,subscription_expires_at&id=eq.${encodeURIComponent(userId)}&limit=1`;
+    const res = await fetchWithTimeout(
+      url,
+      {
+        headers: {
+          apikey: supabaseAnonKey,
+          Authorization: `Bearer ${token}`,
+        },
+      },
+      6000
+    );
+    if (!res.ok) return 'free';
+    const rows = await res.json().catch(() => []);
+    const p = Array.isArray(rows) ? rows[0] : null;
+    if (!p) return 'free';
+    if (p.role === 'admin') return 'premium';
+    const rawTier = String(p.tier || '').toLowerCase();
+    const plan = String(p.subscription_plan || '').toLowerCase();
+    if (rawTier === 'lifetime' || plan === 'lifetime' || plan === 'pro_lifetime') return 'lifetime';
+    if (p.subscription_expires_at && new Date(p.subscription_expires_at) <= new Date()) return 'free';
+    if (rawTier === 'premium' || plan.startsWith('premium')) return 'premium';
+    if (rawTier === 'pro' || plan.startsWith('pro')) return 'pro';
+    return 'free';
+  } catch {
+    return 'free';
+  }
+}
+
 async function fetchUserSavedVideoIds(env, userId, token) {
   const { supabaseUrl, supabaseAnonKey } = getSupabaseRestConfig(env);
   if (!supabaseUrl || !supabaseAnonKey || !userId || !token) {
@@ -210,10 +242,12 @@ export async function onRequestPost(context) {
 
   let savedVideoIds = [];
   let videoLimit = DEFAULT_USER_YOUTUBE_VIDEO_LIMIT;
+  let userTier = 'free';
   try {
-    [savedVideoIds, videoLimit] = await Promise.all([
+    [savedVideoIds, videoLimit, userTier] = await Promise.all([
       fetchUserSavedVideoIds(env, auth.user.id, auth.token),
       fetchConfiguredYoutubeVideoLimit(env),
+      fetchUserEffectiveTier(env, auth.user.id, auth.token),
     ]);
   } catch (err) {
     return jsonResponse(
@@ -223,15 +257,17 @@ export async function onRequestPost(context) {
     );
   }
 
+  const isUnlimitedYoutube = userTier === 'premium' || userTier === 'lifetime';
   const alreadySaved = savedVideoIds.includes(videoId);
-  if (!alreadySaved && savedVideoIds.length >= videoLimit) {
+  if (!isUnlimitedYoutube && !alreadySaved && savedVideoIds.length >= videoLimit) {
     return jsonResponse(
       {
         ok: false,
         code: 'VIDEO_QUOTA_EXCEEDED',
+        tier: userTier,
         limit: videoLimit,
         used: savedVideoIds.length,
-        detail: `Mỗi tài khoản chỉ được lưu tối đa ${videoLimit} video YouTube cá nhân (bạn đang có ${savedVideoIds.length}/${videoLimit}). Hãy xóa bớt video cũ trong Thư viện Video để thêm mới.`,
+        detail: `Gói ${userTier === 'pro' ? 'Pro' : 'Miễn phí'} chỉ được lưu tối đa ${videoLimit} video YouTube cá nhân (${savedVideoIds.length}/${videoLimit}). Hãy xóa bớt video cũ hoặc nâng cấp HiVocab Premium để tải lên không giới hạn!`,
       },
       403,
       corsHeaders
@@ -308,7 +344,7 @@ export async function onRequestPost(context) {
 
   const nextUsedCount = alreadySaved
     ? savedVideoIds.length
-    : Math.min(videoLimit, savedVideoIds.length + 1);
+    : (isUnlimitedYoutube ? savedVideoIds.length + 1 : Math.min(videoLimit, savedVideoIds.length + 1));
 
   return jsonResponse(
     {
@@ -316,7 +352,8 @@ export async function onRequestPost(context) {
       storage: 'supabase_user_youtube_videos',
       quota: {
         used: nextUsedCount,
-        limit: videoLimit,
+        limit: isUnlimitedYoutube ? null : videoLimit,
+        unlimited: isUnlimitedYoutube,
       },
       clip: clipMeta,
       cues_doc: {

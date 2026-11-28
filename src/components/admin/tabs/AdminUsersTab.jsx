@@ -190,7 +190,9 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
 
                       <td className="py-2.5 px-3.5">
                         {p.tier === 'lifetime' ? (
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#F3E8FF] text-[#7E22CE] border border-[#C084FC]">PRO Trọn đời ✨</span>
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#F3E8FF] text-[#7E22CE] border border-[#C084FC]">Trọn đời ✨</span>
+                        ) : p.tier === 'premium' || String(p.subscription_plan || '').startsWith('premium') ? (
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#F3E8FF] text-[#6B21A8] border border-[#A855F7]">PREMIUM 💎</span>
                         ) : p.tier === 'pro' || p.is_pro ? (
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">HiVocab PRO 👑</span>
                         ) : (

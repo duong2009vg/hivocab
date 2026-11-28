@@ -1,6 +1,7 @@
 // src/components/layout/MobileBottomNav.jsx
-// Preserves the signature floating frosted-glass capsule & deep-olive active pill aesthetic,
-// upgraded to 5 spacious touch-friendly slots + a matching frosted More menu for all features.
+// Floating frosted-glass capsule dock with a smooth curved center cradle & raised circular
+// Features button in the middle (2 left tabs · raised center Features button · 2 right tabs),
+// preserving HiVocab's signature warm frosted glass & deep-olive (#5a7d4d) aesthetic.
 import React, { useState, useEffect, useRef } from 'react';
 import { Crown } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
@@ -65,6 +66,14 @@ const MORE_ROUTE_IDS = new Set([
   'dictionary',
 ]);
 
+// Smooth floating capsule with curved center cradle (400 x 68 coordinate space)
+const DOCK_PATH_400 =
+  'M 34 1 L 138 1 C 160 1 164 41 200 41 C 236 41 240 1 262 1 L 366 1 C 384.5 1 399 15.8 399 34 C 399 52.2 384.5 67 366 67 L 34 67 C 15.5 67 1 52.2 1 34 C 1 15.8 15.5 1 34 1 Z';
+
+// Same path normalized to [0..1] for objectBoundingBox CSS backdrop-blur clipping
+const DOCK_CLIP_NORM =
+  'M 0.085 0 L 0.345 0 C 0.400 0 0.410 0.603 0.500 0.603 C 0.590 0.603 0.600 0 0.655 0 L 0.915 0 C 0.962 0 1 0.224 1 0.500 C 1 0.776 0.962 1 0.915 1 L 0.085 1 C 0.038 1 0 0.776 0 0.500 C 0 0.224 0.038 0 0.085 0 Z';
+
 export function MobileBottomNav() {
   const { user, isPaidPro: isPro } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
@@ -111,7 +120,7 @@ export function MobileBottomNav() {
     user?.user_metadata?.picture ||
     '/mascot/mascot_cozy.png';
 
-  const primaryTabs = [
+  const leftTabs = [
     {
       id: 'dashboard',
       label: 'Trang chủ',
@@ -127,12 +136,13 @@ export function MobileBottomNav() {
           .catch(() => {});
       },
     },
-    {
-      id: 'vocabulary',
-      label: 'Sổ từ',
-      icon: 'menu_book',
-    },
   ];
+
+  const vocabTab = {
+    id: 'vocabulary',
+    label: 'Sổ từ',
+    icon: 'menu_book',
+  };
 
   const handleSelectMoreFeature = (item) => {
     setIsMoreOpen(false);
@@ -146,8 +156,46 @@ export function MobileBottomNav() {
 
   const isProfileActive = activeTab === 'profile';
 
+  const renderStandardTab = (tab) => {
+    const isActive = activeTab === tab.id && !isMoreOpen;
+    return (
+      <button
+        key={tab.id}
+        type="button"
+        aria-label={tab.label}
+        aria-current={isActive ? 'page' : undefined}
+        onClick={() => navigateTo(tab.id)}
+        onTouchStart={tab.onTouchPrefetch}
+        className={`relative z-10 h-[52px] w-full max-w-[74px] px-1.5 flex flex-col items-center justify-center rounded-full transition-all duration-150 active:scale-95 cursor-pointer ${
+          isActive
+            ? 'bg-[#5a7d4d] text-white ring-1 ring-white/40 shadow-[0_4px_14px_rgba(90,125,77,0.42)]'
+            : 'text-[#554d42] hover:text-[#2a241f]'
+        }`}
+      >
+        <span
+          className="material-symbols-outlined text-[20px] leading-none mb-1"
+          style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+        >
+          {tab.icon}
+        </span>
+        <span className="text-[10px] font-extrabold leading-none tracking-tight whitespace-nowrap">
+          {tab.label}
+        </span>
+      </button>
+    );
+  };
+
   return (
-    <div ref={containerRef} className="lg:hidden">
+    <div ref={containerRef} id="mobile-bottom-nav" className="lg:hidden">
+      {/* Hidden SVG clipPath definition for curved-cradle frosted backdrop blur */}
+      <svg aria-hidden="true" className="absolute w-0 h-0 overflow-hidden pointer-events-none">
+        <defs>
+          <clipPath id="hivocab-dock-cradle-clip" clipPathUnits="objectBoundingBox">
+            <path d={DOCK_CLIP_NORM} />
+          </clipPath>
+        </defs>
+      </svg>
+
       {/* Subtle Backdrop Scrim when More popover is open */}
       {isMoreOpen && (
         <div
@@ -157,12 +205,12 @@ export function MobileBottomNav() {
         />
       )}
 
-      {/* Frosted-glass More Feature Popover matching the floating dock */}
+      {/* Frosted-glass More Feature Popover floating neatly above the raised center button */}
       {isMoreOpen && (
         <div
           role="dialog"
           aria-label="Khám phá thêm tính năng"
-          className="fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 p-3 rounded-[28px] bg-white/95 backdrop-blur-xl border border-white/90 shadow-[0_16px_42px_rgba(61,53,46,0.22)] select-none"
+          className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 p-3.5 rounded-[28px] bg-[#FFFDF9] border border-[#E5DAC7] shadow-[0_18px_46px_rgba(56,46,43,0.22)] select-none"
         >
           <div className="flex items-center justify-between px-1.5 pb-2 mb-2 border-b border-[#382E2B]/10">
             <span className="text-xs font-extrabold text-[#382E2B] tracking-tight">
@@ -226,140 +274,125 @@ export function MobileBottomNav() {
         </div>
       )}
 
-      {/* Main Floating Frosted Capsule Dock (preserved aesthetic, 5 spacious slots) */}
+      {/* Main Floating Frosted Capsule Dock with Curved Center Cradle */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 flex items-center justify-between px-2.5 sm:px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-xl border border-white/80 shadow-[0_10px_30px_rgba(61,53,46,0.12)] select-none"
+        className="fixed bottom-[calc(0.95rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 h-[70px] select-none"
       >
-        {primaryTabs.map((tab) => {
-          const isActive = activeTab === tab.id && !isMoreOpen;
-          if (isActive) {
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                aria-label={tab.label}
-                aria-current="page"
-                onClick={() => navigateTo(tab.id)}
-                onTouchStart={tab.onTouchPrefetch}
-                className="min-h-[44px] flex flex-col items-center justify-center py-1 px-3 sm:px-4 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
-              >
-                <span
-                  className="material-symbols-outlined text-[19px] leading-none mb-0.5"
-                  style={{ fontVariationSettings: "'FILL' 1" }}
-                >
-                  {tab.icon}
-                </span>
-                <span className="text-[10px] font-bold leading-none tracking-tight whitespace-nowrap">
-                  {tab.label}
-                </span>
-              </button>
-            );
-          }
+        {/* Crisp sculpted frosted-cream capsule with smooth curved center cradle */}
+        <svg
+          aria-hidden="true"
+          viewBox="0 0 400 68"
+          preserveAspectRatio="none"
+          className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
+          style={{ filter: 'drop-shadow(0 10px 24px rgba(56, 46, 43, 0.16))' }}
+        >
+          <path
+            d={DOCK_PATH_400}
+            fill="rgba(255, 253, 249, 0.96)"
+            stroke="rgba(227, 215, 197, 0.95)"
+            strokeWidth="1.5"
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
 
-          return (
+        {/* 5-Column Symmetric Button Layout (2 Left · Raised Center Features · 2 Right) */}
+        <div className="relative z-10 h-full w-full grid grid-cols-5 items-center px-1.5">
+          {/* Slots 1 & 2: Trang chủ, Chủ đề */}
+          {leftTabs.map((tab) => (
+            <div key={tab.id} className="flex items-center justify-center px-0.5">
+              {renderStandardTab(tab)}
+            </div>
+          ))}
+
+          {/* Slot 3 (CENTER): Raised Circular Features Drawer Trigger nestled in the curved cradle */}
+          <div className="relative h-full flex flex-col items-center justify-end pb-2.5">
             <button
-              key={tab.id}
               type="button"
-              aria-label={tab.label}
-              onClick={() => navigateTo(tab.id)}
-              onTouchStart={tab.onTouchPrefetch}
-              className="min-w-[44px] h-11 flex items-center justify-center rounded-full text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer"
+              aria-label="Mở tất cả tính năng học tập"
+              aria-expanded={isMoreOpen}
+              onClick={() => setIsMoreOpen((prev) => !prev)}
+              className={`absolute -top-[21px] left-1/2 -translate-x-1/2 w-[54px] h-[54px] rounded-full flex items-center justify-center text-white border-[2.5px] border-white/95 transition-all duration-200 active:scale-90 cursor-pointer ${
+                isMoreOpen
+                  ? 'bg-[#DE5D53] shadow-[0_8px_22px_rgba(222,93,83,0.48)] rotate-90'
+                  : isMoreRouteActive
+                  ? 'bg-gradient-to-b from-[#698F5B] to-[#46633D] shadow-[0_8px_22px_rgba(70,99,61,0.5)] ring-2 ring-[#F4D06F]/80'
+                  : 'bg-gradient-to-b from-[#698F5B] to-[#4D6B43] hover:from-[#729A63] hover:to-[#537449] shadow-[0_8px_20px_rgba(77,107,67,0.42)]'
+              }`}
             >
-              <span className="material-symbols-outlined text-[22px]">{tab.icon}</span>
+              <span
+                className="material-symbols-outlined text-[24px] leading-none"
+                style={{ fontVariationSettings: "'FILL' 1" }}
+              >
+                {isMoreOpen ? 'close' : activeMoreItem?.icon || 'grid_view'}
+              </span>
             </button>
-          );
-        })}
 
-        {/* 4: More / Explore Features (THPT, Bilingual, Studio, Arena, Library, Dictionary) */}
-        {isMoreOpen || isMoreRouteActive ? (
-          <button
-            type="button"
-            aria-label="Khám phá thêm tính năng"
-            aria-expanded={isMoreOpen}
-            onClick={() => setIsMoreOpen((prev) => !prev)}
-            className="min-h-[44px] flex flex-col items-center justify-center py-1 px-3 sm:px-3.5 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
-          >
-            <span
-              className="material-symbols-outlined text-[19px] leading-none mb-0.5"
-              style={{ fontVariationSettings: "'FILL' 1" }}
+            <button
+              type="button"
+              onClick={() => setIsMoreOpen((prev) => !prev)}
+              className={`text-[10px] font-extrabold leading-none tracking-tight whitespace-nowrap max-w-[74px] truncate cursor-pointer ${
+                isMoreOpen
+                  ? 'text-[#DE5D53]'
+                  : isMoreRouteActive
+                  ? 'text-[#4D6B43]'
+                  : 'text-[#554d42]'
+              }`}
             >
-              {isMoreOpen ? 'close' : activeMoreItem?.icon || 'apps'}
-            </span>
-            <span className="text-[10px] font-bold leading-none tracking-tight whitespace-nowrap max-w-[68px] truncate">
-              {isMoreOpen ? 'Đóng' : activeMoreItem?.label?.split(' ')[0] || 'Khám phá'}
-            </span>
-          </button>
-        ) : (
-          <button
-            type="button"
-            aria-label="Khám phá thêm tính năng"
-            aria-expanded={false}
-            onClick={() => setIsMoreOpen(true)}
-            className="min-w-[44px] h-11 flex items-center justify-center rounded-full text-[#554d42] hover:text-[#1e1b17] active:scale-90 transition-all duration-150 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[22px]">grid_view</span>
-          </button>
-        )}
+              {isMoreOpen
+                ? 'Đóng'
+                : activeMoreItem?.label?.split(' ')[0] || 'Tính năng'}
+            </button>
+          </div>
 
-        {/* 5: Profile Mascot Bé Hổ Churbito */}
-        {isProfileActive && !isMoreOpen ? (
-          <button
-            type="button"
-            aria-label="Hồ sơ cá nhân"
-            aria-current="page"
-            onClick={() => navigateTo('profile')}
-            className="relative min-h-[44px] flex flex-col items-center justify-center py-1 px-3 rounded-full bg-[#5a7d4d] text-white ring-1 ring-white/30 shadow-[0_4px_14px_rgba(90,125,77,0.45)] active:scale-95 transition-all duration-150 cursor-pointer"
-          >
-            <div className="w-5 h-5 rounded-full overflow-hidden border border-white shadow-xs flex items-center justify-center mb-0.5">
-              <img
-                alt="Avatar"
-                className="w-full h-full object-cover object-top scale-110"
-                src={avatarUrl}
-                onError={(e) => {
-                  e.currentTarget.src = '/mascot/mascot_cozy.png';
-                }}
-              />
-            </div>
-            <span className="text-[10px] font-bold leading-none tracking-tight">Hồ sơ</span>
-            {isPro && (
-              <span
-                className="profile-pro-badge absolute -top-1 -right-1 leading-none select-none"
-                title="HiVocab PRO"
+          {/* Slot 4: Sổ từ */}
+          <div className="flex items-center justify-center px-0.5">
+            {renderStandardTab(vocabTab)}
+          </div>
+
+          {/* Slot 5: Hồ sơ Bé Hổ Churbito */}
+          <div className="flex items-center justify-center px-0.5">
+            <button
+              type="button"
+              aria-label="Hồ sơ cá nhân"
+              aria-current={isProfileActive && !isMoreOpen ? 'page' : undefined}
+              onClick={() => navigateTo('profile')}
+              className={`relative z-10 h-[52px] w-full flex flex-col items-center justify-center rounded-full transition-all duration-150 active:scale-95 cursor-pointer ${
+                isProfileActive && !isMoreOpen
+                  ? 'bg-[#5a7d4d] text-white ring-1 ring-white/40 shadow-[0_4px_14px_rgba(90,125,77,0.42)]'
+                  : 'text-[#554d42] hover:text-[#2a241f]'
+              }`}
+            >
+              <div
+                className={`relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center mb-0.5 ${
+                  isProfileActive && !isMoreOpen
+                    ? 'border-[1.5px] border-white shadow-xs'
+                    : 'bg-[#faf2ec] border-[1.5px] border-[#382E2B]/25 shadow-xs'
+                }`}
               >
-                <Crown className="w-3 h-3 text-amber-300 fill-amber-300" />
+                <img
+                  alt="Avatar"
+                  className="w-full h-full object-cover object-top scale-110"
+                  src={avatarUrl}
+                  onError={(e) => {
+                    e.currentTarget.src = '/mascot/mascot_cozy.png';
+                  }}
+                />
+              </div>
+              <span className="text-[10px] font-bold leading-none tracking-tight whitespace-nowrap">
+                Hồ sơ
               </span>
-            )}
-          </button>
-        ) : (
-          <button
-            type="button"
-            aria-label="Tài khoản Bé Hổ Churbito"
-            onClick={() => navigateTo('profile')}
-            className="relative min-w-[44px] h-11 flex items-center justify-center rounded-full active:scale-90 transition-all duration-150 cursor-pointer"
-          >
-            <div className="w-8 h-8 rounded-full overflow-hidden bg-[#faf2ec] border-2 border-white/80 shadow-sm flex items-center justify-center">
-              <img
-                alt="Churbito Avatar"
-                className="w-full h-full object-cover object-top scale-110"
-                src={avatarUrl}
-                onError={(e) => {
-                  e.currentTarget.src = '/mascot/mascot_cozy.png';
-                }}
-              />
-            </div>
-            {isPro ? (
-              <span
-                className="profile-pro-badge absolute top-0.5 right-0.5 leading-none select-none filter drop-shadow-xs"
-                title="HiVocab PRO"
-              >
-                <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
-              </span>
-            ) : (
-              <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#5a7d4d] ring-2 ring-white" />
-            )}
-          </button>
-        )}
+              {isPro && (
+                <span
+                  className="profile-pro-badge absolute top-0.5 right-1.5 leading-none select-none"
+                  title="HiVocab PRO"
+                >
+                  <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
       </nav>
     </div>
   );

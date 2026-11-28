@@ -4,23 +4,17 @@ import React from 'react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useModal } from '../../context/ModalContext.jsx';
 import { CrayonProBadge } from './CrayonProBadge.jsx';
+import { getPlanDisplayName } from '../../config/plans.js';
 import { Crown, Sparkles, Calendar, Clock, RotateCcw, GraduationCap, ArrowRight } from 'lucide-react';
 
-const PLAN_NAMES = {
-  pro_1m: 'Gói 1 Tháng (Trải Nghiệm)',
-  pro_6m: 'Gói 6 Tháng (Phổ Biến Nhất)',
-  pro_1y: 'Gói 1 Năm (Tiết Kiệm Nhất)',
-  pro_lifetime: 'Gói PRO Trọn Đời (Vĩnh Viễn)',
-  lifetime: 'Gói PRO Trọn Đời (Vĩnh Viễn)',
-};
-
 export function CrayonProfileProCard({ className = '' }) {
-  const { user, profile, isPaidPro: isPro, refreshProfile } = useAuth();
+  const { user, profile, tier, isPaidPro: isPro, isPremium, refreshProfile } = useAuth();
   const { openModal } = useModal();
 
-  const handleOpenPricing = (planId = 'pro_6m') => {
+  const handleOpenPricing = (planId = 'pro_6m', defaultTier = undefined) => {
     openModal('pricingModal', {
-      defaultPlanId: planId,
+      ...(planId ? { defaultPlanId: planId } : {}),
+      ...(defaultTier ? { defaultTier } : {}),
       onSuccess: async () => {
         if (typeof refreshProfile === 'function') {
           await refreshProfile();
@@ -93,22 +87,22 @@ export function CrayonProfileProCard({ className = '' }) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
-  // 2. TRẠNG THÁI: THÀNH VIÊN PRO CÓ THỜI HẠN (ACTIVE PRO)
+  // 2. TRẠNG THÁI: THÀNH VIÊN PRO / PREMIUM CÓ THỜI HẠN
   // ─────────────────────────────────────────────────────────────────────────────
   if (isPro && expiresAt) {
     const isUrgent = daysRemaining <= 15;
-    const planDisplayName = PLAN_NAMES[planId] || 'Gói Thành Viên HiVocab PRO';
+    const planDisplayName = getPlanDisplayName(planId, tier);
 
     return (
-      <section className={`bg-gradient-to-r from-[#FFFDF9] via-[#FAF5EB] to-[#FFF8EE] border-[2.5px] border-[#3D352E] shadow-crayon rounded-3xl p-6 relative overflow-hidden select-none ${className}`}>
+      <section className={`bg-gradient-to-r ${isPremium ? 'from-[#FBF7FF] via-[#FFFDF9] to-[#F3E8FF]/60' : 'from-[#FFFDF9] via-[#FAF5EB] to-[#FFF8EE]'} border-[2.5px] border-[#3D352E] shadow-crayon rounded-3xl p-6 relative overflow-hidden select-none ${className}`}>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 relative z-10">
           
           {/* Cột trái: Tên gói và thời hạn */}
           <div className="flex items-start gap-4 text-center md:text-left">
-            <Crown className="w-12 h-12 text-[#8C5311] shrink-0" />
+            <Crown className={`w-12 h-12 shrink-0 ${isPremium ? 'text-[#6B21A8]' : 'text-[#8C5311]'}`} />
             <div>
               <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap mb-1">
-                <CrayonProBadge variant="crown" size="sm" />
+                <CrayonProBadge variant={isPremium ? 'premium' : 'crown'} size="sm" />
                 <span className={`text-[11px] font-black px-2.5 py-0.5 rounded-full border ${
                   isUrgent
                     ? 'bg-[#FBECE7] text-[#C85A3F] border-[#C85A3F]/50 animate-pulse'
@@ -136,24 +130,26 @@ export function CrayonProfileProCard({ className = '' }) {
             </div>
           </div>
 
-          {/* Cột phải: Các nút Gia hạn / Nâng cấp Trọn Đời */}
+          {/* Cột phải: Các nút Gia hạn / Nâng cấp Premium */}
           <div className="flex flex-col sm:flex-row items-center gap-2.5 shrink-0 w-full md:w-auto">
             <button
               type="button"
-              onClick={() => handleOpenPricing('pro_6m')}
+              onClick={() => handleOpenPricing(isPremium ? 'premium_6m' : 'pro_6m')}
               className="w-full sm:w-auto py-2.5 px-5 bg-[#4D6B53] hover:bg-[#3D5642] text-white font-heading font-black text-xs rounded-2xl border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5 shrink-0" />
               <span>Gia hạn gói cước</span>
             </button>
-            <button
-              type="button"
-              onClick={() => handleOpenPricing('pro_lifetime')}
-              className="w-full sm:w-auto py-2.5 px-5 bg-[#F3E8FF] hover:bg-[#E9D5FF] text-[#6B21A8] font-heading font-black text-xs rounded-2xl border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
-            >
-              <Crown className="w-3.5 h-3.5 shrink-0" />
-              <span>Lên Trọn Đời</span>
-            </button>
+            {!isPremium && (
+              <button
+                type="button"
+                onClick={() => handleOpenPricing('premium_6m', 'premium')}
+                className="w-full sm:w-auto py-2.5 px-5 bg-[#F3E8FF] hover:bg-[#E9D5FF] text-[#6B21A8] font-heading font-black text-xs rounded-2xl border-2 border-[#3D352E] shadow-crayonSm active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Crown className="w-3.5 h-3.5 shrink-0" />
+                <span>Lên Premium ∞</span>
+              </button>
+            )}
           </div>
         </div>
       </section>

@@ -64,16 +64,16 @@ export async function onRequestPost(context) {
     const prompt = `Write exactly one short, natural English example sentence that clearly uses the ${label} "${term}" in context. Return only the sentence — no quotes, no explanation, nothing else.`;
 
     const providers = [];
-    if (deepseekKey) providers.push({ name: 'deepseek', url: DEEPSEEK_URL, key: deepseekKey, model: DEEPSEEK_MODEL });
-    if (ckeyKey) providers.push({ name: 'ckey', url: CKEY_URL, key: ckeyKey, model: CKEY_MODEL });
-    if (groqKey) providers.push({ name: 'groq', url: GROQ_URL, key: groqKey, model: GROQ_MODEL });
+    if (deepseekKey) providers.push({ name: 'deepseek', url: DEEPSEEK_URL, key: deepseekKey, model: DEEPSEEK_MODEL, timeoutMs: 7500 });
+    if (ckeyKey) providers.push({ name: 'ckey', url: CKEY_URL, key: ckeyKey, model: CKEY_MODEL, timeoutMs: 7500 });
+    if (groqKey) providers.push({ name: 'groq', url: GROQ_URL, key: groqKey, model: GROQ_MODEL, timeoutMs: 5500 });
 
     let sentence = '';
     let sawTimeout = false;
 
     for (const p of providers) {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), p.timeoutMs);
         try {
             const aiRes = await fetch(p.url, {
                 method: 'POST',

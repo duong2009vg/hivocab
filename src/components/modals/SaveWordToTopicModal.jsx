@@ -160,6 +160,10 @@ export function SaveWordToTopicModal() {
     } catch (err) {
       console.error('[SaveWordToTopicModal] save error:', err);
       toastError(err.message || 'Không thể lưu từ vựng. Vui lòng thử lại!');
+      if (err?.code === 'FREE_WORD_LIMIT_REACHED' || String(err?.message || '').includes('FREE_WORD_LIMIT_REACHED')) {
+        closeModal('saveWordToTopic');
+        openModal('pricingModal', { defaultTier: 'pro', reason: 'word_limit' });
+      }
     } finally {
       setSavingTopicId(null);
     }

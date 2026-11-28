@@ -24,10 +24,13 @@ import {
   loadStudioProgress,
   saveDictationScore,
   savePronunciationScore,
+  prewarmStudioBackend,
 } from '../../services/studioService.js';
+import { useAuth } from '../../providers/AuthProvider.jsx';
 import StudioVoiceRecorder from './StudioVoiceRecorder.jsx';
 
 export function DictationTab({ catalog, voice, onOpenSetup }) {
+  const { canPrewarmStudioAi } = useAuth();
   const rawLessons = useMemo(() => (Array.isArray(catalog?.lessons) ? catalog.lessons : []), [catalog]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,6 +83,13 @@ export function DictationTab({ catalog, voice, onOpenSetup }) {
 
   const lines = useMemo(() => (Array.isArray(activeLesson?.lines) ? activeLesson.lines : []), [activeLesson]);
   const currentLine = lines[sentenceIndex] || null;
+
+  // Pro & Premium: pre-warm Modal container immediately when opening a Dictation lesson
+  useEffect(() => {
+    if (activeLesson?.id && canPrewarmStudioAi) {
+      prewarmStudioBackend({ allowed: true });
+    }
+  }, [activeLesson?.id, canPrewarmStudioAi]);
 
   const resetSentenceState = () => {
     setTypedText('');

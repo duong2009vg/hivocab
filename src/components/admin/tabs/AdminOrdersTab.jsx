@@ -78,11 +78,22 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
 
       if (ordErr) throw ordErr;
 
-      // 2. Activate PRO on user's profile
+      // 2. Activate PRO / PREMIUM on user's profile
       if (order.user_id) {
-        const PLAN_DAYS = { pro_1m: 30, pro_6m: 180, pro_1y: 365, pro_lifetime: 36500 };
+        const PLAN_DAYS = {
+          pro_1m: 30,
+          pro_3m: 90,
+          pro_6m: 180,
+          pro_1y: 365,
+          premium_1m: 30,
+          premium_3m: 90,
+          premium_6m: 180,
+          premium_1y: 365,
+          pro_lifetime: 36500,
+        };
         const days = PLAN_DAYS[order.plan_id] || 30;
         const isLifetime = order.plan_id === 'pro_lifetime' || order.plan_id === 'lifetime';
+        const isPremiumPlan = String(order.plan_id || '').toLowerCase().startsWith('premium');
 
         // Check current profile expiry to extend if active
         const { data: prof } = await supabase
@@ -98,7 +109,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
         await supabase
           .from('profiles')
           .update({
-            tier: isLifetime ? 'lifetime' : 'pro',
+            tier: isLifetime ? 'lifetime' : isPremiumPlan ? 'premium' : 'pro',
             subscription_plan: order.plan_id,
             subscription_status: 'active',
             subscription_started_at: now.toISOString(),
