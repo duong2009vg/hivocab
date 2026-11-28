@@ -81,16 +81,17 @@ export function PageLogin() {
         setErrorMessage('Mật khẩu xác nhận không khớp.');
         return;
       }
-      if (!consentTerms) {
-        setErrorMessage('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ để tiếp tục.');
-        return;
-      }
-      if (!consentPrivacy) {
-        setErrorMessage(
-          'Vui lòng tích chọn đồng ý cho phép xử lý dữ liệu cá nhân theo Chính sách bảo mật (tuân thủ Nghị định 356/2025/NĐ-CP).'
-        );
-        return;
-      }
+    }
+
+    if (!consentTerms) {
+      setErrorMessage('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ để tiếp tục.');
+      return;
+    }
+    if (!consentPrivacy) {
+      setErrorMessage(
+        'Vui lòng tích chọn đồng ý cho phép thu thập và xử lý dữ liệu cá nhân theo Chính sách bảo mật (tuân thủ Nghị định 356/2025/NĐ-CP).'
+      );
+      return;
     }
 
     setIsSubmitting(true);
@@ -172,17 +173,15 @@ export function PageLogin() {
 
   const handleGoogleClick = async () => {
     setErrorMessage('');
-    if (authMode === 'signup') {
-      if (!consentTerms) {
-        setErrorMessage('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ để tiếp tục.');
-        return;
-      }
-      if (!consentPrivacy) {
-        setErrorMessage(
-          'Vui lòng tích chọn đồng ý cho phép xử lý dữ liệu cá nhân theo Chính sách bảo mật (tuân thủ Nghị định 356/2025/NĐ-CP).'
-        );
-        return;
-      }
+    if (!consentTerms) {
+      setErrorMessage('Vui lòng đọc và tích chọn đồng ý với Điều khoản dịch vụ để tiếp tục.');
+      return;
+    }
+    if (!consentPrivacy) {
+      setErrorMessage(
+        'Vui lòng tích chọn đồng ý cho phép thu thập và xử lý dữ liệu cá nhân theo Chính sách bảo mật (tuân thủ Nghị định 356/2025/NĐ-CP).'
+      );
+      return;
     }
     try {
       await signInWithGoogle();
@@ -489,54 +488,52 @@ export function PageLogin() {
                     </div>
                   )}
 
-                  {/* Tách riêng 2 sự đồng ý bắt buộc theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 */}
-                  {authMode === 'signup' && (
-                    <div className="space-y-2.5 p-3 rounded-xl bg-[#FAF5EB]/85 border border-[#E3D7C5]">
-                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
-                        <input
-                          type="checkbox"
-                          id="consent-terms"
-                          checked={consentTerms}
-                          onChange={(e) => setConsentTerms(e.target.checked)}
-                          className="auth-consent-checkbox mt-0.5"
-                        />
-                        <span>
-                          Tôi đã đọc và đồng ý với{' '}
-                          <a
-                            href="/terms.html"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
-                          >
-                            Điều khoản dịch vụ
-                          </a>{' '}
-                          của HiVocab.
-                        </span>
-                      </label>
+                  {/* Tách riêng 2 sự đồng ý bắt buộc theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 (hiển thị cho cả Đăng nhập & Đăng ký) */}
+                  <div className="space-y-2.5 p-3 rounded-xl bg-[#FAF5EB]/85 border border-[#E3D7C5]">
+                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
+                      <input
+                        type="checkbox"
+                        id="consent-terms"
+                        checked={consentTerms}
+                        onChange={(e) => setConsentTerms(e.target.checked)}
+                        className="auth-consent-checkbox mt-0.5"
+                      />
+                      <span>
+                        Tôi đã đọc và đồng ý với{' '}
+                        <a
+                          href="/terms.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
+                        >
+                          Điều khoản dịch vụ
+                        </a>{' '}
+                        của HiVocab.
+                      </span>
+                    </label>
 
-                      <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
-                        <input
-                          type="checkbox"
-                          id="consent-privacy"
-                          checked={consentPrivacy}
-                          onChange={(e) => setConsentPrivacy(e.target.checked)}
-                          className="auth-consent-checkbox mt-0.5"
-                        />
-                        <span>
-                          Tôi đồng ý cho phép HiVocab thu thập và xử lý dữ liệu cá nhân theo{' '}
-                          <a
-                            href="/privacy.html"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
-                          >
-                            Chính sách bảo mật
-                          </a>
-                          .
-                        </span>
-                      </label>
-                    </div>
-                  )}
+                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
+                      <input
+                        type="checkbox"
+                        id="consent-privacy"
+                        checked={consentPrivacy}
+                        onChange={(e) => setConsentPrivacy(e.target.checked)}
+                        className="auth-consent-checkbox mt-0.5"
+                      />
+                      <span>
+                        Tôi đồng ý cho phép HiVocab thu thập và xử lý dữ liệu cá nhân theo{' '}
+                        <a
+                          href="/privacy.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[#302A24] font-bold underline hover:text-[#DE5D53]"
+                        >
+                          Chính sách bảo mật
+                        </a>
+                        .
+                      </span>
+                    </label>
+                  </div>
 
                   {/* Error Message */}
                   {errorMessage && !isExistingAccount && (
@@ -637,39 +634,15 @@ export function PageLogin() {
               </div>
             </div>
 
-            {/* Cam kết pháp lý & bảo mật dữ liệu cá nhân theo luật VN */}
+            {/* Cam kết bảo mật dữ liệu cá nhân theo luật VN (loại bỏ hoàn toàn câu đồng ý mặc định) */}
             <div className="mt-5 text-center px-2">
-              {authMode === 'login' ? (
-                <p className="text-[11px] text-[#8A796F] leading-relaxed font-medium">
-                  Đăng nhập đồng nghĩa với việc bạn đồng ý với{' '}
-                  <a
-                    href="/terms.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#302A24] font-bold underline hover:text-[#557A46]"
-                  >
-                    Điều khoản
-                  </a>{' '}
-                  &amp;{' '}
-                  <a
-                    href="/privacy.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[#302A24] font-bold underline hover:text-[#557A46]"
-                  >
-                    Chính sách bảo mật
-                  </a>{' '}
-                  của HiVocab.
-                </p>
-              ) : (
-                <p className="inline-flex items-start justify-center gap-1.5 text-[10.5px] text-[#8A796F] leading-relaxed font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#557A46] shrink-0 mt-0.5" />
-                  <span>
-                    Dữ liệu cá nhân của bạn được mã hóa an toàn theo Luật Bảo vệ DLCN 91/2025/QH15
-                    &amp; Nghị định 356/2025/NĐ-CP.
-                  </span>
-                </p>
-              )}
+              <p className="inline-flex items-start justify-center gap-1.5 text-[10.5px] text-[#8A796F] leading-relaxed font-medium">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#557A46] shrink-0 mt-0.5" />
+                <span>
+                  Dữ liệu cá nhân của bạn được mã hóa an toàn theo Luật Bảo vệ DLCN 91/2025/QH15
+                  &amp; Nghị định 356/2025/NĐ-CP.
+                </span>
+              </p>
             </div>
           </div>
 
