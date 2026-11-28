@@ -1,9 +1,8 @@
 // src/components/layout/MobileBottomNav.jsx
-// Floating frosted-glass capsule dock with a smooth curved center cradle & raised circular
-// Features button in the middle (2 left tabs · raised center Features button · 2 right tabs),
-// preserving HiVocab's signature warm frosted glass & deep-olive (#5a7d4d) aesthetic.
+// Compact icon-only floating capsule dock with a smooth curved center cradle & raised circular
+// "+" Features button in the middle (2 left icons · raised center "+" button · 2 right icons).
 import React, { useState, useEffect, useRef } from 'react';
-import { Crown } from 'lucide-react';
+import { Crown, Plus } from 'lucide-react';
 import { useAuth } from '../../providers/AuthProvider.jsx';
 import { useRoute } from '../../router/RouteContext.jsx';
 
@@ -66,16 +65,12 @@ const MORE_ROUTE_IDS = new Set([
   'dictionary',
 ]);
 
-// Smooth floating capsule with curved center cradle (400 x 68 coordinate space)
+// Compact sculpted capsule with curved center cradle (400 x 56 coordinate space)
 const DOCK_PATH_400 =
-  'M 34 1 L 138 1 C 160 1 164 41 200 41 C 236 41 240 1 262 1 L 366 1 C 384.5 1 399 15.8 399 34 C 399 52.2 384.5 67 366 67 L 34 67 C 15.5 67 1 52.2 1 34 C 1 15.8 15.5 1 34 1 Z';
-
-// Same path normalized to [0..1] for objectBoundingBox CSS backdrop-blur clipping
-const DOCK_CLIP_NORM =
-  'M 0.085 0 L 0.345 0 C 0.400 0 0.410 0.603 0.500 0.603 C 0.590 0.603 0.600 0 0.655 0 L 0.915 0 C 0.962 0 1 0.224 1 0.500 C 1 0.776 0.962 1 0.915 1 L 0.085 1 C 0.038 1 0 0.776 0 0.500 C 0 0.224 0.038 0 0.085 0 Z';
+  'M 28 1 L 144 1 C 163 1 167 38 200 38 C 233 38 237 1 256 1 L 372 1 C 387 1 399 13 399 28 C 399 43 387 55 372 55 L 28 55 C 13 55 1 43 1 28 C 1 13 13 1 28 1 Z';
 
 export function MobileBottomNav() {
-  const { user, isPaidPro: isPro } = useAuth();
+  const { user, isPaidPro: isPro, isPremium } = useAuth();
   const { currentRoute, navigateTo } = useRoute();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const containerRef = useRef(null);
@@ -90,7 +85,6 @@ export function MobileBottomNav() {
       : currentRoute;
 
   const isMoreRouteActive = MORE_ROUTE_IDS.has(activeTab);
-  const activeMoreItem = MORE_FEATURES.find((item) => item.id === activeTab);
 
   // Close More popover on route change, outside tap, or Escape
   useEffect(() => {
@@ -162,24 +156,22 @@ export function MobileBottomNav() {
       <button
         key={tab.id}
         type="button"
+        title={tab.label}
         aria-label={tab.label}
         aria-current={isActive ? 'page' : undefined}
         onClick={() => navigateTo(tab.id)}
         onTouchStart={tab.onTouchPrefetch}
-        className={`relative z-10 h-[52px] w-full max-w-[74px] px-1.5 flex flex-col items-center justify-center rounded-full transition-all duration-150 active:scale-95 cursor-pointer ${
+        className={`relative z-10 w-[44px] h-[44px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-90 cursor-pointer ${
           isActive
             ? 'bg-[#5a7d4d] text-white ring-1 ring-white/40 shadow-[0_4px_14px_rgba(90,125,77,0.42)]'
-            : 'text-[#554d42] hover:text-[#2a241f]'
+            : 'text-[#554d42] hover:text-[#2a241f] hover:bg-black/[0.04]'
         }`}
       >
         <span
-          className="material-symbols-outlined text-[20px] leading-none mb-1"
+          className="material-symbols-outlined text-[22px] leading-none"
           style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
         >
           {tab.icon}
-        </span>
-        <span className="text-[10px] font-extrabold leading-none tracking-tight whitespace-nowrap">
-          {tab.label}
         </span>
       </button>
     );
@@ -187,15 +179,6 @@ export function MobileBottomNav() {
 
   return (
     <div ref={containerRef} id="mobile-bottom-nav" className="lg:hidden">
-      {/* Hidden SVG clipPath definition for curved-cradle frosted backdrop blur */}
-      <svg aria-hidden="true" className="absolute w-0 h-0 overflow-hidden pointer-events-none">
-        <defs>
-          <clipPath id="hivocab-dock-cradle-clip" clipPathUnits="objectBoundingBox">
-            <path d={DOCK_CLIP_NORM} />
-          </clipPath>
-        </defs>
-      </svg>
-
       {/* Subtle Backdrop Scrim when More popover is open */}
       {isMoreOpen && (
         <div
@@ -205,12 +188,12 @@ export function MobileBottomNav() {
         />
       )}
 
-      {/* Frosted-glass More Feature Popover floating neatly above the raised center button */}
+      {/* Frosted-glass More Feature Popover floating neatly above the raised center "+" button */}
       {isMoreOpen && (
         <div
           role="dialog"
           aria-label="Khám phá thêm tính năng"
-          className="fixed bottom-[calc(6.5rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 p-3.5 rounded-[28px] bg-[#FFFDF9] border border-[#E5DAC7] shadow-[0_18px_46px_rgba(56,46,43,0.22)] select-none"
+          className="fixed bottom-[calc(5.6rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 p-3.5 rounded-[28px] bg-[#FFFDF9] border border-[#E5DAC7] shadow-[0_18px_46px_rgba(56,46,43,0.22)] select-none"
         >
           <div className="flex items-center justify-between px-1.5 pb-2 mb-2 border-b border-[#382E2B]/10">
             <span className="text-xs font-extrabold text-[#382E2B] tracking-tight">
@@ -274,15 +257,15 @@ export function MobileBottomNav() {
         </div>
       )}
 
-      {/* Main Floating Frosted Capsule Dock with Curved Center Cradle */}
+      {/* Compact Icon-Only Floating Capsule Dock with Curved Center Cradle */}
       <nav
         aria-label="Mobile Navigation"
-        className="fixed bottom-[calc(0.95rem+env(safe-area-inset-bottom,0px))] left-3 right-3 max-w-[420px] mx-auto z-50 h-[70px] select-none"
+        className="fixed bottom-[calc(0.85rem+env(safe-area-inset-bottom,0px))] left-4 right-4 max-w-[360px] mx-auto z-50 h-[56px] select-none"
       >
-        {/* Crisp sculpted frosted-cream capsule with smooth curved center cradle */}
+        {/* Crisp sculpted cream capsule with smooth curved center cradle */}
         <svg
           aria-hidden="true"
-          viewBox="0 0 400 68"
+          viewBox="0 0 400 56"
           preserveAspectRatio="none"
           className="absolute inset-0 w-full h-full pointer-events-none overflow-visible"
           style={{ filter: 'drop-shadow(0 10px 24px rgba(56, 46, 43, 0.16))' }}
@@ -296,77 +279,62 @@ export function MobileBottomNav() {
           />
         </svg>
 
-        {/* 5-Column Symmetric Button Layout (2 Left · Raised Center Features · 2 Right) */}
-        <div className="relative z-10 h-full w-full grid grid-cols-5 items-center px-1.5">
-          {/* Slots 1 & 2: Trang chủ, Chủ đề */}
+        {/* 5-Column Symmetric Icon-Only Layout (2 Left · Raised Center "+" · 2 Right) */}
+        <div className="relative z-10 h-full w-full grid grid-cols-5 items-center px-2">
+          {/* Slots 1 & 2: Home, Topics */}
           {leftTabs.map((tab) => (
-            <div key={tab.id} className="flex items-center justify-center px-0.5">
+            <div key={tab.id} className="flex items-center justify-center">
               {renderStandardTab(tab)}
             </div>
           ))}
 
-          {/* Slot 3 (CENTER): Raised Circular Features Drawer Trigger nestled in the curved cradle */}
-          <div className="relative h-full flex flex-col items-center justify-end pb-2.5">
+          {/* Slot 3 (CENTER): Raised Circular "+" Features Trigger nestled in the curved cradle */}
+          <div className="relative h-full flex items-center justify-center">
             <button
               type="button"
-              aria-label="Mở tất cả tính năng học tập"
+              title={isMoreOpen ? 'Đóng menu tính năng' : 'Mở tất cả tính năng học tập'}
+              aria-label={isMoreOpen ? 'Đóng menu tính năng' : 'Mở tất cả tính năng học tập'}
               aria-expanded={isMoreOpen}
               onClick={() => setIsMoreOpen((prev) => !prev)}
-              className={`absolute -top-[21px] left-1/2 -translate-x-1/2 w-[54px] h-[54px] rounded-full flex items-center justify-center text-white border-[2.5px] border-white/95 transition-all duration-200 active:scale-90 cursor-pointer ${
+              className={`absolute -top-[18px] left-1/2 -translate-x-1/2 w-[52px] h-[52px] rounded-full flex items-center justify-center text-white border-[2.5px] border-white/95 transition-all duration-200 active:scale-90 cursor-pointer ${
                 isMoreOpen
-                  ? 'bg-[#DE5D53] shadow-[0_8px_22px_rgba(222,93,83,0.48)] rotate-90'
+                  ? 'bg-[#DE5D53] shadow-[0_8px_22px_rgba(222,93,83,0.48)]'
                   : isMoreRouteActive
-                  ? 'bg-gradient-to-b from-[#698F5B] to-[#46633D] shadow-[0_8px_22px_rgba(70,99,61,0.5)] ring-2 ring-[#F4D06F]/80'
+                  ? 'bg-gradient-to-b from-[#698F5B] to-[#46633D] shadow-[0_8px_22px_rgba(70,99,61,0.5)] ring-2 ring-[#F4D06F]/85'
                   : 'bg-gradient-to-b from-[#698F5B] to-[#4D6B43] hover:from-[#729A63] hover:to-[#537449] shadow-[0_8px_20px_rgba(77,107,67,0.42)]'
               }`}
             >
-              <span
-                className="material-symbols-outlined text-[24px] leading-none"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                {isMoreOpen ? 'close' : activeMoreItem?.icon || 'grid_view'}
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setIsMoreOpen((prev) => !prev)}
-              className={`text-[10px] font-extrabold leading-none tracking-tight whitespace-nowrap max-w-[74px] truncate cursor-pointer ${
-                isMoreOpen
-                  ? 'text-[#DE5D53]'
-                  : isMoreRouteActive
-                  ? 'text-[#4D6B43]'
-                  : 'text-[#554d42]'
-              }`}
-            >
-              {isMoreOpen
-                ? 'Đóng'
-                : activeMoreItem?.label?.split(' ')[0] || 'Tính năng'}
+              <Plus
+                className={`w-6 h-6 stroke-[2.75] transition-transform duration-200 ${
+                  isMoreOpen ? 'rotate-45' : 'rotate-0'
+                }`}
+              />
             </button>
           </div>
 
-          {/* Slot 4: Sổ từ */}
-          <div className="flex items-center justify-center px-0.5">
+          {/* Slot 4: Vocabulary Notebook */}
+          <div className="flex items-center justify-center">
             {renderStandardTab(vocabTab)}
           </div>
 
-          {/* Slot 5: Hồ sơ Bé Hổ Churbito */}
-          <div className="flex items-center justify-center px-0.5">
+          {/* Slot 5: Profile Avatar (icon-only) */}
+          <div className="flex items-center justify-center">
             <button
               type="button"
+              title="Hồ sơ cá nhân"
               aria-label="Hồ sơ cá nhân"
               aria-current={isProfileActive && !isMoreOpen ? 'page' : undefined}
               onClick={() => navigateTo('profile')}
-              className={`relative z-10 h-[52px] w-full flex flex-col items-center justify-center rounded-full transition-all duration-150 active:scale-95 cursor-pointer ${
+              className={`relative z-10 w-[44px] h-[44px] flex items-center justify-center rounded-full transition-all duration-150 active:scale-90 cursor-pointer ${
                 isProfileActive && !isMoreOpen
                   ? 'bg-[#5a7d4d] text-white ring-1 ring-white/40 shadow-[0_4px_14px_rgba(90,125,77,0.42)]'
-                  : 'text-[#554d42] hover:text-[#2a241f]'
+                  : 'hover:bg-black/[0.04]'
               }`}
             >
               <div
-                className={`relative w-6 h-6 rounded-full overflow-hidden flex items-center justify-center mb-0.5 ${
+                className={`relative w-8 h-8 rounded-full overflow-hidden flex items-center justify-center ${
                   isProfileActive && !isMoreOpen
-                    ? 'border-[1.5px] border-white shadow-xs'
+                    ? 'border-2 border-white shadow-xs'
                     : 'bg-[#faf2ec] border-[1.5px] border-[#382E2B]/25 shadow-xs'
                 }`}
               >
@@ -379,15 +347,18 @@ export function MobileBottomNav() {
                   }}
                 />
               </div>
-              <span className="text-[10px] font-bold leading-none tracking-tight whitespace-nowrap">
-                Hồ sơ
-              </span>
               {isPro && (
                 <span
-                  className="profile-pro-badge absolute top-0.5 right-1.5 leading-none select-none"
-                  title="HiVocab PRO"
+                  className="profile-pro-badge absolute -top-0.5 right-0 leading-none select-none"
+                  title={isPremium ? 'HiVocab PREMIUM' : 'HiVocab PRO'}
                 >
-                  <Crown className="w-3 h-3 text-amber-500 fill-amber-400" />
+                  <Crown
+                    className={`w-3.5 h-3.5 drop-shadow-xs ${
+                      isPremium
+                        ? 'text-[#6B21A8] fill-[#C084FC]'
+                        : 'text-amber-500 fill-amber-400'
+                    }`}
+                  />
                 </span>
               )}
             </button>
