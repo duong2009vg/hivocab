@@ -6,6 +6,7 @@ import { AlertTriangle, Lightbulb, RotateCcw } from 'lucide-react';
 import ExerciseResultModal from './ExerciseResultModal.jsx';
 import WordSlotsGrid from './WordSlotsGrid.jsx';
 import { buildTypedAnswerForParts, formatTypedDisplayForParts } from './letterSlotUtils.js';
+import { HiSound } from '../../services/audioService.js';
 
 function cleanCharForSlot(raw) {
   if (!raw) return '';
@@ -13,51 +14,7 @@ function cleanCharForSlot(raw) {
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/đ/gi, 'd')
-    .toUpperCase()
-    .replace(/[^A-Z0-9\-']/g, '');
-}
-
-function getSlotDimensions(maxPartLen) {
-  if (maxPartLen <= 4) {
-    return {
-      slot: 'w-10 sm:w-12 h-11 sm:h-[52px] text-lg sm:text-2xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1 sm:gap-2',
-      gapBetweenWords: 'gap-x-5 sm:gap-x-8 gap-y-2.5 sm:gap-y-3',
-    };
-  }
-  if (maxPartLen <= 6) {
-    return {
-      slot: 'w-9 sm:w-11 h-10 sm:h-12 text-base sm:text-xl rounded-xl sm:rounded-2xl',
-      gap: 'gap-1 sm:gap-1.5',
-      gapBetweenWords: 'gap-x-4 sm:gap-x-7 gap-y-2.5',
-    };
-  }
-  if (maxPartLen <= 8) {
-    return {
-      slot: 'w-8 sm:w-10 h-9 sm:h-11 text-sm sm:text-lg rounded-xl',
-      gap: 'gap-1 sm:gap-1.5',
-      gapBetweenWords: 'gap-x-4 sm:gap-x-6 gap-y-2.5',
-    };
-  }
-  if (maxPartLen <= 10) {
-    return {
-      slot: 'w-7 sm:w-9 h-9 sm:h-10 text-xs sm:text-base rounded-lg sm:rounded-xl',
-      gap: 'gap-0.5 sm:gap-1',
-      gapBetweenWords: 'gap-x-3.5 sm:gap-x-5 gap-y-2',
-    };
-  }
-  if (maxPartLen <= 12) {
-    return {
-      slot: 'w-6 sm:w-8 h-8 sm:h-9 text-xs sm:text-sm rounded-lg sm:rounded-xl',
-      gap: 'gap-0.5 sm:gap-1',
-      gapBetweenWords: 'gap-x-3 sm:gap-x-5 gap-y-2',
-    };
-  }
-  return {
-    slot: 'w-[22px] sm:w-7 h-7 sm:h-9 text-xs rounded-lg',
-    gap: 'gap-0.5 sm:gap-1',
-    gapBetweenWords: 'gap-x-3 sm:gap-x-4 gap-y-2',
-  };
+    .replace(/[^A-Za-z0-9\-']/g, '');
 }
 
 export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onReport, sessionInfo }) {
@@ -105,57 +62,6 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.word?.id || item?.word?.wordId, currentNum]);
 
-  const handleInput = useCallback(
-    (e, flatIdx) => {
-      if (submitted) return;
-      const raw = e.target.value;
-      if (!raw) {
-        setValues((prev) => {
-          const n = [...prev];
-          n[flatIdx] = '';
-          return n;
-        });
-        return;
-      }
-      // Paste handling
-      if (raw.length > 1) {
-        const cleaned = cleanCharForSlot(raw);
-        const chars = cleaned.split('');
-        setValues((prev) => {
-          const n = [...prev];
-          chars.forEach((c, i) => {
-            if (n[flatIdx + i] !== undefined) n[flatIdx + i] = c;
-          });
-          return n;
-        });
-        const nextIdx = Math.min(flatIdx + chars.length, boxes.length - 1);
-        setTimeout(() => {
-          inputRefs.current[nextIdx]?.focus();
-          inputRefs.current[nextIdx]?.select?.();
-        }, 10);
-        return;
-      }
-      const char = cleanCharForSlot(raw.slice(-1));
-      setValues((prev) => {
-        const n = [...prev];
-        n[flatIdx] = char;
-        return n;
-      });
-      if (e.target) e.target.scrollLeft = 0;
-      if (char && flatIdx < boxes.length - 1) {
-        setTimeout(() => {
-          const next = inputRefs.current[flatIdx + 1];
-          if (next) {
-            next.focus();
-            next.select?.();
-            next.scrollLeft = 0;
-          }
-        }, 10);
-      }
-    },
-    [submitted, boxes.length]
-  );
-
   // Smart hint: fills the first empty or mismatched slot instead of overwriting correct letters
   const handleRevealHint = useCallback(() => {
     if (submitted || answerChars.length === 0) return;
@@ -164,28 +70,28 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
 
     const latestVals = valuesRef.current;
     const targetIdx = answerChars.findIndex(
-      (ch, idx) => cleanCharForSlot(latestVals[idx]) !== cleanCharForSlot(ch)
+      (ch, idx) => cleanCharForSlot(latestVals[idx]).toLowerCase() !== cleanCharForSlot(ch).toLowerCase()
     );
     if (targetIdx === -1) return;
 
-    const revealedChar = cleanCharForSlot(answerChars[targetIdx]) || (answerChars[targetIdx] || '').toUpperCase();
+    const revealedChar = cleanCharForSlot(answerChars[targetIdx]) || answerChars[targetIdx] || '';
     const nextValues = [...latestVals];
     nextValues[targetIdx] = revealedChar;
     setValues(nextValues);
     setHintLevel((h) => h + 1);
     setHintPulseIdx(targetIdx);
+    HiSound.playKeyType('hint');
     setTimeout(() => setHintPulseIdx((curr) => (curr === targetIdx ? null : curr)), 450);
 
+    const nextEmpty = answerChars.findIndex(
+      (ch, idx) => idx > targetIdx && cleanCharForSlot(nextValues[idx]).toLowerCase() !== cleanCharForSlot(ch).toLowerCase()
+    );
+    const focusTargetIdx =
+      nextEmpty >= 0 ? nextEmpty : Math.min(targetIdx + 1, boxes.length);
+    setFocusedIdx(focusTargetIdx);
     setTimeout(() => {
-      const nextEmpty = answerChars.findIndex(
-        (ch, idx) => idx > targetIdx && cleanCharForSlot(nextValues[idx]) !== cleanCharForSlot(ch)
-      );
-      const focusTargetIdx =
-        nextEmpty >= 0 ? nextEmpty : Math.min(targetIdx + 1, Math.max(0, boxes.length - 1));
-      const nextInp = inputRefs.current[focusTargetIdx];
-      nextInp?.focus();
-      nextInp?.select?.();
-    }, 50);
+      inputRefs.current[0]?.focus({ preventScroll: true });
+    }, 30);
   }, [submitted, answerChars, hintLevel, boxes.length]);
 
   const handleCheck = useCallback(() => {
@@ -195,60 +101,6 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
     setSubmitted(r);
     setShowResultModal(true);
   }, [submitted, answerParts, values, onSubmit]);
-
-  const handleBackspaceEmpty = useCallback((flatIdx) => {
-    setValues((prev) => {
-      const n = [...prev];
-      n[flatIdx - 1] = '';
-      return n;
-    });
-    inputRefs.current[flatIdx - 1]?.focus();
-  }, []);
-
-  const handleKeyDown = useCallback(
-    (e, flatIdx) => {
-      if (showResultModal) return;
-      const isBackspace = e.key === 'Backspace' || e.keyCode === 8 || e.which === 8 || e.keyCode === 229;
-      if (isBackspace) {
-        if (!values[flatIdx] && flatIdx > 0) {
-          e.preventDefault();
-          handleBackspaceEmpty(flatIdx);
-        } else if (values[flatIdx]) {
-          e.preventDefault();
-          setValues((prev) => {
-            const n = [...prev];
-            n[flatIdx] = '';
-            return n;
-          });
-        }
-      } else if (e.key === 'ArrowLeft' && flatIdx > 0) {
-        e.preventDefault();
-        inputRefs.current[flatIdx - 1]?.focus();
-        inputRefs.current[flatIdx - 1]?.select?.();
-      } else if (e.key === 'ArrowRight' && flatIdx < boxes.length - 1) {
-        e.preventDefault();
-        inputRefs.current[flatIdx + 1]?.focus();
-        inputRefs.current[flatIdx + 1]?.select?.();
-      } else if ((e.key === ' ' || e.code === 'Space') && !e.ctrlKey && !e.metaKey) {
-        e.preventDefault();
-        // If cursor already auto-advanced to first empty slot of next word, keep it there
-        const box = boxes[flatIdx];
-        if (box && box.partIdx > 0 && box.letterIdx === 0 && !values[flatIdx]) {
-          return;
-        }
-        if (flatIdx < boxes.length - 1) {
-          inputRefs.current[flatIdx + 1]?.focus();
-          inputRefs.current[flatIdx + 1]?.select?.();
-        }
-      } else if (e.key === 'Enter') {
-        e.preventDefault();
-        if (values.some(Boolean)) {
-          handleCheck();
-        }
-      }
-    },
-    [values, boxes, showResultModal, handleCheck, handleBackspaceEmpty]
-  );
 
   // Keyboard shortcuts: Alt+H for hint, Enter to check outside input
   useEffect(() => {
@@ -274,17 +126,18 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
     setValues(boxes.map(() => ''));
     setSubmitted(null);
     setHintLevel(0);
+    setFocusedIdx(0);
     onNext?.();
   }, [boxes, onNext]);
 
   const handleClearAll = useCallback(() => {
     if (submitted) return;
+    HiSound.playKeyType('backspace');
     setValues(boxes.map(() => ''));
     setFocusedIdx(0);
     setTimeout(() => {
-      inputRefs.current[0]?.focus();
-      inputRefs.current[0]?.select?.();
-    }, 50);
+      inputRefs.current[0]?.focus({ preventScroll: true });
+    }, 30);
   }, [submitted, boxes]);
 
   const playAudio = useCallback(() => {
@@ -316,8 +169,6 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
   const firstLetter = (d.answer || '').trim()[0]?.toUpperCase() || 'A';
   const userTypedDisplay = formatTypedDisplayForParts(answerParts, values);
   const hasAnyInput = values.some(Boolean);
-  const maxPartLetters = Math.max(...answerParts.map((p) => p.length), 1);
-  const dims = getSlotDimensions(maxPartLetters);
   const wordPos = item?.word?.pos || d.pos;
   const vietnameseMeaning =
     d.meaning ||
@@ -326,15 +177,15 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
   const canHint =
     !submitted &&
     hintLevel < Math.max(1, totalLetters - 1) &&
-    answerChars.some((ch, idx) => cleanCharForSlot(values[idx]) !== cleanCharForSlot(ch));
+    answerChars.some((ch, idx) => cleanCharForSlot(values[idx]).toLowerCase() !== cleanCharForSlot(ch).toLowerCase());
 
   return (
-    <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa py-1 px-2">
-      {/* ── Main Compact Crayon Card ── */}
-      <div className="w-full max-w-xl bg-white rounded-[24px] sm:rounded-[28px] border-[3px] border-[#342e2b] px-3.5 sm:px-6 py-3.5 sm:py-4 shadow-[4px_6px_0px_#2c2523] relative transition-all">
+    <div className="w-full flex flex-col items-center justify-center select-none font-comfortaa py-2 px-2 sm:px-4">
+      {/* ── Expanded Spacious Crayon Card ── */}
+      <div className="w-full max-w-3xl bg-[#FFFDF9] rounded-[26px] sm:rounded-[32px] border-[3px] border-[#342e2b] px-5 sm:px-10 py-5 sm:py-7 shadow-[5px_7px_0px_#2c2523] relative transition-all">
         {/* Top Mascot Hint & Report Header */}
-        <div className="flex items-center justify-between gap-2 pb-2 mb-2.5 border-b-2 border-stone-100">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#FFF5EB] border border-[#E76F51]/40 text-[#D36135] text-[11px] sm:text-xs font-bold min-w-0">
+        <div className="flex items-center justify-between gap-2 pb-3 mb-5 border-b-2 border-[#EFE8DC]">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FFF5EB] border border-[#E76F51]/40 text-[#D36135] text-xs font-bold min-w-0">
             <span className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center shrink-0">
               <img
                 src="/mascot/mascot_cozy.png"
@@ -367,49 +218,61 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
           )}
         </div>
 
-        {/* ── Vietnamese Meaning Prompt Card (Fill by Vietnamese meaning only) ── */}
-        <div className="w-full max-w-md mx-auto bg-[#FAF5EB] border-2 border-[#2B2523] rounded-2xl px-3.5 sm:px-4 py-2.5 sm:py-3 mb-2.5 shadow-[2px_3px_0px_#2B2523] flex items-center justify-between gap-3">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-              <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                Nghĩa tiếng Việt
+        {/* ── Large Centered Vietnamese Meaning Prompt ── */}
+        <div className="w-full max-w-2xl mx-auto text-center space-y-2.5 mb-2">
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+              Nghĩa tiếng Việt
+            </span>
+            {wordPos && (
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-white text-stone-700 border border-stone-300">
+                {wordPos}
               </span>
-              {wordPos && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white text-stone-700 border border-stone-300">
-                  {wordPos}
-                </span>
-              )}
-            </div>
-            <p className="text-sm sm:text-base font-bold text-[#1e1b17] leading-snug select-text">
-              {vietnameseMeaning || 'Điền từ tiếng Anh thích hợp'}
-            </p>
+            )}
+            <button
+              type="button"
+              onClick={playAudio}
+              aria-label="Phát âm từ vựng"
+              className="w-8 h-8 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-[#2B2523] text-sky-800 inline-flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-[1.5px_2px_0px_#2B2523] cursor-pointer shrink-0"
+              title="Nghe phát âm gợi ý"
+            >
+              <svg className="w-4 h-4 text-sky-800" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+                <path
+                  d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={playAudio}
-            aria-label="Phát âm từ vựng"
-            className="w-10 h-10 rounded-full bg-sky-100 hover:bg-sky-200 border-2 border-[#2B2523] text-sky-800 flex items-center justify-center transition-transform hover:scale-105 active:scale-95 shadow-[1.5px_2px_0px_#2B2523] cursor-pointer shrink-0"
-            title="Nghe phát âm gợi ý"
-          >
-            <svg className="w-4 h-4 text-sky-800" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
-              <path
-                d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          <p className="text-2xl sm:text-3xl font-extrabold text-[#2B2523] leading-snug tracking-tight select-text px-2">
+            {vietnameseMeaning || 'Điền từ tiếng Anh thích hợp'}
+          </p>
         </div>
 
-        {/* Compact Action Toolbar: Hint + Clear */}
-        <div className="flex items-center justify-center gap-2 flex-wrap mb-2.5">
+        {/* ── Clean Underline Word-by-Word Typing Canvas ── */}
+        <WordSlotsGrid
+          answerParts={answerParts}
+          totalBoxes={boxes.length}
+          values={values}
+          submitted={submitted}
+          focusedIdx={focusedIdx}
+          hintPulseIdx={hintPulseIdx}
+          inputRefs={inputRefs}
+          dataAttrName="data-fill-index"
+          onFocusSlot={setFocusedIdx}
+          onSetValues={setValues}
+          onCheckSubmit={handleCheck}
+        />
+
+        {/* Action Toolbar: Hint + Clear */}
+        <div className="flex items-center justify-center gap-2.5 flex-wrap mb-3.5">
           <button
             type="button"
             onClick={handleRevealHint}
             disabled={!canHint}
             title="Điền chữ cái kế tiếp còn thiếu/sai (Alt+H)"
-            className="px-3 py-1 bg-amber-50 border-2 border-stone-800 rounded-full text-amber-900 hover:bg-amber-100 font-bold text-xs flex items-center gap-1 transition cursor-pointer shadow-[1.5px_1.5px_0px_#2B2523] active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3.5 py-1.5 bg-amber-50 border-2 border-stone-800 rounded-full text-amber-900 hover:bg-amber-100 font-bold text-xs flex items-center gap-1.5 transition cursor-pointer shadow-[1.5px_1.5px_0px_#2B2523] active:translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Lightbulb className="w-3.5 h-3.5 text-amber-600 inline shrink-0" />
             <span>Gợi ý ({hintLevel}/{totalLetters})</span>
@@ -420,31 +283,13 @@ export default function ExerciseFill({ item, onSubmit, onNext, speakWord, onRepo
               type="button"
               onClick={handleClearAll}
               title="Xóa toàn bộ chữ đã nhập"
-              className="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 border-2 border-stone-800 rounded-full flex items-center gap-1 font-bold text-xs text-stone-700 shadow-[1.5px_1.5px_0px_#2B2523] cursor-pointer active:translate-y-0.5"
+              className="px-3.5 py-1.5 bg-stone-100 hover:bg-stone-200 border-2 border-stone-800 rounded-full flex items-center gap-1.5 font-bold text-xs text-stone-700 shadow-[1.5px_1.5px_0px_#2B2523] cursor-pointer active:translate-y-0.5"
             >
               <RotateCcw className="w-3.5 h-3.5 inline shrink-0" />
-              <span>Xóa hết</span>
+              <span>Làm lại</span>
             </button>
           )}
         </div>
-
-        {/* ── Multi-Word Separated Letter Boxes ── */}
-        <WordSlotsGrid
-          answerParts={answerParts}
-          totalBoxes={boxes.length}
-          values={values}
-          dims={dims}
-          submitted={submitted}
-          focusedIdx={focusedIdx}
-          hintPulseIdx={hintPulseIdx}
-          pulseSlotClass="border-[3px] border-[#3b6e8c] bg-sky-100 text-[#1D5CA8] shadow-[2px_3px_0px_#2B2523] scale-110 z-10"
-          inputRefs={inputRefs}
-          dataAttrName="data-fill-index"
-          onFocusSlot={setFocusedIdx}
-          onInput={handleInput}
-          onKeyDown={handleKeyDown}
-          onBackspaceEmpty={handleBackspaceEmpty}
-        />
 
         {/* Keyboard Navigation Instructions - Compact Desktop Line */}
         <div className="hidden sm:flex text-center font-quicksand text-[11px] text-stone-500 font-medium mb-3 items-center justify-center gap-1.5 flex-wrap">

@@ -67,6 +67,8 @@ class SoundEngine {
     };
     this._correctIdx = 0;
     this._incorrectIdx = 0;
+    this._sfxCtx = null;
+    this._noiseBuffer = null;
 
     if (typeof window !== 'undefined') {
       try {
@@ -156,6 +158,122 @@ class SoundEngine {
 
   playComplete() {
     this.playSound('complete');
+  }
+
+  _ensureSfxContext() {
+    if (typeof window === 'undefined') return null;
+    try {
+      if (!this._sfxCtx) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return null;
+        this._sfxCtx = new AudioCtx();
+      }
+      if (this._sfxCtx.state === 'suspended') {
+        this._sfxCtx.resume().catch(() => {});
+      }
+      if (!this._noiseBuffer && this._sfxCtx) {
+        const sr = this._sfxCtx.sampleRate || 44100;
+        const len = Math.floor(sr * 0.045);
+        const buf = this._sfxCtx.createBuffer(1, len, sr);
+        const ch = buf.getChannelData(0);
+        for (let i = 0; i < len; i += 1) {
+          // Sharp exponential decay impulse noise for mechanical keycap feel
+          ch[i] = (Math.random() * 2 - 1) * Math.exp(-i / (len * 0.28));
+        }
+        this._noiseBuffer = buf;
+      }
+      return this._sfxCtx;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /**
+   * Zero-latency mechanical / typewriter keystroke SFX synthesized via shared Web Audio API.
+   * kind: 'char' | 'wordComplete' | 'space' | 'backspace' | 'hint'
+   */
+  playKeyType(kind = 'char') {
+    if (this._isMuted) return;
+    const ctx = this._ensureSfxContext();
+    if (!ctx || !this._noiseBuffer) return;
+
+    try {
+      const now = ctx.currentTime;
+      const jitter = 0.92 + Math.random() * 0.16; // Organic ±8% variation per keystroke
+
+      if (kind === 'hint') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(560, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.045);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.075);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+        return;
+      }
+
+      // Layer 1: Crisp mechanical keycap transient click (bandpass noise burst)
+      const noise = ctx.createBufferSource();
+      noise.buffer = this._noiseBuffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      const clickGain = ctx.createGain();
+
+      if (kind === 'backspace') {
+        filter.frequency.setValueAtTime(980 * jitter, now);
+        filter.Q.setValueAtTime(1.4, now);
+        clickGain.gain.setValueAtTime(0.11, now);
+        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.022);
+      } else if (kind === 'space' || kind === 'wordComplete') {
+        filter.frequency.setValueAtTime(1250 * jitter, now);
+        filter.Q.setValueAtTime(1.2, now);
+        clickGain.gain.setValueAtTime(0.18, now);
+        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.036);
+      } else {
+        filter.frequency.setValueAtTime(2450 * jitter, now);
+        filter.Q.setValueAtTime(1.7, now);
+        clickGain.gain.setValueAtTime(0.16, now);
+        clickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.024);
+      }
+
+      noise.connect(filter);
+      filter.connect(clickGain);
+      clickGain.connect(ctx.destination);
+      noise.start(now);
+      noise.stop(now + 0.04);
+
+      // Layer 2: Warm wooden/tactile switch body thock
+      const osc = ctx.createOscillator();
+      const bodyGain = ctx.createGain();
+      osc.type = 'triangle';
+
+      if (kind === 'backspace') {
+        osc.frequency.setValueAtTime(125 * jitter, now);
+        osc.frequency.exponentialRampToValueAtTime(60, now + 0.022);
+        bodyGain.gain.setValueAtTime(0.075, now);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.026);
+      } else if (kind === 'space' || kind === 'wordComplete') {
+        osc.frequency.setValueAtTime(118 * jitter, now);
+        osc.frequency.exponentialRampToValueAtTime(48, now + 0.036);
+        bodyGain.gain.setValueAtTime(0.14, now);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.042);
+      } else {
+        osc.frequency.setValueAtTime(165 * jitter, now);
+        osc.frequency.exponentialRampToValueAtTime(68, now + 0.022);
+        bodyGain.gain.setValueAtTime(0.105, now);
+        bodyGain.gain.exponentialRampToValueAtTime(0.001, now + 0.028);
+      }
+
+      osc.connect(bodyGain);
+      bodyGain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.045);
+    } catch (_) {}
   }
 
   isMuted() {

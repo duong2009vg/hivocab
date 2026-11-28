@@ -33,6 +33,10 @@ export function useSound() {
     HiSound.playComplete();
   }, []);
 
+  const playKeyType = useCallback((kind = 'char') => {
+    HiSound.playKeyType(kind);
+  }, []);
+
   const playWord = useCallback((word, rate = 0.9, lang = 'en') => {
     HiAudio.playWord(word, rate, lang);
   }, []);
@@ -48,6 +52,7 @@ export function useSound() {
     playCorrect,
     playIncorrect,
     playComplete,
+    playKeyType,
     playWord,
     stopWord,
   };

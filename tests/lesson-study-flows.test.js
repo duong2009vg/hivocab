@@ -19,6 +19,7 @@ const rootDir = path.resolve(__dirname, '..');
 const exerciseFlashcardContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/ExerciseFlashcard.jsx'), 'utf8');
 const exerciseMCQContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/ExerciseMCQ.jsx'), 'utf8');
 const exerciseFillContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/ExerciseFill.jsx'), 'utf8');
+const wordSlotsGridContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/WordSlotsGrid.jsx'), 'utf8');
 const exerciseListenContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/ExerciseListen.jsx'), 'utf8');
 const exerciseResultModalContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/ExerciseResultModal.jsx'), 'utf8');
 const exerciseCompletedContent = fs.readFileSync(path.resolve(rootDir, 'src/components/learning/ExerciseCompleted.jsx'), 'utf8');
@@ -751,8 +752,10 @@ export async function runLessonStudyFlowsTests() {
     assert(multiData.answerParts.length === 2 && multiData.blankPlaceholder === '____ __', 'T1.9.2: Multi-word phrase groups slots and preserves word space');
 
     assert(
-      exerciseFillContent.includes('h-[52px]') && exerciseFillContent.includes('w-[22px]'),
-      'T1.9.3: Slot dimensions dynamically scale responsive Tailwind classes in ExerciseFill.jsx'
+      exerciseFillContent.includes('<WordSlotsGrid') &&
+      wordSlotsGridContent.includes('text-[30px] sm:text-[42px]') &&
+      wordSlotsGridContent.includes('HiSound.playKeyType('),
+      'T1.9.3: Underline typing canvas dynamically scales large typography and triggers keystroke SFX'
     );
 
     assert(
