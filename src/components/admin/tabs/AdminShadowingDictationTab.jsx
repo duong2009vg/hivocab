@@ -182,7 +182,7 @@ export function AdminShadowingDictationTab() {
                 </span>
               </div>
               <p className="text-xs sm:text-sm font-semibold text-[#6E5D53] leading-relaxed">
-                Điều chỉnh số lượng video YouTube cá nhân tối đa mà mỗi tài khoản người dùng được thêm trong mục Shadowing Video. Thay đổi có hiệu lực ngay trên cả UI, API và Database.
+                Điều chỉnh số lượng video YouTube cá nhân tối đa cho tài khoản <strong className="text-[#3D352E]">Free &amp; Pro</strong> trong mục Shadowing Video (tài khoản <strong className="text-[#6B21A8]">Premium &amp; Admin luôn không giới hạn</strong>). Thay đổi có hiệu lực ngay trên cả UI, API và Database.
               </p>
             </div>
           </div>

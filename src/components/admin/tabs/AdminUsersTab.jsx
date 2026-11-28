@@ -4,13 +4,17 @@ import React, { useState, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
 import { useAuth } from '../../../providers/AuthProvider.jsx';
+import { resolveEffectiveTier } from '../../../config/plans.js';
+import GrantProModal from '../modals/GrantProModal.jsx';
 
 export function AdminUsersTab({ profiles = [], onRefresh }) {
   const { showToast } = useToast();
   const { user: currentAdmin } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL'); // 'ALL' | 'admin' | 'user'
+  const [tierFilter, setTierFilter] = useState('ALL'); // 'ALL' | 'premium' | 'pro' | 'lifetime' | 'free'
   const [processingId, setProcessingId] = useState(null);
+  const [grantTargetUser, setGrantTargetUser] = useState(null);
 
   const filteredUsers = useMemo(() => {
     return profiles.filter((p) => {
@@ -25,9 +29,15 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
         matchRole = (p.role || 'user') === roleFilter;
       }
 
-      return matchSearch && matchRole;
+      let matchTier = true;
+      if (tierFilter !== 'ALL') {
+        const effTier = resolveEffectiveTier({ ...p, role: 'user' });
+        matchTier = effTier === tierFilter;
+      }
+
+      return matchSearch && matchRole && matchTier;
     });
-  }, [profiles, searchTerm, roleFilter]);
+  }, [profiles, searchTerm, roleFilter, tierFilter]);
 
   const handleToggleAdminRole = async (p) => {
     const isCurrentlyAdmin = p.role === 'admin';
@@ -119,6 +129,18 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
             <option value="admin">Quản trị viên (Admin)</option>
             <option value="user">Học viên thường (User)</option>
           </select>
+
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value)}
+            className="h-[38px] px-3.5 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#6B21A8] cursor-pointer"
+          >
+            <option value="ALL">Tất cả hạng</option>
+            <option value="premium">PREMIUM 💎</option>
+            <option value="pro">PRO 👑</option>
+            <option value="lifetime">Trọn đời ✨</option>
+            <option value="free">Miễn phí 🌱</option>
+          </select>
         </div>
 
         <div className="text-xs font-bold text-[#6E5D53]">
@@ -206,6 +228,24 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
 
                       <td className="py-2.5 px-3.5 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          {/* Quick Grant Pro / Premium */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setGrantTargetUser({
+                                id: p.id,
+                                email: p.email,
+                                expiresAt: p.subscription_expires_at,
+                                tier: p.tier || 'free',
+                              })
+                            }
+                            className="px-2.5 py-1 rounded-xl text-[11px] font-black bg-[#FFF8EE] hover:bg-[#FFE8C2] text-[#8C5311] border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 transition-all inline-flex items-center gap-1 cursor-pointer"
+                            title="Cấp hoặc nâng hạng PRO / PREMIUM"
+                          >
+                            <span>🎁</span>
+                            <span>Cấp gói</span>
+                          </button>
+
                           {/* Toggle Admin */}
                           <button
                             type="button"
@@ -243,6 +283,15 @@ export function AdminUsersTab({ profiles = [], onRefresh }) {
           </table>
         </div>
       </div>
+
+      {grantTargetUser && (
+        <GrantProModal
+          isOpen={Boolean(grantTargetUser)}
+          targetUser={grantTargetUser}
+          onClose={() => setGrantTargetUser(null)}
+          onSuccess={onRefresh}
+        />
+      )}
     </div>
   );
 }

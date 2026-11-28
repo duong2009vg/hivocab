@@ -23,7 +23,7 @@ export function AdminOverviewTab({
     {
       title: 'HỘI VIÊN TRẢ PHÍ ACTIVE',
       value: (stats.activePro || 0).toLocaleString(),
-      subtitle: `${stats.activePremium || 0} Premium · ${stats.lifetimePro || 0} Trọn đời`,
+      subtitle: `${stats.activeProOnly || 0} Pro · ${stats.activePremium || 0} Premium · ${stats.lifetimePro || 0} Trọn đời`,
       icon: 'card_giftcard',
       tab: 'subscriptions',
     },
@@ -95,7 +95,7 @@ export function AdminOverviewTab({
             className="h-[36px] px-3.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-extrabold text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
           >
             <span>🎁</span>
-            <span>Tặng PRO học viên</span>
+            <span>Tặng PRO / Premium</span>
           </button>
           <button
             type="button"
@@ -134,7 +134,7 @@ export function AdminOverviewTab({
               <p className="text-[11px] font-semibold text-[#86756C]">Hội viên đang có hiệu lực</p>
             </div>
             <span className="text-xs font-black px-2.5 py-1 rounded-full bg-[#EAF3E7] text-[#557A46] border border-[#8FB383] tabular-nums">
-              Tổng {stats.activePro || 0} PRO
+              {stats.activeProOnly || 0} Pro · {stats.activePremium || 0} Prem
             </span>
           </div>
 
@@ -216,7 +216,13 @@ export function AdminOverviewTab({
                         {order.user_email || 'Ẩn danh'}
                       </td>
                       <td className="py-2.5 px-3 font-bold text-[#6E5D53]">
-                        <span className="px-2 py-0.5 rounded-lg bg-[#FAF5EB] border border-[#3D352E]/20 text-[11px]">
+                        <span
+                          className={`px-2 py-0.5 rounded-lg border text-[11px] font-black ${
+                            String(order.plan_id || '').toLowerCase().startsWith('premium')
+                              ? 'bg-[#F3E8FF] border-[#A855F7] text-[#6B21A8]'
+                              : 'bg-[#FAF5EB] border-[#3D352E]/20 text-[#3D352E]'
+                          }`}
+                        >
                           {order.plan_id}
                         </span>
                       </td>

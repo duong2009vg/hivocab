@@ -12,10 +12,10 @@ export const ADMIN_GROUPS = [
     ],
   },
   {
-    title: 'TÀI CHÍNH & PRO',
+    title: 'TÀI CHÍNH & GÓI CƯỚC',
     items: [
       { id: 'orders', label: 'Doanh thu & Đơn hàng', icon: 'receipt_long' },
-      { id: 'subscriptions', label: 'Hội viên & Tặng PRO', icon: 'card_giftcard' },
+      { id: 'subscriptions', label: 'Hội viên PRO & Premium', icon: 'card_giftcard' },
       { id: 'gating', label: 'Khóa Học liệu PRO', icon: 'lock_open' },
     ],
   },

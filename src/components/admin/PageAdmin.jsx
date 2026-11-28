@@ -130,6 +130,7 @@ export function PageAdmin() {
   const stats = useMemo(() => {
     const totalUsers = profiles.length;
     let activePro = 0;
+    let activeProOnly = 0;
     let activePremium = 0;
     let lifetimePro = 0;
     let plan1m = 0;
@@ -141,19 +142,24 @@ export function PageAdmin() {
       const isPro = checkIsPro(p);
       if (isPro) {
         activePro++;
-        if (p.tier === 'premium' || String(p.subscription_plan || '').startsWith('premium')) {
-          activePremium++;
-        }
-        if (p.tier === 'lifetime' || p.subscription_plan === 'pro_lifetime' || p.subscription_plan === 'lifetime') {
+        const isLifetimeUser =
+          p.tier === 'lifetime' || p.subscription_plan === 'pro_lifetime' || p.subscription_plan === 'lifetime';
+        const isPremiumUser =
+          !isLifetimeUser && (p.tier === 'premium' || String(p.subscription_plan || '').startsWith('premium'));
+
+        if (isLifetimeUser) {
           lifetimePro++;
-        } else if (p.subscription_plan?.includes('1m')) {
-          plan1m++;
-        } else if (p.subscription_plan?.includes('3m')) {
-          plan3m++;
-        } else if (p.subscription_plan?.includes('6m')) {
-          plan6m++;
-        } else if (p.subscription_plan?.includes('1y')) {
-          plan1y++;
+        } else if (isPremiumUser) {
+          activePremium++;
+        } else {
+          activeProOnly++;
+        }
+
+        if (!isLifetimeUser) {
+          if (p.subscription_plan?.includes('1m')) plan1m++;
+          else if (p.subscription_plan?.includes('3m')) plan3m++;
+          else if (p.subscription_plan?.includes('6m')) plan6m++;
+          else if (p.subscription_plan?.includes('1y')) plan1y++;
         }
       }
     });
@@ -164,6 +170,7 @@ export function PageAdmin() {
     return {
       totalUsers,
       activePro,
+      activeProOnly,
       activePremium,
       lifetimePro,
       plan1m,
@@ -181,7 +188,7 @@ export function PageAdmin() {
 
   // Badges for sidebar items
   const sidebarBadges = {
-    subscriptions: stats.activePro > 0 ? `${stats.activePro} PRO` : null,
+    subscriptions: stats.activePro > 0 ? `${stats.activePro} Hội viên` : null,
     reports: counts.pendingReports > 0 ? counts.pendingReports : null,
   };
 

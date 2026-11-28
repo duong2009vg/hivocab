@@ -3,11 +3,13 @@
 import React, { useState, useMemo } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
+import { getPlanDisplayName } from '../../../config/plans.js';
 
 export function AdminOrdersTab({ orders = [], onRefresh }) {
   const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'PAID' | 'PENDING' | 'MANUAL_GIFT'
+  const [tierFilter, setTierFilter] = useState('ALL'); // 'ALL' | 'PRO' | 'PREMIUM' | 'LIFETIME'
   const [processingOrderId, setProcessingOrderId] = useState(null);
 
   const formatCurrency = (amount) => {
@@ -33,19 +35,25 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
   // Filtered orders
   const filteredOrders = useMemo(() => {
     return orders.filter((o) => {
+      const planIdLower = String(o.plan_id || '').toLowerCase();
       const matchSearch =
         String(o.order_code || '').includes(searchTerm.trim()) ||
         String(o.user_email || '').toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
-        String(o.plan_id || '').toLowerCase().includes(searchTerm.toLowerCase().trim());
+        planIdLower.includes(searchTerm.toLowerCase().trim());
 
       let matchStatus = true;
       if (statusFilter === 'PAID') matchStatus = o.status === 'PAID' && o.payment_method !== 'MANUAL_GIFT';
       else if (statusFilter === 'PENDING') matchStatus = o.status === 'PENDING';
       else if (statusFilter === 'MANUAL_GIFT') matchStatus = o.payment_method === 'MANUAL_GIFT';
 
-      return matchSearch && matchStatus;
+      let matchTier = true;
+      if (tierFilter === 'PREMIUM') matchTier = planIdLower.startsWith('premium');
+      else if (tierFilter === 'PRO') matchTier = planIdLower.startsWith('pro') && planIdLower !== 'pro_lifetime';
+      else if (tierFilter === 'LIFETIME') matchTier = planIdLower === 'pro_lifetime' || planIdLower === 'lifetime';
+
+      return matchSearch && matchStatus && matchTier;
     });
-  }, [orders, searchTerm, statusFilter]);
+  }, [orders, searchTerm, statusFilter, tierFilter]);
 
   // Aggregate metrics
   const totalRevenue = useMemo(() => {
@@ -59,7 +67,8 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
 
   // Manual activate pending order
   const handleApprovePending = async (order) => {
-    if (!window.confirm(`Xác nhận đánh dấu đơn hàng #${order.order_code} là ĐÃ THANH TOÁN và kích hoạt PRO cho học viên ${order.user_email}?`)) {
+    const planLabel = getPlanDisplayName(order.plan_id);
+    if (!window.confirm(`Xác nhận đánh dấu đơn hàng #${order.order_code} là ĐÃ THANH TOÁN và kích hoạt gói ${planLabel} cho học viên ${order.user_email}?`)) {
       return;
     }
 
@@ -223,6 +232,18 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
             <option value="PENDING">Chờ thanh toán (PENDING)</option>
             <option value="MANUAL_GIFT">Cấp tặng quà (GIFT)</option>
           </select>
+
+          {/* Tier Filter */}
+          <select
+            value={tierFilter}
+            onChange={(e) => setTierFilter(e.target.value)}
+            className="h-[38px] px-3 rounded-xl bg-white border-2 border-[#3D352E] text-xs font-black text-[#3D352E] focus:outline-none focus:ring-2 focus:ring-[#6B21A8] cursor-pointer"
+          >
+            <option value="ALL">Tất cả gói</option>
+            <option value="PRO">Gói PRO</option>
+            <option value="PREMIUM">Gói PREMIUM 💎</option>
+            <option value="LIFETIME">Gói Trọn đời</option>
+          </select>
         </div>
 
         {/* Export Button */}
@@ -244,7 +265,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
               <tr>
                 <th className="py-2.5 px-3.5">MÃ ĐƠN</th>
                 <th className="py-2.5 px-3.5">HỌC VIÊN</th>
-                <th className="py-2.5 px-3.5">GÓI PRO</th>
+                <th className="py-2.5 px-3.5">GÓI CƯỚC</th>
                 <th className="py-2.5 px-3.5">SỐ TIỀN</th>
                 <th className="py-2.5 px-3.5">TRẠNG THÁI</th>
                 <th className="py-2.5 px-3.5">NGÀY TẠO</th>
@@ -262,6 +283,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                 filteredOrders.map((order) => {
                   const isPaid = order.status === 'PAID';
                   const isGift = order.payment_method === 'MANUAL_GIFT';
+                  const isPremiumOrder = String(order.plan_id || '').toLowerCase().startsWith('premium');
 
                   return (
                     <tr key={order.id} className="hover:bg-[#FAF5EB]/50 transition-colors">
@@ -281,8 +303,15 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                       </td>
 
                       <td className="py-2.5 px-3.5">
-                        <span className="px-2 py-0.5 rounded-lg font-black text-[11px] bg-[#FAF5EB] border border-[#3D352E]/20 text-[#3D352E]">
-                          {order.plan_id || 'pro'}
+                        <span
+                          className={`px-2 py-0.5 rounded-lg font-black text-[11px] border ${
+                            isPremiumOrder
+                              ? 'bg-[#F3E8FF] border-[#A855F7] text-[#6B21A8]'
+                              : 'bg-[#FAF5EB] border-[#3D352E]/20 text-[#3D352E]'
+                          }`}
+                          title={order.plan_id}
+                        >
+                          {getPlanDisplayName(order.plan_id, isPremiumOrder ? 'premium' : 'pro')}
                         </span>
                       </td>
 
@@ -298,7 +327,7 @@ export function AdminOrdersTab({ orders = [], onRefresh }) {
                         {isPaid ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#EAF3E7] text-[#557A46] border border-[#8FB383]">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#557A46]"></span>
-                            <span>{isGift ? 'TẶNG PRO' : 'ĐÃ THANH TOÁN'}</span>
+                            <span>{isGift ? (isPremiumOrder ? 'TẶNG PREMIUM' : 'TẶNG PRO') : 'ĐÃ THANH TOÁN'}</span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#FEF3D6] text-[#B45309] border border-[#ECA43B]">

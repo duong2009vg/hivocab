@@ -53,23 +53,30 @@ export function AdminSubscriptionsTab({
 
   // KPIs
   const stats = useMemo(() => {
-    let activePro = 0;
+    let activeProOnly = 0;
+    let activePremium = 0;
     let lifetime = 0;
     let expiring = 0;
     let free = 0;
 
     profiles.forEach((p) => {
-      const { isActivePro, isLifetime, isExpiringSoon } = evaluateProStatus(p);
+      const { isActivePro, isActivePremium, isLifetime, isExpiringSoon } = evaluateProStatus(p);
       if (isActivePro) {
-        activePro++;
-        if (isLifetime) lifetime++;
-        else if (isExpiringSoon) expiring++;
+        if (isLifetime) {
+          lifetime++;
+        } else if (isActivePremium) {
+          activePremium++;
+          if (isExpiringSoon) expiring++;
+        } else {
+          activeProOnly++;
+          if (isExpiringSoon) expiring++;
+        }
       } else {
         free++;
       }
     });
 
-    return { activePro, lifetime, expiring, free };
+    return { activeProOnly, activePremium, lifetime, expiring, free };
   }, [profiles]);
 
   // Filtered list
@@ -81,10 +88,11 @@ export function AdminSubscriptionsTab({
         String(p.full_name || '').toLowerCase().includes(q) ||
         String(p.id || '').toLowerCase().includes(q);
 
-      const { isActivePro, isLifetime, isExpiringSoon } = evaluateProStatus(p);
+      const { isActivePro, isActivePremium, isLifetime, isExpiringSoon } = evaluateProStatus(p);
 
       let matchTier = true;
-      if (tierFilter === 'PRO') matchTier = isActivePro;
+      if (tierFilter === 'PRO') matchTier = isActivePro && !isActivePremium && !isLifetime;
+      else if (tierFilter === 'PREMIUM') matchTier = isActivePremium && !isLifetime;
       else if (tierFilter === 'EXPIRING') matchTier = isExpiringSoon;
       else if (tierFilter === 'LIFETIME') matchTier = isLifetime;
       else if (tierFilter === 'FREE') matchTier = !isActivePro;
@@ -110,9 +118,10 @@ export function AdminSubscriptionsTab({
     }
   };
 
-  // Revoke PRO
+  // Revoke PRO / PREMIUM
   const handleRevokePro = async (p) => {
-    if (!window.confirm(`Xác nhận THU HỒI quyền PRO của học viên ${p.email}? Tài khoản sẽ chuyển về gói Miễn phí.`)) {
+    const tierText = p.tier === 'premium' || String(p.subscription_plan || '').startsWith('premium') ? 'PREMIUM' : 'PRO';
+    if (!window.confirm(`Xác nhận THU HỒI quyền ${tierText} của học viên ${p.email}? Tài khoản sẽ chuyển về gói Miễn phí.`)) {
       return;
     }
 
@@ -129,7 +138,7 @@ export function AdminSubscriptionsTab({
         .eq('id', p.id);
 
       if (error) throw error;
-      showToast(`Đã thu hồi gói PRO của học viên ${p.email}.`, 'success');
+      showToast(`Đã thu hồi gói ${tierText} của học viên ${p.email}.`, 'success');
       onRefresh?.();
     } catch (err) {
       console.error('handleRevokePro error:', err);
@@ -147,6 +156,7 @@ export function AdminSubscriptionsTab({
         id: p.id,
         email: p.email || 'Ẩn danh',
         expiresAt: p.subscription_expires_at,
+        tier: p.tier || 'free',
       }));
   }, [profiles, selectedUserIds]);
 
@@ -161,10 +171,10 @@ export function AdminSubscriptionsTab({
 
   return (
     <div className="space-y-5 animate-fade-in relative">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      {/* KPI Cards (5 tiers/states) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
         <div
-          onClick={() => setTierFilter('PRO')}
+          onClick={() => setTierFilter(tierFilter === 'PRO' ? 'ALL' : 'PRO')}
           className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'PRO' ? 'bg-[#EAF3E7] ring-2 ring-[#557A46]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
@@ -173,11 +183,24 @@ export function AdminSubscriptionsTab({
             <span className="text-[10px] font-extrabold text-[#86756C] uppercase tracking-wider">Hội viên PRO 👑</span>
             <span className="material-symbols-outlined text-[17px] text-[#557A46]">verified</span>
           </div>
-          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.activePro}</p>
+          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#3D352E] tabular-nums">{stats.activeProOnly}</p>
         </div>
 
         <div
-          onClick={() => setTierFilter('LIFETIME')}
+          onClick={() => setTierFilter(tierFilter === 'PREMIUM' ? 'ALL' : 'PREMIUM')}
+          className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
+            tierFilter === 'PREMIUM' ? 'bg-[#F3E8FF] ring-2 ring-[#6B21A8]' : 'bg-white hover:bg-[#FAF5EB]'
+          }`}
+        >
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-extrabold text-[#6B21A8] uppercase tracking-wider">PREMIUM 💎</span>
+            <span className="material-symbols-outlined text-[17px] text-[#6B21A8]">diamond</span>
+          </div>
+          <p className="font-quicksand font-black text-xl sm:text-2xl text-[#6B21A8] tabular-nums">{stats.activePremium}</p>
+        </div>
+
+        <div
+          onClick={() => setTierFilter(tierFilter === 'LIFETIME' ? 'ALL' : 'LIFETIME')}
           className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'LIFETIME' ? 'bg-[#F3E8FF] ring-2 ring-[#7E22CE]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
@@ -190,7 +213,7 @@ export function AdminSubscriptionsTab({
         </div>
 
         <div
-          onClick={() => setTierFilter('EXPIRING')}
+          onClick={() => setTierFilter(tierFilter === 'EXPIRING' ? 'ALL' : 'EXPIRING')}
           className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'EXPIRING' ? 'bg-[#FEEFEA] ring-2 ring-[#DE5D53]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
@@ -203,7 +226,7 @@ export function AdminSubscriptionsTab({
         </div>
 
         <div
-          onClick={() => setTierFilter('FREE')}
+          onClick={() => setTierFilter(tierFilter === 'FREE' ? 'ALL' : 'FREE')}
           className={`p-3.5 sm:p-4 rounded-2xl border-2 border-[#3D352E] transition-all cursor-pointer shadow-[2.5px_3px_0px_#3D352E] hover:-translate-y-0.5 active:translate-y-0.5 ${
             tierFilter === 'FREE' ? 'bg-[#FAF5EB] ring-2 ring-[#3D352E]' : 'bg-white hover:bg-[#FAF5EB]'
           }`}
@@ -239,6 +262,7 @@ export function AdminSubscriptionsTab({
           >
             <option value="ALL">Tất cả hội viên</option>
             <option value="PRO">Đang dùng PRO</option>
+            <option value="PREMIUM">Đang dùng PREMIUM</option>
             <option value="LIFETIME">Gói Trọn đời</option>
             <option value="EXPIRING">Sắp hết hạn (&le;7 ngày)</option>
             <option value="FREE">Tài khoản Miễn phí</option>
@@ -254,7 +278,7 @@ export function AdminSubscriptionsTab({
               className="h-[38px] px-4 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white font-black text-xs flex items-center gap-1.5 border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all cursor-pointer"
             >
               <span>🎁</span>
-              <span>Tặng PRO {selectedUserIds.size} người</span>
+              <span>Tặng gói {selectedUserIds.size} người</span>
             </button>
           )}
         </div>
@@ -282,7 +306,7 @@ export function AdminSubscriptionsTab({
               className="px-4 py-1.5 rounded-xl bg-[#DE5D53] hover:bg-[#C84F45] text-white text-xs font-black border-2 border-[#3D352E] shadow-[1.5px_2px_0px_#3D352E] active:translate-y-0.5 transition-all flex items-center gap-1 cursor-pointer"
             >
               <span>🎁</span>
-              <span>Cấp PRO Hàng Loạt</span>
+              <span>Cấp PRO / Premium Hàng Loạt</span>
             </button>
           </div>
         </div>
@@ -319,7 +343,7 @@ export function AdminSubscriptionsTab({
               ) : (
                 filteredProfiles.map((p) => {
                   const isSelected = selectedUserIds.has(p.id);
-                  const { isActivePro, isLifetime, isExpiringSoon, expiresAt } = evaluateProStatus(p);
+                  const { isActivePro, isActivePremium, isLifetime, isExpiringSoon, expiresAt } = evaluateProStatus(p);
                   const initial = p.full_name?.charAt(0) || p.email?.charAt(0).toUpperCase() || 'U';
 
                   return (
@@ -342,7 +366,9 @@ export function AdminSubscriptionsTab({
                         <div className="flex items-center gap-2.5">
                           <div
                             className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center shrink-0 border border-[#3D352E]/30 ${
-                              isActivePro
+                              isActivePremium || isLifetime
+                                ? 'bg-[#F3E8FF] text-[#6B21A8]'
+                                : isActivePro
                                 ? 'bg-[#FFE8C2] text-[#B45309]'
                                 : 'bg-[#FAF5EB] text-[#86756C]'
                             }`}
@@ -411,13 +437,14 @@ export function AdminSubscriptionsTab({
                                 id: p.id,
                                 email: p.email,
                                 expiresAt: p.subscription_expires_at,
+                                tier: p.tier || 'free',
                               })
                             }
                             className="px-2.5 py-1 rounded-xl bg-white hover:bg-[#FAF5EB] text-[#DE5D53] border-2 border-[#3D352E] shadow-[1.5px_1.5px_0px_#3D352E] active:translate-y-0.5 font-black text-[11px] flex items-center gap-1 transition-all cursor-pointer"
-                            title="Tặng hoặc gia hạn PRO"
+                            title="Tặng hoặc gia hạn PRO / PREMIUM"
                           >
                             <span>🎁</span>
-                            <span>Tặng PRO</span>
+                            <span>Tặng gói</span>
                           </button>
 
                           {isActivePro && (
@@ -425,7 +452,7 @@ export function AdminSubscriptionsTab({
                               onClick={() => handleRevokePro(p)}
                               disabled={isRevokingId === p.id}
                               className="p-1 rounded-xl border border-transparent hover:border-[#DE5D53] text-[#DE5D53] hover:bg-[#FEEFEA] transition-colors disabled:opacity-50 cursor-pointer"
-                              title="Thu hồi gói PRO"
+                              title="Thu hồi gói trả phí"
                             >
                               <span className="material-symbols-outlined text-[17px]">cancel</span>
                             </button>

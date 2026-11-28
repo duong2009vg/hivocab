@@ -1,14 +1,14 @@
 // src/components/admin/modals/GrantProModal.jsx
 // Modal for Granting / Extending PRO Subscriptions manually (single or bulk)
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabaseClient.js';
 import { useToast } from '../../../context/ToastContext.jsx';
 
 export function GrantProModal({
   isOpen,
   onClose,
-  targetUser,       // { id, email, expiresAt } or null if bulk
-  selectedUsers,    // Array of { id, email, expiresAt } for bulk
+  targetUser,       // { id, email, expiresAt, tier } or null if bulk
+  selectedUsers,    // Array of { id, email, expiresAt, tier } for bulk
   onSuccess,
 }) {
   const { showToast } = useToast();
@@ -17,6 +17,14 @@ export function GrantProModal({
   const [customDays, setCustomDays] = useState(30);
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setSelectedTier(targetUser?.tier === 'premium' ? 'premium' : 'pro');
+    setSelectedPlan('1m');
+    setCustomDays(30);
+    setReason('');
+  }, [isOpen, targetUser?.id, targetUser?.tier]);
 
   if (!isOpen) return null;
 
@@ -44,12 +52,21 @@ export function GrantProModal({
       for (const target of targets) {
         if (!target?.id) continue;
 
-        // Calculate expires_at (extend if existing active subscription)
+        // Calculate expires_at (stack directly if extending same tier, convert fairly if upgrading pro -> premium)
         let newExpiresAt = null;
         if (!isLifetime) {
           const currentExp = target.expiresAt ? new Date(target.expiresAt) : null;
-          const baseTime = (currentExp && currentExp > now) ? currentExp.getTime() : now.getTime();
-          newExpiresAt = new Date(baseTime + daysToAdd * 24 * 60 * 60 * 1000).toISOString();
+          const isActiveCurrent = Boolean(currentExp && currentExp > now);
+          const sameTier = target.tier === selectedTier;
+          if (isActiveCurrent && sameTier) {
+            newExpiresAt = new Date(currentExp.getTime() + daysToAdd * 24 * 60 * 60 * 1000).toISOString();
+          } else if (isActiveCurrent && target.tier === 'pro' && selectedTier === 'premium') {
+            const remDays = Math.ceil((currentExp.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+            const bonusDays = Math.ceil(remDays * (25 / 69));
+            newExpiresAt = new Date(now.getTime() + (daysToAdd + bonusDays) * 24 * 60 * 60 * 1000).toISOString();
+          } else {
+            newExpiresAt = new Date(now.getTime() + daysToAdd * 24 * 60 * 60 * 1000).toISOString();
+          }
         }
 
         const planPrefix = selectedTier === 'premium' ? 'premium' : 'pro';
@@ -114,9 +131,9 @@ export function GrantProModal({
             </div>
             <div>
               <h2 className="font-bold text-base text-on-surface">
-                {isBulk ? `Tặng Gói PRO Hàng Loạt (${userCount} học viên)` : 'Tặng Quyền HiVocab PRO'}
+                {isBulk ? `Tặng Gói PRO / PREMIUM Hàng Loạt (${userCount} học viên)` : 'Tặng Quyền HiVocab PRO / PREMIUM'}
               </h2>
-              <p className="text-xs text-on-surface-variant">Cấp đặc quyền học không giới hạn</p>
+              <p className="text-xs text-on-surface-variant">Chọn hạng tài khoản (Pro hoặc Premium) &amp; thời hạn kích hoạt</p>
             </div>
           </div>
 
@@ -267,7 +284,11 @@ export function GrantProModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50"
+              className={`px-5 py-2 rounded-xl text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 disabled:opacity-50 cursor-pointer ${
+                selectedPlan === 'lifetime' || selectedTier === 'premium'
+                  ? 'bg-purple-600 hover:bg-purple-700'
+                  : 'bg-amber-500 hover:bg-amber-600'
+              }`}
             >
               {isSubmitting ? (
                 <>
@@ -277,7 +298,13 @@ export function GrantProModal({
               ) : (
                 <>
                   <span className="material-symbols-outlined text-[16px]">card_giftcard</span>
-                  <span>Xác nhận Tặng PRO</span>
+                  <span>
+                    {selectedPlan === 'lifetime'
+                      ? 'Xác nhận Tặng Trọn Đời'
+                      : selectedTier === 'premium'
+                      ? 'Xác nhận Tặng PREMIUM'
+                      : 'Xác nhận Tặng PRO'}
+                  </span>
                 </>
               )}
             </button>
