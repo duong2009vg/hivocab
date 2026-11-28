@@ -488,8 +488,8 @@ export function PageLogin() {
                     </div>
                   )}
 
-                  {/* Tách riêng 2 sự đồng ý bắt buộc theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 (hiển thị cho cả Đăng nhập & Đăng ký) */}
-                  <div className="space-y-2.5 p-3 rounded-xl bg-[#FAF5EB]/85 border border-[#E3D7C5]">
+                  {/* Tách riêng 2 sự đồng ý bắt buộc theo Nghị định 356/2025/NĐ-CP & Luật 91/2025/QH15 (hòa trực tiếp vào nền thẻ) */}
+                  <div className="space-y-2 pt-0.5">
                     <label className="flex items-start gap-2.5 cursor-pointer text-xs text-[#524641] font-medium leading-snug select-none">
                       <input
                         type="checkbox"
